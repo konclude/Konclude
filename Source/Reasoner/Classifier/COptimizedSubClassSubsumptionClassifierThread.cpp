@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -133,7 +133,10 @@ namespace Konclude {
 			void COptimizedSubClassSubsumptionClassifierThread::createObviousSubsumptionSatisfiableTestingOrder(COptimizedSubClassOntologyClassificationItem* ontClassItem) {
 				CPrecomputation* precomputation = ontClassItem->getOntology()->getPrecomputation();
 				CSaturationData* saturationData = precomputation->getSaturationModelData();
-				if (saturationData) {
+			
+				bool subsumerSaturationExtraction = CConfigDataReader::readConfigBoolean(ontClassItem->getCalculationConfiguration(),"Konclude.Calculation.Classification.SaturationSubsumerExtraction",true);
+
+				if (saturationData && subsumerSaturationExtraction) {
 					createObviousSubsumptionSatisfiableTestingOrderFromSaturationData(ontClassItem);
 				} else {
 					createObviousSubsumptionSatisfiableTestingOrderFromBuildData(ontClassItem);
@@ -175,7 +178,7 @@ namespace Konclude {
 
 				QHash<CConcept*,CConceptReferenceLinking*>* conRefLinkDataHash = ontClassItem->getConceptReferenceLinkingDataHash();
 				QList<CConcept*> extClassConceptList;
-				CPrecomputedSaturationSubsumerExtractor precSatSubsumerExtractor(onto);
+				CPrecomputedSaturationSubsumerExtractor* precSatSubsumerExtractor = ontClassItem->getPrecomputedSaturationSubsumerExtractor(true);
 
 				CBOXSET<CConcept*> *conceptHash = tBox->getActiveClassConceptSet(false);
 				if (conceptHash) {
@@ -185,9 +188,9 @@ namespace Konclude {
 							COptimizedSubClassSatisfiableTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(concept,true);
 
 							CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
-							CConceptSatisfiableReferenceLinkingData* conRefSatLinking = (CConceptSatisfiableReferenceLinkingData*)conProcData->getConceptReferenceLinking();
+							CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
 							if (!conRefSatLinking) {
-								conRefSatLinking = new CConceptSatisfiableReferenceLinkingData();
+								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
 							}
 
@@ -213,9 +216,9 @@ namespace Konclude {
 					bool unsatisfiableFlag = false;
 					bool insufficientFlag = false;
 
-					if (precSatSubsumerExtractor.getConceptFlags(concept,&unsatisfiableFlag,&insufficientFlag)) {
+					if (precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,&insufficientFlag)) {
 						if (!unsatisfiableFlag) {
-							precSatSubsumerExtractor.extractSubsumers(concept,classItem);
+							precSatSubsumerExtractor->extractSubsumers(concept,classItem);
 							cint64 foundSubsumerCount = classItem->getSubsumingConceptItemCount();
 							classItem->setUnprocessedPredecessorItems(foundSubsumerCount);
 							if (!insufficientFlag) {
@@ -385,9 +388,9 @@ namespace Konclude {
 							COptimizedSubClassSatisfiableTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(concept,true);
 
 							CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
-							CConceptSatisfiableReferenceLinkingData* conRefSatLinking = (CConceptSatisfiableReferenceLinkingData*)conProcData->getConceptReferenceLinking();
+							CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
 							if (!conRefSatLinking) {
-								conRefSatLinking = new CConceptSatisfiableReferenceLinkingData();
+								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
 							}
 
@@ -600,6 +603,14 @@ namespace Konclude {
 					nextSatTestItem->setSatisfiableTestedResult(false);
 					return false;
 				}
+				CPrecomputedSaturationSubsumerExtractor* precSatSubsumerExtractor = optSubClassItem->getPrecomputedSaturationSubsumerExtractor(false);
+				bool unsatisfiableFlag = false;
+				if (precSatSubsumerExtractor && precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,nullptr) && unsatisfiableFlag) {
+					satisfiableFlag = false;
+					nextSatTestItem->setSatisfiableTested(true);
+					nextSatTestItem->setSatisfiableTestedResult(false);
+					return false;
+				}
 				if (fastSatisfiableOnlySubClassPrecheckTest(optSubClassItem,nextSatTestItem,&satisfiableFlag)) {
 					nextSatTestItem->setSatisfiableTested(true);
 					nextSatTestItem->setSatisfiableTestedResult(satisfiableFlag);
@@ -655,7 +666,7 @@ namespace Konclude {
 							subClassConcept = firstConcept;
 						}
 
-						if (subClassConcept) {
+						if (!triggerImpHash->contains(concept) && subClassConcept) {
 							COptimizedSubClassSatisfiableTestingItem* subClassConItem = conceptSatItemHash->value(subClassConcept);
 							if (subClassConItem && subClassConItem->isSatisfiableTested()) {
 								if (!triggerImpHash || !triggerImpHash->contains(subClassConcept)) {

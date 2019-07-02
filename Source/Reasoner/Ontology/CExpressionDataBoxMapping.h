@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -30,6 +30,7 @@
 #include "CConcept.h"
 #include "CIndividual.h"
 #include "CRole.h"
+#include "CDatatype.h"
 #include "COntologyBuildConstructFlags.h"
 #include "CActiveEntityCountVector.h"
 
@@ -46,6 +47,10 @@
 #include "Parser/Expressions/CClassAxiomExpression.h"
 #include "Parser/Expressions/CObjectPropertyAxiomExpression.h"
 #include "Parser/Expressions/CAssertionAxiomExpression.h"
+#include "Parser/Expressions/CDataPropertyTermExpression.h"
+#include "Parser/Expressions/CDataRangeTermExpression.h"
+#include "Parser/Expressions/CDatatypeExpression.h"
+#include "Parser/Expressions/CDataPropertyAxiomExpression.h"
 
 #include "Reasoner/Generator/CExpressionHasher.h"
 
@@ -91,13 +96,27 @@ namespace Konclude {
 
 					CBUILDHASH<CClassTermExpression*,CConcept*>* getClassTermConceptMappingHash();
 					CBUILDHASH<CConcept*,CClassTermExpression*>* getConceptClassTermMappingHash();
+
+					CBUILDHASH<CDataRangeTermExpression*,CConcept*>* getDataRangeTermConceptMappingHash();
+					CBUILDHASH<CConcept*,CDataRangeTermExpression*>* getConceptDataRangeTermMappingHash();
+
 					CBUILDHASH<CObjectPropertyTermExpression*,CRole*>* getObjectPropertyTermRoleMappingHash();
 					CBUILDHASH<CRole*,CObjectPropertyTermExpression*>* getRoleObjectPropertyTermMappingHash();
+
+					CBUILDHASH<CDataPropertyTermExpression*,CRole*>* getDataPropertyTermRoleMappingHash();
+					CBUILDHASH<CRole*,CDataPropertyTermExpression*>* getRoleDataPropertyTermMappingHash();
+
 					CBUILDHASH<CIndividualTermExpression*,CIndividual*>* getIndividulTermIndiMappingHash();
 					CBUILDHASH<CIndividual*,CIndividualTermExpression*>* getIndiIndividulTermMappingHash();
 
+
+					CBUILDHASH<CDatatypeExpression*,CDatatype*>* getDatatypeExpressionDatatypeHash();
+					CBUILDHASH<CDatatype*,CDatatypeExpression*>* getDatatypeDatatypeExpessionHash();
+
+
 					CBUILDHASH<CClassAxiomExpression*,bool>* getUpdatedClassAxiomTellOrRetractHash();
 					CBUILDHASH<CObjectPropertyAxiomExpression*,bool>* getUpdateObjectPropertyAxiomHash();
+					CBUILDHASH<CDataPropertyAxiomExpression*,bool>* getUpdateDataPropertyAxiomHash();
 					CBUILDHASH<CAssertionAxiomExpression*,bool>* getUpdateAssertionAxiomHash();
 
 					CBUILDSET< QPair<CClassTermExpression*,CClassAxiomExpression*> >* getClassTermExpressionClassAxiomExpressionSet();
@@ -105,6 +124,10 @@ namespace Konclude {
 
 					CBUILDSET< QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*> >* getObjectPropertyTermObjectPropertyAxiomSet();
 					CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>* getObjectPropertyTermObjectPropertyAxiomHash();
+
+					CBUILDSET< QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*> >* getDataPropertyTermDataPropertyAxiomSet();
+					CBUILDHASH<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>* getDataPropertyTermDataPropertyAxiomHash();
+
 
 					CBUILDSET< QPair<CIndividualTermExpression*,CAssertionAxiomExpression*> >* getIndividualTermAssertionAxiomSet();
 					CBUILDHASH<CIndividualTermExpression*,CAssertionAxiomExpression*>* getIndividualTermAssertionAxiomHash();
@@ -117,11 +140,17 @@ namespace Konclude {
 					CBUILDHASH<CRoleChain*,CObjectPropertyAxiomExpression*>* getRoleChainObjectPropertyTermHash();
 
 					CBUILDSET<CClassTermExpression*>* getBuildedConceptSet();
-					CBUILDSET<CObjectPropertyTermExpression*>* getBuildedRoleSet();
+					CBUILDSET<CObjectPropertyTermExpression*>* getBuildedObjectRoleSet();
+					CBUILDSET<CDataPropertyTermExpression*>* getBuildedDataRoleSet();
+					CBUILDSET<CDataRangeTermExpression*>* getBuildedDataRangeSet();
+					CBUILDSET<CDatatypeExpression*>* getBuildedDatatypeSet();
 					CBUILDSET<CIndividualTermExpression*>* getBuildedIndividualSet();
 
 					CBUILDLIST<CClassTermExpression*>* getBuildedConceptList();
-					CBUILDLIST<CObjectPropertyTermExpression*>* getBuildedRoleList();
+					CBUILDLIST<CObjectPropertyTermExpression*>* getBuildedObjectRoleList();
+					CBUILDLIST<CDataPropertyTermExpression*>* getBuildedDataRoleList();
+					CBUILDLIST<CDataRangeTermExpression*>* getBuildedDataRangeList();
+					CBUILDLIST<CDatatypeExpression*>* getBuildedDatatypeList();
 					CBUILDLIST<CIndividualTermExpression*>* getBuildedIndividualList();
 
 
@@ -132,26 +161,38 @@ namespace Konclude {
 					cint64 getLastProcessedChangedAxiom();
 					cint64 getLastProcessedBuildIndividual();
 					cint64 getLastProcessedBuildConcept();
-					cint64 getLastProcessedBuildRole();
+					cint64 getLastProcessedBuildObjectRole();
+					cint64 getLastProcessedBuildDataRole();
+					cint64 getLastProcessedBuildDataRange();
+					cint64 getLastProcessedBuildDatatype();
 
 					cint64 getLastProcessedInverseProperty();
 					cint64 getLastProcessedExpression();
 
 					cint64 getLastBuildedIndividual();
 					cint64 getLastBuildedConcept();
-					cint64 getLastBuildedRole();
+					cint64 getLastBuildedObjectRole();
+					cint64 getLastBuildedDataRole();
+					cint64 getLastBuildedDataRange();
+					cint64 getLastBuildedDatatype();
 
 					CExpressionDataBoxMapping* setLastProcessedChangedAxiom(cint64 lastBuilded);
 					CExpressionDataBoxMapping* setLastProcessedBuildIndividual(cint64 lastBuilded);
 					CExpressionDataBoxMapping* setLastProcessedBuildConcept(cint64 lastBuilded);
-					CExpressionDataBoxMapping* setLastProcessedBuildRole(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastProcessedBuildObjectRole(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastProcessedBuildDataRole(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastProcessedBuildDataRange(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastProcessedBuildDatatype(cint64 lastBuilded);
 
 					CExpressionDataBoxMapping* setLastProcessedInverseProperty(cint64 lastBuilded);
 					CExpressionDataBoxMapping* setLastProcessedExpression(cint64 lastBuilded);
 
 					CExpressionDataBoxMapping* setLastBuildedIndividual(cint64 lastBuilded);
 					CExpressionDataBoxMapping* setLastBuildedConcept(cint64 lastBuilded);
-					CExpressionDataBoxMapping* setLastBuildedRole(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastBuildedObjectRole(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastBuildedDataRole(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastBuildedDataRange(cint64 lastBuilded);
+					CExpressionDataBoxMapping* setLastBuildedDatatype(cint64 lastBuilded);
 
 
 					CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>* getInverseObjectPropertyHash();
@@ -171,15 +212,25 @@ namespace Konclude {
 
 					CBUILDHASH<CClassTermExpression*,CConcept*>* mClassTermConceptHash;
 					CBUILDHASH<CConcept*,CClassTermExpression*>* mConceptClassTermHash;
+					CBUILDHASH<CDataRangeTermExpression*,CConcept*>* mDataRangeTermConceptHash;
+					CBUILDHASH<CConcept*,CDataRangeTermExpression*>* mConceptDataRangeTermHash;
 					CBUILDHASH<CObjectPropertyTermExpression*,CRole*>* mObjPropTermRoleHash;
 					CBUILDHASH<CRole*,CObjectPropertyTermExpression*>* mRoleObjPropTermHash;
+
+					CBUILDHASH<CDataPropertyTermExpression*,CRole*>* mDataPropTermRoleHash;
+					CBUILDHASH<CRole*,CDataPropertyTermExpression*>* mRoleDataPropTermHash;
+
+
 					CBUILDHASH<CIndividualTermExpression*,CIndividual*>* mIndividulTermIndiHash;
 					CBUILDHASH<CIndividual*,CIndividualTermExpression*>* mIndiIndividulTermHash;
 
+					CBUILDHASH<CDatatypeExpression*,CDatatype*>* mDatatypeExpDatatypeHash;
+					CBUILDHASH<CDatatype*,CDatatypeExpression*>* mDatatypeDatatypeExpHash;
 
 
 					CBUILDHASH<CClassAxiomExpression*,bool>* mUpdateClassAxiomHash;
 					CBUILDHASH<CObjectPropertyAxiomExpression*,bool>* mUpdateObjectPropertyAxiomHash;
+					CBUILDHASH<CDataPropertyAxiomExpression*,bool>* mUpdateDataPropertyAxiomHash;
 					CBUILDHASH<CAssertionAxiomExpression*,bool>* mUpdateAssertionAxiomHash;
 
 
@@ -189,6 +240,10 @@ namespace Konclude {
 
 					CBUILDSET< QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*> >* mObjPropTermObjPropAxiomSet;
 					CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>* mObjPropTermObjPropAxiomHash;
+
+					CBUILDSET< QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*> >* mDataPropTermDataPropAxiomSet;
+					CBUILDHASH<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>* mDataPropTermDataPropAxiomHash;
+
 
 					CBUILDSET< QPair<CIndividualTermExpression*,CAssertionAxiomExpression*> >* mIndiTermAssertionAxiomSet;
 					CBUILDHASH<CIndividualTermExpression*,CAssertionAxiomExpression*>* mIndiTermAssertionAxiomHash;
@@ -206,21 +261,33 @@ namespace Konclude {
 					cint64 mLastProcessedChangedAxiom;
 					cint64 mLastProcessedBuildIndividual;
 					cint64 mLastProcessedBuildConcept;
-					cint64 mLastProcessedBuildRole;
+					cint64 mLastProcessedBuildObjectRole;
+					cint64 mLastProcessedBuildDataRole;
+					cint64 mLastProcessedBuildDataRange;
+					cint64 mLastProcessedBuildDatatype;
 
 					cint64 mLastProcessedInverseProperty;
 					cint64 mLastProcessedExpression;
 
 					cint64 mLastBuildedIndividual;
 					cint64 mLastBuildedConcept;
-					cint64 mLastBuildedRole;
+					cint64 mLastBuildedObjectRole;
+					cint64 mLastBuildedDataRole;
+					cint64 mLastBuildedDataRange;
+					cint64 mLastBuildedDatatype;
 
 					CBUILDSET<CIndividualTermExpression*>* mBuildedIndividualSet;
-					CBUILDSET<CObjectPropertyTermExpression*>* mBuildedRoleSet;
+					CBUILDSET<CObjectPropertyTermExpression*>* mBuildedObjectRoleSet;
+					CBUILDSET<CDataPropertyTermExpression*>* mBuildedDataRoleSet;
+					CBUILDSET<CDataRangeTermExpression*>* mBuildedDataRangeSet;
+					CBUILDSET<CDatatypeExpression*>* mBuildedDatatypeSet;
 					CBUILDSET<CClassTermExpression*>* mBuildedConceptSet;
 
 					CBUILDLIST<CIndividualTermExpression*>* mBuildedIndividualList;
-					CBUILDLIST<CObjectPropertyTermExpression*>* mBuildedRoleList;
+					CBUILDLIST<CObjectPropertyTermExpression*>* mBuildedObjectRoleList;
+					CBUILDLIST<CDataPropertyTermExpression*>* mBuildedDataRoleList;
+					CBUILDLIST<CDataRangeTermExpression*>* mBuildedDataRangeList;
+					CBUILDLIST<CDatatypeExpression*>* mBuildedDatatypeList;
 					CBUILDLIST<CClassTermExpression*>* mBuildedConceptList;
 
 					CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>* mInverseObjectPropertyHash;

@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -42,7 +42,7 @@ namespace Konclude {
 			CQueryIsClassSatisfiableExpression* CConcreteOntologyQueryBasicBuilder::getIsClassSatisfiableQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) {
 				CQueryIsClassSatisfiableExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(1)) {
+				if (expSplitter.testForExpressionComposition(1)) {
 					expression = getIsClassSatisfiableQuery(expSplitter.getFirstClassTermExpression(),queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'IsClassSatisfiableQuery'-Expression."),this);
@@ -53,7 +53,7 @@ namespace Konclude {
 			CQueryAreClassesEquivalentExpression* CConcreteOntologyQueryBasicBuilder::getAreClassesEquivalenceQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) {
 				CQueryAreClassesEquivalentExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getAreClassesEquivalenceQuery(*expSplitter.getClassTermExpressionList(),queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'AreClassesEquivalentQuery'-Expression."),this);
@@ -64,7 +64,7 @@ namespace Konclude {
 			CQueryAreClassesDisjointExpression* CConcreteOntologyQueryBasicBuilder::getAreClassesDisjointQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) {
 				CQueryAreClassesDisjointExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getAreClassesDisjointQuery(*expSplitter.getClassTermExpressionList(),queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'AreClassesDisjointQuery'-Expression."),this);
@@ -76,7 +76,7 @@ namespace Konclude {
 			CQueryIsClassSubsumedByExpression* CConcreteOntologyQueryBasicBuilder::getIsClassSubsumedByQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) {
 				CQueryIsClassSubsumedByExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getIsClassSubsumedByQuery(expSplitter.getFirstClassTermExpression(),expSplitter.getSecondClassTermExpression(),queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'IsClassSubsumedByQuery'-Expression."),this);
@@ -87,7 +87,7 @@ namespace Konclude {
 			CQueryIsInstanceOfExpression* CConcreteOntologyQueryBasicBuilder::getIsInstanceOfQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) {
 				CQueryIsInstanceOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(1,0,1)) {
+				if (expSplitter.testForExpressionComposition(1,0,1)) {
 					expression = getIsInstanceOfQuery(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstClassTermExpression(),queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'IsInstanceOfQuery'-Expression."),this);
@@ -99,7 +99,7 @@ namespace Konclude {
 			CQueryGetFlattenedTypesExpression* CConcreteOntologyQueryBasicBuilder::getGetFlattenedTypesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) {
 				CQueryGetFlattenedTypesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(0,0,1)) {
+				if (expSplitter.testForExpressionComposition(0,0,1)) {
 					expression = getGetFlattenedTypesQuery(expSplitter.getFirstIndividualTermExpression(),direct,queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetFlattenedTypesQuery'-Expression."),this);
@@ -110,7 +110,7 @@ namespace Konclude {
 			CQueryGetFlattenedInstancesExpression* CConcreteOntologyQueryBasicBuilder::getGetFlattenedInstancesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) {
 				CQueryGetFlattenedInstancesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(1,0,0)) {
+				if (expSplitter.testForExpressionComposition(1,0,0)) {
 					expression = getGetFlattenedInstancesQuery(expSplitter.getFirstClassTermExpression(),direct,queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetFlattenedInstancesQuery'-Expression."),this);
@@ -123,7 +123,7 @@ namespace Konclude {
 			CQueryGetTypesExpression* CConcreteOntologyQueryBasicBuilder::getGetTypesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) {
 				CQueryGetTypesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(0,0,1)) {
+				if (expSplitter.testForExpressionComposition(0,0,1)) {
 					expression = getGetTypesQuery(expSplitter.getFirstIndividualTermExpression(),direct,queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetTypesQuery'-Expression."),this);
@@ -134,7 +134,7 @@ namespace Konclude {
 			CQueryGetInstancesExpression* CConcreteOntologyQueryBasicBuilder::getGetInstancesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) {
 				CQueryGetInstancesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(1,0,0)) {
+				if (expSplitter.testForExpressionComposition(1,0,0)) {
 					expression = getGetInstancesQuery(expSplitter.getFirstClassTermExpression(),direct,queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetInstancesQuery'-Expression."),this);
@@ -147,7 +147,7 @@ namespace Konclude {
 			CQueryGetSubClassesExpression* CConcreteOntologyQueryBasicBuilder::getGetSubClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) {
 				CQueryGetSubClassesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(1,0,0)) {
+				if (expSplitter.testForExpressionComposition(1,0,0)) {
 					expression = getGetSubClassesQuery(expSplitter.getFirstClassTermExpression(),direct,queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetSubClassesQuery'-Expression."),this);
@@ -158,7 +158,7 @@ namespace Konclude {
 			CQueryGetSuperClassesExpression* CConcreteOntologyQueryBasicBuilder::getGetSuperClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) {
 				CQueryGetSuperClassesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(1,0,0)) {
+				if (expSplitter.testForExpressionComposition(1,0,0)) {
 					expression = getGetSuperClassesQuery(expSplitter.getFirstClassTermExpression(),direct,queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetSuperClassesQuery'-Expression."),this);
@@ -169,7 +169,7 @@ namespace Konclude {
 			CQueryGetEquivalentClassesExpression* CConcreteOntologyQueryBasicBuilder::getGetEquivalentClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) {
 				CQueryGetEquivalentClassesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
-				if (expSplitter.proofExpressionComposition(1,0,0)) {
+				if (expSplitter.testForExpressionComposition(1,0,0)) {
 					expression = getGetEquivalentClassesQuery(expSplitter.getFirstClassTermExpression(),queryName);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetEquivalentClassesQuery'-Expression."),this);
@@ -328,6 +328,7 @@ namespace Konclude {
 							queryStats = new CQueryStatisticsCollectionStrings();
 							satCalcJob->setCalclulationStatisticsCollector(queryStats->createCalculationStatisticsCollection());
 						}
+						query->setCalculationConfiguration(calcConfig);
 						satCalcJob->setCalculationConfiguration(calcConfig);
 						query->addTestSatisfiableCalculationJob(satCalcJob,true);
 						query->setQueryStatistics(queryStats);
@@ -335,6 +336,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated IsClassSatisfiable-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete classSatExp;
 				}
 
 
@@ -366,6 +368,7 @@ namespace Konclude {
 							satCalcJob->setCalclulationStatisticsCollector(queryStats->createCalculationStatisticsCollection());
 						}
 						query->setQueryStatistics(queryStats);
+						query->setCalculationConfiguration(calcConfig);
 
 
 						satCalcJob->setCalculationConfiguration(calcConfig);
@@ -374,6 +377,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated IsIstanceOf-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete instanceExp;
 				}
 
 
@@ -399,6 +403,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated FlattenedTypes-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete flattenedTypes;
 				}
 
 
@@ -424,6 +429,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated FlattenedInstances-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete flattenedInstances;
 				}
 
 
@@ -450,6 +456,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated Types-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete typesExp;
 				}
 
 
@@ -500,6 +507,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated GetSubClasses-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete subClassesExp;
 				}
 
 
@@ -526,6 +534,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated GetSuperClasses-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete superClassesExp;
 				}
 
 
@@ -552,6 +561,7 @@ namespace Konclude {
 						queryList.append(query);
 						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated GetEquivalentClasses-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
+					delete equivClassesExp;
 				}
 
 

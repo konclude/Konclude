@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -80,11 +80,11 @@ namespace Konclude {
 				*mDeclarationAxiomSet = *baseOntoBuild->getDeclarationAxiomSet();
 
 				*mBuildConceptSet = *baseOntoBuild->getBuildConceptSet();
-				*mBuildRoleSet = *baseOntoBuild->getBuildRoleSet();
+				*mBuildObjectRoleSet = *baseOntoBuild->getBuildObjectRoleSet();
 				*mBuildIndividualSet = *baseOntoBuild->getBuildIndividualSet();
 
 				*mBuildConceptList = *baseOntoBuild->getBuildConceptList();
-				*mBuildRoleList = *baseOntoBuild->getBuildRoleList();
+				*mBuildObjectRoleList = *baseOntoBuild->getBuildObjectRoleList();
 				*mBuildIndividualList = *baseOntoBuild->getBuildIndividualList();
 
 				*mInverseObjectPropertyHash = *baseOntoBuild->getInverseObjectPropertyHash();
@@ -261,7 +261,7 @@ namespace Konclude {
 				mMergeExpFunctionJumpHash.insert((cint64)CObjectPropertyRangeExpression::BETOBJECTPROPERTYRANGE,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseObjectPropertyRangeStart,&CConcreteOntologyMergingBuilder::parseObjectPropertyRangeEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CInverseObjectPropertiesExpression::BETINVERSEOBJECTPROPERTIES,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseInverseObjectPropertiesStart,&CConcreteOntologyMergingBuilder::parseInverseObjectPropertiesEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CTransetiveObjectPropertyExpression::BETTRANSITIVEOBJECTPROPERTY,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseTransetiveObjectPropertyStart,&CConcreteOntologyMergingBuilder::parseTransetiveObjectPropertyEnd));
-				mMergeExpFunctionJumpHash.insert((cint64)CFunctionalObjectPropertyExpression::BETFUNCTIONALPROPERTY,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseFunctionalObjectPropertyStart,&CConcreteOntologyMergingBuilder::parseFunctionalObjectPropertyEnd));
+				mMergeExpFunctionJumpHash.insert((cint64)CFunctionalObjectPropertyExpression::BETFUNCTIONALOBJECTPROPERTY,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseFunctionalObjectPropertyStart,&CConcreteOntologyMergingBuilder::parseFunctionalObjectPropertyEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CInverseFunctionalObjectPropertyExpression::BETINVERSEFUNCTIONALPROPERTY,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseInverseFunctionalObjectPropertyStart,&CConcreteOntologyMergingBuilder::parseInverseFunctionalObjectPropertyEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CInverseObjectPropertyOfExpression::BETINVERSEOBJECTPROPERTYOF,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseInverseObjectPropertyOfStart,&CConcreteOntologyMergingBuilder::parseInverseObjectPropertyOfEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CObjectPropertyChainExpression::BETOBJECTPROPERTYCHAIN,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseObjectPropertyChainStart,&CConcreteOntologyMergingBuilder::parseObjectPropertyChainEnd));

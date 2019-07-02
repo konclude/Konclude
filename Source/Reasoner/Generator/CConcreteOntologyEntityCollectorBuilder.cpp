@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -38,8 +38,12 @@ namespace Konclude {
 				return &mClassNameSet;
 			}
 
-			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getPropertyNameSet() {
-				return &mPropertyNameSet;
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getObjectPropertyNameSet() {
+				return &mObjectPropertyNameSet;
+			}
+
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getDataPropertyNameSet() {
+				return &mDataPropertyNameSet;
 			}
 
 			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getIndividualNameSet() {
@@ -93,6 +97,15 @@ namespace Konclude {
 
 
 
+			bool CConcreteOntologyEntityCollectorBuilder::addOntologyImport(const QStringRef& name) {
+				return false;
+			}
+
+			bool CConcreteOntologyEntityCollectorBuilder::addOntologyImport(const QString& name) {
+				return false;
+			}
+
+
 
 
 			CDeclarationAxiomExpression* CConcreteOntologyEntityCollectorBuilder::getDeclaration(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
@@ -135,6 +148,227 @@ namespace Konclude {
 			CObjectIndividualVariableExpression* CConcreteOntologyEntityCollectorBuilder::getIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber) {
 				return getIndividualVariable(individualVariableName.toString(),axiomNumber);
 			}
+
+
+
+
+			CDataLiteralExpression* CConcreteOntologyEntityCollectorBuilder::getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype) {
+				return nullptr;
+			}
+
+
+			CDatatypeExpression* CConcreteOntologyEntityCollectorBuilder::getDatatype(const QString& datatypeName) {
+				return nullptr;
+			}
+
+			CDatatypeExpression* CConcreteOntologyEntityCollectorBuilder::getDatatype(const QStringRef& datatypeName) {
+				return nullptr;
+			}
+
+			CDataLexicalValueExpression* CConcreteOntologyEntityCollectorBuilder::getDataLexicalValue(const QString& dataLexicalValue) {
+				return nullptr;
+			}
+
+			CDataLexicalValueExpression* CConcreteOntologyEntityCollectorBuilder::getDataLexicalValue(const QStringRef& dataLexicalValue) {
+				return nullptr;
+			}
+
+			CDataHasValueExpression* CConcreteOntologyEntityCollectorBuilder::getDataHasValue(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataHasValueExpression* CConcreteOntologyEntityCollectorBuilder::getDataHasValue(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataSomeValuesFromExpression* CConcreteOntologyEntityCollectorBuilder::getDataSomeValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataSomeValuesFromExpression* CConcreteOntologyEntityCollectorBuilder::getDataSomeValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataAllValuesFromExpression* CConcreteOntologyEntityCollectorBuilder::getDataAllValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataAllValuesFromExpression* CConcreteOntologyEntityCollectorBuilder::getDataAllValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataIntersectionOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataIntersectionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataIntersectionOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataIntersectionOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataOneOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataOneOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataOneOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataOneOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataUnionOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataUnionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataUnionOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataUnionOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataComplementOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataComplementOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataComplementOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataComplementOf(CBuildExpression* expression) {
+				return nullptr;
+			}
+
+			CDatatypeRestrictionExpression* CConcreteOntologyEntityCollectorBuilder::getDatatypeRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDatatypeRestrictionExpression* CConcreteOntologyEntityCollectorBuilder::getDatatypeRestriction(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataFacetExpression* CConcreteOntologyEntityCollectorBuilder::getDataFacet(const QString& dataFacetIRI) {
+				return nullptr;
+			}
+			
+			CDataFacetExpression* CConcreteOntologyEntityCollectorBuilder::getDataFacet(const QStringRef& dataFacetIRI) {
+				return nullptr;
+			}
+
+
+			CDataFacetRestrictionExpression* CConcreteOntologyEntityCollectorBuilder::getDataFacetRestriction(CDataLiteralExpression* dataLiteralExpression, CDataFacetExpression* dataFacet) {
+				return nullptr;
+			}
+
+			CDataFacetRestrictionExpression* CConcreteOntologyEntityCollectorBuilder::getDataFacetRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataFacetRestrictionExpression* CConcreteOntologyEntityCollectorBuilder::getDataFacetRestriction(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+
+
+			CDataMaxCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataMaxCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
+				return nullptr;
+			}
+
+			CDataMaxCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataMaxCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
+				return nullptr;
+			}
+
+
+			CDataMinCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataMinCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
+				return nullptr;
+			}
+
+			CDataMinCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataMinCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
+				return nullptr;
+			}
+
+
+			CDataExactCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataExactCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
+				return nullptr;
+			}
+
+			CDataExactCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataExactCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
+				return nullptr;
+			}
+
+
+
+			CDataHasValueExpression* CConcreteOntologyEntityCollectorBuilder::getDataHasValue(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataSomeValuesFromExpression* CConcreteOntologyEntityCollectorBuilder::getDataSomeValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataAllValuesFromExpression* CConcreteOntologyEntityCollectorBuilder::getDataAllValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				return nullptr;
+			}
+
+
+			CDataIntersectionOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataIntersectionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
+				return nullptr;
+			}
+			
+			CDataOneOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataOneOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataUnionOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataUnionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataComplementOfExpression* CConcreteOntologyEntityCollectorBuilder::getDataComplementOf(CDataRangeTermExpression* expressions) {
+				return nullptr;
+			}
+
+			CDatatypeRestrictionExpression* CConcreteOntologyEntityCollectorBuilder::getDatatypeRestriction(CDatatypeExpression* datatypeExpression, const CEXPRESSIONLIST<CDataFacetRestrictionExpression*>& expressions) {
+				return nullptr;
+			}
+
+
+			CDataMaxCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataMaxCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) {
+				return nullptr;
+			}
+
+			CDataMinCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataMinCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) {
+				return nullptr;
+			}
+
+			CDataExactCardinalityExpression* CConcreteOntologyEntityCollectorBuilder::getDataExactCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) {
+				return nullptr;
+			}
+
+			CDataRangeTermExpression* CConcreteOntologyEntityCollectorBuilder::getTopDataRange() {
+				return nullptr;
+			}
+			
+			CDataRangeTermExpression* CConcreteOntologyEntityCollectorBuilder::getBottomDataRange() {
+				return nullptr;
+			}
+
+
+			CDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3) {
+				return nullptr;
+			}
+
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getNegativeDataPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getNegativeDataPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3) {
+				return nullptr;
+			}
+
+
+
+			CDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+				return nullptr;
+			}
+
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+				return nullptr;
+			}
+
 
 
 
@@ -311,10 +545,20 @@ namespace Konclude {
 
 
 
+			CDataPropertyExpression* CConcreteOntologyEntityCollectorBuilder::getDataProberty(const QString& dataPropertyName) {
+				mDataPropertyNameSet.insert(dataPropertyName);
+				return nullptr;
+			}
+
+
+			CDataPropertyExpression* CConcreteOntologyEntityCollectorBuilder::getDataProberty(const QStringRef& dataPropertyName) {
+				return getDataProberty(dataPropertyName.toString());
+			}
+
 
 
 			CObjectPropertyExpression* CConcreteOntologyEntityCollectorBuilder::getObjectProberty(const QString& probertyName) {
-				mPropertyNameSet.insert(probertyName);
+				mObjectPropertyNameSet.insert(probertyName);
 				return nullptr;
 			}
 
@@ -350,6 +594,95 @@ namespace Konclude {
 			CObjectPropertyRangeExpression* CConcreteOntologyEntityCollectorBuilder::getObjectPropertyRangeExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				return nullptr;
 			}
+
+
+
+
+			CSubDataPropertyOfExpression* CConcreteOntologyEntityCollectorBuilder::getSubDataPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CSubDataPropertyOfExpression* CConcreteOntologyEntityCollectorBuilder::getSubDataPropertyOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+
+			CEquivalentDataPropertiesExpression* CConcreteOntologyEntityCollectorBuilder::getEquivalentDataProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CEquivalentDataPropertiesExpression* CConcreteOntologyEntityCollectorBuilder::getEquivalentDataProperties(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDisjointDataPropertiesExpression* CConcreteOntologyEntityCollectorBuilder::getDisjointDataProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDisjointDataPropertiesExpression* CConcreteOntologyEntityCollectorBuilder::getDisjointDataProperties(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+
+			CDataPropertyDomainExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyDomainExpression(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataPropertyDomainExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyDomainExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDataPropertyRangeExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyRangeExpression(CBuildExpression* expression1, CBuildExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataPropertyRangeExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyRangeExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+
+			CFunctionalDataPropertyExpression* CConcreteOntologyEntityCollectorBuilder::getFunctionalDataProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CFunctionalDataPropertyExpression* CConcreteOntologyEntityCollectorBuilder::getFunctionalDataProperty(CBuildExpression* expression) {
+				return nullptr;
+			}
+
+
+
+
+			CSubDataPropertyOfExpression* CConcreteOntologyEntityCollectorBuilder::getSubDataPropertyOf(CDataPropertyTermExpression* expression1, CDataPropertyTermExpression* expression2) {
+				return nullptr;
+			}
+
+
+			CEquivalentDataPropertiesExpression* CConcreteOntologyEntityCollectorBuilder::getEquivalentDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions) {
+				return nullptr;
+			}
+
+			CDisjointDataPropertiesExpression* CConcreteOntologyEntityCollectorBuilder::getDisjointDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions) {
+				return nullptr;
+			}
+
+
+
+			CDataPropertyDomainExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyDomainExpression(CDataPropertyTermExpression* expression1, CClassTermExpression* expression2) {
+				return nullptr;
+			}
+
+			CDataPropertyRangeExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyRangeExpression(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				return nullptr;
+			}
+
+			CFunctionalDataPropertyExpression* CConcreteOntologyEntityCollectorBuilder::getFunctionalDataProperty(CDataPropertyTermExpression* expression) {
+				return nullptr;
+			}
+
+
+
+
+
 
 			CInverseObjectPropertiesExpression* CConcreteOntologyEntityCollectorBuilder::getInverseObjectProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				return nullptr;
@@ -531,7 +864,7 @@ namespace Konclude {
 			}
 
 			CAnonymousIndividualExpression* CConcreteOntologyEntityCollectorBuilder::getAnonymousIndividual(const QString& ontologyName, const QString& individualName) {
-				mIndividualNameSet.insert(individualName);
+				mAnonymousIndividualNameSet.insert(individualName);
 				return nullptr;
 			}
 

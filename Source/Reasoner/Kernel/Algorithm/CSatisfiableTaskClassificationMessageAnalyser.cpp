@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -40,6 +40,9 @@ namespace Konclude {
 					mMaxModelAnalysingDepth = 20;
 
 					mConfStopAnalyseWhenNotChanging = true;
+					mEquivalentAlternativesSaturationMerging = true;
+
+					mStatSuccessorModelMergingTestCount = 0;
 				}
 
 
@@ -50,7 +53,9 @@ namespace Konclude {
 					mConfAnalyseIdentifierOccurence = true;
 					mConfAnalysePossibleSubSumptions = true;
 					mConfStopAnalyseWhenNotChanging = true;
+					mEquivalentAlternativesSaturationMerging = true;
 					if (config) {
+						mEquivalentAlternativesSaturationMerging = config->isEquivalentAlternativesSaturationMergingActivated();
 						return true;
 					}
 					return false;
@@ -119,33 +124,34 @@ namespace Konclude {
 
 
 
-				bool CSatisfiableTaskClassificationMessageAnalyser::testSubsumerCandidatePossibleWithMergedSaturatedModel(CIndividualProcessNode* indiNode, CConcept* candidateConcept, CCalculationAlgorithmContext* calcAlgContext) {
+				bool CSatisfiableTaskClassificationMessageAnalyser::testSubsumerCandidatePossibleWithMergedSaturatedModel(CIndividualProcessNode* indiNode, CConcept* equivConcept, CCalculationAlgorithmContext* calcAlgContext) {
 					CTaskProcessorContext* taskProcessorContext = calcAlgContext->getUsedTaskProcessorContext();
+					
+					if (mEquivalentAlternativesSaturationMerging) {
+						if (!mTestSaturatedMergedHash) {
+							mTestSaturatedMergedHash = CObjectParameterizingAllocator< CPROCESSINGHASH< QPair<CConcept*,bool>,CSaturatedMergedTestItem >,CContext* >::allocateAndConstructAndParameterize(taskProcessorContext->getMemoryAllocationManager(),taskProcessorContext);
+						}
+						if (mLastMergingTestNode != indiNode) {
+							mLastMergingTestNode = indiNode;
+							mTestSaturatedMergedHash->clear();
+						}
+						STATINC(ANALYSECANDIDATECONCEPTSATURATEDALTERNATIVETESTCOUNT,calcAlgContext);
 
-					if (!mTestSaturatedMergedHash) {
-						mTestSaturatedMergedHash = CObjectParameterizingAllocator< CPROCESSINGHASH< QPair<CConcept*,bool>,CSaturatedMergedTestItem >,CContext* >::allocateAndConstructAndParameterize(taskProcessorContext->getMemoryAllocationManager(),taskProcessorContext);
-					}
-					if (mLastMergingTestNode != indiNode) {
-						mLastMergingTestNode = indiNode;
-						mTestSaturatedMergedHash->clear();
-					}
-					STATINC(ANALYSECANDIDATECONCEPTSATURATEDALTERNATIVETESTCOUNT,calcAlgContext);
-
-					if (candidateConcept->getOperatorCode() == CCEQCAND) {
-						CConcept* equivConcept = candidateConcept->getOperandList()->getData();
-						CPROCESSINGSET< QPair<CConcept*,bool> > alternativesSet(taskProcessorContext);
-						bool oneMergeSatisfieableFlag = false;
-						bool allMergeUnsatisfieableFlag = true;
-						if (collectEquivalenceConceptAlternatives(indiNode,equivConcept,true,alternativesSet,mTestSaturatedMergedHash,oneMergeSatisfieableFlag,allMergeUnsatisfieableFlag,calcAlgContext)) {
-							if (oneMergeSatisfieableFlag) {
-								STATINC(ANALYSECANDIDATECONCEPTSATURATEDALTERNATIVEFOUNDCOUNT,calcAlgContext);
-								return false;
-							}
-						} else {
-							if (testEquivalenceConceptAlternatives(indiNode,alternativesSet,mTestSaturatedMergedHash,oneMergeSatisfieableFlag,allMergeUnsatisfieableFlag,calcAlgContext)) {
+						if (equivConcept->getOperatorCode() == CCEQ) {
+							CPROCESSINGSET< QPair<CConcept*,bool> > alternativesSet(taskProcessorContext);
+							bool oneMergeSatisfieableFlag = false;
+							bool allMergeUnsatisfieableFlag = true;
+							if (collectEquivalenceConceptAlternatives(indiNode,equivConcept,true,alternativesSet,mTestSaturatedMergedHash,oneMergeSatisfieableFlag,allMergeUnsatisfieableFlag,calcAlgContext)) {
 								if (oneMergeSatisfieableFlag) {
 									STATINC(ANALYSECANDIDATECONCEPTSATURATEDALTERNATIVEFOUNDCOUNT,calcAlgContext);
 									return false;
+								}
+							} else {
+								if (testEquivalenceConceptAlternatives(indiNode,alternativesSet,mTestSaturatedMergedHash,oneMergeSatisfieableFlag,allMergeUnsatisfieableFlag,calcAlgContext)) {
+									if (oneMergeSatisfieableFlag) {
+										STATINC(ANALYSECANDIDATECONCEPTSATURATEDALTERNATIVEFOUNDCOUNT,calcAlgContext);
+										return false;
+									}
 								}
 							}
 						}
@@ -172,7 +178,7 @@ namespace Konclude {
 							CConceptDescriptor* conDes = nullptr;
 							CDependencyTrackPoint* depTrackPoint = nullptr;
 							CCondensedReapplyQueue* reapplyQueue = nullptr;
-							if (conSet->getConceptDescriptorAndReapplyQueue(dataTag,conDes,depTrackPoint,reapplyQueue)) {
+							if (conSet->getConceptDescriptorOrReapplyQueue(dataTag,conDes,depTrackPoint,reapplyQueue)) {
 								if (conDes && satConDes) {
 									if (conDes->isNegated() != satConDes->isNegated()) {
 										mergedConceptsClashed = true;
@@ -260,72 +266,141 @@ namespace Konclude {
 
 
 
+
+				bool CSatisfiableTaskClassificationMessageAnalyser::collectSuccessorMergingNodesAndConcepts(CIndividualProcessNode* indiNode, CIndividualSaturationProcessNode* saturationIndiNode, CReapplyRoleSuccessorHash* roleSuccHash, CRole* role,
+						CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>& trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, CCalculationAlgorithmContext* calcAlgContext) {
+
+					for (CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
+						CRole* superRole = superRoleIt->getData();
+						bool superRoleInversed = superRoleIt->isNegated();
+						if (roleSuccHash && !superRoleInversed) {
+							CReapplyQueueIterator reapplyIt(roleSuccHash->getRoleReapplyIterator(superRole,false));
+							while (reapplyIt.hasNext()) {
+								CReapplyConceptDescriptor* reapplyConDes = reapplyIt.next();
+								CConceptDescriptor* conDes = reapplyConDes->getConceptDescriptor();
+								CConcept* reapplyConcept = conDes->getConcept();
+								bool reapplyConceptNegation = conDes->isNegated();
+								cint64 reapplyConceptOpCode = reapplyConcept->getOperatorCode();
+								if (reapplyConceptNegation && (reapplyConceptOpCode == CCSOME) || !reapplyConceptNegation && (reapplyConceptOpCode == CCALL || reapplyConceptOpCode == CCIMPLALL || reapplyConceptOpCode == CCBRANCHALL || reapplyConceptOpCode == CCAQALL || reapplyConceptOpCode == CCIMPLAQALL || reapplyConceptOpCode == CCBRANCHAQALL)) {
+									for (CSortedNegLinker<CConcept*>* reapplyOperandConLinkerIt = reapplyConcept->getOperandList(); reapplyOperandConLinkerIt; reapplyOperandConLinkerIt = reapplyOperandConLinkerIt->getNext()) {
+										CConcept* reapplyOperandCon = reapplyOperandConLinkerIt->getData();
+										bool reapplyOperandConNeg = reapplyOperandConLinkerIt->isNegated()^reapplyConceptNegation;
+
+										CIndividualSaturationProcessNode* satIndiNode = getSaturatedIndividualNodeForConcept(reapplyOperandCon,reapplyOperandConNeg,calcAlgContext);
+										if (!satIndiNode) {
+											if (!collectTrivialPropagationTestingConcepts(reapplyOperandCon,reapplyOperandConNeg,trivialSuccessorPropagatedConceptList,calcAlgContext)) {
+												return false;
+											}
+										} else if (!satIndiNode->isCompleted() || satIndiNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCARDINALITYPROPLEMATIC | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGNOMINALCONNECTION,false)) {
+											return false;
+										}
+
+										if (satIndiNode) {
+											successorList.append(satIndiNode);
+										}
+									}
+								} else if (!reapplyConceptNegation && (reapplyConceptOpCode == CCAQAND || reapplyConceptOpCode == CCIMPLAQAND || reapplyConceptOpCode == CCBRANCHAQAND)) {
+									if (!addAutomateTransactionConcepts(reapplyConcept,reapplyConceptNegation,superRole,successorList,trivialSuccessorPropagatedConceptList,calcAlgContext)) {
+										return false;
+									}
+								} else {
+									return false;
+								}
+							}
+						} else {
+							backwardRoleSet.insert(superRole);
+						}
+					}
+
+					return true;
+				}
+
+
+
 				bool CSatisfiableTaskClassificationMessageAnalyser::testSaturatedExistentialsModelMergable(CIndividualProcessNode* indiNode, CIndividualSaturationProcessNode* saturationIndiNode, CCalculationAlgorithmContext* calcAlgContext) {
 					STATINC(ANALYSECANDIDATECONCEPTSATURATEDROLESUCCESSOREXTENDEDMERGINGCOUNT,calcAlgContext);
 					CTaskProcessorContext* taskProcessorContext = calcAlgContext->getUsedTaskProcessorContext();
 
 					cint64 remainingMergingDepth = 5;
-					cint64 remainingMergingCount = 10;
+					cint64 remainingMergingCount = 100;
 
 					CReapplyRoleSuccessorHash* roleSuccHash = indiNode->getReapplyRoleSuccessorHash(false);
-					CReapplyConceptSaturationLabelSet* saturatedConSet = saturationIndiNode->getReapplyConceptSaturationLabelSet(false);
-					for (CConceptSaturationDescriptor* conSatDesIt = saturatedConSet->getConceptSaturationDescriptionLinker(); conSatDesIt; conSatDesIt = conSatDesIt->getNext()) {
-						CConceptSaturationDescriptor* conSatDes = conSatDesIt;
-						CConcept* concept = conSatDes->getConcept();
-						bool negated = conSatDes->isNegated();
-						cint64 opCode = concept->getOperatorCode();
-						cint64 card = concept->getParameter();
-						if (!negated && (opCode == CCSOME || opCode == CCAQSOME || opCode == CCATLEAST && card > 0) || negated && (opCode == CCALL || opCode == CCATMOST && card >= 0)) {
 
-							CPROCESSINGLIST<CIndividualSaturationProcessNode*> successorList(taskProcessorContext);
-							CPROCESSINGSET<CRole*> backwardRoleSet(taskProcessorContext);
 
-							CRole* role = concept->getRole();
-							for (CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
-								CRole* superRole = superRoleIt->getData();
-								bool superRoleInversed = superRoleIt->isNegated();
-								if (roleSuccHash && !superRoleInversed) {
-									CReapplyQueueIterator reapplyIt(roleSuccHash->getRoleReapplyIterator(superRole,false));
-									while (reapplyIt.hasNext()) {
-										CReapplyConceptDescriptor* reapplyConDes = reapplyIt.next();
-										CConceptDescriptor* conDes = reapplyConDes->getConceptDescriptor();
-										CConcept* reapplyConcept = conDes->getConcept();
-										bool reapplyConceptNegation = conDes->isNegated();
-										cint64 reapplyConceptOpCode = reapplyConcept->getOperatorCode();
-										if (reapplyConceptNegation && (reapplyConceptOpCode == CCSOME) || !reapplyConceptNegation && (reapplyConceptOpCode == CCALL || reapplyConceptOpCode == CCIMPLALL || reapplyConceptOpCode == CCBRANCHALL || reapplyConceptOpCode == CCAQALL || reapplyConceptOpCode == CCIMPLAQALL || reapplyConceptOpCode == CCBRANCHAQALL)) {
-											for (CSortedNegLinker<CConcept*>* reapplyOperandConLinkerIt = reapplyConcept->getOperandList(); reapplyOperandConLinkerIt; reapplyOperandConLinkerIt = reapplyOperandConLinkerIt->getNext()) {
-												CConcept* reapplyOperandCon = reapplyOperandConLinkerIt->getData();
-												bool reapplyOperandConNeg = reapplyOperandConLinkerIt->isNegated()^reapplyConceptNegation;
+					if (saturationIndiNode->getDirectStatusFlags()->hasSuccessorNodeExtensionsFlag()) {
+						CLinkedRoleSaturationSuccessorHash* linkedSuccHash = saturationIndiNode->getLinkedRoleSuccessorHash(false);
+						if (linkedSuccHash) {
+							CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>* roleLinkedSuccHash = linkedSuccHash->getLinkedRoleSuccessorHash();
+							for (CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>::const_iterator itSucc = roleLinkedSuccHash->constBegin(), itEndSucc = roleLinkedSuccHash->constEnd(); itSucc != itEndSucc; ++itSucc) {
+								CRole* role = itSucc.key();
+								CLinkedRoleSaturationSuccessorData* linkedSuccData = itSucc.value();
+								CPROCESSMAP<cint64,CSaturationSuccessorData*>* succDataMap = linkedSuccData->getSuccessorNodeDataMap(false);
+								if (succDataMap) {
+									for (CPROCESSMAP<cint64,CSaturationSuccessorData*>::const_iterator it = succDataMap->constBegin(), itEnd = succDataMap->constEnd(); it != itEnd; ++it) {
+										CSaturationSuccessorData* succData = it.value();
+										if (succData->mActiveCount >= 1) {
+											for (CXNegLinker<CRole*>* creationRoleLinkerIt = succData->mCreationRoleLinker; creationRoleLinkerIt; creationRoleLinkerIt = creationRoleLinkerIt->getNext()) {
+												if (!creationRoleLinkerIt->isNegated()) {
+													CRole* creationRole = creationRoleLinkerIt->getData();
+													if (creationRole == role) {
 
-												CIndividualSaturationProcessNode* satIndiNode = getSaturatedIndividualNodeForConcept(reapplyOperandCon,reapplyOperandConNeg,calcAlgContext);
-												if (!satIndiNode || !satIndiNode->isCompleted() || satIndiNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCARDINALITYPROPLEMATIC | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGNOMINALCONNECTION,false)) {
-													return false;
+														CPROCESSINGLIST<CIndividualSaturationProcessNode*> successorList(taskProcessorContext);
+														CPROCESSINGLIST<TConceptNegationPair> trivialSuccessorPropagatedConceptList(taskProcessorContext);
+														CPROCESSINGSET<CRole*> backwardRoleSet(taskProcessorContext);
+
+														if (!collectSuccessorMergingNodesAndConcepts(indiNode,saturationIndiNode,roleSuccHash,role,successorList,trivialSuccessorPropagatedConceptList,backwardRoleSet,calcAlgContext)) {
+															return false;
+														}
+
+														if (!successorList.isEmpty() || !trivialSuccessorPropagatedConceptList.isEmpty()) {
+															CIndividualSaturationProcessNode* extSatIndiNode = succData->mSuccIndiNode;
+															successorList.prepend(extSatIndiNode);
+
+															if (!testSaturatedSuccessorModelMergable(extSatIndiNode,successorList,&trivialSuccessorPropagatedConceptList,backwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
+																return false;
+															}
+														}
+
+													}
 												}
-
-												successorList.append(satIndiNode);
 											}
-										} else {
-											return false;
 										}
 									}
-								} else {
-									backwardRoleSet.insert(superRole);
 								}
 							}
+						}
+					} else {
+						CReapplyConceptSaturationLabelSet* saturatedConSet = saturationIndiNode->getReapplyConceptSaturationLabelSet(false);
+						for (CConceptSaturationDescriptor* conSatDesIt = saturatedConSet->getConceptSaturationDescriptionLinker(); conSatDesIt; conSatDesIt = conSatDesIt->getNext()) {
+							CConceptSaturationDescriptor* conSatDes = conSatDesIt;
+							CConcept* concept = conSatDes->getConcept();
+							bool negated = conSatDes->isNegated();
+							cint64 opCode = concept->getOperatorCode();
+							cint64 card = concept->getParameter();
+							if (!negated && (opCode == CCSOME || opCode == CCAQSOME || opCode == CCATLEAST && card > 0) || negated && (opCode == CCALL || opCode == CCATMOST && card >= 0)) {
 
+								CPROCESSINGLIST<CIndividualSaturationProcessNode*> successorList(taskProcessorContext);
+								CPROCESSINGLIST<TConceptNegationPair> trivialSuccessorPropagatedConceptList(taskProcessorContext);
+								CPROCESSINGSET<CRole*> backwardRoleSet(taskProcessorContext);
 
-							if (!successorList.isEmpty()) {
-								CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
-								if (!extSatIndiNode) {
+								CRole* role = concept->getRole();
+								if (!collectSuccessorMergingNodesAndConcepts(indiNode,saturationIndiNode,roleSuccHash,role,successorList,trivialSuccessorPropagatedConceptList,backwardRoleSet,calcAlgContext)) {
 									return false;
 								}
-								successorList.prepend(extSatIndiNode);
 
-								if (!testSaturatedSuccessorModelMergable(extSatIndiNode,successorList,backwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
-									return false;
+								if (!successorList.isEmpty() || !trivialSuccessorPropagatedConceptList.isEmpty()) {
+									CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
+									if (!extSatIndiNode) {
+										return false;
+									}
+									successorList.prepend(extSatIndiNode);
+
+									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,successorList,&trivialSuccessorPropagatedConceptList,backwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
+										return false;
+									}
 								}
+
 							}
-
 						}
 					}
 					return true;
@@ -333,8 +408,68 @@ namespace Konclude {
 
 
 
+				bool CSatisfiableTaskClassificationMessageAnalyser::collectTrivialPropagationTestingConcepts(CConcept* concept, bool negation, CPROCESSINGLIST<TConceptNegationPair>& trivialConceptTestingList, CCalculationAlgorithmContext* calcAlgContext) {
+					CConceptOperator* conOperator = concept->getConceptOperator();
+					cint64 conOpCode = concept->getOperatorCode();
+					if (negation && conOpCode == CCSUB) {
+						trivialConceptTestingList.append(TConceptNegationPair(concept,negation));
+						return true;
+					} else if (!negation && (conOpCode == CCALL || conOpCode == CCIMPLALL || conOpCode == CCBRANCHALL || conOpCode == CCAQALL || conOpCode == CCIMPLAQALL || conOpCode == CCBRANCHAQALL)) {
+						trivialConceptTestingList.append(TConceptNegationPair(concept,negation));
+						return true;
+					} else if (!negation && (conOpCode == CCAQAND || conOpCode == CCIMPLAQAND || conOpCode == CCBRANCHAQAND)) {
+						bool allOperandsSucceeded = true;
+						for (CSortedNegLinker<CConcept*>* operandConLinkerIt = concept->getOperandList(); operandConLinkerIt; operandConLinkerIt = operandConLinkerIt->getNext()) {
+							CConcept* operandCon = operandConLinkerIt->getData();
+							bool operandConNeg = operandConLinkerIt->isNegated();
+							allOperandsSucceeded &= collectTrivialPropagationTestingConcepts(operandCon,operandConNeg,trivialConceptTestingList,calcAlgContext);
+						}
+						return allOperandsSucceeded;
+					}
+					return false;
+				}
 
-				bool CSatisfiableTaskClassificationMessageAnalyser::testSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext) {
+
+				bool CSatisfiableTaskClassificationMessageAnalyser::addAutomateTransactionConcepts(CConcept* concept, bool negation, CRole* role, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>& trivialConceptTestingList, CCalculationAlgorithmContext* calcAlgContext) {
+					cint64 conOpCode = concept->getOperatorCode();
+					if (!negation && (conOpCode == CCAQALL || conOpCode == CCIMPLAQALL || conOpCode == CCBRANCHAQALL)) {
+
+						if (concept->getRole() == role) {
+
+							for (CSortedNegLinker<CConcept*>* operandConLinkerIt = concept->getOperandList(); operandConLinkerIt; operandConLinkerIt = operandConLinkerIt->getNext()) {
+								CConcept* reapplyOperandCon = operandConLinkerIt->getData();
+								bool reapplyOperandConNeg = operandConLinkerIt->isNegated();
+
+								CIndividualSaturationProcessNode* satIndiNode = getSaturatedIndividualNodeForConcept(reapplyOperandCon,reapplyOperandConNeg,calcAlgContext);
+								if (!satIndiNode) {
+									if (!collectTrivialPropagationTestingConcepts(reapplyOperandCon,reapplyOperandConNeg,trivialConceptTestingList,calcAlgContext)) {
+										return false;
+									}
+								} else if (!satIndiNode->isCompleted() || satIndiNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCARDINALITYPROPLEMATIC | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGNOMINALCONNECTION,false)) {
+									return false;
+								}
+								
+								if (satIndiNode) {
+									successorList.append(satIndiNode);
+								}
+							}
+						}
+					} else if (!negation && (conOpCode == CCAQAND || conOpCode == CCIMPLAQAND || conOpCode == CCBRANCHAQAND)) {
+						bool allOperandsSucceeded = true;
+						for (CSortedNegLinker<CConcept*>* operandConLinkerIt = concept->getOperandList(); operandConLinkerIt; operandConLinkerIt = operandConLinkerIt->getNext()) {
+							CConcept* reapplyOperandCon = operandConLinkerIt->getData();
+							bool reapplyOperandConNeg = operandConLinkerIt->isNegated();
+							allOperandsSucceeded &= addAutomateTransactionConcepts(reapplyOperandCon,reapplyOperandConNeg,role,successorList,trivialConceptTestingList,calcAlgContext);
+						}
+						return allOperandsSucceeded;
+					}
+					return true;
+				}
+
+
+
+				bool CSatisfiableTaskClassificationMessageAnalyser::testSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>* trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext) {
+					++mStatSuccessorModelMergingTestCount;
 
 					if (--remainingMergingDepth < 0) {
 						return false;
@@ -342,6 +477,155 @@ namespace Konclude {
 					if (--remainingMergingCount < 0) {
 						return false;
 					}
+
+					if (successorList.count() == 1) {
+						return testSingleSaturatedSuccessorModelMergable(existentialIndiNode,successorList,trivialSuccessorPropagatedConceptList,backwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext);
+					} else {
+						return testMultipleSaturatedSuccessorModelMergable(existentialIndiNode,successorList,trivialSuccessorPropagatedConceptList,backwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext);
+					}
+				}
+
+
+
+				bool CSatisfiableTaskClassificationMessageAnalyser::testSingleSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>* trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext) {
+
+					CTaskProcessorContext* taskProcessorContext = calcAlgContext->getUsedTaskProcessorContext();
+
+					CIndividualSaturationProcessNode* subResolvedExistentialIndiNode = existentialIndiNode;
+					while (subResolvedExistentialIndiNode->hasSubstituteIndividualNode()) {
+						subResolvedExistentialIndiNode = subResolvedExistentialIndiNode->getSubstituteIndividualNode();
+					}
+					CReapplyConceptSaturationLabelSet* satConSet = subResolvedExistentialIndiNode->getReapplyConceptSaturationLabelSet(false);
+					CPROCESSINGHASH<CRole*,TConceptNegationPair> successorInfluenceConceptsHash(taskProcessorContext);
+					if (trivialSuccessorPropagatedConceptList) {
+						for (CPROCESSINGLIST<TConceptNegationPair>::const_iterator trivConIt = trivialSuccessorPropagatedConceptList->constBegin(), trivConItEnd = trivialSuccessorPropagatedConceptList->constEnd(); trivConIt != trivConItEnd; ++trivConIt) {
+							TConceptNegationPair conNegPair(*trivConIt);
+							CConcept* concept = conNegPair.first;
+							bool negation = conNegPair.second;
+							cint64 conOpCode = concept->getOperatorCode();
+
+							if (negation && conOpCode == CCSUB) {
+								CConceptSaturationDescriptor* conSatDes = nullptr;
+								CImplicationReapplyConceptSaturationDescriptor* impConSatDes = nullptr;
+								if (satConSet->getConceptSaturationDescriptor(concept,conSatDes,impConSatDes)) {
+									if (conSatDes && conSatDes->isNegated() != negation) {
+										return false;
+									}
+									if (!conSatDes && impConSatDes) {
+										return false;
+									}
+								} else {
+									CIndividualSaturationProcessNode* tmpSubExistentialIndiNode = existentialIndiNode;
+									while (tmpSubExistentialIndiNode->hasSubstituteIndividualNode()) {
+										CSaturationConceptDataItem* conceptSatItem = (CSaturationConceptDataItem*)tmpSubExistentialIndiNode->getSaturationConceptReferenceLinking();
+										CConcept* satConcept = conceptSatItem->getSaturationConcept();
+										bool satNegation = conceptSatItem->getSaturationNegation();
+										if (satConcept == concept && negation != satNegation) {
+											return false;
+										}
+										tmpSubExistentialIndiNode = tmpSubExistentialIndiNode->getSubstituteIndividualNode();
+									}
+
+								}
+
+							} else if (!negation && (conOpCode == CCALL || conOpCode == CCIMPLALL || conOpCode == CCBRANCHALL || conOpCode == CCAQALL || conOpCode == CCIMPLAQALL || conOpCode == CCBRANCHAQALL)) {
+								CRole* role = concept->getRole();
+								if (backwardRoleSet.contains(role)) {
+									return false;
+								}
+								for (CSortedNegLinker<CConcept*>* operandConLinkerIt = concept->getOperandList(); operandConLinkerIt; operandConLinkerIt = operandConLinkerIt->getNext()) {
+									CConcept* operandCon = operandConLinkerIt->getData();
+									bool operandConNeg = operandConLinkerIt->isNegated()^negation;
+									successorInfluenceConceptsHash.insertMulti(role,TConceptNegationPair(operandCon,operandConNeg));
+								}
+							}
+						}
+					}
+
+
+
+					if (!existentialIndiNode->getDirectStatusFlags()->hasSuccessorNodeExtensionsFlag()) {
+
+						for (CConceptSaturationDescriptor* conSatDesIt = satConSet->getConceptSaturationDescriptionLinker(); conSatDesIt; conSatDesIt = conSatDesIt->getNext()) {
+							CConcept* concept = conSatDesIt->getConcept();
+							bool negated = conSatDesIt->isNegated();
+
+							cint64 opCode = concept->getOperatorCode();
+							//if (!negated && (opCode == CCSOME || opCode == CCAQSOME) || negated && (opCode == CCALL)) {
+							cint64 card = concept->getParameter();
+							if (!negated && (opCode == CCSOME || opCode == CCAQSOME || opCode == CCATLEAST && card > 0) || negated && (opCode == CCALL || opCode == CCATMOST && card >= 0)) {
+
+								CPROCESSINGLIST<CIndividualSaturationProcessNode*> nextSuccessorList(taskProcessorContext);
+								CPROCESSINGLIST<TConceptNegationPair> nextTrivialSuccessorPropagatedConceptList(taskProcessorContext);
+								CPROCESSINGSET<CRole*> nextBackwardRoleSet(taskProcessorContext);
+
+								CRole* role = concept->getRole();
+
+								if (!collectSuccessorMergingNodesAndConcepts(existentialIndiNode,role,successorList,*trivialSuccessorPropagatedConceptList,backwardRoleSet,nextSuccessorList,nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,successorInfluenceConceptsHash,calcAlgContext)) {
+									return false;
+								}							
+
+
+								if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
+									CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
+									nextSuccessorList.prepend(extSatIndiNode);
+
+									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
+										return false;
+									}
+								}
+
+							}
+						}
+					} else {
+
+						CLinkedRoleSaturationSuccessorHash* linkedSuccHash = existentialIndiNode->getLinkedRoleSuccessorHash(false);
+						if (linkedSuccHash) {
+							CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>* roleLinkedSuccHash = linkedSuccHash->getLinkedRoleSuccessorHash();
+							for (CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>::const_iterator itSucc = roleLinkedSuccHash->constBegin(), itEndSucc = roleLinkedSuccHash->constEnd(); itSucc != itEndSucc; ++itSucc) {
+								CRole* role = itSucc.key();
+								CLinkedRoleSaturationSuccessorData* linkedSuccData = itSucc.value();
+								CPROCESSMAP<cint64,CSaturationSuccessorData*>* succDataMap = linkedSuccData->getSuccessorNodeDataMap(false);
+								if (succDataMap) {
+									for (CPROCESSMAP<cint64,CSaturationSuccessorData*>::const_iterator it = succDataMap->constBegin(), itEnd = succDataMap->constEnd(); it != itEnd; ++it) {
+										CSaturationSuccessorData* succData = it.value();
+										if (succData->mActiveCount >= 1) {
+											for (CXNegLinker<CRole*>* creationRoleLinkerIt = succData->mCreationRoleLinker; creationRoleLinkerIt; creationRoleLinkerIt = creationRoleLinkerIt->getNext()) {
+												if (!creationRoleLinkerIt->isNegated()) {
+													CRole* creationRole = creationRoleLinkerIt->getData();
+													if (creationRole == role) {
+
+														CPROCESSINGLIST<CIndividualSaturationProcessNode*> nextSuccessorList(taskProcessorContext);
+														CPROCESSINGLIST<TConceptNegationPair> nextTrivialSuccessorPropagatedConceptList(taskProcessorContext);
+														CPROCESSINGSET<CRole*> nextBackwardRoleSet(taskProcessorContext);
+
+														if (!collectSuccessorMergingNodesAndConcepts(existentialIndiNode,role,successorList,*trivialSuccessorPropagatedConceptList,backwardRoleSet,nextSuccessorList,nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,successorInfluenceConceptsHash,calcAlgContext)) {
+															return false;
+														}
+
+														if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
+															CIndividualSaturationProcessNode* extSatIndiNode = succData->mSuccIndiNode;
+															nextSuccessorList.prepend(extSatIndiNode);
+
+															if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
+																return false;
+															}
+														}
+
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
+					return true;
+				}
+
+				bool CSatisfiableTaskClassificationMessageAnalyser::testMultipleSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>* trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext) {
 
 					CTaskProcessorContext* taskProcessorContext = calcAlgContext->getUsedTaskProcessorContext();
 					// check for problematic forall concepts
@@ -366,7 +650,42 @@ namespace Konclude {
 					}
 
 
+
 					CPROCESSINGHASH<cint64,CConceptNegationTriggerItem> conceptNegationTriggerHash(taskProcessorContext);
+					CPROCESSINGHASH<CRole*,TConceptNegationPair> successorInfluenceConceptsHash(taskProcessorContext);
+					if (trivialSuccessorPropagatedConceptList) {
+						for (CPROCESSINGLIST<TConceptNegationPair>::const_iterator trivConIt = trivialSuccessorPropagatedConceptList->constBegin(), trivConItEnd = trivialSuccessorPropagatedConceptList->constEnd(); trivConIt != trivConItEnd; ++trivConIt) {
+							TConceptNegationPair conNegPair(*trivConIt);
+							CConcept* concept = conNegPair.first;
+							bool negation = conNegPair.second;
+							cint64 conOpCode = concept->getOperatorCode();
+
+							if (negation && conOpCode == CCSUB) {
+								CConceptNegationTriggerItem& conNegTriggerItem = conceptNegationTriggerHash[concept->getConceptTag()];
+								if (conNegTriggerItem.mTriggerFlag) {
+									return false;
+								}
+								if (conNegTriggerItem.mConcept && conNegTriggerItem.mNegationFlag != negation) {
+									return false;
+								}
+								conNegTriggerItem.mNegationFlag = negation;
+								conNegTriggerItem.mConcept = concept;
+							} else if (!negation && (conOpCode == CCALL || conOpCode == CCIMPLALL || conOpCode == CCBRANCHALL || conOpCode == CCAQALL || conOpCode == CCIMPLAQALL || conOpCode == CCBRANCHAQALL)) {
+								CRole* role = concept->getRole();
+								if (backwardRoleSet.contains(role)) {
+									return false;
+								}
+								for (CSortedNegLinker<CConcept*>* operandConLinkerIt = concept->getOperandList(); operandConLinkerIt; operandConLinkerIt = operandConLinkerIt->getNext()) {
+									CConcept* operandCon = operandConLinkerIt->getData();
+									bool operandConNeg = operandConLinkerIt->isNegated()^negation;
+									successorInfluenceConceptsHash.insertMulti(role,TConceptNegationPair(operandCon,operandConNeg));
+								}
+							}
+						}
+					}
+
+
+
 					for (CPROCESSINGLIST<CIndividualSaturationProcessNode*>::const_iterator succIt = successorList.constBegin(), succItEnd = successorList.constEnd(); succIt != succItEnd; ++succIt) {
 						CIndividualSaturationProcessNode* succIndiNode(*succIt);
 
@@ -380,6 +699,9 @@ namespace Konclude {
 							}
 							if (conNegTriggerItem.mConcept && conNegTriggerItem.mNegationFlag != satNegation) {
 								return false;
+							}
+							if (!conNegTriggerItem.mIndiSatNode) {
+								conNegTriggerItem.mIndiSatNode = succIndiNode;
 							}
 							conNegTriggerItem.mNegationFlag = satNegation;
 							conNegTriggerItem.mConcept = satConcept;
@@ -403,6 +725,9 @@ namespace Konclude {
 									if (conNegTriggerItem.mConcept && conNegTriggerItem.mNegationFlag != satNegation) {
 										return false;
 									}
+									if (!conNegTriggerItem.mIndiSatNode) {
+										conNegTriggerItem.mIndiSatNode = succIndiNode;
+									}
 									conNegTriggerItem.mNegationFlag = satNegation;
 									conNegTriggerItem.mConcept = satConcept;
 								} else if (implTrigger) {
@@ -421,6 +746,7 @@ namespace Konclude {
 						if (conNegTriggerItem.mConcept) {
 							CConcept* concept = conNegTriggerItem.mConcept;
 							bool negated = conNegTriggerItem.mNegationFlag;
+							CIndividualSaturationProcessNode* satIndiNode = conNegTriggerItem.mIndiSatNode;
 
 							cint64 opCode = concept->getOperatorCode();
 							//if (!negated && (opCode == CCSOME || opCode == CCAQSOME) || negated && (opCode == CCALL)) {
@@ -428,62 +754,21 @@ namespace Konclude {
 							if (!negated && (opCode == CCSOME || opCode == CCAQSOME || opCode == CCATLEAST && card > 0) || negated && (opCode == CCALL || opCode == CCATMOST && card >= 0)) {
 
 								CPROCESSINGLIST<CIndividualSaturationProcessNode*> nextSuccessorList(taskProcessorContext);
+								CPROCESSINGLIST<TConceptNegationPair> nextTrivialSuccessorPropagatedConceptList(taskProcessorContext);
 								CPROCESSINGSET<CRole*> nextBackwardRoleSet(taskProcessorContext);
 
 								CRole* role = concept->getRole();
-								for (CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
-									CRole* superRole = superRoleIt->getData();
-									bool superRoleInversed = superRoleIt->isNegated();
 
-									if (!superRoleInversed) {
-										for (CPROCESSINGLIST<CIndividualSaturationProcessNode*>::const_iterator succIt = successorList.constBegin(), succItEnd = successorList.constEnd(); succIt != succItEnd; ++succIt) {
-											CIndividualSaturationProcessNode* succIndiNode(*succIt);
-
-											while (succIndiNode->hasSubstituteIndividualNode()) {
-												succIndiNode = succIndiNode->getSubstituteIndividualNode();
-											}
-
-											CRoleBackwardSaturationPropagationHash* roleBackPropHash = succIndiNode->getRoleBackwardPropagationHash(false);
-											if (roleBackPropHash) {
-												CPROCESSHASH<CRole*,CRoleBackwardSaturationPropagationHashData>* roleBackPropDataHash = roleBackPropHash->getRoleBackwardPropagationDataHash();
-												const CRoleBackwardSaturationPropagationHashData& backPropData = roleBackPropDataHash->value(superRole);
-												for (CBackwardSaturationPropagationReapplyDescriptor* reapplyLinkerIt = backPropData.mReapplyLinker; reapplyLinkerIt; reapplyLinkerIt = reapplyLinkerIt->getNext()) {
-													CConceptSaturationDescriptor* reapplyConDes = reapplyLinkerIt->getReapplyConceptSaturationDescriptor();
+								if (!collectSuccessorMergingNodesAndConcepts(satIndiNode,role,successorList,*trivialSuccessorPropagatedConceptList,backwardRoleSet,nextSuccessorList,nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,successorInfluenceConceptsHash,calcAlgContext)) {
+									return false;
+								}							
 
 
-													CConcept* reapplyConcept = reapplyConDes->getConcept();
-													bool reapplyConceptNegation = reapplyConDes->isNegated();
-													cint64 reapplyConceptOpCode = reapplyConcept->getOperatorCode();
-													if (reapplyConceptNegation && (reapplyConceptOpCode == CCSOME) || !reapplyConceptNegation && (reapplyConceptOpCode == CCALL || reapplyConceptOpCode == CCIMPLALL || reapplyConceptOpCode == CCBRANCHALL || reapplyConceptOpCode == CCAQALL || reapplyConceptOpCode == CCIMPLAQALL || reapplyConceptOpCode == CCBRANCHAQALL)) {
-														for (CSortedNegLinker<CConcept*>* reapplyOperandConLinkerIt = reapplyConcept->getOperandList(); reapplyOperandConLinkerIt; reapplyOperandConLinkerIt = reapplyOperandConLinkerIt->getNext()) {
-															CConcept* reapplyOperandCon = reapplyOperandConLinkerIt->getData();
-															bool reapplyOperandConNeg = reapplyOperandConLinkerIt->isNegated()^reapplyConceptNegation;
-
-															CIndividualSaturationProcessNode* satIndiNode = getSaturatedIndividualNodeForConcept(reapplyOperandCon,reapplyOperandConNeg,calcAlgContext);
-															if (!satIndiNode || !satIndiNode->isCompleted() || satIndiNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCARDINALITYPROPLEMATIC | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGNOMINALCONNECTION,false)) {
-																return false;
-															}
-
-															nextSuccessorList.append(satIndiNode);
-														}
-													} else {
-														return false;
-													}
-
-												}
-											}
-										}
-									} else {
-										nextBackwardRoleSet.insert(superRole);
-									}
-								}
-
-
-								if (!nextSuccessorList.isEmpty()) {
+								if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
 									CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
 									nextSuccessorList.prepend(extSatIndiNode);
 
-									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
+									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
 										return false;
 									}
 								}
@@ -493,9 +778,159 @@ namespace Konclude {
 						}
 					}
 
+
+					for (CPROCESSINGLIST<CIndividualSaturationProcessNode*>::const_iterator succIt = successorList.constBegin(), succItEnd = successorList.constEnd(); succIt != succItEnd; ++succIt) {
+						CIndividualSaturationProcessNode* succIndiNode(*succIt);
+
+						if (succIndiNode->getDirectStatusFlags()->hasSuccessorNodeExtensionsFlag()) {
+							CLinkedRoleSaturationSuccessorHash* linkedSuccHash = succIndiNode->getLinkedRoleSuccessorHash(false);
+							if (linkedSuccHash) {
+								CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>* roleLinkedSuccHash = linkedSuccHash->getLinkedRoleSuccessorHash();
+								for (CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>::const_iterator itSucc = roleLinkedSuccHash->constBegin(), itEndSucc = roleLinkedSuccHash->constEnd(); itSucc != itEndSucc; ++itSucc) {
+									CRole* role = itSucc.key();
+									CLinkedRoleSaturationSuccessorData* linkedSuccData = itSucc.value();
+									CPROCESSMAP<cint64,CSaturationSuccessorData*>* succDataMap = linkedSuccData->getSuccessorNodeDataMap(false);
+									if (succDataMap) {
+										for (CPROCESSMAP<cint64,CSaturationSuccessorData*>::const_iterator it = succDataMap->constBegin(), itEnd = succDataMap->constEnd(); it != itEnd; ++it) {
+											CSaturationSuccessorData* succData = it.value();
+											if (succData->mActiveCount >= 1) {
+												for (CXNegLinker<CRole*>* creationRoleLinkerIt = succData->mCreationRoleLinker; creationRoleLinkerIt; creationRoleLinkerIt = creationRoleLinkerIt->getNext()) {
+													if (!creationRoleLinkerIt->isNegated()) {
+														CRole* creationRole = creationRoleLinkerIt->getData();
+														if (creationRole == role) {
+
+															CPROCESSINGLIST<CIndividualSaturationProcessNode*> nextSuccessorList(taskProcessorContext);
+															CPROCESSINGLIST<TConceptNegationPair> nextTrivialSuccessorPropagatedConceptList(taskProcessorContext);
+															CPROCESSINGSET<CRole*> nextBackwardRoleSet(taskProcessorContext);
+
+															if (!collectSuccessorMergingNodesAndConcepts(succIndiNode,role,successorList,*trivialSuccessorPropagatedConceptList,backwardRoleSet,nextSuccessorList,nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,successorInfluenceConceptsHash,calcAlgContext)) {
+																return false;
+															}
+
+															if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
+																CIndividualSaturationProcessNode* extSatIndiNode = succData->mSuccIndiNode;
+																nextSuccessorList.prepend(extSatIndiNode);
+
+																if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
+																	return false;
+																}
+															}
+
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
 					return true;
 
 				}
+
+
+
+
+
+
+
+
+
+
+
+
+
+				bool CSatisfiableTaskClassificationMessageAnalyser::collectSuccessorMergingNodesAndConcepts(CIndividualSaturationProcessNode* excludeSaturationIndiNode, CRole* role, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>& trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet,
+						CPROCESSINGLIST<CIndividualSaturationProcessNode*>& nextSuccessorList, CPROCESSINGLIST<TConceptNegationPair>& nextTrivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& nextBackwardRoleSet,
+						CPROCESSINGHASH<CRole*,TConceptNegationPair>& successorInfluenceConceptsHash, CCalculationAlgorithmContext* calcAlgContext) {
+
+					for (CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
+						CRole* superRole = superRoleIt->getData();
+						bool superRoleInversed = superRoleIt->isNegated();
+
+						if (!superRoleInversed) {
+
+
+							for (CPROCESSINGHASH<CRole*,TConceptNegationPair>::const_iterator it = successorInfluenceConceptsHash.constFind(superRole), itEnd = successorInfluenceConceptsHash.constEnd(); it != itEnd; ++it) {
+								CRole* hashRole(it.key());
+								if (role == hashRole) {
+									TConceptNegationPair conNegPair(it.value());
+									CConcept* reapplyOperandCon = conNegPair.first;
+									bool reapplyOperandConNeg = conNegPair.second;
+
+									CIndividualSaturationProcessNode* satIndiNode = getSaturatedIndividualNodeForConcept(reapplyOperandCon,reapplyOperandConNeg,calcAlgContext);
+									if (!satIndiNode) {
+										if (!collectTrivialPropagationTestingConcepts(reapplyOperandCon,reapplyOperandConNeg,nextTrivialSuccessorPropagatedConceptList,calcAlgContext)) {
+											return false;
+										}
+									} else if (!satIndiNode->isCompleted() || satIndiNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCARDINALITYPROPLEMATIC | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGNOMINALCONNECTION,false)) {
+										return false;
+									}
+
+									if (satIndiNode) {
+										nextSuccessorList.append(satIndiNode);
+									}
+								} else {
+									break;
+								}
+							}
+
+
+							for (CPROCESSINGLIST<CIndividualSaturationProcessNode*>::const_iterator succIt = successorList.constBegin(), succItEnd = successorList.constEnd(); succIt != succItEnd; ++succIt) {
+								CIndividualSaturationProcessNode* succIndiNode(*succIt);
+
+								while (succIndiNode->hasSubstituteIndividualNode()) {
+									succIndiNode = succIndiNode->getSubstituteIndividualNode();
+								}
+
+								if (succIndiNode != excludeSaturationIndiNode) {
+
+									CRoleBackwardSaturationPropagationHash* roleBackPropHash = succIndiNode->getRoleBackwardPropagationHash(false);
+									if (roleBackPropHash) {
+										CPROCESSHASH<CRole*,CRoleBackwardSaturationPropagationHashData>* roleBackPropDataHash = roleBackPropHash->getRoleBackwardPropagationDataHash();
+										const CRoleBackwardSaturationPropagationHashData& backPropData = roleBackPropDataHash->value(superRole);
+										for (CBackwardSaturationPropagationReapplyDescriptor* reapplyLinkerIt = backPropData.mReapplyLinker; reapplyLinkerIt; reapplyLinkerIt = reapplyLinkerIt->getNext()) {
+											CConceptSaturationDescriptor* reapplyConDes = reapplyLinkerIt->getReapplyConceptSaturationDescriptor();
+
+
+											CConcept* reapplyConcept = reapplyConDes->getConcept();
+											bool reapplyConceptNegation = reapplyConDes->isNegated();
+											cint64 reapplyConceptOpCode = reapplyConcept->getOperatorCode();
+											if (reapplyConceptNegation && (reapplyConceptOpCode == CCSOME) || !reapplyConceptNegation && (reapplyConceptOpCode == CCALL || reapplyConceptOpCode == CCIMPLALL || reapplyConceptOpCode == CCBRANCHALL || reapplyConceptOpCode == CCAQALL || reapplyConceptOpCode == CCIMPLAQALL || reapplyConceptOpCode == CCBRANCHAQALL)) {
+												for (CSortedNegLinker<CConcept*>* reapplyOperandConLinkerIt = reapplyConcept->getOperandList(); reapplyOperandConLinkerIt; reapplyOperandConLinkerIt = reapplyOperandConLinkerIt->getNext()) {
+													CConcept* reapplyOperandCon = reapplyOperandConLinkerIt->getData();
+													bool reapplyOperandConNeg = reapplyOperandConLinkerIt->isNegated()^reapplyConceptNegation;
+
+													CIndividualSaturationProcessNode* satIndiNode = getSaturatedIndividualNodeForConcept(reapplyOperandCon,reapplyOperandConNeg,calcAlgContext);
+													if (!satIndiNode) {
+														if (!collectTrivialPropagationTestingConcepts(reapplyOperandCon,reapplyOperandConNeg,nextTrivialSuccessorPropagatedConceptList,calcAlgContext)) {
+															return false;
+														}
+													} else if (!satIndiNode->isCompleted() || satIndiNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCARDINALITYPROPLEMATIC | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED | CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGNOMINALCONNECTION,false)) {
+														return false;
+													}
+
+													nextSuccessorList.append(satIndiNode);
+												}
+											} else {
+												return false;
+											}
+
+										}
+									}
+								}
+							}
+						} else {
+							nextBackwardRoleSet.insert(superRole);
+						}
+					}
+
+					return true;
+				}
+
 
 
 
@@ -640,7 +1075,21 @@ namespace Konclude {
 									alternativeExpList.append(opConNegPair);
 								}
 							}
-						} else if (negation && (conOpCode == CCALL) || !negation && (conOpCode == CCSOME)) {
+						} else if (conOpCode == CCAQCHOOCE) {
+
+							for (CSortedNegLinker<CConcept*>* operandConceptLinkerIt = concept->getOperandList(); operandConceptLinkerIt; operandConceptLinkerIt = operandConceptLinkerIt->getNext()) {
+								CConcept* operandConcept = operandConceptLinkerIt->getData();
+								bool operandNegation = operandConceptLinkerIt->isNegated();
+								if (negation == operandNegation) {
+									QPair<CConcept*,bool> opConNegPair(operandConcept,operandNegation);
+									if (!alternativeExpSet.contains(opConNegPair)) {
+										alternativeExpSet.insert(opConNegPair);
+										alternativeExpList.append(opConNegPair);
+									}
+								}
+							}
+
+						} else if (negation && (conOpCode == CCALL) || !negation && (conOpCode == CCSOME || conOpCode == CCAQSOME)) {
 
 							bool containsNegation = false;
 							if (!conSet->containsConcept(concept,&containsNegation)) {
@@ -691,6 +1140,7 @@ namespace Konclude {
 					CConcept* testingConcept = conDes->getConcept();
 					bool negated = conDes->getNegation();
 
+
 					CConceptReferenceLinking* conRefLinking = nullptr;
 					CConceptData* conData = testingConcept->getConceptData();
 					if (conData && !mUseAlwaysConRefLinkDataHash) {
@@ -737,7 +1187,7 @@ namespace Konclude {
 											} else if (conDesTag == possSubsumConTag) {
 
 												//if (concept->getOperatorCode() == CCEQCAND) {
-												//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept,calcAlgContext)) {
+												//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept->getOperandList()->getData(),calcAlgContext)) {
 												//		possSubsumConData->setPossibleSubsumerInvalid();
 												//	}
 												//}
@@ -762,6 +1212,7 @@ namespace Konclude {
 											CConcept* concept = conDes->getConcept();
 											bool negated = conDes->getNegation();
 
+
 											if (!negated && (concept->hasClassName() && concept->getConceptTag() != 1 && concept != testingConcept)) {
 												if (!possSubsumerList) {
 													possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
@@ -771,7 +1222,17 @@ namespace Konclude {
 												possSubsumerList->append(possSubsumData);
 											}
 											if (concept->getOperatorCode() == CCEQCAND) {
-												if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept,calcAlgContext)) {
+												CConcept* eqConcept = concept->getOperandList()->getData();
+
+												//if (CIRIName::getRecentIRIName(testingConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
+												//	if (CIRIName::getRecentIRIName(eqConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students") {
+												//		bool bug = true;
+												//	}
+												//}
+
+
+
+												if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,eqConcept,calcAlgContext)) {
 													if (!possSubsumerList) {
 														possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
 													}
@@ -783,12 +1244,36 @@ namespace Konclude {
 											conSetIt.moveNext();
 										}
 
+										CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>* eqConNonCandPossSubsumerList = nullptr;
+
+										bool eqConceptsNonCandidatePossSubsumers = false;
+										QSet<CConcept*>* equivConceptNonCandidateSet = calcAlgContext->getUsedProcessingDataBox()->getOntology()->getTBox()->getEquivalentConceptNonCandidateSet(false);
+										if (equivConceptNonCandidateSet) {
+											eqConceptsNonCandidatePossSubsumers = true;
+											for (QSet<CConcept*>::const_iterator it = equivConceptNonCandidateSet->constBegin(), itEnd = equivConceptNonCandidateSet->constEnd(); it != itEnd; ++it) {
+												CConcept* eqConcept = *it;
+
+												//if (CIRIName::getRecentIRIName(testingConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
+												//	if (CIRIName::getRecentIRIName(eqConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students") {
+												//		bool bug = true;
+												//	}
+												//}
+
+												if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,eqConcept,calcAlgContext)) {
+													if (!eqConNonCandPossSubsumerList) {
+														eqConNonCandPossSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
+													}
+													eqConNonCandPossSubsumerList->append(eqConcept);
+												}
+											}
+										}
+
 										if (possSubsumerList) {
 											mMultiplePossSubsumInitAvoidHash->insert(testingConcept,possSubsumerList);
 										}
 
 										CClassificationInitializePossibleSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationInitializePossibleSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
-										possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept,possSubsumerList);
+										possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept,possSubsumerList,eqConceptsNonCandidatePossSubsumers,eqConNonCandPossSubsumerList);
 										messageDataLinker = possSubsumMessageData->append(messageDataLinker);
 									}
 								} else {
@@ -812,7 +1297,7 @@ namespace Konclude {
 											if (conDesTag == possSubsumConTag) {
 
 												//if (concept->getOperatorCode() == CCEQCAND) {
-												//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept,calcAlgContext)) {
+												//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept->getOperandList()->getData(),calcAlgContext)) {
 												//		updatedPossSubsumptions |= possSubsumIt->invalidateSubsumption();
 												//	}
 												//}
@@ -1074,6 +1559,10 @@ namespace Konclude {
 						CIndividualProcessNodeVector* indiNodeVec = processingDataBox->getIndividualProcessNodeVector();
 
 						cint64 maxDetBranchTag = processingDataBox->getMaximumDeterministicBranchTag();
+
+						if (processingDataBox->getOntology()->getDataBoxes()->getMBox()->getValueSpacesTriggers(false)) {
+							extractPseudoModelRootNode = false;
+						}
 
 
 						mUseAlwaysConRefLinkDataHash = false;

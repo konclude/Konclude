@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -34,12 +34,19 @@ namespace Konclude {
 			mAxiomNumber = 0;
 			mHasCurrentXMLBase = false;
 
+			mIgnoreParsingSubElements = false;
+			mParseIgnoreDepth = 0;
 
 			mCurrentXMLBaseValidDepth = 0;
 			mCurrentXMLNamespaceValidDepth = 0;
 
 			mDataTypeReportErrorCount = 100;
 			mAnnotationReportErrorCount = 100;
+
+			mUnsupportedAnnotationError = false;
+			mUnsupportedImportError = false;
+			mOntologyNodeFound = false;
+			mParseTextElement = false;
 
 			mPunctChar = QChar('.');
 			mDoublePunctChar = QChar(':');
@@ -55,11 +62,19 @@ namespace Konclude {
 			mAxiomNumber = 0;
 			mHasCurrentXMLBase = false;
 
+			mIgnoreParsingSubElements = false;
+			mParseIgnoreDepth = 0;
+
 			mCurrentXMLBaseValidDepth = 0;
 			mCurrentXMLNamespaceValidDepth = 0;
 
 			mDataTypeReportErrorCount = 100;
 			mAnnotationReportErrorCount = 100;
+
+			mUnsupportedAnnotationError = false;
+			mUnsupportedImportError = false;
+			mOntologyNodeFound = false;
+			mParseTextElement = false;
 
 			mPunctChar = QChar('.');
 			mDoublePunctChar = QChar(':');
@@ -112,30 +127,48 @@ namespace Konclude {
 
 
 		bool CXMLOWL2StreamHandler::startElement(const QStringRef& namespaceURI, const QStringRef& localName, const QStringRef& qName, const QXmlStreamAttributes& atts) {
+			mParseTextElement = false;
 
-			parseXMLAttributs(atts);
-
-			const CStreamParseFunctionData& functionData = mCurrentParseFunctionJumpHash->value(qName);
-			if (functionData.mParseDirectFunction) {
-				StreamParseFunctionDirect function = functionData.mParseDirectFunction;
-				(this->*function)(atts);
-				if (!mStack.isEmpty() && !mTmpExpList.isEmpty()) {
-					CStreamParseStackObject* topParsStackObj = mStack.top();
-					topParsStackObj->addBuildExpressions(&mTmpExpList);
-				}
+			if (mIgnoreParsingSubElements) {
 				mStack.push(&mDummyFunctionData);
-			} else if (functionData.mParseDelayedFunction) {
-				StreamParseFunctionDelayed function = functionData.mParseDelayedFunction;
-				bool requiredCardinality = functionData.mRequiresCardinalityParsing;
-				if (requiredCardinality) {
-					cint64 cardinality = 0;
-					bool cardinalityParsed = getCardinality(&cardinality,atts);
-					mStack.push(new CStreamParseStackObject(function,cardinality));
-				} else {
-					mStack.push(new CStreamParseStackObject(function));
-				}
 			} else {
-				mStack.push(&mDummyFunctionData);
+				parseXMLAttributs(atts);
+
+				const CStreamParseFunctionData& functionData = mCurrentParseFunctionJumpHash->value(qName);
+				if (functionData.mParseDirectFunction) {
+					StreamParseFunctionDirect function = functionData.mParseDirectFunction;
+					(this->*function)(atts);
+					if (!mStack.isEmpty() && !mTmpExpList.isEmpty()) {
+						CStreamParseStackObject* topParsStackObj = mStack.top();
+						topParsStackObj->addBuildExpressions(&mTmpExpList);
+					}
+					mStack.push(&mDummyFunctionData);
+				} else if (functionData.mParseDelayedFunction) {
+					StreamParseFunctionDelayed function = functionData.mParseDelayedFunction;
+					bool requiredCardinality = functionData.mExtraParsingFlags & CStreamParseFunctionData::EPF_CARDINALITY;
+					bool requiredDatatypeIRI = functionData.mExtraParsingFlags & CStreamParseFunctionData::EPF_DATATYPE_IRI;
+					bool requiredFacetIRI = functionData.mExtraParsingFlags & CStreamParseFunctionData::EPF_FACET_IRI;
+					mParseTextElement = functionData.mExtraParsingFlags & CStreamParseFunctionData::EPF_TEXT_ELEMENT;
+					if (requiredCardinality) {
+						cint64 cardinality = 0;
+						bool cardinalityParsed = getCardinality(&cardinality,atts);
+						mStack.push(new CStreamParseStackObject(function,cardinality));
+					} else if (requiredDatatypeIRI) {
+						QString datatypeIRI;
+						bool datatypeParsed = getDatatypeIRI(&datatypeIRI,atts);
+						bool appendixParsed = getLiteralAppendix(&mLastTextAppendix,atts);
+						mParseTextElement = true;
+						mStack.push(new CStreamParseStackObject(function,datatypeIRI));
+					} else if (requiredFacetIRI) {
+						QString facetIRI;
+						bool facetParsed = getFacetIRI(&facetIRI,atts);
+						mStack.push(new CStreamParseStackObject(function,facetIRI));
+					} else {
+						mStack.push(new CStreamParseStackObject(function));
+					}
+				} else {
+					mStack.push(&mDummyFunctionData);
+				}
 			}
 			return true;
 		}
@@ -144,21 +177,28 @@ namespace Konclude {
 		bool CXMLOWL2StreamHandler::endElement(const QStringRef& namespaceURI, const QStringRef& localName, const QStringRef& qName) {
 			if (!mStack.isEmpty()) {
 				CStreamParseStackObject* parseStackObject = mStack.pop();
-				if (parseStackObject != &mDummyFunctionData) {
+				if (mIgnoreParsingSubElements && mStack.count() <= mParseIgnoreDepth) {
+					mIgnoreParsingSubElements = false;
+					mParseIgnoreDepth = 0;
+				} else {
+					if (parseStackObject != &mDummyFunctionData) {
 
-					StreamParseFunctionDelayed function = parseStackObject->mParseFunction;
-					if (function) {
-						(this->*function)(parseStackObject);
-						if (!mStack.isEmpty() && !mTmpExpList.isEmpty()) {
-							CStreamParseStackObject* topParsStackObj = mStack.top();
-							topParsStackObj->addBuildExpressions(&mTmpExpList);
+						StreamParseFunctionDelayed function = parseStackObject->mParseFunction;
+						if (function) {
+							(this->*function)(parseStackObject);
+							if (!mStack.isEmpty() && !mTmpExpList.isEmpty()) {
+								CStreamParseStackObject* topParsStackObj = mStack.top();
+								topParsStackObj->addBuildExpressions(&mTmpExpList);
+							}
 						}
-					}
 
-					delete parseStackObject;
+						delete parseStackObject;
+					}
 				}
 			}
 			mTmpExpList.clear();
+			mLastReadText.clear();
+			mLastTextAppendix.clear();
 
 			if (mHasCurrentXMLBase) {
 				if (mStack.count() <= mCurrentXMLBaseValidDepth) {
@@ -182,7 +222,14 @@ namespace Konclude {
 				}
 			}
 
+			return true;
+		}
 
+
+		bool CXMLOWL2StreamHandler::readText(const QStringRef& text) {
+			if (mParseTextElement) {
+				mLastReadText = text.toString();
+			}
 			return true;
 		}
 
@@ -309,6 +356,44 @@ namespace Konclude {
 			return entityName;
 		}
 
+
+
+		bool CXMLOWL2StreamHandler::getLiteralAppendix(QString* literalAppendix, const QXmlStreamAttributes& attributes) {
+			QStringRef literalAppendixString;
+			literalAppendixString = attributes.value("lang");
+			if (literalAppendixString.isEmpty()) {
+				literalAppendixString = attributes.value("xml:lang");
+			}
+			if (literalAppendix) {
+				*literalAppendix = literalAppendixString.toString();
+			}
+			return !literalAppendixString.isEmpty();			
+		}
+
+		bool CXMLOWL2StreamHandler::getDatatypeIRI(QString* datatypeIRI, const QXmlStreamAttributes& attributes) {
+			QStringRef datatypeIRIString;
+			datatypeIRIString = attributes.value(mDatatypeIRIString);
+			if (datatypeIRIString.isEmpty()) {
+				datatypeIRIString = attributes.value(mOWLPrefixDatatypeIRIString);
+			}
+			if (datatypeIRI) {
+				*datatypeIRI = datatypeIRIString.toString();
+			}
+			return !datatypeIRIString.isEmpty();			
+		}
+
+		bool CXMLOWL2StreamHandler::getFacetIRI(QString* facetIRI, const QXmlStreamAttributes& attributes) {
+			QStringRef facetIRIString;
+			facetIRIString = attributes.value(mFacetIRIString);
+			if (facetIRIString.isEmpty()) {
+				facetIRIString = attributes.value(mOWLPrefixFacetIRIString);
+			}
+			if (facetIRI) {
+				*facetIRI = facetIRIString.toString();
+			}
+			return !facetIRIString.isEmpty();			
+		}
+
 		bool CXMLOWL2StreamHandler::getCardinality(cint64* cardinality, const QXmlStreamAttributes& attributes) {
 			QStringRef cardinalityString;
 			cardinalityString = attributes.value(mCardinalityString);
@@ -318,11 +403,11 @@ namespace Konclude {
 
 			if (!cardinalityString.isEmpty()) {
 				bool succParsed = false;
-				*cardinality = cardinalityString.toString().toInt(&succParsed);
+				*cardinality = cardinalityString.toString().toLongLong(&succParsed);
 				return succParsed;
 			} else {
 				bool succParsed = false;
-				*cardinality = cardinalityString.toString().toInt(&succParsed);
+				*cardinality = cardinalityString.toString().toLongLong(&succParsed);
 				return succParsed;
 			}
 		}
@@ -384,6 +469,12 @@ namespace Konclude {
 			mCardinalityString = QString("cardinality");
 			mOWLPrefixCardinalityString = mOWLPrefixString+QString(":")+mCardinalityString;
 
+			mDatatypeIRIString = QString("datatypeIRI");
+			mOWLPrefixDatatypeIRIString = mOWLPrefixString+QString(":")+mDatatypeIRIString;
+
+			mFacetIRIString = QString("facet");
+			mOWLPrefixFacetIRIString = mOWLPrefixString+QString(":")+mFacetIRIString;
+
 			mNodeIDString = QString("nodeID");
 			mOWLPrefixNodeIDString = mOWLPrefixString+QString(":")+mNodeIDString;
 
@@ -427,9 +518,9 @@ namespace Konclude {
 
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectIntersectionOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectIntersectionOfNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectUnionOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectUnionOfNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectMaxCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectMaxCardinalityNode,true));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectMinCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectMinCardinalityNode,true));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectExactCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectExactlyCardinalityNode,true));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectMaxCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectMaxCardinalityNode,CStreamParseFunctionData::EPF_CARDINALITY));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectMinCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectMinCardinalityNode,CStreamParseFunctionData::EPF_CARDINALITY));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectExactCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectExactlyCardinalityNode,CStreamParseFunctionData::EPF_CARDINALITY));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectSomeValuesFrom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectSomeValuesFromNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectAllValuesFrom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectAllValuesFromNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectComplementOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseObjectComplementOfNode));
@@ -453,30 +544,37 @@ namespace Konclude {
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("#comment"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseIgnoredNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ExpectedResult"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseIgnoredNode));
 			
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataRange"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Datatype"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataIntersectionOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataUnionOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataComplementOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataOneOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DatatypeRestriction"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyExpression"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataProperty"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataSomeValuesFrom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataAllValuesFrom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataHasValue"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataMinCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataMaxCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataExactCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("SubDataPropertyOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("EquivalentDataProperties"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DisjointDataProperties"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyDomain"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyRange"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("FunctionalDataProperty"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
+
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Datatype"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDatatypeNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataSomeValuesFrom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataSomeValuesFromNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Literal"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataLiteralNode,CStreamParseFunctionData::EPF_DATATYPE_IRI | CStreamParseFunctionData::EPF_LITERAL_APPENDIX | CStreamParseFunctionData::EPF_TEXT_ELEMENT));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataProperty"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyNode));
+
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataAllValuesFrom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataAllValuesFromNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataHasValue"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataHasValueNode));
+
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataIntersectionOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataIntersectionOfNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataOneOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataOneOfNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataUnionOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataUnionOfNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataComplementOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataComplementOfNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DatatypeRestriction"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDatatypeRestrictionNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataMinCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataMinCardinalityNode,CStreamParseFunctionData::EPF_CARDINALITY));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataMaxCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataMaxCardinalityNode,CStreamParseFunctionData::EPF_CARDINALITY));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataExactCardinality"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataExactCardinalityNode,CStreamParseFunctionData::EPF_CARDINALITY));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("SubDataPropertyOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseSubDataPropertyOfNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("EquivalentDataProperties"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseEquivalentDataPropertiesNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DisjointDataProperties"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDisjointDataPropertiesNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyDomain"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyDomainNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyRange"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyRangeNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("FunctionalDataProperty"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseFunctionalDataPropertyNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyAssertion"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyAssertionNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("NegativeDataPropertyAssertion"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseNegativeDataPropertyAssertionNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("FacetRestriction"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDataFacetRestrictionNode,CStreamParseFunctionData::EPF_FACET_IRI));
+
+
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("HasKey"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyAssertion"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("NegativeDataPropertyAssertion"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DatatypeDefinition"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode));
+
 
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Ontology"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionTellOntologyAxiomNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Tell"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionTellOntologyAxiomNode));
@@ -493,10 +591,24 @@ namespace Konclude {
 			
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DifferentIndividualsAtom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDifferentIndividualsAtomNode));
 
+
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Import"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseImportNode,CStreamParseFunctionData::EPF_TEXT_ELEMENT));
+
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("AnnotationProperty"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedAnnotationNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("AnnotationPropertyRange"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedAnnotationNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("AnnotationPropertyDomain"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedAnnotationNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("SubAnnotationPropertyOf"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedAnnotationNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("AnnotationAssertion"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedAnnotationNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Annotation"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedAnnotationNode));
+
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("RDF"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedRDFNode));
+
 			mCurrentParseFunctionJumpHash = &mBaseParseFunctionJumpHash;
 			CQtHash<CStringRefStringHasher,CStreamParseFunctionData>* newParseHash = new CQtHash<CStringRefStringHasher,CStreamParseFunctionData>(*mCurrentParseFunctionJumpHash);
 			extendParsingHashForNamespace(&mBaseParseFunctionJumpHash,newParseHash,mOWLPrefix);
 			mCurrentParseFunctionJumpHash = newParseHash;
+
+			mCurrentParseFunctionJumpHash->insert(CStringRefStringHasher("rdf:RDF"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionUnsupportedRDFNode));
 
 			return true;
 		}
@@ -1278,6 +1390,240 @@ namespace Konclude {
 
 
 
+
+
+
+
+
+
+
+		CDatatypeExpression *CXMLOWL2StreamHandler::parseDatatypeNode(const QXmlStreamAttributes& attributes) {
+			const CStringRefStringHasher& datatypeIRIName = getEntityName(attributes);
+			CDatatypeExpression* exp = nullptr;
+			if (!datatypeIRIName.isEmpty()) {
+				if (mOntoBuilder) {
+					exp = mOntoBuilder->getDatatype(datatypeIRIName.toStringRefernce());
+				}
+			}
+			return exp;
+		}
+
+
+		CDataSomeValuesFromExpression *CXMLOWL2StreamHandler::parseDataSomeValuesFromNode(CStreamParseStackObject* parseStackObj) {
+			CDataSomeValuesFromExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataSomeValuesFrom(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+
+
+
+		CDataAllValuesFromExpression *CXMLOWL2StreamHandler::parseDataAllValuesFromNode(CStreamParseStackObject* parseStackObj) {
+			CDataAllValuesFromExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataAllValuesFrom(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataHasValueExpression *CXMLOWL2StreamHandler::parseDataHasValueNode(CStreamParseStackObject* parseStackObj) {
+			CDataHasValueExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataHasValue(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataIntersectionOfExpression *CXMLOWL2StreamHandler::parseDataIntersectionOfNode(CStreamParseStackObject* parseStackObj) {
+			CDataIntersectionOfExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataIntersectionOf(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataOneOfExpression *CXMLOWL2StreamHandler::parseDataOneOfNode(CStreamParseStackObject* parseStackObj) {
+			CDataOneOfExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataOneOf(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataUnionOfExpression *CXMLOWL2StreamHandler::parseDataUnionOfNode(CStreamParseStackObject* parseStackObj) {
+			CDataUnionOfExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataUnionOf(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataComplementOfExpression *CXMLOWL2StreamHandler::parseDataComplementOfNode(CStreamParseStackObject* parseStackObj) {
+			CDataComplementOfExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataComplementOf(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDatatypeRestrictionExpression *CXMLOWL2StreamHandler::parseDatatypeRestrictionNode(CStreamParseStackObject* parseStackObj) {
+			CDatatypeRestrictionExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDatatypeRestriction(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataMaxCardinalityExpression *CXMLOWL2StreamHandler::parseDataMaxCardinalityNode(CStreamParseStackObject* parseStackObj) {
+			CDataMaxCardinalityExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions() && parseStackObj->mCardinalityParsed) {
+				exp = mOntoBuilder->getDataMaxCardinality(*parseStackObj->getExpressions(),parseStackObj->mCardinality);
+			}
+			return exp;
+		}
+
+		CDataMinCardinalityExpression *CXMLOWL2StreamHandler::parseDataMinCardinalityNode(CStreamParseStackObject* parseStackObj) {
+			CDataMinCardinalityExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions() && parseStackObj->mCardinalityParsed) {
+				exp = mOntoBuilder->getDataMinCardinality(*parseStackObj->getExpressions(),parseStackObj->mCardinality);
+			}
+			return exp;
+		}
+
+		CDataExactCardinalityExpression *CXMLOWL2StreamHandler::parseDataExactCardinalityNode(CStreamParseStackObject* parseStackObj) {
+			CDataExactCardinalityExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions() && parseStackObj->mCardinalityParsed) {
+				exp = mOntoBuilder->getDataExactCardinality(*parseStackObj->getExpressions(),parseStackObj->mCardinality);
+			}
+			return exp;
+		}
+
+		CDataPropertyAssertionExpression *CXMLOWL2StreamHandler::parseDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj) {
+			CDataPropertyAssertionExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataPropertyAssertion(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CNegativeDataPropertyAssertionExpression *CXMLOWL2StreamHandler::parseNegativeDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj) {
+			CNegativeDataPropertyAssertionExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getNegativeDataPropertyAssertion(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CSubDataPropertyOfExpression *CXMLOWL2StreamHandler::parseSubDataPropertyOfNode(CStreamParseStackObject* parseStackObj) {
+			CSubDataPropertyOfExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getSubDataPropertyOf(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CEquivalentDataPropertiesExpression *CXMLOWL2StreamHandler::parseEquivalentDataPropertiesNode(CStreamParseStackObject* parseStackObj) {
+			CEquivalentDataPropertiesExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getEquivalentDataProperties(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDisjointDataPropertiesExpression *CXMLOWL2StreamHandler::parseDisjointDataPropertiesNode(CStreamParseStackObject* parseStackObj) {
+			CDisjointDataPropertiesExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDisjointDataProperties(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataPropertyDomainExpression *CXMLOWL2StreamHandler::parseDataPropertyDomainNode(CStreamParseStackObject* parseStackObj) {
+			CDataPropertyDomainExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataPropertyDomainExpression(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataPropertyRangeExpression *CXMLOWL2StreamHandler::parseDataPropertyRangeNode(CStreamParseStackObject* parseStackObj) {
+			CDataPropertyRangeExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getDataPropertyRangeExpression(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CFunctionalDataPropertyExpression *CXMLOWL2StreamHandler::parseFunctionalDataPropertyNode(CStreamParseStackObject* parseStackObj) {
+			CFunctionalDataPropertyExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				exp = mOntoBuilder->getFunctionalDataProperty(*parseStackObj->getExpressions());
+			}
+			return exp;
+		}
+
+		CDataFacetRestrictionExpression* CXMLOWL2StreamHandler::parseDataFacetRestrictionNode(CStreamParseStackObject* parseStackObj) {
+			CDataFacetRestrictionExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->hasExpressions()) {
+				CQtList<CBuildExpression*> expList(*parseStackObj->getExpressions());
+				CDataFacetExpression* dataFacetExp = mOntoBuilder->getDataFacet(parseStackObj->getParsedIRI());
+				expList.append(dataFacetExp);
+				exp = mOntoBuilder->getDataFacetRestriction(expList);
+			}
+			return exp;
+		}
+
+
+
+
+
+
+
+
+
+
+
+		CDataLiteralExpression *CXMLOWL2StreamHandler::parseDataLiteralNode(CStreamParseStackObject* parseStackObj) {
+			CDataLiteralExpression* exp = nullptr;
+			if (mOntoBuilder && parseStackObj->mIRIParsed) {
+				QString datatypeIRIString = parseStackObj->getParsedIRI();
+				CDatatypeExpression* datatypeExpression = mOntoBuilder->getDatatype(datatypeIRIString);
+				QString valueString = mLastReadText;
+				if (!mLastTextAppendix.isEmpty()) {
+					valueString = mLastReadText+"@"+mLastTextAppendix;
+				}
+				CDataLexicalValueExpression* dataLexicalValueExpression = mOntoBuilder->getDataLexicalValue(valueString);
+				exp = mOntoBuilder->getDataLiteral(dataLexicalValueExpression,datatypeExpression);
+			}
+			return exp;
+		}
+
+
+
+		CDataPropertyExpression *CXMLOWL2StreamHandler::parseDataPropertyNode(const QXmlStreamAttributes& attributes) {
+			const CStringRefStringHasher& probName = getEntityName(attributes);
+			CDataPropertyExpression *objectExpression = 0;
+			if (!probName.isEmpty()) {
+				objectExpression = mOntoBuilder->getDataProberty(probName.toStringRefernce());
+			}
+			return objectExpression;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		void CXMLOWL2StreamHandler::jumpFunctionParseRuleNode(CStreamParseStackObject* parseStackObj) {
 			parseRuleNode(parseStackObj);
 		}
@@ -1295,6 +1641,12 @@ namespace Konclude {
 			addTemporaryBuildExpression(parseRuleDifferentIndividualsAtomNode(parseStackObj));
 		}
 
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyNode(const QXmlStreamAttributes& attributes) {
+			addTemporaryBuildExpression(parseDataPropertyNode(attributes));
+		}
+
+
+
 
 
 
@@ -1307,11 +1659,15 @@ namespace Konclude {
 		}
 
 
+		bool CXMLOWL2StreamHandler::hasOntologyNodeFound() {
+			return mOntologyNodeFound;
+		}
 
 
 
 
 		void CXMLOWL2StreamHandler::jumpFunctionTellOntologyAxiomNode(CStreamParseStackObject* parseStackObj) {
+			mOntologyNodeFound = true;
 			parseTellOntologyAxiomNode(parseStackObj);
 		}
 
@@ -1455,6 +1811,126 @@ namespace Konclude {
 			addTemporaryBuildExpression(parseNamedIndividualNode(attributes));
 		}
 
+
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDatatypeNode(const QXmlStreamAttributes& attributes) {
+			addTemporaryBuildExpression(parseDatatypeNode(attributes));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataSomeValuesFromNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataSomeValuesFromNode(parseStackObj));
+		}
+
+
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataAllValuesFromNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataAllValuesFromNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataHasValueNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataHasValueNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataIntersectionOfNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataIntersectionOfNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataOneOfNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataOneOfNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataUnionOfNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataUnionOfNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataComplementOfNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataComplementOfNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDatatypeRestrictionNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDatatypeRestrictionNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataMaxCardinalityNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataMaxCardinalityNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataMinCardinalityNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataMinCardinalityNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataExactCardinalityNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataExactCardinalityNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataPropertyAssertionNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseNegativeDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseNegativeDataPropertyAssertionNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseSubDataPropertyOfNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseSubDataPropertyOfNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseEquivalentDataPropertiesNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseEquivalentDataPropertiesNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDisjointDataPropertiesNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDisjointDataPropertiesNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyDomainNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataPropertyDomainNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataPropertyRangeNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataPropertyRangeNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseFunctionalDataPropertyNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseFunctionalDataPropertyNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataFacetRestrictionNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataFacetRestrictionNode(parseStackObj));
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseDataLiteralNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseDataLiteralNode(parseStackObj));
+		}
+
 		void CXMLOWL2StreamHandler::jumpFunctionParseAnonymousIndividualNode(const QXmlStreamAttributes& attributes) {
 			addTemporaryBuildExpression(parseAnonymousIndividualNode(attributes));
 		}
@@ -1526,13 +2002,40 @@ namespace Konclude {
 		void CXMLOWL2StreamHandler::jumpFunctionUnsupportedDatatypeNode(CStreamParseStackObject* parseStackObj) {
 			if (mDataTypeReportErrorCount > 0) {
 				--mDataTypeReportErrorCount;
-				LOG(ERROR,getLogDomain(),logTr("Skipped parsing of not supported datatype expression."),this);
+				LOG(ERROR,getLogDomain(),logTr("Skipped parsing of not supported datatype expression/axiom."),this);
 			} else if (mDataTypeReportErrorCount == 0) {
 				--mDataTypeReportErrorCount;
-				LOG(ERROR,getLogDomain(),logTr("Remaining not supported datatype expressions are ignored."),this);
+				LOG(ERROR,getLogDomain(),logTr("Remaining not supported datatype expressions/axioms are ignored."),this);
 			}
 		}
 
+		void CXMLOWL2StreamHandler::jumpFunctionUnsupportedRDFNode(CStreamParseStackObject* parseStackObj) {
+			LOG(ERROR,getLogDomain(),logTr("RDF/XML is currently not supported (Protege can be used to convert ontologies into OWL/XML)."),this);
+		}
+
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseImportNode(CStreamParseStackObject* parseStackObj) {
+			if (!mLastReadText.isEmpty()) {
+				mOntoBuilder->addOntologyImport(mLastReadText);
+			}
+		}
+
+
+		void CXMLOWL2StreamHandler::jumpFunctionUnsupportedImportNode(CStreamParseStackObject* parseStackObj) {
+			if (!mUnsupportedImportError) {
+				mUnsupportedImportError = true;
+				LOG(WARNING,getLogDomain(),logTr("Imports are currently not supported."),this);
+			}
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionUnsupportedAnnotationNode(const QXmlStreamAttributes& attributes) {
+			mIgnoreParsingSubElements = true;
+			mParseIgnoreDepth = mStack.count();
+			if (!mUnsupportedAnnotationError) {
+				mUnsupportedAnnotationError = true;
+				LOG(WARNING,getLogDomain(),logTr("Annotations are currently not handled."),this);
+			}
+		}
 
 	}; // end namespace Parser
 

@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -49,34 +49,40 @@ namespace Konclude {
 					mConceptVector = mTBox->getConceptVector();
 					mIndiVec = mABox->getIndividualVector();
 
-					roleLinkerMemMan = new CDynamicExpandingMemoryManager<CSortedNegLinker<CRole *> >();
-					conceptLinkerMemMan = new CDynamicExpandingMemoryManager<CSortedNegLinker<CConcept *> >();
-					roleMemMan = new CDynamicExpandingMemoryManager<CRole>();
-					roleObjPropTermHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
-
 					mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
 					mOntology = ontology;
 
-					mTopRole = nullptr;
-					mBottomRole = nullptr;
+					mTopObjectRole = nullptr;
+					mBottomObjectRole = nullptr;
 
+					mTopDataRole = nullptr;
+					mBottomDataRole = nullptr;
 
 					QSet<CRole*> mProcessedRoleSet;
 					QSet<cint64> locRoleTagSet;
 					QList<cint64> subRoleUpdateTagList;
 
 					COntologyBuildConstructFlags* construcFlags = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getBuildConstructFlags();
-					bool universalRuleUsed = construcFlags->isTopRoleUsed();
-					bool bottomRuleUsed = construcFlags->isBottomRoleUsed();
+					bool topObjectRuleUsed = construcFlags->isTopObjectRoleUsed();
+					bool bottomObjectRuleUsed = construcFlags->isBottomObjectRoleUsed();
 
-					if (universalRuleUsed) {
+					if (topObjectRuleUsed) {
 						mRoleChainVector = mRBox->getRoleChainVector();
 						makeUniversalSuperRole();
 					}
-					if (bottomRuleUsed) {
-						makeBottomRoleDomain();
+					if (bottomObjectRuleUsed) {
+						makeBottomObjectRoleDomain();
 					}
 
+					bool topDataRuleUsed = construcFlags->isTopDataRoleUsed();
+					bool bottomDataRuleUsed = construcFlags->isBottomDataRoleUsed();
+
+					if (topDataRuleUsed) {
+						makeDataSuperRole();
+					}
+					if (bottomDataRuleUsed) {
+						makeBottomDataRoleDomain();
+					}
 
 					qint64 itemCounts = mRolesVector->getItemCount();
 					for (qint64 i = 0; i < itemCounts; ++i) {
@@ -142,7 +148,7 @@ namespace Konclude {
 							// update indirect super role list
 							QSet< QPair<CRole*,bool> > singleSuperRoleAddSet;
 							singleSuperRoleAddSet.insert(QPair<CRole*,bool>(role,false));
-							CSortedNegLinker<CRole *> *superRoleLinker = roleLinkerMemMan->allocate();
+							CSortedNegLinker<CRole *> *superRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
 							superRoleLinker->init(role,false);
 							role->setIndirectSuperRoleLinker(superRoleLinker);
 
@@ -176,14 +182,9 @@ namespace Konclude {
 						}
 					}
 
-					if (universalRuleUsed && mABox->getIndividualCount() > 0 && hasUniversalRolePropagation()) {
+					if (topObjectRuleUsed && mABox->getIndividualCount() > 0 && hasUniversalRolePropagation()) {
 						makeUniversalConnectionIndividual();
 					}
-
-					CObjectContainer *memCon = ontology->getDataBoxes()->getBoxContext()->getObjectContainer();
-					memCon->addObject(roleLinkerMemMan);
-					memCon->addObject(conceptLinkerMemMan);
-					memCon->addObject(roleMemMan);
 				}
 
 				return ontology;
@@ -226,10 +227,21 @@ namespace Konclude {
 			}
 
 
-			void CSubroleTransformationPreProcess::makeBottomRoleDomain() {
-				mBottomRole = mRolesVector->getData(0);
+			void CSubroleTransformationPreProcess::makeBottomObjectRoleDomain() {
+				mBottomObjectRole = mRolesVector->getData(mRBox->getBottomObjectRoleIndex());
+				makeBottomRoleDomain(mBottomObjectRole);
+			}
+
+
+			void CSubroleTransformationPreProcess::makeBottomDataRoleDomain() {
+				mBottomDataRole = mRolesVector->getData(mRBox->getBottomDataRoleIndex());
+				makeBottomRoleDomain(mBottomDataRole);
+			}
+
+
+			void CSubroleTransformationPreProcess::makeBottomRoleDomain(CRole* role) {
 				bool foundBottom = false;
-				for (CSortedNegLinker<CConcept*>* domainConIt = mBottomRole->getDomainConceptList(); !foundBottom && domainConIt; domainConIt = domainConIt->getNext()) {
+				for (CSortedNegLinker<CConcept*>* domainConIt = role->getDomainConceptList(); !foundBottom && domainConIt; domainConIt = domainConIt->getNext()) {
 					CConcept* domainConcept = domainConIt->getData();
 					bool domainConNegation = domainConIt->isNegated();
 					if (domainConNegation && domainConcept->getOperatorCode() == CCTOP) {
@@ -239,26 +251,26 @@ namespace Konclude {
 					}
 				}
 				if (!foundBottom) {
-					mBottomRole = getLocalizedRole(mBottomRole);
+					role = getLocalizedRole(role);
 					CSortedNegLinker<CConcept*>* domainConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
 					domainConLinker->init(mTBox->getTopConcept(),true);
-					mBottomRole->addDomainConceptLinker(domainConLinker);
+					role->addDomainConceptLinker(domainConLinker);
 				}
 			}
 
 
 			void CSubroleTransformationPreProcess::makeUniversalSuperRole() {
 				mOntology->getDataBoxes()->getExpressionDataBoxMapping()->getBuildConstructFlags()->setComplexRoleUsed();
-				mTopRole = getLocalizedRole(mRolesVector->getData(1));
-				if (!mTopRole->isTransitive()) {
-					mTopRole->setTransitive(true);
+				mTopObjectRole = getLocalizedRole(mRolesVector->getData(mRBox->getTopObjectRoleIndex()));
+				if (!mTopObjectRole->isTransitive()) {
+					mTopObjectRole->setTransitive(true);
 					cint64 roleChainCount = mRoleChainVector->getItemCount();
 					CRoleChain* roleChain = CObjectAllocator< CRoleChain >::allocateAndConstruct(mMemMan);
 					roleChain->initRoleChain();
 					CXLinker<CRole*>* roleLinker1 = CObjectAllocator< CXLinker<CRole*> >::allocateAndConstruct(mMemMan);
 					CXLinker<CRole*>* roleLinker2 = CObjectAllocator< CXLinker<CRole*> >::allocateAndConstruct(mMemMan);
-					roleLinker1->initLinker(mTopRole);
-					roleLinker2->initLinker(mTopRole);
+					roleLinker1->initLinker(mTopObjectRole);
+					roleLinker2->initLinker(mTopObjectRole);
 					roleChain->appendRoleChainLinker(roleLinker1);
 					roleChain->appendRoleChainLinker(roleLinker2);
 					roleChain->initTag(roleChainCount);
@@ -266,27 +278,27 @@ namespace Konclude {
 
 					CXLinker<CRoleChain*>* superRoleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemMan);
 					superRoleChainLinker->initLinker(roleChain);
-					mTopRole->addRoleChainSuperSharingLinker(superRoleChainLinker);
+					mTopObjectRole->addRoleChainSuperSharingLinker(superRoleChainLinker);
 					CXLinker<CRoleChain*>* subRoleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemMan);
 					subRoleChainLinker->initLinker(roleChain);
-					mTopRole->addRoleChainSubSharingLinker(subRoleChainLinker);
+					mTopObjectRole->addRoleChainSubSharingLinker(subRoleChainLinker);
 				}
-				if (!mTopRole->isSymmetric()) {
-					mTopRole->setSymmetric(true);
+				if (!mTopObjectRole->isSymmetric()) {
+					mTopObjectRole->setSymmetric(true);
 
 					CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
-					roleLinker->init(mTopRole,true);
-					mTopRole->addInverseRoleLinker(roleLinker);
+					roleLinker->init(mTopObjectRole,true);
+					mTopObjectRole->addInverseRoleLinker(roleLinker);
 				}
 				cint64 roleCount = mRolesVector->getItemCount();
 				for (cint64 roleIdx = 0; roleIdx < roleCount; ++roleIdx) {
 					CRole* role = mRolesVector->getData(roleIdx);
-					if (role && !role->hasSuperRoleTag(mTopRole->getRoleTag())) {
+					if (role && role->isObjectRole() && !role->hasSuperRoleTag(mTopObjectRole->getRoleTag())) {
 						role = getLocalizedRole(role);
 
 						CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
-						roleLinker->init(mTopRole,true);
-						mTopRole->addSuperRoleLinker(roleLinker);
+						roleLinker->init(mTopObjectRole,true);
+						mTopObjectRole->addSuperRoleLinker(roleLinker);
 					}
 				}
 				// make reflexive -> add \exists u.SELF to TOP
@@ -299,7 +311,7 @@ namespace Konclude {
 				for (CSortedNegLinker<CConcept*>* opLinker = topConcept->getOperandList(); !hasTopExistsUniversalSelf && opLinker; opLinker = opLinker->getNext()) {
 					if (!opLinker->isNegated()) {
 						CConcept* opConcept = opLinker->getData();
-						if (opConcept->getOperatorCode() == CCSELF && opConcept->getRole()->getRoleTag() == mTopRole->getRoleTag()) {
+						if (opConcept->getOperatorCode() == CCSELF && opConcept->getRole()->getRoleTag() == mTopObjectRole->getRoleTag()) {
 							hasTopExistsUniversalSelf = true;
 						}
 					}
@@ -309,7 +321,7 @@ namespace Konclude {
 					cint64 conCount = mConceptVector->getItemCount();
 					univSelfCon->initConcept();
 					univSelfCon->setConceptTag(conCount);
-					univSelfCon->setRole(mTopRole);
+					univSelfCon->setRole(mTopObjectRole);
 					univSelfCon->setOperatorCode(CCSELF);
 					mConceptVector->setData(conCount,univSelfCon);
 
@@ -319,6 +331,25 @@ namespace Konclude {
 					topConcept->incOperandCount(1);
 				}
 				
+			}
+
+
+
+
+
+			void CSubroleTransformationPreProcess::makeDataSuperRole() {
+				mTopDataRole = getLocalizedRole(mRolesVector->getData(mRBox->getTopDataRoleIndex()));
+				cint64 roleCount = mRolesVector->getItemCount();
+				for (cint64 roleIdx = 0; roleIdx < roleCount; ++roleIdx) {
+					CRole* role = mRolesVector->getData(roleIdx);
+					if (role && role->isDataRole() && !role->hasSuperRoleTag(mTopDataRole->getRoleTag())) {
+						role = getLocalizedRole(role);
+
+						CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
+						roleLinker->init(mTopDataRole,true);
+						mTopDataRole->addSuperRoleLinker(roleLinker);
+					}
+				}
 			}
 
 
@@ -354,7 +385,7 @@ namespace Konclude {
 					cint64 upRoleTag = upRole->getRoleTag();
 					if (upRole != role || upNeg) {
 						if (!role->hasSuperRoleTag(upRoleTag,upNeg)) {
-							CSortedNegLinker<CRole *>* superRoleLinker = roleLinkerMemMan->allocate();
+							CSortedNegLinker<CRole*>* superRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
 							superRoleLinker->init(upRole,upNeg);
 							role->addSuperRoleLinker(superRoleLinker);
 						}
@@ -385,8 +416,8 @@ namespace Konclude {
 
 			bool CSubroleTransformationPreProcess::hasUniversalRolePropagation() {
 				QSet<CRole*> topSuperRoleSet;
-				topSuperRoleSet.insert(mTopRole);
-				for (CSortedNegLinker<CRole*>* topSuperRoleIt = mTopRole->getIndirectSuperRoleList(); topSuperRoleIt; topSuperRoleIt = topSuperRoleIt->getNext()) {
+				topSuperRoleSet.insert(mTopObjectRole);
+				for (CSortedNegLinker<CRole*>* topSuperRoleIt = mTopObjectRole->getIndirectSuperRoleList(); topSuperRoleIt; topSuperRoleIt = topSuperRoleIt->getNext()) {
 					CRole* topSuperRole = topSuperRoleIt->getData();
 					topSuperRoleSet.insert(topSuperRole);
 				}
@@ -415,7 +446,7 @@ namespace Konclude {
 					if (!singleSuperRoleAddSet->contains(QPair<CRole*,bool>(superRole,inversed))) {
 						singleSuperRoleAddSet->insert(QPair<CRole*,bool>(superRole,inversed));
 
-						CSortedNegLinker<CRole *> *nextSuperRoleLinker = roleLinkerMemMan->allocate();
+						CSortedNegLinker<CRole *> *nextSuperRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
 						nextSuperRoleLinker->init(superRole,inversed);
 						modifingSubRole->addIndirectSuperRoleLinker(nextSuperRoleLinker);
 

@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -42,6 +42,8 @@ namespace Konclude {
 				mQueryOperationString = QString("query").toLower();
 				mClassificationOperationString = QString("classification").toLower();
 				mConsistencyOperationString = QString("consistency").toLower();
+				mRealisationOperationString = QString("realisation").toLower();
+				mRealizationOperationString = QString("realization").toLower();
 
 
 				mOperationTimeOutputString = QString("Operation time: ");
@@ -115,13 +117,29 @@ namespace Konclude {
 				CCreateKnowledgeBaseCommand* createKBCommand = new CCreateKnowledgeBaseCommand(oreTestKB);
 				QStringList ontoIRIList;
 				ontoIRIList.append(mOntologyFileString);
-				CLoadKnowledgeBaseOWLXMLOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLXMLOntologyCommand(oreTestKB,ontoIRIList);
+				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
 				CKnowledgeBaseClassifyCommand* classifyKBCommand = new CKnowledgeBaseClassifyCommand(oreTestKB);
 				CWriteFunctionalSubClassHierarchyQueryCommand* writeHierarchyCommand = new CWriteFunctionalSubClassHierarchyQueryCommand(oreTestKB,mResponseFileString);
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
 				addProcessingCommand(classifyKBCommand,true,mOperationTimeOutputString);
 				addProcessingCommand(writeHierarchyCommand);
+				processNextCommand();
+			}
+
+			void COREBatchProcessingLoader::createRealisationTestingCommands() {
+				logOutputMessage(QString("Started %1 on %2").arg(mProcessingOperationString).arg(mOntologyFileString));
+				QString oreTestKB = QString("http://konclude.com/ore/test/kb");
+				CCreateKnowledgeBaseCommand* createKBCommand = new CCreateKnowledgeBaseCommand(oreTestKB);
+				QStringList ontoIRIList;
+				ontoIRIList.append(mOntologyFileString);
+				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
+				CKnowledgeBaseRealizeCommand* realizeKBCommand = new CKnowledgeBaseRealizeCommand(oreTestKB);
+				CWriteFunctionalIndividualTypesQueryCommand* writeIndividualTypesCommand = new CWriteFunctionalIndividualTypesQueryCommand(oreTestKB,mResponseFileString);
+				addProcessingCommand(createKBCommand);
+				addProcessingCommand(loadKBCommand);
+				addProcessingCommand(realizeKBCommand,true,mOperationTimeOutputString);
+				addProcessingCommand(writeIndividualTypesCommand);
 				processNextCommand();
 			}
 
@@ -132,7 +150,7 @@ namespace Konclude {
 				CCreateKnowledgeBaseCommand* createKBCommand = new CCreateKnowledgeBaseCommand(oreTestKB);
 				QStringList ontoIRIList;
 				ontoIRIList.append(mOntologyFileString);
-				CLoadKnowledgeBaseOWLXMLOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLXMLOntologyCommand(oreTestKB,ontoIRIList);
+				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
 				CIsConsistentQueryCommand* consistencyKBCommand = new CIsConsistentQueryCommand(oreTestKB);
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
@@ -148,7 +166,7 @@ namespace Konclude {
 				QStringList ontoIRIList;
 				ontoIRIList.append(mOntologyFileString);
 				mWriteSatisfiabilityPrefixString = mIRINameString+QString(",");
-				CLoadKnowledgeBaseOWLXMLOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLXMLOntologyCommand(oreTestKB,ontoIRIList);
+				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
 				CProcessClassNameSatisfiableQueryCommand* consistencyKBCommand = new CProcessClassNameSatisfiableQueryCommand(oreTestKB,mIRINameString);
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
@@ -192,6 +210,14 @@ namespace Konclude {
 					mProcessingOperationString = mConsistencyOperationString;
 					createConsistencyTestingCommands();
 
+				} else if (operationTaskString == mRealisationOperationString) {
+					mProcessingOperationString = mRealisationOperationString;
+					createRealisationTestingCommands();
+
+				} else if (operationTaskString == mRealizationOperationString) {
+					mProcessingOperationString = mRealizationOperationString;
+					createRealisationTestingCommands();
+
 				} else {
 					logOutputError(QString("Operation %1 not supported").arg(mOperationTaskString));
 					terminateProcessing();
@@ -225,9 +251,16 @@ namespace Konclude {
 
 			void COREBatchProcessingLoader::forcedPathCreated(const QString& filePath) {
 				QString path = filePath;
-				path = path.mid(0,path.lastIndexOf("/"));
-				QDir dir;
-				dir.mkpath(path);
+				if (path.contains("/") || path.contains("\\")) {
+					int lastSlash = path.lastIndexOf("/");
+					int lastBackSlash = path.lastIndexOf("\\");
+					int lastSeparator = qMax(lastBackSlash,lastSlash);
+					path = path.mid(0,lastSeparator);
+					if (!path.isEmpty()) {
+						QDir dir;
+						dir.mkpath(path);
+					}
+				}
 			}
 
 			void COREBatchProcessingLoader::writeSatisfiabilityResult(const QString& outputFileName, CCommand* processedCommand) {
@@ -249,7 +282,7 @@ namespace Konclude {
 									} else {
 										outputData = mWriteSatisfiabilityPrefixString+QString("false\n");
 									}
-									outputFile.write(outputData.toLocal8Bit());
+									outputFile.write(outputData.toUtf8());
 									outputFile.close();
 									outputWritten = true;
 								} else {

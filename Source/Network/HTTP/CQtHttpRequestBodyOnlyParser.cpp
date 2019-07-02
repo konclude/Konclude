@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -79,7 +79,7 @@ namespace Konclude {
 					if (!mHeaderCompleted) {
 						if (mHeaderLineReadBufferSize - mHeaderLineReadBufferPosition <= 0) {
 							mRequestError = true;
-                            mErrorString = QString("Line in header is longer than allowed, '%1' is longer than %2").arg(QString::fromLocal8Bit(mHeaderLineReadBuffer)).arg(mHeaderLineReadBufferSize);
+                            mErrorString = QString("Line in header is longer than allowed, '%1' is longer than %2").arg(QString::fromUtf8(mHeaderLineReadBuffer)).arg(mHeaderLineReadBufferSize);
 						} else if (mMaxHeaderDataSize - mReadHeaderDataSize <= 0) {
 							mRequestError = true;
 							mErrorString = QString("Header is longer than allowed");
@@ -152,24 +152,24 @@ namespace Konclude {
 				if (nextSpacePos == mHeaderLineReadBufferSize) {
 					methodProtocolURIParseError = true;
 				} else {
-                    mRequestMethod = QString::fromLocal8Bit(&mHeaderLineReadBuffer[currSpacePos],nextSpacePos-currSpacePos);
+                    mRequestMethod = QString::fromUtf8(&mHeaderLineReadBuffer[currSpacePos],nextSpacePos-currSpacePos);
 					currSpacePos = nextSpacePos+1;
 
 					nextSpacePos = getNextCharacterPosition(' ',currSpacePos);
 					if (nextSpacePos == mHeaderLineReadBufferSize) {
 						methodProtocolURIParseError = true;
 					} else {
-                        mRequestURIString = QString::fromLocal8Bit(&mHeaderLineReadBuffer[currSpacePos],nextSpacePos-currSpacePos);
+                        mRequestURIString = QString::fromUtf8(&mHeaderLineReadBuffer[currSpacePos],nextSpacePos-currSpacePos);
 						currSpacePos = nextSpacePos+1;
 
 						nextSpacePos = mHeaderLineReadBufferPosition-2;
-                        mRequestProtocol = QString::fromLocal8Bit(&mHeaderLineReadBuffer[currSpacePos],nextSpacePos-currSpacePos);
+                        mRequestProtocol = QString::fromUtf8(&mHeaderLineReadBuffer[currSpacePos],nextSpacePos-currSpacePos);
 					}
 				}
 
 				if (methodProtocolURIParseError) {
 					mRequestError = true;
-                    mErrorString = QString("Could not parse method, protocol and uri from request '%1'").arg(QString::fromLocal8Bit(mHeaderLineReadBuffer));
+                    mErrorString = QString("Could not parse method, protocol and uri from request '%1'").arg(QString::fromUtf8(mHeaderLineReadBuffer));
 				}
 			}
 
@@ -179,19 +179,19 @@ namespace Konclude {
 					mHeaderCompleted = true;
 				} else {
 					cint64 doublePointPos = getNextCharacterPosition(':',0);
-                    QString headerKey = QString::fromLocal8Bit(mHeaderLineReadBuffer,doublePointPos);
+                    QString headerKey = QString::fromUtf8(mHeaderLineReadBuffer,doublePointPos);
 					if (QString::compare(headerKey.trimmed(),mHeaderContentLengthString,Qt::CaseInsensitive) == 0) {
-                        QString contentLengthValueString = QString::fromLocal8Bit(&mHeaderLineReadBuffer[doublePointPos+1],mHeaderLineReadBufferPosition-3-doublePointPos);
+                        QString contentLengthValueString = QString::fromUtf8(&mHeaderLineReadBuffer[doublePointPos+1],mHeaderLineReadBufferPosition-3-doublePointPos);
 						bool successfulParsedExpectedContentLength = false;
 						QString trimmedContentLengthValueString = contentLengthValueString.trimmed();
 						mExpectedBodyLength = trimmedContentLengthValueString.toLong(&successfulParsedExpectedContentLength);
 						if (!successfulParsedExpectedContentLength) {
 							mRequestError = true;
-                            mErrorString = QString("Could not parse content length value from '%1'").arg(QString::fromLocal8Bit(mHeaderLineReadBuffer));
+                            mErrorString = QString("Could not parse content length value from '%1'").arg(QString::fromUtf8(mHeaderLineReadBuffer));
 						}
 					} else {
 						if (QString::compare(headerKey.trimmed(),mHeaderConnectionString,Qt::CaseInsensitive) == 0) {							
-                            QString connectionValueString = QString::fromLocal8Bit(&mHeaderLineReadBuffer[doublePointPos+1],mHeaderLineReadBufferPosition-3-doublePointPos);
+                            QString connectionValueString = QString::fromUtf8(&mHeaderLineReadBuffer[doublePointPos+1],mHeaderLineReadBufferPosition-3-doublePointPos);
 							if (QString::compare(connectionValueString,mHeaderConnectionString,Qt::CaseInsensitive) == 0) {
 								mAfterwardsCloseConnection = true;
 							}

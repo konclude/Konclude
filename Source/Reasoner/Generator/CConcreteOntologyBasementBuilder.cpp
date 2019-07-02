@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -80,12 +80,21 @@ namespace Konclude {
 				mTopObjPropExpression = mOntoBuild->getTopObjectPropertyExpression();
 				mBottomObjPropExpression = mOntoBuild->getBottomObjectPropertyExpression();
 
+				mTopDataPropExpression = mOntoBuild->getTopDataPropertyExpression();
+				mBottomDataPropExpression = mOntoBuild->getBottomDataPropertyExpression();
+
 
 				mClassTermConceptHash = mOntoData->getExpressionDataBoxMapping()->getClassTermConceptMappingHash();
 				mConceptClassTermHash = mOntoData->getExpressionDataBoxMapping()->getConceptClassTermMappingHash();
 
 				mObjPropTermRoleHash = mOntoData->getExpressionDataBoxMapping()->getObjectPropertyTermRoleMappingHash();
 				mRoleObjPropTermHash = mOntoData->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
+
+				mDataPropTermRoleHash = mOntoData->getExpressionDataBoxMapping()->getDataPropertyTermRoleMappingHash();
+				mRoleDataPropTermHash = mOntoData->getExpressionDataBoxMapping()->getRoleDataPropertyTermMappingHash();
+
+				mDataPropTermRoleHash = mOntoData->getExpressionDataBoxMapping()->getDataPropertyTermRoleMappingHash();
+				mRoleDataPropTermHash = mOntoData->getExpressionDataBoxMapping()->getRoleDataPropertyTermMappingHash();
 
 				mIndividulTermIndiHash = mOntoData->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash();
 				mIndiIndividulTermHash = mOntoData->getExpressionDataBoxMapping()->getIndiIndividulTermMappingHash();
@@ -99,9 +108,15 @@ namespace Konclude {
 				mClassBuildHash = mOntoBuild->getClassEntityBuildHash();
 				mObjectPropertyBuildHash = mOntoBuild->getObjectPropertyEntityBuildHash();
 				mIndividualBuildHash = mOntoBuild->getIndividualEntityBuildHash();
+				mDataPropertyBuildHash = mOntoBuild->getDataPropertyEntityBuildHash();
 
 				mAbbreviatedNamePrefixMapHash = mOntoStrings->getAbbreviatedNamePrefixHash();
 				mNamePrefixMapHash = mOntoStrings->getNamePrefixHash();
+
+				mDatatypeExpDatatypeHash = mOntoData->getExpressionDataBoxMapping()->getDatatypeExpressionDatatypeHash();
+				mDatatypeDatatypeExpHash = mOntoData->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
+
+				mDatatypeBuildHash = mOntoBuild->getDatatypeIRIBuildHash();
 
 				return true;
 			}
@@ -140,15 +155,42 @@ namespace Konclude {
 			}
 
 
+
+			bool CConcreteOntologyBasementBuilder::createDatatype(const QString& datatypeIRI) {
+				if (!mDatatypeBuildHash->contains(datatypeIRI)) {
+					CDatatypeExpression* datatypeExpression = new CDatatypeExpression(datatypeIRI);
+					datatypeExpression->setEntityID(mOntoBuild->getNextEntityNumber(true));
+					mDatatypeBuildHash->insert(datatypeIRI,datatypeExpression);
+					CDatatype* datatype = new CDatatype();
+					datatype->initDatatype(datatypeIRI);
+					mDatatypeExpDatatypeHash->insert(datatypeExpression,datatype);
+					mDatatypeDatatypeExpHash->insert(datatype,datatypeExpression);
+					CDatatypeVector* datatypeVector = tBox->getDatatypeVector(true);
+					datatype->setDatatypeTag(datatypeVector->getItemCount());
+					datatypeVector->setData(datatype->getDatatypeTag(),datatype);
+				}
+				return true;
+			}
+
+
 			bool CConcreteOntologyBasementBuilder::buildOntologyBasement() {
 				// generate top and bottom class and concept
-				addNameAbbreviation("http://www.w3.org/2002/07/owl#","owl");
+				addNameAbbreviation(PREFIX_OWL,"owl");
+				addNameAbbreviation(PREFIX_RDF,"rdf");
+				addNameAbbreviation(PREFIX_XML,"xml");
+				addNameAbbreviation(PREFIX_XSD,"xsd");
+				addNameAbbreviation(PREFIX_RDFS,"rdfs");
 
-				QString topConceptString = "http://www.w3.org/2002/07/owl#Thing";
-				QString bottomConceptString = "http://www.w3.org/2002/07/owl#Nothing";
-				QString topRoleString = "http://www.w3.org/2002/07/owl#topObjectProperty";
-				QString bottomRoleString = "http://www.w3.org/2002/07/owl#bottomObjectProperty";
-				mActiveEntityCountVector->increaseVectorSize(mOntoBuild->getNextEntityNumber(false)+4);
+				QString topConceptString = PREFIX_OWL_THING;
+				QString bottomConceptString = PREFIX_OWL_NOTHING;
+
+				QString topObjectRoleString = PREFIX_OWL_TOPOBJECTPROPERTY;
+				QString bottomObjectRoleString = PREFIX_OWL_BOTTOMOBJECTPROPERTY;
+
+				QString topDataRoleString = PREFIX_OWL_TOPDATAPROPERTY;
+				QString bottomDataRoleString = PREFIX_OWL_BOTTOMDATAPROPERTY;
+
+				mActiveEntityCountVector->increaseVectorSize(mOntoBuild->getNextEntityNumber(false)+6+35);
 				if (!mTopClassExpression) {
 					CClassExpression* topClassExpression = new CClassExpression(topConceptString);
 					topClassExpression->setEntityID(mOntoBuild->getNextEntityNumber(true));
@@ -156,6 +198,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(topClassExpression);
 					mClassBuildHash->insert(topConceptString,topClassExpression);
 					mTopClassExpression = topClassExpression;
+					mOntoBuild->setTopClassExpression(mTopClassExpression);
 				}
 				if (!mBottomClassExpression) {
 					CClassExpression* bottomClassExpression = new CClassExpression(bottomConceptString);
@@ -164,23 +207,46 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(bottomClassExpression);
 					mClassBuildHash->insert(bottomConceptString,bottomClassExpression);
 					mBottomClassExpression = bottomClassExpression;
+					mOntoBuild->setBottomClassExpression(mBottomClassExpression);
 				}
 				if (!mTopObjPropExpression) {
-					CObjectPropertyExpression* topObjPropExpression = new CObjectPropertyExpression(topRoleString);
+					CObjectPropertyExpression* topObjPropExpression = new CObjectPropertyExpression(topObjectRoleString);
 					topObjPropExpression->setEntityID(mOntoBuild->getNextEntityNumber(true));
 					mActiveEntityCountVector->incActiveEntityCount(topObjPropExpression);
 					mExpressionBuildContainerList->append(topObjPropExpression);
-					mObjectPropertyBuildHash->insert(topRoleString,topObjPropExpression);
+					mObjectPropertyBuildHash->insert(topObjectRoleString,topObjPropExpression);
 					mTopObjPropExpression = topObjPropExpression;
+					mOntoBuild->setTopObjectPropertyExpression(mTopObjPropExpression);
 				}
 				if (!mBottomObjPropExpression) {
-					CObjectPropertyExpression* bottomObjPropExpression = new CObjectPropertyExpression(bottomRoleString);
+					CObjectPropertyExpression* bottomObjPropExpression = new CObjectPropertyExpression(bottomObjectRoleString);
 					bottomObjPropExpression->setEntityID(mOntoBuild->getNextEntityNumber(true));
 					mActiveEntityCountVector->incActiveEntityCount(bottomObjPropExpression);
 					mExpressionBuildContainerList->append(bottomObjPropExpression);
-					mObjectPropertyBuildHash->insert(bottomRoleString,bottomObjPropExpression);
+					mObjectPropertyBuildHash->insert(bottomObjectRoleString,bottomObjPropExpression);
 					mBottomObjPropExpression = bottomObjPropExpression;
+					mOntoBuild->setBottomObjectPropertyExpression(mTopObjPropExpression);
 				}
+
+				if (!mTopDataPropExpression) {
+					CDataPropertyExpression* topDataPropExpression = new CDataPropertyExpression(topDataRoleString);
+					topDataPropExpression->setEntityID(mOntoBuild->getNextEntityNumber(true));
+					mActiveEntityCountVector->incActiveEntityCount(topDataPropExpression);
+					mExpressionBuildContainerList->append(topDataPropExpression);
+					mDataPropertyBuildHash->insert(topDataRoleString,topDataPropExpression);
+					mTopDataPropExpression = topDataPropExpression;
+					mOntoBuild->setTopDataPropertyExpression(mTopDataPropExpression);
+				}
+				if (!mBottomDataPropExpression) {
+					CDataPropertyExpression* bottomDataPropExpression = new CDataPropertyExpression(bottomDataRoleString);
+					bottomDataPropExpression->setEntityID(mOntoBuild->getNextEntityNumber(true));
+					mActiveEntityCountVector->incActiveEntityCount(bottomDataPropExpression);
+					mExpressionBuildContainerList->append(bottomDataPropExpression);
+					mDataPropertyBuildHash->insert(bottomDataRoleString,bottomDataPropExpression);
+					mBottomDataPropExpression = bottomDataPropExpression;
+					mOntoBuild->setBottomDataPropertyExpression(mBottomDataPropExpression);
+				}
+
 				CMemoryAllocationManager* tBoxMemMan = CContext::getMemoryAllocationManager(tBox->getBoxContext());
 				CConcept* topConcept = tBox->getTopConcept();
 				if (!topConcept) {
@@ -191,6 +257,7 @@ namespace Konclude {
 					updateName(topConcept,topConceptString);
 					mClassTermConceptHash->insert(mTopClassExpression,topConcept);
 					mConceptClassTermHash->insert(topConcept,mTopClassExpression);
+					tBox->setTopConcept(topConcept);
 				}
 				CConcept* bottomConcept = tBox->getBottomConcept();
 				if (!bottomConcept) {
@@ -201,6 +268,7 @@ namespace Konclude {
 					updateName(bottomConcept,bottomConceptString);
 					mClassTermConceptHash->insert(mBottomClassExpression,bottomConcept);
 					mConceptClassTermHash->insert(bottomConcept,mBottomClassExpression);
+					tBox->setBottomConcept(bottomConcept);
 				}
 				CConcept* indiTriggerConcept = tBox->getIndividualTriggerConcept();
 				if (!indiTriggerConcept) {
@@ -208,39 +276,120 @@ namespace Konclude {
 					indiTriggerConcept->initConcept();
 					indiTriggerConcept->setConceptTag(tBox->getIndividualTriggerConceptIndex());
 					indiTriggerConcept->setOperatorCode(CCIMPLTRIG);
+					tBox->setIndividualTriggerConcept(indiTriggerConcept);
 				}
-				tBox->setTopConcept(topConcept);
-				tBox->setIndividualTriggerConcept(indiTriggerConcept);
-				tBox->setBottomConcept(bottomConcept);
-
+				CConcept* topDataRangeConcept = tBox->getTopDataRangeConcept();
+				if (!topDataRangeConcept) {
+					topDataRangeConcept = CObjectAllocator<CConcept>::allocateAndConstruct(tBoxMemMan);
+					topDataRangeConcept->initConcept();
+					topDataRangeConcept->setConceptTag(tBox->getTopDataRangeConceptIndex());
+					topDataRangeConcept->setOperatorCode(CCIMPLTRIG);
+					tBox->setTopDataRangeConcept(topDataRangeConcept);
+				}
 
 				CMemoryAllocationManager* rBoxMemMan = CContext::getMemoryAllocationManager(rBox->getBoxContext());
-				CRole* topRole = rBox->getTopRole();
-				if (!topRole) {
-					topRole = CObjectAllocator<CRole>::allocateAndConstruct(tBoxMemMan);
-					topRole->initRole();
-					topRole->setRoleTag(1);
-					updateName(topRole,topRoleString);
-					mObjPropTermRoleHash->insert(mTopObjPropExpression,topRole);
-					mRoleObjPropTermHash->insert(topRole,mTopObjPropExpression);
+				CRole* topObjectRole = rBox->getTopObjectRole();
+				if (!topObjectRole) {
+					topObjectRole = CObjectAllocator<CRole>::allocateAndConstruct(tBoxMemMan);
+					topObjectRole->initRole();
+					topObjectRole->setRoleTag(rBox->getTopObjectRoleIndex());
+					updateName(topObjectRole,topObjectRoleString);
+					mObjPropTermRoleHash->insert(mTopObjPropExpression,topObjectRole);
+					mRoleObjPropTermHash->insert(topObjectRole,mTopObjPropExpression);
+					rBox->setTopObjectRole(topObjectRole);
 				}
-				CRole* bottomRole = rBox->getBottomRole();
-				if (!bottomRole) {
-					bottomRole = CObjectAllocator<CRole>::allocateAndConstruct(tBoxMemMan);
-					bottomRole->initRole();
-					bottomRole->setRoleTag(0);
-					updateName(bottomRole,bottomRoleString);
-					mObjPropTermRoleHash->insert(mBottomObjPropExpression,bottomRole);
-					mRoleObjPropTermHash->insert(bottomRole,mBottomObjPropExpression);
+				CRole* bottomObjectRole = rBox->getBottomObjectRole();
+				if (!bottomObjectRole) {
+					bottomObjectRole = CObjectAllocator<CRole>::allocateAndConstruct(tBoxMemMan);
+					bottomObjectRole->initRole();
+					bottomObjectRole->setRoleTag(rBox->getBottomObjectRoleIndex());
+					updateName(bottomObjectRole,bottomObjectRoleString);
+					mObjPropTermRoleHash->insert(mBottomObjPropExpression,bottomObjectRole);
+					mRoleObjPropTermHash->insert(bottomObjectRole,mBottomObjPropExpression);
+					rBox->setBottomObjectRole(bottomObjectRole);
 				}
-				rBox->setTopRole(topRole);
-				rBox->setBottomRole(bottomRole);
+				CRole* topDataRole = rBox->getTopDataRole();
+				if (!topDataRole) {
+					topDataRole = CObjectAllocator<CRole>::allocateAndConstruct(tBoxMemMan);
+					topDataRole->initRole();
+					topDataRole->setDataRole(true);
+					topDataRole->setRoleTag(rBox->getTopDataRoleIndex());
+					updateName(topDataRole,topDataRoleString);
+					mDataPropTermRoleHash->insert(mTopDataPropExpression,topDataRole);
+					mRoleDataPropTermHash->insert(topDataRole,mTopDataPropExpression);
+					rBox->setTopDataRole(topDataRole);
+				}
+				CRole* bottomDataRole = rBox->getBottomDataRole();
+				if (!bottomDataRole) {
+					bottomDataRole = CObjectAllocator<CRole>::allocateAndConstruct(tBoxMemMan);
+					bottomDataRole->initRole();
+					bottomDataRole->setDataRole(true);
+					bottomDataRole->setRoleTag(rBox->getBottomDataRoleIndex());
+					updateName(bottomDataRole,bottomDataRoleString);
+					mDataPropTermRoleHash->insert(mBottomDataPropExpression,bottomDataRole);
+					mRoleDataPropTermHash->insert(bottomDataRole,mBottomDataPropExpression);
+					rBox->setBottomDataRole(bottomDataRole);
+				}
 
 
-				mOntoBuild->setTopClassExpression(mTopClassExpression);
-				mOntoBuild->setBottomClassExpression(mBottomClassExpression);
-				mOntoBuild->setTopObjectPropertyExpression(mTopObjPropExpression);
-				mOntoBuild->setBottomObjectPropertyExpression(mBottomObjPropExpression);
+
+				createDatatype(PREFIX_OWL_TOP_DATATYPE);
+				createDatatype(PREFIX_OWL_BOTTOM_DATATYPE);
+				createDatatype(PREFIX_OWL_REAL_DATATYPE);
+				createDatatype(PREFIX_OWL_RATIONAL_DATATYPE);
+				createDatatype(PREFIX_XML_DECIMAL_DATATYPE);
+				createDatatype(PREFIX_XML_INTEGER_DATATYPE);
+
+				createDatatype(PREFIX_XML_NONNEGATIVEINTEGER_DATATYPE);
+				createDatatype(PREFIX_XML_POSITIVEINTEGER_DATATYPE);
+				createDatatype(PREFIX_XML_NONPOSITIVEINTEGER_DATATYPE);
+				createDatatype(PREFIX_XML_NEGATIVEINTEGER_DATATYPE);
+				createDatatype(PREFIX_XML_LONG_DATATYPE);
+				createDatatype(PREFIX_XML_INT_DATATYPE);
+				createDatatype(PREFIX_XML_SHORT_DATATYPE);
+				createDatatype(PREFIX_XML_BYTE_DATATYPE);
+				createDatatype(PREFIX_XML_UNSIGNEDLONG_DATATYPE);
+				createDatatype(PREFIX_XML_UNSIGNEDINT_DATATYPE);
+				createDatatype(PREFIX_XML_UNSIGNEDSHORT_DATATYPE);
+				createDatatype(PREFIX_XML_UNSIGNEDBYTE_DATATYPE);
+
+
+				createDatatype(PREFIX_XML_PLAINLITERAL_DATATYPE);
+				createDatatype(PREFIX_XML_STRING_DATATYPE);
+				createDatatype(PREFIX_XML_NORMALIZEDSTRING_DATATYPE);
+				createDatatype(PREFIX_XML_TOKEN_DATATYPE);
+				createDatatype(PREFIX_XML_NAME_DATATYPE);
+				createDatatype(PREFIX_XML_NCNAME_DATATYPE);
+				createDatatype(PREFIX_XML_NMTOKEN_DATATYPE);
+				createDatatype(PREFIX_XML_LANGUAGE_DATATYPE);
+
+
+				createDatatype(PREFIX_XML_BOOLEAN_DATATYPE);
+
+
+				createDatatype(PREFIX_XML_DOUBLE_DATATYPE);
+				createDatatype(PREFIX_XML_FLOAT_DATATYPE);
+
+
+				createDatatype(PREFIX_XML_BINARYHEX_DATATYPE);
+				createDatatype(PREFIX_XML_BINARYBASE64_DATATYPE);
+
+
+				createDatatype(PREFIX_XML_IRI_DATATYPE);
+
+
+				createDatatype(PREFIX_XML_DATETIME_DATATYPE);
+				createDatatype(PREFIX_XML_DATETIMESTAMP_DATATYPE);
+
+
+				createDatatype(PREFIX_XML_XML_DATATYPE);
+
+
+				CDatatypeExpression* topDatatypeExpression = mDatatypeBuildHash->value(CStringRefStringHasher(PREFIX_OWL_TOP_DATATYPE));
+				mOntoBuild->setTopDataRangeExpression(topDatatypeExpression);
+
+				CDatatypeExpression* bottomDatatypeExpression = mDatatypeBuildHash->value(CStringRefStringHasher(PREFIX_OWL_BOTTOM_DATATYPE));
+				mOntoBuild->setBottomDataRangeExpression(bottomDatatypeExpression);
 				return true;
 			}
 

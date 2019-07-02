@@ -14,6 +14,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/COntologyParser.h \
     ./Source/Parser/COWL2QtXMLOntologyParser.h \
     ./Source/Parser/COWL2QtXMLOntologySAXParser.h \
+    ./Source/Parser/COWL2QtXMLOntologyStableStreamParser.h \
     ./Source/Parser/COWL2QtXMLOntologyStreamParser.h \
     ./Source/Parser/COWLlinkQtXMLCommandParser.h \
     ./Source/Parser/COWLlinkQtXMLComplexQueryParser.h \
@@ -53,18 +54,52 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/Expressions/CClassTermExpression.h \
     ./Source/Parser/Expressions/CClassTermExpressionAssociator.h \
     ./Source/Parser/Expressions/CClassVariableTermExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDataAllValuesFromExpression.h \
+    ./Source/Parser/Expressions/CDataCardinalityExpression.h \
+    ./Source/Parser/Expressions/CDataComplementOfExpression.h \
+    ./Source/Parser/Expressions/CDataExactCardinalityExpression.h \
+    ./Source/Parser/Expressions/CDataFacetExpression.h \
+    ./Source/Parser/Expressions/CDataFacetExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDataFacetRestrictionExpression.h \
+    ./Source/Parser/Expressions/CDataFacetRestrictionExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDataHasValueExpression.h \
+    ./Source/Parser/Expressions/CDataIntersectionOfExpression.h \
+    ./Source/Parser/Expressions/CDataLexicalValueExpression.h \
+    ./Source/Parser/Expressions/CDataLexicalValueExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDataLiteralExpression.h \
+    ./Source/Parser/Expressions/CDataLiteralExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDataMaxCardinalityExpression.h \
+    ./Source/Parser/Expressions/CDataMinCardinalityExpression.h \
+    ./Source/Parser/Expressions/CDataOneOfExpression.h \
+    ./Source/Parser/Expressions/CDataPropertyAssertionExpression.h \
+    ./Source/Parser/Expressions/CDataPropertyAxiomExpression.h \
+    ./Source/Parser/Expressions/CDataPropertyDomainExpression.h \
+    ./Source/Parser/Expressions/CDataPropertyExpression.h \
+    ./Source/Parser/Expressions/CDataPropertyRangeExpression.h \
+    ./Source/Parser/Expressions/CDataPropertyTermExpression.h \
+    ./Source/Parser/Expressions/CDataPropertyTermExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDataRangeTermExpression.h \
+    ./Source/Parser/Expressions/CDataRangeTermExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDataSomeValuesFromExpression.h \
+    ./Source/Parser/Expressions/CDatatypeExpression.h \
+    ./Source/Parser/Expressions/CDatatypeExpressionAssociator.h \
+    ./Source/Parser/Expressions/CDatatypeRestrictionExpression.h \
+    ./Source/Parser/Expressions/CDataUnionOfExpression.h \
     ./Source/Parser/Expressions/CDeclarationAxiomExpression.h \
     ./Source/Parser/Expressions/CDifferentIndividualsExpression.h \
     ./Source/Parser/Expressions/CDisjointClassesExpression.h \
+    ./Source/Parser/Expressions/CDisjointDataPropertiesExpression.h \
     ./Source/Parser/Expressions/CDisjointObjectPropertiesExpression.h \
     ./Source/Parser/Expressions/CDisjointUnionExpression.h \
     ./Source/Parser/Expressions/CEntailmentAxiomExpressionAssociation.h \
     ./Source/Parser/Expressions/CEntityAssociator.h \
     ./Source/Parser/Expressions/CEquivalentClassesExpression.h \
+    ./Source/Parser/Expressions/CEquivalentDataPropertiesExpression.h \
     ./Source/Parser/Expressions/CEquivalentObjectPropertiesExpression.h \
     ./Source/Parser/Expressions/CExpressionAssociator.h \
     ./Source/Parser/Expressions/CExpressionEntity.h \
     ./Source/Parser/Expressions/CExpressionHashMixer.h \
+    ./Source/Parser/Expressions/CFunctionalDataPropertyExpression.h \
     ./Source/Parser/Expressions/CFunctionalObjectPropertyExpression.h \
     ./Source/Parser/Expressions/CIndividualExpression.h \
     ./Source/Parser/Expressions/CIndividualTermExpression.h \
@@ -76,6 +111,9 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/Expressions/CListAxiomExpressionAssociator.h \
     ./Source/Parser/Expressions/CListClassTermExpressionAssociator.h \
     ./Source/Parser/Expressions/CListClassVariableTermExpressionAssociator.h \
+    ./Source/Parser/Expressions/CListDataFacetRestrictionExpressionAssociator.h \
+    ./Source/Parser/Expressions/CListDataPropertyTermExpressionAssociator.h \
+    ./Source/Parser/Expressions/CListDataRangeTermExpressionAssociator.h \
     ./Source/Parser/Expressions/CListExpression.h \
     ./Source/Parser/Expressions/CListExpressionAssociator.h \
     ./Source/Parser/Expressions/CListIndividualTermExpressionAssociator.h \
@@ -84,6 +122,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/Expressions/CNameAssociator.h \
     ./Source/Parser/Expressions/CNamedIndividualExpression.h \
     ./Source/Parser/Expressions/CNameExpression.h \
+    ./Source/Parser/Expressions/CNegativeDataPropertyAssertionExpression.h \
     ./Source/Parser/Expressions/CNegativeObjectPropertyAssertionExpression.h \
     ./Source/Parser/Expressions/CObjectAllValuesFromExpression.h \
     ./Source/Parser/Expressions/CObjectCardinalityExpression.h \
@@ -109,6 +148,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/Expressions/CObjectUnionOfExpression.h \
     ./Source/Parser/Expressions/COrderedListObjectPropertyTermExpressionAssociator.h \
     ./Source/Parser/Expressions/COrderedPairClassTermExpressionAssociator.h \
+    ./Source/Parser/Expressions/COrderedPairDataPropertyTermExpressionAssociator.h \
     ./Source/Parser/Expressions/COrderedPairExpressionAssociator.h \
     ./Source/Parser/Expressions/COrderedPairIndividualTermExpressionAssociator.h \
     ./Source/Parser/Expressions/COrderedPairObjectPropertyTermExpressionAssociator.h \
@@ -117,7 +157,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/Expressions/CPrecedentBuildClassExpression.h \
     ./Source/Parser/Expressions/CPrecedentBuildIndividualExpression.h \
     ./Source/Parser/Expressions/CPrecedentBuildPropertyExpression.h \
-    ./Source/Parser/Expressions/CPropertyExpression.h \
+    ./Source/Parser/Expressions/CPropertyTermExpression.h \
     ./Source/Parser/Expressions/CQueryAreClassesDisjointExpression.h \
     ./Source/Parser/Expressions/CQueryAreClassesEquivalentExpression.h \
     ./Source/Parser/Expressions/CQueryExpression.h \
@@ -142,6 +182,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/Expressions/CRulePropertyAtomTermExpression.h \
     ./Source/Parser/Expressions/CSameIndividualExpression.h \
     ./Source/Parser/Expressions/CSubClassOfExpression.h \
+    ./Source/Parser/Expressions/CSubDataPropertyOfExpression.h \
     ./Source/Parser/Expressions/CSubExpressionVisitor.h \
     ./Source/Parser/Expressions/CSubObjectPropertyOfExpression.h \
     ./Source/Parser/Expressions/CSymmetricObjectPropertyExpression.h \
@@ -151,6 +192,25 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Parser/Expressions/CUnorderedPairIndividualTermExpressionAssociator.h \
     ./Source/Parser/Expressions/CUnorderedPairObjectPropertyTermExpressionAssociator.h \
     ./Source/Parser/Expressions/ExpressionSettings.h \
+    ./Source/Parser/FunctionalJAVACC/CConcreteOWL2FunctionalStyleParser.h \
+    ./Source/Parser/FunctionalJAVACC/CharStream.h \
+    ./Source/Parser/FunctionalJAVACC/CJAVACCParser.h \
+    ./Source/Parser/FunctionalJAVACC/COWL2FunctionalJAVACCOntologyStreamParser.h \
+    ./Source/Parser/FunctionalJAVACC/COWL2FunctionalStyleParserErrorHandler.h \
+    ./Source/Parser/FunctionalJAVACC/COWL2FunctionalStyleParserTokenManager.h \
+    ./Source/Parser/FunctionalJAVACC/CQtIODeviceStreamReader.h \
+    ./Source/Parser/FunctionalJAVACC/CTokenBase.h \
+    ./Source/Parser/FunctionalJAVACC/CTokenManager.h \
+    ./Source/Parser/FunctionalJAVACC/ErrorHandler.h \
+    ./Source/Parser/FunctionalJAVACC/FunctionalJAVACCSettings.h \
+    ./Source/Parser/FunctionalJAVACC/JavaCC.h \
+    ./Source/Parser/FunctionalJAVACC/OWL2FunctionalStyleParser.h \
+    ./Source/Parser/FunctionalJAVACC/OWL2FunctionalStyleParserConstants.h \
+    ./Source/Parser/FunctionalJAVACC/OWL2FunctionalStyleParserTokenManager.h \
+    ./Source/Parser/FunctionalJAVACC/ParseException.h \
+    ./Source/Parser/FunctionalJAVACC/Token.h \
+    ./Source/Parser/FunctionalJAVACC/TokenManager.h \
+    ./Source/Parser/FunctionalJAVACC/TokenMgrError.h \
     ./Source/Logger/CAbstractLogObserver.h \
     ./Source/Logger/CCallbackRequestLogMessagesContext.h \
     ./Source/Logger/CConsolePrintConfigurableLogObserver.h \
@@ -255,6 +315,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Ontology/CBoxContext.h \
     ./Source/Reasoner/Ontology/CBranchingTriggerVector.h \
     ./Source/Reasoner/Ontology/CCachingTags.h \
+    ./Source/Reasoner/Ontology/CComputedConsequencesCachingData.h \
     ./Source/Reasoner/Ontology/CConcept.h \
     ./Source/Reasoner/Ontology/CConceptAssertionLinker.h \
     ./Source/Reasoner/Ontology/CConceptCycleData.h \
@@ -274,12 +335,64 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Ontology/CConcreteOntology.h \
     ./Source/Reasoner/Ontology/CConcreteOntologyContextBase.h \
     ./Source/Reasoner/Ontology/CDataBox.h \
+    ./Source/Reasoner/Ontology/CDataLiteral.h \
+    ./Source/Reasoner/Ontology/CDataLiteralBinaryBase64DataValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralBinaryDataValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralBinaryHexDataValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralBooleanValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralCompareValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralDateTimeValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralDoubleValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralFloatValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralIRIValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralRealValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralStringValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralValue.h \
+    ./Source/Reasoner/Ontology/CDataLiteralXMLValue.h \
+    ./Source/Reasoner/Ontology/CDatatype.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryBase64DataTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryBase64DataType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryHexDataTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryHexDataType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBooleanTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBooleanType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceCompareTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceCompareType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceConceptTriggeringData.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceConceptTriggerLinker.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDateTimeTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDateTimeType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDoubleTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDoubleType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceFloatTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceFloatType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceIRITriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceIRIType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceRealTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceRealType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpacesTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceStringTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceStringType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringData.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringIterator.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMap.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMapArranger.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMapData.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTypes.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceUnknownType.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceXMLTriggers.h \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceXMLType.h \
+    ./Source/Reasoner/Ontology/CDatatypeVector.h \
     ./Source/Reasoner/Ontology/CExpressionDataBoxMapping.h \
     ./Source/Reasoner/Ontology/CExtendedConceptReferenceLinkingData.h \
     ./Source/Reasoner/Ontology/CImplicationReplacementVector.h \
     ./Source/Reasoner/Ontology/CIndividual.h \
+    ./Source/Reasoner/Ontology/CIndividualData.h \
     ./Source/Reasoner/Ontology/CIndividualDependence.h \
     ./Source/Reasoner/Ontology/CIndividualDependenceVector.h \
+    ./Source/Reasoner/Ontology/CIndividualProcessData.h \
     ./Source/Reasoner/Ontology/CIndividualVector.h \
     ./Source/Reasoner/Ontology/CIRIName.h \
     ./Source/Reasoner/Ontology/CMBox.h \
@@ -295,6 +408,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Ontology/COntologyCoreConceptCyclesData.h \
     ./Source/Reasoner/Ontology/COntologyDataBoxes.h \
     ./Source/Reasoner/Ontology/COntologyExpressivity.h \
+    ./Source/Reasoner/Ontology/COntologyImportData.h \
     ./Source/Reasoner/Ontology/COntologyInspector.h \
     ./Source/Reasoner/Ontology/COntologyLoadingData.h \
     ./Source/Reasoner/Ontology/COntologyProcessingConceptSaturationRequirement.h \
@@ -400,6 +514,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Query/CTaxonomyPremisingQuerySupport.h \
     ./Source/Reasoner/Query/CTypesQuery.h \
     ./Source/Reasoner/Query/CWriteFunctionalClassSubsumptionsHierarchyQuery.h \
+    ./Source/Reasoner/Query/CWriteFunctionalIndividualFlattenedTypesQuery.h \
     ./Source/Reasoner/Query/CWriteOWLXMLClassSubsumptionsHierarchyQuery.h \
     ./Source/Reasoner/Query/CWriteOWLXMLIndividualFlattenedTypesQuery.h \
     ./Source/Reasoner/Query/QuerySettings.h \
@@ -412,7 +527,16 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Cache/CCacheStatistics.h \
     ./Source/Reasoner/Kernel/Cache/CCacheTaggingPool.h \
     ./Source/Reasoner/Kernel/Cache/CCacheValue.h \
+    ./Source/Reasoner/Kernel/Cache/CCacheValueHasher.h \
     ./Source/Reasoner/Kernel/Cache/CCompletionGraphCache.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCache.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheContext.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheEntry.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheReader.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheWriteData.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheWriter.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheWriteTypesData.h \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesTypesCacheEntry.h \
     ./Source/Reasoner/Kernel/Cache/CExpanderBranchedLinker.h \
     ./Source/Reasoner/Kernel/Cache/CExpanderCacheValueLinker.h \
     ./Source/Reasoner/Kernel/Cache/CIncrementalUnsatisfiableCacheReader.h \
@@ -435,6 +559,20 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Cache/CSatisfiableCache.h \
     ./Source/Reasoner/Kernel/Cache/CSatisfiableCacheReader.h \
     ./Source/Reasoner/Kernel/Cache/CSatisfiableCacheWriter.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedConceptExpansion.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedConceptLinker.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedDependentNominalSet.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedDeterministicConceptExpansion.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCache.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheContext.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheEntry.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheExpansionWriteData.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheReader.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheUnsatisfiabilityWriteData.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheWriteData.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheWriter.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedNondeterministicConceptExpansion.h \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeCacheUpdater.h \
     ./Source/Reasoner/Kernel/Cache/CSignatureSatisfiableExpanderCache.h \
     ./Source/Reasoner/Kernel/Cache/CSignatureSatisfiableExpanderCacheContext.h \
     ./Source/Reasoner/Kernel/Cache/CSignatureSatisfiableExpanderCacheEntry.h \
@@ -450,12 +588,15 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Cache/CUnsatisfiableCacheReader.h \
     ./Source/Reasoner/Kernel/Cache/CUnsatisfiableCacheWriter.h \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteCachedDataEvent.h \
+    ./Source/Reasoner/Kernel/Cache/Events/CWriteComputedConcequencesCacheEntryEvent.h \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteExpandCachedEvent.h \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteSatisfiableBranchCachedEvent.h \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteSatisfiableCacheEntryEvent.h \
+    ./Source/Reasoner/Kernel/Cache/Events/CWriteSaturationCacheDataEvent.h \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteUnsatisfiableCacheEntryEvent.h \
     ./Source/Reasoner/Kernel/Strategy/CConceptProcessingPriorityStrategy.h \
     ./Source/Reasoner/Kernel/Strategy/CConcreteConceptProcessingOperatorPriorityStrategy.h \
+    ./Source/Reasoner/Kernel/Strategy/CEqualDepthCacheOrientatedProcessingPriorityStrategy.h \
     ./Source/Reasoner/Kernel/Strategy/CEqualDepthTaskProcessingPriorityStrategy.h \
     ./Source/Reasoner/Kernel/Strategy/CGenerativeNonDeterministicUnsatisfiableCacheRetrievalStrategy.h \
     ./Source/Reasoner/Kernel/Strategy/CIndividualAncestorDepthMaximumConceptProcessingPriorityStrategy.h \
@@ -488,9 +629,26 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Algorithm/CCalculationTableauSaturationTaskHandleAlgorithm.h \
     ./Source/Reasoner/Kernel/Algorithm/CClashDescriptorFactory.h \
     ./Source/Reasoner/Kernel/Algorithm/CCompletionGraphCacheHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CComputedConsequencesCacheHandler.h \
     ./Source/Reasoner/Kernel/Algorithm/CConceptNominalSchemaGroundingHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CDatatypeDependencyCollection.h \
+    ./Source/Reasoner/Kernel/Algorithm/CDatatypeIndividualProcessNodeHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CDatatypeValueTestingCollection.h \
     ./Source/Reasoner/Kernel/Algorithm/CDependencyFactory.h \
     ./Source/Reasoner/Kernel/Algorithm/CIndividualNodeManager.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeBinaryBase64DataValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeBinaryHexDataValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeBooleanValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeCompareValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeDateTimeValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeDoubleValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeFloatValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeIRIValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeRealValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeStringValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeUnknownValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeValueSpaceHandler.h \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeXMLValueSpaceHandler.h \
     ./Source/Reasoner/Kernel/Algorithm/CReuseCompletionGraphCacheHandler.h \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableConsistencyPreyingAnalyser.h \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableExpanderCacheHandler.h \
@@ -500,6 +658,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskPilingSaturationSubsumptionIdentifierAnalyser.h \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskSaturationPreyingAnalyser.h \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskSaturationSubsumptionIdentifierAnalyser.h \
+    ./Source/Reasoner/Kernel/Algorithm/CSaturationNodeExpansionCacheHandler.h \
     ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDependencyLine.h \
     ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDescriptor.h \
     ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDescriptorHasher.h \
@@ -527,6 +686,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Process/CBranchingORProcessingRestrictionSpecification.h \
     ./Source/Reasoner/Kernel/Process/CBranchingTag.h \
     ./Source/Reasoner/Kernel/Process/CClashedConceptDescriptor.h \
+    ./Source/Reasoner/Kernel/Process/CClashedDatatypeValueSpaceExclusionDescriptor.h \
     ./Source/Reasoner/Kernel/Process/CClashedDependencyDescriptor.h \
     ./Source/Reasoner/Kernel/Process/CClashedIndividualDistinctDescriptor.h \
     ./Source/Reasoner/Kernel/Process/CClashedIndividualLinkDescriptor.h \
@@ -572,6 +732,49 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Process/CCriticalIndividualNodeProcessingQueue.h \
     ./Source/Reasoner/Kernel/Process/CCriticalSaturationConceptQueue.h \
     ./Source/Reasoner/Kernel/Process/CCriticalSaturationConceptTypeQueues.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBinaryBase64DataValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBinaryDataValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBinaryHexDataValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBooleanValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBooleanValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueDataExclusion.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceMapArranger.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceMapData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDateTimeValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDateTimeValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDependencyTrackPointCollection.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDoubleValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDoubleValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeFloatValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeFloatValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeIRIValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeIRIValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueDataExclusion.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueExclusionType.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceMapArranger.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceMapData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueDataExclusion.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueExclusionType.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceMap.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceMapArranger.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceMapData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypesValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeUnknownValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceDependencyCollector.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceRealValuesCounter.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceStringValuesCounter.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceValuesCounter.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeXMLValueSpaceData.h \
+    ./Source/Reasoner/Kernel/Process/CDatatypeXMLValueSpaceMap.h \
     ./Source/Reasoner/Kernel/Process/CDependencyTracker.h \
     ./Source/Reasoner/Kernel/Process/CDisjointSuccessorRoleHash.h \
     ./Source/Reasoner/Kernel/Process/CDisjointSuccessorRoleIterator.h \
@@ -611,6 +814,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Process/CIndividualProcessNodeVector.h \
     ./Source/Reasoner/Kernel/Process/CIndividualReactivationProcessingQueue.h \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNode.h \
+    ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeCacheData.h \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeExtensionData.h \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeLinker.h \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeStatusFlags.h \
@@ -786,6 +990,8 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Kernel/Process/Dependency/CBranchingTree.h \
     ./Source/Reasoner/Kernel/Process/Dependency/CBranchTreeNode.h \
     ./Source/Reasoner/Kernel/Process/Dependency/CCONNECTIONDependencyNode.h \
+    ./Source/Reasoner/Kernel/Process/Dependency/CDATATYPECONNECTIONDependencyNode.h \
+    ./Source/Reasoner/Kernel/Process/Dependency/CDATATYPETRIGGERDependencyNode.h \
     ./Source/Reasoner/Kernel/Process/Dependency/CDependency.h \
     ./Source/Reasoner/Kernel/Process/Dependency/CDependencyIterator.h \
     ./Source/Reasoner/Kernel/Process/Dependency/CDependencyNode.h \
@@ -872,6 +1078,8 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Preprocess/CCoreBlockingConceptMarkerPreProcess.h \
     ./Source/Reasoner/Preprocess/CCoreOntologyCyclesExtractorPreProcess.h \
     ./Source/Reasoner/Preprocess/CDataExtenderPreProcess.h \
+    ./Source/Reasoner/Preprocess/CDataLiteralNormalizerPreProcess.h \
+    ./Source/Reasoner/Preprocess/CDatatypeNormalizerPreProcess.h \
     ./Source/Reasoner/Preprocess/CDisjunctSortingPreProcess.h \
     ./Source/Reasoner/Preprocess/CExtractPropagationIntoCreationDirectionPreProcess.h \
     ./Source/Reasoner/Preprocess/CExtractRelevantConceptRolePreProcess.h \
@@ -904,7 +1112,6 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Preprocess/CRoleChainAutomataTransformationPreProcess.h \
     ./Source/Reasoner/Preprocess/CSubroleTransformationPreProcess.h \
     ./Source/Reasoner/Preprocess/CTriggeredImplicationBinaryAbsorberPreProcess.h \
-    ./Source/Reasoner/Preprocess/CTriggeredImplicationGCIAbsorberPreProcess.h \
     ./Source/Reasoner/Preprocess/PreprocessSettings.h \
     ./Source/Reasoner/Preprocess/Events/CCallbackPreprocessedOntologyEvent.h \
     ./Source/Reasoner/Preprocess/Events/CPreprocessingCalculatedCallbackEvent.h \
@@ -1226,6 +1433,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Control/Command/Instructions/CAreClassesEquivalentQueryOWL2XMLNodeCommand.h \
     ./Source/Control/Command/Instructions/CBuildQueryCommand.h \
     ./Source/Control/Command/Instructions/CCalculateQueryCommand.h \
+    ./Source/Control/Command/Instructions/CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand.h \
     ./Source/Control/Command/Instructions/CChooseParseInstallKnowledgeBaseOWLXMLOntologyCommand.h \
     ./Source/Control/Command/Instructions/CClassifyQueryCommand.h \
     ./Source/Control/Command/Instructions/CConstructClassifyQueryCommand.h \
@@ -1234,6 +1442,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Control/Command/Instructions/CConstructIsConsistentQueryCommand.h \
     ./Source/Control/Command/Instructions/CConstructRealizeQueryCommand.h \
     ./Source/Control/Command/Instructions/CConstructSubClassHirarchyQueryCommand.h \
+    ./Source/Control/Command/Instructions/CConstructWriteFunctionalIndividualTypesQueryCommand.h \
     ./Source/Control/Command/Instructions/CConstructWriteFunctionalSubClassHirarchyQueryCommand.h \
     ./Source/Control/Command/Instructions/CConstructWriteXMLIndividualTypesQueryCommand.h \
     ./Source/Control/Command/Instructions/CConstructWriteXMLSubClassHirarchyQueryCommand.h \
@@ -1263,6 +1472,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Control/Command/Instructions/CGetSettingsCommand.h \
     ./Source/Control/Command/Instructions/CGetSubClassHierarchyQueryCommand.h \
     ./Source/Control/Command/Instructions/CGetSubClassHierarchyQueryOWL2XMLNodeCommand.h \
+    ./Source/Control/Command/Instructions/CImportKnowledgeBaseOWLAutoOntologyCommand.h \
     ./Source/Control/Command/Instructions/CInitializeConfigurationCommand.h \
     ./Source/Control/Command/Instructions/CInitializeReasonerCommand.h \
     ./Source/Control/Command/Instructions/CInsertResponseCommentCommand.h \
@@ -1282,9 +1492,15 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Control/Command/Instructions/CKnowledgeBaseQueryCommand.h \
     ./Source/Control/Command/Instructions/CKnowledgeBaseRealizeCommand.h \
     ./Source/Control/Command/Instructions/CKnowledgeBaseRevisionCommandProvider.h \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseAllDownloadedContinuer.h \
     ./Source/Control/Command/Instructions/CLoadKnowledgeBaseCommand.h \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseData.h \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseFinishDownloadCommand.h \
     ./Source/Control/Command/Instructions/CLoadKnowledgeBaseKRSSTestConceptCommand.h \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseOWLAutoOntologyCommand.h \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseOWLFunctionalOntologyCommand.h \
     ./Source/Control/Command/Instructions/CLoadKnowledgeBaseOWLXMLOntologyCommand.h \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseStartDownloadCommand.h \
     ./Source/Control/Command/Instructions/CParseCommandsCommand.h \
     ./Source/Control/Command/Instructions/CParseKRSSTestConceptOntologyCommand.h \
     ./Source/Control/Command/Instructions/CParseOntologyCommand.h \
@@ -1315,12 +1531,14 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Control/Command/Instructions/CSetConfigCommand.h \
     ./Source/Control/Command/Instructions/CSetKnowledgeBaseConfigCommand.h \
     ./Source/Control/Command/Instructions/CSkipUnsupportedCommandCommand.h \
+    ./Source/Control/Command/Instructions/CStreamParseOWL2FunctionalOntologyCommand.h \
     ./Source/Control/Command/Instructions/CStreamParseOWL2XMLOntologyCommand.h \
     ./Source/Control/Command/Instructions/CTellKnowledgeBaseCommand.h \
     ./Source/Control/Command/Instructions/CTellKnowledgeBaseOWL2XMLNodeCommand.h \
     ./Source/Control/Command/Instructions/CTestExtendedCalculateQueryCommand.h \
     ./Source/Control/Command/Instructions/CTestTestfileCommand.h \
     ./Source/Control/Command/Instructions/CTestTestsuiteCommand.h \
+    ./Source/Control/Command/Instructions/CWriteFunctionalIndividualTypesQueryCommand.h \
     ./Source/Control/Command/Instructions/CWriteFunctionalSubClassHierarchyQueryCommand.h \
     ./Source/Control/Command/Instructions/CWriteOntologyCommand.h \
     ./Source/Control/Command/Instructions/CWriteOWL2XMLOntologyCommand.h \
@@ -1407,6 +1625,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Test/COWLFileOWLlinkClassifyRequestGenerator.h \
     ./Source/Test/COWLFileOWLlinkConsistencyRequestGenerator.h \
     ./Source/Test/COWLFileOWLlinkSatisfiabilityRequestGenerator.h \
+    ./Source/Test/COWLFileOWLlinkTypesRequestGenerator.h \
     ./Source/Test/COWLLargeJoinTestDataGenerator.h \
     ./Source/Test/COWLlinkAPIReasonerTestfileTester.h \
     ./Source/Test/COWLPigeonholePrincipleGenerator.h \
@@ -1466,6 +1685,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Test/Events/CEvaluateTestfileTestEvent.h \
     ./Source/Test/Events/CTestTestfileEvent.h \
     ./Source/Test/Evaluation/CConfigDependendReasonerEvaluationFactory.h \
+    ./Source/Test/Evaluation/CCriticalSystemProcessTester.h \
     ./Source/Test/Evaluation/CReasonerEvaluationAnalyseContext.h \
     ./Source/Test/Evaluation/CReasonerEvaluationAnalyser.h \
     ./Source/Test/Evaluation/CReasonerEvaluationAnalyserChecker.h \
@@ -1599,6 +1819,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Network/HTTP/CQtHttpConnectionHandlerFactory.h \
     ./Source/Network/HTTP/CQtHttpConnectionHandlerPooledFactory.h \
     ./Source/Network/HTTP/CQtHttpConnectionHandlerReleaser.h \
+    ./Source/Network/HTTP/CQtHttpDownloadFileRequest.h \
     ./Source/Network/HTTP/CQtHttpListner.h \
     ./Source/Network/HTTP/CQtHttpPooledConnectionHandler.h \
     ./Source/Network/HTTP/CQtHttpRequest.h \
@@ -1607,10 +1828,11 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Network/HTTP/CQtHttpResponse.h \
     ./Source/Network/HTTP/CQtHttpTransactionManager.h \
     ./Source/Network/HTTP/HttpSettings.h \
+    ./Source/Network/HTTP/Events/CAddResponseFinishedCallbackEvent.h \
     ./Source/Network/HTTP/Events/CConnectionDisconnectedEvent.h \
     ./Source/Network/HTTP/Events/CConnectionReadyReadEvent.h \
-    ./Source/Network/HTTP/Events/CExtractResponseTextCallbackEvent.h \
-    ./Source/Network/HTTP/Events/CExtractResponseTextEvent.h \
+    ./Source/Network/HTTP/Events/CExtractResponseDataCallbackEvent.h \
+    ./Source/Network/HTTP/Events/CExtractResponseDataEvent.h \
     ./Source/Network/HTTP/Events/CHandleIncomingHttpConnectionEvent.h \
     ./Source/Network/HTTP/Events/CHttpReplyFinishedEvent.h \
     ./Source/Network/HTTP/Events/CHttpRequstEvent.h \
@@ -1625,7 +1847,9 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Renderer/CRenderedItemLinker.h \
     ./Source/Renderer/CRenderedQtXMLItemLinker.h \
     ./Source/Renderer/CRenderWriteManager.h \
-    ./Source/Renderer/RendererSettings.h
+    ./Source/Renderer/RendererSettings.h \
+    ./Source/Control/Loader/CLoggerConfigurationLoader.h \
+    ./Source/Logger/Events/CConfigureLoggerEvent.h
 SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/mainLoader.cpp \
     ./Source/Parser/CABoxAxiomBuilder.cpp \
@@ -1637,6 +1861,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/COntologyParser.cpp \
     ./Source/Parser/COWL2QtXMLOntologyParser.cpp \
     ./Source/Parser/COWL2QtXMLOntologySAXParser.cpp \
+    ./Source/Parser/COWL2QtXMLOntologyStableStreamParser.cpp \
     ./Source/Parser/COWL2QtXMLOntologyStreamParser.cpp \
     ./Source/Parser/COWLlinkQtXMLCommandParser.cpp \
     ./Source/Parser/COWLlinkQtXMLComplexQueryParser.cpp \
@@ -1675,18 +1900,52 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/Expressions/CClassTermExpression.cpp \
     ./Source/Parser/Expressions/CClassTermExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CClassVariableTermExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDataAllValuesFromExpression.cpp \
+    ./Source/Parser/Expressions/CDataCardinalityExpression.cpp \
+    ./Source/Parser/Expressions/CDataComplementOfExpression.cpp \
+    ./Source/Parser/Expressions/CDataExactCardinalityExpression.cpp \
+    ./Source/Parser/Expressions/CDataFacetExpression.cpp \
+    ./Source/Parser/Expressions/CDataFacetExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDataFacetRestrictionExpression.cpp \
+    ./Source/Parser/Expressions/CDataFacetRestrictionExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDataHasValueExpression.cpp \
+    ./Source/Parser/Expressions/CDataIntersectionOfExpression.cpp \
+    ./Source/Parser/Expressions/CDataLexicalValueExpression.cpp \
+    ./Source/Parser/Expressions/CDataLexicalValueExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDataLiteralExpression.cpp \
+    ./Source/Parser/Expressions/CDataLiteralExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDataMaxCardinalityExpression.cpp \
+    ./Source/Parser/Expressions/CDataMinCardinalityExpression.cpp \
+    ./Source/Parser/Expressions/CDataOneOfExpression.cpp \
+    ./Source/Parser/Expressions/CDataPropertyAssertionExpression.cpp \
+    ./Source/Parser/Expressions/CDataPropertyAxiomExpression.cpp \
+    ./Source/Parser/Expressions/CDataPropertyDomainExpression.cpp \
+    ./Source/Parser/Expressions/CDataPropertyExpression.cpp \
+    ./Source/Parser/Expressions/CDataPropertyRangeExpression.cpp \
+    ./Source/Parser/Expressions/CDataPropertyTermExpression.cpp \
+    ./Source/Parser/Expressions/CDataPropertyTermExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDataRangeTermExpression.cpp \
+    ./Source/Parser/Expressions/CDataRangeTermExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDataSomeValuesFromExpression.cpp \
+    ./Source/Parser/Expressions/CDatatypeExpression.cpp \
+    ./Source/Parser/Expressions/CDatatypeExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CDatatypeRestrictionExpression.cpp \
+    ./Source/Parser/Expressions/CDataUnionOfExpression.cpp \
     ./Source/Parser/Expressions/CDeclarationAxiomExpression.cpp \
     ./Source/Parser/Expressions/CDifferentIndividualsExpression.cpp \
     ./Source/Parser/Expressions/CDisjointClassesExpression.cpp \
+    ./Source/Parser/Expressions/CDisjointDataPropertiesExpression.cpp \
     ./Source/Parser/Expressions/CDisjointObjectPropertiesExpression.cpp \
     ./Source/Parser/Expressions/CDisjointUnionExpression.cpp \
     ./Source/Parser/Expressions/CEntailmentAxiomExpressionAssociation.cpp \
     ./Source/Parser/Expressions/CEntityAssociator.cpp \
     ./Source/Parser/Expressions/CEquivalentClassesExpression.cpp \
+    ./Source/Parser/Expressions/CEquivalentDataPropertiesExpression.cpp \
     ./Source/Parser/Expressions/CEquivalentObjectPropertiesExpression.cpp \
     ./Source/Parser/Expressions/CExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CExpressionEntity.cpp \
     ./Source/Parser/Expressions/CExpressionHashMixer.cpp \
+    ./Source/Parser/Expressions/CFunctionalDataPropertyExpression.cpp \
     ./Source/Parser/Expressions/CFunctionalObjectPropertyExpression.cpp \
     ./Source/Parser/Expressions/CIndividualExpression.cpp \
     ./Source/Parser/Expressions/CIndividualTermExpression.cpp \
@@ -1698,6 +1957,9 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/Expressions/CListAxiomExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CListClassTermExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CListClassVariableTermExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CListDataFacetRestrictionExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CListDataPropertyTermExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/CListDataRangeTermExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CListExpression.cpp \
     ./Source/Parser/Expressions/CListExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CListIndividualTermExpressionAssociator.cpp \
@@ -1706,6 +1968,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/Expressions/CNameAssociator.cpp \
     ./Source/Parser/Expressions/CNamedIndividualExpression.cpp \
     ./Source/Parser/Expressions/CNameExpression.cpp \
+    ./Source/Parser/Expressions/CNegativeDataPropertyAssertionExpression.cpp \
     ./Source/Parser/Expressions/CNegativeObjectPropertyAssertionExpression.cpp \
     ./Source/Parser/Expressions/CObjectAllValuesFromExpression.cpp \
     ./Source/Parser/Expressions/CObjectCardinalityExpression.cpp \
@@ -1731,6 +1994,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/Expressions/CObjectUnionOfExpression.cpp \
     ./Source/Parser/Expressions/COrderedListObjectPropertyTermExpressionAssociator.cpp \
     ./Source/Parser/Expressions/COrderedPairClassTermExpressionAssociator.cpp \
+    ./Source/Parser/Expressions/COrderedPairDataPropertyTermExpressionAssociator.cpp \
     ./Source/Parser/Expressions/COrderedPairExpressionAssociator.cpp \
     ./Source/Parser/Expressions/COrderedPairIndividualTermExpressionAssociator.cpp \
     ./Source/Parser/Expressions/COrderedPairObjectPropertyTermExpressionAssociator.cpp \
@@ -1739,7 +2003,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/Expressions/CPrecedentBuildClassExpression.cpp \
     ./Source/Parser/Expressions/CPrecedentBuildIndividualExpression.cpp \
     ./Source/Parser/Expressions/CPrecedentBuildPropertyExpression.cpp \
-    ./Source/Parser/Expressions/CPropertyExpression.cpp \
+    ./Source/Parser/Expressions/CPropertyTermExpression.cpp \
     ./Source/Parser/Expressions/CQueryAreClassesDisjointExpression.cpp \
     ./Source/Parser/Expressions/CQueryAreClassesEquivalentExpression.cpp \
     ./Source/Parser/Expressions/CQueryExpression.cpp \
@@ -1764,6 +2028,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/Expressions/CRulePropertyAtomTermExpression.cpp \
     ./Source/Parser/Expressions/CSameIndividualExpression.cpp \
     ./Source/Parser/Expressions/CSubClassOfExpression.cpp \
+    ./Source/Parser/Expressions/CSubDataPropertyOfExpression.cpp \
     ./Source/Parser/Expressions/CSubExpressionVisitor.cpp \
     ./Source/Parser/Expressions/CSubObjectPropertyOfExpression.cpp \
     ./Source/Parser/Expressions/CSymmetricObjectPropertyExpression.cpp \
@@ -1772,6 +2037,20 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Parser/Expressions/CUnorderedPairExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CUnorderedPairIndividualTermExpressionAssociator.cpp \
     ./Source/Parser/Expressions/CUnorderedPairObjectPropertyTermExpressionAssociator.cpp \
+    ./Source/Parser/FunctionalJAVACC/CConcreteOWL2FunctionalStyleParser.cpp \
+    ./Source/Parser/FunctionalJAVACC/CharStream.cpp \
+    ./Source/Parser/FunctionalJAVACC/CJAVACCParser.cpp \
+    ./Source/Parser/FunctionalJAVACC/COWL2FunctionalJAVACCOntologyStreamParser.cpp \
+    ./Source/Parser/FunctionalJAVACC/COWL2FunctionalStyleParserErrorHandler.cpp \
+    ./Source/Parser/FunctionalJAVACC/COWL2FunctionalStyleParserTokenManager.cpp \
+    ./Source/Parser/FunctionalJAVACC/CQtIODeviceStreamReader.cpp \
+    ./Source/Parser/FunctionalJAVACC/CTokenBase.cpp \
+    ./Source/Parser/FunctionalJAVACC/CTokenManager.cpp \
+    ./Source/Parser/FunctionalJAVACC/OWL2FunctionalStyleParser.cpp \
+    ./Source/Parser/FunctionalJAVACC/OWL2FunctionalStyleParserTokenManager.cpp \
+    ./Source/Parser/FunctionalJAVACC/ParseException.cpp \
+    ./Source/Parser/FunctionalJAVACC/Token.cpp \
+    ./Source/Parser/FunctionalJAVACC/TokenMgrError.cpp \
     ./Source/Logger/CAbstractLogObserver.cpp \
     ./Source/Logger/CCallbackRequestLogMessagesContext.cpp \
     ./Source/Logger/CConsolePrintConfigurableLogObserver.cpp \
@@ -1855,6 +2134,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Ontology/CBoxContext.cpp \
     ./Source/Reasoner/Ontology/CBranchingTriggerVector.cpp \
     ./Source/Reasoner/Ontology/CCachingTags.cpp \
+    ./Source/Reasoner/Ontology/CComputedConsequencesCachingData.cpp \
     ./Source/Reasoner/Ontology/CConcept.cpp \
     ./Source/Reasoner/Ontology/CConceptAssertionLinker.cpp \
     ./Source/Reasoner/Ontology/CConceptCycleData.cpp \
@@ -1874,12 +2154,64 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Ontology/CConcreteOntology.cpp \
     ./Source/Reasoner/Ontology/CConcreteOntologyContextBase.cpp \
     ./Source/Reasoner/Ontology/CDataBox.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteral.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralBinaryBase64DataValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralBinaryDataValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralBinaryHexDataValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralBooleanValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralCompareValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralDateTimeValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralDoubleValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralFloatValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralIRIValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralRealValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralStringValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralValue.cpp \
+    ./Source/Reasoner/Ontology/CDataLiteralXMLValue.cpp \
+    ./Source/Reasoner/Ontology/CDatatype.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryBase64DataTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryBase64DataType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryHexDataTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBinaryHexDataType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBooleanTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBooleanType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceCompareTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceCompareType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceConceptTriggeringData.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceConceptTriggerLinker.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDateTimeTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDateTimeType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDoubleTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceDoubleType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceFloatTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceFloatType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceIRITriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceIRIType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceRealTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceRealType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpacesTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceStringTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceStringType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringData.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringIterator.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMap.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMapArranger.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMapData.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTypes.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceUnknownType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceXMLTriggers.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeValueSpaceXMLType.cpp \
+    ./Source/Reasoner/Ontology/CDatatypeVector.cpp \
     ./Source/Reasoner/Ontology/CExpressionDataBoxMapping.cpp \
     ./Source/Reasoner/Ontology/CExtendedConceptReferenceLinkingData.cpp \
     ./Source/Reasoner/Ontology/CImplicationReplacementVector.cpp \
     ./Source/Reasoner/Ontology/CIndividual.cpp \
+    ./Source/Reasoner/Ontology/CIndividualData.cpp \
     ./Source/Reasoner/Ontology/CIndividualDependence.cpp \
     ./Source/Reasoner/Ontology/CIndividualDependenceVector.cpp \
+    ./Source/Reasoner/Ontology/CIndividualProcessData.cpp \
     ./Source/Reasoner/Ontology/CIndividualVector.cpp \
     ./Source/Reasoner/Ontology/CIRIName.cpp \
     ./Source/Reasoner/Ontology/CMBox.cpp \
@@ -1895,6 +2227,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Ontology/COntologyCoreConceptCyclesData.cpp \
     ./Source/Reasoner/Ontology/COntologyDataBoxes.cpp \
     ./Source/Reasoner/Ontology/COntologyExpressivity.cpp \
+    ./Source/Reasoner/Ontology/COntologyImportData.cpp \
     ./Source/Reasoner/Ontology/COntologyInspector.cpp \
     ./Source/Reasoner/Ontology/COntologyLoadingData.cpp \
     ./Source/Reasoner/Ontology/COntologyProcessingConceptSaturationRequirement.cpp \
@@ -1998,6 +2331,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Query/CTaxonomyPremisingQuerySupport.cpp \
     ./Source/Reasoner/Query/CTypesQuery.cpp \
     ./Source/Reasoner/Query/CWriteFunctionalClassSubsumptionsHierarchyQuery.cpp \
+    ./Source/Reasoner/Query/CWriteFunctionalIndividualFlattenedTypesQuery.cpp \
     ./Source/Reasoner/Query/CWriteOWLXMLClassSubsumptionsHierarchyQuery.cpp \
     ./Source/Reasoner/Query/CWriteOWLXMLIndividualFlattenedTypesQuery.cpp \
     ./Source/Reasoner/Kernel/Cache/CCache.cpp \
@@ -2007,7 +2341,16 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Cache/CCacheStatistics.cpp \
     ./Source/Reasoner/Kernel/Cache/CCacheTaggingPool.cpp \
     ./Source/Reasoner/Kernel/Cache/CCacheValue.cpp \
+    ./Source/Reasoner/Kernel/Cache/CCacheValueHasher.cpp \
     ./Source/Reasoner/Kernel/Cache/CCompletionGraphCache.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCache.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheContext.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheEntry.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheReader.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheWriteData.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheWriter.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesCacheWriteTypesData.cpp \
+    ./Source/Reasoner/Kernel/Cache/CComputedConsequencesTypesCacheEntry.cpp \
     ./Source/Reasoner/Kernel/Cache/CExpanderBranchedLinker.cpp \
     ./Source/Reasoner/Kernel/Cache/CExpanderCacheValueLinker.cpp \
     ./Source/Reasoner/Kernel/Cache/CIncrementalUnsatisfiableCacheReader.cpp \
@@ -2030,6 +2373,20 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Cache/CSatisfiableCache.cpp \
     ./Source/Reasoner/Kernel/Cache/CSatisfiableCacheReader.cpp \
     ./Source/Reasoner/Kernel/Cache/CSatisfiableCacheWriter.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedConceptExpansion.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedConceptLinker.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedDependentNominalSet.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedDeterministicConceptExpansion.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCache.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheContext.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheEntry.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheExpansionWriteData.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheReader.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheUnsatisfiabilityWriteData.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheWriteData.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheWriter.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeAssociatedNondeterministicConceptExpansion.cpp \
+    ./Source/Reasoner/Kernel/Cache/CSaturationNodeCacheUpdater.cpp \
     ./Source/Reasoner/Kernel/Cache/CSignatureSatisfiableExpanderCache.cpp \
     ./Source/Reasoner/Kernel/Cache/CSignatureSatisfiableExpanderCacheContext.cpp \
     ./Source/Reasoner/Kernel/Cache/CSignatureSatisfiableExpanderCacheEntry.cpp \
@@ -2045,12 +2402,15 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Cache/CUnsatisfiableCacheReader.cpp \
     ./Source/Reasoner/Kernel/Cache/CUnsatisfiableCacheWriter.cpp \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteCachedDataEvent.cpp \
+    ./Source/Reasoner/Kernel/Cache/Events/CWriteComputedConcequencesCacheEntryEvent.cpp \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteExpandCachedEvent.cpp \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteSatisfiableBranchCachedEvent.cpp \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteSatisfiableCacheEntryEvent.cpp \
+    ./Source/Reasoner/Kernel/Cache/Events/CWriteSaturationCacheDataEvent.cpp \
     ./Source/Reasoner/Kernel/Cache/Events/CWriteUnsatisfiableCacheEntryEvent.cpp \
     ./Source/Reasoner/Kernel/Strategy/CConceptProcessingPriorityStrategy.cpp \
     ./Source/Reasoner/Kernel/Strategy/CConcreteConceptProcessingOperatorPriorityStrategy.cpp \
+    ./Source/Reasoner/Kernel/Strategy/CEqualDepthCacheOrientatedProcessingPriorityStrategy.cpp \
     ./Source/Reasoner/Kernel/Strategy/CEqualDepthTaskProcessingPriorityStrategy.cpp \
     ./Source/Reasoner/Kernel/Strategy/CGenerativeNonDeterministicUnsatisfiableCacheRetrievalStrategy.cpp \
     ./Source/Reasoner/Kernel/Strategy/CIndividualAncestorDepthMaximumConceptProcessingPriorityStrategy.cpp \
@@ -2081,9 +2441,26 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CCalculationTableauSaturationTaskHandleAlgorithm.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CClashDescriptorFactory.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CCompletionGraphCacheHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CComputedConsequencesCacheHandler.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CConceptNominalSchemaGroundingHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CDatatypeDependencyCollection.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CDatatypeIndividualProcessNodeHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CDatatypeValueTestingCollection.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CDependencyFactory.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CIndividualNodeManager.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeBinaryBase64DataValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeBinaryHexDataValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeBooleanValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeCompareValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeDateTimeValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeDoubleValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeFloatValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeIRIValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeRealValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeStringValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeUnknownValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeValueSpaceHandler.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CIndividualProcessNodeXMLValueSpaceHandler.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CReuseCompletionGraphCacheHandler.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableConsistencyPreyingAnalyser.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableExpanderCacheHandler.cpp \
@@ -2093,6 +2470,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskPilingSaturationSubsumptionIdentifierAnalyser.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskSaturationPreyingAnalyser.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskSaturationSubsumptionIdentifierAnalyser.cpp \
+    ./Source/Reasoner/Kernel/Algorithm/CSaturationNodeExpansionCacheHandler.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDependencyLine.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDescriptor.cpp \
     ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDescriptorHasher.cpp \
@@ -2120,6 +2498,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Process/CBranchingORProcessingRestrictionSpecification.cpp \
     ./Source/Reasoner/Kernel/Process/CBranchingTag.cpp \
     ./Source/Reasoner/Kernel/Process/CClashedConceptDescriptor.cpp \
+    ./Source/Reasoner/Kernel/Process/CClashedDatatypeValueSpaceExclusionDescriptor.cpp \
     ./Source/Reasoner/Kernel/Process/CClashedDependencyDescriptor.cpp \
     ./Source/Reasoner/Kernel/Process/CClashedIndividualDistinctDescriptor.cpp \
     ./Source/Reasoner/Kernel/Process/CClashedIndividualLinkDescriptor.cpp \
@@ -2165,6 +2544,49 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Process/CCriticalIndividualNodeProcessingQueue.cpp \
     ./Source/Reasoner/Kernel/Process/CCriticalSaturationConceptQueue.cpp \
     ./Source/Reasoner/Kernel/Process/CCriticalSaturationConceptTypeQueues.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBinaryBase64DataValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBinaryDataValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBinaryHexDataValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBooleanValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeBooleanValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueDataExclusion.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceMapArranger.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeCompareValueSpaceMapData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDateTimeValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDateTimeValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDependencyTrackPointCollection.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDoubleValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeDoubleValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeFloatValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeFloatValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeIRIValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeIRIValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueDataExclusion.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueExclusionType.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceMapArranger.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeRealValueSpaceMapData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueDataExclusion.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueExclusionType.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceMap.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceMapArranger.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeStringValueSpaceMapData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypesValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeUnknownValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceDependencyCollector.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceRealValuesCounter.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceStringValuesCounter.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeValueSpaceValuesCounter.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeXMLValueSpaceData.cpp \
+    ./Source/Reasoner/Kernel/Process/CDatatypeXMLValueSpaceMap.cpp \
     ./Source/Reasoner/Kernel/Process/CDependencyTracker.cpp \
     ./Source/Reasoner/Kernel/Process/CDisjointSuccessorRoleHash.cpp \
     ./Source/Reasoner/Kernel/Process/CDisjointSuccessorRoleIterator.cpp \
@@ -2204,6 +2626,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Process/CIndividualProcessNodeVector.cpp \
     ./Source/Reasoner/Kernel/Process/CIndividualReactivationProcessingQueue.cpp \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNode.cpp \
+    ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeCacheData.cpp \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeExtensionData.cpp \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeLinker.cpp \
     ./Source/Reasoner/Kernel/Process/CIndividualSaturationProcessNodeStatusFlags.cpp \
@@ -2378,6 +2801,8 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Kernel/Process/Dependency/CBranchingTree.cpp \
     ./Source/Reasoner/Kernel/Process/Dependency/CBranchTreeNode.cpp \
     ./Source/Reasoner/Kernel/Process/Dependency/CCONNECTIONDependencyNode.cpp \
+    ./Source/Reasoner/Kernel/Process/Dependency/CDATATYPECONNECTIONDependencyNode.cpp \
+    ./Source/Reasoner/Kernel/Process/Dependency/CDATATYPETRIGGERDependencyNode.cpp \
     ./Source/Reasoner/Kernel/Process/Dependency/CDependency.cpp \
     ./Source/Reasoner/Kernel/Process/Dependency/CDependencyIterator.cpp \
     ./Source/Reasoner/Kernel/Process/Dependency/CDependencyNode.cpp \
@@ -2463,6 +2888,8 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Preprocess/CCoreBlockingConceptMarkerPreProcess.cpp \
     ./Source/Reasoner/Preprocess/CCoreOntologyCyclesExtractorPreProcess.cpp \
     ./Source/Reasoner/Preprocess/CDataExtenderPreProcess.cpp \
+    ./Source/Reasoner/Preprocess/CDataLiteralNormalizerPreProcess.cpp \
+    ./Source/Reasoner/Preprocess/CDatatypeNormalizerPreProcess.cpp \
     ./Source/Reasoner/Preprocess/CDisjunctSortingPreProcess.cpp \
     ./Source/Reasoner/Preprocess/CExtractPropagationIntoCreationDirectionPreProcess.cpp \
     ./Source/Reasoner/Preprocess/CExtractRelevantConceptRolePreProcess.cpp \
@@ -2495,7 +2922,6 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Preprocess/CRoleChainAutomataTransformationPreProcess.cpp \
     ./Source/Reasoner/Preprocess/CSubroleTransformationPreProcess.cpp \
     ./Source/Reasoner/Preprocess/CTriggeredImplicationBinaryAbsorberPreProcess.cpp \
-    ./Source/Reasoner/Preprocess/CTriggeredImplicationGCIAbsorberPreProcess.cpp \
     ./Source/Reasoner/Preprocess/Events/CCallbackPreprocessedOntologyEvent.cpp \
     ./Source/Reasoner/Preprocess/Events/CPreprocessingCalculatedCallbackEvent.cpp \
     ./Source/Reasoner/Preprocess/Events/CPreprocessOntologyEvent.cpp \
@@ -2804,6 +3230,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Control/Command/Instructions/CAreClassesEquivalentQueryOWL2XMLNodeCommand.cpp \
     ./Source/Control/Command/Instructions/CBuildQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CCalculateQueryCommand.cpp \
+    ./Source/Control/Command/Instructions/CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CChooseParseInstallKnowledgeBaseOWLXMLOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CClassifyQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CConstructClassifyQueryCommand.cpp \
@@ -2812,6 +3239,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Control/Command/Instructions/CConstructIsConsistentQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CConstructRealizeQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CConstructSubClassHirarchyQueryCommand.cpp \
+    ./Source/Control/Command/Instructions/CConstructWriteFunctionalIndividualTypesQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CConstructWriteFunctionalSubClassHirarchyQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CConstructWriteXMLIndividualTypesQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CConstructWriteXMLSubClassHirarchyQueryCommand.cpp \
@@ -2841,6 +3269,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Control/Command/Instructions/CGetSettingsCommand.cpp \
     ./Source/Control/Command/Instructions/CGetSubClassHierarchyQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CGetSubClassHierarchyQueryOWL2XMLNodeCommand.cpp \
+    ./Source/Control/Command/Instructions/CImportKnowledgeBaseOWLAutoOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CInitializeConfigurationCommand.cpp \
     ./Source/Control/Command/Instructions/CInitializeReasonerCommand.cpp \
     ./Source/Control/Command/Instructions/CInsertResponseCommentCommand.cpp \
@@ -2860,9 +3289,15 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Control/Command/Instructions/CKnowledgeBaseQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CKnowledgeBaseRealizeCommand.cpp \
     ./Source/Control/Command/Instructions/CKnowledgeBaseRevisionCommandProvider.cpp \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseAllDownloadedContinuer.cpp \
     ./Source/Control/Command/Instructions/CLoadKnowledgeBaseCommand.cpp \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseData.cpp \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseFinishDownloadCommand.cpp \
     ./Source/Control/Command/Instructions/CLoadKnowledgeBaseKRSSTestConceptCommand.cpp \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseOWLAutoOntologyCommand.cpp \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseOWLFunctionalOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CLoadKnowledgeBaseOWLXMLOntologyCommand.cpp \
+    ./Source/Control/Command/Instructions/CLoadKnowledgeBaseStartDownloadCommand.cpp \
     ./Source/Control/Command/Instructions/CParseCommandsCommand.cpp \
     ./Source/Control/Command/Instructions/CParseKRSSTestConceptOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CParseOntologyCommand.cpp \
@@ -2893,12 +3328,14 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Control/Command/Instructions/CSetConfigCommand.cpp \
     ./Source/Control/Command/Instructions/CSetKnowledgeBaseConfigCommand.cpp \
     ./Source/Control/Command/Instructions/CSkipUnsupportedCommandCommand.cpp \
+    ./Source/Control/Command/Instructions/CStreamParseOWL2FunctionalOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CStreamParseOWL2XMLOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CTellKnowledgeBaseCommand.cpp \
     ./Source/Control/Command/Instructions/CTellKnowledgeBaseOWL2XMLNodeCommand.cpp \
     ./Source/Control/Command/Instructions/CTestExtendedCalculateQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CTestTestfileCommand.cpp \
     ./Source/Control/Command/Instructions/CTestTestsuiteCommand.cpp \
+    ./Source/Control/Command/Instructions/CWriteFunctionalIndividualTypesQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CWriteFunctionalSubClassHierarchyQueryCommand.cpp \
     ./Source/Control/Command/Instructions/CWriteOntologyCommand.cpp \
     ./Source/Control/Command/Instructions/CWriteOWL2XMLOntologyCommand.cpp \
@@ -2983,6 +3420,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Test/COWLFileOWLlinkClassifyRequestGenerator.cpp \
     ./Source/Test/COWLFileOWLlinkConsistencyRequestGenerator.cpp \
     ./Source/Test/COWLFileOWLlinkSatisfiabilityRequestGenerator.cpp \
+    ./Source/Test/COWLFileOWLlinkTypesRequestGenerator.cpp \
     ./Source/Test/COWLLargeJoinTestDataGenerator.cpp \
     ./Source/Test/COWLlinkAPIReasonerTestfileTester.cpp \
     ./Source/Test/COWLPigeonholePrincipleGenerator.cpp \
@@ -3040,6 +3478,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Test/Events/CEvaluateTestfileTestEvent.cpp \
     ./Source/Test/Events/CTestTestfileEvent.cpp \
     ./Source/Test/Evaluation/CConfigDependendReasonerEvaluationFactory.cpp \
+    ./Source/Test/Evaluation/CCriticalSystemProcessTester.cpp \
     ./Source/Test/Evaluation/CReasonerEvaluationAnalyseContext.cpp \
     ./Source/Test/Evaluation/CReasonerEvaluationAnalyser.cpp \
     ./Source/Test/Evaluation/CReasonerEvaluationAnalyserChecker.cpp \
@@ -3168,6 +3607,7 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Network/HTTP/CQtHttpConnectionHandlerFactory.cpp \
     ./Source/Network/HTTP/CQtHttpConnectionHandlerPooledFactory.cpp \
     ./Source/Network/HTTP/CQtHttpConnectionHandlerReleaser.cpp \
+    ./Source/Network/HTTP/CQtHttpDownloadFileRequest.cpp \
     ./Source/Network/HTTP/CQtHttpListner.cpp \
     ./Source/Network/HTTP/CQtHttpPooledConnectionHandler.cpp \
     ./Source/Network/HTTP/CQtHttpRequest.cpp \
@@ -3175,10 +3615,11 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Network/HTTP/CQtHttpRequestParser.cpp \
     ./Source/Network/HTTP/CQtHttpResponse.cpp \
     ./Source/Network/HTTP/CQtHttpTransactionManager.cpp \
+    ./Source/Network/HTTP/Events/CAddResponseFinishedCallbackEvent.cpp \
     ./Source/Network/HTTP/Events/CConnectionDisconnectedEvent.cpp \
     ./Source/Network/HTTP/Events/CConnectionReadyReadEvent.cpp \
-    ./Source/Network/HTTP/Events/CExtractResponseTextCallbackEvent.cpp \
-    ./Source/Network/HTTP/Events/CExtractResponseTextEvent.cpp \
+    ./Source/Network/HTTP/Events/CExtractResponseDataCallbackEvent.cpp \
+    ./Source/Network/HTTP/Events/CExtractResponseDataEvent.cpp \
     ./Source/Network/HTTP/Events/CHandleIncomingHttpConnectionEvent.cpp \
     ./Source/Network/HTTP/Events/CHttpReplyFinishedEvent.cpp \
     ./Source/Network/HTTP/Events/CHttpRequstEvent.cpp \
@@ -3192,4 +3633,6 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Renderer/COntologyRenderVisitor.cpp \
     ./Source/Renderer/CRenderedItemLinker.cpp \
     ./Source/Renderer/CRenderedQtXMLItemLinker.cpp \
-    ./Source/Renderer/CRenderWriteManager.cpp
+    ./Source/Renderer/CRenderWriteManager.cpp \
+    ./Source/Control/Loader/CLoggerConfigurationLoader.cpp \
+    ./Source/Logger/Events/CConfigureLoggerEvent.cpp

@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -41,6 +41,8 @@ namespace Konclude {
 					defaultCommandDelegater = preSynchronizer;
 
 					mConfLogProcessingTimes = false;
+
+					mNetworkManager = nullptr;
 
 					if (immediatelyStartThread) {
 						startThread();
@@ -69,6 +71,138 @@ namespace Konclude {
 					return this;
 				}
 
+				QStringList COWLlinkProcessor::getParserOrderFromFileName(const QString& fileName) {
+					QStringList parserList;
+					bool owl2FunctionalParserAdded = false;
+					bool owl2XMLParserAdded = false;
+					QString upperFileString = fileName.toUpper();
+					if (!owl2XMLParserAdded && (upperFileString.endsWith(".OWL.XML") || upperFileString.endsWith(".XML.OWL"))) {
+						owl2XMLParserAdded = true;
+						parserList.append(QString("OWL2XML"));
+					}
+					if (!owl2FunctionalParserAdded && (upperFileString.endsWith(".OWL.FSS") || upperFileString.endsWith(".FSS.OWL"))) {
+						owl2FunctionalParserAdded = true;
+						parserList.append(QString("OWL2Functional"));
+					}
+					if (!owl2XMLParserAdded && (upperFileString.endsWith(".XML"))) {
+						owl2XMLParserAdded = true;
+						parserList.append(QString("OWL2XML"));
+					}
+					if (!owl2FunctionalParserAdded && (upperFileString.endsWith(".FSS"))) {
+						owl2FunctionalParserAdded = true;
+						parserList.append(QString("OWL2Functional"));
+					}
+					if (!owl2XMLParserAdded && (upperFileString.contains(".XML"))) {
+						owl2XMLParserAdded = true;
+						parserList.append(QString("OWL2XML"));
+					}
+					if (!owl2FunctionalParserAdded && (upperFileString.contains(".FSS"))) {
+						owl2FunctionalParserAdded = true;
+						parserList.append(QString("OWL2Functional"));
+					}
+					if (!owl2XMLParserAdded && (upperFileString.contains("XML"))) {
+						owl2XMLParserAdded = true;
+						parserList.append(QString("OWL2XML"));
+					}
+					if (!owl2FunctionalParserAdded && (upperFileString.contains("FSS"))) {
+						owl2FunctionalParserAdded = true;
+						parserList.append(QString("OWL2Functional"));
+					}
+					if (!owl2FunctionalParserAdded) {
+						owl2FunctionalParserAdded = true;
+						parserList.append(QString("OWL2Functional"));
+					}
+					if (!owl2XMLParserAdded) {
+						owl2XMLParserAdded = true;
+						parserList.append(QString("OWL2XML"));
+					}
+					return parserList;
+				}
+
+
+				CQtHttpTransactionManager* COWLlinkProcessor::getNetworkTransactionManager() {
+					if (!mNetworkManager) {
+						mNetworkManager = new CQtHttpTransactionManager(30*60*1000);
+					}
+					return mNetworkManager;
+				}
+
+
+
+
+				bool COWLlinkProcessor::createDownloadParseCommands(const QString& knowledgeBaseNameString, CCommand* parentCommand, CKnowledgeBaseRevisionCommandProvider* kbProviderCommand, const QMap<QString,QString>& ontoIRIMapping, const QStringList& ontoIRIStringList, CCommandRecordRouter& commandRecordRouter) {
+					QList<CLoadKnowledgeBaseData*> loadDataList;
+					QList<CCommand*> preconditionsList;
+
+					cint64 downloadRequiredCount = 0;
+
+					foreach (const QString& ontoIRIString, ontoIRIStringList) {
+
+						QString resolvedString = ontoIRIString;
+						for (QMap<QString,QString>::const_iterator resolveIRIIt = ontoIRIMapping.constBegin(), resolveIRIItEnd = ontoIRIMapping.constEnd(); resolveIRIIt != resolveIRIItEnd; ++resolveIRIIt) {
+							QString identifyIRI(resolveIRIIt.key());
+							QString resolvingIRI(resolveIRIIt.value());
+							if (resolvedString.startsWith(identifyIRI)) {
+								resolvedString = resolvedString.mid(identifyIRI.length());
+								resolvedString = resolvingIRI + resolvedString;
+							}
+						}
+						if (resolvedString != ontoIRIString) {
+							CUnspecifiedMessageInformationRecord::makeRecord(QString("Redirecting '%1' to '%2'.").arg(ontoIRIString).arg(resolvedString),&commandRecordRouter);
+						}
+
+						if (resolvedString.startsWith("http:") || resolvedString.startsWith("https:") || resolvedString.startsWith("ftp:")) {
+							QBuffer* tmpBuffer = new QBuffer();
+
+							CLoadKnowledgeBaseFinishDownloadCommand* finishDownloadCommand = new CLoadKnowledgeBaseFinishDownloadCommand(resolvedString,tmpBuffer,preSynchronizer);
+							parentCommand->makeToSubCommand(finishDownloadCommand);
+
+							CLoadKnowledgeBaseStartDownloadCommand* startDownloadCommand = new CLoadKnowledgeBaseStartDownloadCommand(resolvedString,finishDownloadCommand);
+							parentCommand->makeToSubCommand(startDownloadCommand);
+							preSynchronizer->delegateCommand(startDownloadCommand);
+
+							preconditionsList.append(startDownloadCommand);
+							preconditionsList.append(finishDownloadCommand);
+							++downloadRequiredCount;
+
+							CLoadKnowledgeBaseData* loadData = new CLoadKnowledgeBaseData(tmpBuffer,ontoIRIString,resolvedString);
+							loadDataList.append(loadData);
+
+						} else {
+
+							QString iriFileString = resolvedString;
+							if (iriFileString.startsWith("file:")) {
+								iriFileString.replace("file:","");
+							}
+							while (!QFile::exists(iriFileString) && iriFileString.startsWith("/")) {
+								iriFileString = iriFileString.remove(0,1);
+							}
+
+							if (!QFile::exists(iriFileString)) {
+								CUnspecifiedMessageErrorRecord::makeRecord(QString("File '%1' not found.").arg(resolvedString),&commandRecordRouter);
+							} else {
+								QFile* file = new QFile(iriFileString);
+								CLoadKnowledgeBaseData* loadData = new CLoadKnowledgeBaseData(file,ontoIRIString,resolvedString);
+								loadDataList.append(loadData);
+							}
+
+						}
+					}
+
+					CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand* chPaInKBOntComm = new CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand(knowledgeBaseNameString,loadDataList,ontoIRIMapping,kbProviderCommand);
+					parentCommand->makeToSubCommand(chPaInKBOntComm);
+					for (QList<CCommand*>::const_iterator it = preconditionsList.constBegin(), itEnd = preconditionsList.constEnd(); it != itEnd; ++it) {
+						CCommand* preconditionCommand = *it;
+						chPaInKBOntComm->addCommandPrecondition(new CCommandProcessedPrecondition(preconditionCommand));
+					}
+					if (kbProviderCommand->getCommand() != parentCommand) {
+						chPaInKBOntComm->addCommandPrecondition(new CCommandProcessedPrecondition(kbProviderCommand->getCommand()));
+					}
+					preSynchronizer->delegateCommand(chPaInKBOntComm);
+					return true;
+				}
+
+
 
 				bool COWLlinkProcessor::processCustomsEvents(QEvent::Type type, CCustomEvent *event) {
 					if (!CThread::processCustomsEvents(type,event)) {
@@ -91,6 +225,7 @@ namespace Konclude {
 										preSynchronizer->delegateCommand(pOWLOntC);
 
 										CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(tellKBC->getKnowledgeBaseName(),pOWLOntC);
+										inKBRevUpC->addCommandPrecondition(new CCommandProcessedPrecondition(pOWLOntC));
 										tellKBC->makeToSubCommand(inKBRevUpC);
 										preSynchronizer->delegateCommand(inKBRevUpC);
 
@@ -120,6 +255,7 @@ namespace Konclude {
 										preSynchronizer->delegateCommand(pOWLOntC);
 
 										CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(loadKBC->getKnowledgeBaseName(),pOWLOntC);
+										inKBRevUpC->addCommandPrecondition(new CCommandProcessedPrecondition(pOWLOntC));
 										loadKBC->makeToSubCommand(inKBRevUpC);
 										preSynchronizer->delegateCommand(inKBRevUpC);
 
@@ -174,6 +310,50 @@ namespace Konclude {
 											CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 											CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 										}
+
+
+
+									} else if (dynamic_cast<CLoadKnowledgeBaseOWLFunctionalOntologyCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(),getLogDomain(),command);
+										CLoadKnowledgeBaseOWLFunctionalOntologyCommand *loadKBOWLXMLOnto = (CLoadKnowledgeBaseOWLFunctionalOntologyCommand *)command;
+
+										CCreateKnowledgeBaseRevisionUpdateCommand *crKBRevUpC = new CCreateKnowledgeBaseRevisionUpdateCommand(loadKBOWLXMLOnto->getKnowledgeBaseName());
+										loadKBOWLXMLOnto->makeToSubCommand(crKBRevUpC);
+										preSynchronizer->delegateCommand(crKBRevUpC);
+
+										CCommand* lastWaitCommand = crKBRevUpC;
+										CKnowledgeBaseRevisionCommandProvider *ontologyRevisionProviderCommand = nullptr;
+
+										QStringList ontoIRIs(loadKBOWLXMLOnto->getLoadIRIStrings());
+										foreach (QString ontoIRI, ontoIRIs) {
+
+											CStreamParseOWL2FunctionalOntologyCommand *pOWLOntC = new CStreamParseOWL2FunctionalOntologyCommand(ontoIRI,crKBRevUpC);
+											if (lastWaitCommand) {
+												pOWLOntC->addCommandPrecondition(new CCommandProcessedPrecondition(lastWaitCommand));
+											}
+
+											loadKBOWLXMLOnto->makeToSubCommand(pOWLOntC);
+											preSynchronizer->delegateCommand(pOWLOntC);
+
+											ontologyRevisionProviderCommand = pOWLOntC;
+											lastWaitCommand = pOWLOntC;
+										}
+
+										CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(loadKBOWLXMLOnto->getKnowledgeBaseName(),ontologyRevisionProviderCommand);
+										inKBRevUpC->addCommandPrecondition(new CCommandProcessedPrecondition(lastWaitCommand));
+										loadKBOWLXMLOnto->makeToSubCommand(inKBRevUpC);
+										preSynchronizer->delegateCommand(inKBRevUpC);
+
+										CPrepareKnowledgeBaseForRevisionCommand* prepareKBC = new CPrepareKnowledgeBaseForRevisionCommand(ontologyRevisionProviderCommand);
+										loadKBOWLXMLOnto->makeToSubCommand(prepareKBC);
+										prepareKBC->addCommandPrecondition(new CCommandProcessedPrecondition(inKBRevUpC));
+										preSynchronizer->delegateCommand(prepareKBC);
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
 
 
 									} else if (dynamic_cast<CLoadKnowledgeBaseOWLXMLOntologyCommand *>(command)) {
@@ -264,6 +444,7 @@ namespace Konclude {
 											}
 
 											CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(chPaInKBOntComm->getKnowledgeBaseName(),ontologyRevisionProviderCommand);
+											inKBRevUpC->addCommandPrecondition(new CCommandProcessedPrecondition(lastWaitCommand));
 											chPaInKBOntComm->makeToSubCommand(inKBRevUpC);
 											preSynchronizer->delegateCommand(inKBRevUpC);
 
@@ -277,6 +458,281 @@ namespace Konclude {
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
+
+
+									} else if (dynamic_cast<CLoadKnowledgeBaseStartDownloadCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(),getLogDomain(),command);
+										CLoadKnowledgeBaseStartDownloadCommand* loadKBStartDownload = (CLoadKnowledgeBaseStartDownloadCommand *)command;
+
+										CLoadKnowledgeBaseFinishDownloadCommand* finishCommand = loadKBStartDownload->getFinishCommand();
+										QByteArray* destinationDataArray = new QByteArray();
+
+										CQtHttpTransactionManager* transMan = getNetworkTransactionManager();
+										CHttpRequest* request = transMan->createRequest(loadKBStartDownload->getDownloadIRIString());
+										CHttpResponse* response = transMan->getResponse(request);
+										transMan->callbackResponseData(response,destinationDataArray,finishCommand);
+
+										finishCommand->setTemporaryDataPointer(destinationDataArray);
+										finishCommand->setResponse(response);
+
+										LOG(INFO,getLogDomain(),logTr("Downloading '%1'.").arg(loadKBStartDownload->getDownloadIRIString()),this);
+
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+									} else if (dynamic_cast<CLoadKnowledgeBaseFinishDownloadCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(),getLogDomain(),command);
+										CLoadKnowledgeBaseFinishDownloadCommand* loadKBFinishDownload = (CLoadKnowledgeBaseFinishDownloadCommand *)command;
+
+										CQtHttpTransactionManager* transMan = getNetworkTransactionManager();
+										CHttpResponse* response = loadKBFinishDownload->getResponse();
+										QString iriString = loadKBFinishDownload->getDownloadString();
+										QByteArray* dataArray = loadKBFinishDownload->getTemporaryDataPointer(true);
+
+
+										if (!transMan->hasFinishedSucecssfully(response)) {
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Download of '%1' has failed.").arg(iriString),&commandRecordRouter);
+										} else {
+											cint64 downloadSize = dataArray->count();
+											QString unitString = "Bytes";
+											if (downloadSize > 10000) {
+												downloadSize /= 1024;
+												unitString = "KBytes";
+											}
+											if (downloadSize > 10000) {
+												downloadSize /= 1024;
+												unitString = "MBytes";
+											}
+											LOG(INFO,getLogDomain(),logTr("Successfully downloaded '%1', received %2 %3.").arg(iriString).arg(downloadSize).arg(unitString),this);
+											//CUnspecifiedMessageInformationRecord::makeRecord(QString("Successfully downloaded '%1', received %2 MBytes.").arg(iriString).arg(downloadSize),&commandRecordRouter);
+											QIODevice* writeDevice = loadKBFinishDownload->getWriteIODevice();
+											if (writeDevice) {
+												if (writeDevice->open(QIODevice::WriteOnly)) {
+													writeDevice->write(*dataArray);
+													writeDevice->close();
+												}
+											}
+										}
+										delete dataArray;
+										transMan->releaseResponse(response);
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
+
+									} else if (dynamic_cast<CLoadKnowledgeBaseOWLAutoOntologyCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(),getLogDomain(),command);
+										CLoadKnowledgeBaseOWLAutoOntologyCommand *loadKBOWLAutoOnto = (CLoadKnowledgeBaseOWLAutoOntologyCommand *)command;
+
+										CCreateKnowledgeBaseRevisionUpdateCommand *crKBRevUpC = new CCreateKnowledgeBaseRevisionUpdateCommand(loadKBOWLAutoOnto->getKnowledgeBaseName());
+										loadKBOWLAutoOnto->makeToSubCommand(crKBRevUpC);
+										preSynchronizer->delegateCommand(crKBRevUpC);
+
+
+										QMap<QString,QString> ontoIRIMapping = loadKBOWLAutoOnto->getOntologieIRIMappings();
+
+										QStringList ontoIRIStringList(loadKBOWLAutoOnto->getLoadIRIStrings());
+
+										createDownloadParseCommands(loadKBOWLAutoOnto->getKnowledgeBaseName(),loadKBOWLAutoOnto,crKBRevUpC,ontoIRIMapping,ontoIRIStringList,commandRecordRouter);
+
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
+
+									} else if (dynamic_cast<CImportKnowledgeBaseOWLAutoOntologyCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(),getLogDomain(),command);
+										CImportKnowledgeBaseOWLAutoOntologyCommand *importKBOWLAutoOnto = (CImportKnowledgeBaseOWLAutoOntologyCommand *)command;
+
+
+										QMap<QString,QString> ontoIRIMapping = importKBOWLAutoOnto->getOntologieIRIMappings();
+
+										QStringList ontoIRIStringList(importKBOWLAutoOnto->getLoadIRIStrings());
+
+										createDownloadParseCommands(importKBOWLAutoOnto->getKnowledgeBaseName(),importKBOWLAutoOnto,importKBOWLAutoOnto,ontoIRIMapping,ontoIRIStringList,commandRecordRouter);
+
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
+
+
+									} else if (dynamic_cast<CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(),getLogDomain(),command);
+										CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand* chPaInKBOntComm = (CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand *)command;
+
+										CConfigData* data = nullptr;
+										COntologyRevision* ontoRev = chPaInKBOntComm->getOntologyRevision();
+										if (ontoRev) {
+											COntologyConfigurationExtension* ontoConfExt = chPaInKBOntComm->getOntologyRevision()->getOntologyConfiguration();
+
+											COntologyConfigurationExtension *ontConfig = ontoRev->getOntologyConfiguration();
+											CConcreteOntology *ont = ontoRev->getOntology();
+
+
+											QList<QString> importOntologiesList;
+
+											QList<CLoadKnowledgeBaseData*> loadDataList(chPaInKBOntComm->getLoadDataList());
+
+											bool allParsingSucceeded = true;
+
+											for (QList<CLoadKnowledgeBaseData*>::const_iterator loadDataIt = loadDataList.constBegin(), loadDataItEnd = loadDataList.constEnd(); loadDataIt != loadDataItEnd; ++loadDataIt) {
+												CLoadKnowledgeBaseData* loadData = *loadDataIt;
+
+												QIODevice* device = loadData->getLoadDevice();
+												QString ontoIRI = loadData->getOriginalDataName();
+												QString resolvedIRI = loadData->getResolvedDataName();
+
+												QString iriFileString = resolvedIRI;
+
+
+
+												QStringList parserList = getParserOrderFromFileName(iriFileString);
+												QStringList parserErrorList;
+
+
+												QTime parsingTime;
+												if (mConfLogProcessingTimes) {
+													parsingTime.start();
+												}
+
+												CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(ont);
+												builder->initializeBuilding();
+
+												bool parsingSucceeded = false;
+												for (QStringList::const_iterator parserIt = parserList.constBegin(), parserItEnd = parserList.constEnd(); !parsingSucceeded && parserIt != parserItEnd; ++parserIt) {
+
+													QString parserString(*parserIt);
+													QString parsingTryLogString;
+
+													if (parserString == "OWL2Functional") {
+														COWL2FunctionalJAVACCOntologyStreamParser *owl2Parser = new COWL2FunctionalJAVACCOntologyStreamParser(builder);
+														parsingTryLogString = QString("Trying stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString);
+														LOG(INFO,getLogDomain(),parsingTryLogString,this);
+														if (device->open(QIODevice::ReadOnly)) {
+															device->reset();
+															if (owl2Parser->parseOntology(device)) {
+																builder->completeBuilding();
+																parsingSucceeded = true;
+																LOG(INFO,getLogDomain(),logTr("Finished stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString),this);
+															} else {
+																if (owl2Parser->hasError()) {
+																	parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing error: %1").arg(owl2Parser->getErrorString()));
+																}
+																parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing for '%1' failed.").arg(iriFileString));
+															}
+															device->close();
+														} else {
+															CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI),&commandRecordRouter);
+														}
+
+														delete owl2Parser;
+													} else if (parserString == "OWL2XML") {
+														bool enforceUTF8ConvertingParsing = CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing");
+														COWL2QtXMLOntologyStreamParser *owl2Parser = nullptr;
+														if (enforceUTF8ConvertingParsing) {
+															owl2Parser = new COWL2QtXMLOntologyStableStreamParser(builder);
+														} else {
+															owl2Parser = new COWL2QtXMLOntologyStreamParser(builder);
+														}
+														parsingTryLogString = QString("Trying stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString);
+														LOG(INFO,getLogDomain(),parsingTryLogString,this);
+														if (device->open(QIODevice::ReadOnly)) {
+															device->reset();
+															if (owl2Parser->parseOntology(device)) {
+																builder->completeBuilding();
+																parsingSucceeded = true;
+																LOG(INFO,getLogDomain(),logTr("Finished stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString),this);
+															} else {
+																if (owl2Parser->hasError()) {
+																	parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing error: %1").arg(owl2Parser->getErrorString()));
+																}
+																parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing for '%1' failed.").arg(iriFileString));
+															}
+															device->close();
+														} else {
+															CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI),&commandRecordRouter);
+														}
+
+														delete owl2Parser;
+													}
+												}
+												importOntologiesList = builder->takeAddedImportOntologyList();
+												delete builder;
+
+
+												if (!parsingSucceeded) {
+													allParsingSucceeded = false;
+													parserErrorList.append(QString("All parsers failed for '%1'.").arg(iriFileString));
+													for (QStringList::const_iterator errorIt = parserErrorList.constBegin(), errorItEnd = parserErrorList.constEnd(); errorIt != errorItEnd; ++errorIt) {
+														CUnspecifiedMessageErrorRecord::makeRecord(*errorIt,&commandRecordRouter);
+													}
+												}
+
+
+												if (mConfLogProcessingTimes) {
+													cint64 parsingMilliSeconds = parsingTime.elapsed();
+													QString ontologieCountString = "Ontology";
+													if (loadDataList.count() > 1) {
+														ontologieCountString = "Ontologies";
+													}
+													LOG(INFO,getLogDomain(),logTr("%1 parsed in %2 ms.").arg(ontologieCountString).arg(parsingMilliSeconds),this);
+												}
+
+											}
+
+											if (importOntologiesList.isEmpty()) {
+												CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(chPaInKBOntComm->getKnowledgeBaseName(),chPaInKBOntComm);
+												chPaInKBOntComm->makeToSubCommand(inKBRevUpC);
+												preSynchronizer->delegateCommand(inKBRevUpC);
+
+												CPrepareKnowledgeBaseForRevisionCommand* prepareKBC = new CPrepareKnowledgeBaseForRevisionCommand(chPaInKBOntComm);
+												chPaInKBOntComm->makeToSubCommand(prepareKBC);
+												prepareKBC->addCommandPrecondition(new CCommandProcessedPrecondition(inKBRevUpC));
+												preSynchronizer->delegateCommand(prepareKBC);
+											} else {
+												if (importOntologiesList.count() > 1) {
+													LOG(INFO,getLogDomain(),logTr("Scheduling the import of %1 ontologies.").arg(importOntologiesList.count()),this);
+												} else {
+													LOG(INFO,getLogDomain(),logTr("Scheduling the import of '%1'.").arg(importOntologiesList.first()),this);
+												}
+												CImportKnowledgeBaseOWLAutoOntologyCommand* importKBsCommand = new CImportKnowledgeBaseOWLAutoOntologyCommand(chPaInKBOntComm->getKnowledgeBaseName(),importOntologiesList,chPaInKBOntComm->getOntologieIRIMappings(),chPaInKBOntComm);
+												chPaInKBOntComm->makeToSubCommand(importKBsCommand);
+												preSynchronizer->delegateCommand(importKBsCommand);
+											}
+										} else {
+											CUnspecifiedMessageErrorRecord::makeRecord("Ontology revision not available.",&commandRecordRouter);
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
 
 
 
@@ -421,10 +877,10 @@ namespace Konclude {
 
 											if (mConfLogProcessingTimes) {
 												cint64 parsingMilliSeconds = parsingTime.elapsed();
-												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 milliseconds.").arg(parsingMilliSeconds),this);
+												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 ms.").arg(parsingMilliSeconds),this);
 											}
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowlegebase revision not available."),&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base revision not available."),&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -457,17 +913,12 @@ namespace Konclude {
 											delete builder;
 											delete owl2Parser;
 
-											//COntologyConfigDependedPreProcesser *ontConDepPreProcessor = new COntologyConfigDependedPreProcesser(commandRecordRouter);
-											//ontConDepPreProcessor->preprocess(ont,ontConfig);
-											//delete ontConDepPreProcessor;
-
-
 											if (mConfLogProcessingTimes) {
 												cint64 parsingMilliSeconds = parsingTime.elapsed();
-												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 milliseconds.").arg(parsingMilliSeconds),this);
+												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 ms.").arg(parsingMilliSeconds),this);
 											}
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowlegebase revision not available."),&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base revision not available."),&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -510,17 +961,12 @@ namespace Konclude {
 											delete builder;
 											delete owl2Parser;
 
-											//COntologyConfigDependedPreProcesser *ontConDepPreProcessor = new COntologyConfigDependedPreProcesser(commandRecordRouter);
-											//ontConDepPreProcessor->preprocess(ont,ontConfig);
-											//delete ontConDepPreProcessor;
-
-
 											if (mConfLogProcessingTimes) {
 												cint64 parsingMilliSeconds = parsingTime.elapsed();
-												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 milliseconds.").arg(parsingMilliSeconds),this);
+												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 ms.").arg(parsingMilliSeconds),this);
 											}
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowlegebase revision not available."),&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base revision not available."),&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -553,34 +999,108 @@ namespace Konclude {
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
 
 											CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(ont);
-											COWL2QtXMLOntologyStreamParser *owl2Parser = new COWL2QtXMLOntologyStreamParser(builder);
+											bool enforceUTF8ConvertingParsing = CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing");
+											COWL2QtXMLOntologyStreamParser *owl2Parser = nullptr;
+											if (enforceUTF8ConvertingParsing) {
+												owl2Parser = new COWL2QtXMLOntologyStableStreamParser(builder);
+											} else {
+												owl2Parser = new COWL2QtXMLOntologyStreamParser(builder);
+											}
 											builder->initializeBuilding();
-											LOG(INFO,getLogDomain(),logTr("Starting stream-based ontology parsing for '%1'.").arg(iriString),this);
+											LOG(INFO,getLogDomain(),logTr("Starting stream-based OWL2/XML ontology parsing for '%1'.").arg(iriString),this);
 											if (owl2Parser->parseOntology(iriString)) {
-												LOG(INFO,getLogDomain(),logTr("Finished stream-based ontology parsing for '%1'.").arg(iriString),this);
+												LOG(INFO,getLogDomain(),logTr("Finished stream-based OWL2/XML ontology parsing for '%1'.").arg(iriString),this);
 												builder->completeBuilding();
 											} else {
-												CUnspecifiedMessageErrorRecord::makeRecord(QString("Stream-based ontology parsing for '%1' failed.").arg(iriString),&commandRecordRouter);
+												if (owl2Parser->hasError()) {
+													CUnspecifiedMessageErrorRecord::makeRecord(QString("Stream-based OWL2/XML ontology parsing error: '%1'.").arg(owl2Parser->getErrorString()),&commandRecordRouter);
+												}
+												CUnspecifiedMessageErrorRecord::makeRecord(QString("Stream-based OWL2/XML ontology parsing for '%1' failed.").arg(iriString),&commandRecordRouter);
 											}
 
 											delete builder;
 											delete owl2Parser;
 
-											//COntologyConfigDependedPreProcesser *ontConDepPreProcessor = new COntologyConfigDependedPreProcesser(commandRecordRouter);
-											//ontConDepPreProcessor->preprocess(ont,ontConfig);
-											//delete ontConDepPreProcessor;
-
-
 											if (mConfLogProcessingTimes) {
 												cint64 parsingMilliSeconds = parsingTime.elapsed();
-												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 milliseconds.").arg(parsingMilliSeconds),this);
+												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 ms.").arg(parsingMilliSeconds),this);
 											}
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowlegebase revision not available."),&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base revision not available."),&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
+
+
+
+
+									} else if (dynamic_cast<CStreamParseOWL2FunctionalOntologyCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CStreamParseOWL2FunctionalOntologyCommand *pOWLOntC = (CStreamParseOWL2FunctionalOntologyCommand *)command;
+
+										QString iriString = pOWLOntC->getSourceString();
+										if (iriString.startsWith("file:")) {
+											iriString.replace("file:","");
+										}
+										while (!QFile::exists(iriString) && iriString.startsWith("/")) {
+											iriString = iriString.remove(0,1);
+										}
+
+
+										COntologyRevision *ontRev = pOWLOntC->getOntologyRevision();
+										if (ontRev) {
+											CConcreteOntology *ont = ontRev->getOntology();
+
+											QTime parsingTime;
+											if (mConfLogProcessingTimes) {
+												parsingTime.start();
+											}
+
+											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
+
+											CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(ont);
+											COWL2FunctionalJAVACCOntologyStreamParser *owl2Parser = new COWL2FunctionalJAVACCOntologyStreamParser(builder);
+											builder->initializeBuilding();
+											LOG(INFO,getLogDomain(),logTr("Starting stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriString),this);
+											if (owl2Parser->parseOntology(iriString)) {
+												LOG(INFO,getLogDomain(),logTr("Finished stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriString),this);
+												builder->completeBuilding();
+											} else {
+												if (owl2Parser->hasError()) {
+													CUnspecifiedMessageErrorRecord::makeRecord(QString("Stream-based OWL2/Functional ontology parsing error: '%1'.").arg(owl2Parser->getErrorString()),&commandRecordRouter);
+												}
+												CUnspecifiedMessageErrorRecord::makeRecord(QString("Stream-based OWL2/Functional ontology parsing for '%1' failed.").arg(iriString),&commandRecordRouter);
+											}
+
+											delete builder;
+											delete owl2Parser;
+
+
+											if (mConfLogProcessingTimes) {
+												cint64 parsingMilliSeconds = parsingTime.elapsed();
+												LOG(INFO,getLogDomain(),logTr("Ontology parsed in %1 ms.").arg(parsingMilliSeconds),this);
+											}
+										} else {
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base revision not available."),&commandRecordRouter);
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
+
+
+
 
 									} else if (dynamic_cast<CProcessQueryOWL2XMLNodeCommand *>(command)) {
 										CCommandRecordRouter commandRecordRouter(command,this);
@@ -814,6 +1334,41 @@ namespace Konclude {
 
 
 
+
+									} else if (dynamic_cast<CWriteFunctionalIndividualTypesQueryCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CWriteFunctionalIndividualTypesQueryCommand *wFITC = (CWriteFunctionalIndividualTypesQueryCommand *)command;
+
+										CBuildQueryCommand *buildQC = wFITC->getBuildQueryCommand();
+										if (!buildQC) {
+											buildQC = new CBuildQueryCommand(0,wFITC);
+											wFITC->setBuildQueryCommand(buildQC);
+										}
+
+										CCalculateQueryCommand *calcQC = wFITC->getCalculateQueryCommand();
+										if (!calcQC) {
+											calcQC = new CCalculateQueryCommand(buildQC,wFITC);
+											wFITC->setCalculateQueryCommand(calcQC);
+										}
+
+										CGetCurrentKnowledgeBaseRevisionCommand *getCKBRC = new CGetCurrentKnowledgeBaseRevisionCommand(wFITC->getKnowledgeBaseName());
+										buildQC->makeToSubCommand(getCKBRC);
+
+										CConstructWriteFunctionalIndividualTypesQueryCommand *pOWLQC = new CConstructWriteFunctionalIndividualTypesQueryCommand(getCKBRC,wFITC->getOutputFileString(),wFITC->getIndividualName());
+										buildQC->makeToSubCommand(pOWLQC);
+										buildQC->setQueryCommandProvider(pOWLQC);
+
+
+										preSynchronizer->delegateCommand(buildQC);
+										preSynchronizer->delegateCommand(calcQC);
+
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
 									} else if (dynamic_cast<CClassifyQueryCommand *>(command)) {
 										CCommandRecordRouter commandRecordRouter(command,this);
 										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1043,7 +1598,7 @@ namespace Konclude {
 											query->setQueryStatistics(new CQueryStatisticsCollectionStrings());
 											cSCHQC->setQuery(query);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1093,7 +1648,7 @@ namespace Konclude {
 
 
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1115,7 +1670,7 @@ namespace Konclude {
 
 
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1134,7 +1689,7 @@ namespace Konclude {
 											CIsConsistentQuery *query = new CIsConsistentQuery(ontRev->getOntology(),ontConfig);
 											cICQC->setQuery(query);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1165,6 +1720,7 @@ namespace Konclude {
 												//}
 												//query->setQueryStatistics(queryStats);
 												satCalcJob->setCalculationConfiguration(calcConfig);
+												query->setCalculationConfiguration(calcConfig);
 												query->addTestSatisfiableCalculationJob(satCalcJob,true);
 
 												cCSQC->setQuery(query);
@@ -1172,7 +1728,7 @@ namespace Konclude {
 												CUnspecifiedMessageErrorRecord::makeRecord(QString("Concept '%1' cannot be resolved in ontology '%2'.").arg(cCSQC->getClassName()).arg(ontRev->getOntology()->getOntologyName()),&commandRecordRouter);
 											}
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1191,7 +1747,7 @@ namespace Konclude {
 											CWriteFunctionalClassSubsumptionsHierarchyQuery *query = new CWriteFunctionalClassSubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,cWFSCHQC->getOutputFileName());
 											cWFSCHQC->setQuery(query);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1208,7 +1764,7 @@ namespace Konclude {
 											CWriteOWLXMLClassSubsumptionsHierarchyQuery *query = new CWriteOWLXMLClassSubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,cWXSCHQC->getOutputFileName());
 											cWXSCHQC->setQuery(query);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1227,7 +1783,26 @@ namespace Konclude {
 											CWriteOWLXMLIndividualFlattenedTypesQuery *query = new CWriteOWLXMLIndividualFlattenedTypesQuery(ontRev->getOntology(),ontConfig,cWXITQC->getOutputFileName(),cWXITQC->getIndividualName());
 											cWXITQC->setQuery(query);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+									} else if (dynamic_cast<CConstructWriteFunctionalIndividualTypesQueryCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+										CConstructWriteFunctionalIndividualTypesQueryCommand *cWFITQC = (CConstructWriteFunctionalIndividualTypesQueryCommand *)command;
+										COntologyRevision *ontRev = cWFITQC->getOntologyRevision();
+										if (ontRev) {
+											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
+											CWriteFunctionalIndividualFlattenedTypesQuery *query = new CWriteFunctionalIndividualFlattenedTypesQuery(ontRev->getOntology(),ontConfig,cWFITQC->getOutputFileName(),cWFITQC->getIndividualName());
+											cWFITQC->setQuery(query);
+										} else {
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1245,7 +1820,7 @@ namespace Konclude {
 											CClassifyQuery *query = new CClassifyQuery(ontRev->getOntology(),ontConfig);
 											cCQC->setQuery(query);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1262,7 +1837,7 @@ namespace Konclude {
 											CRealizeQuery *query = new CRealizeQuery(ontRev->getOntology(),ontConfig);
 											cRQC->setQuery(query);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1279,7 +1854,7 @@ namespace Konclude {
 										if (queryGenerator) {
 											queryList = queryGenerator->generateQuerys();
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("No query generater.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("No query generated.",&commandRecordRouter);
 										}
 
 										CQuery *query = 0;
@@ -1343,7 +1918,7 @@ namespace Konclude {
 											pOWLQC->setQueryGenerator(queryBuilderGen);
 
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowlegebase revision not available.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);

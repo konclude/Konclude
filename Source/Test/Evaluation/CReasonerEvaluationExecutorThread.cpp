@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -45,6 +45,7 @@ namespace Konclude {
 				mTestCount = 0;
 				mErrorCommBreakCount = 2;
 				mFirstTest = true;
+				mCriticalProcessesTester = nullptr;
 				startThread();
 			}
 
@@ -54,6 +55,7 @@ namespace Konclude {
 				delete mReasonerEvaluator;
 				delete mReasonerProvider;
 				delete mReasonerClient;
+				delete mCriticalProcessesTester;
 			}
 
 			bool CReasonerEvaluationExecutorThread::executeEvaluation(CReasonerEvaluationTestsuite* evaluationTestsuite, CCallbackData* callbackData) {
@@ -116,7 +118,7 @@ namespace Konclude {
 						executeNextEvaluationTest(mReasonerInitFileString,mNextTestInputFile);
 
 						if (mWaitingTimeBetweenTests > 0) {
-							LOG(INFO,getLogDomain(),logTr("Waiting %1 milliseconds before continuation.").arg(mWaitingTimeBetweenTests),this);
+							LOG(INFO,getLogDomain(),logTr("Waiting %1 ms before continuation.").arg(mWaitingTimeBetweenTests),this);
 							QThread::msleep(mWaitingTimeBetweenTests);
 						}
 
@@ -124,7 +126,7 @@ namespace Konclude {
 						bool succ = evaluateExecutedTest(terminationResults,requestResults,outputFileString);
 
 						if (mWaitingTimeBetweenTests > 0) {
-							LOG(INFO,getLogDomain(),logTr("Waiting %1 milliseconds before continuation.").arg(mWaitingTimeBetweenTests),this);
+							LOG(INFO,getLogDomain(),logTr("Waiting %1 ms before continuation.").arg(mWaitingTimeBetweenTests),this);
 							QThread::msleep(mWaitingTimeBetweenTests);
 						}
 
@@ -204,9 +206,12 @@ namespace Konclude {
 
 				mWaitingTimeBetweenTests = CConfigDataReader::readConfigInteger(mConfiguration,"Konclude.Evaluation.WaitingTimeBetweenTests");
 				mWaitingTimeAfterReasonerCreation = CConfigDataReader::readConfigInteger(mConfiguration,"Konclude.Evaluation.WaitingTimeAfterReasonerCreation");
+				mSystemReadyRetestTimeForTests = CConfigDataReader::readConfigInteger(mConfiguration,"Konclude.Evaluation.SystemReadyRetestTimeForTests");
 
 				mFirstTestWarmUp = CConfigDataReader::readConfigBoolean(mConfiguration,"Konclude.Evaluation.FirstTestsWarmingUp");
 				mAllTestsWarmUp = CConfigDataReader::readConfigBoolean(mConfiguration,"Konclude.Evaluation.AllTestsWarmingUp");
+
+				mCriticalProcessesTester = new CCriticalSystemProcessTester(mConfiguration);
 
 				if (mFirstTestWarmUp) {
 					mFirstTest = true;
@@ -323,7 +328,27 @@ namespace Konclude {
 			}
 
 
+			bool CReasonerEvaluationExecutorThread::testSystemReadyForNextEvaluationTest() {
+				if (mCriticalProcessesTester->hasCriticalSystemProcesses()) {
+					LOG(WARNING,getLogDomain(),logTr("Critical processes are running on the test system."),this);
+					return false;
+				}
+				return true;
+			}
+
+			void CReasonerEvaluationExecutorThread::delayNextEvaluationTestUntilSystemReady() {
+				while (!testSystemReadyForNextEvaluationTest()) {
+					LOG(WARNING,getLogDomain(),logTr("Test system not ready, retest after %1 ms.").arg(mSystemReadyRetestTimeForTests),this);
+					QThread::msleep(mSystemReadyRetestTimeForTests);
+				}
+			}
+
+
+
 			bool CReasonerEvaluationExecutorThread::executeNextEvaluationTest(const QString& testcaseInit, const QString& testcaseInput) {
+
+				delayNextEvaluationTestUntilSystemReady();
+
 				if (!mReasonerProvider) {
 					mReasonerProvider = mReasonerEvalFactory->createReasonerProvider(mConfiguration);
 				}
@@ -337,7 +362,7 @@ namespace Konclude {
 					LOG(INFO,getLogDomain(),logTr("Testing reasoner '%1' with test case '%2'.").arg(mReasonerName).arg(testcaseInput),this);
 				}
 				if (mWaitingTimeAfterReasonerCreation > 0) {
-					LOG(INFO,getLogDomain(),logTr("Waiting %1 milliseconds after created reasoner.").arg(mWaitingTimeAfterReasonerCreation),this);
+					LOG(INFO,getLogDomain(),logTr("Waiting %1 ms after created reasoner.").arg(mWaitingTimeAfterReasonerCreation),this);
 					QThread::msleep(mWaitingTimeAfterReasonerCreation);
 				}
 				mReasonerClient->evaluateReasoner(testcaseInit,testcaseInput,addressString,mConfiguration,new CReasonerEvaluationNextEvent(this,0));

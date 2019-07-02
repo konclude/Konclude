@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -29,25 +29,7 @@ namespace Konclude {
 
 
 			CRole::CRole() {
-				superRoles = 0;
-				indirectSuperRoles = 0;
-				mComplexity = false;
-				mFunctional = false;
-				mInvFunctional = false;
-				mTransetive = false;
-				mAsymmetric = false;
-				mSymmetric = false;
-				mReflexive = false;
-				mIrreflexive = false;
-				rangeLinker = 0;
-				domainLinker = 0;
-				tax = 0;
-				mInverseEquivalentRoles = 0;
-				mDisjointRoles = 0;
-				mRoleChainSubSharingLinker = nullptr;
-				mRoleChainSuperSharingLinker = nullptr;
-				mInverseRole = nullptr;
-				mRoleData = nullptr;
+				initRole();
 			}
 
 
@@ -67,6 +49,7 @@ namespace Konclude {
 				mSymmetric = false;
 				mReflexive = false;
 				mIrreflexive = false;
+				mDataRole = false;
 				rangeLinker = 0;
 				domainLinker = 0;
 				tax = 0;
@@ -80,26 +63,8 @@ namespace Konclude {
 
 
 			CRole *CRole::init(qint64 roleTag) {
-				mNameLinker = 0;
+				initRole();
 				mTag = roleTag;
-				superRoles = 0;
-				indirectSuperRoles = 0;
-				rangeLinker = 0;
-				domainLinker = 0;
-				tax = 0;
-				mInverseEquivalentRoles = 0;
-				mDisjointRoles = 0;
-				mInverseRole = nullptr;
-				mComplexity = false;
-				mFunctional = false;
-				mInvFunctional = false;
-				mTransetive = false;
-				mAsymmetric = false;
-				mSymmetric = false;
-				mReflexive = false;
-				mIrreflexive = false;
-				mRoleChainSubSharingLinker = nullptr;
-				mRoleChainSuperSharingLinker = nullptr;
 				return this;
 			}
 
@@ -107,6 +72,7 @@ namespace Konclude {
 			CRole *CRole::init(CRole *role) {
 				mNameLinker = role->getPropertyNameLinker();
 				mTag = role->mTag;
+				mDataRole = role->mDataRole;
 				superRoles = 0;
 				indirectSuperRoles = 0;
 				rangeLinker = 0;
@@ -133,6 +99,7 @@ namespace Konclude {
 			CRole *CRole::initRoleCopy(CRole *role, CMemoryAllocationManager* memMan) {
 				mNameLinker = role->getPropertyNameLinker();
 				mTag = role->mTag;
+				mDataRole = role->mDataRole;
 				superRoles = 0;
 				indirectSuperRoles = 0;
 				rangeLinker = 0;
@@ -196,6 +163,27 @@ namespace Konclude {
 
 				return this;
 			}
+
+
+
+			bool CRole::isDataRole() {
+				return mDataRole;
+			}
+
+			bool CRole::isObjectRole() {
+				return !isDataRole();
+			}
+
+			CRole* CRole::setDataRole(bool dataRole) {
+				mDataRole = dataRole;
+				return this;
+			}
+
+			CRole* CRole::setObjectRole(bool objectRole) {
+				setDataRole(!objectRole);
+				return this;
+			}
+
 
 
 			CRole* CRole::getInverseRole() {

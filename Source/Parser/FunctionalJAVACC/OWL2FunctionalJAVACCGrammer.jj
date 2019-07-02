@@ -1,0 +1,1703 @@
+// OWL 2 Functional Grammer: http://www.w3.org/TR/owl2-syntax/#Appendix:_Complete_Grammar_.28Normative.29
+// EBNF Grammer of OWL 2 Functional Style: http://answers.semanticweb.com/questions/19985/ebnf-grammar-for-owl2-functional-style-syntax
+
+
+options
+{
+  OUTPUT_LANGUAGE = "c++";
+  UNICODE_INPUT = true;
+  NAMESPACE = "Konclude::Parser::FunctionalJAVACC";
+  TOKEN_MANAGER_SUPER_CLASS = "CTokenManager";
+  TOKEN_MANAGER_INCLUDES = "CTokenManager.h";
+  PARSER_INCLUDES = "CJAVACCParser.h";
+  PARSER_SUPER_CLASS = "CJAVACCParser";
+  TOKEN_EXTENDS = "CTokenBase";
+  TOKEN_INCLUDES = "CTokenBase.h";
+  
+  
+//  CACHE_TOKENS = true;
+//  OUTPUT_DIRECTORY = "gen";
+//  STATIC = false;
+}
+
+PARSER_BEGIN(OWL2FunctionalStyleParser)
+
+	public: 
+		inline COntologyBuilder* getBuilder() {
+			return mBuilder;
+		}
+		
+	protected:
+		COntologyBuilder* mBuilder;
+	
+
+
+PARSER_END(OWL2FunctionalStyleParser)
+
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  < OPEN_BRACKET: "(" >
+| < CLOSE_BRACKET: ")" >
+| < EQUALS: "=" > 
+| < REFERENCE: "^^" >
+
+
+
+/* Ontology Keywords */
+| < PREFIX: "Prefix" >
+| < ONTOLOGY: "Ontology" >
+| < IMPORT: "Import" >
+
+/* Entities and Literals */
+| < CLASS: "Class" >
+| < DATATYPE: "Datatype" >
+| < OBJECT_PROPERTY: "ObjectProperty" >
+| < DATA_PROPERTY: "DataProperty" >
+| < ANNOTATION_PROPERTY: "AnnotationProperty" >
+| < NAMED_INDIVIDUAL: "NamedIndividual" >
+
+/* Declaration */
+| < DECLARATION: "Declaration" >
+
+/* Property Expressions */
+| < OBJECT_INVERSE_OF: "ObjectInverseOf" >
+| < OBJECT_PROPERTY_CHAIN: "ObjectPropertyChain" >
+
+/* Data Ranges */
+| < COMPLEMENT_OF: "ComplementOf" >
+| < ONE_OF: "OneOf" >
+| < DATATYPE_RESTRICTION: "DatatypeRestriction" >
+
+/* Class Expressions */
+| < OBJECT_INTERSECTION_OF: "ObjectIntersectionOf" >
+| < OBJECT_UNION_OF: "ObjectUnionOf" >
+| < OBJECT_COMPLEMENT_OF: "ObjectComplementOf" >
+| < OBJECT_ONE_OF: "ObjectOneOf" >
+| < OBJECT_SOME_VALUES_FROM: "ObjectSomeValuesFrom" >
+| < OBJECT_ALL_VALUES_FROM: "ObjectAllValuesFrom" >
+| < OBJECT_HAS_VALUE: "ObjectHasValue" >
+| < OBJECT_HAS_SELF: "ObjectHasSelf" >
+| < OBJECT_MIN_CARDINALITY: "ObjectMinCardinality" >
+| < OBJECT_MAX_CARDINALITY: "ObjectMaxCardinality" >
+| < OBJECT_EXACT_CARDINALITY: "ObjectExactCardinality" >
+| < DATA_INTERSECTION_OF: "DataIntersectionOf" >
+| < DATA_UNION_OF: "DataUnionOf" >
+| < DATA_COMPLEMENT_OF: "DataComplementOf" >
+| < DATA_ONE_OF: "DataOneOf" >
+| < DATA_SOME_VALUES_FROM: "DataSomeValuesFrom" >
+| < DATA_ALL_VALUES_FROM: "DataAllValuesFrom" >
+| < DATA_HAS_VALUE: "DataHasValue" >
+| < DATA_MIN_CARDINALITY: "DataMinCardinality" >
+| < DATA_MAX_CARDINALITY: "DataMaxCardinality" >
+| < DATA_EXACT_CARDINALITY: "DataExactCardinality" >
+
+/* Class Expressions Axioms */
+| < SUB_CLASS_OF: "SubClassOf" >
+| < EQUIVALENT_CLASSES: "EquivalentClasses" >
+| < DISJOINT_CLASSES: "DisjointClasses" >
+| < DISJOINT_UNION: "DisjointUnion" >
+
+/* Object Property Axioms */
+| < SUB_OBJECT_PROPERTY_OF: "SubObjectPropertyOf" >
+| < EQUIVALENT_OBJECT_PROPERTIES: "EquivalentObjectProperties" >
+| < DISJOINT_OBJECT_PROPERTIES: "DisjointObjectProperties" >
+| < OBJECT_PROPERTY_DOMAIN: "ObjectPropertyDomain" >
+| < OBJECT_PROPERTY_RANGE: "ObjectPropertyRange" >
+| < INVERSE_OBJECT_PROPERTIES: "InverseObjectProperties" >
+| < FUNCTIONAL_OBJECT_PROPERTY: "FunctionalObjectProperty" >
+| < INVERSE_FUNCTIONAL_OBJECT_PROPERTY: "InverseFunctionalObjectProperty" >
+| < REFLEXIVE_OBJECT_PROPERTY: "ReflexiveObjectProperty" >
+| < IRREFLEXIVE_OBJECT_PROPERTY: "IrreflexiveObjectProperty" >
+| < SYMMETRIC_OBJECT_PROPERTY: "SymmetricObjectProperty" >
+| < ASYMMETRIC_OBJECT_PROPERTY: "AsymmetricObjectProperty" >
+| < TRANSITIVE_OBJECT_PROPERTY: "TransitiveObjectProperty" >
+
+/* Data Property Axioms */
+| < SUB_DATA_PROPERTY_OF: "SubDataPropertyOf" >
+| < EQUIVALENT_DATA_PROPERTIES: "EquivalentDataProperties" >
+| < DISJOINT_DATA_PROPERTIES: "DisjointDataProperties" >
+| < DATA_PROPERTY_DOMAIN: "DataPropertyDomain" >
+| < DATA_PROPERTY_RANGE: "DataPropertyRange" >
+| < FUNCTIONAL_DATA_PROPERTY: "FunctionalDataProperty" >
+| < DATATYPE_DEFINITION: "DatatypeDefinition" >
+
+/* Keys */
+| < HAS_KEY: "HasKey" >
+
+/* Assertions */
+| < SAME_INDIVIDUAL: "SameIndividual" >
+| < DIFFERENT_INDIVIDUALS: "DifferentIndividuals" >
+| < CLASS_ASSERTION: "ClassAssertion" >
+| < OBJECT_PROPERTY_ASSERTION: "ObjectPropertyAssertion" >
+| < NEGATIVE_OBJECT_PROPERTY_ASSERTION: "NegativeObjectPropertyAssertion" >
+| < DATA_PROPERTY_ASSERTION: "DataPropertyAssertion" >
+| < NEGATIVE_DATA_PROPERTY_ASSERTION: "NegativeDataPropertyAssertion" >
+
+/* Annotations */
+| < ANNOTATION: "Annotation" >
+| < ANNOTATION_ASSERTION: "AnnotationAssertion" >
+| < SUB_ANNOTATION_PROPERTY_OF: "SubAnnotationPropertyOf" >
+| < ANNOTATION_PROPERTY_DOMAIN: "AnnotationPropertyDomain" >
+| < ANNOTATION_PROPERTY_RANGE: "AnnotationPropertyRange" >
+
+| < NON_NEGATIVE_INTEGER: (<DIGIT>)+ >
+| < LANGTAG: "@" ( ["a"-"z","A"-"Z"])+ ("-" (["a"-"z","A"-"Z"]|<DIGIT>)+ )* >
+
+| < PNAME_NS: (<PN_PREFIX>)? ":" > : AfterPrefix
+| < #PN_PREFIX: <PN_CHARS_BASE> ( ( <PN_CHARS> | "." )* <PN_CHARS> )? >
+| < BLANK_NODE_PREFIX: "_:" > : AfterPrefix
+// | < PNAME_LN: <PNAME_NS> <PN_LOCAL> >
+// | < BLANK_NODE_LABEL: "_:" <PN_LOCAL> >
+
+/* Auxiliary character tokens */
+| < #DIGIT: ["0"-"9"] >
+| < #PN_CHARS_U: <PN_CHARS_BASE> | "_" >
+| < #PN_CHARS:
+      <PN_CHARS_U>
+    | "-"
+    | <DIGIT>
+    | "\u00B7"
+    | ["\u0300"-"\u036F"]
+    | ["\u203F"-"\u2040"]
+  >
+| < #PN_CHARS_BASE:
+      ["a"-"z"]
+    | ["A"-"Z"]
+    | ["\u00C0"-"\u00D6"]
+    | ["\u00D8"-"\u00F6"]
+    | ["\u00F8"-"\u02FF"]
+    | ["\u0370"-"\u037D"]
+    | ["\u037F"-"\u1FFF"]
+    | ["\u200C"-"\u200D"]
+    | ["\u2070"-"\u218F"]
+    | ["\u2C00"-"\u2FEF"]
+    | ["\u3001"-"\uD7FF"]
+    | ["\uF900"-"\uFDCF"]
+    | ["\uFDF0"-"\uFFFD"]
+  >
+}
+
+SKIP : 
+{ 
+  "<" : FullIri
+| "\"" : QuotedQString
+| "#" : Comment
+}
+
+<FullIri> TOKEN : 
+{ 
+  /* based on IRI_REF of [SPARQL] */
+  < FULL_IRI: ( ~["<",">","\"","{","}","|","^","`","\\","\u0000"-"\u0020"] )* > : FullIriEnd
+}
+
+<FullIriEnd> SKIP :
+{
+  ">" : DEFAULT
+}
+
+<AfterPrefix> TOKEN :
+{
+  < PN_LOCAL: ( <PN_CHARS_U> | <DIGIT> ) ( ( <PN_CHARS> | "." )* <PN_CHARS>)? > : DEFAULT
+}
+
+
+<AfterPrefix> SKIP :
+{
+  "" : DEFAULT
+}
+
+<QuotedQString> TOKEN :
+{
+  < QUOTED_QString: ( ~["\\","\""]  |  ("\\" ["\"","\'","\\"]) )* > : QuotedQStringEnd
+}            
+
+<QuotedQStringEnd> SKIP :
+{
+  "\"" : DEFAULT
+}
+
+<Comment> SKIP :
+{
+  "\n": DEFAULT
+| "\r": DEFAULT
+}
+
+<Comment> SKIP :
+{
+  < ~[] >	
+}
+
+
+/*------------------------------------------------------------------
+ * PARSER RULES
+ *------------------------------------------------------------------*/
+
+/* 2 Preliminary Definitions */
+
+/* 2.3 Integers, Characters, QStrings, Language Tags, and Node IDs */
+/* @ (U+40) followed a nonempty sequence of characters matching the
+* langtag production from [BCP 47]
+*/
+QString languageTag():
+{
+	Token* t;
+}{
+	t = <LANGTAG> {
+		return JAVACC_TO_QSTRING(t->image);
+	}
+}
+
+/* See LANGTAG in [SPARQL] */
+/* a finite sequence of characters matching the BLANK_NODE_LABEL
+* production of [SPARQL]
+*/
+QString nodeId():
+{
+	Token* t;
+}{
+	<BLANK_NODE_PREFIX> t = <PN_LOCAL> {
+		return JAVACC_TO_QSTRING(t->image);
+	}
+}
+
+
+/* 2.3 IRIs */
+/* An iri as defined in [RFC3987], enclosed in a pair of < (U+3C) and >
+* (U+3E) characters. See IRI_REF in [SPARQL].
+* The function returns only the IRI part of the QString without the
+* enclosing < >.
+*/
+QString fullIri():
+{
+	Token* t;
+}{
+	t = <FULL_IRI> {
+		return JAVACC_TO_QSTRING(t->image);
+	}
+}
+
+/* Extract the actual IRI from a full IRI or abbreviated IRI */
+QString iri():
+{
+	QString x;
+}{
+	(
+	  x = fullIri()
+	| x = abbreviatedIri()
+	) { return x; }
+}
+
+/* 
+* A finite sequence of characters matching the PNAME_LN production of
+* [SPARQL]. The function returns the IRI that the abbreviation encodes
+* based on the known prefix declarations.
+*/
+QString abbreviatedIri():
+{
+	Token* t;
+	QString abbName;
+}{
+	abbName = prefixName()
+	t = <PN_LOCAL> {
+		return getBuilder()->resolveAbbreviationName(abbName+JAVACC_TO_QSTRING(t->image));
+	}
+}
+
+/* a finite sequence of characters matching the as PNAME_NS production of
+* [SPARQL]
+*/
+QString prefixName():
+{
+	Token* t = nullptr;
+}{
+	t = <PNAME_NS> {
+		return JAVACC_TO_QSTRING(t->image);
+	}
+}
+
+
+/* 3 Ontologies */
+
+/* 3.5 Ontology Annotations */
+void ontologyAnnotations():
+{}{
+	( annotation() )*
+}
+
+/* 3.7 Functional-Style Syntax */
+void ontologyDocument() :
+{}{
+	( prefixDeclaration() )* ontology()
+}
+
+void prefixDeclaration() :
+{
+	QString abbName;
+	QString fullName;
+}{
+	<PREFIX> <OPEN_BRACKET>
+		abbName = prefixName()
+		<EQUALS>
+		fullName = fullIri()
+	<CLOSE_BRACKET> {
+		if (abbName.endsWith(":")) {
+			abbName = abbName.remove(abbName.length()-1,1);
+		}
+		getBuilder()->addNameAbbreviation(fullName,abbName);
+	}
+}
+
+void ontology() :
+{}{
+	<ONTOLOGY> <OPEN_BRACKET> ( ontologyIri() ( versionIri() )? )?
+		directlyImportsDocuments()
+		ontologyAnnotations()
+		axioms()
+	<CLOSE_BRACKET>
+}
+
+QString ontologyIri():
+{
+	QString x;
+}{
+	x = iri() { return x; }
+}
+
+QString versionIri():
+{
+	QString x;
+}{
+	x = iri() { return x; }
+}
+
+void directlyImportsDocuments():
+{
+	QString x;
+}{
+	( <IMPORT> <OPEN_BRACKET> x = iri() { getBuilder()->addOntologyImport(x); } <CLOSE_BRACKET> )*
+}
+
+void axioms() :
+{
+	CBuildExpressionPtr x;
+}{
+	( x = axiom() { getBuilder()->tellOntologyAxiom(x); } )*
+}
+
+
+
+
+
+
+
+
+/* 5 Entities and Literals */
+
+/* 5.1 Classes */
+CBuildExpressionPtr owlClass():
+{
+	QString x;
+}{
+	x = iri() { return getBuilder()->getClass(x); }
+}
+
+/* 5.2 Datatypes */
+CBuildExpressionPtr datatype():
+{
+	QString x;
+}{
+	x = iri() {
+		return getBuilder()->getDatatype(x);
+	}
+}
+
+/* 5.3 Object Properties */
+CBuildExpressionPtr objectProperty():
+{
+	QString x;
+}{
+	x = iri() {
+		return getBuilder()->getObjectProberty(x);
+	}
+}
+
+/* 5.4 Data Properties */
+CBuildExpressionPtr dataProperty():
+{
+	QString x;
+}{
+	x = iri() {
+		return getBuilder()->getDataProberty(x);
+	}
+}
+
+/* 5.5 Annotation Properties */
+CBuildExpressionPtr annotationProperty():
+{
+	QString x;
+}{
+	x = iri() {
+		return nullptr;
+	}
+// 	| <RDFS_LABEL>
+// 	| <RDFS_COMMENT>
+// 	| <RDFS_SEE_ALSO>
+// 	| <RDFS_IS_DEFINED_BY>
+// 	| <OWL_DEPRECATED>
+// 	| <OWL_VERSION_INFO>
+// 	| <OWL_PRIOR_VERSION>
+// 	| <OWL_BACKWARD_COMPATIBLE_WITH>
+// 	| <OWL_INCOMPATIBLE_WITH>
+}
+
+/* 5.6 Individuals */
+CBuildExpressionPtr individual():
+{
+	CBuildExpressionPtr x;
+}{
+	(
+	  x = namedIndividual()
+	| x = anonymousIndividual()
+	) { return x; }
+}
+
+/* 5.6.1 Named Individuals */
+CBuildExpressionPtr namedIndividual():
+{
+	QString x;
+}{
+	x = iri() {
+		return getBuilder()->getNamedIndividual(x);
+	}
+}
+
+/* 5.6.2 Anonymous Individuals */
+CBuildExpressionPtr anonymousIndividual():
+{
+	QString x;
+}{
+	x = nodeId() {
+		return getBuilder()->getAnonymousIndividual(getBuilder()->getOntologyName(),x);
+	}
+}
+
+/* 5.7 Literals */
+CBuildExpressionPtr literal(bool annotation):
+{
+	QString x,l;
+	CBuildExpressionPtr d = nullptr;
+}{
+	x = quotedQString()
+	(
+		<REFERENCE> d = datatype()
+		| ( l = languageTag() )?
+	) {
+		if (annotation) {
+			return nullptr;
+		}
+		if (d == nullptr) {
+			d = getBuilder()->getDatatype("http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral");
+			if (l.isEmpty()) {
+				x += "@";
+			} else {
+				x += l;
+			}
+		}
+		CBuildExpressionPtr y = getBuilder()->getDataLexicalValue(x);
+		return getBuilder()->getDataLiteral((CDataLexicalValueExpressionPtr)y,(CDatatypeExpressionPtr)d);
+	}
+}
+
+
+/* Retrieve the content of a quoted QString. */
+QString quotedQString():
+{
+	Token* t;
+}{
+	t = <QUOTED_QString> {
+		return JAVACC_TO_QSTRING(t->image);
+	}
+}
+
+/* 5.8 Entity Declarations and Typing */
+CBuildExpressionPtr declaration():
+{
+	CBuildExpressionPtr x;
+}{
+	<DECLARATION> <OPEN_BRACKET> axiomAnnotations()
+	x = entity()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDeclaration(x);
+	}
+}
+
+CBuildExpressionPtr entity():
+{
+  CBuildExpressionPtr x = nullptr;
+}{ (
+    <CLASS> <OPEN_BRACKET> x = owlClass() <CLOSE_BRACKET>
+	| <DATATYPE> <OPEN_BRACKET> x = datatype() <CLOSE_BRACKET>
+	| <OBJECT_PROPERTY> <OPEN_BRACKET> x = objectProperty() <CLOSE_BRACKET>
+	| <DATA_PROPERTY> <OPEN_BRACKET> x = dataProperty() <CLOSE_BRACKET>
+	| <ANNOTATION_PROPERTY> <OPEN_BRACKET> x = annotationProperty() <CLOSE_BRACKET>
+	| <NAMED_INDIVIDUAL> <OPEN_BRACKET> x = namedIndividual() <CLOSE_BRACKET>
+   ) { return x; }
+}
+
+/* 6 Property Expressions */
+CBuildExpressionPtr objectPropertyExpression():
+{
+	CBuildExpressionPtr x;
+}{
+	(
+	x = objectProperty()
+	| x = inverseObjectProperty()
+	) { return x; }
+}
+
+
+
+/* 6.1.1 Inverse Object Properties */
+CBuildExpressionPtr inverseObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<OBJECT_INVERSE_OF> <OPEN_BRACKET>
+		x = objectProperty()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getInverseObjectPropertyOf(x);
+	}
+}
+
+/* 6.2 Data Property Expressions */
+CBuildExpressionPtr dataPropertyExpression():
+{
+	CBuildExpressionPtr x;
+}{
+	x = dataProperty() { return x; }
+}
+
+
+
+/* 7 Data Ranges */
+
+CBuildExpressionPtr dataRange():
+{
+	CBuildExpressionPtr x;
+}{
+	(
+	x = datatype()
+	| x = dataIntersectionOf()
+	| x = dataUnionOf()
+	| x = dataComplementOf()
+	| x = dataOneOf()
+	| x = datatypeRestriction()
+	) { return x; }
+}
+
+CEXPRESSIONLIST<CBuildExpressionPtr> dataRangeList():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	( x = dataRange() { v.append(x); } )+
+	{ return v; }
+}
+
+/* 7.1 Intersection of Data Ranges */
+CBuildExpressionPtr dataIntersectionOf():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DATA_INTERSECTION_OF> <OPEN_BRACKET>
+		v = dataRangeList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDataIntersectionOf(v);
+	}
+}
+
+/* 7.2 Union of Data Ranges */
+CBuildExpressionPtr  dataUnionOf():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DATA_UNION_OF> <OPEN_BRACKET>
+		v = dataRangeList()
+	<CLOSE_BRACKET>{
+		return getBuilder()->getDataUnionOf(v);
+	}
+}
+
+/* 7.3 Complement of Data Ranges */
+CBuildExpressionPtr dataComplementOf():
+{
+	CBuildExpressionPtr x;
+}{
+	<DATA_COMPLEMENT_OF> <OPEN_BRACKET>
+		x = dataRange()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDataComplementOf(x);
+	}
+}
+
+/* 7.4 Enumeration of Literals */
+CBuildExpressionPtr dataOneOf():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DATA_ONE_OF> <OPEN_BRACKET>
+		( x = literal(false) { v.append(x); } )+
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDataOneOf(v);
+	}
+}
+
+/* 7.5 Datatype Restrictions */
+CBuildExpressionPtr datatypeRestriction():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DATATYPE_RESTRICTION> <OPEN_BRACKET>
+		x = datatype()
+		v = facetRestrictionList()
+	<CLOSE_BRACKET> {
+		v.append(x);
+		return getBuilder()->getDatatypeRestriction(v);
+	}
+}
+
+
+CEXPRESSIONLIST<CBuildExpressionPtr> facetRestrictionList():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	( x = facetRestriction() { v.append(x); } )+
+	{ return v; }
+}
+
+
+
+CBuildExpressionPtr facetRestriction():
+{
+	QString f;
+	CBuildExpressionPtr l;
+}{
+	f = iri() 
+	l = literal(false)	
+	{ 
+		CBuildExpressionPtr x = getBuilder()->getDataFacet(f);
+		return getBuilder()->getDataFacetRestriction(l,x);
+	}
+}
+
+
+
+
+/* 8 Class Expressions */
+CBuildExpressionPtr classExpression():
+{
+	CBuildExpressionPtr x;
+}{ (
+	x = owlClass()
+	| x = objectIntersectionOf()
+	| x = objectUnionOf()
+	| x = objectComplementOf()
+	| x = objectOneOf()
+	| x = objectSomeValuesFrom()
+	| x = objectAllValuesFrom()
+	| x = objectHasValue()
+	| x = objectHasSelf()
+	| x = objectMinCardinality()	
+	| x = objectMaxCardinality()	
+	| x = objectExactCardinality()
+	| x = dataSomeValuesFrom()
+	| x = dataAllValuesFrom()
+	| x = dataHasValue()
+	| x = dataMinCardinality()
+	| x = dataMaxCardinality()
+	| x = dataExactCardinality()	
+   ) { return x; }
+}
+
+
+/* 8.1 Propositional Connectives and Enumeration of Individuals */
+
+/* 8.1.1 Intersection of Class Expressions */
+CBuildExpressionPtr objectIntersectionOf():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<OBJECT_INTERSECTION_OF> <OPEN_BRACKET>
+		v = classExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectIntersectionOf(v);
+	}
+}
+
+/* 8.1.2 Union of Class Expressions */
+CBuildExpressionPtr objectUnionOf():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<OBJECT_UNION_OF> <OPEN_BRACKET>
+		v = classExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectUnionOf(v);
+	}
+}
+
+/* 8.1.3 Complement of Class Expressions */
+CBuildExpressionPtr objectComplementOf():
+{
+	CBuildExpressionPtr x;
+}{
+	<OBJECT_COMPLEMENT_OF> <OPEN_BRACKET>
+		x = classExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectComplementOf(x);
+	}
+}
+
+/* 8.1.4 Enumeration of Individuals */
+CBuildExpressionPtr objectOneOf():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<OBJECT_ONE_OF> <OPEN_BRACKET>
+		( x = individual() { v.append(x); } )+
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectOneOf(v);
+	}
+}
+
+
+/* 8.2 Object Property Restrictions */
+
+/* 8.2.1 Existential Quantification */
+CBuildExpressionPtr objectSomeValuesFrom():
+{
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y;
+}{
+	<OBJECT_SOME_VALUES_FROM> <OPEN_BRACKET>
+		x = objectPropertyExpression()
+		y = classExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectSomeValuesFrom(x,y);
+	}
+}
+
+/* 8.2.2 Universal Quantification */
+CBuildExpressionPtr objectAllValuesFrom():
+{
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y;
+}{
+	<OBJECT_ALL_VALUES_FROM> <OPEN_BRACKET>
+		x = objectPropertyExpression()
+		y = classExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectAllValuesFrom(x,y);
+	}
+}
+
+/* 8.2.3 Individual Value Restriction */
+CBuildExpressionPtr objectHasValue():
+{
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y;
+}{
+	<OBJECT_HAS_VALUE> <OPEN_BRACKET>
+		x = objectPropertyExpression()
+		y = individual()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectHasValue(x,y);
+	}
+}
+
+/* 8.2.4 Self-Restriction */
+CBuildExpressionPtr objectHasSelf():
+{
+	CBuildExpressionPtr x;
+}{
+	<OBJECT_HAS_SELF> <OPEN_BRACKET>
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectHasSelf(x);
+	}
+}
+
+
+/* 8.3 Object Property Cardinality Restrictions */
+
+/* 8.3.1 Minimum Cardinality */
+CBuildExpressionPtr objectMinCardinality():
+{
+	Token* n;
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y = nullptr;
+}{
+	<OBJECT_MIN_CARDINALITY> <OPEN_BRACKET>
+		n = <NON_NEGATIVE_INTEGER>
+		x = objectPropertyExpression()
+		( y = classExpression() )?
+	<CLOSE_BRACKET> {
+		if (y == nullptr) {
+			y = getBuilder()->getTopClass();
+		}
+		cint64 cardinality = JAVACC_TO_QSTRING(n->image).toLongLong();
+		return getBuilder()->getObjectMinCardinality(x,y,cardinality);
+	}
+}
+
+/* 8.3.2 Maximum Cardinality */
+CBuildExpressionPtr objectMaxCardinality():
+{
+	Token* n;
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y = nullptr;
+}{
+	<OBJECT_MAX_CARDINALITY> <OPEN_BRACKET>
+		n = <NON_NEGATIVE_INTEGER>
+		x = objectPropertyExpression()
+		( y = classExpression() )?
+	<CLOSE_BRACKET> {
+		if (y == nullptr) {
+			y = getBuilder()->getTopClass();
+		}
+		cint64 cardinality = JAVACC_TO_QSTRING(n->image).toLongLong();
+		return getBuilder()->getObjectMaxCardinality(x,y,cardinality);
+	}
+}
+
+/* 8.3.3 Exact Cardinality */
+CBuildExpressionPtr objectExactCardinality():
+{
+	Token* n;
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y = nullptr;
+}{
+	<OBJECT_EXACT_CARDINALITY> <OPEN_BRACKET>
+		n = <NON_NEGATIVE_INTEGER>
+		x = objectPropertyExpression()
+		( y = classExpression() )?
+	<CLOSE_BRACKET> {
+		if (y == nullptr) {
+			y = getBuilder()->getTopClass();
+		}
+		cint64 cardinality = JAVACC_TO_QSTRING(n->image).toLongLong();
+		return getBuilder()->getObjectExactlyCardinality(x,y,cardinality);
+	}
+}
+
+/* 8.4 Data Property Restrictions */
+
+/* 8.4.1 Existential Quantification */
+CBuildExpressionPtr dataSomeValuesFrom():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<DATA_SOME_VALUES_FROM> <OPEN_BRACKET>
+		x = dataProperty()
+		y = dataRange() 
+	<CLOSE_BRACKET>
+	{
+		if (y == nullptr) {
+			y = getBuilder()->getTopDataRange();
+		}
+		return getBuilder()->getDataSomeValuesFrom(x,y);
+	}
+}
+
+
+
+/* 8.4.2 Universal Quantification */
+CBuildExpressionPtr dataAllValuesFrom():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<DATA_ALL_VALUES_FROM> <OPEN_BRACKET>
+		x = dataProperty()
+		y = dataRange() 
+	<CLOSE_BRACKET>
+	{
+		return getBuilder()->getDataAllValuesFrom(x,y);
+	}
+}
+
+
+/* 8.4.3 Literal Value Restriction */
+CBuildExpressionPtr dataHasValue():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<DATA_HAS_VALUE> <OPEN_BRACKET>
+		x = dataPropertyExpression()
+		y = literal(false)
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDataHasValue(x,y);
+	}
+}
+
+
+/* 8.5 Data Property Cardinality Restrictions */
+
+/* 8.5.1 Minimum Cardinality */
+CBuildExpressionPtr dataMinCardinality():
+{
+	Token* n;
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y = nullptr;
+}{
+	<DATA_MIN_CARDINALITY> <OPEN_BRACKET>
+		n = <NON_NEGATIVE_INTEGER>
+		x = dataPropertyExpression()
+		( y = dataRange() )?
+	<CLOSE_BRACKET> {
+		if (y == nullptr) {
+			y = getBuilder()->getTopDataRange();
+		}
+		cint64 cardinality = JAVACC_TO_QSTRING(n->image).toLongLong();
+		return getBuilder()->getDataMinCardinality(x,y,cardinality);
+	}
+}
+
+/* 8.5.2 Maximum Cardinality */
+CBuildExpressionPtr dataMaxCardinality():
+{
+	Token* n;
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y = nullptr;
+}{
+	<DATA_MAX_CARDINALITY> <OPEN_BRACKET>
+		n = <NON_NEGATIVE_INTEGER>
+		x = dataPropertyExpression()
+		( y = dataRange() )?
+	<CLOSE_BRACKET> {
+		if (y == nullptr) {
+			y = getBuilder()->getTopDataRange();
+		}
+		cint64 cardinality = JAVACC_TO_QSTRING(n->image).toLongLong();
+		return getBuilder()->getDataMaxCardinality(x,y,cardinality);
+	}
+}
+
+/* 8.5.3 Exact Cardinality */
+CBuildExpressionPtr dataExactCardinality():
+{
+	Token* n;
+	CBuildExpressionPtr x;
+	CBuildExpressionPtr y = nullptr;
+}{
+	<DATA_EXACT_CARDINALITY> <OPEN_BRACKET>
+		n = <NON_NEGATIVE_INTEGER>
+		x = dataPropertyExpression()
+		( y = dataRange() )?
+	<CLOSE_BRACKET> {
+		if (y == nullptr) {
+			y = getBuilder()->getTopDataRange();
+		}
+		cint64 cardinality = JAVACC_TO_QSTRING(n->image).toLongLong();
+		return getBuilder()->getDataExactCardinality(x,y,cardinality);
+	}
+}
+
+
+/* 9 Axioms */
+CBuildExpressionPtr axiom():
+{
+	CBuildExpressionPtr x = nullptr; 
+}{
+	(
+	x = declaration()
+	| x = classAxiom()
+	| x = objectPropertyAxiom()
+	| x = dataPropertyAxiom()
+	| x = datatypeDefinition()
+	| x = hasKey()
+	| x = assertion()
+	| x = annotationAxiom()
+	) { return x; }
+}
+
+void axiomAnnotations():
+{}{
+	( annotation() )*
+}
+
+/* 9.1 Class Expression Axioms */
+CBuildExpressionPtr classAxiom():
+{
+	CBuildExpressionPtr x;
+}{ (
+	x = subClassOf()
+	| x = equivalentClasses()
+	| x = disjointClasses()
+	| x = disjointUnion()
+   ) { return x; }
+}
+
+/* 9.1.1 Subclass Axioms */
+CBuildExpressionPtr subClassOf():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<SUB_CLASS_OF> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = classExpression()
+		y = classExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getSubClassOf(x,y);
+	}
+}
+
+/* 9.1.2 Equivalent Classes */
+CBuildExpressionPtr equivalentClasses():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<EQUIVALENT_CLASSES> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = classExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getEquivalentClasses(v);
+	}
+}
+
+/* 9.1.3 Disjoint Classes */
+CBuildExpressionPtr disjointClasses():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DISJOINT_CLASSES> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = classExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDisjointClasses(v);
+	}
+}
+
+/* 9.1.4 Disjoint Union of Class Expressions */
+CBuildExpressionPtr disjointUnion():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DISJOINT_UNION> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = owlClass()
+		v = classExpressionList()
+	<CLOSE_BRACKET> {
+		v.prepend(x);
+		return getBuilder()->getDisjointUnion(v);
+	}
+}
+
+CEXPRESSIONLIST<CBuildExpressionPtr> classExpressionList():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	( x = classExpression() { v.append(x); } )+
+	{ return v; }
+}
+
+/* 9.2 Object Property Axioms */
+CBuildExpressionPtr objectPropertyAxiom():
+{
+	CBuildExpressionPtr x;
+}{
+	(
+	x = subObjectPropertyOf()
+	| x = equivalentObjectProperties()
+	| x = disjointObjectProperties()
+	| x = inverseObjectProperties()
+	| x = objectPropertyDomain()
+	| x = objectPropertyRange()
+	| x = functionalObjectProperty()
+	| x = inverseFunctionalObjectProperty()
+	| x = reflexiveObjectProperty()
+	| x = irreflexiveObjectProperty()
+	| x = symmetricObjectProperty()
+	| x = asymmetricObjectProperty()
+	| x = transitiveObjectProperty()
+	) { return x; }
+}
+
+/* 9.2.1 Object Subproperties */
+CBuildExpressionPtr subObjectPropertyOf():
+{
+	CBuildExpressionPtr x = nullptr;
+	CBuildExpressionPtr z;
+}{
+	<SUB_OBJECT_PROPERTY_OF> <OPEN_BRACKET>
+		axiomAnnotations()
+		(
+		  x = objectPropertyExpression()
+		| x = propertyExpressionChain()
+		)
+		z = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getSubObjectPropertyOf(x,z);
+	}
+}
+
+CBuildExpressionPtr propertyExpressionChain():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<OBJECT_PROPERTY_CHAIN> <OPEN_BRACKET>
+		v = objectPropertyExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectPropertyChain(v);
+	}
+}
+
+/* 9.2.2 Equivalent Object Properties */
+CBuildExpressionPtr equivalentObjectProperties():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<EQUIVALENT_OBJECT_PROPERTIES> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = objectPropertyExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getEquivalentObjectProperties(v);
+	}
+}
+
+/* 9.2.3 Disjoint Object Properties */
+CBuildExpressionPtr disjointObjectProperties():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DISJOINT_OBJECT_PROPERTIES> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = objectPropertyExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDisjointObjectProperties(v);
+	}
+}
+
+CEXPRESSIONLIST<CBuildExpressionPtr> objectPropertyExpressionList():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	( x = objectPropertyExpression() { v.append(x); } )+
+	{ return v; }
+}
+
+
+/* 9.2.4 Inverse Object Properties */
+CBuildExpressionPtr inverseObjectProperties():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<INVERSE_OBJECT_PROPERTIES> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+		y = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getInverseObjectProperties(x,y);
+	}
+}
+
+/* 9.2.5 Object Property Domain */
+CBuildExpressionPtr objectPropertyDomain():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<OBJECT_PROPERTY_DOMAIN> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+		y = classExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectPropertyDomainExpression(x,y);
+	}
+}
+
+/* 9.2.6 Object Property Range */
+CBuildExpressionPtr objectPropertyRange():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<OBJECT_PROPERTY_RANGE> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+		y = classExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectPropertyRangeExpression(x,y);
+	}
+}
+
+/* 9.2.7 Functional Object Properties */
+CBuildExpressionPtr functionalObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<FUNCTIONAL_OBJECT_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getFunctionalObjectProperty(x);
+	}
+}
+
+/* 9.2.8 Inverse-Functional Object Properties */
+CBuildExpressionPtr inverseFunctionalObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<INVERSE_FUNCTIONAL_OBJECT_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getInverseFunctionalObjectProperty(x);
+	}
+}
+
+/* 9.2.9 Reflexive Object Properties */
+CBuildExpressionPtr reflexiveObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<REFLEXIVE_OBJECT_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getReflexiveObjectProperty(x);
+	}
+}
+
+/* 9.2.10 Irreflexive Object Properties */
+CBuildExpressionPtr irreflexiveObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<IRREFLEXIVE_OBJECT_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getIrreflexiveObjectProperty(x);
+	}
+}
+
+/* 9.2.11 Symmetric Object Properties */
+CBuildExpressionPtr symmetricObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<SYMMETRIC_OBJECT_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getSymmetricObjectProperty(x);
+	}
+}
+
+/* 9.2.12 Asymmetric Object Properties */
+CBuildExpressionPtr asymmetricObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<ASYMMETRIC_OBJECT_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getAsymmetricObjectProperty(x);
+	}
+}
+
+/* 9.2.13 Transitive Object Properties */
+CBuildExpressionPtr transitiveObjectProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<TRANSITIVE_OBJECT_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+	<CLOSE_BRACKET>{
+		return getBuilder()->getTransetiveObjectProperty(x);
+	}
+}
+
+/* 9.3 Data Property Axioms */
+CBuildExpressionPtr dataPropertyAxiom():
+{
+	CBuildExpressionPtr x;
+}{
+	(
+	x = subDataPropertyOf()
+	| x = equivalentDataProperties()
+	| x = disjointDataProperties()
+	| x = dataPropertyDomain()
+	| x = dataPropertyRange()
+	| x = functionalDataProperty()
+	) { return x; }
+}
+
+/* 9.3.1 Data Subproperties */
+CBuildExpressionPtr subDataPropertyOf():
+{
+	CBuildExpressionPtr x,y;
+}{
+	<SUB_DATA_PROPERTY_OF> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = dataPropertyExpression()
+		y = dataPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getSubDataPropertyOf(x,y);
+	}
+}
+
+/* 9.3.2 Equivalent Data Properties */
+CBuildExpressionPtr equivalentDataProperties():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<EQUIVALENT_DATA_PROPERTIES> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = dataPropertyExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getEquivalentDataProperties(v);
+	}
+}
+
+/* 9.3.3 Disjoint Data Properties */
+CBuildExpressionPtr disjointDataProperties():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DISJOINT_DATA_PROPERTIES> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = dataPropertyExpressionList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDisjointDataProperties(v);
+	}
+}
+
+CEXPRESSIONLIST<CBuildExpressionPtr> dataPropertyExpressionList():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	( x = dataPropertyExpression() { v.append(x); } )+
+	{ return v; }
+}
+
+
+/* 9.3.4 Data Property Domain */
+CBuildExpressionPtr dataPropertyDomain():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<DATA_PROPERTY_DOMAIN> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = dataPropertyExpression()
+		y = classExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDataPropertyDomainExpression(x,y);
+	}
+}
+
+/* 9.3.5 Data Property Range */
+CBuildExpressionPtr dataPropertyRange():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<DATA_PROPERTY_RANGE> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = dataPropertyExpression()
+		y = dataRange()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDataPropertyRangeExpression(x,y);
+	}
+}
+
+/* 9.3.6 Functional Data Properties */
+CBuildExpressionPtr functionalDataProperty():
+{
+	CBuildExpressionPtr x;
+}{
+	<FUNCTIONAL_DATA_PROPERTY> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = dataPropertyExpression()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getFunctionalDataProperty(x);
+	}
+}
+
+/* 9.4 Datatype Definitions */
+CBuildExpressionPtr datatypeDefinition():
+{
+}{
+	<DATATYPE_DEFINITION> <OPEN_BRACKET>
+		axiomAnnotations()
+		datatype()
+		dataRange()
+	<CLOSE_BRACKET> {
+		return nullptr;
+	}
+}
+
+/* 9.5 Keys */
+CBuildExpressionPtr hasKey():
+{
+}{
+	<HAS_KEY> <OPEN_BRACKET>
+		axiomAnnotations()
+		classExpression()
+		<OPEN_BRACKET> ( objectPropertyExpression() )* <CLOSE_BRACKET>
+		<OPEN_BRACKET> ( objectPropertyExpression() )* <CLOSE_BRACKET>
+	<CLOSE_BRACKET> {
+		return nullptr;
+	}
+}
+
+/* 9.6 Assertions */
+CBuildExpressionPtr assertion():
+{
+	CBuildExpressionPtr x;
+}{
+	(
+	x = sameIndividual()
+	| x = differentIndividuals()
+	| x = classAssertion()
+	| x = objectPropertyAssertion()
+	| x = negativeObjectPropertyAssertion()
+	| x = dataPropertyAssertion()
+	| x = negativeDataPropertyAssertion()
+	) { return x; }
+}
+
+/* 9.6.1 Individual Equality */
+CBuildExpressionPtr sameIndividual():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<SAME_INDIVIDUAL> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = individualList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getSameIndividual(v);
+	}
+}
+
+/* 9.6.2 Individual Inequality */
+CBuildExpressionPtr differentIndividuals():
+{
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	<DIFFERENT_INDIVIDUALS> <OPEN_BRACKET>
+		axiomAnnotations()
+		v = individualList()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDifferentIndividuals(v);
+	}
+}
+
+CEXPRESSIONLIST<CBuildExpressionPtr> individualList():
+{
+	CBuildExpressionPtr x;
+	CEXPRESSIONLIST<CBuildExpressionPtr> v;
+}{
+	( x = individual() { v.append(x); } )+
+	{ return v;	}
+}
+
+/* 9.6.3 Class Assertions */
+CBuildExpressionPtr classAssertion():
+{
+	CBuildExpressionPtr x, y;
+}{
+	<CLASS_ASSERTION> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = classExpression()
+		y = individual()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getClassAssertion(x,y);
+	}
+}
+
+/* 9.6.4 Positive Object Property Assertions */
+CBuildExpressionPtr objectPropertyAssertion():
+{
+	CBuildExpressionPtr x, y, z;
+}{
+	<OBJECT_PROPERTY_ASSERTION> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+		y = individual()
+		z = individual()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getObjectPropertyAssertion(x,y,z);
+	}
+}
+
+/* 9.6.5 Negative Object Property Assertions */
+CBuildExpressionPtr negativeObjectPropertyAssertion():
+{
+	CBuildExpressionPtr x, y, z;
+}{
+	<NEGATIVE_OBJECT_PROPERTY_ASSERTION> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = objectPropertyExpression()
+		y = individual()
+		z = individual()
+	<CLOSE_BRACKET> {
+		return getBuilder()->getNegativeObjectPropertyAssertion(x,y,z);
+	}
+}
+
+/* 9.6.6 Positive Data Property Assertions */
+CBuildExpressionPtr dataPropertyAssertion():
+{
+	CBuildExpressionPtr x, y, z;
+}{
+	<DATA_PROPERTY_ASSERTION> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = dataPropertyExpression()
+		y = individual()
+		z = literal(false)
+	<CLOSE_BRACKET> {
+		return getBuilder()->getDataPropertyAssertion(x,y,z);
+	}
+}
+
+/* 9.6.7 Negative Data Property Assertions */
+CBuildExpressionPtr negativeDataPropertyAssertion():
+{
+	CBuildExpressionPtr x, y, z;
+}{
+	<NEGATIVE_DATA_PROPERTY_ASSERTION> <OPEN_BRACKET>
+		axiomAnnotations()
+		x = dataPropertyExpression()
+		y = individual()
+		z = literal(false)
+	<CLOSE_BRACKET> {
+		return getBuilder()->getNegativeDataPropertyAssertion(x,y,z);
+	}
+}
+
+
+/* 10 Annotations */
+
+/* 10.1 Annotations of Ontologies, Axioms, and other Annotations */
+CBuildExpressionPtr annotation(): 
+{
+}{
+	<ANNOTATION> <OPEN_BRACKET>
+		annotationAnnotations()
+		annotationProperty()
+		annotationValue()
+	<CLOSE_BRACKET> {
+		return nullptr;
+	}
+}
+
+void annotationAnnotations():
+{}{
+	( annotation() )*
+}
+
+CBuildExpressionPtr annotationValue():
+{
+}{
+	( anonymousIndividual() 
+	| iri() 
+	| literal(true)
+	) {
+		return nullptr;
+	}
+}
+
+/* 10.2 Annotation Axioms */
+CBuildExpressionPtr annotationAxiom():
+{
+}{
+	( annotationAssertion()
+	| subAnnotationPropertyOf()
+	| annotationPropertyDomain()
+	| annotationPropertyRange()
+	) { 
+		return nullptr; 
+	}
+}
+
+/* 10.2.1 Annotation Assertion */
+CBuildExpressionPtr annotationAssertion():
+{
+}{
+	<ANNOTATION_ASSERTION> <OPEN_BRACKET>
+		axiomAnnotations()
+		annotationProperty()
+		annotationSubject()
+		annotationValue()
+	<CLOSE_BRACKET> {
+		return nullptr;
+	}
+}
+
+CBuildExpressionPtr annotationSubject():
+{
+}{
+	( iri() 
+	| anonymousIndividual()
+	) {
+		return nullptr;
+	}
+}
+
+/* 10.2.2 Annotation Subproperties */
+CBuildExpressionPtr subAnnotationPropertyOf():
+{
+}{
+	<SUB_ANNOTATION_PROPERTY_OF> <OPEN_BRACKET>
+		axiomAnnotations()
+		annotationProperty()
+		annotationProperty()
+	<CLOSE_BRACKET> {
+		return nullptr;
+	}
+}
+
+
+/* 10.2.3 Annotation Property Domain */
+CBuildExpressionPtr annotationPropertyDomain():
+{
+}{
+	<ANNOTATION_PROPERTY_DOMAIN> <OPEN_BRACKET>
+		axiomAnnotations()
+		annotationProperty()
+		iri()
+	<CLOSE_BRACKET> {
+		return nullptr;
+	}
+}
+
+/* 10.2.4 Annotation Property Range */
+CBuildExpressionPtr annotationPropertyRange():
+{
+}{
+	<ANNOTATION_PROPERTY_RANGE> <OPEN_BRACKET>
+		axiomAnnotations()
+		annotationProperty()
+		iri()
+	<CLOSE_BRACKET> {
+		return nullptr;
+	}
+}

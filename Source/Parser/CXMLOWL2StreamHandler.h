@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -80,37 +80,41 @@ namespace Konclude {
 				CStreamParseFunctionData() {
 					mParseDelayedFunction = nullptr;
 					mParseDirectFunction = nullptr;
-					mRequiresCardinalityParsing = false;
+					mExtraParsingFlags = 0;
 				}
-				CStreamParseFunctionData(StreamParseFunctionDelayed parseDelayedFunction) {
+				CStreamParseFunctionData(StreamParseFunctionDelayed parseDelayedFunction, cint64 extraParsingFlags = 0) {
 					mParseDelayedFunction = parseDelayedFunction;
 					mParseDirectFunction = nullptr;
-					mRequiresCardinalityParsing = false;
-				}
-				CStreamParseFunctionData(StreamParseFunctionDelayed parseDelayedFunction, bool parseCardinalityRequired) {
-					mParseDelayedFunction = parseDelayedFunction;
-					mParseDirectFunction = nullptr;
-					mRequiresCardinalityParsing = parseCardinalityRequired;
+					mExtraParsingFlags = extraParsingFlags;
 				}
 				CStreamParseFunctionData(StreamParseFunctionDirect parseDirectFunction) {
 					mParseDelayedFunction = nullptr;
 					mParseDirectFunction = parseDirectFunction;
-					mRequiresCardinalityParsing = false;
+					mExtraParsingFlags = 0;
 				}
 
 				StreamParseFunctionDelayed mParseDelayedFunction;
 				StreamParseFunctionDirect mParseDirectFunction;
-				bool mRequiresCardinalityParsing;
+
+				const static cint64 EPF_CARDINALITY					= 0x0001;
+				const static cint64 EPF_DATATYPE_IRI				= 0x0002;
+				const static cint64 EPF_FACET_IRI					= 0x0004;
+				const static cint64 EPF_TEXT_ELEMENT				= 0x0008;
+				const static cint64 EPF_LITERAL_APPENDIX			= 0x0010;
+
+				cint64 mExtraParsingFlags;
 		};
 
 
 		class CStreamParseStackObject {
 			public:
-				inline CStreamParseStackObject() : mParseFunction(nullptr),mCardinality(0),mCardinalityParsed(false) {
+				inline CStreamParseStackObject() : mParseFunction(nullptr),mCardinality(0),mCardinalityParsed(false),mIRIParsed(false) {
 				}
-				inline CStreamParseStackObject(StreamParseFunctionDelayed parseFunction) : mParseFunction(parseFunction),mCardinality(0),mCardinalityParsed(false) {
+				inline CStreamParseStackObject(StreamParseFunctionDelayed parseFunction) : mParseFunction(parseFunction),mCardinality(0),mCardinalityParsed(false),mIRIParsed(false) {
 				}
-				inline CStreamParseStackObject(StreamParseFunctionDelayed parseFunction, cint64 cardinality) : mParseFunction(parseFunction),mCardinality(cardinality),mCardinalityParsed(true) {
+				inline CStreamParseStackObject(StreamParseFunctionDelayed parseFunction, cint64 cardinality) : mParseFunction(parseFunction),mCardinality(cardinality),mCardinalityParsed(true),mIRIParsed(false) {
+				}
+				inline CStreamParseStackObject(StreamParseFunctionDelayed parseFunction, const QString& parsedIRI) : mParseFunction(parseFunction),mCardinality(0),mCardinalityParsed(false),mIRIParsed(true),mParsedIRI(parsedIRI) {
 				}
 
 				inline CStreamParseStackObject* addBuildExpression(CBuildExpression* buildExpression) {
@@ -135,9 +139,15 @@ namespace Konclude {
 					return &mExpList;
 				}
 
+				inline QString& getParsedIRI() {
+					return mParsedIRI;
+				}
+
 				StreamParseFunctionDelayed mParseFunction;
 				cint64 mCardinality;
 				bool mCardinalityParsed;
+				QString mParsedIRI;
+				bool mIRIParsed;
 
 				CQtList<CBuildExpression*> mExpList;
 		};
@@ -191,10 +201,14 @@ namespace Konclude {
 				virtual bool startElement(const QStringRef& namespaceURI, const QStringRef& localName, const QStringRef& qName, const QXmlStreamAttributes& atts);
 				virtual bool endElement(const QStringRef& namespaceURI, const QStringRef& localName, const QStringRef& qName);
 
+
+				virtual bool readText(const QStringRef& text);
+
+
 				virtual bool startDocument();
 				virtual bool endDocument();
 				
-				
+				bool hasOntologyNodeFound();
 
 			// protected methods
 			protected:
@@ -203,7 +217,10 @@ namespace Konclude {
 				bool getCardinality(cint64* cardinality, const QXmlStreamAttributes& attributes);
 				QStringRef getNodeID(const QXmlStreamAttributes& attributes);
 				bool startsWithScheme(const QStringRef& uriString);
+				bool getDatatypeIRI(QString* datatypeIRI, const QXmlStreamAttributes& attributes);
+				bool getFacetIRI(QString* facetIRI, const QXmlStreamAttributes& attributes);
 
+				bool getLiteralAppendix(QString* literalAppendix, const QXmlStreamAttributes& attributes);
 
 				virtual bool parseXMLAttributs(const QXmlStreamAttributes& atts);
 
@@ -363,6 +380,69 @@ namespace Konclude {
 				void jumpFunctionParseIgnoredNode(CStreamParseStackObject* parseStackObj);
 
 				void jumpFunctionUnsupportedDatatypeNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionUnsupportedRDFNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionUnsupportedImportNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionUnsupportedAnnotationNode(const QXmlStreamAttributes& attributes);
+
+				void jumpFunctionParseImportNode(CStreamParseStackObject* parseStackObj);
+
+
+
+				CDatatypeExpression* parseDatatypeNode(const QXmlStreamAttributes& attributes);
+				CDataPropertyExpression* parseDataPropertyNode(const QXmlStreamAttributes& attributes);
+				CDataLiteralExpression* parseDataLiteralNode(CStreamParseStackObject* parseStackObj);
+				CDataSomeValuesFromExpression* parseDataSomeValuesFromNode(CStreamParseStackObject* parseStackObj);
+
+
+				CDataFacetRestrictionExpression* parseDataFacetRestrictionNode(CStreamParseStackObject* parseStackObj);
+
+				CDataAllValuesFromExpression* parseDataAllValuesFromNode(CStreamParseStackObject* parseStackObj);
+				CDataHasValueExpression* parseDataHasValueNode(CStreamParseStackObject* parseStackObj);
+				CDataIntersectionOfExpression* parseDataIntersectionOfNode(CStreamParseStackObject* parseStackObj);
+				CDataOneOfExpression* parseDataOneOfNode(CStreamParseStackObject* parseStackObj);
+				CDataUnionOfExpression* parseDataUnionOfNode(CStreamParseStackObject* parseStackObj);
+				CDataComplementOfExpression* parseDataComplementOfNode(CStreamParseStackObject* parseStackObj);
+				CDatatypeRestrictionExpression* parseDatatypeRestrictionNode(CStreamParseStackObject* parseStackObj);
+				CDataMaxCardinalityExpression* parseDataMaxCardinalityNode(CStreamParseStackObject* parseStackObj);
+				CDataMinCardinalityExpression* parseDataMinCardinalityNode(CStreamParseStackObject* parseStackObj);
+				CDataExactCardinalityExpression* parseDataExactCardinalityNode(CStreamParseStackObject* parseStackObj);
+				CDataPropertyAssertionExpression* parseDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj);
+				CNegativeDataPropertyAssertionExpression* parseNegativeDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj);
+				CSubDataPropertyOfExpression* parseSubDataPropertyOfNode(CStreamParseStackObject* parseStackObj);
+				CEquivalentDataPropertiesExpression* parseEquivalentDataPropertiesNode(CStreamParseStackObject* parseStackObj);
+				CDisjointDataPropertiesExpression* parseDisjointDataPropertiesNode(CStreamParseStackObject* parseStackObj);
+				CDataPropertyDomainExpression* parseDataPropertyDomainNode(CStreamParseStackObject* parseStackObj);
+				CDataPropertyRangeExpression* parseDataPropertyRangeNode(CStreamParseStackObject* parseStackObj);
+				CFunctionalDataPropertyExpression* parseFunctionalDataPropertyNode(CStreamParseStackObject* parseStackObj);
+
+
+				void jumpFunctionParseDatatypeNode(const QXmlStreamAttributes& attributes);
+				void jumpFunctionParseDataPropertyNode(const QXmlStreamAttributes& attributes);
+				void jumpFunctionParseDataLiteralNode(CStreamParseStackObject* parseStackObj);
+
+				void jumpFunctionParseDataSomeValuesFromNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataAllValuesFromNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataHasValueNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataIntersectionOfNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataOneOfNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataUnionOfNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataComplementOfNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDatatypeRestrictionNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataMaxCardinalityNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataMinCardinalityNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataExactCardinalityNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseNegativeDataPropertyAssertionNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseSubDataPropertyOfNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseEquivalentDataPropertiesNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDisjointDataPropertiesNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataPropertyDomainNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataPropertyRangeNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseFunctionalDataPropertyNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseDataFacetRestrictionNode(CStreamParseStackObject* parseStackObj);
+
+
+
 
 
 				void addTemporaryBuildExpression(CBuildExpression* buildExp);
@@ -394,13 +474,15 @@ namespace Konclude {
 
 
 
+
 				CStreamParseStackObject mDummyFunctionData;
 
 				CQtHash<CStringRefStringHasher,CStreamParseFunctionData> mBaseParseFunctionJumpHash;
 
 				QList<CBuildExpression*> mRuleExpContainer;
 
-
+				QString mLastReadText;
+				QString mLastTextAppendix;
 				CQtList<CBuildExpression*> mTmpExpList;
 
 				QString mOWLString;
@@ -418,6 +500,12 @@ namespace Konclude {
 				QString mCardinalityString;
 				QString mOWLPrefixCardinalityString;
 
+				QString mDatatypeIRIString;
+				QString mOWLPrefixDatatypeIRIString;
+
+				QString mFacetIRIString;
+				QString mOWLPrefixFacetIRIString;
+
 				QString mNodeIDString;
 				QString mOWLPrefixNodeIDString;
 
@@ -431,6 +519,15 @@ namespace Konclude {
 
 				cint64 mDataTypeReportErrorCount;
 				cint64 mAnnotationReportErrorCount;
+
+				bool mUnsupportedImportError;
+				bool mUnsupportedAnnotationError;
+				bool mOntologyNodeFound;
+
+
+				cint64 mParseIgnoreDepth;
+				bool mIgnoreParsingSubElements;
+				bool mParseTextElement;
 
 			// private methods
 			private:

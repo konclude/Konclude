@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -87,13 +87,14 @@ namespace Konclude {
 													foundError = true;
 													break;
 
-												} else if (classResEl.nodeName() == "ClassHierarchy" || classResEl.nodeName() == "BooleanResponse") {
+												} else if (classResEl.nodeName() == "ClassHierarchy" || classResEl.nodeName() == "BooleanResponse" || classResEl.nodeName() == "Classes") {
 													foundResult = true;
 													CClassHierarchyResult* classHierResult = nullptr;
 													if (lastClassHierResult && lastClassHierResultNumber == nodeNumber) {
 														classHierResult = lastClassHierResult;
 													}
 													CBooleanQueryResult* booleanResult = nullptr;
+													CClassesResult* classesResult = nullptr;
 
 													cint64 diffCount = 0;
 
@@ -126,6 +127,16 @@ namespace Konclude {
 															if (!isBooleanResultSimilarTo(booleanResult,nodeNumber,otherResponseFileString)) {
 																diffCount = 1;
 															}
+														} else if (classResEl.nodeName() == "Classes") {
+															if (!classesResult) {
+																classesResult = mResultParser.parseClassesResult(&classResEl);
+															}
+
+															QString otherResponseFileString = otherResponseFileStringList.first();
+															LOG(INFO,"::Konclude::Test::Evaluation::ResultDifferenceAnalyser",logTr("Comparing classes results between '%1' and '%2'.").arg(responseFileString).arg(otherResponseFileString),this);
+															if (!isClassesResultSimilarTo(classesResult,nodeNumber,otherResponseFileString)) {
+																diffCount = 1;
+															}
 														}
 														compareDiffCountHash->insert(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal),diffCount);
 													}
@@ -142,6 +153,9 @@ namespace Konclude {
 													}
 													if (booleanResult) {
 														delete booleanResult;
+													}
+													if (classesResult) {
+														delete classesResult;
 													}
 
 												} 
@@ -250,6 +264,46 @@ namespace Konclude {
 				return resultSimilar;
 			}
 
+
+
+			bool CReasonerEvaluationGroupRequestReasonerResultDifferenceAnalyser::isClassesResultSimilarTo(CClassesResult* classesResult, cint64 nodeNumber, const QString& otherResponseFileString) {
+				bool resultSimilar = true;
+				QFile responseFile(otherResponseFileString);
+				if (responseFile.open(QIODevice::ReadOnly)) {
+					QDomDocument document;
+					document.setContent(&responseFile,false);
+					QDomElement rootEl = document.documentElement();
+					QDomElement classResEl = rootEl.firstChildElement();
+					cint64 currNodeNumber = 0;
+					if (!classResEl.isNull()) {
+						while (!classResEl.isNull()) {
+							if (classResEl.nodeName() == "Error") {
+								break;
+
+							} else if (currNodeNumber == nodeNumber && classResEl.nodeName() == "Classes") {
+								CClassesResult* otherClassesResult = mResultParser.parseClassesResult(&classResEl);
+								if (otherClassesResult) {
+
+									if (!classesResult->isResultEquivalentTo(otherClassesResult)) {
+										resultSimilar = false;
+									}
+
+									delete otherClassesResult;
+								}
+								break;
+
+							} else {
+								++currNodeNumber;
+								if (currNodeNumber > nodeNumber) {
+									break;
+								}
+								classResEl = classResEl.nextSiblingElement();
+							}
+						}
+					}
+				}
+				return resultSimilar;
+			}
 
 			bool CReasonerEvaluationGroupRequestReasonerResultDifferenceAnalyser::analyseGroupedEvaluationData(const QStringList& groubList, const QStringList& requestList, const QStringList& reasonerList, const QString& outputDirectory, CReasonerEvaluationAnalyseContext* context, CReasonerEvaluationGroupRequestSelector* selector) {
 

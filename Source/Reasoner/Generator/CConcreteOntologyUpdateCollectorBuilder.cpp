@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -50,6 +50,10 @@ namespace Konclude {
 				mChangeAxiomList = mOntoBuild->getChangeAxiomList();
 				mChangeUpdatedAxiomList = mOntoBuild->getUpdatedChangeAxiomList();
 
+				mLocTellUpdatedAxiomSet.clear();
+				mLocRetractUpdatedAxiomSet.clear();
+				mLocAddedImportOntologies.clear();
+
 				return true;
 			}
 
@@ -60,11 +64,11 @@ namespace Konclude {
 				mOntoBuild->setNextAxiomNumber(mNextAxiomNumber+mNextMaxAxiomNumberOffset);
 				mOntoBuild->setNextEntityNumber(mNextEntityNumber);
 
-				FOREACHIT (CAxiomExpression* axiomExp, *mRetractUpdatedAxiomSet) {
+				FOREACHIT (CAxiomExpression* axiomExp, mLocRetractUpdatedAxiomSet) {
 					mChangeUpdatedAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,false) );
 					mChangeAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,false) );
 				}
-				FOREACHIT (CAxiomExpression* axiomExp, *mTellUpdatedAxiomSet) {
+				FOREACHIT (CAxiomExpression* axiomExp, mLocTellUpdatedAxiomSet) {
 					mChangeUpdatedAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,true) );
 					mChangeAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,true) );
 				}
@@ -79,10 +83,12 @@ namespace Konclude {
 				if (!mTellAxiomSet->contains(axiom)) {
 					mRetractAxiomSet->remove(axiom);
 					mTellAxiomSet->insert(axiom);
-					if (mRetractUpdatedAxiomSet->contains(axiom)) {
+					if (mLocRetractUpdatedAxiomSet.contains(axiom)) {
 						mRetractUpdatedAxiomSet->remove(axiom);
+						mLocRetractUpdatedAxiomSet.remove(axiom);
 					} else {
 						mTellUpdatedAxiomSet->insert(axiom);
+						mLocTellUpdatedAxiomSet.insert(axiom);
 					}
 				}
 				return true;
@@ -92,13 +98,40 @@ namespace Konclude {
 				if (mTellAxiomSet->contains(axiom)) {
 					mTellAxiomSet->remove(axiom);
 					mRetractAxiomSet->insert(axiom);
-					if (mTellUpdatedAxiomSet->contains(axiom)) {
+					if (mLocTellUpdatedAxiomSet.contains(axiom)) {
 						mTellUpdatedAxiomSet->remove(axiom);
+						mLocTellUpdatedAxiomSet.remove(axiom);
 					} else {
 						mRetractUpdatedAxiomSet->insert(axiom);
+						mLocRetractUpdatedAxiomSet.insert(axiom);
 					}
 				}
 				return true;
+			}
+
+
+
+			bool CConcreteOntologyUpdateCollectorBuilder::addOntologyImport(const QStringRef& name) {
+				if (CConcreteOntologyBuildDataUpdater::addOntologyImport(name)) {
+					mLocAddedImportOntologies.append(name.toString());
+					return true;
+				}
+				return false;
+			}
+
+			bool CConcreteOntologyUpdateCollectorBuilder::addOntologyImport(const QString& name) {
+				if (CConcreteOntologyBuildDataUpdater::addOntologyImport(name)) {
+					mLocAddedImportOntologies.append(name);
+					return true;
+				}
+				return false;
+			}
+
+
+			QList<QString> CConcreteOntologyUpdateCollectorBuilder::takeAddedImportOntologyList() {
+				QList<QString> tmpList(mLocAddedImportOntologies);
+				mLocAddedImportOntologies.clear();
+				return tmpList;
 			}
 
 

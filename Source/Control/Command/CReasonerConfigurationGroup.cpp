@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -76,6 +76,17 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Logging.MinLoggingLevel",
+						"Minimum logging level.",
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
+
+				addConfigProperty(new CConfigDescription("Konclude.Logging.MaxLogMessageCount",
+						"Maximum number of log messages that are kept by the logger.",
+						new CIntegerConfigType(-1)),
+						new CIntegerConfigType(-1));
+
+
 				// Parallelisation configurations
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.ProcessorCount",
@@ -100,10 +111,14 @@ namespace Konclude {
 						new CIntegerConfigType(1024*1024*1200));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Memory.IncreaseAllocationSize",
 						"Sets the memory allocation increasing size for the calculation.",
-						new CIntegerConfigType(1024*1024*25)),
-						new CIntegerConfigType(1024*1024*25));
+						new CIntegerConfigType(1024*1024*512)),
+						new CIntegerConfigType(1024*1024*512));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.DatatypeReasoning",
+						"Determines whether datatype reasoning is activated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -303,7 +318,29 @@ namespace Konclude {
 						"Determines whether the reasoner uses the completion graph from the consistency test to improve the saturation of concept that have a connection to nominals.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationExpansionSatisfiabilityCacheWriting",
+						"Determines whether the reasoner caches expansions and satisfiability for saturated nodes.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationExpansionSatisfiabilityCacheCount",
+						"Determines how many expansions are cached by the reasoner for each saturated nodes.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationUnsatisfiabilityCacheWriting",
+						"Determines whether the reasoner caches and propagates unsatisfiability for saturated nodes.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.EquivalentAlternativesSaturationMerging",
+						"Determinses whether model merging with the saturation for alternatives of equivalent candidate concepts is used to prune possible subsumers.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.ConceptSaturation",
+						"Determinses whether concepts are saturated for the assisting of the tableau algorithm.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -333,12 +370,16 @@ namespace Konclude {
 						"Determines whether the ontology is preprocessed with general concept axioms (GCI) absorption into triggered binary implications.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.GCIAbsorption.TriggeredImplicationGCIAbsorption",
-						"Determines whether the ontology is preprocessed with general concept axioms (GCI) absorption into triggered implications.",
-						new CBooleanConfigType(false)),
-						new CBooleanConfigType(false));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.SubroleTransformation",
 						"Determines whether the ontology is preprocessed with subrole transformation.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.DatatypeNormalizer",
+						"Determines whether the ontology is preprocessed with datatype normalization.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.DataLiteralValueNormalizer",
+						"Determines whether the ontology is preprocessed with data literal value normalization.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.OntologyAssignmentTransformation",
@@ -389,6 +430,15 @@ namespace Konclude {
 						"Determines whether in the preprocessing phase equivalent defined concepts are absorbed to subclasses and implications.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.PartialEquivalentDefinitionToCandidatesAbsorption",
+						"Determines whether in the preprocessing phase equivalent defined concepts are partially absorbed to candidates.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.PartialDisjunctionAbsorption",
+						"Determines whether in the preprocessing phase disjunctions are partially.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.PartialGCIImplicationAbsorption",
 						"Determines whether in the preprocessing phase GCIs are partially absorbed.",
 						new CBooleanConfigType(true)),
@@ -399,8 +449,8 @@ namespace Konclude {
 						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.DisjunctSorting",
 						"Determines whether the disjuncts in disjunctions are sorted.",
-						new CBooleanConfigType(false)),
-						new CBooleanConfigType(false));
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.NominalSchemaTemplateExtraction",
 						"Determines whether in the preprocessing phase nominal schema templates are extracted.",
 						new CBooleanConfigType(true)),
@@ -433,6 +483,10 @@ namespace Konclude {
 						"Determines whether in the preprocessing phase all concepts and roles that are relevant for inferences are marked.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.DatatypeAbsorption",
+						"Determines whether datatypes are absorbed.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.CoreConceptCyclesExtraction.SkipForELFragment",
@@ -587,6 +641,10 @@ namespace Konclude {
 						new CIntegerConfigType(600));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.SaturationSubsumerExtraction",
+						"Determinses whether the subsumption relations are extracted from the saturation.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -811,18 +869,59 @@ namespace Konclude {
 						new CStringConfigType("Evaluation/Filters/ABoxFilter.txt"));
 
 
-				
-				addConfigProperty(new CConfigDescription("Konclude.Debug.CacheLineWriteViewer",
-						"Widget that shows written Cache lines.",
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.GenerateClassifyTests",
+						"Determines whether classification tests are generated.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
-				addConfigProperty(new CConfigDescription("Konclude.Debug.VisualizeCalcBoxIndividuals",
-						"Shows individuals from CalcBoxes in the CalcBox-Tracking-View.",
-						new CBooleanConfigType(true)),
-						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.GenerateConsistencyTests",
+						"Determines whether consistency tests are generated.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.GenerateSatisfiabilityTests",
+						"Determines whether satisfiability tests are generated.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.GenerateTypeTests",
+						"Determines whether type tests are generated.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+
 				
 				addConfigProperty(new CConfigDescription("Konclude.Debug.PrecheckReasoning",
 						"Prechecking Query with Default Reasoner before Debugging.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debug.FailAfterConsistencyConceptSaturation",
+						"Fail after the saturation of concepts required for the consistency test for debugging.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debug.FailAfterConsistencyCheck",
+						"Fail after the consistency test for debugging.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debug.FailAfterConceptSaturation",
+						"Fail after the saturation of concepts for debugging.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debug.FailAfterPreprocessing",
+						"Fail after the preprocessing for debugging.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debug.FailAfterBuilt",
+						"Fail after the built for debugging.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
@@ -877,6 +976,10 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing",
+						"Determines whether UTF-8 compatibility is enforced for stream-based XML parsing.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 				
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.AbbreviatedIRIs",
@@ -1159,6 +1262,15 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SystemReadyRetestTimeForTests",
+						"Waiting time for retest whether system is ready for next evaluation test in milliseconds.",
+						new CIntegerConfigType(false)),
+						new CIntegerConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.CriticalSystemProcessTesterProgram",
+						"Program/Script/Command Line that returns 1 if there are running critical processes on the system.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
 
 
 
@@ -1174,6 +1286,17 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
+
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Output.WriteOnlyDirectTypes",
+						"Determines whether only direct types are written to the output file for realization tasks.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Output.WriteReducedInconsistency",
+						"Determines whether for inconsistent ontologies only SubclassOf(Top,Bottom) is written to the output.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 
 
@@ -1211,7 +1334,12 @@ namespace Konclude {
 
 
 				addConfigProperty(new CConfigDescription("Konclude.ORE.ClassHierarchyResult.WriteDeclarations",
-						"Determines whether declarations are also written to the output file.",
+						"Determines whether declarations are also written to the output file for the class hierarchy.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.ClassHierarchyResult.AbbreviatedIRIs",
+						"Determines whether abbreviated IRIs are used for the classes.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
@@ -1225,16 +1353,38 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
-					addConfigProperty(new CConfigDescription("Konclude.ORE.ClassHierarchyResult.WriteReducedBottomSubclasses",
+				addConfigProperty(new CConfigDescription("Konclude.ORE.ClassHierarchyResult.WriteReducedBottomSubclasses",
 						"Determines whether only SubclassOf(A,Bottom) axioms are written for all classes A that are semantically equivalent to Bottom.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
-					addConfigProperty(new CConfigDescription("Konclude.ORE.ClassHierarchyResult.WriteReducedInconsistency",
+				addConfigProperty(new CConfigDescription("Konclude.ORE.ClassHierarchyResult.WriteReducedInconsistency",
 						"Determines whether only SubclassOf(Top,Bottom) is written for inconsistent ontologies.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.RealizationResult.WriteDeclarations",
+						"Determines whether declarations are also written to the realization output file.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.RealizationResult.AbbreviatedIRIs",
+						"Determines whether abbreviated IRIs are used for the individuals and classes.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.RealizationResult.WriteReducedInconsistency",
+						"Determines whether only SubclassOf(Top,Bottom) is written for inconsistent ontologies.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.RealizationResult.WriteOnlyDirectTypes",
+						"Determines whether only direct types are written to the output file for realization tasks.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 			}
 
 

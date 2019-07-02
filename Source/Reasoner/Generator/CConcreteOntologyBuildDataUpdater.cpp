@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -47,6 +47,14 @@ namespace Konclude {
 					if (indiExp) {
 						return getDeclaration((CExpressionEntity*)indiExp);
 					}
+					CDataPropertyExpression* dataPropExp = dynamic_cast<CDataPropertyExpression*>(buildExpression);
+					if (dataPropExp) {
+						return getDeclaration((CExpressionEntity*)dataPropExp);
+					}
+					CDatatypeExpression* datatypeExp = dynamic_cast<CDatatypeExpression*>(buildExpression);
+					if (datatypeExp) {
+						return getDeclaration((CExpressionEntity*)datatypeExp);
+					}
 				}
 				LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'Declaration'-Expression."),this);
 				return nullptr;
@@ -67,6 +75,14 @@ namespace Konclude {
 					if (indiExp) {
 						return getDeclaration((CExpressionEntity*)indiExp);
 					}
+					CDataPropertyExpression* dataPropExp = dynamic_cast<CDataPropertyExpression*>(buildExpression);
+					if (dataPropExp) {
+						return getDeclaration((CExpressionEntity*)dataPropExp);
+					}
+					CDatatypeExpression* datatypeExp = dynamic_cast<CDatatypeExpression*>(buildExpression);
+					if (datatypeExp) {
+						return getDeclaration((CExpressionEntity*)datatypeExp);
+					}
 				}
 				LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'Declaration'-Expression."),this);
 				return nullptr;
@@ -76,7 +92,7 @@ namespace Konclude {
 			CEquivalentClassesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentClasses(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CEquivalentClassesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getEquivalentClasses(*expSplitter.getClassTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'EquivalentClasses'-Expression."),this);
@@ -87,7 +103,7 @@ namespace Konclude {
 			CEquivalentClassesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentClasses(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CEquivalentClassesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getEquivalentClasses(*expSplitter.getClassTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'EquivalentClasses'-Expression."),this);
@@ -98,7 +114,7 @@ namespace Konclude {
 			CSubClassOfExpression* CConcreteOntologyBuildDataUpdater::getSubClassOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CSubClassOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getSubClassOf(expSplitter.getFirstClassTermExpression(),expSplitter.getSecondClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SubClassOf'-Expression."),this);
@@ -109,7 +125,7 @@ namespace Konclude {
 			CSubClassOfExpression* CConcreteOntologyBuildDataUpdater::getSubClassOf(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CSubClassOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getSubClassOf(expSplitter.getFirstClassTermExpression(),expSplitter.getSecondClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SubClassOf'-Expression."),this);
@@ -121,7 +137,7 @@ namespace Konclude {
 			CDisjointClassesExpression* CConcreteOntologyBuildDataUpdater::getDisjointClasses(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CDisjointClassesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					expression = getDisjointClasses(*expSplitter.getClassTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DisjointClasses'-Expression."),this);
@@ -132,7 +148,7 @@ namespace Konclude {
 			CDisjointUnionExpression* CConcreteOntologyBuildDataUpdater::getDisjointUnion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CDisjointUnionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(2)) {
+				if (expSplitter.testForExpressionComposition(2)) {
 					CEXPRESSIONLIST<CClassTermExpression*>* classTermExpressionList = expSplitter.getClassTermExpressionList();
 					CClassExpression* classExpression = nullptr;
 					cint64 pos = -1;
@@ -158,7 +174,7 @@ namespace Konclude {
 			CObjectComplementOfExpression* CConcreteOntologyBuildDataUpdater::getObjectComplementOf(CBuildExpression* compExpression) {
 				CObjectComplementOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(compExpression);
-				if (expSplitter.proofExpressionComposition(1)) {
+				if (expSplitter.testForExpressionComposition(1)) {
 					expression = getObjectComplementOf(expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectComplementOf'-Expression."),this);
@@ -169,7 +185,7 @@ namespace Konclude {
 			CObjectComplementOfExpression* CConcreteOntologyBuildDataUpdater::getObjectComplementOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectComplementOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(1)) {
+				if (expSplitter.testForExpressionComposition(1)) {
 					expression = getObjectComplementOf(expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectComplementOf'-Expression."),this);
@@ -180,7 +196,7 @@ namespace Konclude {
 			CObjectIntersectionOfExpression* CConcreteOntologyBuildDataUpdater::getObjectIntersectionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectIntersectionOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0)) {
+				if (expSplitter.testForExpressionComposition(0)) {
 					expression = getObjectIntersectionOf(*expSplitter.getClassTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectIntersectionOf'-Expression."),this);
@@ -191,7 +207,7 @@ namespace Konclude {
 			CObjectUnionOfExpression* CConcreteOntologyBuildDataUpdater::getObjectUnionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectUnionOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0)) {
+				if (expSplitter.testForExpressionComposition(0)) {
 					expression = getObjectUnionOf(*expSplitter.getClassTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectUnionOf'-Expression."),this);
@@ -202,7 +218,7 @@ namespace Konclude {
 			CObjectMaxCardinalityExpression* CConcreteOntologyBuildDataUpdater::getObjectMaxCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
 				CObjectMaxCardinalityExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectMaxCardinality(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression(),cardinality);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectMaxCardinality'-Expression."),this);
@@ -213,7 +229,7 @@ namespace Konclude {
 			CObjectMaxCardinalityExpression* CConcreteOntologyBuildDataUpdater::getObjectMaxCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
 				CObjectMaxCardinalityExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectMaxCardinality(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression(),cardinality);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectMaxCardinality'-Expression."),this);
@@ -224,7 +240,7 @@ namespace Konclude {
 			CObjectMinCardinalityExpression* CConcreteOntologyBuildDataUpdater::getObjectMinCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
 				CObjectMinCardinalityExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectMinCardinality(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression(),cardinality);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectMinCardinality'-Expression."),this);
@@ -235,7 +251,7 @@ namespace Konclude {
 			CObjectMinCardinalityExpression* CConcreteOntologyBuildDataUpdater::getObjectMinCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
 				CObjectMinCardinalityExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectMinCardinality(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression(),cardinality);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectMinCardinality'-Expression."),this);
@@ -246,7 +262,7 @@ namespace Konclude {
 			CObjectExactlyCardinalityExpression* CConcreteOntologyBuildDataUpdater::getObjectExactlyCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
 				CObjectExactlyCardinalityExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectExactlyCardinality(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression(),cardinality);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectExactCardinality'-Expression."),this);
@@ -257,7 +273,7 @@ namespace Konclude {
 			CObjectExactlyCardinalityExpression* CConcreteOntologyBuildDataUpdater::getObjectExactlyCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
 				CObjectExactlyCardinalityExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectExactlyCardinality(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression(),cardinality);
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectExactCardinality'-Expression."),this);
@@ -268,7 +284,7 @@ namespace Konclude {
 			CObjectAllValuesFromExpression* CConcreteOntologyBuildDataUpdater::getObjectAllValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectAllValuesFromExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectAllValuesFrom(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectAllValuesFrom'-Expression."),this);
@@ -279,7 +295,7 @@ namespace Konclude {
 			CObjectAllValuesFromExpression* CConcreteOntologyBuildDataUpdater::getObjectAllValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CObjectAllValuesFromExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectAllValuesFrom(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectAllValuesFrom'-Expression."),this);
@@ -290,7 +306,7 @@ namespace Konclude {
 			CObjectSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getObjectSomeValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectSomeValuesFromExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectSomeValuesFrom(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectSomeValuesFrom'-Expression."),this);
@@ -301,7 +317,7 @@ namespace Konclude {
 			CObjectSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getObjectSomeValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CObjectSomeValuesFromExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectSomeValuesFrom(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstOptionalClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectSomeValuesFrom'-Expression."),this);
@@ -310,10 +326,313 @@ namespace Konclude {
 			}
 
 
+			CDataFacetRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDataFacetRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataFacetRestrictionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,0,1,0,0,1)) {
+					expression = getDataFacetRestriction(expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataFacetExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FacetRestriction'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataFacetRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDataFacetRestriction(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataFacetRestrictionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,0,1,0,0,1)) {
+					expression = getDataFacetRestriction(expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataFacetExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FacetRestriction'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataSomeValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataSomeValuesFromExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataSomeValuesFrom(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataSomeValuesFrom'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataSomeValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataSomeValuesFromExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataSomeValuesFrom(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataSomeValuesFrom'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+			CDataHasValueExpression* CConcreteOntologyBuildDataUpdater::getDataHasValue(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataHasValueExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataHasValue(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataHasValue'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataHasValueExpression* CConcreteOntologyBuildDataUpdater::getDataHasValue(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataHasValueExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataHasValue(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataHasValue'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+			CDataAllValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataAllValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataAllValuesFromExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,1,1)) {
+					expression = getDataAllValuesFrom(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataAllValuesFrom'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataAllValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataAllValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataAllValuesFromExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,1,1)) {
+					expression = getDataAllValuesFrom(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataAllValuesFrom'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+			CDataIntersectionOfExpression* CConcreteOntologyBuildDataUpdater::getDataIntersectionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataIntersectionOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataIntersectionOf(*expSplitter.getDataRangeTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataIntersectionOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataIntersectionOfExpression* CConcreteOntologyBuildDataUpdater::getDataIntersectionOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataIntersectionOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataIntersectionOf(*expSplitter.getDataRangeTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataIntersectionOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+			CDataOneOfExpression* CConcreteOntologyBuildDataUpdater::getDataOneOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataOneOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataOneOf(*expSplitter.getDataRangeTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataOneOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataOneOfExpression* CConcreteOntologyBuildDataUpdater::getDataOneOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataOneOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataOneOf(*expSplitter.getDataRangeTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataOneOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+			CDataUnionOfExpression* CConcreteOntologyBuildDataUpdater::getDataUnionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataUnionOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataUnionOf(*expSplitter.getDataRangeTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataUnionOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataUnionOfExpression* CConcreteOntologyBuildDataUpdater::getDataUnionOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataUnionOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataUnionOf(*expSplitter.getDataRangeTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataUnionOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+			CDataComplementOfExpression* CConcreteOntologyBuildDataUpdater::getDataComplementOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataComplementOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataComplementOf(expSplitter.getFirstDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataComplementOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataComplementOfExpression* CConcreteOntologyBuildDataUpdater::getDataComplementOf(CBuildExpression* expression1) {
+				CDataComplementOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1);
+				if (expSplitter.testForExpressionComposition(0,0,0,1)) {
+					expression = getDataComplementOf(expSplitter.getFirstDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataComplementOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+			CDatatypeRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDatatypeRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDatatypeRestrictionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,0,0,1,1)) {
+					expression = getDatatypeRestriction(expSplitter.getFirstDatatypeExpression(),*expSplitter.getDataFacetRestrictionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DatatypeRestriction'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDatatypeRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDatatypeRestriction(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDatatypeRestrictionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,0,0,1,1)) {
+					expression = getDatatypeRestriction(expSplitter.getFirstDatatypeExpression(),*expSplitter.getDataFacetRestrictionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DatatypeRestriction'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+			CDataMaxCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataMaxCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
+				CDataMaxCardinalityExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataMaxCardinality(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression(),cardinality);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataMaxCardinality'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataMaxCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataMaxCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
+				CDataMaxCardinalityExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataMaxCardinality(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression(),cardinality);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataMaxCardinality'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+			CDataMinCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataMinCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
+				CDataMinCardinalityExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataMinCardinality(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression(),cardinality);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataMinCardinality'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataMinCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataMinCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
+				CDataMinCardinalityExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataMinCardinality(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression(),cardinality);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataMinCardinality'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+			CDataExactCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataExactCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) {
+				CDataExactCardinalityExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataExactCardinality(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression(),cardinality);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataExactCardinality'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataExactCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataExactCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) {
+				CDataExactCardinalityExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getDataExactCardinality(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstOptionalDataRangeTermExpression(),cardinality);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataExactCardinality'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+
 			CObjectOneOfExpression* CConcreteOntologyBuildDataUpdater::getObjectOneOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectOneOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,0,0)) {
+				if (expSplitter.testForExpressionComposition(0,0,0)) {
 					expression = getObjectOneOf(*expSplitter.getIndividualTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectOneOf'-Expression."),this);
@@ -325,7 +644,7 @@ namespace Konclude {
 			CObjectOneOfExpression* CConcreteOntologyBuildDataUpdater::getObjectOneOf(CBuildExpression* indiExpression) {
 				CObjectOneOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(indiExpression);
-				if (expSplitter.proofExpressionComposition(0,0,0)) {
+				if (expSplitter.testForExpressionComposition(0,0,0)) {
 					expression = getObjectOneOf(*expSplitter.getIndividualTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectOneOf'-Expression."),this);
@@ -338,7 +657,7 @@ namespace Konclude {
 			CObjectHasValueExpression* CConcreteOntologyBuildDataUpdater::getObjectHasValue(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectHasValueExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1,1)) {
+				if (expSplitter.testForExpressionComposition(0,1,1)) {
 					expression = getObjectHasValue(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstIndividualTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectHasValue'-Expression."),this);
@@ -349,7 +668,7 @@ namespace Konclude {
 			CObjectHasValueExpression* CConcreteOntologyBuildDataUpdater::getObjectHasValue(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CObjectHasValueExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,1,1)) {
+				if (expSplitter.testForExpressionComposition(0,1,1)) {
 					expression = getObjectHasValue(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstIndividualTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectHasValue'-Expression."),this);
@@ -362,7 +681,7 @@ namespace Konclude {
 			CObjectHasSelfExpression* CConcreteOntologyBuildDataUpdater::getObjectHasSelf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectHasSelfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectHasSelf(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectHasSelf'-Expression."),this);
@@ -373,7 +692,7 @@ namespace Konclude {
 			CObjectHasSelfExpression* CConcreteOntologyBuildDataUpdater::getObjectHasSelf(CBuildExpression* selfExpression) {
 				CObjectHasSelfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(selfExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectHasSelf(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectHasSelf'-Expression."),this);
@@ -394,7 +713,7 @@ namespace Konclude {
 				}
 				if (!expression) {
 					CExpressionSplitter expSplitter(expressions);
-					if (expSplitter.proofExpressionComposition(0,2)) {
+					if (expSplitter.testForExpressionComposition(0,2)) {
 						CEXPRESSIONLIST<CObjectPropertyTermExpression*>* objectPropertyExpressionList = expSplitter.getObjectPropertyTermExpressionList();
 						CObjectPropertyTermExpression* superObjectPropertyExpression = objectPropertyExpressionList->takeLast();
 						expression = getSubObjectPropertyOf(*objectPropertyExpressionList,superObjectPropertyExpression);
@@ -412,13 +731,15 @@ namespace Konclude {
 				if (propertyChain && superObjectPropTerm) {
 					expression = getSubObjectPropertyOf(propertyChain,superObjectPropTerm);
 				}
-				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,2)) {
-					CEXPRESSIONLIST<CObjectPropertyTermExpression*>* objectPropertyExpressionList = expSplitter.getObjectPropertyTermExpressionList();
-					CObjectPropertyTermExpression* superObjectPropertyExpression = objectPropertyExpressionList->takeLast();
-					expression = getSubObjectPropertyOf(*objectPropertyExpressionList,superObjectPropertyExpression);
-				} else {
-					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SubObjectPropertyOf'-Expression."),this);
+				if (!expression) {
+					CExpressionSplitter expSplitter(expression1,expression2);
+					if (expSplitter.testForExpressionComposition(0,2)) {
+						CEXPRESSIONLIST<CObjectPropertyTermExpression*>* objectPropertyExpressionList = expSplitter.getObjectPropertyTermExpressionList();
+						CObjectPropertyTermExpression* superObjectPropertyExpression = objectPropertyExpressionList->takeLast();
+						expression = getSubObjectPropertyOf(*objectPropertyExpressionList,superObjectPropertyExpression);
+					} else {
+						LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SubObjectPropertyOf'-Expression."),this);
+					}
 				}
 				return expression;
 			}
@@ -426,7 +747,7 @@ namespace Konclude {
 			CObjectPropertyChainExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyChain(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectPropertyChainExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectPropertyChain(*expSplitter.getObjectPropertyTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyChain'-Expression."),this);
@@ -437,7 +758,7 @@ namespace Konclude {
 			CObjectPropertyChainExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyChain(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CObjectPropertyChainExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getObjectPropertyChain(*expSplitter.getObjectPropertyTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyChain'-Expression."),this);
@@ -448,7 +769,7 @@ namespace Konclude {
 			CEquivalentObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentObjectProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CEquivalentObjectPropertiesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,2)) {
+				if (expSplitter.testForExpressionComposition(0,2)) {
 					expression = getEquivalentObjectProperties(*expSplitter.getObjectPropertyTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'EquivalentObjectProperties'-Expression."),this);
@@ -459,7 +780,7 @@ namespace Konclude {
 			CEquivalentObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentObjectProperties(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CEquivalentObjectPropertiesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,2)) {
+				if (expSplitter.testForExpressionComposition(0,2)) {
 					expression = getEquivalentObjectProperties(*expSplitter.getObjectPropertyTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'EquivalentObjectProperties'-Expression."),this);
@@ -470,7 +791,7 @@ namespace Konclude {
 			CDisjointObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getDisjointObjectProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CDisjointObjectPropertiesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,2)) {
+				if (expSplitter.testForExpressionComposition(0,2)) {
 					expression = getDisjointObjectProperties(*expSplitter.getObjectPropertyTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DisjointObjectProperties'-Expression."),this);
@@ -481,7 +802,7 @@ namespace Konclude {
 			CDisjointObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getDisjointObjectProperties(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CDisjointObjectPropertiesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,2)) {
+				if (expSplitter.testForExpressionComposition(0,2)) {
 					expression = getDisjointObjectProperties(*expSplitter.getObjectPropertyTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DisjointObjectProperties'-Expression."),this);
@@ -493,7 +814,7 @@ namespace Konclude {
 			CObjectPropertyDomainExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyDomainExpression(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CObjectPropertyDomainExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(1,1)) {
+				if (expSplitter.testForExpressionComposition(1,1)) {
 					expression = getObjectPropertyDomainExpression(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyDomain'-Expression."),this);
@@ -504,7 +825,7 @@ namespace Konclude {
 			CObjectPropertyDomainExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyDomainExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectPropertyDomainExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(1,1)) {
+				if (expSplitter.testForExpressionComposition(1,1)) {
 					expression = getObjectPropertyDomainExpression(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyDomain'-Expression."),this);
@@ -515,7 +836,7 @@ namespace Konclude {
 			CObjectPropertyRangeExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyRangeExpression(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CObjectPropertyRangeExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(1,1)) {
+				if (expSplitter.testForExpressionComposition(1,1)) {
 					expression = getObjectPropertyRangeExpression(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyRange'-Expression."),this);
@@ -526,7 +847,7 @@ namespace Konclude {
 			CObjectPropertyRangeExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyRangeExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectPropertyRangeExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(1,1)) {
+				if (expSplitter.testForExpressionComposition(1,1)) {
 					expression = getObjectPropertyRangeExpression(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyRange'-Expression."),this);
@@ -535,10 +856,160 @@ namespace Konclude {
 			}
 
 
+
+
+
+
+
+
+
+
+			CSubDataPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getSubDataPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CSubDataPropertyOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,2)) {
+					expression = getSubDataPropertyOf(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getSecondDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SubDataPropertyOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CSubDataPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getSubDataPropertyOf(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CSubDataPropertyOfExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,2)) {
+					expression = getSubDataPropertyOf(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getSecondDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SubDataPropertyOf'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+			CEquivalentDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentDataProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CEquivalentDataPropertiesExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,2)) {
+					expression = getEquivalentDataProperties(*expSplitter.getDataPropertyTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'EquivalentDataProperties'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CEquivalentDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentDataProperties(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CEquivalentDataPropertiesExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,2)) {
+					expression = getEquivalentDataProperties(*expSplitter.getDataPropertyTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'EquivalentDataProperties'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDisjointDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getDisjointDataProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDisjointDataPropertiesExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,2)) {
+					expression = getDisjointDataProperties(*expSplitter.getDataPropertyTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DisjointDataProperties'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDisjointDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getDisjointDataProperties(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDisjointDataPropertiesExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,2)) {
+					expression = getDisjointDataProperties(*expSplitter.getDataPropertyTermExpressionList());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DisjointDataProperties'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+			CDataPropertyDomainExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyDomainExpression(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataPropertyDomainExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(1,0,0,0,1)) {
+					expression = getDataPropertyDomainExpression(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstClassTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyDomain'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataPropertyDomainExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyDomainExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataPropertyDomainExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(1,0,0,0,1)) {
+					expression = getDataPropertyDomainExpression(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstClassTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyDomain'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataPropertyRangeExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyRangeExpression(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataPropertyRangeExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2);
+				if (expSplitter.testForExpressionComposition(0,0,0,1,1)) {
+					expression = getDataPropertyRangeExpression(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyRange'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataPropertyRangeExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyRangeExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataPropertyRangeExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,1,1)) {
+					expression = getDataPropertyRangeExpression(expSplitter.getFirstDataPropertyTermExpression(),expSplitter.getFirstDataRangeTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyRange'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+			CFunctionalDataPropertyExpression* CConcreteOntologyBuildDataUpdater::getFunctionalDataProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CFunctionalDataPropertyExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getFunctionalDataProperty(expSplitter.getFirstDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FunctionalDataProperty'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CFunctionalDataPropertyExpression* CConcreteOntologyBuildDataUpdater::getFunctionalDataProperty(CBuildExpression* funcExpression) {
+				CFunctionalDataPropertyExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(funcExpression);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1)) {
+					expression = getFunctionalDataProperty(expSplitter.getFirstDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FunctionalDataProperty'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
+
 			CInverseObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getInverseObjectProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CInverseObjectPropertiesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,2)) {
+				if (expSplitter.testForExpressionComposition(0,2)) {
 					expression = getInverseObjectProperties(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getSecondObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'InverseObjectProperties'-Expression."),this);
@@ -549,7 +1020,7 @@ namespace Konclude {
 			CInverseObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getInverseObjectProperties(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CInverseObjectPropertiesExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(0,2)) {
+				if (expSplitter.testForExpressionComposition(0,2)) {
 					expression = getInverseObjectProperties(expSplitter.getFirstObjectPropertyTermExpression(),expSplitter.getSecondObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'InverseObjectProperties'-Expression."),this);
@@ -561,7 +1032,7 @@ namespace Konclude {
 			CTransetiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getTransetiveObjectProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CTransetiveObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getTransetiveObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'TransetiveObjectProperty'-Expression."),this);
@@ -572,7 +1043,7 @@ namespace Konclude {
 			CTransetiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getTransetiveObjectProperty(CBuildExpression* transExpression) {
 				CTransetiveObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(transExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getTransetiveObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'TransetiveObjectProperty'-Expression."),this);
@@ -583,7 +1054,7 @@ namespace Konclude {
 			CFunctionalObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getFunctionalObjectProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CFunctionalObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getFunctionalObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FunctionalObjectProperty'-Expression."),this);
@@ -594,7 +1065,7 @@ namespace Konclude {
 			CFunctionalObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getFunctionalObjectProperty(CBuildExpression* funcExpression) {
 				CFunctionalObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(funcExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getFunctionalObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FunctionalObjectProperty'-Expression."),this);
@@ -605,7 +1076,7 @@ namespace Konclude {
 			CInverseFunctionalObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getInverseFunctionalObjectProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CInverseFunctionalObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getInverseFunctionalObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'InverseFunctionalObjectProperty'-Expression."),this);
@@ -616,7 +1087,7 @@ namespace Konclude {
 			CInverseFunctionalObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getInverseFunctionalObjectProperty(CBuildExpression* funcExpression) {
 				CInverseFunctionalObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(funcExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getInverseFunctionalObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'InverseFunctionalObjectProperty'-Expression."),this);
@@ -626,7 +1097,7 @@ namespace Konclude {
 			CSymmetricObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getSymmetricObjectProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CSymmetricObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getSymmetricObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SymmetricObjectProperty'-Expression."),this);
@@ -637,7 +1108,7 @@ namespace Konclude {
 			CSymmetricObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getSymmetricObjectProperty(CBuildExpression* funcExpression) {
 				CSymmetricObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(funcExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getSymmetricObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SymmetricObjectProperty'-Expression."),this);
@@ -649,7 +1120,7 @@ namespace Konclude {
 			CAsymmetricObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getAsymmetricObjectProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CAsymmetricObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getAsymmetricObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'AsymmetricObjectProperty'-Expression."),this);
@@ -660,7 +1131,7 @@ namespace Konclude {
 			CAsymmetricObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getAsymmetricObjectProperty(CBuildExpression* funcExpression) {
 				CAsymmetricObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(funcExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getAsymmetricObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'AsymmetricObjectProperty'-Expression."),this);
@@ -672,7 +1143,7 @@ namespace Konclude {
 			CReflexiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getReflexiveObjectProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CReflexiveObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getReflexiveObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ReflexiveObjectProperty'-Expression."),this);
@@ -683,7 +1154,7 @@ namespace Konclude {
 			CReflexiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getReflexiveObjectProperty(CBuildExpression* funcExpression) {
 				CReflexiveObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(funcExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getReflexiveObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ReflexiveObjectProperty'-Expression."),this);
@@ -695,7 +1166,7 @@ namespace Konclude {
 			CIrreflexiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getIrreflexiveObjectProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CIrreflexiveObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getIrreflexiveObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'IrreflexiveObjectProperty'-Expression."),this);
@@ -706,7 +1177,7 @@ namespace Konclude {
 			CIrreflexiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getIrreflexiveObjectProperty(CBuildExpression* funcExpression) {
 				CIrreflexiveObjectPropertyExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(funcExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getIrreflexiveObjectProperty(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'IrreflexiveObjectProperty'-Expression."),this);
@@ -718,7 +1189,7 @@ namespace Konclude {
 			CInverseObjectPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getInverseObjectPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CInverseObjectPropertyOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getInverseObjectPropertyOf(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'InverseObjectPropertyOf'-Expression."),this);
@@ -729,7 +1200,7 @@ namespace Konclude {
 			CInverseObjectPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getInverseObjectPropertyOf(CBuildExpression* invExpression) {
 				CInverseObjectPropertyOfExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(invExpression);
-				if (expSplitter.proofExpressionComposition(0,1)) {
+				if (expSplitter.testForExpressionComposition(0,1)) {
 					expression = getInverseObjectPropertyOf(expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'InverseObjectPropertyOf'-Expression."),this);
@@ -742,7 +1213,7 @@ namespace Konclude {
 			CClassAssertionExpression* CConcreteOntologyBuildDataUpdater::getClassAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CClassAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(1,0,1)) {
+				if (expSplitter.testForExpressionComposition(1,0,1)) {
 					expression = getClassAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ClassAssertion'-Expression."),this);
@@ -753,7 +1224,7 @@ namespace Konclude {
 			CClassAssertionExpression* CConcreteOntologyBuildDataUpdater::getClassAssertion(CBuildExpression* expression1, CBuildExpression* expression2) {
 				CClassAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
-				if (expSplitter.proofExpressionComposition(1,0,1)) {
+				if (expSplitter.testForExpressionComposition(1,0,1)) {
 					expression = getClassAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstClassTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ClassAssertion'-Expression."),this);
@@ -761,10 +1232,14 @@ namespace Konclude {
 				return expression;
 			}
 
+
+
+
+
 			CObjectPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CObjectPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1,2)) {
+				if (expSplitter.testForExpressionComposition(0,1,2)) {
 					expression = getObjectPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getSecondIndividualTermExpression(),expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyAssertion'-Expression."),this);
@@ -775,7 +1250,7 @@ namespace Konclude {
 			CObjectPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3) {
 				CObjectPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2,expression3);
-				if (expSplitter.proofExpressionComposition(0,1,2)) {
+				if (expSplitter.testForExpressionComposition(0,1,2)) {
 					expression = getObjectPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getSecondIndividualTermExpression(),expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'ObjectPropertyAssertion'-Expression."),this);
@@ -787,7 +1262,7 @@ namespace Konclude {
 			CNegativeObjectPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeObjectPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CNegativeObjectPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,1,2)) {
+				if (expSplitter.testForExpressionComposition(0,1,2)) {
 					expression = getNegativeObjectPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getSecondIndividualTermExpression(),expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'NegativeObjectPropertyAssertion'-Expression."),this);
@@ -798,7 +1273,7 @@ namespace Konclude {
 			CNegativeObjectPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeObjectPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3) {
 				CNegativeObjectPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2,expression3);
-				if (expSplitter.proofExpressionComposition(0,1,2)) {
+				if (expSplitter.testForExpressionComposition(0,1,2)) {
 					expression = getNegativeObjectPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getSecondIndividualTermExpression(),expSplitter.getFirstObjectPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'NegativeObjectPropertyAssertion'-Expression."),this);
@@ -807,10 +1282,63 @@ namespace Konclude {
 			}
 
 
+
+
+			CDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataPropertyAssertionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
+					expression = getDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyAssertion'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3) {
+				CDataPropertyAssertionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2,expression3);
+				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
+					expression = getDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyAssertion'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeDataPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CNegativeDataPropertyAssertionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
+					expression = getNegativeDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'NegativeDataPropertyAssertion'-Expression."),this);
+				}
+				return expression;
+			}
+
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeDataPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3) {
+				CNegativeDataPropertyAssertionExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expression1,expression2,expression3);
+				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
+					expression = getNegativeDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'NegativeDataPropertyAssertion'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
+
 			CSameIndividualExpression* CConcreteOntologyBuildDataUpdater::getSameIndividual(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CSameIndividualExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,0,2)) {
+				if (expSplitter.testForExpressionComposition(0,0,2)) {
 					expression = getSameIndividual(*expSplitter.getIndividualTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'SameIndividual'-Expression."),this);
@@ -822,7 +1350,7 @@ namespace Konclude {
 			CDifferentIndividualsExpression* CConcreteOntologyBuildDataUpdater::getDifferentIndividuals(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				CDifferentIndividualsExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
-				if (expSplitter.proofExpressionComposition(0,0,2)) {
+				if (expSplitter.testForExpressionComposition(0,0,2)) {
 					expression = getDifferentIndividuals(*expSplitter.getIndividualTermExpressionList());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DifferentIndividual'-Expression."),this);
@@ -1035,6 +1563,236 @@ namespace Konclude {
 			}
 
 
+
+
+
+			CDataLiteralExpression* CConcreteOntologyBuildDataUpdater::getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype) {
+				CDataLiteralExpression* expression = nullptr;
+				CDataLiteralExpression tmpExpression(dataLexicalValue,datatype);
+				expression = (CDataLiteralExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataLiteralExpression(dataLexicalValue,datatype);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildDataRangeSet->insert(expression);
+					mBuildDataRangeList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+			CDataSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataSomeValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				CDataSomeValuesFromExpression* expression = nullptr;
+				CDataSomeValuesFromExpression tmpExpression(expression1,expression2);
+				expression = (CDataSomeValuesFromExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataSomeValuesFromExpression(expression1,expression2);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildConceptSet->insert(expression);
+					mBuildConceptList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+			CDataHasValueExpression* CConcreteOntologyBuildDataUpdater::getDataHasValue(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				CDataHasValueExpression* expression = nullptr;
+				CDataHasValueExpression tmpExpression(expression1,expression2);
+				expression = (CDataHasValueExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataHasValueExpression(expression1,expression2);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildConceptSet->insert(expression);
+					mBuildConceptList->append(expression);
+				}
+				return expression;
+			}
+
+
+			CDataAllValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataAllValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				CDataAllValuesFromExpression* expression = nullptr;
+				CDataAllValuesFromExpression tmpExpression(expression1,expression2);
+				expression = (CDataAllValuesFromExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataAllValuesFromExpression(expression1,expression2);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildConceptSet->insert(expression);
+					mBuildConceptList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+			CDataMaxCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataMaxCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) {
+				CDataMaxCardinalityExpression* expression = nullptr;
+				if (expression2 == nullptr) {
+					expression2 = mTopDataRangeExpression;
+				}
+				CDataMaxCardinalityExpression tmpExpression(expression1,expression2,cardinality);
+				expression = (CDataMaxCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataMaxCardinalityExpression(expression1,expression2,cardinality);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildConceptSet->insert(expression);
+					mBuildConceptList->append(expression);
+				}
+				return expression;
+			}
+
+
+			CDataMinCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataMinCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) {
+				CDataMinCardinalityExpression* expression = nullptr;
+				if (expression2 == nullptr) {
+					expression2 = mTopDataRangeExpression;
+				}
+				CDataMinCardinalityExpression tmpExpression(expression1,expression2,cardinality);
+				expression = (CDataMinCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataMinCardinalityExpression(expression1,expression2,cardinality);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildConceptSet->insert(expression);
+					mBuildConceptList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+
+			CDataExactCardinalityExpression* CConcreteOntologyBuildDataUpdater::getDataExactCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) {
+				CDataExactCardinalityExpression* expression = nullptr;
+				if (expression2 == nullptr) {
+					expression2 = mTopDataRangeExpression;
+				}
+				CDataExactCardinalityExpression tmpExpression(expression1,expression2,cardinality);
+				expression = (CDataExactCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataExactCardinalityExpression(expression1,expression2,cardinality);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildConceptSet->insert(expression);
+					mBuildConceptList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+			CDataFacetRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDataFacetRestriction(CDataLiteralExpression* dataLiteralExpression, CDataFacetExpression* dataFacet) {
+				CDataFacetRestrictionExpression* expression = nullptr;
+				CDataFacetRestrictionExpression tmpExpression(dataLiteralExpression,dataFacet);
+				expression = (CDataFacetRestrictionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataFacetRestrictionExpression(dataLiteralExpression,dataFacet);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+			CDataIntersectionOfExpression* CConcreteOntologyBuildDataUpdater::getDataIntersectionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
+				CDataIntersectionOfExpression* expression = nullptr;
+				CDataIntersectionOfExpression tmpExpression(expressions);
+				expression = (CDataIntersectionOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataIntersectionOfExpression(expressions);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildDataRangeSet->insert(expression);
+					mBuildDataRangeList->append(expression);
+				}
+				return expression;
+			}
+
+			CDataOneOfExpression* CConcreteOntologyBuildDataUpdater::getDataOneOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
+				CDataOneOfExpression* expression = nullptr;
+				CDataOneOfExpression tmpExpression(expressions);
+				expression = (CDataOneOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataOneOfExpression(expressions);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildDataRangeSet->insert(expression);
+					mBuildDataRangeList->append(expression);
+				}
+				return expression;
+			}
+
+			CDataUnionOfExpression* CConcreteOntologyBuildDataUpdater::getDataUnionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
+				CDataUnionOfExpression* expression = nullptr;
+				CDataUnionOfExpression tmpExpression(expressions);
+				expression = (CDataUnionOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataUnionOfExpression(expressions);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildDataRangeSet->insert(expression);
+					mBuildDataRangeList->append(expression);
+				}
+				return expression;
+			}
+
+			CDataComplementOfExpression* CConcreteOntologyBuildDataUpdater::getDataComplementOf(CDataRangeTermExpression* expression1) {
+				CDataComplementOfExpression* expression = nullptr;
+				CDataComplementOfExpression tmpExpression(expression1);
+				expression = (CDataComplementOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataComplementOfExpression(expression1);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildDataRangeSet->insert(expression);
+					mBuildDataRangeList->append(expression);
+				}
+				return expression;
+			}
+
+			CDatatypeRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDatatypeRestriction(CDatatypeExpression* datatypeExpression, const CEXPRESSIONLIST<CDataFacetRestrictionExpression*>& expressions) {
+				CDatatypeRestrictionExpression* expression = nullptr;
+				CDatatypeRestrictionExpression tmpExpression(datatypeExpression,expressions);
+				expression = (CDatatypeRestrictionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDatatypeRestrictionExpression(datatypeExpression,expressions);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+					mBuildDataRangeSet->insert(expression);
+					mBuildDataRangeList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			CObjectSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getObjectSomeValuesFrom(CObjectPropertyTermExpression* expression1, CClassTermExpression* expression2) {
 				CObjectSomeValuesFromExpression* expression = nullptr;
 				CObjectSomeValuesFromExpression tmpExpression(expression1,expression2);
@@ -1158,6 +1916,93 @@ namespace Konclude {
 				return expression;
 			}
 
+
+
+
+
+
+
+
+			CSubDataPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getSubDataPropertyOf(CDataPropertyTermExpression* subExpression, CDataPropertyTermExpression* superExpression) {
+				CSubDataPropertyOfExpression* expression = nullptr;
+				CSubDataPropertyOfExpression tmpExpression(subExpression,superExpression);
+				expression = (CSubDataPropertyOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CSubDataPropertyOfExpression(subExpression,superExpression);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+			CEquivalentDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions) {
+				CEquivalentDataPropertiesExpression* expression = nullptr;
+				CEquivalentDataPropertiesExpression tmpExpression(expressions);
+				expression = (CEquivalentDataPropertiesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CEquivalentDataPropertiesExpression(expressions);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+			CDisjointDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getDisjointDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions) {
+				CDisjointDataPropertiesExpression* expression = nullptr;
+				CDisjointDataPropertiesExpression tmpExpression(expressions);
+				expression = (CDisjointDataPropertiesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDisjointDataPropertiesExpression(expressions);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+
+			CDataPropertyDomainExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyDomainExpression(CDataPropertyTermExpression* expression1, CClassTermExpression* expression2) {
+				CDataPropertyDomainExpression* expression = nullptr;
+				CDataPropertyDomainExpression tmpExpression(expression1,expression2);
+				expression = (CDataPropertyDomainExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataPropertyDomainExpression(expression1,expression2);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+			CDataPropertyRangeExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyRangeExpression(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
+				CDataPropertyRangeExpression* expression = nullptr;
+				CDataPropertyRangeExpression tmpExpression(expression1,expression2);
+				expression = (CDataPropertyRangeExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataPropertyRangeExpression(expression1,expression2);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+			CFunctionalDataPropertyExpression* CConcreteOntologyBuildDataUpdater::getFunctionalDataProperty(CDataPropertyTermExpression* buildExpression) {
+				CFunctionalDataPropertyExpression* expression = nullptr;
+				CFunctionalDataPropertyExpression tmpExpression(buildExpression);
+				expression = (CFunctionalDataPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CFunctionalDataPropertyExpression(buildExpression);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
+
 			CInverseObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getInverseObjectProperties(CObjectPropertyTermExpression* expression1, CObjectPropertyTermExpression* expression2) {
 				CInverseObjectPropertiesExpression* expression = nullptr;
 				CInverseObjectPropertiesExpression tmpExpression(expression1,expression2);
@@ -1263,8 +2108,8 @@ namespace Konclude {
 				if (!expression) {
 					expression = new CInverseObjectPropertyOfExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mBuildRoleSet->insert(expression);
-					mBuildRoleList->append(expression);
+					mBuildObjectRoleSet->insert(expression);
+					mBuildObjectRoleList->append(expression);
 					mInverseObjectPropertyHash->insert(buildExpression,expression);
 					mInverseObjectPropertyHash->insert(expression,buildExpression);
 					mInverseObjectPropertyList->append( QPair<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>(expression,buildExpression) );
@@ -1348,6 +2193,31 @@ namespace Konclude {
 
 
 
+			CDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+				CDataPropertyAssertionExpression* expression = nullptr;
+				CDataPropertyAssertionExpression tmpExpression(expression3,expression1,expression2);
+				expression = (CDataPropertyAssertionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CDataPropertyAssertionExpression(expression3,expression1,expression2);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+				CNegativeDataPropertyAssertionExpression* expression = nullptr;
+				CNegativeDataPropertyAssertionExpression tmpExpression(expression3,expression1,expression2);
+				expression = (CNegativeDataPropertyAssertionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				if (!expression) {
+					expression = new CNegativeDataPropertyAssertionExpression(expression3,expression1,expression2);
+					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					mExpressionBuildContainerList->append(expression);
+				}
+				return expression;
+			}
+
+
 
 
 			bool CConcreteOntologyBuildDataUpdater::initializeBuilding() {
@@ -1367,13 +2237,25 @@ namespace Konclude {
 				mTopObjPropExpression = mOntoBuild->getTopObjectPropertyExpression();
 				mBottomObjPropExpression = mOntoBuild->getBottomObjectPropertyExpression();
 
+				mTopDataRangeExpression = mOntoBuild->getTopDataRangeExpression();
+				mBottomDataRangeExpression = mOntoBuild->getBottomDataRangeExpression();
+
+				mTopDataPropExpression = mOntoBuild->getTopDataPropertyExpression();
+				mBottomDataPropExpression = mOntoBuild->getBottomDataPropertyExpression();
+
 				mBuildConceptSet = mOntoBuild->getBuildConceptSet();
-				mBuildRoleSet = mOntoBuild->getBuildRoleSet();
+				mBuildObjectRoleSet = mOntoBuild->getBuildObjectRoleSet();
 				mBuildIndividualSet = mOntoBuild->getBuildIndividualSet();
+				mBuildDataRoleSet = mOntoBuild->getBuildDataRoleSet();
+				mBuildDatatypeSet = mOntoBuild->getBuildDatatypeSet();
+				mBuildDataRangeSet = mOntoBuild->getBuildDataRangeSet();
 
 				mBuildConceptList = mOntoBuild->getBuildConceptList();
-				mBuildRoleList = mOntoBuild->getBuildRoleList();
+				mBuildObjectRoleList = mOntoBuild->getBuildObjectRoleList();
 				mBuildIndividualList = mOntoBuild->getBuildIndividualList();
+				mBuildDataRoleList = mOntoBuild->getBuildDataRoleList();
+				mBuildDataRangeList = mOntoBuild->getBuildDataRangeList();
+				mBuildDatatypeList = mOntoBuild->getBuildDatatypeList();
 
 				mExpressionBuildContainerList = mOntoBuild->getExpressionBuildListContainer();
 				mInverseObjectPropertyHash = mOntoBuild->getInverseObjectPropertyHash();
@@ -1386,6 +2268,8 @@ namespace Konclude {
 				mIndividualBuildHash = mOntoBuild->getIndividualEntityBuildHash();
 				mAnoIndividualBuildHash = mOntoBuild->getAnonymousIndividualBuildHash();
 				mIndividualVariableBuildHash = mOntoBuild->getIndividualVariableBuildHash();
+				mDataPropertyBuildHash = mOntoBuild->getDataPropertyEntityBuildHash();
+				mDataLexicalValueBuildHash = mOntoBuild->getDataLexicalValueBuildHash();
 
 				mNextAxiomNumber = mOntoBuild->getNextAxiomNumber();
 				mNextEntityNumber = mOntoBuild->getNextEntityNumber();
@@ -1397,6 +2281,11 @@ namespace Konclude {
 				mPrefixList = mOntoStrings->getPrefixList();
 
 				mIndividualVariableIDHash = mOntoBuild->getIndividualVariableIDHash();
+
+				mDatatypeBuildHash = mOntoBuild->getDatatypeIRIBuildHash();
+				mDataFacetBuildHash = mOntoBuild->getFacetIRIBuildHash();
+
+				mImportDataHash = mOntoBuild->getImportDataHash();
 				return true;
 			}
 
@@ -1413,6 +2302,14 @@ namespace Konclude {
 
 			cint64 CConcreteOntologyBuildDataUpdater::getAxiomNumber() {
 				return mNextAxiomNumber;
+			}
+
+			CDataRangeTermExpression* CConcreteOntologyBuildDataUpdater::getTopDataRange() {
+				return mTopDataRangeExpression;
+			}
+
+			CDataRangeTermExpression* CConcreteOntologyBuildDataUpdater::getBottomDataRange() {
+				return mBottomDataRangeExpression;
 			}
 
 
@@ -1432,8 +2329,36 @@ namespace Konclude {
 			}
 
 
+
+
+			bool CConcreteOntologyBuildDataUpdater::addOntologyImport(const QStringRef& name) {
+				if (!mImportDataHash->contains(CStringRefStringHasher(name))) {
+					QString importIRIString = name.toString();
+					COntologyImportData*& importData = (*mImportDataHash)[CStringRefStringHasher(importIRIString)];
+					importData = new COntologyImportData();
+					importData->initOntologyImportData(importIRIString);
+					return true;
+				}
+				return false;
+			}
+
+			bool CConcreteOntologyBuildDataUpdater::addOntologyImport(const QString& name) {
+				COntologyImportData*& importData = (*mImportDataHash)[CStringRefStringHasher(name)];
+				if (!importData) {
+					importData = new COntologyImportData();
+					importData->initOntologyImportData(name);
+					return true;
+				}
+				return false;
+			}
+
+
+
+
+
 			bool CConcreteOntologyBuildDataUpdater::addNameAbbreviation(const QString &name, const QString &abbreviatedName) {
-				if (!mAbbreviatedNamePrefixMapHash->contains(abbreviatedName)) {
+				CNamePrefix* previousNamePrefix = mAbbreviatedNamePrefixMapHash->value(abbreviatedName);
+				if (!previousNamePrefix || previousNamePrefix->getPrefixString() != name) {
 					CNamePrefix* namePrefix = new CNamePrefix(abbreviatedName,name);
 					mAbbreviatedNamePrefixMapHash->insert(abbreviatedName,namePrefix);
 					mNamePrefixMapHash->insert(name,namePrefix);
@@ -1503,6 +2428,135 @@ namespace Konclude {
 				return expression;
 			}
 
+
+
+			CDatatypeExpression* CConcreteOntologyBuildDataUpdater::getDatatype(const QString& datatypeName) {
+				CDatatypeExpression* expression = nullptr;
+				expression = mDatatypeBuildHash->value(datatypeName);
+				if (!expression) {
+					expression = new CDatatypeExpression(datatypeName);
+					expression->setEntityID(mNextEntityNumber++);
+					mDatatypeBuildHash->insert(datatypeName,expression);
+					mBuildDatatypeSet->insert(expression);
+					mBuildDatatypeList->append(expression);
+				}
+				return expression;
+			}
+
+			CDatatypeExpression* CConcreteOntologyBuildDataUpdater::getDatatype(const QStringRef& datatypeName) {
+				CDatatypeExpression* expression = nullptr;
+				expression = mDatatypeBuildHash->value(datatypeName);
+				if (!expression) {
+					QString datatypeNameString(datatypeName.toString());
+					expression = new CDatatypeExpression(datatypeNameString);
+					expression->setEntityID(mNextEntityNumber++);
+					mDatatypeBuildHash->insert(datatypeNameString,expression);
+					mBuildDatatypeSet->insert(expression);
+					mBuildDatatypeList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
+			CDataFacetExpression* CConcreteOntologyBuildDataUpdater::getDataFacet(const QString& dataFacetIRI) {
+				CDataFacetExpression* expression = nullptr;
+				expression = mDataFacetBuildHash->value(dataFacetIRI);
+				if (!expression) {
+					expression = new CDataFacetExpression(dataFacetIRI);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataFacetBuildHash->insert(dataFacetIRI,expression);
+				}
+				return expression;
+			}
+
+			CDataFacetExpression* CConcreteOntologyBuildDataUpdater::getDataFacet(const QStringRef& dataFacetIRI) {
+				CDataFacetExpression* expression = nullptr;
+				expression = mDataFacetBuildHash->value(dataFacetIRI);
+				if (!expression) {
+					QString datatypeNameString(dataFacetIRI.toString());
+					expression = new CDataFacetExpression(datatypeNameString);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataFacetBuildHash->insert(dataFacetIRI,expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
+			CDataLexicalValueExpression* CConcreteOntologyBuildDataUpdater::getDataLexicalValue(const QString& dataLexicalValue) {
+				CDataLexicalValueExpression* expression = nullptr;
+				expression = mDataLexicalValueBuildHash->value(dataLexicalValue);
+				if (!expression) {
+					if (dataLexicalValue == "an ancient site of significant religious importance") {
+						bool bug = true;
+					}
+					expression = new CDataLexicalValueExpression(dataLexicalValue);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataLexicalValueBuildHash->insert(dataLexicalValue,expression);
+				}
+				return expression;
+			}
+
+			CDataLexicalValueExpression* CConcreteOntologyBuildDataUpdater::getDataLexicalValue(const QStringRef& dataLexicalValue) {
+				CDataLexicalValueExpression* expression = nullptr;
+				expression = mDataLexicalValueBuildHash->value(dataLexicalValue);
+				if (!expression) {
+					QString dataLexicalValueString(dataLexicalValue.toString());
+					expression = new CDataLexicalValueExpression(dataLexicalValueString);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataLexicalValueBuildHash->insert(dataLexicalValueString,expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
+			CDataPropertyExpression* CConcreteOntologyBuildDataUpdater::getDataProberty(const QString& dataPropertyName) {
+				CDataPropertyExpression* expression = nullptr;
+				expression = mDataPropertyBuildHash->value(dataPropertyName);
+				if (!expression) {
+					expression = new CDataPropertyExpression(dataPropertyName);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataPropertyBuildHash->insert(dataPropertyName,expression);
+					mBuildDataRoleSet->insert(expression);
+					mBuildDataRoleList->append(expression);
+				}
+				return expression;
+			}
+
+			CDataPropertyExpression* CConcreteOntologyBuildDataUpdater::getDataProberty(const QStringRef& dataPropertyName) {
+				CDataPropertyExpression* expression = nullptr;
+				expression = mDataPropertyBuildHash->value(dataPropertyName);
+				if (!expression) {
+					QString dataPropertyNameString(dataPropertyName.toString());
+					expression = new CDataPropertyExpression(dataPropertyNameString);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataPropertyBuildHash->insert(dataPropertyNameString,expression);
+					mBuildDataRoleSet->insert(expression);
+					mBuildDataRoleList->append(expression);
+				}
+				return expression;
+			}
+
+
+
+
+
+
+
 			CObjectIndividualVariableExpression* CConcreteOntologyBuildDataUpdater::getIndividualVariable(const QString &individualVariableName, cint64 axiomNumber) {
 				CObjectIndividualVariableExpression* expression = nullptr;
 				expression = mIndividualVariableBuildHash->value(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber));
@@ -1539,8 +2593,8 @@ namespace Konclude {
 					expression = new CObjectPropertyExpression(probertyName);
 					expression->setEntityID(mNextEntityNumber++);
 					mObjectPropertyBuildHash->insert(probertyName,expression);
-					mBuildRoleSet->insert(expression);
-					mBuildRoleList->append(expression);
+					mBuildObjectRoleSet->insert(expression);
+					mBuildObjectRoleList->append(expression);
 				}
 				return expression;
 			}
@@ -1553,8 +2607,8 @@ namespace Konclude {
 					expression = new CObjectPropertyExpression(propertyNameString);
 					expression->setEntityID(mNextEntityNumber++);
 					mObjectPropertyBuildHash->insert(propertyNameString,expression);
-					mBuildRoleSet->insert(expression);
-					mBuildRoleList->append(expression);
+					mBuildObjectRoleSet->insert(expression);
+					mBuildObjectRoleList->append(expression);
 				}
 				return expression;
 			}
@@ -1594,6 +2648,7 @@ namespace Konclude {
 				expression = mAnoIndividualBuildHash->value(namePair);
 				if (!expression) {
 					expression = new CAnonymousIndividualExpression(ontologyName,individualName);
+					expression->setEntityID(mNextEntityNumber++);
 					mAnoIndividualBuildHash->insert(namePair,expression);
 					mBuildIndividualSet->insert(expression);
 					mBuildIndividualList->append(expression);
@@ -1610,6 +2665,7 @@ namespace Konclude {
 					QString ontologyNameString(ontologyName.toString());
 					QString individualNameString(individualName.toString());
 					expression = new CAnonymousIndividualExpression(ontologyNameString,individualNameString);
+					expression->setEntityID(mNextEntityNumber++);
 					mAnoIndividualBuildHash->insert(QPair<CStringRefStringHasher,CStringRefStringHasher>(ontologyNameString,individualNameString),expression);
 					mBuildIndividualSet->insert(expression);
 					mBuildIndividualList->append(expression);

@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -64,6 +64,101 @@ namespace Konclude {
 		}
 
 		CSingleThreadTaskProcessorUnit::~CSingleThreadTaskProcessorUnit() {
+		}
+
+
+		cint64 CSingleThreadTaskProcessorUnit::countProcessingTasksMemoryPools() {
+			cint64 memoryPoolCount = 0;
+			CTask* taskProcessingQueueIt = mTaskProcessingQueue;
+			while (taskProcessingQueueIt) {
+				CMemoryPool* memoryPoolIt = taskProcessingQueueIt->getMemoryPools();
+				memoryPoolCount += memoryPoolIt->getCount();
+				taskProcessingQueueIt = taskProcessingQueueIt->getNext();
+			}
+			return memoryPoolCount;
+		}
+
+
+		cint64 CSingleThreadTaskProcessorUnit::countProcessedOpenTasksMemoryPools() {
+			cint64 memoryPoolCount = 0;
+			QSet<CTask*> taskSet;
+			QList<CTask*> taskList;
+			CTask* taskProcessingQueueIt = mTaskProcessingQueue;
+			while (taskProcessingQueueIt) {
+				if (taskProcessingQueueIt->getParentTask()) {
+					if (!taskSet.contains(taskProcessingQueueIt->getParentTask())) {
+						taskSet.insert(taskProcessingQueueIt->getParentTask());
+						taskList.append(taskProcessingQueueIt->getParentTask());
+					}
+				}
+				taskProcessingQueueIt = taskProcessingQueueIt->getNext();
+			}
+
+			while (!taskList.isEmpty()) {
+				CTask* task = taskList.takeFirst();
+				if (task->getParentTask()) {
+					if (!taskSet.contains(task->getParentTask())) {
+						taskSet.insert(task->getParentTask());
+						taskList.append(task->getParentTask());
+					}
+				}
+				CMemoryPool* memoryPoolIt = task->getMemoryPools();
+				memoryPoolCount += memoryPoolIt->getCount();
+			}
+
+			return memoryPoolCount;
+		}
+
+
+
+
+
+		cint64 CSingleThreadTaskProcessorUnit::closeOpenTasksMemoryPools() {
+			cint64 closedMemoryPoolCount = 0;
+			QSet<CTask*> taskSet;
+			QList<CTask*> taskList;
+			CTask* taskProcessingQueueIt = mTaskProcessingQueue;
+			while (taskProcessingQueueIt) {
+				if (!taskSet.contains(taskProcessingQueueIt)) {
+					taskSet.insert(taskProcessingQueueIt);
+					taskList.append(taskProcessingQueueIt);
+				}
+				taskProcessingQueueIt = taskProcessingQueueIt->getNext();
+			}
+
+			while (!taskList.isEmpty()) {
+
+				CTask* task = taskList.takeFirst();
+				CBooleanTaskResult* satResult = (CBooleanTaskResult*)task->getTaskResult();
+				if (satResult) {
+					satResult->installResult(false);
+				}
+				CCallbackData* callbackLinkerIt = task->getCallbackLinker();
+				while (callbackLinkerIt) {
+					CCallbackData* callback = callbackLinkerIt;
+					callbackLinkerIt = callbackLinkerIt->getNext();
+					if (mCallbackExecuter) {
+						mCallbackExecuter->executeCallback(task,callback);
+						INCTASKPROCESSINGSTAT(mStats.incStatisticCallbacksExecutedCount(1));
+					} else {
+						callback->doCallback();
+					}
+				}
+				if (task->getParentTask()) {
+					if (!taskSet.contains(task->getParentTask())) {
+						taskSet.insert(task->getParentTask());
+						taskList.append(task->getParentTask());
+					}
+				}
+				CMemoryPool* memoryPoolIt = task->getMemoryPools();
+				closedMemoryPoolCount += memoryPoolIt->getCount();
+				mMemoryAllocator->releaseMemoryPoolContainer(task);
+			}
+
+			mTaskProcessingQueue = 0;
+			mTaskCompletionQueue = 0;
+
+			return closedMemoryPoolCount;
 		}
 
 
@@ -224,6 +319,10 @@ namespace Konclude {
 					CTask* processingTask = mTaskProcessingQueue;
 					mTaskProcessingQueue = mTaskProcessingQueue->getNext();
 					cint64 taskDepth = processingTask->getTaskDepth();
+
+					//cint64 memoryPoolCount1 = countProcessingTasksMemoryPools();
+					//cint64 memoryPoolCount2 = countProcessedOpenTasksMemoryPools();
+
 					bool continueProcessing = processTask(processingTask);
 					if (continueProcessing) {
 						processingTask->getTaskStatus()->setTaskQUEUEDState();
@@ -238,6 +337,10 @@ namespace Konclude {
 						--mTaskProcessingCount;
 						++mStatRemovedTasks;
 					}
+
+					//if (mStatRemovedTasks > 100000) {
+					//	closeOpenTasksMemoryPools();
+					//}
 				}
 				if (!mTaskProcessingQueue && mTaskSchedulingQueue) {
 					CTask* nextTask = mTaskSchedulingQueue;

@@ -439,6 +439,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\Source\Parser\COWL2QtXMLOntologyStableStreamParser.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Parser\COWL2QtXMLOntologyStableStreamParser.h"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Parser\COWL2QtXMLOntologyStreamParser.cpp"
 						>
 					</File>
@@ -750,6 +758,254 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Parser\Expressions\CDataAllValuesFromExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataAllValuesFromExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataCardinalityExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataCardinalityExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataComplementOfExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataComplementOfExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataExactCardinalityExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataExactCardinalityExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetRestrictionExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetRestrictionExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetRestrictionExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataFacetRestrictionExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataHasValueExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataHasValueExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataIntersectionOfExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataIntersectionOfExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLexicalValueExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLexicalValueExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLexicalValueExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLexicalValueExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLiteralExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLiteralExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLiteralExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataLiteralExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataMaxCardinalityExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataMaxCardinalityExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataMinCardinalityExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataMinCardinalityExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataOneOfExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataOneOfExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyAssertionExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyAssertionExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyAxiomExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyAxiomExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyDomainExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyDomainExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyRangeExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyRangeExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyTermExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyTermExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyTermExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataPropertyTermExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataRangeTermExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataRangeTermExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataRangeTermExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataRangeTermExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataSomeValuesFromExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataSomeValuesFromExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDatatypeExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDatatypeExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDatatypeExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDatatypeExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDatatypeRestrictionExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDatatypeRestrictionExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataUnionOfExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDataUnionOfExpression.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Parser\Expressions\CDeclarationAxiomExpression.cpp"
 							>
 						</File>
@@ -771,6 +1027,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Parser\Expressions\CDisjointClassesExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDisjointDataPropertiesExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CDisjointDataPropertiesExpression.h"
 							>
 						</File>
 						<File
@@ -814,6 +1078,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Parser\Expressions\CEquivalentDataPropertiesExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CEquivalentDataPropertiesExpression.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Parser\Expressions\CEquivalentObjectPropertiesExpression.cpp"
 							>
 						</File>
@@ -843,6 +1115,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Parser\Expressions\CExpressionHashMixer.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CFunctionalDataPropertyExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CFunctionalDataPropertyExpression.h"
 							>
 						</File>
 						<File
@@ -934,6 +1214,30 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Parser\Expressions\CListDataFacetRestrictionExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CListDataFacetRestrictionExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CListDataPropertyTermExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CListDataPropertyTermExpressionAssociator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CListDataRangeTermExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CListDataRangeTermExpressionAssociator.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Parser\Expressions\CListExpression.cpp"
 							>
 						</File>
@@ -995,6 +1299,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Parser\Expressions\CNameExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CNegativeDataPropertyAssertionExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CNegativeDataPropertyAssertionExpression.h"
 							>
 						</File>
 						<File
@@ -1198,6 +1510,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Parser\Expressions\COrderedPairDataPropertyTermExpressionAssociator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\COrderedPairDataPropertyTermExpressionAssociator.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Parser\Expressions\COrderedPairExpressionAssociator.cpp"
 							>
 						</File>
@@ -1262,11 +1582,11 @@
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Parser\Expressions\CPropertyExpression.cpp"
+							RelativePath=".\Source\Parser\Expressions\CPropertyTermExpression.cpp"
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Parser\Expressions\CPropertyExpression.h"
+							RelativePath=".\Source\Parser\Expressions\CPropertyTermExpression.h"
 							>
 						</File>
 						<File
@@ -1462,6 +1782,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Parser\Expressions\CSubDataPropertyOfExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CSubDataPropertyOfExpression.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Parser\Expressions\CSubExpressionVisitor.cpp"
 							>
 						</File>
@@ -1527,6 +1855,150 @@
 						</File>
 						<File
 							RelativePath=".\Source\Parser\Expressions\ExpressionSettings.h"
+							>
+						</File>
+					</Filter>
+					<Filter
+						Name="XMLQt"
+						>
+					</Filter>
+					<Filter
+						Name="FunctionalANTLR"
+						>
+					</Filter>
+					<Filter
+						Name="FunctionalJAVACC"
+						>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CConcreteOWL2FunctionalStyleParser.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CConcreteOWL2FunctionalStyleParser.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CharStream.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CharStream.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CJAVACCParser.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CJAVACCParser.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\COWL2FunctionalJAVACCOntologyStreamParser.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\COWL2FunctionalJAVACCOntologyStreamParser.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\COWL2FunctionalStyleParserErrorHandler.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\COWL2FunctionalStyleParserErrorHandler.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\COWL2FunctionalStyleParserTokenManager.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\COWL2FunctionalStyleParserTokenManager.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CQtIODeviceStreamReader.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CQtIODeviceStreamReader.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CTokenBase.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CTokenBase.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CTokenManager.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\CTokenManager.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\ErrorHandler.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\FunctionalJAVACCSettings.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\JavaCC.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\OWL2FunctionalStyleParser.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\OWL2FunctionalStyleParser.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\OWL2FunctionalStyleParserConstants.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\OWL2FunctionalStyleParserTokenManager.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\OWL2FunctionalStyleParserTokenManager.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\ParseException.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\ParseException.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\Token.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\Token.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\TokenManager.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\TokenMgrError.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\FunctionalJAVACC\TokenMgrError.h"
 							>
 						</File>
 					</Filter>
@@ -1637,6 +2109,14 @@
 					<Filter
 						Name="Events"
 						>
+						<File
+							RelativePath=".\Source\Logger\Events\CConfigureLoggerEvent.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Logger\Events\CConfigureLoggerEvent.h"
+							>
+						</File>
 						<File
 							RelativePath=".\Source\Logger\Events\CLoggingEvent.cpp"
 							>
@@ -2314,6 +2794,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\CComputedConsequencesCachingData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CComputedConsequencesCachingData.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\CConcept.cpp"
 							>
 						</File>
@@ -2466,6 +2954,406 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteral.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteral.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBinaryBase64DataValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBinaryBase64DataValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBinaryDataValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBinaryDataValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBinaryHexDataValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBinaryHexDataValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBooleanValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralBooleanValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralCompareValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralCompareValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralDateTimeValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralDateTimeValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralDoubleValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralDoubleValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralFloatValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralFloatValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralIRIValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralIRIValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralRealValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralRealValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralStringValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralStringValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralXMLValue.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDataLiteralXMLValue.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatype.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatype.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryBase64DataTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryBase64DataTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryBase64DataType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryBase64DataType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryHexDataTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryHexDataTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryHexDataType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBinaryHexDataType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBooleanTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBooleanTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBooleanType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceBooleanType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceCompareTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceCompareTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceCompareType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceCompareType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceConceptTriggeringData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceConceptTriggeringData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceConceptTriggerLinker.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceConceptTriggerLinker.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDateTimeTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDateTimeTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDateTimeType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDateTimeType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDoubleTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDoubleTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDoubleType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceDoubleType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceFloatTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceFloatTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceFloatType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceFloatType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceIRITriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceIRITriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceIRIType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceIRIType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceRealTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceRealTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceRealType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceRealType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpacesTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpacesTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceStringTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceStringTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceStringType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceStringType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringIterator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringIterator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringMap.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringMap.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringMapArranger.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringMapArranger.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringMapData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggeringMapData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTypes.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceTypes.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceUnknownType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceUnknownType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceXMLTriggers.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceXMLTriggers.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceXMLType.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeValueSpaceXMLType.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeVector.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CDatatypeVector.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\CExpressionDataBoxMapping.cpp"
 							>
 						</File>
@@ -2498,6 +3386,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualData.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\CIndividualDependence.cpp"
 							>
 						</File>
@@ -2511,6 +3407,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Ontology\CIndividualDependenceVector.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualProcessData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualProcessData.h"
 							>
 						</File>
 						<File
@@ -2631,6 +3535,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Ontology\COntologyExpressivity.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyImportData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyImportData.h"
 							>
 						</File>
 						<File
@@ -3474,6 +4386,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Query\CWriteFunctionalIndividualFlattenedTypesQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CWriteFunctionalIndividualFlattenedTypesQuery.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Query\CWriteOWLXMLClassSubsumptionsHierarchyQuery.cpp"
 							>
 						</File>
@@ -3565,11 +4485,83 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CCacheValueHasher.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CCacheValueHasher.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Cache\CCompletionGraphCache.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Cache\CCompletionGraphCache.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCache.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCache.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheContext.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheContext.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheEntry.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheEntry.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheReader.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheReader.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheWriteData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheWriteData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheWriter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheWriter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheWriteTypesData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesCacheWriteTypesData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesTypesCacheEntry.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CComputedConsequencesTypesCacheEntry.h"
 								>
 							</File>
 							<File
@@ -3749,6 +4741,118 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedConceptExpansion.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedConceptExpansion.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedConceptLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedConceptLinker.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedDependentNominalSet.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedDependentNominalSet.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedDeterministicConceptExpansion.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedDeterministicConceptExpansion.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCache.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCache.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheContext.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheContext.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheEntry.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheEntry.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheExpansionWriteData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheExpansionWriteData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheReader.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheReader.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheUnsatisfiabilityWriteData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheUnsatisfiabilityWriteData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheWriteData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheWriteData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheWriter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedExpansionCacheWriter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedNondeterministicConceptExpansion.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedNondeterministicConceptExpansion.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeCacheUpdater.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeCacheUpdater.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Cache\CSignatureSatisfiableExpanderCache.cpp"
 								>
 							</File>
@@ -3872,6 +4976,14 @@
 									>
 								</File>
 								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteComputedConcequencesCacheEntryEvent.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteComputedConcequencesCacheEntryEvent.h"
+									>
+								</File>
+								<File
 									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteExpandCachedEvent.cpp"
 									>
 								</File>
@@ -3893,6 +5005,14 @@
 								</File>
 								<File
 									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteSatisfiableCacheEntryEvent.h"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteSaturationCacheDataEvent.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteSaturationCacheDataEvent.h"
 									>
 								</File>
 								<File
@@ -3922,6 +5042,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Strategy\CConcreteConceptProcessingOperatorPriorityStrategy.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Strategy\CEqualDepthCacheOrientatedProcessingPriorityStrategy.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Strategy\CEqualDepthCacheOrientatedProcessingPriorityStrategy.h"
 								>
 							</File>
 							<File
@@ -4181,11 +5309,43 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CComputedConsequencesCacheHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CComputedConsequencesCacheHandler.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CConceptNominalSchemaGroundingHandler.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CConceptNominalSchemaGroundingHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CDatatypeDependencyCollection.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CDatatypeDependencyCollection.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CDatatypeIndividualProcessNodeHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CDatatypeIndividualProcessNodeHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CDatatypeValueTestingCollection.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CDatatypeValueTestingCollection.h"
 								>
 							</File>
 							<File
@@ -4202,6 +5362,110 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualNodeManager.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeBinaryBase64DataValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeBinaryBase64DataValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeBinaryHexDataValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeBinaryHexDataValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeBooleanValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeBooleanValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeCompareValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeCompareValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeDateTimeValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeDateTimeValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeDoubleValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeDoubleValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeFloatValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeFloatValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeIRIValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeIRIValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeRealValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeRealValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeStringValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeStringValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeUnknownValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeUnknownValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeValueSpaceHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeXMLValueSpaceHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualProcessNodeXMLValueSpaceHandler.h"
 								>
 							</File>
 							<File
@@ -4274,6 +5538,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskSaturationSubsumptionIdentifierAnalyser.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSaturationNodeExpansionCacheHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSaturationNodeExpansionCacheHandler.h"
 								>
 							</File>
 							<File
@@ -4494,6 +5766,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CClashedConceptDescriptor.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CClashedDatatypeValueSpaceExclusionDescriptor.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CClashedDatatypeValueSpaceExclusionDescriptor.h"
 								>
 							</File>
 							<File
@@ -4965,6 +6245,350 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBinaryBase64DataValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBinaryBase64DataValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBinaryDataValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBinaryDataValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBinaryHexDataValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBinaryHexDataValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBooleanValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBooleanValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBooleanValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeBooleanValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueDataExclusion.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueDataExclusion.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceMapArranger.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceMapArranger.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceMapData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeCompareValueSpaceMapData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDateTimeValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDateTimeValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDateTimeValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDateTimeValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDependencyTrackPointCollection.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDependencyTrackPointCollection.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDoubleValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDoubleValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDoubleValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeDoubleValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeFloatValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeFloatValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeFloatValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeFloatValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeIRIValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeIRIValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeIRIValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeIRIValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueDataExclusion.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueDataExclusion.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueExclusionType.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueExclusionType.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceMapArranger.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceMapArranger.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceMapData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeRealValueSpaceMapData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueDataExclusion.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueDataExclusion.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueExclusionType.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueExclusionType.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceMap.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceMapArranger.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceMapArranger.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceMapData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeStringValueSpaceMapData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypesValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypesValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeUnknownValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeUnknownValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceDependencyCollector.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceDependencyCollector.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceRealValuesCounter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceRealValuesCounter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceStringValuesCounter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceStringValuesCounter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceValuesCounter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeValueSpaceValuesCounter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeXMLValueSpaceData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeXMLValueSpaceData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeXMLValueSpaceMap.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CDatatypeXMLValueSpaceMap.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CDependencyTracker.cpp"
 								>
 							</File>
@@ -5346,6 +6970,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNode.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeCacheData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeCacheData.h"
 								>
 							</File>
 							<File
@@ -6932,6 +8564,22 @@
 									>
 								</File>
 								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CDATATYPECONNECTIONDependencyNode.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CDATATYPECONNECTIONDependencyNode.h"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CDATATYPETRIGGERDependencyNode.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CDATATYPETRIGGERDependencyNode.h"
+									>
+								</File>
+								<File
 									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CDependency.cpp"
 									>
 									<FileConfiguration
@@ -7742,6 +9390,22 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Preprocess\CDataLiteralNormalizerPreProcess.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Preprocess\CDataLiteralNormalizerPreProcess.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Preprocess\CDatatypeNormalizerPreProcess.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Preprocess\CDatatypeNormalizerPreProcess.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Preprocess\CDisjunctSortingPreProcess.cpp"
 							>
 						</File>
@@ -7995,14 +9659,6 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Preprocess\CTriggeredImplicationBinaryAbsorberPreProcess.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Preprocess\CTriggeredImplicationGCIAbsorberPreProcess.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Preprocess\CTriggeredImplicationGCIAbsorberPreProcess.h"
 							>
 						</File>
 						<File
@@ -10669,6 +12325,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Control\Command\Instructions\CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CChooseParseInstallKnowledgeBaseOWLAutoOntologyCommand.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Control\Command\Instructions\CChooseParseInstallKnowledgeBaseOWLXMLOntologyCommand.cpp"
 								>
 							</File>
@@ -10730,6 +12394,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Control\Command\Instructions\CConstructSubClassHirarchyQueryCommand.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CConstructWriteFunctionalIndividualTypesQueryCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CConstructWriteFunctionalIndividualTypesQueryCommand.h"
 								>
 							</File>
 							<File
@@ -10965,6 +12637,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Control\Command\Instructions\CImportKnowledgeBaseOWLAutoOntologyCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CImportKnowledgeBaseOWLAutoOntologyCommand.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Control\Command\Instructions\CInitializeConfigurationCommand.cpp"
 								>
 							</File>
@@ -11117,11 +12797,35 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseAllDownloadedContinuer.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseAllDownloadedContinuer.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseCommand.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseCommand.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseFinishDownloadCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseFinishDownloadCommand.h"
 								>
 							</File>
 							<File
@@ -11133,11 +12837,35 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseOWLAutoOntologyCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseOWLAutoOntologyCommand.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseOWLFunctionalOntologyCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseOWLFunctionalOntologyCommand.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseOWLXMLOntologyCommand.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseOWLXMLOntologyCommand.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseStartDownloadCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CLoadKnowledgeBaseStartDownloadCommand.h"
 								>
 							</File>
 							<File
@@ -11381,6 +13109,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Control\Command\Instructions\CStreamParseOWL2FunctionalOntologyCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CStreamParseOWL2FunctionalOntologyCommand.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Control\Command\Instructions\CStreamParseOWL2XMLOntologyCommand.cpp"
 								>
 							</File>
@@ -11426,6 +13162,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Control\Command\Instructions\CTestTestsuiteCommand.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CWriteFunctionalIndividualTypesQueryCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CWriteFunctionalIndividualTypesQueryCommand.h"
 								>
 							</File>
 							<File
@@ -11751,6 +13495,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Control\Loader\CLoaderFactory.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Control\Loader\CLoggerConfigurationLoader.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Control\Loader\CLoggerConfigurationLoader.h"
 							>
 						</File>
 						<File
@@ -12224,6 +13976,14 @@
 					</File>
 					<File
 						RelativePath=".\Source\Test\COWLFileOWLlinkSatisfiabilityRequestGenerator.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkTypesRequestGenerator.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkTypesRequestGenerator.h"
 						>
 					</File>
 					<File
@@ -12882,6 +14642,58 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Test\Evaluation\CCriticalSystemProcessTester.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CCriticalSystemProcessTester.h"
+							>
+							<FileConfiguration
+								Name="Release|Win32"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description=""
+									CommandLine=""
+									AdditionalDependencies=""
+									Outputs=""
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description=""
+									CommandLine=""
+									AdditionalDependencies=""
+									Outputs=""
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|Win32"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description=""
+									CommandLine=""
+									AdditionalDependencies=""
+									Outputs=""
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Debug|x64"
+								>
+								<Tool
+									Name="VCCustomBuildTool"
+									Description=""
+									CommandLine=""
+									AdditionalDependencies=""
+									Outputs=""
+								/>
+							</FileConfiguration>
+						</File>
+						<File
 							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationAnalyseContext.cpp"
 							>
 						</File>
@@ -13493,7 +15305,7 @@
 								<Tool
 									Name="VCCustomBuildTool"
 									Description="Moc&apos;ing $(InputFileName)..."
-									CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;  &quot;$(InputPath)&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot; -DKONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED -DNDEBUG -DQT_CORE_LIB -DQT_NETWORK_LIB -DQT_NO_DEBUG -DQT_THREAD_SUPPORT -DQT_XML_LIB -DUNICODE -DWIN32 -I&quot;$(QTDIR)\include\.&quot; -I&quot;$(QTDIR)\include\QtCore\.&quot; -I&quot;$(QTDIR)\include\QtGui\.&quot; -I&quot;$(QTDIR)\include\QtNetwork\.&quot; -I&quot;$(QTDIR)\include\QtXml\.&quot; -I&quot;.\.&quot; -I&quot;.\GeneratedFiles\$(ConfigurationName)\.&quot; -I&quot;.\generatedfiles\.&quot; -I&quot;.\Source\.&quot; -I&quot;.\Source\GUI\Widgets\.&quot;&#x0D;&#x0A;"
+									CommandLine="&quot;$(QTDIR)\bin\moc.exe&quot;   -DUNICODE -DWIN32 -DQT_THREAD_SUPPORT -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_XML_LIB -DQT_NETWORK_LIB -DKONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED  -I&quot;$(QTDIR)\include\.&quot; -I&quot;.\generatedfiles\.&quot; -I&quot;.\GeneratedFiles\$(ConfigurationName)\.&quot; -I&quot;$(QTDIR)\include\QtCore\.&quot; -I&quot;$(QTDIR)\include\QtGui\.&quot; -I&quot;$(QTDIR)\include\QtXml\.&quot; -I&quot;.\Source\.&quot; -I&quot;.\Source\GUI\Widgets\.&quot; -I&quot;$(QTDIR)\include\QtNetwork\.&quot; -I&quot;.\.&quot; &quot;.\Source\Test\Evaluation\CReasonerEvaluationUpdaterThread.h&quot; -o &quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;&#x0D;&#x0A;"
 									AdditionalDependencies="&quot;$(QTDIR)\bin\moc.exe&quot;;$(InputPath)"
 									Outputs="&quot;.\GeneratedFiles\$(ConfigurationName)\moc_$(InputName).cpp&quot;"
 								/>
@@ -14246,6 +16058,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Network\HTTP\CQtHttpDownloadFileRequest.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Network\HTTP\CQtHttpDownloadFileRequest.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Network\HTTP\CQtHttpListner.cpp"
 							>
 						</File>
@@ -14397,6 +16217,14 @@
 							Name="Events"
 							>
 							<File
+								RelativePath=".\Source\Network\HTTP\Events\CAddResponseFinishedCallbackEvent.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Network\HTTP\Events\CAddResponseFinishedCallbackEvent.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Network\HTTP\Events\CConnectionDisconnectedEvent.cpp"
 								>
 							</File>
@@ -14413,19 +16241,19 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseTextCallbackEvent.cpp"
+								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseDataCallbackEvent.cpp"
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseTextCallbackEvent.h"
+								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseDataCallbackEvent.h"
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseTextEvent.cpp"
+								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseDataEvent.cpp"
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseTextEvent.h"
+								RelativePath=".\Source\Network\HTTP\Events\CExtractResponseDataEvent.h"
 								>
 							</File>
 							<File
@@ -14571,26 +16399,6 @@
 			SourceControlFiles="false"
 			>
 			<File
-				RelativePath=".\generatedfiles\release\moc_COWLlinkHttpConnectionHandlerProcessor.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\generatedfiles\debug\moc_COWLlinkHttpConnectionHandlerProcessor.cpp"
 				>
 				<FileConfiguration
@@ -14611,7 +16419,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\generatedfiles\release\moc_CQtHttpTransactionManager.cpp"
+				RelativePath=".\generatedfiles\release\moc_COWLlinkHttpConnectionHandlerProcessor.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -14673,7 +16481,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\generatedfiles\release\moc_CReasonerEvaluationUpdaterThread.cpp"
+				RelativePath=".\generatedfiles\release\moc_CQtHttpTransactionManager.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -14731,6 +16539,26 @@
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)\$(InputName)1.obj"
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\generatedfiles\release\moc_CReasonerEvaluationUpdaterThread.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
 			</File>
@@ -14797,6 +16625,26 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\generatedfiles\release\moc_CReasonerKoncludeEvaluationProvider.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\generatedfiles\debug\moc_CReasonerKoncludeEvaluationProvider.cpp"
 				>
 				<FileConfiguration
@@ -14835,46 +16683,6 @@
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)\$(InputName)1.obj"
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\generatedfiles\release\moc_CReasonerKoncludeEvaluationProvider.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\generatedfiles\release\moc_CReasonerOWLlinkEvaluationProvider.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
 			</File>
@@ -14921,10 +16729,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\GeneratedFiles\debug\moc_CReasonerTestfileTester.cpp"
+				RelativePath=".\generatedfiles\release\moc_CReasonerOWLlinkEvaluationProvider.cpp"
 				>
 				<FileConfiguration
-					Name="Release|Win32"
+					Name="Debug|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -14932,7 +16740,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|x64"
+					Name="Debug|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -14960,6 +16768,38 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\GeneratedFiles\debug\moc_CReasonerTestfileTester.cpp"
+				>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<Filter
+				Name="Release"
+				Filter="cpp;moc"
+				SourceControlFiles="false"
+				>
+			</Filter>
+			<Filter
+				Name="Debug"
+				Filter="cpp;moc"
+				SourceControlFiles="false"
+				>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Dateien"

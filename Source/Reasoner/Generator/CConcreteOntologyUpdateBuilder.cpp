@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -65,14 +65,25 @@ namespace Konclude {
 
 				mUpdateClassAxiomHash = mOntoData->getExpressionDataBoxMapping()->getUpdatedClassAxiomTellOrRetractHash();
 				mUpdateObjectPropertyAxiomHash = mOntoData->getExpressionDataBoxMapping()->getUpdateObjectPropertyAxiomHash();
+				mUpdateDataPropertyAxiomHash = mOntoData->getExpressionDataBoxMapping()->getUpdateDataPropertyAxiomHash();
 				mUpdateAssertionAxiomHash = mOntoData->getExpressionDataBoxMapping()->getUpdateAssertionAxiomHash();
 
 				mClassTermClassAxiomSet = mOntoData->getExpressionDataBoxMapping()->getClassTermExpressionClassAxiomExpressionSet();
 				mClassTermClassAxiomHash = mOntoData->getExpressionDataBoxMapping()->getClassTermExpressionClassAxiomExpressionHash();
 
 
+				mDatatypeExpDatatypeHash = mOntoData->getExpressionDataBoxMapping()->getDatatypeExpressionDatatypeHash();
+				mDatatypeDatatypeExpHash = mOntoData->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
+
+
+
 				mObjPropTermObjPropAxiomSet = mOntoData->getExpressionDataBoxMapping()->getObjectPropertyTermObjectPropertyAxiomSet();
 				mObjPropTermObjPropAxiomHash = mOntoData->getExpressionDataBoxMapping()->getObjectPropertyTermObjectPropertyAxiomHash();
+
+
+				mDataPropTermDataPropAxiomSet = mOntoData->getExpressionDataBoxMapping()->getDataPropertyTermDataPropertyAxiomSet();
+				mDataPropTermDataPropAxiomHash = mOntoData->getExpressionDataBoxMapping()->getDataPropertyTermDataPropertyAxiomHash();
+
 
 				mIndiTermAssertionAxiomSet = mOntoData->getExpressionDataBoxMapping()->getIndividualTermAssertionAxiomSet();
 				mIndiTermAssertionAxiomHash = mOntoData->getExpressionDataBoxMapping()->getIndividualTermAssertionAxiomHash();
@@ -83,12 +94,18 @@ namespace Konclude {
 
 				mClassTermConceptHash = mOntoData->getExpressionDataBoxMapping()->getClassTermConceptMappingHash();
 				mConceptClassTermHash = mOntoData->getExpressionDataBoxMapping()->getConceptClassTermMappingHash();
+				mDataRangeTermConceptHash = mOntoData->getExpressionDataBoxMapping()->getDataRangeTermConceptMappingHash();
+				mConceptDataRangeTermHash = mOntoData->getExpressionDataBoxMapping()->getConceptDataRangeTermMappingHash();
 
 				mObjPropTermRoleHash = mOntoData->getExpressionDataBoxMapping()->getObjectPropertyTermRoleMappingHash();
 				mRoleObjPropTermHash = mOntoData->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
+				mDataPropTermRoleHash = mOntoData->getExpressionDataBoxMapping()->getDataPropertyTermRoleMappingHash();
+				mRoleDataPropTermHash = mOntoData->getExpressionDataBoxMapping()->getRoleDataPropertyTermMappingHash();
 
 				mIndividulTermIndiHash = mOntoData->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash();
 				mIndiIndividulTermHash = mOntoData->getExpressionDataBoxMapping()->getIndiIndividulTermMappingHash();
+
+
 
 
 				mRoleChainObjPropTermHash = mOntoData->getExpressionDataBoxMapping()->getRoleChainObjectPropertyTermHash();
@@ -97,25 +114,37 @@ namespace Konclude {
 				mLastProcessedChangedAxiom = mOntoData->getExpressionDataBoxMapping()->getLastProcessedChangedAxiom();
 				mLastProcessedBuildIndividual = mOntoData->getExpressionDataBoxMapping()->getLastProcessedBuildIndividual();
 				mLastProcessedBuildConcept = mOntoData->getExpressionDataBoxMapping()->getLastProcessedBuildConcept();
-				mLastProcessedBuildRole = mOntoData->getExpressionDataBoxMapping()->getLastProcessedBuildRole();
+				mLastProcessedBuildObjectRole = mOntoData->getExpressionDataBoxMapping()->getLastProcessedBuildObjectRole();
+				mLastProcessedBuildDataRole = mOntoData->getExpressionDataBoxMapping()->getLastProcessedBuildDataRole();
+				mLastProcessedBuildDataRange = mOntoData->getExpressionDataBoxMapping()->getLastProcessedBuildDataRange();
+				mLastProcessedBuildDatatype = mOntoData->getExpressionDataBoxMapping()->getLastProcessedBuildDatatype();
 
 				mLastProcessedExpression = mOntoData->getExpressionDataBoxMapping()->getLastProcessedExpression();
 				mLastProcessedInverseProperty = mOntoData->getExpressionDataBoxMapping()->getLastProcessedInverseProperty();
 
 				mLastBuildedIndividual = mOntoData->getExpressionDataBoxMapping()->getLastBuildedIndividual();
 				mLastBuildedConcept = mOntoData->getExpressionDataBoxMapping()->getLastBuildedConcept();
-				mLastBuildedRole = mOntoData->getExpressionDataBoxMapping()->getLastBuildedRole();
+				mLastBuildedObjectRole = mOntoData->getExpressionDataBoxMapping()->getLastBuildedObjectRole();
+				mLastBuildedDataRole = mOntoData->getExpressionDataBoxMapping()->getLastBuildedDataRole();
+				mLastBuildedDataRange = mOntoData->getExpressionDataBoxMapping()->getLastBuildedDataRange();
+				mLastBuildedDatatype = mOntoData->getExpressionDataBoxMapping()->getLastBuildedDatatype();
 
 				mLocExpressionBuildHash = mOntoData->getExpressionDataBoxMapping()->getStructuralExpressionBuildHash();
 				mLocExpressionBuildContainerList = mOntoData->getExpressionDataBoxMapping()->getExpressionBuildListContainer();
 				mLocInverseObjectPropertyHash = mOntoData->getExpressionDataBoxMapping()->getInverseObjectPropertyHash();
 
 				mLocBuildConceptSet = mOntoData->getExpressionDataBoxMapping()->getBuildedConceptSet();
-				mLocBuildRoleSet = mOntoData->getExpressionDataBoxMapping()->getBuildedRoleSet();
+				mLocBuildObjectRoleSet = mOntoData->getExpressionDataBoxMapping()->getBuildedObjectRoleSet();
+				mLocBuildDataRoleSet = mOntoData->getExpressionDataBoxMapping()->getBuildedDataRoleSet();
+				mLocBuildDataRangeSet = mOntoData->getExpressionDataBoxMapping()->getBuildedDataRangeSet();
+				mLocBuildDatatypeSet = mOntoData->getExpressionDataBoxMapping()->getBuildedDatatypeSet();
 				mLocBuildIndividualSet = mOntoData->getExpressionDataBoxMapping()->getBuildedIndividualSet();
 
 				mLocBuildConceptList = mOntoData->getExpressionDataBoxMapping()->getBuildedConceptList();
-				mLocBuildRoleList = mOntoData->getExpressionDataBoxMapping()->getBuildedRoleList();
+				mLocBuildObjectRoleList = mOntoData->getExpressionDataBoxMapping()->getBuildedObjectRoleList();
+				mLocBuildDataRoleList = mOntoData->getExpressionDataBoxMapping()->getBuildedDataRoleList();
+				mLocBuildDataRangeList = mOntoData->getExpressionDataBoxMapping()->getBuildedDataRangeList();
+				mLocBuildDatatypeList = mOntoData->getExpressionDataBoxMapping()->getBuildedDatatypeList();
 				mLocBuildIndividualList = mOntoData->getExpressionDataBoxMapping()->getBuildedIndividualList();
 
 				mRebuildTopConcept = false;
@@ -126,8 +155,12 @@ namespace Konclude {
 				mBuildingConceptSet.clear();
 				mNewBuildedConceptSet.clear();
 
-				mNewBuildedRoleSet.clear();
-				mBuildingRoleSet.clear();
+				mNewBuildedObjectRoleSet.clear();
+				mNewBuildedDataRoleSet.clear();
+				mBuildingObjectRoleSet.clear();
+				mBuildingDataRangeSet.clear();
+				mBuildingDatatypeSet.clear();
+				mBuildingDataRoleSet.clear();
 
 				mNewBuildedIndividualSet.clear();
 				mBuildingIndividualSet.clear();
@@ -142,7 +175,10 @@ namespace Konclude {
 				mInstallIndividualList.clear();
 
 				mNewBuildConceptSet.clear();
-				mNewBuildRoleSet.clear();
+				mNewBuildObjectRoleSet.clear();
+				mNewBuildDataRoleSet.clear();
+				mNewBuildDataRangeSet.clear();
+				mNewBuildDatatypeSet.clear();
 				mNewBuildIndividualSet.clear();
 
 				return true;
@@ -249,19 +285,76 @@ namespace Konclude {
 				mBuildConceptSet = mLocBuildConceptSet;
 				mBuildConceptList = mLocBuildConceptList;
 
-				if (mLastProcessedBuildRole <= 0) {
-					*mLocBuildRoleSet = *mBuildRoleSet;
-					*mLocBuildRoleList = *mBuildRoleList;
-					mLastProcessedBuildRole = mLocBuildRoleList->count();
+
+
+				if (mLastProcessedBuildObjectRole <= 0) {
+					*mLocBuildObjectRoleSet = *mBuildObjectRoleSet;
+					*mLocBuildObjectRoleList = *mBuildObjectRoleList;
+					mLastProcessedBuildObjectRole = mLocBuildObjectRoleList->count();
 				} else {
-					while (mLastProcessedBuildRole < mBuildRoleList->count()) {
-						CObjectPropertyTermExpression* buildExp((*mBuildRoleList)[mLastProcessedBuildRole++]);
-						mLocBuildRoleList->append(buildExp);
-						mLocBuildRoleSet->insert(buildExp);
+					while (mLastProcessedBuildObjectRole < mBuildObjectRoleList->count()) {
+						CObjectPropertyTermExpression* buildExp((*mBuildObjectRoleList)[mLastProcessedBuildObjectRole++]);
+						mLocBuildObjectRoleList->append(buildExp);
+						mLocBuildObjectRoleSet->insert(buildExp);
 					}
 				}
-				mBuildRoleSet = mLocBuildRoleSet;
-				mBuildRoleList = mLocBuildRoleList;
+				mBuildObjectRoleSet = mLocBuildObjectRoleSet;
+				mBuildObjectRoleList = mLocBuildObjectRoleList;
+
+
+
+
+				if (mLastProcessedBuildDataRole <= 0) {
+					*mLocBuildDataRoleSet = *mBuildDataRoleSet;
+					*mLocBuildDataRoleList = *mBuildDataRoleList;
+					mLastProcessedBuildDataRole = mLocBuildDataRoleList->count();
+				} else {
+					while (mLastProcessedBuildDataRole < mBuildDataRoleList->count()) {
+						CDataPropertyTermExpression* buildExp((*mBuildDataRoleList)[mLastProcessedBuildDataRole++]);
+						mLocBuildDataRoleList->append(buildExp);
+						mLocBuildDataRoleSet->insert(buildExp);
+					}
+				}
+				mBuildDataRoleSet = mLocBuildDataRoleSet;
+				mBuildDataRoleList = mLocBuildDataRoleList;
+
+
+
+
+
+				if (mLastProcessedBuildDataRange <= 0) {
+					*mLocBuildDataRangeSet = *mBuildDataRangeSet;
+					*mLocBuildDataRangeList = *mBuildDataRangeList;
+					mLastProcessedBuildDataRange = mLocBuildDataRangeList->count();
+				} else {
+					while (mLastProcessedBuildDataRange < mBuildDataRangeList->count()) {
+						CDataRangeTermExpression* buildExp((*mBuildDataRangeList)[mLastProcessedBuildDataRange++]);
+						mLocBuildDataRangeList->append(buildExp);
+						mLocBuildDataRangeSet->insert(buildExp);
+					}
+				}
+				mBuildDataRangeSet = mLocBuildDataRangeSet;
+				mBuildDataRangeList = mLocBuildDataRangeList;
+
+
+
+
+
+				if (mLastProcessedBuildDatatype <= 0) {
+					*mLocBuildDatatypeSet = *mBuildDatatypeSet;
+					*mLocBuildDatatypeList = *mBuildDatatypeList;
+					mLastProcessedBuildDatatype = mLocBuildDatatypeList->count();
+				} else {
+					while (mLastProcessedBuildDatatype < mBuildDatatypeList->count()) {
+						CDatatypeExpression* buildExp((*mBuildDatatypeList)[mLastProcessedBuildDatatype++]);
+						mLocBuildDatatypeList->append(buildExp);
+						mLocBuildDatatypeSet->insert(buildExp);
+					}
+				}
+				mBuildDatatypeSet = mLocBuildDatatypeSet;
+				mBuildDatatypeList = mLocBuildDatatypeList;
+
+
 
 
 				FOREACHIT (CAxiomExpression* axiomExp, newTellUpdatedAxiomSet) {
@@ -272,6 +365,10 @@ namespace Konclude {
 					CObjectPropertyAxiomExpression* objPropAxiomExp = dynamic_cast<CObjectPropertyAxiomExpression*>(axiomExp);
 					if (objPropAxiomExp) {
 						mUpdateObjectPropertyAxiomHash->insert(objPropAxiomExp,true);
+					}
+					CDataPropertyAxiomExpression* dataPropAxiomExp = dynamic_cast<CDataPropertyAxiomExpression*>(axiomExp);
+					if (dataPropAxiomExp) {
+						mUpdateDataPropertyAxiomHash->insert(dataPropAxiomExp,true);
 					}
 					CDeclarationAxiomExpression* declAxiomExp = dynamic_cast<CDeclarationAxiomExpression*>(axiomExp);
 					if (declAxiomExp) {
@@ -290,6 +387,10 @@ namespace Konclude {
 					CObjectPropertyAxiomExpression* objPropAxiomExp = dynamic_cast<CObjectPropertyAxiomExpression*>(axiomExp);
 					if (objPropAxiomExp) {
 						mUpdateObjectPropertyAxiomHash->insert(objPropAxiomExp,false);
+					}
+					CDataPropertyAxiomExpression* dataPropAxiomExp = dynamic_cast<CDataPropertyAxiomExpression*>(axiomExp);
+					if (dataPropAxiomExp) {
+						mUpdateDataPropertyAxiomHash->insert(dataPropAxiomExp,false);
 					}
 					CDeclarationAxiomExpression* declAxiomExp = dynamic_cast<CDeclarationAxiomExpression*>(axiomExp);
 					if (declAxiomExp) {
@@ -337,6 +438,27 @@ namespace Konclude {
 								mIndiTermAssertionAxiomHash->insertMulti(indiTermExp,assAxiomExp);
 							}
 						}
+					} else if (expType == CBuildExpression::BETDATAPROPERTYASSERTION) {
+						CDataPropertyAssertionExpression* propAssExp = (CDataPropertyAssertionExpression*)assAxiomExp;
+						CIndividualTermExpression* indiTermExp = propAssExp->getIndividualTermExpression();
+						mNewBuildIndividualSet.insert(indiTermExp);
+						if (!mIndiTermAssertionAxiomSet->contains(QPair<CIndividualTermExpression*,CAssertionAxiomExpression*>(indiTermExp,assAxiomExp))) {
+							mIndiTermAssertionAxiomSet->insert(QPair<CIndividualTermExpression*,CAssertionAxiomExpression*>(indiTermExp,assAxiomExp));
+							if (tellAxiom) {
+								mIndiTermAssertionAxiomHash->insertMulti(indiTermExp,assAxiomExp);
+							}
+						}
+					} else if (expType == CBuildExpression::BETNEGATIVEDATAPROPERTYASSERTION) {
+						mConstructFlags->setNonELConstructUsed();
+						CNegativeDataPropertyAssertionExpression* propAssExp = (CNegativeDataPropertyAssertionExpression*)assAxiomExp;
+						CIndividualTermExpression* indiTermExp = propAssExp->getIndividualTermExpression();
+						mNewBuildIndividualSet.insert(indiTermExp);
+						if (!mIndiTermAssertionAxiomSet->contains(QPair<CIndividualTermExpression*,CAssertionAxiomExpression*>(indiTermExp,assAxiomExp))) {
+							mIndiTermAssertionAxiomSet->insert(QPair<CIndividualTermExpression*,CAssertionAxiomExpression*>(indiTermExp,assAxiomExp));
+							if (tellAxiom) {
+								mIndiTermAssertionAxiomHash->insertMulti(indiTermExp,assAxiomExp);
+							}
+						}
 					} else if (expType == CBuildExpression::BETSAMEINDIVIDUAL) {
 						mConstructFlags->setNonELConstructUsed();
 						CSameIndividualExpression* sameIndiAssExp = (CSameIndividualExpression*)assAxiomExp;
@@ -363,6 +485,9 @@ namespace Konclude {
 						}
 					}
 				}
+
+
+
 
 
 
@@ -431,13 +556,16 @@ namespace Konclude {
 				}
 
 
+
+
+
 				FOREACHHASHIT (CObjectPropertyAxiomExpression* objPropAxiomExp, bool tellAxiom, *mUpdateObjectPropertyAxiomHash) {
 					CBuildExpression::ExpressionType expType = objPropAxiomExp->getType();
 					if (expType == CBuildExpression::BETEQUIVALENTOBJECTPROPERTIES) {
 						// all associated properties has to be updated
 						CEquivalentObjectPropertiesExpression* eqObjPropExp = (CEquivalentObjectPropertiesExpression*)objPropAxiomExp;
 						FOREACHIT (CObjectPropertyTermExpression* objPropTermExp, *eqObjPropExp->getObjectPropertyTermExpressionList()) {
-							mNewBuildRoleSet.insert(objPropTermExp);
+							mNewBuildObjectRoleSet.insert(objPropTermExp);
 							if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 								mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 								if (tellAxiom) {
@@ -450,7 +578,7 @@ namespace Konclude {
 						// all associated properties has to be updated
 						CDisjointObjectPropertiesExpression* eqObjPropExp = (CDisjointObjectPropertiesExpression*)objPropAxiomExp;
 						FOREACHIT (CObjectPropertyTermExpression* objPropTermExp, *eqObjPropExp->getObjectPropertyTermExpressionList()) {
-							mNewBuildRoleSet.insert(objPropTermExp);
+							mNewBuildObjectRoleSet.insert(objPropTermExp);
 							if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 								mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 								if (tellAxiom) {
@@ -461,7 +589,7 @@ namespace Konclude {
 					} else if (expType == CBuildExpression::BETSUBOBJECTPROPERTYOF) {
 						CSubObjectPropertyOfExpression* subObjPropExp = (CSubObjectPropertyOfExpression*)objPropAxiomExp;
 						FOREACHIT (CObjectPropertyTermExpression* objPropTermExp, *subObjPropExp->getSubObjectPropertyTermExpressionList()) {
-							mNewBuildRoleSet.insert(objPropTermExp);
+							mNewBuildObjectRoleSet.insert(objPropTermExp);
 							if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 								mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 								if (tellAxiom) {
@@ -472,7 +600,7 @@ namespace Konclude {
 						if (subObjPropExp->getSubObjectPropertyTermExpressionList()->count() >= 2) {
 							mConstructFlags->setComplexRoleUsed();
 							CObjectPropertyTermExpression* objPropTermExp = subObjPropExp->getSuperObjectPropertyTermExpression();
-							mNewBuildRoleSet.insert(objPropTermExp);
+							mNewBuildObjectRoleSet.insert(objPropTermExp);
 							if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 								mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 								if (tellAxiom) {
@@ -486,25 +614,25 @@ namespace Konclude {
 						CInverseObjectPropertiesExpression* invObjPropExp = (CInverseObjectPropertiesExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp1 = invObjPropExp->getFirstObjectPropertyTermExpression();
 						CObjectPropertyTermExpression* objPropTermExp2 = invObjPropExp->getSecondObjectPropertyTermExpression();
-						mNewBuildRoleSet.insert(objPropTermExp1);
+						mNewBuildObjectRoleSet.insert(objPropTermExp1);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp1,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp1,objPropAxiomExp));
 							if (tellAxiom) {
 								mObjPropTermObjPropAxiomHash->insertMulti(objPropTermExp1,objPropAxiomExp);
 							}
 						}
-						mNewBuildRoleSet.insert(objPropTermExp2);
+						mNewBuildObjectRoleSet.insert(objPropTermExp2);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp2,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp2,objPropAxiomExp));
 							if (tellAxiom) {
 								mObjPropTermObjPropAxiomHash->insertMulti(objPropTermExp2,objPropAxiomExp);
 							}
 						}
-					} else if (expType == CBuildExpression::BETFUNCTIONALPROPERTY) {
+					} else if (expType == CBuildExpression::BETFUNCTIONALOBJECTPROPERTY) {
 						mConstructFlags->setNonELConstructUsed();
 						CFunctionalObjectPropertyExpression* funcObjPropExp = (CFunctionalObjectPropertyExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = funcObjPropExp->getFunctionalObjectPropertyExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -515,7 +643,7 @@ namespace Konclude {
 						mConstructFlags->setNonELConstructUsed();
 						CInverseFunctionalObjectPropertyExpression* funcObjPropExp = (CInverseFunctionalObjectPropertyExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = funcObjPropExp->getInverseFunctionalObjectPropertyExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -526,7 +654,7 @@ namespace Konclude {
 						mConstructFlags->setNonELConstructUsed();
 						CSymmetricObjectPropertyExpression* objPropExpAxiom = (CSymmetricObjectPropertyExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = objPropExpAxiom->getObjectPropertyTermExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -537,7 +665,7 @@ namespace Konclude {
 						mConstructFlags->setNonELConstructUsed();
 						CAsymmetricObjectPropertyExpression* objPropExpAxiom = (CAsymmetricObjectPropertyExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = objPropExpAxiom->getObjectPropertyTermExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -547,7 +675,7 @@ namespace Konclude {
 					} else if (expType == CBuildExpression::BETREFLEXIVEPROPERTY) {
 						CReflexiveObjectPropertyExpression* objPropExpAxiom = (CReflexiveObjectPropertyExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = objPropExpAxiom->getObjectPropertyTermExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -558,7 +686,7 @@ namespace Konclude {
 						mConstructFlags->setNonELConstructUsed();
 						CIrreflexiveObjectPropertyExpression* objPropExpAxiom = (CIrreflexiveObjectPropertyExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = objPropExpAxiom->getObjectPropertyTermExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -569,7 +697,7 @@ namespace Konclude {
 						mConstructFlags->setComplexRoleUsed();
 						CTransetiveObjectPropertyExpression* objPropExpAxiom = (CTransetiveObjectPropertyExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = objPropExpAxiom->getTransetivePropertyExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -579,7 +707,7 @@ namespace Konclude {
 					} else if (expType == CBuildExpression::BETOBJECTPROPERTYDOMAIN) {
 						CObjectPropertyDomainExpression* objPropExpAxiom = (CObjectPropertyDomainExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = objPropExpAxiom->getObjectPropertyTermExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -589,7 +717,7 @@ namespace Konclude {
 					} else if (expType == CBuildExpression::BETOBJECTPROPERTYRANGE) {
 						CObjectPropertyRangeExpression* objPropExpAxiom = (CObjectPropertyRangeExpression*)objPropAxiomExp;
 						CObjectPropertyTermExpression* objPropTermExp = objPropExpAxiom->getObjectPropertyTermExpression();
-						mNewBuildRoleSet.insert(objPropTermExp);
+						mNewBuildObjectRoleSet.insert(objPropTermExp);
 						if (!mObjPropTermObjPropAxiomSet->contains(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp))) {
 							mObjPropTermObjPropAxiomSet->insert(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiomExp));
 							if (tellAxiom) {
@@ -602,37 +730,142 @@ namespace Konclude {
 
 
 
-				while (mLastBuildedConcept < mBuildConceptList->size() || mLastBuildedRole < mBuildRoleList->size() || mLastBuildedIndividual < mBuildIndividualList->size()
-						|| !mNewBuildConceptSet.isEmpty() || !mNewBuildRoleSet.isEmpty() || !mNewBuildIndividualSet.isEmpty()) {
+
+				FOREACHHASHIT (CDataPropertyAxiomExpression* dataPropAxiomExp, bool tellAxiom, *mUpdateDataPropertyAxiomHash) {
+					CBuildExpression::ExpressionType expType = dataPropAxiomExp->getType();
+					if (expType == CBuildExpression::BETEQUIVALENTDATAPROPERTIES) {
+						// all associated properties has to be updated
+						CEquivalentDataPropertiesExpression* eqDataPropExp = (CEquivalentDataPropertiesExpression*)dataPropAxiomExp;
+						FOREACHIT (CDataPropertyTermExpression* dataPropTermExp, *eqDataPropExp->getDataPropertyTermExpressionList()) {
+							mNewBuildDataRoleSet.insert(dataPropTermExp);
+							if (!mDataPropTermDataPropAxiomSet->contains(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp))) {
+								mDataPropTermDataPropAxiomSet->insert(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp));
+								if (tellAxiom) {
+									mDataPropTermDataPropAxiomHash->insertMulti(dataPropTermExp,dataPropAxiomExp);
+								}
+							}
+						}
+					} else if (expType == CBuildExpression::BETDISJOINTDATAPROPERTIES) {
+						mConstructFlags->setNonELConstructUsed();
+						// all associated properties has to be updated
+						CDisjointDataPropertiesExpression* eqDisjPropExp = (CDisjointDataPropertiesExpression*)dataPropAxiomExp;
+						FOREACHIT (CDataPropertyTermExpression* dataPropTermExp, *eqDisjPropExp->getDataPropertyTermExpressionList()) {
+							mNewBuildDataRoleSet.insert(dataPropTermExp);
+							if (!mDataPropTermDataPropAxiomSet->contains(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp))) {
+								mDataPropTermDataPropAxiomSet->insert(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp));
+								if (tellAxiom) {
+									mDataPropTermDataPropAxiomHash->insertMulti(dataPropTermExp,dataPropAxiomExp);
+								}
+							}
+						}
+					} else if (expType == CBuildExpression::BETSUBDATAPROPERTYOF) {
+						CSubDataPropertyOfExpression* subDataPropExp = (CSubDataPropertyOfExpression*)dataPropAxiomExp;
+						CDataPropertyTermExpression* dataPropTermExp = subDataPropExp->getSubDataPropertyTermExpression();
+						mNewBuildDataRoleSet.insert(dataPropTermExp);
+						if (!mDataPropTermDataPropAxiomSet->contains(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp))) {
+							mDataPropTermDataPropAxiomSet->insert(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp));
+							if (tellAxiom) {
+								mDataPropTermDataPropAxiomHash->insertMulti(dataPropTermExp,dataPropAxiomExp);
+							}
+						}
+
+					} else if (expType == CBuildExpression::BETFUNCTIONALDATAPROPERTY) {
+						mConstructFlags->setNonELConstructUsed();
+						CFunctionalDataPropertyExpression* funcDataPropExp = (CFunctionalDataPropertyExpression*)dataPropAxiomExp;
+						CDataPropertyTermExpression* dataPropTermExp = funcDataPropExp->getFunctionalDataPropertyExpression();
+						mNewBuildDataRoleSet.insert(dataPropTermExp);
+						if (!mDataPropTermDataPropAxiomSet->contains(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp))) {
+							mDataPropTermDataPropAxiomSet->insert(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp));
+							if (tellAxiom) {
+								mDataPropTermDataPropAxiomHash->insertMulti(dataPropTermExp,dataPropAxiomExp);
+							}
+						}
+
+					} else if (expType == CBuildExpression::BETDATAPROPERTYDOMAIN) {
+						CDataPropertyDomainExpression* dataPropExpAxiom = (CDataPropertyDomainExpression*)dataPropAxiomExp;
+						CDataPropertyTermExpression* dataPropTermExp = dataPropExpAxiom->getDataPropertyTermExpression();
+						mNewBuildDataRoleSet.insert(dataPropTermExp);
+						if (!mDataPropTermDataPropAxiomSet->contains(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp))) {
+							mDataPropTermDataPropAxiomSet->insert(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp));
+							if (tellAxiom) {
+								mDataPropTermDataPropAxiomHash->insertMulti(dataPropTermExp,dataPropAxiomExp);
+							}
+						}
+					} else if (expType == CBuildExpression::BETDATAPROPERTYRANGE) {
+						CDataPropertyRangeExpression* dataPropExpAxiom = (CDataPropertyRangeExpression*)dataPropAxiomExp;
+						CDataPropertyTermExpression* dataPropTermExp = dataPropExpAxiom->getDataPropertyTermExpression();
+						mNewBuildDataRoleSet.insert(dataPropTermExp);
+						if (!mDataPropTermDataPropAxiomSet->contains(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp))) {
+							mDataPropTermDataPropAxiomSet->insert(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiomExp));
+							if (tellAxiom) {
+								mDataPropTermDataPropAxiomHash->insertMulti(dataPropTermExp,dataPropAxiomExp);
+							}
+						}
+					}
+				}
+
+
+
+				while (mLastBuildedConcept < mBuildConceptList->size() || mLastBuildedObjectRole < mBuildObjectRoleList->size() || mLastBuildedDataRole < mBuildDataRoleList->size() || mLastBuildedIndividual < mBuildIndividualList->size()
+						|| mLastBuildedDatatype < mBuildDatatypeList->size() || mLastBuildedDataRange < mBuildDataRangeList->size()
+						|| !mNewBuildConceptSet.isEmpty() || !mNewBuildObjectRoleSet.isEmpty() || !mNewBuildDataRoleSet.isEmpty() || !mNewBuildIndividualSet.isEmpty() || !mNewBuildDataRangeSet.isEmpty() || !mNewBuildDatatypeSet.isEmpty()) {
 
 
 					while (mLastBuildedConcept < mBuildConceptList->size()) {
 						mNewBuildConceptSet.insert((*mBuildConceptList)[mLastBuildedConcept++]);
 					}
-					while (mLastBuildedRole < mBuildRoleList->size()) {
-						mNewBuildRoleSet.insert((*mBuildRoleList)[mLastBuildedRole++]);
+					while (mLastBuildedObjectRole < mBuildObjectRoleList->size()) {
+						mNewBuildObjectRoleSet.insert((*mBuildObjectRoleList)[mLastBuildedObjectRole++]);
+					}
+					while (mLastBuildedDataRole < mBuildDataRoleList->size()) {
+						mNewBuildDataRoleSet.insert((*mBuildDataRoleList)[mLastBuildedDataRole++]);
 					}
 					while (mLastBuildedIndividual < mBuildIndividualList->size()) {
 						mNewBuildIndividualSet.insert((*mBuildIndividualList)[mLastBuildedIndividual++]);
 					}
 
+					while (mLastBuildedDatatype < mBuildDatatypeList->size()) {
+						mNewBuildDatatypeSet.insert((*mBuildDatatypeList)[mLastBuildedDatatype++]);
+					}
+
+					while (mLastBuildedDataRange < mBuildDataRangeList->size()) {
+						mNewBuildDataRangeSet.insert((*mBuildDataRangeList)[mLastBuildedDataRange++]);
+					}
 
 					// construct concepts, roles, individuals
 					// build all class expressions
 
-					while (!mNewBuildRoleSet.isEmpty()) {
-						mBuildingRoleSet = mNewBuildRoleSet;
-						mNewBuildRoleSet.clear();
+					while (!mNewBuildObjectRoleSet.isEmpty()) {
+						mBuildingObjectRoleSet = mNewBuildObjectRoleSet;
+						mNewBuildObjectRoleSet.clear();
 
-						FOREACHIT (CObjectPropertyTermExpression* objTermExp, mBuildingRoleSet) {
-							if (!mNewBuildedRoleSet.contains(objTermExp)) {
-								mNewBuildedRoleSet.insert(objTermExp);
+						FOREACHIT (CObjectPropertyTermExpression* objTermExp, mBuildingObjectRoleSet) {
+							if (!mNewBuildedObjectRoleSet.contains(objTermExp)) {
+								mNewBuildedObjectRoleSet.insert(objTermExp);
 
-								// build role axioms
+								// build role for object property axioms
 								buildObjectPropertyRole(objTermExp);
 							}
 						}
 					}
+
+
+
+					while (!mNewBuildDataRoleSet.isEmpty()) {
+						mBuildingDataRoleSet = mNewBuildDataRoleSet;
+						mNewBuildDataRoleSet.clear();
+
+						FOREACHIT (CDataPropertyTermExpression* dataTermExp, mBuildingDataRoleSet) {
+							if (!mNewBuildedDataRoleSet.contains(dataTermExp)) {
+								mNewBuildedDataRoleSet.insert(dataTermExp);
+
+								// build role for data property axioms
+								buildDataPropertyRole(dataTermExp);
+							}
+						}
+					}
+
+
 
 
 
@@ -651,6 +884,124 @@ namespace Konclude {
 						}
 
 					}
+
+
+
+
+					while (!mNewBuildDatatypeSet.isEmpty()) {
+						mBuildingDatatypeSet = mNewBuildDatatypeSet;
+						mNewBuildDatatypeSet.clear();
+
+						FOREACHIT (CDatatypeExpression* datatypeExp, mBuildingDatatypeSet) {
+							if (!mNewBuildedDatatypeSet.contains(datatypeExp)) {
+								mNewBuildedDatatypeSet.insert(datatypeExp);
+
+								// build datatype
+								buildDatatype(datatypeExp);
+							}
+						}
+					}
+
+
+
+
+					while (!mNewBuildDataRangeSet.isEmpty()) {
+						mBuildingDataRangeSet = mNewBuildDataRangeSet;
+						mNewBuildDataRangeSet.clear();
+
+						FOREACHIT (CDataRangeTermExpression* dataRangeExp, mBuildingDataRangeSet) {
+							if (!mNewBuildedDataRangeSet.contains(dataRangeExp)) {
+								mNewBuildedDataRangeSet.insert(dataRangeExp);
+
+								CBuildExpression::ExpressionType expType = dataRangeExp->getType();
+								CConcept* concept = getConceptForDataRangeTerm(dataRangeExp,true);
+
+								if (expType == CBuildExpression::BETDATATYPE) {
+									mConstructFlags->setNonELConstructUsed();
+									CDatatypeExpression* datatypeExp = (CDatatypeExpression*)dataRangeExp;
+									CDatatype* datatype = getDatatypeForDatatypeExpression(datatypeExp);
+									concept->setOperatorCode(CCDATATYPE);
+									concept->setDatatype(datatype);
+
+								} else if (expType == CBuildExpression::BETDATALITERAL) {
+									mConstructFlags->setNonELConstructUsed();
+									CDataLiteralExpression* litExp = (CDataLiteralExpression*)dataRangeExp;
+									CDataLiteral* dataLiteral = getDataLiteralForLiteralExpression(litExp);
+									concept->setOperatorCode(CCDATALITERAL);
+									concept->setDataLiteral(dataLiteral);
+								} else if (expType == CBuildExpression::BETDATACOMPLEMENTOF) {
+									CDataComplementOfExpression* dataExp = (CDataComplementOfExpression*)dataRangeExp;
+									mConstructFlags->setNonELConstructUsed();
+									CDataRangeTermExpression* opDataRangeTermExp = dataExp->getDataRangeTermExpression();
+									setConceptOperandsFromDataRangeTerms(concept,opDataRangeTermExp);
+									concept->setOperatorCode(CCNOT);
+								} else if (expType == CBuildExpression::BETDATAUNIONOF) {
+									CDataUnionOfExpression* dataExp = (CDataUnionOfExpression*)dataRangeExp;
+									mConstructFlags->setNonELConstructUsed();
+									CEXPRESSIONLIST<CDataRangeTermExpression*>* opDataRangeTermExpList = dataExp->getDataRangeTermExpressionList();
+									setConceptOperandsFromDataRangeTerms(concept,opDataRangeTermExpList);
+									concept->setOperatorCode(CCOR);
+								} else if (expType == CBuildExpression::BETDATAONEOF) {
+									CDataOneOfExpression* dataExp = (CDataOneOfExpression*)dataRangeExp;
+									mConstructFlags->setNonELConstructUsed();
+									CEXPRESSIONLIST<CDataRangeTermExpression*>* opDataRangeTermExpList = dataExp->getDataRangeTermExpressionList();
+									setConceptOperandsFromDataRangeTerms(concept,opDataRangeTermExpList);
+									concept->setOperatorCode(CCOR);
+								} else if (expType == CBuildExpression::BETDATAINTERSECTIONOF) {
+									CDataIntersectionOfExpression* dataExp = (CDataIntersectionOfExpression*)dataRangeExp;
+									CEXPRESSIONLIST<CDataRangeTermExpression*>* opDataRangeTermExpList = dataExp->getDataRangeTermExpressionList();
+									setConceptOperandsFromDataRangeTerms(concept,opDataRangeTermExpList);
+									concept->setOperatorCode(CCAND);								
+								} else if (expType == CBuildExpression::BETDATATYPERESTRICTION) {
+									mConstructFlags->setNonELConstructUsed();
+									CDatatypeRestrictionExpression* dataExp = (CDatatypeRestrictionExpression*)dataRangeExp;
+									CEXPRESSIONLIST<CDataFacetRestrictionExpression*>* facetExpList = dataExp->getDataFacetRestrictionExpressionList();
+									CDatatypeExpression* datatypeExpression = dataExp->getDatatypeExpression();
+									if (facetExpList->count() == 1) {
+										CDataFacetRestrictionExpression* facetRestrictionExp = facetExpList->first();
+										CDataLiteralExpression* litExp = facetRestrictionExp->getDataLiteralExpression();
+										CDataFacetExpression* facetExp = facetRestrictionExp->getDataFacetExpression();
+										CDataLiteral* dataLiteral = getDataLiteralForLiteralExpression(litExp);
+										CDatatype* datatype = getDatatypeForDatatypeExpression(datatypeExpression);
+										cint64 facetDataCode = 0;
+										const QString& facetIRI = facetExp->getName();
+										if (facetIRI == PREFIX_MIN_INCLUSIVE_FACET) {
+											facetDataCode = CDFC_MIN_INCLUSIVE;
+										} else if (facetIRI == PREFIX_MIN_EXCLUSIVE_FACET) {
+											facetDataCode = CDFC_MIN_EXCLUSIVE;
+										} else if (facetIRI == PREFIX_MAX_INCLUSIVE_FACET) {
+											facetDataCode = CDFC_MAX_INCLUSIVE;
+										} else if (facetIRI == PREFIX_MAX_EXCLUSIVE_FACET) {
+											facetDataCode = CDFC_MAX_EXCLUSIVE;
+										} else if (facetIRI == PREFIX_MAX_LENGTH_FACET) {
+											facetDataCode = CDFC_MAX_LENGTH_INCLUSIVE;
+										} else if (facetIRI == PREFIX_MIN_LENGTH_FACET) {
+											facetDataCode = CDFC_MIN_LENGTH_INCLUSIVE;
+										} else if (facetIRI == PREFIX_LENGTH_FACET) {
+											facetDataCode = CDFC_LENGTH;
+										} else if (facetIRI == PREFIX_PATTERN_FACET) {
+											facetDataCode = CDFC_PATTERN;
+										} else if (facetIRI == PREFIX_LANGUAGE_RANGE_FACET) {
+											facetDataCode = CDFC_LANGUAGE_RANGE;
+										}
+										concept->setParameter(facetDataCode);
+										concept->setDatatype(datatype);
+										concept->setDataLiteral(dataLiteral);
+										concept->setOperatorCode(CCDATARESTRICTION);								
+									} else {
+										FOREACHIT (CDataFacetRestrictionExpression* facetExp, *facetExpList) {
+											CDatatypeRestrictionExpression* separatedDataExp = getDatatypeRestriction(datatypeExpression,CEXPRESSIONLIST<CDataFacetRestrictionExpression*>()<<facetExp);
+											setConceptOperandsFromDataRangeTerms(concept,separatedDataExp);
+										}
+										concept->setOperatorCode(CCAND);
+									}
+								}
+
+							}
+						}
+					}
+
+
 
 
 
@@ -684,6 +1035,96 @@ namespace Konclude {
 									}
 									setConceptOperandsFromClassTerms(concept,opClassExp);
 									concept->setOperatorCode(CCSOME);
+
+								} else if (expType == CBuildExpression::BETDATASOMEVALUEFROM) {
+									CDataSomeValuesFromExpression* dataSomeValueExp = (CDataSomeValuesFromExpression*)classTermExp;
+									CDataPropertyTermExpression* dataPropPropExp = dataSomeValueExp->getDataPropertyTermExpression();									
+									setConceptRoleFromDataPropertyTerm(concept,dataPropPropExp);
+									CDataRangeTermExpression* dataRangeTermExp = dataSomeValueExp->getDataRangeTermExpression();
+									if (dataRangeTermExp == nullptr) {
+										dataRangeTermExp = mTopDataRangeExpression;
+									}
+									setConceptOperandsFromDataRangeTerms(concept,dataRangeTermExp);
+									concept->setOperatorCode(CCSOME);
+								} else if (expType == CBuildExpression::BETDATAALLVALUEFROM) {
+									CDataAllValuesFromExpression* dataAllValueExp = (CDataAllValuesFromExpression*)classTermExp;
+									CDataPropertyTermExpression* dataPropPropExp = dataAllValueExp->getDataPropertyTermExpression();									
+									setConceptRoleFromDataPropertyTerm(concept,dataPropPropExp);
+									CDataRangeTermExpression* dataRangeTermExp = dataAllValueExp->getDataRangeTermExpression();
+									setConceptOperandsFromDataRangeTerms(concept,dataRangeTermExp);
+									concept->setOperatorCode(CCALL);
+
+
+
+
+								} else if (expType == CBuildExpression::BETDATAMINCARDINALITY) {
+									CDataMinCardinalityExpression* dataExp = (CDataMinCardinalityExpression*)classTermExp;
+									CDataPropertyTermExpression* opDataPropExp = dataExp->getDataPropertyTermExpression();
+									setConceptRoleFromDataPropertyTerm(concept,opDataPropExp);
+									cint64 cardinality = dataExp->getCardinality();
+									CDataRangeTermExpression* opDataRangeTermExp = dataExp->getDataRangeTermExpression();
+									if (cardinality == 1) {
+										if (opDataRangeTermExp == nullptr) {
+											opDataRangeTermExp = mTopDataRangeExpression;
+										}
+										setConceptOperandsFromDataRangeTerms(concept,opDataRangeTermExp);
+										concept->setOperatorCode(CCSOME);
+									} else {
+										if (opDataRangeTermExp != mTopDataRangeExpression) {
+											setConceptOperandsFromDataRangeTerms(concept,opDataRangeTermExp);
+										}
+										mConstructFlags->setNonELConstructUsed();
+										concept->setParameter(cardinality);
+										concept->setOperatorCode(CCATLEAST);
+									}
+								} else if (expType == CBuildExpression::BETDATAMAXCARDINALITY) {
+									mConstructFlags->setNonELConstructUsed();
+									CDataMaxCardinalityExpression* dataExp = (CDataMaxCardinalityExpression*)classTermExp;
+									CDataPropertyTermExpression* opDataPropExp = dataExp->getDataPropertyTermExpression();
+									setConceptRoleFromDataPropertyTerm(concept,opDataPropExp);
+									CDataRangeTermExpression* opDataRangeTermExp = dataExp->getDataRangeTermExpression();
+									cint64 cardinality = dataExp->getCardinality();
+									if (cardinality == 0) {
+										if (opDataRangeTermExp == nullptr) {
+											opDataRangeTermExp = mTopDataRangeExpression;
+										}
+										CDataComplementOfExpression* compExp = getDataComplementOf(opDataRangeTermExp);
+										setConceptOperandsFromDataRangeTerms(concept,compExp);
+										concept->setOperatorCode(CCALL);
+									} else {
+										if (opDataRangeTermExp != mTopDataRangeExpression) {
+											setConceptOperandsFromDataRangeTerms(concept,opDataRangeTermExp);
+										}
+										concept->setParameter(cardinality);
+										concept->setOperatorCode(CCATMOST);
+									}
+								} else if (expType == CBuildExpression::BETDATAEXACTCARDINALITY) {
+									mConstructFlags->setNonELConstructUsed();
+									CDataExactCardinalityExpression* dataExp = (CDataExactCardinalityExpression*)classTermExp;
+									CDataPropertyTermExpression* opDataPropExp = dataExp->getDataPropertyTermExpression();
+									CDataRangeTermExpression* opDataRangeTermExp = dataExp->getDataRangeTermExpression();
+									cint64 cardinality = dataExp->getCardinality();
+									CDataMaxCardinalityExpression* maxCardExp = getDataMaxCardinality(opDataPropExp,opDataRangeTermExp,cardinality);
+									CDataMinCardinalityExpression* minCardExp = getDataMinCardinality(opDataPropExp,opDataRangeTermExp,cardinality);
+									CObjectIntersectionOfExpression* maxMinIntersect = getObjectIntersectionOf(CEXPRESSIONLIST<CClassTermExpression*>()<<maxCardExp<<minCardExp);
+									setConceptRoleFromDataPropertyTerm(concept,opDataPropExp);
+									setConceptOperandsFromClassTerms(concept,maxMinIntersect);
+									concept->setParameter(cardinality);
+									concept->setOperatorCode(CCAND);
+
+								} else if (expType == CBuildExpression::BETDATAHASVALUE) {
+									mConstructFlags->setNonELConstructUsed();
+									CDataHasValueExpression* dataExp = (CDataHasValueExpression*)classTermExp;
+									CDataPropertyTermExpression* opDataPropExp = dataExp->getDataPropertyTermExpression();
+									CDataRangeTermExpression* dataRangeExp = dataExp->getDataRangeTermExpression();
+									setConceptRoleFromDataPropertyTerm(concept,opDataPropExp);
+									setConceptOperandsFromDataRangeTerms(concept,dataRangeExp);
+									concept->setOperatorCode(CCSOME);
+
+
+
+
+
 								} else if (expType == CBuildExpression::BETOBJECTMINCARDINALITY) {
 									CObjectMinCardinalityExpression* objExp = (CObjectMinCardinalityExpression*)classTermExp;
 									CObjectPropertyTermExpression* opObjPropExp = objExp->getObjectPropertyTermExpression();
@@ -822,8 +1263,8 @@ namespace Konclude {
 								}
 							}
 							FOREACHIT (CObjectPropertyTermExpression* rebuildObjectPropertyTermExp, *mTopRebuildObjectPropertyTermExpressionsSet) {
-								if (!mNewBuildedRoleSet.contains(rebuildObjectPropertyTermExp) && !mBuildingRoleSet.contains(rebuildObjectPropertyTermExp)) {
-									mNewBuildRoleSet.insert(rebuildObjectPropertyTermExp);
+								if (!mNewBuildedObjectRoleSet.contains(rebuildObjectPropertyTermExp) && !mBuildingObjectRoleSet.contains(rebuildObjectPropertyTermExp)) {
+									mNewBuildObjectRoleSet.insert(rebuildObjectPropertyTermExp);
 								}
 							}
 
@@ -845,14 +1286,20 @@ namespace Konclude {
 				mOntoData->getExpressionDataBoxMapping()->setLastProcessedChangedAxiom(mLastProcessedChangedAxiom);
 				mOntoData->getExpressionDataBoxMapping()->setLastProcessedBuildIndividual(mLastProcessedBuildIndividual);
 				mOntoData->getExpressionDataBoxMapping()->setLastProcessedBuildConcept(mLastProcessedBuildConcept);
-				mOntoData->getExpressionDataBoxMapping()->setLastProcessedBuildRole(mLastProcessedBuildRole);
+				mOntoData->getExpressionDataBoxMapping()->setLastProcessedBuildObjectRole(mLastProcessedBuildObjectRole);
+				mOntoData->getExpressionDataBoxMapping()->setLastProcessedBuildDataRole(mLastProcessedBuildDataRole);
+				mOntoData->getExpressionDataBoxMapping()->setLastProcessedBuildDataRange(mLastProcessedBuildDataRange);
+				mOntoData->getExpressionDataBoxMapping()->setLastProcessedBuildDatatype(mLastProcessedBuildDatatype);
 
 				mOntoData->getExpressionDataBoxMapping()->setLastProcessedInverseProperty(mLastProcessedInverseProperty);
 				mOntoData->getExpressionDataBoxMapping()->setLastProcessedExpression(mLastProcessedExpression);
 
 				mOntoData->getExpressionDataBoxMapping()->setLastBuildedIndividual(mLastBuildedIndividual);
 				mOntoData->getExpressionDataBoxMapping()->setLastBuildedConcept(mLastBuildedConcept);
-				mOntoData->getExpressionDataBoxMapping()->setLastBuildedRole(mLastBuildedRole);
+				mOntoData->getExpressionDataBoxMapping()->setLastBuildedObjectRole(mLastBuildedObjectRole);
+				mOntoData->getExpressionDataBoxMapping()->setLastBuildedDataRole(mLastBuildedDataRole);
+				mOntoData->getExpressionDataBoxMapping()->setLastBuildedDataRange(mLastBuildedDataRange);
+				mOntoData->getExpressionDataBoxMapping()->setLastBuildedDatatype(mLastBuildedDatatype);
 
 				return true;
 			}
@@ -933,12 +1380,28 @@ namespace Konclude {
 								setIndividualAssertionRoleFromObjectPropertyTerm(individual,objPropTermExp,destIndiTermExp);
 								//CClassTermExpression* classTermExp = getObjectHasValue(objPropTermExp,destIndiTermExp);
 								//setIndividualAssertionConceptFromClassTerm(individual,classTermExp,false);
+
+							} else if (expType == CBuildExpression::BETDATAPROPERTYASSERTION) {	
+								CDataPropertyAssertionExpression* dataAssExp = (CDataPropertyAssertionExpression*)assAxiom;
+								CDataPropertyTermExpression* dataPropTermExp = dataAssExp->getDataPropertyTermExpression();
+								CDataLiteralExpression* dataLiteralExp = dataAssExp->getDataLiteralExpression();
+								CClassTermExpression* classTermExp = getDataHasValue(dataPropTermExp,dataLiteralExp);
+								setIndividualAssertionConceptFromClassTerm(individual,classTermExp,false);
+
+							} else if (expType == CBuildExpression::BETNEGATIVEDATAPROPERTYASSERTION) {	
+								CNegativeDataPropertyAssertionExpression* dataAssExp = (CNegativeDataPropertyAssertionExpression*)assAxiom;
+								CDataPropertyTermExpression* dataPropTermExp = dataAssExp->getDataPropertyTermExpression();
+								CDataLiteralExpression* dataLiteralExp = dataAssExp->getDataLiteralExpression();
+								CClassTermExpression* classTermExp = getDataHasValue(dataPropTermExp,dataLiteralExp);
+								setIndividualAssertionConceptFromClassTerm(individual,classTermExp,true);
+
 							} else if (expType == CBuildExpression::BETNEGATIVEOBJECTPROPERTYASSERTION) {	
 								CNegativeObjectPropertyAssertionExpression* propAssExp = (CNegativeObjectPropertyAssertionExpression*)assAxiom;
 								CObjectPropertyTermExpression* objPropTermExp = propAssExp->getObjectPropertyTermExpression();
 								CIndividualTermExpression* destIndiTermExp = propAssExp->getSecondIndividualTermExpression();
 								CClassTermExpression* classTermExp = getObjectHasValue(objPropTermExp,destIndiTermExp);
 								setIndividualAssertionConceptFromClassTerm(individual,classTermExp,true);
+
 							} else if (expType == CBuildExpression::BETSAMEINDIVIDUAL) {	
 								CSameIndividualExpression* sameIndiAssExp = (CSameIndividualExpression*)assAxiom;
 								FOREACHIT (CIndividualTermExpression* indiTermExp2, *sameIndiAssExp->getIndividualTermExpressionList()) {
@@ -963,18 +1426,110 @@ namespace Konclude {
 				if (!nominalAssClass) {
 					setIndividualAssertionNominalFromClassTerm(individual,nominalAssClassTermExp,false);
 				}
-				CConceptAssertionLinker* opConLinker = CObjectAllocator< CConceptAssertionLinker >::allocateAndConstruct(mMemManager);
-				opConLinker->initNegLinker(tBox->getIndividualTriggerConcept(),false);
-				individual->addAssertionConceptLinker(opConLinker);
+				if (!individual->isAnonymousIndividual()) {
+					CConceptAssertionLinker* opConLinker = CObjectAllocator< CConceptAssertionLinker >::allocateAndConstruct(mMemManager);
+					opConLinker->initNegLinker(tBox->getIndividualTriggerConcept(),false);
+					individual->addAssertionConceptLinker(opConLinker);
+				}
 
 				return true;
 			}
 
 
+			bool CConcreteOntologyUpdateBuilder::buildDatatype(CDatatypeExpression* datatypeExp) {
+				return true;
+			}
+
+
+			bool CConcreteOntologyUpdateBuilder::buildDataPropertyRole(CDataPropertyTermExpression* dataPropTermExp) {
+
+
+				CBUILDLIST<CDataPropertyAxiomExpression*> dataPropAccAxiomList(mDataPropTermDataPropAxiomHash->values(dataPropTermExp));
+				mDataPropTermDataPropAxiomHash->remove(dataPropTermExp);
+
+
+				CRole* role = getRoleForDataPropertyTerm(dataPropTermExp,true);
+
+
+
+				FOREACHIT (CDataPropertyAxiomExpression* dataPropAxiom, dataPropAccAxiomList) {
+					if (!mRetractUpdatedAxiomSet->contains(dataPropAxiom)) {
+						mDataPropTermDataPropAxiomHash->insertMulti(dataPropTermExp,dataPropAxiom);
+						CBuildExpression::ExpressionType expType = dataPropAxiom->getType();
+						if (expType == CBuildExpression::BETSUBDATAPROPERTYOF) {
+							CSubDataPropertyOfExpression* dataPropAxiomExp = (CSubDataPropertyOfExpression*)dataPropAxiom;
+							CDataPropertyTermExpression* superDataPropertyExpression = dataPropAxiomExp->getSuperDataPropertyTermExpression();
+							if (superDataPropertyExpression != mTopDataPropExpression) {
+								CRole* superRole = getRoleForDataPropertyTerm(superDataPropertyExpression);
+								if (!role->hasSuperRole(superRole)) {
+									CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+									roleLinker->init(superRole,false);
+									role->addSuperRoleLinker(roleLinker);
+								}
+							}
+						} else if (expType == CBuildExpression::BETEQUIVALENTDATAPROPERTIES) {
+							CEquivalentDataPropertiesExpression* dataPropAxiomExp = (CEquivalentDataPropertiesExpression*)dataPropAxiom;
+							CEXPRESSIONLIST<CDataPropertyTermExpression*>* eqDataPropertyExpressionList = dataPropAxiomExp->getDataPropertyTermExpressionList();
+							FOREACHIT (CDataPropertyTermExpression* eqDataPropTermExp, *eqDataPropertyExpressionList) {
+								if (dataPropTermExp != eqDataPropTermExp) {
+									CRole* eqRole = getRoleForDataPropertyTerm(eqDataPropTermExp);
+									if (!role->hasEquivalentRole(eqRole)) {
+										CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+										roleLinker->init(eqRole,false);
+										role->addEquivalentRoleLinker(roleLinker);
+									}
+								}
+							}
+						} else if (expType == CBuildExpression::BETDISJOINTDATAPROPERTIES) {
+							CDisjointDataPropertiesExpression* dataPropAxiomExp = (CDisjointDataPropertiesExpression*)dataPropAxiom;
+							CEXPRESSIONLIST<CDataPropertyTermExpression*>* disDataPropertyExpressionList = dataPropAxiomExp->getDataPropertyTermExpressionList();
+							FOREACHIT (CDataPropertyTermExpression* disDataPropTermExp, *disDataPropertyExpressionList) {
+								if (dataPropTermExp != disDataPropTermExp) {
+									CRole* disRole = getRoleForDataPropertyTerm(disDataPropTermExp);
+									if (!role->hasDisjointRole(disRole)) {
+										CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+										roleLinker->init(disRole,false);
+										role->addDisjointRoleLinker(roleLinker);
+									}
+								}
+							}
+						} else if (expType == CBuildExpression::BETDATAPROPERTYDOMAIN) {
+							CDataPropertyDomainExpression* dataPropAxiomExp = (CDataPropertyDomainExpression*)dataPropAxiom;
+							CClassTermExpression* domainExp = dataPropAxiomExp->getClassTermExpression();
+							CConcept* domainCon = getConceptForClassTerm(domainExp);
+							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+							conceptLinker->init(domainCon,false);
+							role->addDomainConceptLinker(conceptLinker);
+						} else if (expType == CBuildExpression::BETDATAPROPERTYRANGE) {
+							CDataPropertyRangeExpression* dataPropAxiomExp = (CDataPropertyRangeExpression*)dataPropAxiom;
+							CDataRangeTermExpression* rangeExp = dataPropAxiomExp->getDataRangeTermExpression();
+							CConcept* rangeCon = getConceptForDataRangeTerm(rangeExp);
+							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+							conceptLinker->init(rangeCon,false);
+							role->addRangeConceptLinker(conceptLinker);
+						} else if (expType == CBuildExpression::BETFUNCTIONALDATAPROPERTY) {
+							CFunctionalDataPropertyExpression* dataPropAxiomExp = (CFunctionalDataPropertyExpression*)dataPropAxiom;
+							CDataMaxCardinalityExpression* funcCardExp = getDataMaxCardinality(dataPropTermExp,mTopDataPropExpression,1);
+							CConcept* domainCon = getConceptForClassTerm(funcCardExp);
+							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+							conceptLinker->init(domainCon,false);
+							role->addDomainConceptLinker(conceptLinker);
+							role->setFunctional(true);
+						}
+					} else {
+						mDataPropTermDataPropAxiomSet->remove(QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>(dataPropTermExp,dataPropAxiom));
+					}
+				}
+				return true;
+			}
+
+
+
+
 			bool CConcreteOntologyUpdateBuilder::buildObjectPropertyRole(CObjectPropertyTermExpression* objPropTermExp) {
 				if (mTopRebuildObjectPropertyTermExpressionsSet->contains(objPropTermExp)) {
-					if (!mNewBuildedConceptSet.contains(mTopClassExpression) && !mBuildingConceptSet.contains(mTopClassExpression)) {
-						mNewBuildConceptSet.insert(mTopClassExpression);
+					if (!mNewBuildedObjectRoleSet.contains(mTopObjPropExpression) && !mBuildingObjectRoleSet.contains(mTopObjPropExpression)) {
+						mNewBuildObjectRoleSet.insert(mTopObjPropExpression);
 					}
 				}
 
@@ -983,186 +1538,184 @@ namespace Konclude {
 
 				CObjectPropertyTermExpression* inverseObjPropTermExp = mInverseObjectPropertyHash->value(objPropTermExp,nullptr);
 
-				if (objPropTermExp != mTopObjPropExpression || !objPropAccAxiomList.isEmpty() || inverseObjPropTermExp) {
 
-					CRole* role = getRoleForObjectPropertyTerm(objPropTermExp,true);
+				CRole* role = getRoleForObjectPropertyTerm(objPropTermExp,true);
 
-					if (inverseObjPropTermExp) {
-						CRole* invRole = getRoleForObjectPropertyTerm(inverseObjPropTermExp);
-						if (!role->hasInverseRole(invRole)) {
-							if (!role->getInverseRole()) {
-								role->setInverseRole(invRole);
-							}
-							CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-							roleLinker->init(invRole,true);
-							role->addInverseRoleLinker(roleLinker);
+				if (inverseObjPropTermExp) {
+					CRole* invRole = getRoleForObjectPropertyTerm(inverseObjPropTermExp);
+					if (!role->hasInverseRole(invRole)) {
+						if (!role->getInverseRole()) {
+							role->setInverseRole(invRole);
 						}
-						if (!invRole->hasInverseRole(role)) {
-							if (!invRole->getInverseRole()) {
-								invRole->setInverseRole(role);
-							}
-							CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-							roleLinker->init(role,true);
-							invRole->addInverseRoleLinker(roleLinker);
-						}
+						CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+						roleLinker->init(invRole,true);
+						role->addInverseRoleLinker(roleLinker);
 					}
-
-					FOREACHIT (CObjectPropertyAxiomExpression* objPropAxiom, objPropAccAxiomList) {
-						if (!mRetractUpdatedAxiomSet->contains(objPropAxiom)) {
-							mObjPropTermObjPropAxiomHash->insertMulti(objPropTermExp,objPropAxiom);
-							CBuildExpression::ExpressionType expType = objPropAxiom->getType();
-							if (expType == CBuildExpression::BETSUBOBJECTPROPERTYOF) {
-								if (objPropTermExp != mBottomObjPropExpression) {
-									CSubObjectPropertyOfExpression* objPropAxiomExp = (CSubObjectPropertyOfExpression*)objPropAxiom;
-									CEXPRESSIONLIST<CObjectPropertyTermExpression*>* subObjectPropertyExpressionList = objPropAxiomExp->getSubObjectPropertyTermExpressionList();
-									// build only once
-									CObjectPropertyTermExpression* superObjectPropertyExpression = objPropAxiomExp->getSuperObjectPropertyTermExpression();
-									if (subObjectPropertyExpressionList->count() <= 1) {
-										// build simple sub role relation
-										if (superObjectPropertyExpression != mTopObjPropExpression) {
-											CRole* superRole = getRoleForObjectPropertyTerm(superObjectPropertyExpression);
-											if (!role->hasSuperRole(superRole)) {
-												CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-												roleLinker->init(superRole,false);
-												role->addSuperRoleLinker(roleLinker);
-											}
-										}
-									} else {
-										// build role chain
-										CRoleChain* roleChain = buildRoleChainForSubObjectPropertyOfExpression(objPropAxiomExp);
-										CXLinker<CRoleChain*>* roleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemManager);
-										roleChainLinker->initLinker(roleChain);
-										if (objPropTermExp == superObjectPropertyExpression) {
-											// role is super role
-											role->addRoleChainSuperSharingLinker(roleChainLinker);
-										} else {
-											role->addRoleChainSubSharingLinker(roleChainLinker);
-										}
-									}
-								}
-							} else if (expType == CBuildExpression::BETEQUIVALENTOBJECTPROPERTIES) {
-								CEquivalentObjectPropertiesExpression* objPropAxiomExp = (CEquivalentObjectPropertiesExpression*)objPropAxiom;
-								CEXPRESSIONLIST<CObjectPropertyTermExpression*>* eqObjectPropertyExpressionList = objPropAxiomExp->getObjectPropertyTermExpressionList();
-								FOREACHIT (CObjectPropertyTermExpression* eqObjPropTermExp, *eqObjectPropertyExpressionList) {
-									if (objPropTermExp != eqObjPropTermExp) {
-										CRole* eqRole = getRoleForObjectPropertyTerm(eqObjPropTermExp);
-										if (!role->hasEquivalentRole(eqRole)) {
-											CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-											roleLinker->init(eqRole,false);
-											role->addEquivalentRoleLinker(roleLinker);
-										}
-									}
-								}
-							} else if (expType == CBuildExpression::BETDISJOINTOBJECTPROPERTIES) {
-								CDisjointObjectPropertiesExpression* objPropAxiomExp = (CDisjointObjectPropertiesExpression*)objPropAxiom;
-								CEXPRESSIONLIST<CObjectPropertyTermExpression*>* disObjectPropertyExpressionList = objPropAxiomExp->getObjectPropertyTermExpressionList();
-								FOREACHIT (CObjectPropertyTermExpression* disObjPropTermExp, *disObjectPropertyExpressionList) {
-									if (objPropTermExp != disObjPropTermExp) {
-										CRole* disRole = getRoleForObjectPropertyTerm(disObjPropTermExp);
-										if (!role->hasDisjointRole(disRole)) {
-											CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-											roleLinker->init(disRole,false);
-											role->addDisjointRoleLinker(roleLinker);
-										}
-									}
-								}
-							} else if (expType == CBuildExpression::BETINVERSEOBJECTPROPERTIES) {
-								CInverseObjectPropertiesExpression* objPropAxiomExp = (CInverseObjectPropertiesExpression*)objPropAxiom;
-								CObjectPropertyTermExpression* invObjPropTermExp = nullptr;
-								if (objPropTermExp == objPropAxiomExp->getFirstObjectPropertyTermExpression()) {
-									invObjPropTermExp = objPropAxiomExp->getSecondObjectPropertyTermExpression();
-								} else {
-									invObjPropTermExp = objPropAxiomExp->getFirstObjectPropertyTermExpression();
-								}
-								CRole* invRole = getRoleForObjectPropertyTerm(invObjPropTermExp);
-								if (!role->hasInverseRole(invRole)) {
-									CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-									roleLinker->init(invRole,true);
-									role->addInverseRoleLinker(roleLinker);
-								}
-							} else if (expType == CBuildExpression::BETOBJECTPROPERTYDOMAIN) {
-								CObjectPropertyDomainExpression* objPropAxiomExp = (CObjectPropertyDomainExpression*)objPropAxiom;
-								CClassTermExpression* domainExp = objPropAxiomExp->getClassTermExpression();
-								CConcept* domainCon = getConceptForClassTerm(domainExp);
-								CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-								conceptLinker->init(domainCon,false);
-								role->addDomainConceptLinker(conceptLinker);
-							} else if (expType == CBuildExpression::BETOBJECTPROPERTYRANGE) {
-								CObjectPropertyRangeExpression* objPropAxiomExp = (CObjectPropertyRangeExpression*)objPropAxiom;
-								CClassTermExpression* rangeExp = objPropAxiomExp->getClassTermExpression();
-								CConcept* rangeCon = getConceptForClassTerm(rangeExp);
-								CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-								conceptLinker->init(rangeCon,false);
-								role->addRangeConceptLinker(conceptLinker);
-							} else if (expType == CBuildExpression::BETFUNCTIONALPROPERTY) {
-								CFunctionalObjectPropertyExpression* objPropAxiomExp = (CFunctionalObjectPropertyExpression*)objPropAxiom;
-								CObjectMaxCardinalityExpression* funcCardExp = getObjectMaxCardinality(objPropTermExp,mTopClassExpression,1);
-								CConcept* domainCon = getConceptForClassTerm(funcCardExp);
-								CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-								conceptLinker->init(domainCon,false);
-								role->addDomainConceptLinker(conceptLinker);
-								role->setFunctional(true);
-							} else if (expType == CBuildExpression::BETINVERSEFUNCTIONALPROPERTY) {
-								CInverseFunctionalObjectPropertyExpression* objPropAxiomExp = (CInverseFunctionalObjectPropertyExpression*)objPropAxiom;
-								CObjectMaxCardinalityExpression* funcCardExp = getObjectMaxCardinality(getCorrectedInverseObjectPropertyOf(objPropTermExp),mTopClassExpression,1);
-								CConcept* rangeCon = getConceptForClassTerm(funcCardExp);
-								CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-								conceptLinker->init(rangeCon,false);
-								role->addRangeConceptLinker(conceptLinker);
-								role->setInverseFunctional(true);
-							} else if (expType == CBuildExpression::BETREFLEXIVEPROPERTY) {
-								CReflexiveObjectPropertyExpression* objPropAxiomExp = (CReflexiveObjectPropertyExpression*)objPropAxiom;
-								CObjectHasSelfExpression* gciSelfExp = getObjectHasSelf(objPropTermExp);
-								buildGeneralConceptInclusionClassExpression(gciSelfExp);
-								role->setReflexive(true);
-							} else if (expType == CBuildExpression::BETIRREFLEXIVEPROPERTY) {
-								CIrreflexiveObjectPropertyExpression* objPropAxiomExp = (CIrreflexiveObjectPropertyExpression*)objPropAxiom;
-								CObjectHasSelfExpression* selfExp = getObjectHasSelf(objPropTermExp);
-								CObjectComplementOfExpression* gciNotSelfExp = getObjectComplementOf(selfExp);
-								buildGeneralConceptInclusionClassExpression(gciNotSelfExp);
-								role->setIrreflexive(true);
-							} else if (expType == CBuildExpression::BETSYMMETRICPROPERTY) {
-								// has it self as inverse
-								CSymmetricObjectPropertyExpression* objPropAxiomExp = (CSymmetricObjectPropertyExpression*)objPropAxiom;
-								CRole* invRole = role;
-								if (!role->hasInverseRole(invRole)) {
-									CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-									roleLinker->init(invRole,true);
-									role->addInverseRoleLinker(roleLinker);
-								}
-								role->setSymmetric(true);
-							} else if (expType == CBuildExpression::BETASYMMETRICPROPERTY) {
-								// disjoint to the inverse
-								CAsymmetricObjectPropertyExpression* objPropAxiomExp = (CAsymmetricObjectPropertyExpression*)objPropAxiom;
-								CObjectPropertyTermExpression* invObjPropTermExp = getCorrectedInverseObjectPropertyOf(objPropTermExp);
-								CRole* invRole = getRoleForObjectPropertyTerm(invObjPropTermExp);
-								if (!role->hasDisjointRole(invRole)) {
-									CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-									roleLinker->init(invRole,false);
-									role->addDisjointRoleLinker(roleLinker);
-								}
-								if (!invRole->hasDisjointRole(role)) {
-									CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-									roleLinker->init(role,false);
-									invRole->addDisjointRoleLinker(roleLinker);
-								}
-								role->setAsymmetric(true);
-							} else if (expType == CBuildExpression::BETTRANSITIVEOBJECTPROPERTY) {
-								// TODO: build RR [= R ??
-								CTransetiveObjectPropertyExpression* objPropAxiomExp = (CTransetiveObjectPropertyExpression*)objPropAxiom;
-								CRoleChain* roleChain = buildRoleChainForTransetiveObjectPropertyExpression(objPropAxiomExp);
-
-								CXLinker<CRoleChain*>* superRoleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemManager);
-								superRoleChainLinker->initLinker(roleChain);
-								role->addRoleChainSuperSharingLinker(superRoleChainLinker);
-								CXLinker<CRoleChain*>* subRoleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemManager);
-								subRoleChainLinker->initLinker(roleChain);
-								role->addRoleChainSubSharingLinker(subRoleChainLinker);
-								role->setTransitive(true);
-							} 
-						} else {
-							mObjPropTermObjPropAxiomSet->remove(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiom));
+					if (!invRole->hasInverseRole(role)) {
+						if (!invRole->getInverseRole()) {
+							invRole->setInverseRole(role);
 						}
+						CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+						roleLinker->init(role,true);
+						invRole->addInverseRoleLinker(roleLinker);
+					}
+				}
+
+				FOREACHIT (CObjectPropertyAxiomExpression* objPropAxiom, objPropAccAxiomList) {
+					if (!mRetractUpdatedAxiomSet->contains(objPropAxiom)) {
+						mObjPropTermObjPropAxiomHash->insertMulti(objPropTermExp,objPropAxiom);
+						CBuildExpression::ExpressionType expType = objPropAxiom->getType();
+						if (expType == CBuildExpression::BETSUBOBJECTPROPERTYOF) {
+							if (objPropTermExp != mBottomObjPropExpression) {
+								CSubObjectPropertyOfExpression* objPropAxiomExp = (CSubObjectPropertyOfExpression*)objPropAxiom;
+								CEXPRESSIONLIST<CObjectPropertyTermExpression*>* subObjectPropertyExpressionList = objPropAxiomExp->getSubObjectPropertyTermExpressionList();
+								// build only once
+								CObjectPropertyTermExpression* superObjectPropertyExpression = objPropAxiomExp->getSuperObjectPropertyTermExpression();
+								if (subObjectPropertyExpressionList->count() <= 1) {
+									// build simple sub role relation
+									if (superObjectPropertyExpression != mTopObjPropExpression) {
+										CRole* superRole = getRoleForObjectPropertyTerm(superObjectPropertyExpression);
+										if (!role->hasSuperRole(superRole)) {
+											CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+											roleLinker->init(superRole,false);
+											role->addSuperRoleLinker(roleLinker);
+										}
+									}
+								} else {
+									// build role chain
+									CRoleChain* roleChain = buildRoleChainForSubObjectPropertyOfExpression(objPropAxiomExp);
+									CXLinker<CRoleChain*>* roleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemManager);
+									roleChainLinker->initLinker(roleChain);
+									if (objPropTermExp == superObjectPropertyExpression) {
+										// role is super role
+										role->addRoleChainSuperSharingLinker(roleChainLinker);
+									} else {
+										role->addRoleChainSubSharingLinker(roleChainLinker);
+									}
+								}
+							}
+						} else if (expType == CBuildExpression::BETEQUIVALENTOBJECTPROPERTIES) {
+							CEquivalentObjectPropertiesExpression* objPropAxiomExp = (CEquivalentObjectPropertiesExpression*)objPropAxiom;
+							CEXPRESSIONLIST<CObjectPropertyTermExpression*>* eqObjectPropertyExpressionList = objPropAxiomExp->getObjectPropertyTermExpressionList();
+							FOREACHIT (CObjectPropertyTermExpression* eqObjPropTermExp, *eqObjectPropertyExpressionList) {
+								if (objPropTermExp != eqObjPropTermExp) {
+									CRole* eqRole = getRoleForObjectPropertyTerm(eqObjPropTermExp);
+									if (!role->hasEquivalentRole(eqRole)) {
+										CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+										roleLinker->init(eqRole,false);
+										role->addEquivalentRoleLinker(roleLinker);
+									}
+								}
+							}
+						} else if (expType == CBuildExpression::BETDISJOINTOBJECTPROPERTIES) {
+							CDisjointObjectPropertiesExpression* objPropAxiomExp = (CDisjointObjectPropertiesExpression*)objPropAxiom;
+							CEXPRESSIONLIST<CObjectPropertyTermExpression*>* disObjectPropertyExpressionList = objPropAxiomExp->getObjectPropertyTermExpressionList();
+							FOREACHIT (CObjectPropertyTermExpression* disObjPropTermExp, *disObjectPropertyExpressionList) {
+								if (objPropTermExp != disObjPropTermExp) {
+									CRole* disRole = getRoleForObjectPropertyTerm(disObjPropTermExp);
+									if (!role->hasDisjointRole(disRole)) {
+										CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+										roleLinker->init(disRole,false);
+										role->addDisjointRoleLinker(roleLinker);
+									}
+								}
+							}
+						} else if (expType == CBuildExpression::BETINVERSEOBJECTPROPERTIES) {
+							CInverseObjectPropertiesExpression* objPropAxiomExp = (CInverseObjectPropertiesExpression*)objPropAxiom;
+							CObjectPropertyTermExpression* invObjPropTermExp = nullptr;
+							if (objPropTermExp == objPropAxiomExp->getFirstObjectPropertyTermExpression()) {
+								invObjPropTermExp = objPropAxiomExp->getSecondObjectPropertyTermExpression();
+							} else {
+								invObjPropTermExp = objPropAxiomExp->getFirstObjectPropertyTermExpression();
+							}
+							CRole* invRole = getRoleForObjectPropertyTerm(invObjPropTermExp);
+							if (!role->hasInverseRole(invRole)) {
+								CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+								roleLinker->init(invRole,true);
+								role->addInverseRoleLinker(roleLinker);
+							}
+						} else if (expType == CBuildExpression::BETOBJECTPROPERTYDOMAIN) {
+							CObjectPropertyDomainExpression* objPropAxiomExp = (CObjectPropertyDomainExpression*)objPropAxiom;
+							CClassTermExpression* domainExp = objPropAxiomExp->getClassTermExpression();
+							CConcept* domainCon = getConceptForClassTerm(domainExp);
+							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+							conceptLinker->init(domainCon,false);
+							role->addDomainConceptLinker(conceptLinker);
+						} else if (expType == CBuildExpression::BETOBJECTPROPERTYRANGE) {
+							CObjectPropertyRangeExpression* objPropAxiomExp = (CObjectPropertyRangeExpression*)objPropAxiom;
+							CClassTermExpression* rangeExp = objPropAxiomExp->getClassTermExpression();
+							CConcept* rangeCon = getConceptForClassTerm(rangeExp);
+							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+							conceptLinker->init(rangeCon,false);
+							role->addRangeConceptLinker(conceptLinker);
+						} else if (expType == CBuildExpression::BETFUNCTIONALOBJECTPROPERTY) {
+							CFunctionalObjectPropertyExpression* objPropAxiomExp = (CFunctionalObjectPropertyExpression*)objPropAxiom;
+							CObjectMaxCardinalityExpression* funcCardExp = getObjectMaxCardinality(objPropTermExp,mTopClassExpression,1);
+							CConcept* domainCon = getConceptForClassTerm(funcCardExp);
+							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+							conceptLinker->init(domainCon,false);
+							role->addDomainConceptLinker(conceptLinker);
+							role->setFunctional(true);
+						} else if (expType == CBuildExpression::BETINVERSEFUNCTIONALPROPERTY) {
+							CInverseFunctionalObjectPropertyExpression* objPropAxiomExp = (CInverseFunctionalObjectPropertyExpression*)objPropAxiom;
+							CObjectMaxCardinalityExpression* funcCardExp = getObjectMaxCardinality(getCorrectedInverseObjectPropertyOf(objPropTermExp),mTopClassExpression,1);
+							CConcept* rangeCon = getConceptForClassTerm(funcCardExp);
+							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+							conceptLinker->init(rangeCon,false);
+							role->addRangeConceptLinker(conceptLinker);
+							role->setInverseFunctional(true);
+						} else if (expType == CBuildExpression::BETREFLEXIVEPROPERTY) {
+							CReflexiveObjectPropertyExpression* objPropAxiomExp = (CReflexiveObjectPropertyExpression*)objPropAxiom;
+							CObjectHasSelfExpression* gciSelfExp = getObjectHasSelf(objPropTermExp);
+							buildGeneralConceptInclusionClassExpression(gciSelfExp);
+							role->setReflexive(true);
+						} else if (expType == CBuildExpression::BETIRREFLEXIVEPROPERTY) {
+							CIrreflexiveObjectPropertyExpression* objPropAxiomExp = (CIrreflexiveObjectPropertyExpression*)objPropAxiom;
+							CObjectHasSelfExpression* selfExp = getObjectHasSelf(objPropTermExp);
+							CObjectComplementOfExpression* gciNotSelfExp = getObjectComplementOf(selfExp);
+							buildGeneralConceptInclusionClassExpression(gciNotSelfExp);
+							role->setIrreflexive(true);
+						} else if (expType == CBuildExpression::BETSYMMETRICPROPERTY) {
+							// has it self as inverse
+							CSymmetricObjectPropertyExpression* objPropAxiomExp = (CSymmetricObjectPropertyExpression*)objPropAxiom;
+							CRole* invRole = role;
+							if (!role->hasInverseRole(invRole)) {
+								CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+								roleLinker->init(invRole,true);
+								role->addInverseRoleLinker(roleLinker);
+							}
+							role->setSymmetric(true);
+						} else if (expType == CBuildExpression::BETASYMMETRICPROPERTY) {
+							// disjoint to the inverse
+							CAsymmetricObjectPropertyExpression* objPropAxiomExp = (CAsymmetricObjectPropertyExpression*)objPropAxiom;
+							CObjectPropertyTermExpression* invObjPropTermExp = getCorrectedInverseObjectPropertyOf(objPropTermExp);
+							CRole* invRole = getRoleForObjectPropertyTerm(invObjPropTermExp);
+							if (!role->hasDisjointRole(invRole)) {
+								CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+								roleLinker->init(invRole,false);
+								role->addDisjointRoleLinker(roleLinker);
+							}
+							if (!invRole->hasDisjointRole(role)) {
+								CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+								roleLinker->init(role,false);
+								invRole->addDisjointRoleLinker(roleLinker);
+							}
+							role->setAsymmetric(true);
+						} else if (expType == CBuildExpression::BETTRANSITIVEOBJECTPROPERTY) {
+							// TODO: build RR [= R ??
+							CTransetiveObjectPropertyExpression* objPropAxiomExp = (CTransetiveObjectPropertyExpression*)objPropAxiom;
+							CRoleChain* roleChain = buildRoleChainForTransetiveObjectPropertyExpression(objPropAxiomExp);
+
+							CXLinker<CRoleChain*>* superRoleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemManager);
+							superRoleChainLinker->initLinker(roleChain);
+							role->addRoleChainSuperSharingLinker(superRoleChainLinker);
+							CXLinker<CRoleChain*>* subRoleChainLinker = CObjectAllocator< CXLinker<CRoleChain*> >::allocateAndConstruct(mMemManager);
+							subRoleChainLinker->initLinker(roleChain);
+							role->addRoleChainSubSharingLinker(subRoleChainLinker);
+							role->setTransitive(true);
+						} 
+					} else {
+						mObjPropTermObjPropAxiomSet->remove(QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>(objPropTermExp,objPropAxiom));
 					}
 				}
 				return true;
@@ -1342,9 +1895,6 @@ namespace Konclude {
 						// build simple subclass inclusion
 						setConceptOperandsFromClassTerms(concept,inclusionClassExp,negate);
 						concept->setOperatorCode(CCSUB);
-						// not necessary
-						//CConcept* atomicSubClassUnfoldConcept = getAtomicSubClassConcept(subClassExp);
-						//setConceptOperands(concept,atomicSubClassUnfoldConcept);
 					} else {
 						// build GCI
 						CClassTermExpression* compSubClassExp = getObjectComplementOf(subClassExp);
@@ -1372,13 +1922,6 @@ namespace Konclude {
 				return true;
 			}
 
-
-			CConcept* CConcreteOntologyUpdateBuilder::getAtomicSubClassConcept(CClassTermExpression* subClassExp) {
-				CConcept* concept = CObjectAllocator<CConcept>::allocateAndConstruct(mMemManager);
-				concept->initConcept();
-				mTaggingConceptList.append(concept);
-				return concept;
-			}
 
 			bool CConcreteOntologyUpdateBuilder::updateName(CNamedItem* item, const QString& name) {
 				bool nameAdded = false;
@@ -1418,10 +1961,11 @@ namespace Konclude {
 				bool forceCreation = false;
 				if (classTermExp == mTopClassExpression || classTermExp == mBottomClassExpression) {
 					forceLocalisation = true;
-				} else if (mInitialBuild) {
-					forceLocalisation = false;
 				}
 				concept = mClassTermConceptHash->value(classTermExp);
+				if (concept && concept->getTag() == -1) {
+					forceLocalisation = false;
+				}
 				if (concept && forceLocalisation) {
 					if (!mLocalisationSet.contains(classTermExp)) {
 						forceCreation = true;
@@ -1443,6 +1987,7 @@ namespace Konclude {
 						}	
 						mInstallConceptList.append(concept);
 					} else {
+						concept->setTag(-1);
 						mTaggingConceptList.append(concept);
 					}
 					mClassTermConceptHash->insert(classTermExp,concept);
@@ -1458,13 +2003,87 @@ namespace Konclude {
 				return concept;
 			}
 
+			CDataLiteral* CConcreteOntologyUpdateBuilder::getDataLiteralForLiteralExpression(CDataLiteralExpression* dataLiteralExp, bool forceLocalisation) {
+				CDatatypeExpression* datatypeExp = dataLiteralExp->getDatatypeExpression();
+				CDataLexicalValueExpression* lexDatValueExp = dataLiteralExp->getDataLexicalValueExpression();
+				CDatatype* datatype = getDatatypeForDatatypeExpression(datatypeExp);
+				CDataLiteral* dataLiteral = CObjectAllocator<CDataLiteral>::allocateAndConstruct(mMemManager);
+				dataLiteral->initDataLiteral(lexDatValueExp->getName(),datatype);
+				return dataLiteral;
+			}
+
+
+			CDatatype* CConcreteOntologyUpdateBuilder::getDatatypeForDatatypeExpression(CDatatypeExpression* datatypeExp, bool forceLocalisation) {
+				CDatatype* datatype = nullptr;
+				datatype = mDatatypeExpDatatypeHash->value(datatypeExp);
+				bool forceCreation = false;
+				if (datatype && forceLocalisation) {
+					if (!mLocalisationSet.contains(datatypeExp)) {
+						forceCreation = true;
+					}
+				}
+				if (!datatype || forceCreation) {
+					if (forceLocalisation) {
+						mLocalisationSet.insert(datatypeExp);
+					}
+					datatype = CObjectAllocator<CDatatype>::allocateAndConstruct(mMemManager);
+					datatype->initDatatype(datatypeExp->getName());
+					CDatatypeVector* datatypeVec = tBox->getDatatypeVector();
+					cint64 nextDatatypeTag = datatypeVec->getItemCount();
+					datatype->setDatatypeTag(nextDatatypeTag);
+					datatypeVec->setData(nextDatatypeTag,datatype);
+					mDatatypeExpDatatypeHash->insert(datatypeExp,datatype);
+					mDatatypeDatatypeExpHash->insert(datatype,datatypeExp);
+
+				}
+				return datatype;
+			}
+
+
+
+
+			CConcept* CConcreteOntologyUpdateBuilder::getConceptForDataRangeTerm(CDataRangeTermExpression* dataRangeExp, bool forceLocalisation) {
+				CConcept* concept = nullptr;
+				concept = mDataRangeTermConceptHash->value(dataRangeExp);
+				bool forceCreation = false;
+				if (concept && concept->getTag() == -1) {
+					forceLocalisation = false;
+				}
+				if (concept && forceLocalisation) {
+					if (!mLocalisationSet.contains(dataRangeExp)) {
+						forceCreation = true;
+					}
+				}
+				if (!concept || forceCreation) {
+					CConcept* prevConcept = concept;
+					if (forceLocalisation) {
+						mLocalisationSet.insert(dataRangeExp);
+					}
+					concept = CObjectAllocator<CConcept>::allocateAndConstruct(mMemManager);
+					concept->initConcept();
+					if (prevConcept) {
+						cint64 prevConceptTag = prevConcept->getConceptTag();
+						concept->initTag(prevConceptTag);
+						cint64 prevConceptOpCode = prevConcept->getOperatorCode();
+						mInstallConceptList.append(concept);
+					} else {
+						mTaggingConceptList.append(concept);
+						concept->setTag(-1);
+					}
+					mDataRangeTermConceptHash->insert(dataRangeExp,concept);
+					mConceptDataRangeTermHash->insert(concept,dataRangeExp);
+				}
+				return concept;
+			}
+
+
 
 
 			CIndividual* CConcreteOntologyUpdateBuilder::getIndividualForIndividualTerm(CIndividualTermExpression* indiTermExp, bool forceLocalisation) {
 				CIndividual* indi = nullptr;
 				indi = mIndividulTermIndiHash->value(indiTermExp);
 				bool forceCreation = false;
-				if (mInitialBuild) {
+				if (indi && indi->getTag() == -1) {
 					forceLocalisation = false;
 				}
 				if (indi && forceLocalisation) {
@@ -1483,7 +2102,8 @@ namespace Konclude {
 						indi->initTag(prevIndi->getIndividualID());
 						mInstallIndividualList.append(indi);
 					} else {
-						mTaggingIndividualSet.insert(indi);
+						mTaggingIndividualSet.append(indi);
+						indi->setTag(-1);
 					}
 					mIndividulTermIndiHash->insert(indiTermExp,indi);
 					mIndiIndividulTermHash->insert(indi,indiTermExp);
@@ -1493,6 +2113,11 @@ namespace Konclude {
 						CNamedIndividualExpression* namedIndiExp = (CNamedIndividualExpression*)indiTermExp;
 						QString indiName = namedIndiExp->getName();
 						updateName(indi,indiName);
+					} else if (indiTermExp->getType() == CBuildExpression::BETANONYMOUSINDIVIDUAL) {
+						CAnonymousIndividualExpression* anonymousIndiExp = (CAnonymousIndividualExpression*)indiTermExp;
+						QString indiName = anonymousIndiExp->getName();
+						updateName(indi,indiName);
+						indi->setAnonymousIndividual(true);
 					}
 
 
@@ -1502,19 +2127,71 @@ namespace Konclude {
 
 
 
+
+			CRole* CConcreteOntologyUpdateBuilder::getRoleForDataPropertyTerm(CDataPropertyTermExpression* dataPropTermExp, bool forceLocalisation) {
+				CRole* role = nullptr;
+				role = mDataPropTermRoleHash->value(dataPropTermExp);
+				bool forceCreation = false;
+				if (dataPropTermExp == mTopDataPropExpression) {
+					mConstructFlags->setTopDataRoleUsed();
+					forceLocalisation = true;
+				} else if (dataPropTermExp == mBottomDataPropExpression) {
+					mConstructFlags->setBottomDataRoleUsed();
+					forceLocalisation = true;
+				}
+				if (role && role->getTag() == -1) {
+					forceLocalisation = false;
+				}
+				if (role && forceLocalisation) {
+					if (!mLocalisationSet.contains(dataPropTermExp)) {
+						forceCreation = true;
+					}
+				}
+				if (!role || forceCreation) {
+					CRole* prevRole = role;
+					if (forceLocalisation) {
+						mLocalisationSet.insert(dataPropTermExp);
+					}
+					role = CObjectAllocator<CRole>::allocateAndConstruct(mMemManager);
+					role->initRole();
+					if (prevRole) {
+						role->initTag(prevRole->getRoleTag());
+						mInstallRoleList.append(role);
+					} else {
+						mTaggingRoleSet.insert(role);
+						role->setTag(-1);
+					}
+					role->setDataRole(true);
+					mDataPropTermRoleHash->insert(dataPropTermExp,role);
+					mRoleDataPropTermHash->insert(role,dataPropTermExp);
+
+					if (dataPropTermExp->getType() == CBuildExpression::BETDATAPROPERTY) {
+						// update name
+						CDataPropertyExpression* dataPropExp = (CDataPropertyExpression*)dataPropTermExp;
+						QString propName = dataPropExp->getName();
+						updateName(role,propName);
+					}
+
+				}
+				return role;
+			}
+
+
 			CRole* CConcreteOntologyUpdateBuilder::getRoleForObjectPropertyTerm(CObjectPropertyTermExpression* objPropTermExp, bool forceLocalisation) {
 				CRole* role = nullptr;
 				role = mObjPropTermRoleHash->value(objPropTermExp);
 				bool forceCreation = false;
 				if (objPropTermExp == mTopObjPropExpression) {
-					mConstructFlags->setTopRoleUsed();
+					mConstructFlags->setTopObjectRoleUsed();
 					forceLocalisation = true;
 				} else if (objPropTermExp == mBottomObjPropExpression) {
-					mConstructFlags->setBottomRoleUsed();
+					mConstructFlags->setBottomObjectRoleUsed();
 					forceLocalisation = true;
-				} else if (mInitialBuild) {
+				}
+				if (role && role->getTag() == -1) {
 					forceLocalisation = false;
 				}
+
 				if (role && forceLocalisation) {
 					if (!mLocalisationSet.contains(objPropTermExp)) {
 						forceCreation = true;
@@ -1532,6 +2209,7 @@ namespace Konclude {
 						mInstallRoleList.append(role);
 					} else {
 						mTaggingRoleSet.insert(role);
+						role->setTag(-1);
 					}
 					mObjPropTermRoleHash->insert(objPropTermExp,role);
 					mRoleObjPropTermHash->insert(role,objPropTermExp);
@@ -1561,6 +2239,11 @@ namespace Konclude {
 				return true;
 			}
 
+			bool CConcreteOntologyUpdateBuilder::setConceptRoleFromDataPropertyTerm(CConcept* concept, CDataPropertyTermExpression* dataPropertyTermExp) {
+				CRole* opRole = getRoleForDataPropertyTerm(dataPropertyTermExp);
+				concept->setRole(opRole);
+				return true;
+			}
 
 
 			cint64 CConcreteOntologyUpdateBuilder::getIndividualVariableID(CConcept* concept, CObjectIndividualVariableExpression* objectIndVarExp) {
@@ -1628,6 +2311,34 @@ namespace Konclude {
 				return false;
 			}
 
+
+			bool CConcreteOntologyUpdateBuilder::setConceptOperandsFromDataRangeTerms(CConcept* concept, CDataRangeTermExpression* dataRangeTermExp, bool negate) {
+				if (dataRangeTermExp) {
+					CConcept* opConcept = getConceptForDataRangeTerm(dataRangeTermExp);
+					//if (!concept->hasOperandConcept(opConcept,negate)) {
+					CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+					opConLinker->init(opConcept,negate);
+					concept->addOperandLinker(opConLinker);
+					concept->incOperandCount();
+					//}
+					return true;
+				}
+				return false;
+			}
+
+			bool CConcreteOntologyUpdateBuilder::setConceptOperandsFromDataRangeTerms(CConcept* concept, CEXPRESSIONLIST<CDataRangeTermExpression*>* dataRangeTermExpList, bool negate) {
+				FOREACHIT (CDataRangeTermExpression* dataRangeTermExp, *dataRangeTermExpList) {
+					CConcept* opConcept = getConceptForDataRangeTerm(dataRangeTermExp);
+					//if (!concept->hasOperandConcept(opConcept,negate)) {
+					CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+					opConLinker->init(opConcept,negate);
+					concept->addOperandLinker(opConLinker);
+					concept->incOperandCount();
+					//}
+				}
+				return true;
+			}
+
 			bool CConcreteOntologyUpdateBuilder::setConceptOperands(CConcept* concept, CConcept* operandConcept, bool negate) {
 				//if (!concept->hasOperandConcept(operandConcept,negate)) {
 					CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
@@ -1678,10 +2389,117 @@ namespace Konclude {
 
 			bool CConcreteOntologyUpdateBuilder::buildIndividualIDs() {
 				cint64 nextIndiID = aBox->getIndividualCount();
-				FOREACHIT (CIndividual* indi, mTaggingIndividualSet) {
-					indi->setIndividualID(nextIndiID++);
-					mInstallIndividualList.append(indi);
+
+
+
+				class CIndividualTaggingDependingItem : public CIndividualData {
+				public:
+					CIndividualTaggingDependingItem() {
+						mDependent = false;
+					}
+				public:
+					bool mDependent;
+				};
+
+
+				cint64 taggingCount = mTaggingIndividualSet.count();
+				CIndividualTaggingDependingItem* taggingItemVec = new CIndividualTaggingDependingItem[taggingCount];
+
+				cint64 itemIdx = 0;
+				for (CBUILDLIST<CIndividual*>::const_iterator it1 = mTaggingIndividualSet.constBegin(), it1End = mTaggingIndividualSet.constEnd(); it1 != it1End; ++it1) {
+					CIndividual* individual = *it1;
+					if (!individual->hasIndividualData()) {
+						CIndividualTaggingDependingItem* taggingItem = &taggingItemVec[itemIdx++];
+						individual->setIndividualData(taggingItem);
+					}
 				}
+
+				CBUILDLIST<CIndividual*> dependedIndividualList;
+				CBUILDLIST<CIndividual*> directIndividualList;
+				CBUILDLIST<CIndividual*> currentIndividualList;
+
+				for (CBUILDLIST<CIndividual*>::const_iterator it1 = mTaggingIndividualSet.constBegin(), it1End = mTaggingIndividualSet.constEnd(); it1 != it1End; ++it1) {
+					CIndividual* individual = *it1;
+					for (CRoleAssertionLinker* roleAssLinkIt = individual->getAssertionRoleLinker(); roleAssLinkIt; roleAssLinkIt = roleAssLinkIt->getNext()) {
+						CIndividual* otIndi = roleAssLinkIt->getIndividual();
+						if (otIndi->getIndividualID() <= 0) {
+							CIndividualTaggingDependingItem* taggingItem = (CIndividualTaggingDependingItem*)otIndi->getIndividualData();
+							if (taggingItem && !taggingItem->mDependent) {
+								taggingItem->mDependent = true;
+								dependedIndividualList.append(otIndi);
+							}
+						}
+					}
+				}
+				for (CBUILDLIST<CIndividual*>::const_iterator it1 = mTaggingIndividualSet.constBegin(), it1End = mTaggingIndividualSet.constEnd(); it1 != it1End; ++it1) {
+					CIndividual* individual = *it1;
+					CIndividualTaggingDependingItem* taggingItem = (CIndividualTaggingDependingItem*)individual->getIndividualData();
+					if (!taggingItem->mDependent) {
+						directIndividualList.append(individual);
+					}
+				}
+				CBUILDLIST<CIndividual*> taggingIndividualList;
+				while (!directIndividualList.isEmpty() || !dependedIndividualList.isEmpty()) {
+					CIndividual* individual = nullptr;
+					if (currentIndividualList.isEmpty() && !directIndividualList.isEmpty()) {
+						individual = directIndividualList.takeFirst();
+						currentIndividualList.append(individual);
+					}
+					if (currentIndividualList.isEmpty() && !dependedIndividualList.isEmpty()) {
+						CIndividual* individual = dependedIndividualList.takeFirst();
+						CIndividualTaggingDependingItem* taggingItem = (CIndividualTaggingDependingItem*)individual->getIndividualData();
+						if (taggingItem && taggingItem->mDependent) {
+							taggingItem->mDependent = false;
+							currentIndividualList.append(individual);
+						}
+					}
+					CBUILDLIST<CIndividual*> nextTaggingConceptList;
+					while (!currentIndividualList.isEmpty()) {
+						individual = currentIndividualList.takeFirst();
+						nextTaggingConceptList.append(individual);
+
+						for (CRoleAssertionLinker* roleAssLinkIt = individual->getAssertionRoleLinker(); roleAssLinkIt; roleAssLinkIt = roleAssLinkIt->getNext()) {
+							CIndividual* otIndi = roleAssLinkIt->getIndividual();
+							if (otIndi->getIndividualID() <= 0) {
+								CIndividualTaggingDependingItem* taggingItem = (CIndividualTaggingDependingItem*)otIndi->getIndividualData();
+								if (taggingItem && taggingItem->mDependent) {
+									taggingItem->mDependent = false;
+									currentIndividualList.append(otIndi);
+								}
+							}
+						}
+					}
+					for (CBUILDLIST<CIndividual*>::const_iterator it1 = nextTaggingConceptList.constBegin(), it1End = nextTaggingConceptList.constEnd(); it1 != it1End; ++it1) {
+						taggingIndividualList.append(*it1);
+					}
+
+				}
+				for (CBUILDLIST<CIndividual*>::const_iterator it1 = taggingIndividualList.constBegin(), it1End = taggingIndividualList.constEnd(); it1 != it1End; ++it1) {
+					CIndividual* taggingIndividual = *it1;
+					taggingIndividual->setIndividualID(nextIndiID++);
+					mInstallIndividualList.append(taggingIndividual);
+				}
+
+				for (CBUILDLIST<CIndividual*>::const_iterator it1 = mTaggingIndividualSet.constBegin(), it1End = mTaggingIndividualSet.constEnd(); it1 != it1End; ++it1) {
+					CIndividual* individual = *it1;
+					individual->setIndividualData(nullptr);
+				}
+
+				delete [] taggingItemVec;
+
+
+
+
+				//FOREACHIT (CIndividual* indi, mTaggingIndividualSet) {
+
+				//	QString indiName = CIRIName::getRecentIRIName(indi->getIndividualNameLinker());
+				//	indiName = indiName.replace("file:/C:/temp/s","");
+				//	cint64 indiNameID = indiName.toLongLong();
+				//	indi->setIndividualID(indiNameID);
+
+				//	//indi->setIndividualID(nextIndiID++);
+				//	mInstallIndividualList.append(indi);
+				//}
 				return true;
 			}
 

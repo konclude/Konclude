@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -172,7 +172,10 @@ namespace Konclude {
 			void COptimizedKPSetClassSubsumptionClassifierThread::createObviousSubsumptionSatisfiableTestingOrder(COptimizedKPSetClassOntologyClassificationItem* ontClassItem) {
 				CPrecomputation* precomputation = ontClassItem->getOntology()->getPrecomputation();
 				CSaturationData* saturationData = precomputation->getSaturationModelData();
-				if (saturationData) {
+
+				bool subsumerSaturationExtraction = CConfigDataReader::readConfigBoolean(ontClassItem->getCalculationConfiguration(),"Konclude.Calculation.Classification.SaturationSubsumerExtraction",true);
+
+				if (saturationData && subsumerSaturationExtraction) {
 					createObviousSubsumptionSatisfiableTestingOrderFromSaturationData(ontClassItem);
 				} else {
 					createObviousSubsumptionSatisfiableTestingOrderFromBuildData(ontClassItem);
@@ -230,7 +233,7 @@ namespace Konclude {
 
 				QHash<CConcept*,CConceptReferenceLinking*>* conRefLinkDataHash = ontClassItem->getConceptReferenceLinkingDataHash();
 				QList<CConcept*> extClassConceptList;
-				CPrecomputedSaturationSubsumerExtractor precSatSubsumerExtractor(onto);
+				CPrecomputedSaturationSubsumerExtractor* precSatSubsumerExtractor = ontClassItem->getPrecomputedSaturationSubsumerExtractor(true);
 
 
 
@@ -243,13 +246,14 @@ namespace Konclude {
 								if (!eqConCandidateHash || !eqConCandidateHash->contains(concept)) {
 									equivConNonCandSet->insert(concept);
 								}
-							}			
+							}		
+
 							COptimizedKPSetClassTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(concept,true);
 
 							CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
-							CConceptSatisfiableReferenceLinkingData* conRefSatLinking = (CConceptSatisfiableReferenceLinkingData*)conProcData->getConceptReferenceLinking();
+							CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
 							if (!conRefSatLinking) {
-								conRefSatLinking = new CConceptSatisfiableReferenceLinkingData();
+								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
 							}
 
@@ -264,6 +268,7 @@ namespace Konclude {
 						}
 					}
 				}
+
 
 
 				for (QList<CConcept*>::const_iterator it = extClassConceptList.constBegin(), itEnd = extClassConceptList.constEnd(); it != itEnd; ++it) {
@@ -283,10 +288,10 @@ namespace Konclude {
 
 
 
-					if (precSatSubsumerExtractor.getConceptFlags(concept,&unsatisfiableFlag,&insufficientFlag)) {
+					if (precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,&insufficientFlag)) {
 						if (!unsatisfiableFlag) {
 							bool possibleSubsumerFlag = false;
-							precSatSubsumerExtractor.extractSubsumers(concept,classItem,&possibleSubsumerFlag);
+							precSatSubsumerExtractor->extractSubsumers(concept,classItem,&possibleSubsumerFlag);
 							if (equivConNonCandSet && !equivConNonCandSet->isEmpty()) {
 								for (CBOXSET<CConcept*>::const_iterator eqConIt = equivConNonCandSet->constBegin(), eqConItEnd = equivConNonCandSet->constEnd(); !possibleSubsumerFlag && eqConIt != eqConItEnd; ++eqConIt) {
 									CConcept* eqCon = *eqConIt;
@@ -487,9 +492,9 @@ namespace Konclude {
 							COptimizedKPSetClassTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(concept,true);
 
 							CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
-							CConceptSatisfiableReferenceLinkingData* conRefSatLinking = (CConceptSatisfiableReferenceLinkingData*)conProcData->getConceptReferenceLinking();
+							CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
 							if (!conRefSatLinking) {
-								conRefSatLinking = new CConceptSatisfiableReferenceLinkingData();
+								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
 							}
 
@@ -887,28 +892,30 @@ namespace Konclude {
 
 											COptimizedKPSetClassPossibleSubsumptionMap* upPropItemPossSubsumMap = upPropItem->getPossibleSubsumptionMap(false);
 											if (upPropItemPossSubsumMap) {
-												COptimizedKPSetClassPossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd();
 												COptimizedKPSetClassPossibleSubsumptionMap::const_iterator itUpPoss = upPropItemPossSubsumMap->constBegin(), itUpPossEnd = upPropItemPossSubsumMap->constEnd();
-												while (itPoss != itPossEnd && itUpPoss != itUpPossEnd) {
-													CConcept* possCon = itPoss.key().getConcept();
-													CConcept* possUpCon = itUpPoss.key().getConcept();
-													if (possCon->getConceptTag() == possUpCon->getConceptTag()) {
-														++itPoss;
-														++itUpPoss;
-													} else if (possCon->getConceptTag() < possUpCon->getConceptTag()) {
-														++itPoss;
-													} else if (possCon->getConceptTag() > possUpCon->getConceptTag()) {
-														COptimizedKPSetClassPossibleSubsumptionData* upPossData = itUpPoss.value();
-														if (!item->hasSubsumerConceptItem(upPossData->getClassItem()) && item != upPossData->getClassItem()) {
-															if (!upPossData->isSubsumptionInvalided()) {
-																upPossData->setSubsumptionInvalid(true);
-																if (upPossData->isUpdateRequired()) {
-																	prunePossibleSubsumptions(optKPSetClassificationItem,upPropItem,upPossData);
+												if (possSubsumMap) {
+													COptimizedKPSetClassPossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd();
+													while (itPoss != itPossEnd && itUpPoss != itUpPossEnd) {
+														CConcept* possCon = itPoss.key().getConcept();
+														CConcept* possUpCon = itUpPoss.key().getConcept();
+														if (possCon->getConceptTag() == possUpCon->getConceptTag()) {
+															++itPoss;
+															++itUpPoss;
+														} else if (possCon->getConceptTag() < possUpCon->getConceptTag()) {
+															++itPoss;
+														} else if (possCon->getConceptTag() > possUpCon->getConceptTag()) {
+															COptimizedKPSetClassPossibleSubsumptionData* upPossData = itUpPoss.value();
+															if (!item->hasSubsumerConceptItem(upPossData->getClassItem()) && item != upPossData->getClassItem()) {
+																if (!upPossData->isSubsumptionInvalided()) {
+																	upPossData->setSubsumptionInvalid(true);
+																	if (upPossData->isUpdateRequired()) {
+																		prunePossibleSubsumptions(optKPSetClassificationItem,upPropItem,upPossData);
+																	}
+																	OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
 																}
-																OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
 															}
+															++itUpPoss;
 														}
-														++itUpPoss;
 													}
 												}
 												while (itUpPoss != itUpPossEnd) {
@@ -1160,7 +1167,7 @@ namespace Konclude {
 				cout<<QString("Calculating whether '%1' is satisfiable").arg(iriClassNameString).toLocal8Bit().data()<<endl<<endl;
 #endif
 
-				//if (iriClassNameString == "http://owl.man.ac.uk/2005/07/sssw/people#sheep") {
+				//if (iriClassNameString == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
 				//	bool bug = true;
 				//}
 
@@ -1172,6 +1179,14 @@ namespace Konclude {
 					return false;
 				}
 				if (nextSatTestItem->isResultUnsatisfiableDerivated()) {
+					satisfiableFlag = false;
+					nextSatTestItem->setSatisfiableTested(true);
+					nextSatTestItem->setSatisfiableTestedResult(false);
+					return false;
+				}
+				CPrecomputedSaturationSubsumerExtractor* precSatSubsumerExtractor = optKPSetClassificationItem->getPrecomputedSaturationSubsumerExtractor(false);
+				bool unsatisfiableFlag = false;
+				if (precSatSubsumerExtractor && precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,nullptr) && unsatisfiableFlag) {
 					satisfiableFlag = false;
 					nextSatTestItem->setSatisfiableTested(true);
 					nextSatTestItem->setSatisfiableTestedResult(false);
@@ -1242,7 +1257,7 @@ namespace Konclude {
 #endif
 
 
-				//if (iriClassNameString1 == "http://www.bootstrep.eu/ontology/GRO#BindingOfProteinToProteinBindingSiteOfDNA" && iriClassNameString2 == "http://www.bootstrep.eu/ontology/GRO#DNAProteinInteraction" ) {
+				//if (iriClassNameString1 == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students" && iriClassNameString2 == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students" ) {
 				//	bool bug = true;
 				//}
 
@@ -1311,7 +1326,7 @@ namespace Konclude {
 							superClassConcept = firstConcept;
 						}
 
-						if (superClassConcept) {
+						if (!triggerImpHash->contains(concept) && superClassConcept) {
 							COptimizedKPSetClassTestingItem* superClassConItem = conceptSatItemHash->value(superClassConcept);
 							if (superClassConItem && superClassConItem->isSatisfiableTested()) {
 								if (!triggerImpHash || !triggerImpHash->contains(superClassConcept)) {
@@ -1388,7 +1403,7 @@ namespace Konclude {
 
 					
 						COptimizedKPSetClassPossibleSubsumptionMap* superPosSubsumMap = topClassConItem->getPossibleSubsumptionMap(false);
-						if (superPosSubsumMap) {
+						if (superPosSubsumMap && !nextSatTestItem->isPossibleSubsumptionMapInitialized()) {
 							COptimizedKPSetClassPossibleSubsumptionMap* subPosSubsumMap = nextSatTestItem->getPossibleSubsumptionMap(true);
 							for (COptimizedKPSetClassPossibleSubsumptionMap::const_iterator it = superPosSubsumMap->constBegin(), itEnd = superPosSubsumMap->constEnd(); it != itEnd; ++it) {
 								CConcept* con = it.key().getConcept();
@@ -1401,6 +1416,7 @@ namespace Konclude {
 							}
 						}
 						nextSatTestItem->setPossibleSubsumptionMapInitialized(true);
+						OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
 					}
 				}
 				if (satFlag && isSatisfiableFlag) {
@@ -1612,6 +1628,8 @@ namespace Konclude {
 						CClassificationInitializePossibleSubsumptionMessageData* possSubsumMessageData = (CClassificationInitializePossibleSubsumptionMessageData*)messageData;
 						CConcept* subsumedConcept = possSubsumMessageData->getSubsumedConcept();
 						CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* possSubsumerList = possSubsumMessageData->getClassPossibleSubsumerList();
+						bool eqConceptsNonCandidatePossSubsumers = possSubsumMessageData->hasEqConceptsNonCandidatePossSubsumers();
+						CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>* eqConNonCandPossSubsumerList = possSubsumMessageData->getClassEqConceptNonCandidatePossibleSubsumerList();
 
 #ifdef OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGB
 						QString iriClassNameString = CIRIName::getRecentIRIName(subsumedConcept->getClassNameLinker());
@@ -1662,14 +1680,30 @@ namespace Konclude {
 										}
 									}
 									OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
-									for (QSet<CConcept*>::const_iterator it = equivConNonCandidateSet->constBegin(), itEnd = equivConNonCandidateSet->constEnd(); it != itEnd; ++it) {
-										CConcept* eqConcept = *it;
-										COptimizedKPSetClassTestingItem* possEqSubsumItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(eqConcept);
-										if (!subsumedItem->hasSubsumerConceptItem(possEqSubsumItem) && subsumedItem != possEqSubsumItem) {
-											if (!possSubsumMap->contains(CConceptTagComparer(eqConcept))) {
-												COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(possEqSubsumItem);
-												possSubsumMap->insert(CConceptTagComparer(eqConcept),possSubsumData);
-												incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,possSubsumMap);
+									if (eqConceptsNonCandidatePossSubsumers) {
+										if (eqConNonCandPossSubsumerList) {
+											for (CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>::const_iterator it = eqConNonCandPossSubsumerList->constBegin(), itEnd = eqConNonCandPossSubsumerList->constEnd(); it != itEnd; ++it) {
+												CConcept* eqConcept = *it;
+												COptimizedKPSetClassTestingItem* possEqSubsumItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(eqConcept);
+												if (!subsumedItem->hasSubsumerConceptItem(possEqSubsumItem) && subsumedItem != possEqSubsumItem) {
+													if (!possSubsumMap->contains(CConceptTagComparer(eqConcept))) {
+														COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(possEqSubsumItem);
+														possSubsumMap->insert(CConceptTagComparer(eqConcept),possSubsumData);
+														incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,possSubsumMap);
+													}
+												}
+											}
+										}
+									} else {
+										for (QSet<CConcept*>::const_iterator it = equivConNonCandidateSet->constBegin(), itEnd = equivConNonCandidateSet->constEnd(); it != itEnd; ++it) {
+											CConcept* eqConcept = *it;
+											COptimizedKPSetClassTestingItem* possEqSubsumItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(eqConcept);
+											if (!subsumedItem->hasSubsumerConceptItem(possEqSubsumItem) && subsumedItem != possEqSubsumItem) {
+												if (!possSubsumMap->contains(CConceptTagComparer(eqConcept))) {
+													COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(possEqSubsumItem);
+													possSubsumMap->insert(CConceptTagComparer(eqConcept),possSubsumData);
+													incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,possSubsumMap);
+												}
 											}
 										}
 									}

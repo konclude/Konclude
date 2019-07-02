@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -38,7 +38,7 @@ namespace Konclude {
 					mQueryString = QString("Get Subclass Hierarchy of class '%1'").arg(mClassName);
 				}
 
-				mUseAbbreviatedIRIs = CConfigDataReader::readConfigBoolean(configuration,"Konclude.OWLlink.AbbreviatedIRIs",false);
+				mUseAbbreviatedIRIs = CConfigDataReader::readConfigBoolean(configuration,"Konclude.ORE.ClassHierarchyResult.AbbreviatedIRIs",false);
 				mWriteDeclarations = CConfigDataReader::readConfigBoolean(configuration,"Konclude.ORE.ClassHierarchyResult.WriteDeclarations",false);
 				mWriteDirectEquivalences = CConfigDataReader::readConfigBoolean(configuration,"Konclude.ORE.ClassHierarchyResult.WriteDirectEquivalences",false);
 
@@ -72,8 +72,11 @@ namespace Konclude {
 
 			void CWriteFunctionalClassSubsumptionsHierarchyQuery::forcedPathCreated(const QString& filePath) {
 				QString path = filePath;
-				if (path.contains("/")) {
-					path = path.mid(0,path.lastIndexOf("/"));
+				if (path.contains("/") || path.contains("\\")) {
+					int lastSlash = path.lastIndexOf("/");
+					int lastBackSlash = path.lastIndexOf("\\");
+					int lastSeparator = qMax(lastBackSlash,lastSlash);
+					path = path.mid(0,lastSeparator);
 					if (!path.isEmpty()) {
 						QDir dir;
 						dir.mkpath(path);
@@ -182,14 +185,14 @@ namespace Konclude {
 							QSet<CHierarchyNode *>* childNodeSet(procNode->getChildNodeSet());
 							foreach (CHierarchyNode *childNode, *childNodeSet) {
 
-								if (!processNodeSet.contains(childNode)) {
-									writeEquivalences(childNode,&outputFile);
-									writeDeclarations(childNode,&outputFile);
-									processNodeSet.insert(childNode);
-									processNodeList.append(childNode);
-								}
+								if (childNode != bottomNode) {
+									if (!processNodeSet.contains(childNode)) {
+										writeEquivalences(childNode,&outputFile);
+										writeDeclarations(childNode,&outputFile);
+										processNodeSet.insert(childNode);
+										processNodeList.append(childNode);
+									}
 
-								if (childNode != bottomNode && procNode != topNode) {
 									writeSubClassRelations(procNode,childNode,&outputFile);
 								}
 							}
@@ -264,7 +267,7 @@ namespace Konclude {
 					outputClassNameList += QString("<%1>").arg(className);
 				}
 				QString writeString = QString("EquivalentClasses(%1)\n").arg(outputClassNameList);
-				outputFile->write(writeString.toLocal8Bit());
+				outputFile->write(writeString.toUtf8());
 			}
 
 
@@ -305,24 +308,24 @@ namespace Konclude {
 
 			void CWriteFunctionalClassSubsumptionsHierarchyQuery::writeDeclaration(const QString& className, QFile* outputFile) {
 				QString writeString = QString("Declaration(Class(<%1>))\n").arg(className);
-				outputFile->write(writeString.toLocal8Bit());
+				outputFile->write(writeString.toUtf8());
 			}
 
 
 			void CWriteFunctionalClassSubsumptionsHierarchyQuery::writeOntologyStart(QFile* outputFile) {
-				outputFile->write(QString("Prefix(:=<http://www.w3.org/2002/07/owl#>)\n").toLocal8Bit());
-				outputFile->write(QString("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)\n").toLocal8Bit());
-				outputFile->write(QString("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\n").toLocal8Bit());
-				outputFile->write(QString("Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)\n").toLocal8Bit());
-				outputFile->write(QString("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n").toLocal8Bit());
-				outputFile->write(QString("Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n").toLocal8Bit());
+				outputFile->write(QString("Prefix(:=<http://www.w3.org/2002/07/owl#>)\n").toUtf8());
+				outputFile->write(QString("Prefix(owl:=<http://www.w3.org/2002/07/owl#>)\n").toUtf8());
+				outputFile->write(QString("Prefix(rdf:=<http://www.w3.org/1999/02/22-rdf-syntax-ns#>)\n").toUtf8());
+				outputFile->write(QString("Prefix(xml:=<http://www.w3.org/XML/1998/namespace>)\n").toUtf8());
+				outputFile->write(QString("Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)\n").toUtf8());
+				outputFile->write(QString("Prefix(rdfs:=<http://www.w3.org/2000/01/rdf-schema#>)\n").toUtf8());
 
-				outputFile->write(QString("\nOntology(\n").toLocal8Bit());
+				outputFile->write(QString("\nOntology(\n").toUtf8());
 			}
 
 
 			void CWriteFunctionalClassSubsumptionsHierarchyQuery::writeOntologyEnd(QFile* outputFile) {
-				outputFile->write(QString(")").toLocal8Bit());
+				outputFile->write(QString(")").toUtf8());
 			}
 
 
@@ -341,7 +344,7 @@ namespace Konclude {
 
 			void CWriteFunctionalClassSubsumptionsHierarchyQuery::writeSubClassRelation(const QString& subClassName, const QString& superClassName, QFile* outputFile) {
 				QString writeString = QString("SubClassOf(<%1> <%2>)\n").arg(subClassName,superClassName);
-				outputFile->write(writeString.toLocal8Bit());
+				outputFile->write(writeString.toUtf8());
 			}
 
 

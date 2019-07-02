@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -80,7 +80,20 @@ namespace Konclude {
 						reportLog("Stopped subrole transformation preprocessing.");
 						delete subRoleNorm;
 					}
-
+					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.DatatypeNormalizer",true)) {
+						COntologyPreProcess* datatypeNorm = new CDatatypeNormalizerPreProcess();
+						reportLog("Starting datatype normalization preprocessing.");
+						datatypeNorm->preprocess(ontology,&preprocessingContext);
+						reportLog("Stopped datatype normalization preprocessing.");
+						delete datatypeNorm;
+					}
+					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.DataLiteralValueNormalizer",true)) {
+						COntologyPreProcess* dataLitNorm = new CDataLiteralNormalizerPreProcess();
+						reportLog("Starting data literal values normalization preprocessing.");
+						dataLitNorm->preprocess(ontology,&preprocessingContext);
+						reportLog("Stopped data literal values normalization preprocessing.");
+						delete dataLitNorm;
+					}
 					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false)) {
 						COntologyTextFormater::writeOntologyToFile(ontology,"unprocessedTBox.txt");
 					}
@@ -111,12 +124,6 @@ namespace Konclude {
 						triggImplNorm->preprocess(ontology,&preprocessingContext);
 						reportLog("Stopped triggered implication binary GCI absorption preprocessing.");
 						delete triggImplNorm;
-					} else if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.GCIAbsorption.TriggeredImplicationGCIAbsorption",true)) {
-						COntologyPreProcess *triggImplNorm = new CTriggeredImplicationGCIAbsorberPreProcess();
-						reportLog("Starting triggered implication GCI absorption preprocessing.");
-						triggImplNorm->preprocess(ontology,&preprocessingContext);
-						reportLog("Stopped triggered implication GCI absorption preprocessing.");
-						delete triggImplNorm;
 					}
 
 					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false)) {
@@ -125,9 +132,9 @@ namespace Konclude {
 
 					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.RoleChainAutomataTransformation",true)) {
 						COntologyPreProcess *onPreProc = new CRoleChainAutomataTransformationPreProcess();
-						reportLog("Starting role chain automata transformation transformation preprocessing.");
+						reportLog("Starting role chain automata transformation preprocessing.");
 						onPreProc->preprocess(ontology,&preprocessingContext);
-						reportLog("Stopped role chain automata transformation transformation preprocessing.");
+						reportLog("Stopped role chain automata transformation preprocessing.");
 						delete onPreProc;
 					}
 

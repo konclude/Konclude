@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -80,6 +80,7 @@ namespace Konclude {
 					unsatCache = 0;
 					mSatExpCache = 0;
 					mReuseCompGraphCache = 0;
+					mSatNodeExpCache = 0;
 					//}
 					mPrecomputationManager = new CPrecomputationManager(this);
 					mPreprocessingManager = new CPreprocessingManager(this);
@@ -178,6 +179,8 @@ namespace Konclude {
 					CUnsatisfiableCacheHandler* unsatCacheHandler = nullptr;
 					CSatisfiableExpanderCacheHandler* satExpCacheHandler = nullptr;
 					CReuseCompletionGraphCacheHandler* reuseCompGraphCacheHandler = nullptr;
+					CSaturationNodeExpansionCacheHandler* satNodeCacheHandler = nullptr;
+					CComputedConsequencesCacheHandler* compConsCachHandler = nullptr;
 					if (unsatCache) {
 						unsatCacheHandler = new CUnsatisfiableCacheHandler(unsatCache->getCacheReader(),unsatCache->getCacheWriter());
 					}
@@ -187,10 +190,16 @@ namespace Konclude {
 					if (mReuseCompGraphCache) {
 						reuseCompGraphCacheHandler = new CReuseCompletionGraphCacheHandler(mReuseCompGraphCache->createCacheReader(),mReuseCompGraphCache->createCacheWriter());
 					}
+					if (mSatNodeExpCache) {
+						satNodeCacheHandler = new CSaturationNodeExpansionCacheHandler(mSatNodeExpCache->createCacheReader(),mSatNodeExpCache->createCacheWriter());
+					}
+					if (mCompConsCache) {
+						compConsCachHandler = new CComputedConsequencesCacheHandler(mCompConsCache->createCacheReader(),mCompConsCache->createCacheWriter());
+					}
 					CCalculationTableauApproximationSaturationTaskHandleAlgorithm* approxSatHandleAlg = new CCalculationTableauApproximationSaturationTaskHandleAlgorithm();;
 					CCalculationTableauSaturationTaskHandleAlgorithm* satTaskHandleAlg = new CCalculationTableauSaturationTaskHandleAlgorithm();
 					CCalculationTableauPilingSaturationTaskHandleAlgorithm* pilSatTaskHandleAlg = new CCalculationTableauPilingSaturationTaskHandleAlgorithm();
-					CCalculationTableauCompletionTaskHandleAlgorithm* compTaskHandleAlg = new CCalculationTableauCompletionTaskHandleAlgorithm(unsatCacheHandler,satExpCacheHandler,reuseCompGraphCacheHandler);
+					CCalculationTableauCompletionTaskHandleAlgorithm* compTaskHandleAlg = new CCalculationTableauCompletionTaskHandleAlgorithm(unsatCacheHandler,satExpCacheHandler,reuseCompGraphCacheHandler,satNodeCacheHandler,compConsCachHandler);
 					return new CCalculationChooseTaskHandleAlgorithm(compTaskHandleAlg,satTaskHandleAlg,pilSatTaskHandleAlg,approxSatHandleAlg);
 				}
 
@@ -204,6 +213,8 @@ namespace Konclude {
 					unsatCache = new COccurrenceUnsatisfiableCache(mWorkControllerCount+2);
 					mSatExpCache = new CSignatureSatisfiableExpanderCache();
 					mReuseCompGraphCache = new CReuseCompletionGraphCache();
+					mSatNodeExpCache = new CSaturationNodeAssociatedExpansionCache(configProvider->getCurrentConfiguration());
+					mCompConsCache = new CComputedConsequencesCache(configProvider->getCurrentConfiguration());
 
 					CConfigDependedCalculationFactory* calcFactory = new CConfigDependedCalculationFactory(this);
 					CCalculationManager* calculationManager = calcFactory->createCalculationManager(configProvider);
@@ -238,6 +249,10 @@ namespace Konclude {
 					if (mReuseCompGraphCache) {
 						mReuseCompGraphCache->stopThread(true);
 						delete mReuseCompGraphCache;
+					}
+					if (mSatNodeExpCache) {
+						mSatNodeExpCache->stopThread(true);
+						delete mSatNodeExpCache;
 					}
 
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Reasoner closed."),this);
@@ -452,6 +467,7 @@ namespace Konclude {
 								callback->doCallback();
 							}
 						}
+						delete reqData;
 					}
 				}
 
@@ -512,6 +528,7 @@ namespace Konclude {
 
 						if (reqPrepData->mDepCount <= 0) {
 							initiateQueryReasoning(query,callbackData,reasoningData,reqPrepData->mFailedReqList);
+							delete reqPrepData;
 						} else {
 							for (QHash<CConcreteOntology*,COntologyRequirementPreparingData*>::const_iterator it = reqPrepData->mOntoReqDataHash.constBegin(), itEnd = reqPrepData->mOntoReqDataHash.constEnd(); it != itEnd; ++it) {
 								CConcreteOntology* ontology = it.key();
@@ -594,8 +611,6 @@ namespace Konclude {
 						CConsistencePremisingQuery* consQuery = dynamic_cast<CConsistencePremisingQuery *>(query);
 						if (consQuery) {
 							reasoningData->mCallback = callbackData;
-							mReasoningTaskDataHash.insert((cint64)query,reasoningData);
-							CReasoningTaskData* reasoningData = mReasoningTaskDataHash.value((cint64)query,nullptr);
 							CQueryStatistics* queryStats = consQuery->getQueryStatistics();
 							CConcreteOntology* ontology = consQuery->getOntology();
 							if (queryStats) {
@@ -615,7 +630,7 @@ namespace Konclude {
 							consQuery->constructResult(ontology->getConsistence());
 
 							qint64 mSecs = reasoningData->mStartTime.elapsed();
-							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' milliseconds.").arg(consQuery->getQueryName()).arg(mSecs),this);
+							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' ms.").arg(consQuery->getQueryName()).arg(mSecs),this);
 
 							CCallbackData* callback = reasoningData->mCallback;
 							if (callback) {
@@ -628,10 +643,6 @@ namespace Konclude {
 						CTaxonomyPremisingQuery *taxQuery = dynamic_cast<CTaxonomyPremisingQuery *>(query);
 						if (taxQuery) {
 							reasoningData->mCallback = callbackData;
-							mReasoningTaskDataHash.insert((cint64)query,reasoningData);
-
-
-							CReasoningTaskData* reasoningData = mReasoningTaskDataHash.value((cint64)query,nullptr);
 
 							CQueryStatistics* queryStats = taxQuery->getQueryStatistics();
 							CConcreteOntology* ontology = taxQuery->getOntology();
@@ -652,7 +663,7 @@ namespace Konclude {
 							taxQuery->constructResult(ontology->getClassification()->getClassConceptClassification()->getClassConceptTaxonomy());
 
 							qint64 mSecs = reasoningData->mStartTime.elapsed();
-							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' milliseconds.").arg(taxQuery->getQueryName()).arg(mSecs),this);
+							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' ms.").arg(taxQuery->getQueryName()).arg(mSecs),this);
 
 
 							CCallbackData* callback = reasoningData->mCallback;
@@ -665,10 +676,6 @@ namespace Konclude {
 						CRealizationPremisingQuery* realQuery = dynamic_cast<CRealizationPremisingQuery *>(query);
 						if (realQuery) {
 							reasoningData->mCallback = callbackData;
-							mReasoningTaskDataHash.insert((cint64)query,reasoningData);
-
-
-							CReasoningTaskData* reasoningData = mReasoningTaskDataHash.value((cint64)query,nullptr);
 
 							CQueryStatistics* queryStats = realQuery->getQueryStatistics();
 							CConcreteOntology* ontology = realQuery->getOntology();
@@ -678,7 +685,7 @@ namespace Konclude {
 							realQuery->constructResult(ontology->getRealization());
 
 							qint64 mSecs = reasoningData->mStartTime.elapsed();
-							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' milliseconds.").arg(realQuery->getQueryName()).arg(mSecs),this);
+							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' ms.").arg(realQuery->getQueryName()).arg(mSecs),this);
 
 
 							CCallbackData* callback = reasoningData->mCallback;
@@ -872,7 +879,7 @@ namespace Konclude {
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed. Question '%2' answered with '%3'.\r\n").arg(cqe->getQueryName()).arg(cqe->getQueryString()).arg(cqe->getAnswerString()),this);
 
 					qint64 mSecs = reasoningData->mStartTime.elapsed();
-					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' milliseconds.").arg(cqe->getQueryName()).arg(mSecs),this);
+					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' ms.").arg(cqe->getQueryName()).arg(mSecs),this);
 					
 					// print calculation statistics
 					loggingCalculationStatistics();
@@ -883,6 +890,7 @@ namespace Konclude {
 						callback->doCallback();
 					}
 					mCalculatingQuerySet.remove(query);
+					mReasoningTaskDataHash.remove((cint64)query);
 					delete reasoningData;
 
 				}

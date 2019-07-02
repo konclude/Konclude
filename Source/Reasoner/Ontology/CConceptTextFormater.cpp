@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -93,6 +93,45 @@ namespace Konclude {
 					}
 					if (opCode == CCEQCAND) {
 						conText += QString::number(con->getConceptTag())+QString("~EQCONCAND");
+					}
+					if (opCode == CCDATATYPE) {
+						conText += QString::number(con->getConceptTag())+QString("~DATATYPE");
+						CDatatype* datatype = con->getDatatype();
+						if (datatype) {
+							conText += QString("-%1").arg(datatype->getDatatypeIRI());
+						}
+					}
+					if (opCode == CCDATARESTRICTION) {
+						conText += QString::number(con->getConceptTag())+QString("~DATARESTRICTION");
+						cint64 restrictionCode = con->getParameter();
+						QString restrictionString;
+						if (restrictionCode == CDFC_RATIONAL) {
+							restrictionString = "rationals-only";
+						} else if (restrictionCode == CDFC_DECIMAL) {
+							restrictionString = "decimals-only";
+						} else if (restrictionCode == CDFC_INTEGER) {
+							restrictionString = "integers-only";
+						} else if (restrictionCode == CDFC_MIN_EXCLUSIVE) {
+							restrictionString = "min-exclusive";
+						} else if (restrictionCode == CDFC_MIN_INCLUSIVE) {
+							restrictionString = "min-inclusive";
+						} else if (restrictionCode == CDFC_MAX_INCLUSIVE) {
+							restrictionString = "max-inclusive";
+						} else if (restrictionCode == CDFC_MAX_EXCLUSIVE) {
+							restrictionString = "max-exclusive";
+						}
+						conText += QString("-%1").arg(restrictionString);
+						CDataLiteral* dataLiteral = con->getDataLiteral();
+						if (dataLiteral) {
+							conText += QString(":-{%1}").arg(dataLiteral->getLexicalDataLiteralValueString());
+						}
+					}
+					if (opCode == CCDATALITERAL) {
+						conText += QString::number(con->getConceptTag())+QString("~DATALITERAL");
+						CDataLiteral* dataLit = con->getDataLiteral();
+						if (dataLit) {
+							conText += QString("-{%1}").arg(dataLit->getLexicalDataLiteralValueString());
+						}
 					}
 					if (opCode == CCIMPLTRIG) {
 						conText += QString::number(con->getConceptTag())+QString("~IMPLTRIG");
@@ -364,205 +403,6 @@ namespace Konclude {
 
 
 
-
-			QString CConceptTextFormater::getConceptViewString(CConcept *concept, bool negated, bool useTag, qint64 defSkipCount, bool useNumberTag) {
-
-				CConcept *con = concept;
-				QString className;
-
-				if (concept->hasClassName()) {
-					defSkipCount--;
-				}
-				if (useNumberTag) {
-					className += QString(" ");
-				}
-
-				if (negated) {
-					className += QChar(0x00AC);
-				}
-				if (defSkipCount <= 0 || useTag || concept->getDefinitionOperatorTag() == CCNONE) {
-					if (useNumberTag) {
-						className += QString::number(con->getConceptTag());
-					}
-					QString iriClassNameString = CIRIName::getRecentIRIName(con->getClassNameLinker());
-					if (!iriClassNameString.isEmpty()) {
-						if (useNumberTag) {
-							className += "~";
-						}
-						if (iriClassNameString == "http://www.w3.org/2002/07/owl#Thing") {
-							className += QChar(0x22A4);
-						} else if (iriClassNameString == "http://www.w3.org/2002/07/owl#Nothing") {
-							className += QChar(0x22A5);
-						} else {
-							className += iriClassNameString;
-						}
-					} 
-				}
-
-
-				if (!concept->hasClassName() || defSkipCount > 0) {
-					if (!className.isEmpty()) {
-						className += ", \n ";
-					}
-
-					QString conText;
-					qint64 opCode = con->getProcessingOperatorTag();
-					CConceptOperator* conOperator = con->getConceptOperator();
-					if (negated) {
-						conText += QChar(0x00AC);
-					}
-					conText += "(";
-					if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AND_AQAND_TYPE)) {
-						bool opInserted = false;
-						CSortedNegLinker<CConcept *> *opLinker = con->getOperandList();
-						while (opLinker) {
-							if (opInserted) {
-								conText += QChar(0x2293);
-							}
-							if (opLinker->isNegated()) {
-								conText += QChar(0x00AC);
-							}
-							opInserted = true;
-							//conText += QString::number(opLinker->getData()->getConceptTag());
-							conText += getConceptViewString(opLinker->getData(),false,false,defSkipCount,false);
-							opLinker = opLinker->getNext();						
-						}
-					}
-					if (opCode == CCOR) {
-						bool opInserted = false;
-						CSortedNegLinker<CConcept *> *opLinker = con->getOperandList();
-						while (opLinker) {
-							if (opInserted) {
-								conText += QChar(0x2294);
-							}
-							if (opLinker->isNegated()) {
-								conText += QChar(0x00AC);
-							}
-							opInserted = true;
-							//conText += QString::number(opLinker->getData()->getConceptTag());
-							conText += getConceptViewString(opLinker->getData(),false,false,defSkipCount,false);
-							opLinker = opLinker->getNext();
-						}
-					}	
-					if (opCode == CCAQCHOOCE) {
-						bool opInserted = false;
-						CSortedNegLinker<CConcept *> *opLinker = con->getOperandList();
-						while (opLinker) {
-							if (opInserted) {
-								conText += QString("AQ");
-							}
-							if (opLinker->isNegated()) {
-								conText += QChar(0x00AC);
-							}
-							opInserted = true;
-							//conText += QString::number(opLinker->getData()->getConceptTag());
-							conText += getConceptViewString(opLinker->getData(),false,false,defSkipCount,false);
-							opLinker = opLinker->getNext();
-						}
-					}	
-					if (opCode == CCSOME || opCode == CCAQSOME) {
-						bool opInserted = false;
-						CSortedNegLinker<CConcept *> *opLinker = con->getOperandList();
-						conText += QChar(0x2203);
-						if (con->getRole()->hasPropertyName()) {
-							conText += QString("%1.").arg(CIRIName::getRecentIRIName(con->getRole()->getPropertyNameLinker()));
-						} else {
-							conText += QString("%1.").arg(con->getRole()->getRoleTag());
-						}
-						while (opLinker) {
-							if (opInserted) {
-								conText += ", ";
-							}
-							if (opLinker->isNegated()) {
-								conText += QChar(0x00AC);
-							}
-							opInserted = true;
-							//conText += QString::number(opLinker->getData()->getConceptTag());
-							conText += getConceptViewString(opLinker->getData(),false,false,defSkipCount,false);
-							opLinker = opLinker->getNext();
-						}
-					}
-
-					if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE)) {
-						bool opInserted = false;
-						CSortedNegLinker<CConcept *> *opLinker = con->getOperandList();
-						conText += QChar(0x2200);
-						if (con->getRole()->hasPropertyName()) {
-							conText += QString("%1.").arg(CIRIName::getRecentIRIName(con->getRole()->getPropertyNameLinker()));
-						} else {
-							conText += QString("%1.").arg(con->getRole()->getRoleTag());
-						}
-						while (opLinker) {
-							if (opInserted) {
-								conText += ", ";
-							}
-							if (opLinker->isNegated()) {
-								conText += QChar(0x00AC);
-							}
-							opInserted = true;
-							//conText += QString::number(opLinker->getData()->getConceptTag());
-							conText += getConceptViewString(opLinker->getData(),false,false,defSkipCount,false);
-							opLinker = opLinker->getNext();
-						}
-					}
-					if (opCode == CCATLEAST) {
-						bool opInserted = false;
-						CSortedNegLinker<CConcept *> *opLinker = con->getOperandList();
-						conText += QChar(0x2265);
-						conText += QString("[%1]").arg(con->getParameter());
-						if (con->getRole()->hasPropertyName()) {
-							conText += QString("%1.").arg(CIRIName::getRecentIRIName(con->getRole()->getPropertyNameLinker()));
-						} else {
-							conText += QString("%1.").arg(con->getRole()->getRoleTag());
-						}
-						while (opLinker) {
-							if (opInserted) {
-								conText += ", ";
-							}
-							if (opLinker->isNegated()) {
-								conText += QChar(0x00AC);
-							}
-							opInserted = true;
-							//conText += QString::number(opLinker->getData()->getConceptTag());
-							conText += getConceptViewString(opLinker->getData(),false,false,defSkipCount,false);
-							opLinker = opLinker->getNext();
-						}
-					}	
-					if (opCode == CCATMOST) {
-						bool opInserted = false;
-						CSortedNegLinker<CConcept *> *opLinker = con->getOperandList();
-						conText += QChar(0x2264);
-						conText += QString("[%1]").arg(con->getParameter());
-						if (con->getRole()->hasPropertyName()) {
-							conText += QString("%1.").arg(CIRIName::getRecentIRIName(con->getRole()->getPropertyNameLinker()));
-						} else {
-							conText += QString("%1.").arg(con->getRole()->getRoleTag());
-						}
-						while (opLinker) {
-							if (opInserted) {
-								conText += ", ";
-							}
-							if (opLinker->isNegated()) {
-								conText += QChar(0x00AC);
-							}
-							opInserted = true;
-							//conText += QString::number(opLinker->getData()->getConceptTag());
-							conText += getConceptViewString(opLinker->getData(),false,false,defSkipCount,false);
-							opLinker = opLinker->getNext();
-						}
-					}	
-
-					conText += ")";
-					className += conText;
-				} else {
-					if (useNumberTag) {
-						if (!className.isEmpty()) {
-							className += ",   \n";
-						}
-					}
-				}
-				return className;
-			}
 
 
 

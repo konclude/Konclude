@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -99,6 +99,7 @@ namespace Konclude {
 					mPrevReusingConExpData = nullptr;
 
 					mInitializingConceptLinkerIt = nullptr;
+					mProcessInitializingConceptLinkerIt = nullptr;
 					mAssertionConceptLinkerIt = nullptr;
 					mAssertionRoleLinkerIt = nullptr;
 					mBlockedIndividualsLinker = nullptr;
@@ -161,6 +162,11 @@ namespace Konclude {
 
 					mLocReactivationData = nullptr;
 					mUseReactivationData = nullptr;
+
+					mLocNominalConnectionSet = nullptr;
+					mUseNominalConnectionSet = nullptr;
+					mUseDatatypesValueSpaceData = nullptr;
+					mLocDatatypesValueSpaceData = nullptr;
 				}
 
 
@@ -171,6 +177,8 @@ namespace Konclude {
 					mRequiredBackProp = false;
 					mSubstituteIndiNode = nullptr;
 					mLocReactivationData = nullptr;
+					mLocNominalConnectionSet = nullptr;
+					mLocDatatypesValueSpaceData = nullptr;
 					setBlockedTestTag(prevIndividual->getBlockedTestTag());
 					mPrevIndividual = prevIndividual;
 					mDebugBlockerIndi = prevIndividual->mDebugBlockerIndi;
@@ -196,6 +204,7 @@ namespace Konclude {
 					mPrevDistinctHash = prevIndividual->mUseDistinctHash;
 					mUseDistinctHash = mPrevDistinctHash;
 					mInitializingConceptLinkerIt = prevIndividual->mInitializingConceptLinkerIt;
+					mProcessInitializingConceptLinkerIt = prevIndividual->mProcessInitializingConceptLinkerIt;
 					mBlockedIndividualsLinker = prevIndividual->mBlockedIndividualsLinker;
 					mSuccessorIndiNodeBackwardDependencyLinker = prevIndividual->mSuccessorIndiNodeBackwardDependencyLinker;
 					mBackwardDependencyToAncestorIndividualNode = prevIndividual->mBackwardDependencyToAncestorIndividualNode;
@@ -244,6 +253,8 @@ namespace Konclude {
 					mCachingLossNodeReactivationInstalled = prevIndividual->mCachingLossNodeReactivationInstalled;
 					prevIndividual->setRelocalized();
 					mUseReactivationData = prevIndividual->mUseReactivationData;
+					mUseNominalConnectionSet = prevIndividual->mUseNominalConnectionSet;
+					mUseDatatypesValueSpaceData = prevIndividual->mUseDatatypesValueSpaceData;
 					return this;
 				}
 
@@ -255,6 +266,8 @@ namespace Konclude {
 					mRequiredBackProp = false;
 					mSubstituteIndiNode = nullptr;
 					mLocReactivationData = nullptr;
+					mLocNominalConnectionSet = nullptr;
+					mLocDatatypesValueSpaceData = nullptr;
 					prevIndividual->setRelocalized();
 					if (adobtStatus) {
 						setBlockedTestTag(prevIndividual->getBlockedTestTag());
@@ -289,10 +302,13 @@ namespace Konclude {
 						mPrevDistinctHash = prevIndividual->mUseDistinctHash;
 						mUseDistinctHash = mPrevDistinctHash;
 						mUseReactivationData = prevIndividual->mUseReactivationData;
+						mUseNominalConnectionSet = prevIndividual->mUseNominalConnectionSet;
 						mNominalProcessingDelayingChecked = prevIndividual->mNominalProcessingDelayingChecked;
+						mUseDatatypesValueSpaceData = prevIndividual->mUseDatatypesValueSpaceData;
 					}
 					if (adobtStatus) {
 						mInitializingConceptLinkerIt = prevIndividual->mInitializingConceptLinkerIt;
+						mProcessInitializingConceptLinkerIt = prevIndividual->mProcessInitializingConceptLinkerIt;
 						mBlockedIndividualsLinker = prevIndividual->mBlockedIndividualsLinker;
 						mSuccessorIndiNodeBackwardDependencyLinker = prevIndividual->mSuccessorIndiNodeBackwardDependencyLinker;
 						mBackwardDependencyToAncestorIndividualNode = prevIndividual->mBackwardDependencyToAncestorIndividualNode;
@@ -362,11 +378,15 @@ namespace Konclude {
 					return mInitializingConceptLinkerIt != nullptr;
 				}
 
-				CIndividualProcessNode* CIndividualProcessNode::clearInitializingConcepts() {
-					mInitializingConceptLinkerIt = nullptr;
+				CIndividualProcessNode* CIndividualProcessNode::clearProcessInitializingConcepts() {
+					mProcessInitializingConceptLinkerIt = nullptr;
 					return this;
 				}
 
+
+				CXSortedNegLinker<CConcept*>* CIndividualProcessNode::getProcessInitializingConceptLinkerIt() {
+					return mProcessInitializingConceptLinkerIt;
+				}
 
 				CXSortedNegLinker<CConcept*>* CIndividualProcessNode::getInitializingConceptLinkerIt() {
 					return mInitializingConceptLinkerIt;
@@ -380,6 +400,7 @@ namespace Konclude {
 				CIndividualProcessNode* CIndividualProcessNode::addInitializingConceptLinkerIt(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt) {
 					if (initializingConceptLinkerIt) {
 						mInitializingConceptLinkerIt = initializingConceptLinkerIt->append(mInitializingConceptLinkerIt);
+						mProcessInitializingConceptLinkerIt = mInitializingConceptLinkerIt;
 					}
 					return this;
 				}
@@ -1463,13 +1484,54 @@ namespace Konclude {
 				CNominalCachingLossReactivationData* CIndividualProcessNode::getNominalCachingLossReactivationData(bool create) {
 					CNominalCachingLossReactivationData* nominalNodeReactData = nullptr;
 					if (!mLocReactivationData && create) {
-						CNominalCachingLossReactivationData* nominalNodeReactData = CObjectParameterizingAllocator< CNominalCachingLossReactivationData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);;
+						CNominalCachingLossReactivationData* nominalNodeReactData = CObjectParameterizingAllocator< CNominalCachingLossReactivationData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 						nominalNodeReactData->initNominalCachingLossReactivationData(getIndividualID(),mUseReactivationData);
 						mLocReactivationData = nominalNodeReactData;
 						mUseReactivationData = nominalNodeReactData;
 					}
 					return mUseReactivationData;
 				}
+
+				CSuccessorConnectedNominalSet* CIndividualProcessNode::getSuccessorNominalConnectionSet(bool create) {
+					CSuccessorConnectedNominalSet* nomConnSet = nullptr;
+					if (!mLocNominalConnectionSet && create) {
+						CSuccessorConnectedNominalSet* nomConnSet = CObjectParameterizingAllocator< CSuccessorConnectedNominalSet,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						nomConnSet->initSuccessorConnectedNominalSet(mUseNominalConnectionSet);
+						mLocNominalConnectionSet = nomConnSet;
+						mUseNominalConnectionSet = nomConnSet;
+					}
+					return mUseNominalConnectionSet;
+				}
+
+				bool CIndividualProcessNode::hasSuccessorConnectionToNominal(cint64 nominalID) {
+					CSuccessorConnectedNominalSet* nomConnSet = getSuccessorNominalConnectionSet(false);
+					if (nomConnSet) {
+						return nomConnSet->hasSuccessorConnectedNominal(nominalID);
+					}
+					return false;
+				}
+
+				bool CIndividualProcessNode::addSuccessorConnectionToNominal(cint64 nominalID) {
+					CSuccessorConnectedNominalSet* nomConnSet = getSuccessorNominalConnectionSet(true);
+					if (nomConnSet) {
+						return nomConnSet->addSuccessorConnectedNominal(nominalID);
+					}
+					return false;
+				}
+
+
+
+				CDatatypesValueSpaceData* CIndividualProcessNode::getDatatypesValueSpaceData(bool create) {
+					CDatatypesValueSpaceData* nomConnSet = nullptr;
+					if (!mLocDatatypesValueSpaceData && create) {
+						CDatatypesValueSpaceData* nomConnSet = CObjectParameterizingAllocator< CDatatypesValueSpaceData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						nomConnSet->initDatatypesValueSpaceData(mUseDatatypesValueSpaceData);
+						mLocDatatypesValueSpaceData = nomConnSet;
+						mUseDatatypesValueSpaceData = nomConnSet;
+					}
+					return mUseDatatypesValueSpaceData;
+				}
+
 
 			}; // end namespace Process
 

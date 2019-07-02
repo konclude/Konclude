@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -121,6 +121,11 @@ namespace Konclude {
 					const static cint64 CCF_BACKACTIVTRIG		= Q_UINT64_C(0x0040000000000000);
 					const static cint64 CCF_BACKACTIVIMPL		= Q_UINT64_C(0x0080000000000000);
 
+					const static cint64 CCF_DATATYPE			= Q_UINT64_C(0x0100000000000000);
+					const static cint64 CCF_DATALITERAL			= Q_UINT64_C(0x0200000000000000);
+					const static cint64 CCF_DATARESTRICTION		= Q_UINT64_C(0x0400000000000000);
+
+
 
 					bool hasPartialOperatorCodeFlag(cint64 operatorCodeFlag);
 					bool hasAllOperatorCodeFlags(cint64 operatorCodeFlags);
@@ -159,6 +164,9 @@ namespace Konclude {
 					const static cint64 CCFS_POSSIBLE_ROLE_CREATION_TYPE	= CCF_SOME | CCF_AQSOME | CCF_ALL | CCF_ATLEAST | CCF_ATMOST;
 
 					const static cint64 CCFS_ABSORPTION_RELEVANT_TYPE		= CCFS_TRIG_TYPE | CCFS_IMPL_TYPE | CCF_IMPLAQALL | CCF_BRANCHAQALL | CCF_PBINDAQALL | CCF_VARBINDAQALL | CCF_VARPBACKAQALL | CCF_IMPLAQAND | CCF_BRANCHAQAND | CCF_PBINDAQAND | CCF_VARBINDAQAND | CCF_VARPBACKAQAND;
+
+					const static cint64 CCFS_DATATYPE_RELATED_TYPE			= CCF_DATATYPE | CCF_DATALITERAL | CCF_DATARESTRICTION;
+
 
 				// protected methods
 				protected:

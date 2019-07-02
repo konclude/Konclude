@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -31,8 +31,8 @@ namespace Konclude {
 
 
 
-				CReapplyConceptSaturationLabelSetIterator::CReapplyConceptSaturationLabelSetIterator(const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itBegin, const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itEnd, bool iterateConSatDes, bool iterateReapplies) 
-						: mItBegin(itBegin), mItEnd(itEnd), mIterateConSatDes(iterateConSatDes), mIterateReapplies(iterateReapplies) {
+				CReapplyConceptSaturationLabelSetIterator::CReapplyConceptSaturationLabelSetIterator(const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itBegin, const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itEnd, const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itAdditionalBegin, const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itAdditionalEnd, bool iterateConSatDes, bool iterateReapplies) 
+						: mItBegin(itBegin), mItEnd(itEnd), mItAdditionalBegin(itAdditionalBegin), mItAdditionalEnd(itAdditionalEnd), mIterateConSatDes(iterateConSatDes), mIterateReapplies(iterateReapplies) {
 					
 					while (!isIteratorValid()) {
 						++mItBegin;
@@ -45,14 +45,26 @@ namespace Konclude {
 
 				bool CReapplyConceptSaturationLabelSetIterator::isIteratorValid(bool allowConSatDes, bool allowReapplies) {
 					if (mItBegin == mItEnd) {
-						return true;
+						if (mItAdditionalBegin == mItAdditionalEnd) {
+							return true;
+						}
 					}
-					const CConceptSaturationDescriptorReapplyData& data = mItBegin.value();
-					if (data.mConSatDes && allowConSatDes) {
-						return true;
-					}
-					if (data.mImpReapplyConSatDes && allowReapplies) {
-						return true;
+					if (mItBegin != mItEnd) {
+						const CConceptSaturationDescriptorReapplyData& data = mItBegin.value();
+						if (data.mConSatDes && allowConSatDes) {
+							return true;
+						}
+						if (data.mImpReapplyConSatDes && allowReapplies) {
+							return true;
+						}
+					} else {
+						const CConceptSaturationDescriptorReapplyData& data = mItAdditionalBegin.value();
+						if (data.mConSatDes && allowConSatDes) {
+							return true;
+						}
+						if (data.mImpReapplyConSatDes && allowReapplies) {
+							return true;
+						}
 					}
 					return false;
 				}
@@ -60,8 +72,13 @@ namespace Konclude {
 
 
 				cint64 CReapplyConceptSaturationLabelSetIterator::getDataTag() {
-					cint64 dataTag = mItBegin.key();
-					return dataTag;
+					if (mItBegin != mItEnd) {
+						cint64 dataTag = mItBegin.key();
+						return dataTag;
+					} else {
+						cint64 dataTag = mItAdditionalBegin.key();
+						return dataTag;
+					}
 					//CConceptSaturationDescriptor* conDes = mItBegin.value().mConSatDes;
 					//if (conDes) {
 					//	return conDes->getConceptTag();
@@ -71,43 +88,71 @@ namespace Konclude {
 				}
 
 				CConceptSaturationDescriptor* CReapplyConceptSaturationLabelSetIterator::getConceptSaturationDescriptor() {
-					return mItBegin.value().mConSatDes;
+					if (mItBegin != mItEnd) {
+						return mItBegin.value().mConSatDes;
+					} else {
+						return mItAdditionalBegin.value().mConSatDes;
+					}
 				}
 
 				CImplicationReapplyConceptSaturationDescriptor* CReapplyConceptSaturationLabelSetIterator::getImplicationReapplyConceptSaturationDescriptor() {
-					return mItBegin.value().mImpReapplyConSatDes;
+					if (mItBegin != mItEnd) {
+						return mItBegin.value().mImpReapplyConSatDes;
+					} else {
+						return mItAdditionalBegin.value().mImpReapplyConSatDes;
+					}
 				}
 
 
 				bool CReapplyConceptSaturationLabelSetIterator::hasNext() {
-					return mItBegin != mItEnd;
+					if (mItBegin != mItEnd) {
+						return true;
+					} else {
+						return mItAdditionalBegin != mItAdditionalEnd;
+					}
 				}
 
 				cint64 CReapplyConceptSaturationLabelSetIterator::next(bool moveToNext) {
 					cint64 tag = getDataTag();
 					if (moveToNext) {
-						++mItBegin;
-						while (!isIteratorValid()) {
+						if (mItBegin != mItEnd) {
 							++mItBegin;
+						} else {
+							++mItAdditionalBegin;
+						}
+						while (!isIteratorValid()) {
+							if (mItBegin != mItEnd) {
+								++mItBegin;
+							} else {
+								++mItAdditionalBegin;
+							}
 						}
 					}
 					return tag;
 				}
 
 				CReapplyConceptSaturationLabelSetIterator* CReapplyConceptSaturationLabelSetIterator::moveNext() {
-					++mItBegin;
-					while (!isIteratorValid()) {
+					if (mItBegin != mItEnd) {
 						++mItBegin;
+					} else {
+						++mItAdditionalBegin;
+					}
+					while (!isIteratorValid()) {
+						if (mItBegin != mItEnd) {
+							++mItBegin;
+						} else {
+							++mItAdditionalBegin;
+						}
 					}
 					return this;
 				}
 
 				bool CReapplyConceptSaturationLabelSetIterator::operator!=(CReapplyConceptSaturationLabelSetIterator& const_iterator) {
-					return mItBegin != const_iterator.mItBegin;
+					return mItBegin != const_iterator.mItBegin && mItAdditionalBegin != const_iterator.mItAdditionalBegin;
 				}
 
 				bool CReapplyConceptSaturationLabelSetIterator::operator==(CReapplyConceptSaturationLabelSetIterator& const_iterator) {
-					return mItBegin == const_iterator.mItBegin;
+					return mItBegin == const_iterator.mItBegin && mItAdditionalBegin == const_iterator.mItAdditionalBegin;
 				}
 
 

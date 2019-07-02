@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -110,8 +110,16 @@ namespace Konclude {
 				CSortedNegLinker<CConcept*>* opLinker = concept->getOperandList();
 				for (CSortedNegLinker<CConcept*>* opLinkerIt = opLinker; opLinkerIt; opLinkerIt = opLinkerIt->getNext()) {
 					if (opLinkerIt->isNegated()) {
-						ontStructSum->setNegationDisjunctionsOccurrence();
+						CConcept* opConcept = opLinkerIt->getData();
+						CConceptOperator* conOperator = opConcept->getConceptOperator();
+						if (!conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_TRIG_TYPE)) {
+							ontStructSum->setNegationDisjunctionsOccurrence();
+						}
 					}
+				}
+				CRole* role = concept->getRole();
+				if (role && role->isDataRole()) {
+					ontStructSum->setDatatypeOccurrence();
 				}
 				if (isClass) {
 					ontStructSum->incClassCount();
@@ -185,6 +193,7 @@ namespace Konclude {
 						ontStructSum->setNegationDisjunctionsOccurrence();
 					} else if (conOpTag == CCSELF) {
 						ontStructSum->incConceptSelfCount();
+					} else if (conOpTag == CCDATATYPE || CCDATALITERAL || CCDATARESTRICTION) {
 					}
 				} 
 				return ontStructSum;
@@ -308,20 +317,43 @@ namespace Konclude {
 				CStructureFlags structureFlags;
 
 				CTBox *tBox = ontology->getDataBoxes()->getTBox();
+				CABox* aBox = ontology->getDataBoxes()->getABox();
 				CConcept *topConcept = ontology->getDataBoxes()->getTopConcept();
 				CConcept *bottomConcept = ontology->getDataBoxes()->getBottomConcept();
 
 				QSet< QPair<CConcept*,bool> > singleConNegSet;
 
+				CDatatypeValueSpacesTriggers* valueSpaceTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
+				if (valueSpaceTriggers) {
+					structureFlags.mValidDeterministic = false;
+				}
+
 				CBOXSET<CConcept*> *conceptHash = tBox->getActiveClassConceptSet(false);
 				if (conceptHash) {
-					for (CBOXSET<CConcept*>::const_iterator it = conceptHash->constBegin(), itEnd = conceptHash->constEnd(); it != itEnd; ++it) {
+					for (CBOXSET<CConcept*>::const_iterator it = conceptHash->constBegin(), itEnd = conceptHash->constEnd(); it != itEnd && (structureFlags.mValidDeterministic); ++it) {
 						CConcept *concept = (*it);
 						if (concept) {
 							if (concept->getOperatorCode() == CCEQ) {
 								structureFlags.mValidDeterministic = false;
 							} else {
 								analyseConceptStructureFlags(concept,false,singleConNegSet,nullptr,structureFlags);
+							}
+						}
+					}
+				}
+				if (structureFlags.mValidDeterministic && (structureFlags.mUniversalRoleOccurence || structureFlags.mNominalOccurence)) {
+					CBOXSET<CIndividual*>* individualSet = aBox->getActiveIndividualSet(false);
+					if (individualSet) {
+						for (CBOXSET<CIndividual*>::const_iterator it = individualSet->constBegin(), itEnd = individualSet->constEnd(); it != itEnd && (structureFlags.mValidDeterministic); ++it) {
+							CIndividual *indi = (*it);
+							if (indi) {
+								CConceptAssertionLinker* assConIt = indi->getAssertionConceptLinker();
+								while (assConIt) {
+									CConcept* assCon = assConIt->getData();
+									bool assConNeg = assConIt->isNegated();
+									analyseConceptStructureFlags(assCon,assConNeg,singleConNegSet,nullptr,structureFlags);
+									assConIt = assConIt->getNext();
+								}
 							}
 						}
 					}
@@ -345,9 +377,14 @@ namespace Konclude {
 				QSet< QPair<CConcept*,bool> > singleConNegSet;
 				QHash<CRole*,bool> existRoleHash;
 
+				CDatatypeValueSpacesTriggers* valueSpaceTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
+				if (valueSpaceTriggers) {
+					structureFlags.mValidEL = false;
+				}
+
 				CBOXSET<CConcept*> *conceptHash = tBox->getActiveClassConceptSet(false);
 				if (conceptHash) {
-					for (CBOXSET<CConcept*>::const_iterator it = conceptHash->constBegin(), itEnd = conceptHash->constEnd(); it != itEnd; ++it) {
+					for (CBOXSET<CConcept*>::const_iterator it = conceptHash->constBegin(), itEnd = conceptHash->constEnd(); it != itEnd && (structureFlags.mValidEL); ++it) {
 						CConcept *concept = (*it);
 						if (concept) {
 							if (concept->getOperatorCode() == CCEQ) {
@@ -371,16 +408,23 @@ namespace Konclude {
 
 				CStructureFlags structureFlags;
 
-				CTBox *tBox = ontology->getDataBoxes()->getTBox();
+				CTBox* tBox = ontology->getDataBoxes()->getTBox();
+				CABox* aBox = ontology->getDataBoxes()->getABox();
 				CConcept *topConcept = ontology->getDataBoxes()->getTopConcept();
 				CConcept *bottomConcept = ontology->getDataBoxes()->getBottomConcept();
 
 				QSet< QPair<CConcept*,bool> > singleConNegSet;
 				QHash<CRole*,bool> existRoleHash;
 
-				CBOXSET<CConcept*> *conceptHash = tBox->getActiveClassConceptSet(false);
-				if (conceptHash) {
-					for (CBOXSET<CConcept*>::const_iterator it = conceptHash->constBegin(), itEnd = conceptHash->constEnd(); it != itEnd; ++it) {
+				CDatatypeValueSpacesTriggers* valueSpaceTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
+				if (valueSpaceTriggers) {
+					structureFlags.mValidEL = false;
+					structureFlags.mValidDeterministic = false;
+				}
+
+				CBOXSET<CConcept*>* conceptSet = tBox->getActiveClassConceptSet(false);
+				if (conceptSet) {
+					for (CBOXSET<CConcept*>::const_iterator it = conceptSet->constBegin(), itEnd = conceptSet->constEnd(); it != itEnd && (structureFlags.mValidEL || structureFlags.mValidDeterministic || !structureFlags.mNominalOccurence); ++it) {
 						CConcept *concept = (*it);
 						if (concept) {
 							if (concept->getOperatorCode() == CCEQ) {
@@ -388,6 +432,25 @@ namespace Konclude {
 								structureFlags.mValidDeterministic = false;
 							} else {
 								analyseConceptStructureFlags(concept,false,singleConNegSet,&existRoleHash,structureFlags);
+							}
+						}
+					}
+				}
+
+				
+				if (structureFlags.mValidDeterministic && (structureFlags.mUniversalRoleOccurence || structureFlags.mNominalOccurence)) {
+					CBOXSET<CIndividual*>* individualSet = aBox->getActiveIndividualSet(false);
+					if (individualSet) {
+						for (CBOXSET<CIndividual*>::const_iterator it = individualSet->constBegin(), itEnd = individualSet->constEnd(); it != itEnd && (structureFlags.mValidEL || structureFlags.mValidDeterministic || !structureFlags.mNominalOccurence); ++it) {
+							CIndividual *indi = (*it);
+							if (indi) {
+								CConceptAssertionLinker* assConIt = indi->getAssertionConceptLinker();
+								while (assConIt) {
+									CConcept* assCon = assConIt->getData();
+									bool assConNeg = assConIt->isNegated();
+									analyseConceptStructureFlags(assCon,assConNeg,singleConNegSet,&existRoleHash,structureFlags);
+									assConIt = assConIt->getNext();
+								}
 							}
 						}
 					}
@@ -416,6 +479,9 @@ namespace Konclude {
 					bool conNeg = conNegPair.second;
 					CRole* role = con->getRole();
 					if (role) {
+						if (role->getRoleTag() == 1) {
+							structureFlags.mUniversalRoleOccurence = true;
+						}
 						CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList();
 						while (superRoleIt) {
 							CRole* superRole = superRoleIt->getData();
@@ -449,16 +515,6 @@ namespace Konclude {
 					if (indi) {
 						structureFlags.mValidEL = false;
 						structureFlags.mNominalOccurence = true;
-						CConceptAssertionLinker* assConIt = indi->getAssertionConceptLinker();
-						while (assConIt) {
-							CConcept* assCon = assConIt->getData();
-							bool assConNeg = assConIt->isNegated();
-							if (!singleConNegSet.contains(QPair<CConcept*,bool>(assCon,assConNeg))) {
-								singleConNegSet.insert(QPair<CConcept*,bool>(assCon,assConNeg));
-								checkConNegList.append(QPair<CConcept*,bool>(assCon,assConNeg));
-							}
-							assConIt = assConIt->getNext();
-						}
 					}
 
 
@@ -506,6 +562,9 @@ namespace Konclude {
 								existRoleHash->insert(role,true);
 							}
 						}
+					}
+					if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_DATATYPE_RELATED_TYPE)) {
+						structureFlags.mValidEL = false;
 					}
 
 					bool inspectOperandsNegated = false;

@@ -1,20 +1,8 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
  *
- *		This file is part of the reasoning system Konclude.
- *		For details and support, see <http://konclude.com/>.
- *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
- *
- *		Konclude is distributed in the hope that it will be useful,
- *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		Author:		Andreas Steigmiller
+ *		Copyright:	2009 Andreas Steigmiller
+ *		Project:	Konclude
  *
  */
 
@@ -36,9 +24,10 @@
 // Other includes
 #include "Network/HTTP/Events/CHttpRequstEvent.h"
 #include "Network/HTTP/Events/CHttpReplyFinishedEvent.h"
-#include "Network/HTTP/Events/CExtractResponseTextEvent.h"
-#include "Network/HTTP/Events/CExtractResponseTextCallbackEvent.h"
+#include "Network/HTTP/Events/CExtractResponseDataEvent.h"
+#include "Network/HTTP/Events/CExtractResponseDataCallbackEvent.h"
 #include "Network/HTTP/Events/CReleaseResponseEvent.h"
+#include "Network/HTTP/Events/CAddResponseFinishedCallbackEvent.h"
 #include "Network/HTTP/Events/CInstallRequestFinishedCallbackEvent.h"
 
 #include "Concurrent/CIntervalThread.h"
@@ -78,17 +67,22 @@ namespace Konclude {
 					virtual ~CQtHttpTransactionManager();
 
 					virtual CHttpRequest* createRequest(const QString& url);
-					virtual CHttpRequest* createRequest(const QString& url, const QByteArray& byteArray);
+					CHttpRequest* createRequest(const QString& url, const QByteArray& byteArray);
+					//virtual CHttpRequest* createFileDownloadRequest(const QString& url, QIODevice* openWriteFile);
+
 					virtual bool releaseResponse(CHttpResponse* response, bool releaseAlsoRequest = true);
 
 					virtual CHttpResponse* getResponse(CHttpRequest* request);
 					virtual CQtHttpResponse* getResponse(CQtHttpRequest* request);
 
-					virtual QString* getExtractedText(CHttpResponse* response);
-					virtual bool hasFinishedSucecssful(CHttpResponse* response);
-
+					virtual bool callbackFinished(CHttpResponse* response, CCallbackData* callback);
+					virtual bool callbackFinished(CQtHttpResponse* response, CCallbackData* callback);
 					virtual bool callbackFinishedRequest(CHttpResponse* response, CCallbackData* callbackData);
 
+					virtual QString* getExtractedText(CHttpResponse* response);
+					virtual bool callbackResponseData(CHttpResponse* response, QByteArray* dataArray, CCallbackData* callback);
+					virtual QByteArray* getResponseData(CHttpResponse* response);
+					virtual bool hasFinishedSucecssfully(CHttpResponse* response);
 
 				// protected slots
 				protected slots:

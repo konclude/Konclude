@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -61,12 +61,14 @@
 #include "CReusingIndividualNodeConceptExpansionData.h"
 #include "CIndividualNodeSaturationBlockingData.h"
 #include "CNominalCachingLossReactivationData.h"
+#include "CSuccessorConnectedNominalSet.h"
 
 #include "CPropagationBindingSet.h"
 #include "CConceptPropagationBindingSetHash.h"
 #include "CConceptVariableBindingPathSetHash.h"
 #include "CConceptRepresentativePropagationSetHash.h"
 
+#include "CDatatypesValueSpaceData.h"
 
 // Other includes
 #include "Reasoner/Ontology/CConcept.h"
@@ -255,8 +257,9 @@ namespace Konclude {
 						CIndividualProcessNode* setIndividualID(cint64 indiID);
 
 						bool hasInitializingConcepts();
-						CIndividualProcessNode* clearInitializingConcepts();
+						CIndividualProcessNode* clearProcessInitializingConcepts();
 						CXSortedNegLinker<CConcept*>* getInitializingConceptLinkerIt();
+						CXSortedNegLinker<CConcept*>* getProcessInitializingConceptLinkerIt();
 						CIndividualProcessNode* setInitializingConceptLinkerIt(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt);
 						CIndividualProcessNode* addInitializingConceptLinkerIt(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt);
 
@@ -390,6 +393,16 @@ namespace Konclude {
 						CIndividualProcessNode* setCachingLossNodeReactivationInstalled(bool reactivationInstalled);
 						CNominalCachingLossReactivationData* getNominalCachingLossReactivationData(bool create = true);
 
+
+
+						CSuccessorConnectedNominalSet* getSuccessorNominalConnectionSet(bool create = true);
+						bool hasSuccessorConnectionToNominal(cint64 nominalID);
+						bool addSuccessorConnectionToNominal(cint64 nominalID);
+
+
+						CDatatypesValueSpaceData* getDatatypesValueSpaceData(bool create = true);
+
+
 						CConceptPropagationBindingSetHash* getConceptPropagationBindingSetHash(bool create = true);
 
 						CConceptVariableBindingPathSetHash* getConceptVariableBindingPathSetHash(bool create = true);
@@ -399,51 +412,61 @@ namespace Konclude {
 
 
 
-						const static cint64 PRFDIRECTBLOCKED									= 0x1;
-						const static cint64 PRFPROCESSINGBLOCKED								= 0x2;
-						const static cint64 PRFINDIRECTBLOCKED									= 0x4;
-						const static cint64 PRFPURGEDBLOCKED									= 0x8;
-						const static cint64 PRFBLOCKINGRETESTDUEPROCESSINGCOMPLETED				= 0x10;
-						const static cint64 PRFINVALIDBLOCKINGORCACHING							= 0x20;
+						const static cint64 PRFDIRECTBLOCKED									= Q_UINT64_C(0x1);
+						const static cint64 PRFPROCESSINGBLOCKED								= Q_UINT64_C(0x2);
+						const static cint64 PRFINDIRECTBLOCKED									= Q_UINT64_C(0x4);
+						const static cint64 PRFPURGEDBLOCKED									= Q_UINT64_C(0x8);
+						const static cint64 PRFBLOCKINGRETESTDUEPROCESSINGCOMPLETED				= Q_UINT64_C(0x10);
+						const static cint64 PRFINVALIDBLOCKINGORCACHING							= Q_UINT64_C(0x20);
 
-						const static cint64 PRFBLOCKINGRETESTDUEANCESTORMODIFIED				= 0x100;
-						const static cint64 PRFBLOCKINGRETESTDUEDIRECTMODIFIED					= 0x200;
-						const static cint64 PRFBLOCKINGRETESTDUEBLOCKERMODIFIED					= 0x400;
-						const static cint64 PRFBLOCKINGRETESTDUEINDIRECTBLOCKERLOSS				= 0x800;
+						const static cint64 PRFBLOCKINGRETESTDUEANCESTORMODIFIED				= Q_UINT64_C(0x100);
+						const static cint64 PRFBLOCKINGRETESTDUEDIRECTMODIFIED					= Q_UINT64_C(0x200);
+						const static cint64 PRFBLOCKINGRETESTDUEBLOCKERMODIFIED					= Q_UINT64_C(0x400);
+						const static cint64 PRFBLOCKINGRETESTDUEINDIRECTBLOCKERLOSS				= Q_UINT64_C(0x800);
 
-						const static cint64 PRFPROCESSINGCOMPLETED								= 0x1000;
-						const static cint64 PRFANCESTORALLPROCESSED								= 0x2000;
+						const static cint64 PRFPROCESSINGCOMPLETED								= Q_UINT64_C(0x1000);
+						const static cint64 PRFANCESTORALLPROCESSED								= Q_UINT64_C(0x2000);
 
-						const static cint64 PRFCONSNODEPREPARATIONINDINODE						= 0x10000;
+						const static cint64 PRFCONSNODEPREPARATIONINDINODE						= Q_UINT64_C(0x10000);
+						const static cint64 PRFCONCRETEDATAINDINODE								= Q_UINT64_C(0x20000);
 
-						const static cint64 PRFSATISFIABLECACHED								= 0x100000;
-						const static cint64 PRFANCESTORSATISFIABLECACHED						= 0x200000;
-						const static cint64 PRFRETESTSATISFIABLECACHEDDUEDIRECTMODIFIED 		= 0x400000;
-						const static cint64 PRFANCESTORSATISFIABLECACHEDABOLISHED				= 0x800000;
+						const static cint64 PRFSATISFIABLECACHED								= Q_UINT64_C(0x100000);
+						const static cint64 PRFANCESTORSATISFIABLECACHED						= Q_UINT64_C(0x200000);
+						const static cint64 PRFRETESTSATISFIABLECACHEDDUEDIRECTMODIFIED 		= Q_UINT64_C(0x400000);
+						const static cint64 PRFANCESTORSATISFIABLECACHEDABOLISHED				= Q_UINT64_C(0x800000);
 						
-						const static cint64 PRFSIGNATUREBLOCKINGCACHED							= 0x1000000;
-						const static cint64 PRFANCESTORSIGNATUREBLOCKINGCACHED					= 0x2000000;
-						const static cint64 PRFRETESTSIGNATUREBLOCKINGCACHEDDUEDIRECTMODIFIED	= 0x4000000;
-						const static cint64 PRFANCESTORSIGNATUREBLOCKINGCACHEDABOLISHED			= 0x8000000;
+						const static cint64 PRFSIGNATUREBLOCKINGCACHED							= Q_UINT64_C(0x1000000);
+						const static cint64 PRFANCESTORSIGNATUREBLOCKINGCACHED					= Q_UINT64_C(0x2000000);
+						const static cint64 PRFRETESTSIGNATUREBLOCKINGCACHEDDUEDIRECTMODIFIED	= Q_UINT64_C(0x4000000);
+						const static cint64 PRFANCESTORSIGNATUREBLOCKINGCACHEDABOLISHED			= Q_UINT64_C(0x8000000);
 
-						const static cint64 PRFSATURATIONBLOCKINGCACHED							= 0x10000000;
-						const static cint64 PRFANCESTORSATURATIONBLOCKINGCACHED					= 0x20000000;
-						const static cint64 PRFRETESTSATURATIONBLOCKINGCACHEDDUEDIRECTMODIFIED	= 0x40000000;
-						const static cint64 PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED		= 0x80000000;
+						const static cint64 PRFSATURATIONBLOCKINGCACHED							= Q_UINT64_C(0x10000000);
+						const static cint64 PRFANCESTORSATURATIONBLOCKINGCACHED					= Q_UINT64_C(0x20000000);
+						const static cint64 PRFRETESTSATURATIONBLOCKINGCACHEDDUEDIRECTMODIFIED	= Q_UINT64_C(0x40000000);
+						const static cint64 PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED		= Q_UINT64_C(0x80000000);
 
-						const static cint64 PRFSATURATIONSUCCESSORCREATIONBLOCKINGCACHED		= 0x100000000;
-						const static cint64 PRFSATURATIONBLOCKINGCACHEDINVALIDATED				= 0x200000000;
+						const static cint64 PRFSATURATIONSUCCESSORCREATIONBLOCKINGCACHED		= Q_UINT64_C(0x100000000);
+						const static cint64 PRFSATURATIONBLOCKINGCACHEDINVALIDATED				= Q_UINT64_C(0x200000000);
+						const static cint64 PRFSATURATIONBLOCKINGCACHEDRETESTDUETOMODIFICATION  = Q_UINT64_C(0x400000000);
 
-						const static cint64 PRFSUCCESSORNOMINALCONNECTION						= 0x200000000;
 
-						const static cint64 PRFCOMPLETIONGRAPHCACHED							= 0x1000000000;
-						const static cint64 PRFCOMPLETIONGRAPHCACHINGINVALID					= 0x2000000000;
-						const static cint64 PRFCOMPLETIONGRAPHCACHINGINVALIDATED				= 0x4000000000;
-						const static cint64 PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED		= 0x8000000000;
+						const static cint64 PRFCOMPLETIONGRAPHCACHED							= Q_UINT64_C(0x1000000000);
+						const static cint64 PRFCOMPLETIONGRAPHCACHINGINVALID					= Q_UINT64_C(0x2000000000);
+						const static cint64 PRFCOMPLETIONGRAPHCACHINGINVALIDATED				= Q_UINT64_C(0x4000000000);
+						const static cint64 PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED		= Q_UINT64_C(0x8000000000);
 
-						const static cint64 PRFREUSINGINDIVIDUAL								= 0x10000000000LL;
-						const static cint64 PRFANCESTORREUSINGINDIVIDUALBLOCKED					= 0x20000000000LL;
-						const static cint64 PRFANCESTORREUSINGINDIVIDUALBLOCKEDABOLISHED		= 0x40000000000LL;
+						const static cint64 PRFCOMPLETIONGRAPHCACHEDNODELOCATED					= Q_UINT64_C(0x10000000000);
+						const static cint64 PRFCOMPLETIONGRAPHCACHEDNODEEXTENDED				= Q_UINT64_C(0x20000000000);
+
+
+						const static cint64 PRFSUCCESSORNOMINALCONNECTION						= Q_UINT64_C(0x40000000000);
+						const static cint64 PRFSUCCESSORNEWNOMINALCONNECTION					= Q_UINT64_C(0x80000000000);
+
+						const static cint64 PRFREUSINGINDIVIDUAL								= Q_UINT64_C(0x100000000000);
+						const static cint64 PRFANCESTORREUSINGINDIVIDUALBLOCKED					= Q_UINT64_C(0x200000000000);
+						const static cint64 PRFANCESTORREUSINGINDIVIDUALBLOCKEDABOLISHED		= Q_UINT64_C(0x400000000000);
+
+						const static cint64 PRFCACHEDCOMPUTEDTYPESADDED							= Q_UINT64_C(0x1000000000000);
 
 
 
@@ -455,7 +478,7 @@ namespace Konclude {
 
 						const static cint64 PRFINVALIDATEBLOCKERFLAGSCOMPINATION				= PRFDIRECTBLOCKED | PRFINDIRECTBLOCKED | PRFPROCESSINGBLOCKED | PRFPURGEDBLOCKED | PRFSATISFIABLECACHED | 
 																									PRFANCESTORSATISFIABLECACHED | PRFSIGNATUREBLOCKINGCACHED | PRFANCESTORSIGNATUREBLOCKINGCACHED | 
-																									PRFREUSINGINDIVIDUAL | PRFANCESTORREUSINGINDIVIDUALBLOCKED | PRFANCESTORSATURATIONBLOCKINGCACHED;
+																									PRFREUSINGINDIVIDUAL | PRFANCESTORREUSINGINDIVIDUALBLOCKED | PRFANCESTORSATURATIONBLOCKINGCACHED | PRFCONCRETEDATAINDINODE;
 
 						CIndividualProcessNode* mDebugBlockerIndi;
 						CConceptDescriptor* mDebugBlockerLastConceptDes;
@@ -553,6 +576,7 @@ namespace Konclude {
 						CConceptDescriptor* mInitConceptDescriptor;
 
 						CXSortedNegLinker<CConcept*>* mInitializingConceptLinkerIt;
+						CXSortedNegLinker<CConcept*>* mProcessInitializingConceptLinkerIt;
 						CConceptAssertionLinker* mAssertionConceptLinkerIt;
 						CRoleAssertionLinker* mAssertionRoleLinkerIt;
 
@@ -607,6 +631,16 @@ namespace Konclude {
 						CNominalCachingLossReactivationData* mLocReactivationData;
 
 
+
+						CSuccessorConnectedNominalSet* mUseNominalConnectionSet;
+						CSuccessorConnectedNominalSet* mLocNominalConnectionSet;
+
+
+
+						CDatatypesValueSpaceData* mUseDatatypesValueSpaceData;
+						CDatatypesValueSpaceData* mLocDatatypesValueSpaceData;
+
+						
 					// private methods
 					private:
 

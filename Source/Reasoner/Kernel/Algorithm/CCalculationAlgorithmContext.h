@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -108,6 +108,7 @@ namespace Konclude {
 						virtual CUnsatisfiableCacheRetrievalStrategy* getUnsatisfiableCacheRetrievalStrategy() = 0;
 						virtual CDependencyFactory* getDependencyFactory() = 0;
 						virtual CSatisfiableExpanderCacheHandler* getSatisfiableExpanderCacheHandler() = 0;
+						virtual CSaturationNodeExpansionCacheHandler* getSaturationNodeExpansionCacheHandler() = 0;
 
 
 						inline CProcessTagger* getUsedProcessTagger();
@@ -129,6 +130,7 @@ namespace Konclude {
 						inline CUnsatisfiableCacheRetrievalStrategy* getUsedUnsatisfiableCacheRetrievalStrategy();
 						inline CDependencyFactory* getUsedDependencyFactory();
 						inline CSatisfiableExpanderCacheHandler* getUsedSatisfiableExpanderCacheHandler();
+						inline CSaturationNodeExpansionCacheHandler* getUsedSaturationNodeExpansionCacheHandler();
 
 						inline bool setMinModificationAncestorDepthCandidate(cint64 ancDepthCandidate);
 						inline bool setMinModificationIndividualIDCandidate(cint64 indiIDCandidate);
@@ -179,6 +181,7 @@ namespace Konclude {
 						cint64 mMaxCompletionGraphCachedIndiNodeID;
 						CIndividualProcessNode* mCurrentIndiNode;
 						cint64 mCompletionGraphCachedLocalizationTag;
+						CSaturationNodeExpansionCacheHandler* mUsedSatNodeExpCacheHandler;
 
 
 					// private methods
@@ -281,6 +284,10 @@ namespace Konclude {
 
 				CSatisfiableExpanderCacheHandler* CCalculationAlgorithmContext::getUsedSatisfiableExpanderCacheHandler() {
 					return mUsedSatExpCacheHandler;
+				}
+
+				CSaturationNodeExpansionCacheHandler* CCalculationAlgorithmContext::getUsedSaturationNodeExpansionCacheHandler() {
+					return mUsedSatNodeExpCacheHandler;
 				}
 
 			}; // end namespace Algorithm

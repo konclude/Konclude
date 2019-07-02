@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -33,6 +33,7 @@ namespace Konclude {
 				CProcessingDataBox::CProcessingDataBox(CProcessContext* processContext) : mProcessContext(processContext) {
 					mIndiProcessVector = CObjectParameterizingAllocator< CIndividualProcessNodeVector,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 					mOntologyTopConcept = nullptr;
+					mOntologyTopDataRangeConcept = nullptr;
 					mSignatureBlockingCandidateHash = nullptr;
 					mUseSignatureBlockingCandidateHash = nullptr;
 					mPrevSignatureBlockingCandidateHash = nullptr;
@@ -106,6 +107,7 @@ namespace Konclude {
 					mUseRoleAssertionProcessQueue = nullptr;
 					mPrevRoleAssertionProcessQueue = nullptr;
 					mConstructedIndiNodeInitialized = false;
+					mMultipleConstructionIndiNodes = false;
 					mMaximumDeterministicBranchTag = 0;
 					mNextIndividualNodeID = 0;
 					mNextSatResSuccExtIndividualNodeID = -1;
@@ -155,12 +157,19 @@ namespace Konclude {
 					mDelayedNominalProcessingOccured = false;
 					mProblematicEQCandidateNodeOccured = false;
 					mClashedDescriptorLinker = nullptr;
+					mValueSpaceTriggeringProcessingQueue = nullptr;
+					mUseValueSpaceTriggeringProcessingQueue = nullptr;
+					mPrevValueSpaceTriggeringProcessingQueue = nullptr;
+					mDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
+					mUseDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
+					mPrevDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
 				}
 
 
 				CProcessingDataBox* CProcessingDataBox::initProcessingDataBox(CConcreteOntology* ontology) {
 					mOntology = ontology;
 					mOntologyTopConcept = mOntology->getTBox()->getTopConcept();
+					mOntologyTopDataRangeConcept = mOntology->getTBox()->getTopDataRangeConcept();
 					mUseExtendedConceptVector = mOntology->getTBox()->getConceptVector(false);
 					return this;
 				}
@@ -198,6 +207,7 @@ namespace Konclude {
 					mSatNominalDependentNodeHash = nullptr;
 					mSatInfluencedNominalSet = nullptr;
 					mConstructedIndiNodeInitialized = false;
+					mMultipleConstructionIndiNodes = false;
 					mLocExtendedConceptVector = nullptr;
 					mUseExtendedConceptVector = nullptr;
 					mUseGroundingHash = nullptr;
@@ -238,6 +248,10 @@ namespace Konclude {
 						mUseVarBindConceptBatchProcessQueue = mPrevVarBindConceptBatchProcessQueue;
 						mPrevIndiBlockedReactivationProcessingQueue = processingDataBox->mUseIndiSignatureBlockingUpdateProcessingQueue;
 						mUseIndiSignatureBlockingUpdateProcessingQueue = mPrevIndiBlockedReactivationProcessingQueue;
+						mPrevValueSpaceTriggeringProcessingQueue = processingDataBox->mUseValueSpaceTriggeringProcessingQueue;
+						mUseValueSpaceTriggeringProcessingQueue = mPrevValueSpaceTriggeringProcessingQueue;
+						mPrevDistinctValueSpaceSatisfiabilityCheckingQueue = processingDataBox->mUseDistinctValueSpaceSatisfiabilityCheckingQueue;
+						mUseDistinctValueSpaceSatisfiabilityCheckingQueue = mPrevDistinctValueSpaceSatisfiabilityCheckingQueue;
 						mPrevSignatureBlockingCandidateHash = processingDataBox->mUseSignatureBlockingCandidateHash;
 						mUseSignatureBlockingCandidateHash = mPrevSignatureBlockingCandidateHash;
 
@@ -269,6 +283,7 @@ namespace Konclude {
 						mPrevBranchingTree = processingDataBox->mUseBranchingTree;
 						mUseBranchingTree = mPrevBranchingTree;
 						mOntologyTopConcept = processingDataBox->mOntologyTopConcept;
+						mOntologyTopDataRangeConcept = processingDataBox->mOntologyTopDataRangeConcept;
 						mIndividualNodeCacheTestingLinker = processingDataBox->mIndividualNodeCacheTestingLinker;
 						mSortedNominalNonDetProcessingNodeLinker = processingDataBox->mSortedNominalNonDetProcessingNodeLinker;
 						mSortedNominalNonDetProcessingNodesSorted = processingDataBox->mSortedNominalNonDetProcessingNodesSorted;
@@ -282,6 +297,7 @@ namespace Konclude {
 						mRemConPilProcessLinker = processingDataBox->mRemConPilProcessLinker;
 						mRemConPilDes = processingDataBox->mRemConPilDes;
 						mIndiPilingProcessVector = processingDataBox->mIndiPilingProcessVector;
+						mMultipleConstructionIndiNodes = processingDataBox->mMultipleConstructionIndiNodes;
 						mConstructedIndiNodeInitialized = processingDataBox->mConstructedIndiNodeInitialized;
 						mMaximumDeterministicBranchTag = processingDataBox->mMaximumDeterministicBranchTag;
 						mNextPropagationID = processingDataBox->mNextPropagationID;
@@ -360,6 +376,8 @@ namespace Konclude {
 					clearReusingReviewData();
 					clearBlockedResolveIndividualNodes();
 					clearSortedNominalNonDeterministicProcessingNodeLinker();
+					clearValueSpaceTriggeringProcessingQueue();
+					clearDistinctValueSpaceSatisfiabilityCheckingQueue();
 					return this;
 				}
 
@@ -511,6 +529,10 @@ namespace Konclude {
 
 				CConcept* CProcessingDataBox::getOntologyTopConcept() {
 					return mOntologyTopConcept;
+				}
+
+				CConcept* CProcessingDataBox::getOntologyTopDataRangeConcept() {
+					return mOntologyTopDataRangeConcept;
 				}
 
 				CConcreteOntology* CProcessingDataBox::getOntology() {
@@ -724,6 +746,48 @@ namespace Konclude {
 					mIndiBlockedReactivationProcessingQueue = nullptr;
 					mUseIndiBlockedReactivationProcessingQueue = nullptr;
 					mPrevIndiBlockedReactivationProcessingQueue = nullptr;
+					return this;
+				}
+
+
+
+
+				CIndividualDepthProcessingQueue* CProcessingDataBox::getValueSpaceTriggeringProcessingQueue(bool create) {
+					if (!mValueSpaceTriggeringProcessingQueue && create) {
+						mValueSpaceTriggeringProcessingQueue = CObjectParameterizingAllocator< CIndividualDepthProcessingQueue,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mValueSpaceTriggeringProcessingQueue->initProcessingQueue(mPrevValueSpaceTriggeringProcessingQueue);
+						mUseValueSpaceTriggeringProcessingQueue = mValueSpaceTriggeringProcessingQueue;
+					}
+					return mUseValueSpaceTriggeringProcessingQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearValueSpaceTriggeringProcessingQueue() {
+					mValueSpaceTriggeringProcessingQueue = nullptr;
+					mUseValueSpaceTriggeringProcessingQueue = nullptr;
+					mPrevValueSpaceTriggeringProcessingQueue = nullptr;
+					return this;
+				}
+
+
+
+
+
+
+				CIndividualDepthProcessingQueue* CProcessingDataBox::getDistinctValueSpaceSatisfiabilityCheckingQueue(bool create) {
+					if (!mDistinctValueSpaceSatisfiabilityCheckingQueue && create) {
+						mDistinctValueSpaceSatisfiabilityCheckingQueue = CObjectParameterizingAllocator< CIndividualDepthProcessingQueue,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mDistinctValueSpaceSatisfiabilityCheckingQueue->initProcessingQueue(mPrevDistinctValueSpaceSatisfiabilityCheckingQueue);
+						mUseDistinctValueSpaceSatisfiabilityCheckingQueue = mDistinctValueSpaceSatisfiabilityCheckingQueue;
+					}
+					return mUseDistinctValueSpaceSatisfiabilityCheckingQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearDistinctValueSpaceSatisfiabilityCheckingQueue() {
+					mDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
+					mUseDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
+					mPrevDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
 					return this;
 				}
 
@@ -963,6 +1027,16 @@ namespace Konclude {
 						linker = mIndividualNodeResolveLinker->append(linker);
 					}
 					return this;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::setMultipleConstructionIndividualNodes(bool multiple) {
+					mMultipleConstructionIndiNodes = multiple;
+					return this;
+				}
+
+				bool CProcessingDataBox::hasMultipleConstructionIndividualNodes() {
+					return mMultipleConstructionIndiNodes;
 				}
 
 

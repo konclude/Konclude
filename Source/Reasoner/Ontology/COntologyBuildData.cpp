@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -46,14 +46,24 @@ namespace Konclude {
 				mTopClassExpression = nullptr;
 				mBottomClassExpression = nullptr;
 
+				mTopDataRangeExpression = nullptr;
+				mBottomDataRangeExpression = nullptr;
+
 				mTopObjPropExpression = nullptr;
 				mBottomObjPropExpression = nullptr;
+
+				mTopDataPropExpression = nullptr;
+				mBottomDataPropExpression = nullptr;
 
 				mExpressionBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CExpressionHasher,CBuildExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mClassBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CClassExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mObjectPropertyBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CObjectPropertyExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mIndividualBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mAnoIndividualBuildHash = CObjectParameterizingAllocator< CBUILDHASH<QPair<CStringRefStringHasher,CStringRefStringHasher>,CAnonymousIndividualExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mDatatypeIRIDatatypeBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mDataPropertyBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mDataLexicalValueBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mFacetIRIFacetBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				
 				mExpressionBuildListContainer = CObjectParameterizingAllocator< CBUILDLIST<CBuildExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
@@ -64,12 +74,22 @@ namespace Konclude {
 				mIndividualVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				
 				mBuildConceptSet = CObjectParameterizingAllocator< CBUILDSET<CClassTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
-				mBuildRoleSet = CObjectParameterizingAllocator< CBUILDSET<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildObjectRoleSet = CObjectParameterizingAllocator< CBUILDSET<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mBuildIndividualSet = CObjectParameterizingAllocator< CBUILDSET<CIndividualTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
-				
+				mBuildDataRoleSet = CObjectParameterizingAllocator< CBUILDSET<CDataPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildDatatypeSet = CObjectParameterizingAllocator< CBUILDSET<CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildDataRangesSet = CObjectParameterizingAllocator< CBUILDSET<CDataRangeTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+
 				mBuildConceptList = CObjectParameterizingAllocator< CBUILDLIST<CClassTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
-				mBuildRoleList = CObjectParameterizingAllocator< CBUILDLIST<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildObjectRoleList = CObjectParameterizingAllocator< CBUILDLIST<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mBuildIndividualList = CObjectParameterizingAllocator< CBUILDLIST<CIndividualTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildDataRoleList = CObjectParameterizingAllocator< CBUILDLIST<CDataPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildDatatypeList = CObjectParameterizingAllocator< CBUILDLIST<CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildDataRangesList = CObjectParameterizingAllocator< CBUILDLIST<CDataRangeTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+
+
+				mImportDataHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,COntologyImportData*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+
 
 				mAxiomNumber = 0;
 				mEntityNumber = 0;
@@ -97,7 +117,11 @@ namespace Konclude {
 				COPADestroyAndRelease(mObjectPropertyBuildHash,memAllocMan);
 				COPADestroyAndRelease(mIndividualBuildHash,memAllocMan);
 				COPADestroyAndRelease(mAnoIndividualBuildHash,memAllocMan);
+				COPADestroyAndRelease(mDatatypeIRIDatatypeBuildHash,memAllocMan);
 				COPADestroyAndRelease(mExpressionBuildListContainer,memAllocMan);
+				COPADestroyAndRelease(mDataPropertyBuildHash,memAllocMan);
+				COPADestroyAndRelease(mDataLexicalValueBuildHash,memAllocMan);
+				COPADestroyAndRelease(mFacetIRIFacetBuildHash,memAllocMan);
 
 				COPADestroyAndRelease(mInverseObjectPropertyHash,memAllocMan);
 				COPADestroyAndRelease(mInverseObjectPropertyList,memAllocMan);
@@ -105,12 +129,20 @@ namespace Konclude {
 				COPADestroyAndRelease(mIndividualVariableBuildHash,memAllocMan);
 
 				COPADestroyAndRelease(mBuildConceptSet,memAllocMan);
-				COPADestroyAndRelease(mBuildRoleSet,memAllocMan);
+				COPADestroyAndRelease(mBuildObjectRoleSet,memAllocMan);
 				COPADestroyAndRelease(mBuildIndividualSet,memAllocMan);
+				COPADestroyAndRelease(mBuildDataRoleSet,memAllocMan);
+				COPADestroyAndRelease(mBuildDatatypeSet,memAllocMan);
+				COPADestroyAndRelease(mBuildDataRangesSet,memAllocMan);
 
 				COPADestroyAndRelease(mBuildConceptList,memAllocMan);
-				COPADestroyAndRelease(mBuildRoleList,memAllocMan);
+				COPADestroyAndRelease(mBuildObjectRoleList,memAllocMan);
+				COPADestroyAndRelease(mBuildDataRoleList,memAllocMan);
 				COPADestroyAndRelease(mBuildIndividualList,memAllocMan);
+				COPADestroyAndRelease(mBuildDatatypeList,memAllocMan);
+				COPADestroyAndRelease(mBuildDataRangesList,memAllocMan);
+
+				COPADestroyAndRelease(mImportDataHash,memAllocMan);
 			}
 
 
@@ -134,14 +166,24 @@ namespace Konclude {
 				mTopClassExpression = buildData->mTopClassExpression;
 				mBottomClassExpression = buildData->mBottomClassExpression;
 
+				mTopDataRangeExpression = buildData->mTopDataRangeExpression;
+				mBottomDataRangeExpression = buildData->mBottomDataRangeExpression;
+
 				mTopObjPropExpression = buildData->mTopObjPropExpression;
 				mBottomObjPropExpression = buildData->mBottomObjPropExpression;
+
+				mTopDataPropExpression = buildData->mTopDataPropExpression;
+				mBottomDataPropExpression = buildData->mBottomDataPropExpression;
 
 				*mExpressionBuildHash = *buildData->mExpressionBuildHash;
 				*mClassBuildHash = *buildData->mClassBuildHash;
 				*mObjectPropertyBuildHash = *buildData->mObjectPropertyBuildHash;
 				*mIndividualBuildHash = *buildData->mIndividualBuildHash;
 				*mAnoIndividualBuildHash = *buildData->mAnoIndividualBuildHash;
+				*mDatatypeIRIDatatypeBuildHash = *buildData->mDatatypeIRIDatatypeBuildHash;
+				*mDataPropertyBuildHash = *buildData->mDataPropertyBuildHash;
+				*mDataLexicalValueBuildHash = *buildData->mDataLexicalValueBuildHash;
+				*mFacetIRIFacetBuildHash = *buildData->mFacetIRIFacetBuildHash;
 
 				*mExpressionBuildListContainer = *buildData->mExpressionBuildListContainer;
 
@@ -153,15 +195,24 @@ namespace Konclude {
 
 				*mBuildIndividualList = *buildData->mBuildIndividualList;
 				*mBuildConceptList = *buildData->mBuildConceptList;
-				*mBuildRoleList = *buildData->mBuildRoleList;
+				*mBuildObjectRoleList = *buildData->mBuildObjectRoleList;
+				*mBuildDataRoleList = *buildData->mBuildDataRoleList;
+				*mBuildDatatypeList = *buildData->mBuildDatatypeList;
+				*mBuildDataRangesList = *buildData->mBuildDataRangesList;
+
+				*mImportDataHash = *buildData->mImportDataHash;
 
 				mAxiomNumber = buildData->mAxiomNumber;
 				mEntityNumber = buildData->mEntityNumber;
+
 
 				return this;
 			}
 
 
+			CBUILDHASH<CStringRefStringHasher,COntologyImportData*>* COntologyBuildData::getImportDataHash() {
+				return mImportDataHash;
+			}
 
 
 
@@ -205,12 +256,33 @@ namespace Konclude {
 				return mBottomClassExpression;
 			}
 
+
+
+			CDataRangeTermExpression* COntologyBuildData::getTopDataRangeExpression() {
+				return mTopDataRangeExpression;
+			}
+
+			CDataRangeTermExpression* COntologyBuildData::getBottomDataRangeExpression() {
+				return mBottomDataRangeExpression;
+			}
+
+
+
 			CObjectPropertyTermExpression* COntologyBuildData::getTopObjectPropertyExpression() {
 				return mTopObjPropExpression;
 			}
 
 			CObjectPropertyTermExpression* COntologyBuildData::getBottomObjectPropertyExpression() {
 				return mBottomObjPropExpression;
+			}
+
+
+			CDataPropertyTermExpression* COntologyBuildData::getTopDataPropertyExpression() {
+				return mTopDataPropExpression;
+			}
+
+			CDataPropertyTermExpression* COntologyBuildData::getBottomDataPropertyExpression() {
+				return mBottomDataPropExpression;
 			}
 
 
@@ -226,6 +298,18 @@ namespace Konclude {
 			}
 
 
+			COntologyBuildData* COntologyBuildData::setTopDataRangeExpression(CDataRangeTermExpression* dataRangeExp) {
+				mTopDataRangeExpression = dataRangeExp;
+				return this;
+			}
+
+			COntologyBuildData* COntologyBuildData::setBottomDataRangeExpression(CDataRangeTermExpression* dataRangeExp) {
+				mBottomDataRangeExpression = dataRangeExp;
+				return this;
+			}
+
+
+
 			COntologyBuildData* COntologyBuildData::setTopObjectPropertyExpression(CObjectPropertyTermExpression* topObjectPropertyExp) {
 				mTopObjPropExpression = topObjectPropertyExp;
 				return this;
@@ -233,6 +317,16 @@ namespace Konclude {
 
 			COntologyBuildData* COntologyBuildData::setBottomObjectPropertyExpression(CObjectPropertyTermExpression* bottomObjectPropertyExp) {
 				mBottomObjPropExpression = bottomObjectPropertyExp;
+				return this;
+			}
+
+			COntologyBuildData* COntologyBuildData::setTopDataPropertyExpression(CDataPropertyTermExpression* dataPropertyExp) {
+				mTopDataPropExpression = dataPropertyExp;
+				return this;
+			}
+
+			COntologyBuildData* COntologyBuildData::setBottomDataPropertyExpression(CDataPropertyTermExpression* dataPropertyExp) {
+				mBottomDataPropExpression = dataPropertyExp;
 				return this;
 			}
 
@@ -251,6 +345,17 @@ namespace Konclude {
 				return mObjectPropertyBuildHash;
 			}
 
+
+			CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* COntologyBuildData::getDataPropertyEntityBuildHash() {
+				return mDataPropertyBuildHash;
+			}
+
+
+			CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* COntologyBuildData::getDataLexicalValueBuildHash() {
+				return mDataLexicalValueBuildHash;
+			}
+
+
 			CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>* COntologyBuildData::getIndividualEntityBuildHash() {
 				return mIndividualBuildHash;
 			}
@@ -261,6 +366,14 @@ namespace Konclude {
 			}
 
 
+			CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>* COntologyBuildData::getDatatypeIRIBuildHash() {
+				return mDatatypeIRIDatatypeBuildHash;
+			}
+
+
+			CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>* COntologyBuildData::getFacetIRIBuildHash() {
+				return mFacetIRIFacetBuildHash;
+			}
 
 			
 			CBUILDLIST<CBuildExpression*>* COntologyBuildData::getExpressionBuildListContainer() {
@@ -290,9 +403,25 @@ namespace Konclude {
 				return mBuildConceptSet;
 			}
 
-			CBUILDSET<CObjectPropertyTermExpression*>* COntologyBuildData::getBuildRoleSet() {
-				return mBuildRoleSet;
+			CBUILDSET<CObjectPropertyTermExpression*>* COntologyBuildData::getBuildObjectRoleSet() {
+				return mBuildObjectRoleSet;
 			}
+
+			CBUILDSET<CDataPropertyTermExpression*>* COntologyBuildData::getBuildDataRoleSet() {
+				return mBuildDataRoleSet;
+			}
+
+			CBUILDSET<CDataRangeTermExpression*>* COntologyBuildData::getBuildDataRangeSet() {
+				return mBuildDataRangesSet;
+			}
+
+			CBUILDSET<CDatatypeExpression*>* COntologyBuildData::getBuildDatatypeSet() {
+				return mBuildDatatypeSet;
+			}
+
+
+
+
 
 			CBUILDSET<CIndividualTermExpression*>* COntologyBuildData::getBuildIndividualSet() {
 				return mBuildIndividualSet;
@@ -303,12 +432,24 @@ namespace Konclude {
 				return mBuildConceptList;
 			}
 
-			CBUILDLIST<CObjectPropertyTermExpression*>* COntologyBuildData::getBuildRoleList() {
-				return mBuildRoleList;
+			CBUILDLIST<CObjectPropertyTermExpression*>* COntologyBuildData::getBuildObjectRoleList() {
+				return mBuildObjectRoleList;
+			}
+
+			CBUILDLIST<CDataPropertyTermExpression*>* COntologyBuildData::getBuildDataRoleList() {
+				return mBuildDataRoleList;
 			}
 
 			CBUILDLIST<CIndividualTermExpression*>* COntologyBuildData::getBuildIndividualList() {
 				return mBuildIndividualList;
+			}
+
+			CBUILDLIST<CDataRangeTermExpression*>* COntologyBuildData::getBuildDataRangeList() {
+				return mBuildDataRangesList;
+			}
+
+			CBUILDLIST<CDatatypeExpression*>* COntologyBuildData::getBuildDatatypeList() {
+				return mBuildDatatypeList;
 			}
 
 			cint64 COntologyBuildData::getNextAxiomNumber(bool moveNext) {

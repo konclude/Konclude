@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -50,6 +50,20 @@
 #include "Parser/Expressions/CObjectHasValueExpression.h"
 #include "Parser/Expressions/CObjectHasSelfExpression.h"
 
+#include "Parser/Expressions/CDataLiteralExpression.h"
+#include "Parser/Expressions/CDatatypeExpression.h"
+#include "Parser/Expressions/CDataLexicalValueExpression.h"
+#include "Parser/Expressions/CDataSomeValuesFromExpression.h"
+#include "Parser/Expressions/CDataAllValuesFromExpression.h"
+#include "Parser/Expressions/CDataIntersectionOfExpression.h"
+#include "Parser/Expressions/CDataOneOfExpression.h"
+#include "Parser/Expressions/CDataUnionOfExpression.h"
+#include "Parser/Expressions/CDataComplementOfExpression.h"
+#include "Parser/Expressions/CDatatypeRestrictionExpression.h"
+#include "Parser/Expressions/CDataMaxCardinalityExpression.h"
+#include "Parser/Expressions/CDataMinCardinalityExpression.h"
+#include "Parser/Expressions/CDataExactCardinalityExpression.h"
+#include "Parser/Expressions/CDataHasValueExpression.h"
 
 
 
@@ -87,6 +101,85 @@ namespace Konclude {
 				virtual CClassExpression* getClass(const QStringRef &className) = 0;
 				virtual CObjectIndividualVariableExpression* getIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber) = 0;
 				virtual CObjectIndividualVariableExpression* getIndividualVariable(const QString &individualVariableName, cint64 axiomNumber) = 0;
+
+
+
+				virtual CDataLiteralExpression* getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype) = 0;
+
+
+				virtual CDatatypeExpression* getDatatype(const QString& datatypeName) = 0;
+				virtual CDatatypeExpression* getDatatype(const QStringRef& datatypeName) = 0;
+				virtual CDataLexicalValueExpression* getDataLexicalValue(const QString& dataLexicalValue) = 0;
+				virtual CDataLexicalValueExpression* getDataLexicalValue(const QStringRef& dataLexicalValue) = 0;
+
+
+
+
+				virtual CDataFacetRestrictionExpression* getDataFacetRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataFacetRestrictionExpression* getDataFacetRestriction(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+
+
+				virtual CDataSomeValuesFromExpression* getDataSomeValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataSomeValuesFromExpression* getDataSomeValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+				
+				virtual CDataHasValueExpression* getDataHasValue(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataHasValueExpression* getDataHasValue(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+
+				virtual CDataAllValuesFromExpression* getDataAllValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataAllValuesFromExpression* getDataAllValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+
+				virtual CDataIntersectionOfExpression* getDataIntersectionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataIntersectionOfExpression* getDataIntersectionOf(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+				
+				virtual CDataOneOfExpression* getDataOneOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataOneOfExpression* getDataOneOf(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+
+				virtual CDataUnionOfExpression* getDataUnionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataUnionOfExpression* getDataUnionOf(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+
+				virtual CDataComplementOfExpression* getDataComplementOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDataComplementOfExpression* getDataComplementOf(CBuildExpression* expression) = 0;
+
+				virtual CDatatypeRestrictionExpression* getDatatypeRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
+				virtual CDatatypeRestrictionExpression* getDatatypeRestriction(CBuildExpression* expression1, CBuildExpression* expression2) = 0;
+
+
+				virtual CDataFacetExpression* getDataFacet(const QString& dataFacetIRI) = 0;
+				virtual CDataFacetExpression* getDataFacet(const QStringRef& dataFacetIRI) = 0;
+
+				virtual CDataFacetRestrictionExpression* getDataFacetRestriction(CDataLiteralExpression* dataLiteralExpression, CDataFacetExpression* dataFacet) = 0;
+
+				virtual CDataMaxCardinalityExpression* getDataMaxCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) = 0;
+				virtual CDataMaxCardinalityExpression* getDataMaxCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) = 0;
+
+				virtual CDataMinCardinalityExpression* getDataMinCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) = 0;
+				virtual CDataMinCardinalityExpression* getDataMinCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) = 0;
+				
+				virtual CDataExactCardinalityExpression* getDataExactCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality) = 0;
+				virtual CDataExactCardinalityExpression* getDataExactCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality) = 0;
+
+
+				virtual CDataSomeValuesFromExpression* getDataSomeValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) = 0;
+				virtual CDataHasValueExpression* getDataHasValue(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) = 0;
+				virtual CDataAllValuesFromExpression* getDataAllValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) = 0;
+				virtual CDataIntersectionOfExpression* getDataIntersectionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) = 0;
+				virtual CDataOneOfExpression* getDataOneOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) = 0;
+				virtual CDataUnionOfExpression* getDataUnionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) = 0;
+				virtual CDataComplementOfExpression* getDataComplementOf(CDataRangeTermExpression* expressions) = 0;
+				virtual CDatatypeRestrictionExpression* getDatatypeRestriction(CDatatypeExpression* datatypeExpression, const CEXPRESSIONLIST<CDataFacetRestrictionExpression*>& expressions) = 0;
+
+				virtual CDataMaxCardinalityExpression* getDataMaxCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) = 0;
+				virtual CDataMinCardinalityExpression* getDataMinCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) = 0;
+				virtual CDataExactCardinalityExpression* getDataExactCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality) = 0;
+
+
+				virtual CDataRangeTermExpression* getTopDataRange() = 0;
+				virtual CDataRangeTermExpression* getBottomDataRange() = 0;
+
+
+
+
+
 
 				virtual CEquivalentClassesExpression *getEquivalentClasses(const CEXPRESSIONLIST<CBuildExpression *> &expressions) = 0;
 				virtual CEquivalentClassesExpression *getEquivalentClasses(CBuildExpression *expression1, CBuildExpression *expression2) = 0;

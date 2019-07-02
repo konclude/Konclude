@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -44,6 +44,8 @@ namespace Konclude {
 				recorder = 0;
 				closured = false;
 				errorLevel = 0;
+
+				mUnclosedCommandCount = 1;
 
 				if (parentSuperCommand) {
 					parentSuperCommand->makeToSubCommand(this);
@@ -98,6 +100,7 @@ namespace Konclude {
 
 
 			CCommand *CCommand::makeToSubCommand(CCommand *subCommand) {
+				++mUnclosedCommandCount;
 				addSubCommand(subCommand);
 				subCommand->setSuperCommand(this);
 				subCommand->setRecorder(recorder);
@@ -115,8 +118,15 @@ namespace Konclude {
 			}
 
 			CCommand *CCommand::setProcessed(bool processedCommand) {
-				processed = processedCommand;
-				checkProcessedCallback();
+				if (processed) {
+					closureSyncMutex.lock();
+					mUnclosedCommandCount++;
+					processed = processedCommand;
+					closureSyncMutex.unlock();
+				} else {
+					processed = processedCommand;
+					reduceUnclosedCheckCallback();
+				}
 				return this;
 			}
 
@@ -137,7 +147,7 @@ namespace Konclude {
 
 
 			bool CCommand::isProcessed() {
-				return processed && areAllSubCommandsProcessed();
+				return mUnclosedCommandCount <= 0;
 			}
 
 			bool CCommand::isThisCommandProcessed() {
@@ -243,31 +253,36 @@ namespace Konclude {
 
 
 			CCommand *CCommand::addProcessedCallback(CCallbackData *callback) {
-				processedCallbackExecuter.addCallbackData(callback);
-				checkProcessedCallback();
+				if (isProcessed()) {
+					callback->doCallback();
+				} else {
+					processedCallbackExecuter.addCallbackData(callback);
+				}
 				return this;
 			}
 
 
+			CCommand* CCommand::closedSubCommand() {
+				reduceUnclosedCheckCallback();
+				return this;
+			}
 
-			CCommand *CCommand::checkProcessedCallback() {
-				if (isProcessed()) {
-					if (!closured) {
-						bool commandClosured = false;
-						closureSyncMutex.lock();
-						if (!closured) {
-							CClosureProcessCommandRecord::makeRecord(recorder,"::Konclude::Command::Command",this);
-							closured = true;
-							commandClosured = true;
-						}
-						closureSyncMutex.unlock();
-						if (commandClosured) {
-							if (superCommand) {
-								superCommand->checkProcessedCallback();
-							}
-						}
-					}
+			CCommand *CCommand::reduceUnclosedCheckCallback() {
+				closureSyncMutex.lock();
+				mUnclosedCommandCount--;
+				bool closeCommand = false;
+				if (mUnclosedCommandCount == 0) {
+					closeCommand = true;
+				}
+				closureSyncMutex.unlock();
+				if (!closured && closeCommand) {
+					CClosureProcessCommandRecord::makeRecord(recorder,"::Konclude::Command::Command",this);
+					closured = true;
+					CCommand* tmpSuperCommand = superCommand;
 					processedCallbackExecuter.doCallback();
+					if (tmpSuperCommand) {
+						tmpSuperCommand->closedSubCommand();
+					}
 				}
 				return this;
 			}

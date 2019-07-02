@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -94,6 +94,8 @@ namespace Konclude {
 			protected:
 				bool initializeParseFunctionJumpHash();
 				QString getEntityName(QDomElement* node);
+
+				cint64 parseCardinality(QDomElement* node);
 
 				CBuildExpression* parseBuildNode(QDomElement* node);
 				QList<CBuildExpression* > parseChildNodes(QDomElement* node);
@@ -226,7 +228,72 @@ namespace Konclude {
 				CBuildExpression* jumpFunctionParseInverseFunctionalObjectPropertyNode(QDomElement* node);
 
 				CBuildExpression* jumpFunctionParseIgnoredNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseImportNode(QDomElement* node);
 
+
+				CBuildExpression* jumpFunctionParseDatatypeNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataPropertyNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataSomeValuesFromNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataLiteralNode(QDomElement* node);
+
+
+
+
+				CBuildExpression* jumpFunctionParseDataAllValuesFromNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataHasValueNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataIntersectionOfNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataOneOfNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataUnionOfNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataComplementOfNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDatatypeRestrictionNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataMaxCardinalityNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataMinCardinalityNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataExactCardinalityNode(QDomElement* node);
+
+				CBuildExpression* jumpFunctionParseDataPropertyAssertionNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseNegativeDataPropertyAssertionNode(QDomElement* node);
+
+				CBuildExpression* jumpFunctionParseSubDataPropertyOfNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseEquivalentDataPropertiesNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDisjointDataPropertiesNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataPropertyDomainNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseDataPropertyRangeNode(QDomElement* node);
+				CBuildExpression* jumpFunctionParseFunctionalDataPropertyNode(QDomElement* node);
+
+				CBuildExpression* jumpFunctionParseDataFacetRestrictionNode(QDomElement* node);
+
+
+
+
+
+				CDatatypeExpression* parseDatatypeNode(QDomElement* node);
+				CDataPropertyExpression* parseDataPropertyNode(QDomElement* node);
+				CDataSomeValuesFromExpression* parseDataSomeValuesFromNode(QDomElement* node);
+				CDataLiteralExpression* parseDataLiteralNode(QDomElement* node);
+
+				CDataFacetRestrictionExpression* parseDataFacetRestrictionNode(QDomElement* node);
+
+
+				CDataAllValuesFromExpression* parseDataAllValuesFromNode(QDomElement* node);
+				CDataHasValueExpression* parseDataHasValueNode(QDomElement* node);
+				CDataIntersectionOfExpression* parseDataIntersectionOfNode(QDomElement* node);
+				CDataOneOfExpression* parseDataOneOfNode(QDomElement* node);
+				CDataUnionOfExpression* parseDataUnionOfNode(QDomElement* node);
+				CDataComplementOfExpression* parseDataComplementOfNode(QDomElement* node);
+				CDatatypeRestrictionExpression* parseDatatypeRestrictionNode(QDomElement* node);
+				CDataMaxCardinalityExpression* parseDataMaxCardinalityNode(QDomElement* node);
+				CDataMinCardinalityExpression* parseDataMinCardinalityNode(QDomElement* node);
+				CDataExactCardinalityExpression* parseDataExactCardinalityNode(QDomElement* node);
+
+				CDataPropertyAssertionExpression* parseDataPropertyAssertionNode(QDomElement* node);
+				CNegativeDataPropertyAssertionExpression* parseNegativeDataPropertyAssertionNode(QDomElement* node);
+
+				CSubDataPropertyOfExpression* parseSubDataPropertyOfNode(QDomElement* node);
+				CEquivalentDataPropertiesExpression* parseEquivalentDataPropertiesNode(QDomElement* node);
+				CDisjointDataPropertiesExpression* parseDisjointDataPropertiesNode(QDomElement* node);
+				CDataPropertyDomainExpression* parseDataPropertyDomainNode(QDomElement* node);
+				CDataPropertyRangeExpression* parseDataPropertyRangeNode(QDomElement* node);
+				CFunctionalDataPropertyExpression* parseFunctionalDataPropertyNode(QDomElement* node);
 
 			// protected variables
 			protected:

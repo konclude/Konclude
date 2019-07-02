@@ -1,20 +1,8 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
  *
- *		This file is part of the reasoning system Konclude.
- *		For details and support, see <http://konclude.com/>.
- *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
- *
- *		Konclude is distributed in the hope that it will be useful,
- *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		Author:		Andreas Steigmiller
+ *		Copyright:	2009 Andreas Steigmiller
+ *		Project:	Konclude
  *
  */
 
@@ -42,6 +30,10 @@ namespace Konclude {
 				return httpRequest;
 			}
 
+			//CHttpRequest* CQtHttpTransactionManager::createFileDownloadRequest(const QString& url, QIODevice* openWriteFile) {
+			//	CQtHttpDownloadFileRequest* httpRequest = new CQtHttpDownloadFileRequest(url);
+			//	return httpRequest;
+			//}
 
 
 			CHttpRequest* CQtHttpTransactionManager::createRequest(const QString& url, const QByteArray& byteArray) {
@@ -78,6 +70,26 @@ namespace Konclude {
 				return nullptr;
 			}
 
+
+			bool CQtHttpTransactionManager::callbackFinishedRequest(CHttpResponse* response, CCallbackData* callbackData) {
+				return callbackFinished(response,callbackData);
+			}
+
+
+			bool CQtHttpTransactionManager::callbackFinished(CHttpResponse* response, CCallbackData* callback) {
+				if (response) {
+					CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
+					return callbackFinished(qtResponse,callback);
+				}
+				return false;
+			}
+
+			bool CQtHttpTransactionManager::callbackFinished(CQtHttpResponse* response, CCallbackData* callback) {
+				postEvent(new CAddResponseFinishedCallbackEvent(response,callback));
+				return true;
+			}
+
+
 			void CQtHttpTransactionManager::finishedNetworkReply(QNetworkReply* reply) {
 				QNetworkReply::NetworkError error = reply->error();
 				if (error) {
@@ -91,16 +103,40 @@ namespace Konclude {
 				QString* text = nullptr;
 				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
 				if (qtResponse) {
-					text = new QString();
+					QByteArray data;
 					CBlockingCallbackData blockCallback;
-					postEvent(new CExtractResponseTextEvent(qtResponse,text,&blockCallback));
+					postEvent(new CExtractResponseDataEvent(qtResponse,&data,&blockCallback));
 					blockCallback.waitForCallback();
+					text = new QString(data);
 				}
 				return text;
 			}
 
 
-			bool CQtHttpTransactionManager::hasFinishedSucecssful(CHttpResponse* response) {
+			QByteArray* CQtHttpTransactionManager::getResponseData(CHttpResponse* response) {
+				QByteArray* data = nullptr;
+				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
+				if (qtResponse) {
+					data = new QByteArray();
+					CBlockingCallbackData blockCallback;
+					postEvent(new CExtractResponseDataEvent(qtResponse,data,&blockCallback));
+					blockCallback.waitForCallback();
+				}
+				return data;
+				
+			}
+
+
+			bool CQtHttpTransactionManager::callbackResponseData(CHttpResponse* response, QByteArray* dataArray, CCallbackData* callback) {
+				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
+				if (qtResponse) {
+					postEvent(new CExtractResponseDataEvent(qtResponse,dataArray,callback));
+					return true;
+				}
+				return false;
+			}
+
+			bool CQtHttpTransactionManager::hasFinishedSucecssfully(CHttpResponse* response) {
 				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
 				if (qtResponse) {
 					QNetworkReply* reply = qtResponse->getQNetworkReply();
@@ -114,14 +150,6 @@ namespace Konclude {
 				return false;
 			}
 
-			bool CQtHttpTransactionManager::callbackFinishedRequest(CHttpResponse* response, CCallbackData* callbackData) {
-				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
-				if (qtResponse) {
-					postEvent(new CInstallRequestFinishedCallbackEvent(qtResponse,callbackData));
-					return true;
-				}
-				return false;
-			}
 
 			void CQtHttpTransactionManager::threadStarted() {
 				CThread::threadStarted();
@@ -205,25 +233,24 @@ namespace Konclude {
 						}
 					}
 					return true;
-				} else if (type == CExtractResponseTextEvent::EVENTTYPE) {
-					CExtractResponseTextEvent* erte = (CExtractResponseTextEvent*)event;
+				} else if (type == CExtractResponseDataEvent::EVENTTYPE) {
+					CExtractResponseDataEvent* erte = (CExtractResponseDataEvent*)event;
 					CQtHttpResponse* response = erte->getResponse();
-					CExtractResponseTextCallbackEvent* ertce = new CExtractResponseTextCallbackEvent(this,response,erte->getText(),erte->getCallbacks());
+					CExtractResponseDataCallbackEvent* ertce = new CExtractResponseDataCallbackEvent(this,response,erte->getDataPointer(),erte->getCallbacks());
 					response->getFinishedCallbackList()->addCallbacks(ertce);
 					return true;
-				} else if (type == CInstallRequestFinishedCallbackEvent::EVENTTYPE) {
-					CInstallRequestFinishedCallbackEvent* erte = (CInstallRequestFinishedCallbackEvent*)event;
+				} else if (type == CAddResponseFinishedCallbackEvent::EVENTTYPE) {
+					CAddResponseFinishedCallbackEvent* erte = (CAddResponseFinishedCallbackEvent*)event;
 					CQtHttpResponse* response = erte->getResponse();
 					response->getFinishedCallbackList()->addCallbacks(erte->getCallbacks());
 					return true;
-				} else if (type == CExtractResponseTextCallbackEvent::EVENTTYPE) {
-					CExtractResponseTextCallbackEvent* ertce = (CExtractResponseTextCallbackEvent*)event;
+				} else if (type == CExtractResponseDataCallbackEvent::EVENTTYPE) {
+					CExtractResponseDataCallbackEvent* ertce = (CExtractResponseDataCallbackEvent*)event;
 					CQtHttpResponse* response = ertce->getResponse();
-					QString* testString = ertce->getText();
-					if (response && testString && hasFinishedSucecssful(response)) {
+					QByteArray* dataArray = ertce->getDataPointer();
+					if (response && dataArray && hasFinishedSucecssfully(response)) {
 						QNetworkReply* reply = response->getQNetworkReply();
-						QString respText(reply->readAll());
-						*testString = respText;
+						*dataArray = reply->readAll();
 					}
 					CCallbackData* callbackIt = ertce->getCallbacks();
 					while (callbackIt) {

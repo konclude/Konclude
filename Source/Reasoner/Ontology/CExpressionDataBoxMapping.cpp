@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -36,13 +36,22 @@ namespace Konclude {
 
 				mClassTermConceptHash = CObjectParameterizingAllocator< CBUILDHASH<CClassTermExpression*,CConcept*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mConceptClassTermHash = CObjectParameterizingAllocator< CBUILDHASH<CConcept*,CClassTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mDataRangeTermConceptHash = CObjectParameterizingAllocator< CBUILDHASH<CDataRangeTermExpression*,CConcept*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mConceptDataRangeTermHash = CObjectParameterizingAllocator< CBUILDHASH<CConcept*,CDataRangeTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mObjPropTermRoleHash = CObjectParameterizingAllocator< CBUILDHASH<CObjectPropertyTermExpression*,CRole*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mRoleObjPropTermHash = CObjectParameterizingAllocator< CBUILDHASH<CRole*,CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mDataPropTermRoleHash = CObjectParameterizingAllocator< CBUILDHASH<CDataPropertyTermExpression*,CRole*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mRoleDataPropTermHash = CObjectParameterizingAllocator< CBUILDHASH<CRole*,CDataPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mIndividulTermIndiHash = CObjectParameterizingAllocator< CBUILDHASH<CIndividualTermExpression*,CIndividual*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mIndiIndividulTermHash = CObjectParameterizingAllocator< CBUILDHASH<CIndividual*,CIndividualTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
+				mDatatypeExpDatatypeHash = CObjectParameterizingAllocator< CBUILDHASH<CDatatypeExpression*,CDatatype*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mDatatypeDatatypeExpHash = CObjectParameterizingAllocator< CBUILDHASH<CDatatype*,CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+
+
 				mUpdateClassAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CClassAxiomExpression*,bool>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mUpdateObjectPropertyAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CObjectPropertyAxiomExpression*,bool>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mUpdateDataPropertyAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CDataPropertyAxiomExpression*,bool>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mUpdateAssertionAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CAssertionAxiomExpression*,bool>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 				mClassTermClassAxiomSet = CObjectParameterizingAllocator< CBUILDSET< QPair<CClassTermExpression*,CClassAxiomExpression*> >,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
@@ -50,6 +59,9 @@ namespace Konclude {
 
 				mObjPropTermObjPropAxiomSet = CObjectParameterizingAllocator< CBUILDSET< QPair<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*> >,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mObjPropTermObjPropAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+
+				mDataPropTermDataPropAxiomSet = CObjectParameterizingAllocator< CBUILDSET< QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*> >,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mDataPropTermDataPropAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 				mIndiTermAssertionAxiomSet = CObjectParameterizingAllocator< CBUILDSET< QPair<CIndividualTermExpression*,CAssertionAxiomExpression*> >,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mIndiTermAssertionAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CIndividualTermExpression*,CAssertionAxiomExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
@@ -61,11 +73,17 @@ namespace Konclude {
 				mRoleChainObjPropTermHash = CObjectParameterizingAllocator< CBUILDHASH<CRoleChain*,CObjectPropertyAxiomExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 				mBuildedConceptSet = CObjectParameterizingAllocator< CBUILDSET<CClassTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
-				mBuildedRoleSet = CObjectParameterizingAllocator< CBUILDSET<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedObjectRoleSet = CObjectParameterizingAllocator< CBUILDSET<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedDataRoleSet = CObjectParameterizingAllocator< CBUILDSET<CDataPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedDataRangeSet = CObjectParameterizingAllocator< CBUILDSET<CDataRangeTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedDatatypeSet = CObjectParameterizingAllocator< CBUILDSET<CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mBuildedIndividualSet = CObjectParameterizingAllocator< CBUILDSET<CIndividualTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 			
 				mBuildedConceptList = CObjectParameterizingAllocator< CBUILDLIST<CClassTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
-				mBuildedRoleList = CObjectParameterizingAllocator< CBUILDLIST<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedObjectRoleList = CObjectParameterizingAllocator< CBUILDLIST<CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedDataRoleList = CObjectParameterizingAllocator< CBUILDLIST<CDataPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedDataRangeList = CObjectParameterizingAllocator< CBUILDLIST<CDataRangeTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildedDatatypeList = CObjectParameterizingAllocator< CBUILDLIST<CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mBuildedIndividualList = CObjectParameterizingAllocator< CBUILDLIST<CIndividualTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 				mExpressionBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CExpressionHasher,CBuildExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
@@ -77,31 +95,48 @@ namespace Konclude {
 				mLastProcessedChangedAxiom = 0;
 				mLastProcessedBuildIndividual = 0;
 				mLastProcessedBuildConcept = 0;
-				mLastProcessedBuildRole = 0;
+				mLastProcessedBuildObjectRole = 0;
+				mLastProcessedBuildDataRole = 0;
+				mLastProcessedBuildDataRange = 0;
+				mLastProcessedBuildDatatype = 0;
 
 				mLastProcessedInverseProperty = 0;
 				mLastProcessedExpression = 0;
 
 				mLastBuildedIndividual = 0;
 				mLastBuildedConcept = 0;
-				mLastBuildedRole = 0;
+				mLastBuildedObjectRole = 0;
+				mLastBuildedDataRole = 0;
+				mLastBuildedDataRange = 0;
+				mLastBuildedDatatype = 0;
 			}
 
 			CExpressionDataBoxMapping::~CExpressionDataBoxMapping() {
 				CMemoryAllocationManager* memAllocMan = CContext::getMemoryAllocationManager(mOntoContext);
 				COPADestroyAndRelease(mClassTermConceptHash,memAllocMan);
 				COPADestroyAndRelease(mConceptClassTermHash,memAllocMan);
+				COPADestroyAndRelease(mDataRangeTermConceptHash,memAllocMan);
+				COPADestroyAndRelease(mConceptDataRangeTermHash,memAllocMan);
 				COPADestroyAndRelease(mObjPropTermRoleHash,memAllocMan);
 				COPADestroyAndRelease(mRoleObjPropTermHash,memAllocMan);
+				COPADestroyAndRelease(mDataPropTermRoleHash,memAllocMan);
+				COPADestroyAndRelease(mRoleDataPropTermHash,memAllocMan);
 				COPADestroyAndRelease(mIndividulTermIndiHash,memAllocMan);
 				COPADestroyAndRelease(mIndiIndividulTermHash,memAllocMan);
 
+				COPADestroyAndRelease(mDatatypeExpDatatypeHash,memAllocMan);
+				COPADestroyAndRelease(mDatatypeDatatypeExpHash,memAllocMan);
+
 				COPADestroyAndRelease(mUpdateClassAxiomHash,memAllocMan);
 				COPADestroyAndRelease(mUpdateObjectPropertyAxiomHash,memAllocMan);
+				COPADestroyAndRelease(mUpdateDataPropertyAxiomHash,memAllocMan);
 				COPADestroyAndRelease(mUpdateAssertionAxiomHash,memAllocMan);
 
 				COPADestroyAndRelease(mObjPropTermObjPropAxiomSet,memAllocMan);
 				COPADestroyAndRelease(mObjPropTermObjPropAxiomHash,memAllocMan);
+
+				COPADestroyAndRelease(mDataPropTermDataPropAxiomSet,memAllocMan);
+				COPADestroyAndRelease(mDataPropTermDataPropAxiomHash,memAllocMan);
 
 				COPADestroyAndRelease(mIndiTermAssertionAxiomSet,memAllocMan);
 				COPADestroyAndRelease(mIndiTermAssertionAxiomHash,memAllocMan);
@@ -116,11 +151,17 @@ namespace Konclude {
 				COPADestroyAndRelease(mRoleChainObjPropTermHash,memAllocMan);
 
 				COPADestroyAndRelease(mBuildedConceptSet,memAllocMan);
-				COPADestroyAndRelease(mBuildedRoleSet,memAllocMan);
+				COPADestroyAndRelease(mBuildedObjectRoleSet,memAllocMan);
+				COPADestroyAndRelease(mBuildedDataRoleSet,memAllocMan);
+				COPADestroyAndRelease(mBuildedDataRangeSet,memAllocMan);
+				COPADestroyAndRelease(mBuildedDatatypeSet,memAllocMan);
 				COPADestroyAndRelease(mBuildedIndividualSet,memAllocMan);
 
 				COPADestroyAndRelease(mBuildedIndividualList,memAllocMan);
-				COPADestroyAndRelease(mBuildedRoleList,memAllocMan);
+				COPADestroyAndRelease(mBuildedObjectRoleList,memAllocMan);
+				COPADestroyAndRelease(mBuildedDataRoleList,memAllocMan);
+				COPADestroyAndRelease(mBuildedDataRangeList,memAllocMan);
+				COPADestroyAndRelease(mBuildedDatatypeList,memAllocMan);
 				COPADestroyAndRelease(mBuildedConceptList,memAllocMan);
 
 				COPADestroyAndRelease(mExpressionBuildHash,memAllocMan);
@@ -131,15 +172,23 @@ namespace Konclude {
 			CExpressionDataBoxMapping* CExpressionDataBoxMapping::referenceDataBoxMapping(CExpressionDataBoxMapping* dataBoxMapping) {
 				*mClassTermConceptHash = *dataBoxMapping->mClassTermConceptHash;
 				*mConceptClassTermHash = *dataBoxMapping->mConceptClassTermHash;
+				*mDataRangeTermConceptHash = *dataBoxMapping->mDataRangeTermConceptHash;
+				*mConceptDataRangeTermHash = *dataBoxMapping->mConceptDataRangeTermHash;
 				*mObjPropTermRoleHash = *dataBoxMapping->mObjPropTermRoleHash;
 				*mRoleObjPropTermHash = *dataBoxMapping->mRoleObjPropTermHash;
+				*mDataPropTermRoleHash = *dataBoxMapping->mDataPropTermRoleHash;
+				*mRoleDataPropTermHash = *dataBoxMapping->mRoleDataPropTermHash;
 				*mIndividulTermIndiHash = *dataBoxMapping->mIndividulTermIndiHash;
 				*mIndiIndividulTermHash = *dataBoxMapping->mIndiIndividulTermHash;
+
+				*mDatatypeExpDatatypeHash = *dataBoxMapping->mDatatypeExpDatatypeHash;
+				*mDatatypeDatatypeExpHash = *dataBoxMapping->mDatatypeDatatypeExpHash;
 
 				mActiveEntityCountVector->initActiveEntityCountVector(dataBoxMapping->mActiveEntityCountVector);
 
 				mUpdateClassAxiomHash->clear();
 				mUpdateObjectPropertyAxiomHash->clear();
+				mUpdateDataPropertyAxiomHash->clear();
 				mUpdateAssertionAxiomHash->clear();
 
 				//*mUpdateClassAxiomHash = *dataBoxMapping->mUpdateClassAxiomHash;
@@ -151,6 +200,9 @@ namespace Konclude {
 
 				*mObjPropTermObjPropAxiomSet = *dataBoxMapping->mObjPropTermObjPropAxiomSet;
 				*mObjPropTermObjPropAxiomHash = *dataBoxMapping->mObjPropTermObjPropAxiomHash;
+
+				*mDataPropTermDataPropAxiomSet = *dataBoxMapping->mDataPropTermDataPropAxiomSet;
+				*mDataPropTermDataPropAxiomHash = *dataBoxMapping->mDataPropTermDataPropAxiomHash;
 
 				*mIndiTermAssertionAxiomSet = *dataBoxMapping->mIndiTermAssertionAxiomSet;
 				*mIndiTermAssertionAxiomHash = *dataBoxMapping->mIndiTermAssertionAxiomHash;
@@ -166,21 +218,33 @@ namespace Konclude {
 				mLastProcessedChangedAxiom = dataBoxMapping->mLastProcessedChangedAxiom;
 				mLastProcessedBuildIndividual = dataBoxMapping->mLastProcessedBuildIndividual;
 				mLastProcessedBuildConcept = dataBoxMapping->mLastProcessedBuildConcept;
-				mLastProcessedBuildRole = dataBoxMapping->mLastProcessedBuildRole;
+				mLastProcessedBuildObjectRole = dataBoxMapping->mLastProcessedBuildObjectRole;
+				mLastProcessedBuildDataRole = dataBoxMapping->mLastProcessedBuildDataRole;
+				mLastProcessedBuildDataRange = dataBoxMapping->mLastProcessedBuildDataRange;
+				mLastProcessedBuildDatatype = dataBoxMapping->mLastProcessedBuildDatatype;
 
 				mLastProcessedInverseProperty = dataBoxMapping->mLastProcessedInverseProperty;
 				mLastProcessedExpression = dataBoxMapping->mLastProcessedExpression;
 
 				mLastBuildedIndividual = dataBoxMapping->mLastBuildedIndividual;
 				mLastBuildedConcept = dataBoxMapping->mLastBuildedConcept;
-				mLastBuildedRole = dataBoxMapping->mLastBuildedRole;
+				mLastBuildedObjectRole = dataBoxMapping->mLastBuildedObjectRole;
+				mLastBuildedDataRole = dataBoxMapping->mLastBuildedDataRole;
+				mLastBuildedDataRange = dataBoxMapping->mLastBuildedDataRange;
+				mLastBuildedDatatype = dataBoxMapping->mLastBuildedDatatype;
 
 				*mBuildedIndividualList = *dataBoxMapping->mBuildedIndividualList;
 				*mBuildedConceptList = *dataBoxMapping->mBuildedConceptList;
-				*mBuildedRoleList = *dataBoxMapping->mBuildedRoleList;
+				*mBuildedObjectRoleList = *dataBoxMapping->mBuildedObjectRoleList;
+				*mBuildedDataRoleList = *dataBoxMapping->mBuildedDataRoleList;
+				*mBuildedDataRangeList = *dataBoxMapping->mBuildedDataRangeList;
+				*mBuildedDatatypeList = *dataBoxMapping->mBuildedDatatypeList;
 
 				*mBuildedIndividualSet = *dataBoxMapping->mBuildedIndividualSet;
-				*mBuildedRoleSet = *dataBoxMapping->mBuildedRoleSet;
+				*mBuildedObjectRoleSet = *dataBoxMapping->mBuildedObjectRoleSet;
+				*mBuildedDataRoleSet = *dataBoxMapping->mBuildedDataRoleSet;
+				*mBuildedDatatypeSet = *dataBoxMapping->mBuildedDatatypeSet;
+				*mBuildedDataRangeSet = *dataBoxMapping->mBuildedDataRangeSet;
 				*mBuildedConceptSet = *dataBoxMapping->mBuildedConceptSet;
 
 				*mInverseObjectPropertyHash = *dataBoxMapping->mInverseObjectPropertyHash;
@@ -200,6 +264,7 @@ namespace Konclude {
 			COntologyBuildConstructFlags* CExpressionDataBoxMapping::getBuildConstructFlags() {
 				return &mConstructFlags;
 			}
+
 			CBUILDHASH<CClassTermExpression*,CConcept*>* CExpressionDataBoxMapping::getClassTermConceptMappingHash() {
 				return mClassTermConceptHash;
 			}
@@ -208,6 +273,16 @@ namespace Konclude {
 				return mConceptClassTermHash;
 			}
 
+			CBUILDHASH<CDataRangeTermExpression*,CConcept*>* CExpressionDataBoxMapping::getDataRangeTermConceptMappingHash() {
+				return mDataRangeTermConceptHash;
+			}
+
+			CBUILDHASH<CConcept*,CDataRangeTermExpression*>* CExpressionDataBoxMapping::getConceptDataRangeTermMappingHash() {
+				return mConceptDataRangeTermHash;
+			}
+
+
+
 			CBUILDHASH<CObjectPropertyTermExpression*,CRole*>* CExpressionDataBoxMapping::getObjectPropertyTermRoleMappingHash() {
 				return mObjPropTermRoleHash;
 			}
@@ -215,6 +290,16 @@ namespace Konclude {
 			CBUILDHASH<CRole*,CObjectPropertyTermExpression*>* CExpressionDataBoxMapping::getRoleObjectPropertyTermMappingHash() {
 				return mRoleObjPropTermHash;
 			}
+
+
+			CBUILDHASH<CDataPropertyTermExpression*,CRole*>* CExpressionDataBoxMapping::getDataPropertyTermRoleMappingHash() {
+				return mDataPropTermRoleHash;
+			}
+
+			CBUILDHASH<CRole*,CDataPropertyTermExpression*>* CExpressionDataBoxMapping::getRoleDataPropertyTermMappingHash() {
+				return mRoleDataPropTermHash;
+			}
+
 
 
 			CBUILDHASH<CIndividualTermExpression*,CIndividual*>* CExpressionDataBoxMapping::getIndividulTermIndiMappingHash() {
@@ -226,6 +311,17 @@ namespace Konclude {
 			}
 
 
+
+			CBUILDHASH<CDatatypeExpression*,CDatatype*>* CExpressionDataBoxMapping::getDatatypeExpressionDatatypeHash() {
+				return mDatatypeExpDatatypeHash;
+			}
+
+			CBUILDHASH<CDatatype*,CDatatypeExpression*>* CExpressionDataBoxMapping::getDatatypeDatatypeExpessionHash() {
+				return mDatatypeDatatypeExpHash;
+			}
+
+
+
 			CBUILDHASH<CClassAxiomExpression*,bool>* CExpressionDataBoxMapping::getUpdatedClassAxiomTellOrRetractHash() {
 				return mUpdateClassAxiomHash;
 			}
@@ -233,6 +329,10 @@ namespace Konclude {
 
 			CBUILDHASH<CObjectPropertyAxiomExpression*,bool>* CExpressionDataBoxMapping::getUpdateObjectPropertyAxiomHash() {
 				return mUpdateObjectPropertyAxiomHash;
+			}
+
+			CBUILDHASH<CDataPropertyAxiomExpression*,bool>* CExpressionDataBoxMapping::getUpdateDataPropertyAxiomHash() {
+				return mUpdateDataPropertyAxiomHash;
 			}
 
 			CBUILDHASH<CAssertionAxiomExpression*,bool>* CExpressionDataBoxMapping::getUpdateAssertionAxiomHash() {
@@ -257,6 +357,22 @@ namespace Konclude {
 			CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyAxiomExpression*>* CExpressionDataBoxMapping::getObjectPropertyTermObjectPropertyAxiomHash() {
 				return mObjPropTermObjPropAxiomHash;
 			}
+
+
+
+
+
+			CBUILDSET< QPair<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*> >* CExpressionDataBoxMapping::getDataPropertyTermDataPropertyAxiomSet() {
+				return mDataPropTermDataPropAxiomSet;
+			}
+
+			CBUILDHASH<CDataPropertyTermExpression*,CDataPropertyAxiomExpression*>* CExpressionDataBoxMapping::getDataPropertyTermDataPropertyAxiomHash() {
+				return mDataPropTermDataPropAxiomHash;
+			}
+
+
+
+
 
 
 			CBUILDSET< QPair<CIndividualTermExpression*,CAssertionAxiomExpression*> >* CExpressionDataBoxMapping::getIndividualTermAssertionAxiomSet() {
@@ -291,8 +407,21 @@ namespace Konclude {
 				return mBuildedConceptSet;
 			}
 
-			CBUILDSET<CObjectPropertyTermExpression*>* CExpressionDataBoxMapping::getBuildedRoleSet() {
-				return mBuildedRoleSet;
+			CBUILDSET<CObjectPropertyTermExpression*>* CExpressionDataBoxMapping::getBuildedObjectRoleSet() {
+				return mBuildedObjectRoleSet;
+			}
+
+			CBUILDSET<CDataPropertyTermExpression*>* CExpressionDataBoxMapping::getBuildedDataRoleSet() {
+				return mBuildedDataRoleSet;
+			}
+
+
+			CBUILDSET<CDataRangeTermExpression*>* CExpressionDataBoxMapping::getBuildedDataRangeSet() {
+				return mBuildedDataRangeSet;
+			}
+
+			CBUILDSET<CDatatypeExpression*>* CExpressionDataBoxMapping::getBuildedDatatypeSet() {
+				return mBuildedDatatypeSet;
 			}
 
 			CBUILDSET<CIndividualTermExpression*>* CExpressionDataBoxMapping::getBuildedIndividualSet() {
@@ -323,11 +452,22 @@ namespace Konclude {
 				return mLastBuildedConcept;
 			}
 
-			cint64 CExpressionDataBoxMapping::getLastBuildedRole() {
-				return mLastBuildedRole;
+			cint64 CExpressionDataBoxMapping::getLastBuildedObjectRole() {
+				return mLastBuildedObjectRole;
 			}
 
+			cint64 CExpressionDataBoxMapping::getLastBuildedDataRole() {
+				return mLastBuildedDataRole;
+			}
 
+			cint64 CExpressionDataBoxMapping::getLastBuildedDataRange() {
+				return mLastBuildedDataRange;
+			}
+
+			cint64 CExpressionDataBoxMapping::getLastBuildedDatatype() {
+				return mLastBuildedDatatype;
+
+			}
 			cint64 CExpressionDataBoxMapping::getLastProcessedBuildIndividual() {
 				return mLastProcessedBuildIndividual;
 			}
@@ -336,8 +476,20 @@ namespace Konclude {
 				return mLastProcessedBuildConcept;
 			}
 
-			cint64 CExpressionDataBoxMapping::getLastProcessedBuildRole() {
-				return mLastProcessedBuildRole;
+			cint64 CExpressionDataBoxMapping::getLastProcessedBuildObjectRole() {
+				return mLastProcessedBuildObjectRole;
+			}
+
+			cint64 CExpressionDataBoxMapping::getLastProcessedBuildDataRole() {
+				return mLastProcessedBuildDataRole;
+			}
+
+			cint64 CExpressionDataBoxMapping::getLastProcessedBuildDatatype() {
+				return mLastProcessedBuildDatatype;
+			}
+
+			cint64 CExpressionDataBoxMapping::getLastProcessedBuildDataRange() {
+				return mLastProcessedBuildDataRange;
 			}
 
 			cint64 CExpressionDataBoxMapping::getLastProcessedInverseProperty() {
@@ -364,11 +516,25 @@ namespace Konclude {
 			}
 
 
-			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastProcessedBuildRole(cint64 lastBuilded) {
-				mLastProcessedBuildRole = lastBuilded;
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastProcessedBuildObjectRole(cint64 lastBuilded) {
+				mLastProcessedBuildObjectRole = lastBuilded;
 				return this;
 			}
 
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastProcessedBuildDataRole(cint64 lastBuilded) {
+				mLastProcessedBuildDataRole = lastBuilded;
+				return this;
+			}
+
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastProcessedBuildDatatype(cint64 lastBuilded) {
+				mLastProcessedBuildDatatype = lastBuilded;
+				return this;
+			}
+
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastProcessedBuildDataRange(cint64 lastBuilded) {
+				mLastProcessedBuildDataRange = lastBuilded;
+				return this;
+			}
 
 			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastProcessedInverseProperty(cint64 lastBuilded) {
 				mLastProcessedInverseProperty = lastBuilded;
@@ -391,18 +557,45 @@ namespace Konclude {
 			}
 
 
-			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastBuildedRole(cint64 lastBuilded) {
-				mLastBuildedRole = lastBuilded;
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastBuildedObjectRole(cint64 lastBuilded) {
+				mLastBuildedObjectRole = lastBuilded;
 				return this;
 			}
 
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastBuildedDataRole(cint64 lastBuilded) {
+				mLastBuildedDataRole = lastBuilded;
+				return this;
+			}
+
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastBuildedDataRange(cint64 lastBuilded) {
+				mLastBuildedDataRange = lastBuilded;
+				return this;
+			}
+
+			CExpressionDataBoxMapping* CExpressionDataBoxMapping::setLastBuildedDatatype(cint64 lastBuilded) {
+				mLastBuildedDatatype = lastBuilded;
+				return this;
+			}
 
 			CBUILDLIST<CClassTermExpression*>* CExpressionDataBoxMapping::getBuildedConceptList() {
 				return mBuildedConceptList;
 			}
 
-			CBUILDLIST<CObjectPropertyTermExpression*>* CExpressionDataBoxMapping::getBuildedRoleList() {
-				return mBuildedRoleList;
+			CBUILDLIST<CObjectPropertyTermExpression*>* CExpressionDataBoxMapping::getBuildedObjectRoleList() {
+				return mBuildedObjectRoleList;
+			}
+
+			CBUILDLIST<CDataPropertyTermExpression*>* CExpressionDataBoxMapping::getBuildedDataRoleList() {
+				return mBuildedDataRoleList;
+			}
+
+
+			CBUILDLIST<CDataRangeTermExpression*>* CExpressionDataBoxMapping::getBuildedDataRangeList() {
+				return mBuildedDataRangeList;
+			}
+
+			CBUILDLIST<CDatatypeExpression*>* CExpressionDataBoxMapping::getBuildedDatatypeList() {
+				return mBuildedDatatypeList;
 			}
 
 			CBUILDLIST<CIndividualTermExpression*>* CExpressionDataBoxMapping::getBuildedIndividualList() {

@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -72,7 +72,9 @@ namespace Konclude {
 					}
 
 					CTotallyOntologyPrecomputationItem* totallyPreCompItem = (CTotallyOntologyPrecomputationItem*)ontPreCompItem;
+					
 
+					bool failDebug = false;
 					if (!workTestCreated && totallyPreCompItem->isConsistenceStepRequired()) {
 						if (!totallyPreCompItem->isConsistenceStepFinished()) {
 							if (totallyPreCompItem->areConsistenceStepProcessingRequirementSatisfied()) {
@@ -97,7 +99,16 @@ namespace Konclude {
 								}
 
 
-								if (!totallyPreCompItem->hasConsistenceCheckCreated() && !totallyPreCompItem->isSaturationComputationRunning()) {
+								if (!totallyPreCompItem->isSaturationComputationRunning()) {
+									if (totallyPreCompItem->failAfterConsistencyConceptSaturation()) {
+										totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
+										totallyPreCompItem->getConsistencePrecomputationStep()->setStepFinished(true);
+										failDebug |= true;
+									}
+								}
+
+
+								if (!failDebug && !totallyPreCompItem->hasConsistenceCheckCreated() && !totallyPreCompItem->isSaturationComputationRunning()) {
 									LOG(INFO,getLogDomain(),logTr("Precompute ontology consistency."),this);
 									totallyPreCompItem->setConsistenceCheckCreated(true);
 									workTestCreated = createConsistencePrecomputationCheck(totallyPreCompItem);
@@ -106,11 +117,18 @@ namespace Konclude {
 								if (totallyPreCompItem->hasConsistenceCheched()) {
 									totallyPreCompItem->getConsistencePrecomputationStep()->setStepFinished(true);
 
-									if (totallyPreCompItem->getOntology()->getConsistence()->isOntologyConsistent()) {
-										totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL);
+									if (totallyPreCompItem->failAfterConsistencyChecking()) {
+										totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
+										failDebug |= true;
 									} else {
-										totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL | COntologyProcessingStatus::PSINCONSITENT);
+
+										if (totallyPreCompItem->getOntology()->getConsistence()->isOntologyConsistent()) {
+											totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL);
+										} else {
+											totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL | COntologyProcessingStatus::PSINCONSITENT);
+										}
 									}
+
 								}
 
 							} else {
@@ -146,17 +164,25 @@ namespace Konclude {
 
 									CPrecomputation* precomputation = totallyPreCompItem->getPrecomputation();
 									CSaturationData* saturationData = totallyPreCompItem->getSaturationData();
-									if (!saturationData) {
-										LOG(ERROR,getLogDomain(),logTr("Unknow error in computation, tableau saturation for ontology '%1' failed.").arg(ontPreCompItem->getOntology()->getTerminologyName()),getLogObject());
-										totallyPreCompItem->getSaturationPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
+
+
+									if (totallyPreCompItem->failAfterConceptSaturation()) {
+										totallyPreCompItem->getSaturationPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
+										failDebug |= true;
 									} else {
 
-#ifdef KONCLUDE_PRECOMPUTATION_SATURATION_STATISTIC_OUTPUT
-										logSaturationInfos(totallyPreCompItem);
-#endif
-										extractCommonDisjunctConceptsFromPrecomputedSaturation(totallyPreCompItem);
+										if (!saturationData) {
+											LOG(ERROR,getLogDomain(),logTr("Unknow error in computation, tableau saturation for ontology '%1' failed.").arg(ontPreCompItem->getOntology()->getTerminologyName()),getLogObject());
+											totallyPreCompItem->getSaturationPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
+										} else {
 
-										totallyPreCompItem->getSaturationPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL);
+#ifdef KONCLUDE_PRECOMPUTATION_SATURATION_STATISTIC_OUTPUT
+											logSaturationInfos(totallyPreCompItem);
+#endif
+											extractCommonDisjunctConceptsFromPrecomputedSaturation(totallyPreCompItem);
+
+											totallyPreCompItem->getSaturationPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL);
+										}
 									}
 								}
 
@@ -530,10 +556,10 @@ namespace Konclude {
 				bool candidateAlternativeExtraction = false;
 				if (!negation && concept->hasClassName()) {
 					if (concept->getOperatorCode() == CCEQ) {
-						CBOXHASH<CConcept*,CConcept*>* eqConHash = totallyPreCompItem->getOntology()->getTBox()->getEquivalentConceptCandidateHash(false);
-						if (eqConHash->contains(concept)) {
+						//CBOXHASH<CConcept*,CConcept*>* eqConHash = totallyPreCompItem->getOntology()->getTBox()->getEquivalentConceptCandidateHash(false);
+						//if (eqConHash->contains(concept)) {
 							candidateAlternativeExtraction = true;
-						}
+						//}
 					}
 					for (CSortedNegLinker<CConcept*>* opConIt = concept->getOperandList(); opConIt; opConIt = opConIt->getNext()) {
 						CConcept* opConcept = opConIt->getData();
@@ -557,6 +583,18 @@ namespace Konclude {
 							CConcept* opConcept = opConIt->getData();
 							bool opNegation = opConIt->isNegated()^nextNegation;
 							conNegPairList.append(TConceptNegPair(opConcept,opNegation));
+						}
+
+					} else if (nOpCode == CCAQCHOOCE) {
+						for (CSortedNegLinker<CConcept*>* opConIt = nextConcept->getOperandList(); opConIt; opConIt = opConIt->getNext()) {
+							CConcept* opConcept = opConIt->getData();
+							bool opNegation = opConIt->isNegated();
+							if (nextNegation == opNegation) {
+								conNegPairList.append(TConceptNegPair(opConcept,opNegation));
+							}
+							if (candidateAlternativeExtraction && nextNegation != opNegation) {
+								conNegPairList.append(TConceptNegPair(opConcept,!opNegation));
+							}
 						}
 
 					} else if (nextNegation && ((nOpCode == CCAND || nOpCode == CCEQ) && opCount > 1) || !nextNegation && nOpCode == CCOR) {
@@ -600,7 +638,7 @@ namespace Konclude {
 
 
 
-					} else if (!nextNegation && nOpCode == CCALL || nextNegation && nOpCode == CCSOME) {
+					} else if (!nextNegation && (nOpCode == CCALL) || nextNegation && (nOpCode == CCSOME || nOpCode == CCAQSOME)) {
 						if (candidateAlternativeExtraction) {
 							// saturate pseudo models to invalidate candidates concepts
 
@@ -660,32 +698,37 @@ namespace Konclude {
 
 
 			bool CTotallyPrecomputationThread::addIdentifiedRemainingConsistencyRequiredConcepts(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
-				CConcept* topConcept = totallyPreCompItem->getOntology()->getTBox()->getTopConcept();
+
 				bool constConReqSatAdded = false;
-				if (topConcept->getOperandList() != nullptr) {
-					totallyPreCompItem->addConsistencyRequiredSaturationConcept(topConcept,false);
-					constConReqSatAdded = true;
-				}
-				CIndividualVector* indiVec = totallyPreCompItem->getOntology()->getABox()->getIndividualVector(false);
-				if (indiVec) {
-					QSet<TConceptNegPair> assConNegPairSet;
-					cint64 indiCount = indiVec->getItemCount();
-					for (cint64 indiId = 0; indiId < indiCount; ++indiId) {
-						CIndividual* indi = indiVec->getData(indiId);
-						if (indi) {
-							for (CConceptAssertionLinker* conAssLinkIt = indi->getAssertionConceptLinker(); conAssLinkIt; conAssLinkIt = conAssLinkIt->getNext()) {
-								CConcept* assCon = conAssLinkIt->getData();
-								bool assConNeg = conAssLinkIt->isNegated();
-								if (assCon->getOperatorCode() != CCNOMINAL) {
-									assConNegPairSet.insert(TConceptNegPair(assCon,assConNeg));
+				bool saturateConcepts = CConfigDataReader::readConfigBoolean(totallyPreCompItem->getCalculationConfiguration(),"Konclude.Calculation.Optimization.ConceptSaturation",true);
+
+				if (saturateConcepts) {
+					CConcept* topConcept = totallyPreCompItem->getOntology()->getTBox()->getTopConcept();
+					if (topConcept->getOperandList() != nullptr) {
+						totallyPreCompItem->addConsistencyRequiredSaturationConcept(topConcept,false);
+						constConReqSatAdded = true;
+					}
+					CIndividualVector* indiVec = totallyPreCompItem->getOntology()->getABox()->getIndividualVector(false);
+					if (indiVec) {
+						QSet<TConceptNegPair> assConNegPairSet;
+						cint64 indiCount = indiVec->getItemCount();
+						for (cint64 indiId = 0; indiId < indiCount; ++indiId) {
+							CIndividual* indi = indiVec->getData(indiId);
+							if (indi) {
+								for (CConceptAssertionLinker* conAssLinkIt = indi->getAssertionConceptLinker(); conAssLinkIt; conAssLinkIt = conAssLinkIt->getNext()) {
+									CConcept* assCon = conAssLinkIt->getData();
+									bool assConNeg = conAssLinkIt->isNegated();
+									if (assCon->getOperatorCode() != CCNOMINAL) {
+										assConNegPairSet.insert(TConceptNegPair(assCon,assConNeg));
+									}
 								}
 							}
 						}
-					}
-					for (QSet<TConceptNegPair>::const_iterator it = assConNegPairSet.constBegin(), itEnd = assConNegPairSet.constEnd(); it != itEnd; ++it) {
-						constConReqSatAdded = true;
-						TConceptNegPair assConNegPair(*it);
-						totallyPreCompItem->addConsistencyRequiredSaturationConcept(assConNegPair.first,assConNegPair.second);
+						for (QSet<TConceptNegPair>::const_iterator it = assConNegPairSet.constBegin(), itEnd = assConNegPairSet.constEnd(); it != itEnd; ++it) {
+							constConReqSatAdded = true;
+							TConceptNegPair assConNegPair(*it);
+							totallyPreCompItem->addConsistencyRequiredSaturationConcept(assConNegPair.first,assConNegPair.second);
+						}
 					}
 				}
 				
@@ -786,6 +829,22 @@ namespace Konclude {
 										}		
 									} else {
 										conNegPairList.append(TConceptNegPair(opConcept,opNegation));
+									}
+								}
+							}
+						} else if (nOpCode == CCAQCHOOCE) {
+							for (CSortedNegLinker<CConcept*>* opConIt = nextConcept->getOperandList(); opConIt; opConIt = opConIt->getNext()) {
+								CConcept* opConcept = opConIt->getData();
+								if (opConIt->isNegated() == nextNegation) {
+									CSaturationConceptDataItem* opMarkingItem = totallyPreCompItem->getSaturationConceptDataItem(opConcept,false,false);
+									if (opMarkingItem) {
+										if (!opMarkingItem->isItemProcessingMarked()) {
+											++markedConcepts;
+											opMarkingItem->setItemProcessingMarked(true);
+											itemList.append(opMarkingItem);
+										}		
+									} else {
+										conNegPairList.append(TConceptNegPair(opConcept,false));
 									}
 								}
 							}
@@ -941,11 +1000,12 @@ namespace Konclude {
 
 			void CTotallyPrecomputationThread::createSaturationConstructionJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
 
-				CTBox *tBox = totallyPreCompItem->getOntology()->getDataBoxes()->getTBox();
+				CTBox* tBox = totallyPreCompItem->getOntology()->getDataBoxes()->getTBox();
 
 				CConcreteOntology *onto = totallyPreCompItem->getOntology();
-				CConcept *topConcept = onto->getDataBoxes()->getTopConcept();
-				CConcept *bottomConcept = onto->getDataBoxes()->getBottomConcept();
+				CConcept* topConcept = onto->getDataBoxes()->getTopConcept();
+				CConcept* bottomConcept = onto->getDataBoxes()->getBottomConcept();
+				CConcept* topDataRangeConcept = tBox->getTopDataRangeConcept();
 
 				CConceptVector* conVec = tBox->getConceptVector();
 
@@ -957,6 +1017,7 @@ namespace Konclude {
 
 
 
+				bool saturateConcepts = CConfigDataReader::readConfigBoolean(totallyPreCompItem->getCalculationConfiguration(),"Konclude.Calculation.Optimization.ConceptSaturation",true);
 
 				cint64 statExistsConceptCount = 0;
 				cint64 statClassCount = 0;
@@ -967,87 +1028,95 @@ namespace Konclude {
 				QList<CSaturationConceptDataItem*> disjunctionCandidateAlternativeList;
 
 				cint64 conCount = conVec->getItemCount();
-				for (cint64 conIdx = 1; conIdx < conCount; ++conIdx) {
-					CConcept* concept = conVec->getData(conIdx);
+				if (saturateConcepts) {
+					for (cint64 conIdx = 1; conIdx < conCount; ++conIdx) {
+						CConcept* concept = conVec->getData(conIdx);
 
-					//if (CIRIName::getRecentIRIName(concept->getClassNameLinker()) == "file:F:/Projects/OIL/DAMLOilEd/ontologies/ka.daml#Publication") {
-					//	bool bug = true;
-					//}
+						//if (CIRIName::getRecentIRIName(concept->getClassNameLinker()) == "file:F:/Projects/OIL/DAMLOilEd/ontologies/ka.daml#Publication") {
+						//	bool bug = true;
+						//}
 
-					if (concept) {
-						cint64 opCode = concept->getOperatorCode();
-						if (opCode == CCSOME || opCode == CCALL || opCode == CCAQSOME || opCode == CCATLEAST || opCode == CCATMOST) {
-							++statExistsConceptCount;
-							bool negation = opCode == CCALL;
-							CRole* role = concept->getRole();
-							CSortedNegLinker<CConcept*>* opLinker = concept->getOperandList();
-							CConcept* opConcept = nullptr;
-							bool opNegation = false;
-							if (opLinker) {
-								opConcept = opLinker->getData();
-								if (opCode == CCATLEAST || opCode == CCATMOST) {
-									opNegation = opLinker->isNegated();
+						if (concept) {
+							cint64 opCode = concept->getOperatorCode();
+							if (opCode == CCSOME || opCode == CCALL || opCode == CCAQSOME || opCode == CCATLEAST || opCode == CCATMOST) {
+								++statExistsConceptCount;
+								bool negation = opCode == CCALL;
+								CRole* role = concept->getRole();
+								CSortedNegLinker<CConcept*>* opLinker = concept->getOperandList();
+								CConcept* opConcept = nullptr;
+								bool opNegation = false;
+								if (opLinker) {
+									opConcept = opLinker->getData();
+									if (opCode == CCATLEAST || opCode == CCATMOST) {
+										opNegation = opLinker->isNegated();
+									} else {
+										opNegation = opLinker->isNegated()^negation;
+									}
 								} else {
-									opNegation = opLinker->isNegated()^negation;
+									opConcept = topConcept;
+									if (opCode == CCATLEAST || opCode == CCATMOST) {
+										opNegation = false;
+									} else {
+										opNegation = negation;
+									}
 								}
-							} else {
-								opConcept = topConcept;
-								if (opCode == CCATLEAST || opCode == CCATMOST) {
-									opNegation = false;
+
+
+								if (hasRoleRanges(totallyPreCompItem,role)) {
+									CSaturationConceptDataItem* conItem = nullptr;
+									conItem = totallyPreCompItem->getSaturationRoleSuccessorConceptDataItem(role,opConcept,opNegation,true);
+									conItem->setPotentiallyExistInitializationConcept(true);
+									existConList.append(conItem);
+									if (role->isDataRole()) {
+										conItem->setDataRangeConcept(true);
+									}
+
+									CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
+									CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
+									if (!conRefSatLinking) {
+										conRefSatLinking = new CConceptSaturationReferenceLinkingData();
+										conProcData->setConceptReferenceLinking(conRefSatLinking);
+									}
+									if (conRefSatLinking->getExistentialSuccessorConceptSaturationReferenceLinkingData() == nullptr) {
+										conRefSatLinking->setExistentialSuccessorConceptSaturationReferenceLinkingData(conItem);
+										allConItemList.append(conItem);
+									}
+
 								} else {
-									opNegation = negation;
+									CSaturationConceptDataItem* conItem = nullptr;
+									conItem = totallyPreCompItem->getSaturationConceptDataItem(opConcept,opNegation,true);
+									conItem->setPotentiallyExistInitializationConcept(true);
+									existConList.append(conItem);
+									if (role->isDataRole()) {
+										conItem->setDataRangeConcept(true);
+									}
+
+									CConceptProcessData* opConProcData = (CConceptProcessData*)opConcept->getConceptData();
+									CConceptSaturationReferenceLinkingData* opConRefSatLinking = (CConceptSaturationReferenceLinkingData*)opConProcData->getConceptReferenceLinking();
+									if (!opConRefSatLinking) {
+										opConRefSatLinking = new CConceptSaturationReferenceLinkingData();
+										opConProcData->setConceptReferenceLinking(opConRefSatLinking);
+									}
+									if (opConRefSatLinking->getConceptSaturationReferenceLinkingData(opNegation) == nullptr) {
+										opConRefSatLinking->setSaturationReferenceLinkingData(conItem,opNegation);
+										allConItemList.append(conItem);
+									}
 								}
-							}
 
+							} else if (concept->hasClassName() || concept == topDataRangeConcept) {
 
-							if (hasRoleRanges(totallyPreCompItem,role)) {
-								CSaturationConceptDataItem* conItem = nullptr;
-								conItem = totallyPreCompItem->getSaturationRoleSuccessorConceptDataItem(role,opConcept,opNegation,true);
-								conItem->setPotentiallyExistInitializationConcept(true);
-								existConList.append(conItem);
-
+								++statClassCount;
 								CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
 								CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
 								if (!conRefSatLinking) {
 									conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 									conProcData->setConceptReferenceLinking(conRefSatLinking);
 								}
-								if (conRefSatLinking->getExistentialSuccessorConceptSaturationReferenceLinkingData() == nullptr) {
-									conRefSatLinking->setExistentialSuccessorConceptSaturationReferenceLinkingData(conItem);
+								if (conRefSatLinking->getConceptSaturationReferenceLinkingData(false) == nullptr) {
+									CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(concept,false,true);
+									conRefSatLinking->setSaturationReferenceLinkingData(conItem,false);
 									allConItemList.append(conItem);
 								}
-
-							} else {
-								CSaturationConceptDataItem* conItem = nullptr;
-								conItem = totallyPreCompItem->getSaturationConceptDataItem(opConcept,opNegation,true);
-								conItem->setPotentiallyExistInitializationConcept(true);
-								existConList.append(conItem);
-
-								CConceptProcessData* opConProcData = (CConceptProcessData*)opConcept->getConceptData();
-								CConceptSaturationReferenceLinkingData* opConRefSatLinking = (CConceptSaturationReferenceLinkingData*)opConProcData->getConceptReferenceLinking();
-								if (!opConRefSatLinking) {
-									opConRefSatLinking = new CConceptSaturationReferenceLinkingData();
-									opConProcData->setConceptReferenceLinking(opConRefSatLinking);
-								}
-								if (opConRefSatLinking->getConceptSaturationReferenceLinkingData(opNegation) == nullptr) {
-									opConRefSatLinking->setSaturationReferenceLinkingData(conItem,opNegation);
-									allConItemList.append(conItem);
-								}
-							}
-
-						} else if (concept->hasClassName()) {
-
-							++statClassCount;
-							CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
-							CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
-							if (!conRefSatLinking) {
-								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
-								conProcData->setConceptReferenceLinking(conRefSatLinking);
-							}
-							if (conRefSatLinking->getConceptSaturationReferenceLinkingData(false) == nullptr) {
-								CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(concept,false,true);
-								conRefSatLinking->setSaturationReferenceLinkingData(conItem,false);
-								allConItemList.append(conItem);
 							}
 						}
 					}

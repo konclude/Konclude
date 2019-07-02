@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -86,6 +86,9 @@ namespace Konclude {
 						bool hasMissedABoxConsistencyFlag();
 						CIndividualSaturationProcessNodeStatusFlags* setMissedABoxConsistencyFlag(bool value);
 
+						bool hasSuccessorNodeExtensionsFlag();
+						CIndividualSaturationProcessNodeStatusFlags* setSuccessorNodeExtensionsFlag(bool value);
+
 						bool hasFlags(cint64 flags, bool checkAllFlags);
 						bool hasFlags(CIndividualSaturationProcessNodeStatusFlags* flags, bool checkAllFlags);
 						CIndividualSaturationProcessNodeStatusFlags* setFlags(cint64 flags, bool value);
@@ -103,6 +106,7 @@ namespace Konclude {
 						const static cint64 INDSATFLAGEQCANDPROPLEMATIC			= 0x0010;
 						const static cint64 INDSATFLAGCARDINALITYPROPLEMATIC	= 0x0020;
 						const static cint64 INDMISSEDABOXCONSISTENCYDATA		= 0x0040;
+						const static cint64 INDSUCCESSORNODEEXTENSIONS			= 0x0080;
 
 
 						const static cint64 INDSATFLAGINITIALIZED				= 0x0100;

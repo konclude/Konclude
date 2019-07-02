@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 #include "CLogger.h"
@@ -29,9 +29,9 @@ namespace Konclude {
 
 	namespace Logger {
 
-		CLogger *CLogger::instance=0;
+		CLogger *CLogger::mInstance=0;
 
-		QMutex *CLogger::lockCreatingMoreInstances = new QMutex();
+		QMutex *CLogger::mInstanceCreationMutex = new QMutex();
 
 
 		CLogger::CLogger()
@@ -44,6 +44,10 @@ namespace Konclude {
 
 			nextMessageID = 0;
 
+			mMaxLogMessageCount = -1;
+			mMinLoggingLevel = 0;
+			mCurrentLogMessageCount = 0;
+
 			startThread();
 		}
 
@@ -55,13 +59,13 @@ namespace Konclude {
 
 
 		void CLogger::shutdownLogger() {
-			lockCreatingMoreInstances->lock();
-			instance->stopThread();
+			mInstanceCreationMutex->lock();
+			mInstance->stopThread();
 			// wait until the thread is stopped
-			instance->wait();
-			delete instance;
-			instance = 0;
-			lockCreatingMoreInstances->unlock();
+			mInstance->wait();
+			delete mInstance;
+			mInstance = 0;
+			mInstanceCreationMutex->unlock();
 		}
 
 
@@ -86,10 +90,23 @@ namespace Konclude {
 		}
 
 
+		double CLogger::getMinLoggingLevel() {
+			return mMinLoggingLevel;
+		}
+
+
+		bool CLogger::hasMinLoggingLevel(double level) {
+			return level >= mMinLoggingLevel;
+		}
+
+
+		void CLogger::configureLogger(qint64 maxLogMessages, double minLoggingLevel) {
+			postEvent(new CConfigureLoggerEvent(maxLogMessages,minLoggingLevel));
+		}
+
+
 		void CLogger::addLogMessage(QString message, double level, QString domain, void *object) {
-			//if (level >= 40) {
-				postEvent(new CLoggingEvent(new CLogMessage(domain,message,level,object)));
-			//}
+			postEvent(new CLoggingEvent(new CLogMessage(domain,message,level,object)));
 		}
 
 		void CLogger::addLogObserver(CAbstractLogObserver *observer, double level, QStringList domains) {
@@ -181,6 +198,19 @@ namespace Konclude {
 
 
 
+		bool CLogger::deleteOldLogMessages() {
+			bool messagesDeleted = false;
+			if (mCurrentLogMessageCount > mMaxLogMessageCount && mMaxLogMessageCount >= 0) {
+				while (mCurrentLogMessageCount > mMaxLogMessageCount && !loglist.isEmpty()) {
+					CLogMessage* deleteLM = loglist.takeLast();
+					idMessageHash.remove(deleteLM->getLogID());
+					delete deleteLM;
+					messagesDeleted = true;
+					--mCurrentLogMessageCount;
+				}
+			}	
+			return messagesDeleted;
+		}
 
 
 
@@ -203,22 +233,35 @@ namespace Konclude {
 
 				lm->setLogID(nextMessageID);
 				idMessageHash.insert(nextMessageID,lm);
-				nextMessageID++;
+				++nextMessageID;
+				++mCurrentLogMessageCount;
 
-				addLogMessageToDomainHash("::",lm);
+				propagateLogMessageToDomain("::",lm);
 
 				QString accDomain;
 
 				foreach (QString endDomain, domainList) {
 					accDomain.append("::");
 					accDomain.append(endDomain);
-					addLogMessageToDomainHash(accDomain,lm);
-					addLogMessageToDomainHash(endDomain,lm);
+					propagateLogMessageToDomain(accDomain,lm);
+					propagateLogMessageToDomain(endDomain,lm);
 				}
 				observerSyncMutex.unlock();
 
+				deleteOldLogMessages();
+
 				return true;
 
+			} else if (type == Konclude::Logger::EVENTCONFIGURELOGGER) {
+				SETTASKDESCRIPTION("Configure Logger");
+				CConfigureLoggerEvent* cle = (CConfigureLoggerEvent *)event;
+
+				mMaxLogMessageCount = cle->getMaxLogMessageCount();
+				mMinLoggingLevel = cle->getMinLoggingLevel();
+
+				deleteOldLogMessages();
+
+				return true;
 
 			} else if (type == Konclude::Logger::EVENTRELEASELOGMESSAGES) {
 				SETTASKDESCRIPTION("Release Log Message");
@@ -256,8 +299,6 @@ namespace Konclude {
 					domainGetSet.insert(domain);
 				}
 
-				QSet<qint64> messageHash;
-
 				QLinkedList<void *> objectList = rlm->getObjects();
 
 				for (qint64 startID = qMax(beginID,lastInMemoryMessage); startID != endID; ++startID) {
@@ -268,24 +309,33 @@ namespace Konclude {
 						double logLevel = message->getLogLevel();
 						if (logLevel >= beginLevel && logLevel <= endLevel) {
 
-							if (messageDomainHash.contains((qint64)message)) {
-								QList<CLogDomain *> domainList(messageDomainHash.values((qint64)message));
-
-								foreach (CLogDomain *domain, domainList) {
-									QString strDomain = domain->getDomain();
-									if (domainGetList.isEmpty() || domainGetSet.contains(strDomain)) {
-										
-										if (!messageHash.contains((qint64)message)) {
-											messageHash.insert((qint64)message);
-											logMessageContext->addLogMessage(message);
-											message->incLockCount();
+							bool messageRequested = false;
+							if (domainGetList.isEmpty()) {
+								messageRequested = true;
+							} else {
+								if (domainGetSet.contains("::")) {
+									messageRequested = true;
+								} else {
+									QStringList domainList(message->getDomain().split("::",QString::SkipEmptyParts));
+									QString accDomain;
+									foreach (const QString& endDomain, domainList) {
+										accDomain.append("::");
+										accDomain.append(endDomain);
+										if (domainGetSet.contains(accDomain) || domainGetSet.contains(endDomain)) {
+											messageRequested = true;
+											break;
 										}
-
 									}
+
 								}
-
-
 							}
+
+
+							if (messageRequested) {
+								logMessageContext->addLogMessage(message);
+								message->incLockCount();
+							}
+										
 						}
 
 
@@ -303,17 +353,10 @@ namespace Konclude {
 		}
 
 
-		void CLogger::addLogMessageToDomainHash(QString domain, CLogMessage *message) {
-			CLogDomain *logDomain = 0;
-			if (domainHash.contains(domain)) {
-				logDomain = domainHash.value(domain);
-			} else {
-				logDomain = new CLogDomain(domain);
-				domainHash.insert(domain,logDomain);
-			}
+		void CLogger::propagateLogMessageToDomain(QString domain, CLogMessage *message) {
+			CLogDomain *logDomain = domainHash.value(domain);
 			if (logDomain) {
-				messageDomainHash.insertMulti((qint64)message,logDomain);
-				logDomain->addAndPostLogMessage(message);
+				logDomain->postLogMessage(message);
 			}
 		}
 
@@ -327,16 +370,16 @@ namespace Konclude {
 		}
 
 
-		// returns the Instance of the CLogger and creates it when neccessary
+		// returns the Instance of the CLogger and creates it when necessary
 		CLogger *CLogger::getInstance() {
-			if (instance == 0) {
-				lockCreatingMoreInstances->lock();
-				if (instance == 0) {
-					instance = new CLogger();
+			if (mInstance == nullptr) {
+				mInstanceCreationMutex->lock();
+				if (mInstance == 0) {
+					mInstance = new CLogger();
 				}
-				lockCreatingMoreInstances->unlock();
+				mInstanceCreationMutex->unlock();
 			}
-			return instance;
+			return mInstance;
 		}
 
 

@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -34,6 +34,7 @@ namespace Konclude {
 					mProcessContext = processContext;
 					mDistinctMergedNodesSet = nullptr;
 					mMergingNodesLinker = nullptr;
+					mNominalMergingNodesLinker = nullptr;
 					mMergingInitNodesLinker = nullptr;
 					mOnlyPosQualifyNodesLinker = nullptr;
 					mOnlyNegQualifyNodesLinker = nullptr;
@@ -68,6 +69,7 @@ namespace Konclude {
 						if (prevRest->mLastDistinctMergedNodesSet) {
 							mLastDistinctMergedNodesSet = prevRest->mLastDistinctMergedNodesSet;
 						}
+						mNominalMergingNodesLinker = prevRest->mNominalMergingNodesLinker;
 						mMergingNodesLinker = prevRest->mMergingNodesLinker;
 						mMergingInitNodesLinker = prevRest->mMergingInitNodesLinker;
 						mOnlyPosQualifyNodesLinker = prevRest->mOnlyPosQualifyNodesLinker;
@@ -90,6 +92,7 @@ namespace Konclude {
 					} else {
 						mDistinctMergedNodesSet = nullptr;
 						mMergingNodesLinker = nullptr;
+						mNominalMergingNodesLinker = nullptr;
 						mMergingInitNodesLinker = nullptr;
 						mOnlyPosQualifyNodesLinker = nullptr;
 						mOnlyNegQualifyNodesLinker = nullptr;
@@ -152,29 +155,40 @@ namespace Konclude {
 					CBranchingMergingIndividualNodeCandidateLinker* tmpMergingNodeLinker = nullptr;
 					tmpMergingNodeLinker = takeNextMergingInitializationCandidateNodeLinker();
 					if (!tmpMergingNodeLinker) {
-						tmpMergingNodeLinker = mMergingNodesLinker;
-						if (mMergingNodesLinker) {
+						tmpMergingNodeLinker = mNominalMergingNodesLinker;
+						if (mNominalMergingNodesLinker) {
 							--mRemainingLinkerMergingCandidateIndiNodeCount;
 							--mRemainingValidMergingCandidateIndiNodeCount;
-							mMergingNodesLinker = mMergingNodesLinker->getNext();
+							mNominalMergingNodesLinker = mNominalMergingNodesLinker->getNext();
+						}
+						if (!tmpMergingNodeLinker) {
+							tmpMergingNodeLinker = mMergingNodesLinker;
+							if (mMergingNodesLinker) {
+								--mRemainingLinkerMergingCandidateIndiNodeCount;
+								--mRemainingValidMergingCandidateIndiNodeCount;
+								mMergingNodesLinker = mMergingNodesLinker->getNext();
+							}
 						}
 					}
 					return tmpMergingNodeLinker;
 				}
 
 				CBranchingMergingProcessingRestrictionSpecification* CBranchingMergingProcessingRestrictionSpecification::addMergingCandidateNodeLinker(CBranchingMergingIndividualNodeCandidateLinker* linker) {
-					if (linker) {
+					while (linker) {
 						CBranchingMergingIndividualNodeCandidateLinker* linkerIt = linker;
-						while (linkerIt) {
-							if (!mAddedBlockablePredMergingNodeCandidate && linkerIt->isCandidateBlockableAndCreator()) {
-								mAddedBlockablePredDepTrackPoint = linkerIt->getMergingIndividualLink()->getDependencyTrackPoint();
-								mAddedBlockablePredMergingNodeCandidate = true;
-							}
-							++mRemainingLinkerMergingCandidateIndiNodeCount;
-							++mRemainingValidMergingCandidateIndiNodeCount;
-							linkerIt = linkerIt->getNext();
+						linker = linker->getNext();
+						linkerIt->clearNext();
+						if (!mAddedBlockablePredMergingNodeCandidate && linkerIt->isCandidateBlockableAndCreator()) {
+							mAddedBlockablePredDepTrackPoint = linkerIt->getMergingIndividualLink()->getDependencyTrackPoint();
+							mAddedBlockablePredMergingNodeCandidate = true;
 						}
-						mMergingNodesLinker = linker->append(mMergingNodesLinker);
+						++mRemainingLinkerMergingCandidateIndiNodeCount;
+						++mRemainingValidMergingCandidateIndiNodeCount;
+						if (linkerIt->getMergingIndividualNodeCandidate()->isNominalIndividual()) {
+							mNominalMergingNodesLinker = linkerIt->append(mNominalMergingNodesLinker);
+						} else {
+							mMergingNodesLinker = linkerIt->append(mMergingNodesLinker);
+						}
 					}
 					return this;
 				}
@@ -305,7 +319,7 @@ namespace Konclude {
 
 
 				bool CBranchingMergingProcessingRestrictionSpecification::hasRemainingMergingCandidates() {
-					return mMergingNodesLinker != nullptr || mMergingInitNodesLinker != nullptr;
+					return mNominalMergingNodesLinker != nullptr || mMergingNodesLinker != nullptr || mMergingInitNodesLinker != nullptr;
 				}
 
 				bool CBranchingMergingProcessingRestrictionSpecification::hasMergingInitializationCandidates() {
@@ -330,6 +344,12 @@ namespace Konclude {
 					mRemainingNominalCreationCount = nomCount;
 					return this;
 				}
+
+				CBranchingMergingProcessingRestrictionSpecification* CBranchingMergingProcessingRestrictionSpecification::decRemainingNominalCreationCount(cint64 decCount) {
+					mRemainingNominalCreationCount -= decCount;
+					return this;
+				}
+
 
 				cint64 CBranchingMergingProcessingRestrictionSpecification::getRemainingNominalCreationCount() {
 					return mRemainingNominalCreationCount;

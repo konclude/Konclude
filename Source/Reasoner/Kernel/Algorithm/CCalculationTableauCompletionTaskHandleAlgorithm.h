@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -44,6 +44,9 @@
 #include "CReuseCompletionGraphCacheHandler.h"
 #include "CCompletionGraphCacheHandler.h"
 #include "CConceptNominalSchemaGroundingHandler.h"
+#include "CSaturationNodeExpansionCacheHandler.h"
+#include "CDatatypeIndividualProcessNodeHandler.h"
+#include "CComputedConsequencesCacheHandler.h"
 
 // Other includes
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationTask.h"
@@ -94,6 +97,7 @@
 #include "Reasoner/Kernel/Strategy/CConceptProcessingPriorityStrategy.h"
 #include "Reasoner/Kernel/Strategy/CIndividualProcessingPriorityStrategy.h"
 #include "Reasoner/Kernel/Strategy/CTaskProcessingPriorityStrategy.h"
+#include "Reasoner/Kernel/Strategy/CEqualDepthCacheOrientatedProcessingPriorityStrategy.h"
 #include "Reasoner/Kernel/Strategy/CConcreteConceptProcessingOperatorPriorityStrategy.h"
 #include "Reasoner/Kernel/Strategy/CIndividualAncestorDepthMaximumConceptProcessingPriorityStrategy.h"
 #include "Reasoner/Kernel/Strategy/CEqualDepthTaskProcessingPriorityStrategy.h"
@@ -135,24 +139,6 @@ namespace Konclude {
 
 			namespace Algorithm {
 
-#ifdef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
-#define KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(a)
-#define KONCLUCE_TASK_ALGORITHM_CLASH_STRING_INSTRUCTION(a)
-
-#define KONCLUCE_TASK_ALGORITHM_TIME_MEASURE_INSTRUCTION(a)
-
-#else
-
-//#define KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(a) a
-#define KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(a)
-
-//#define KONCLUCE_TASK_ALGORITHM_CLASH_STRING_INSTRUCTION(a) a
-#define KONCLUCE_TASK_ALGORITHM_CLASH_STRING_INSTRUCTION(a) 
-
-#define KONCLUCE_TASK_ALGORITHM_TIME_MEASURE_INSTRUCTION(a) a
-//#define KONCLUCE_TASK_ALGORITHM_TIME_MEASURE_INSTRUCTION(a)
-
-#endif
 
 				/*! 
 				 *
@@ -166,7 +152,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CCalculationTableauCompletionTaskHandleAlgorithm(CUnsatisfiableCacheHandler* unsatCacheHandler, CSatisfiableExpanderCacheHandler* satExpCacheHandler, CReuseCompletionGraphCacheHandler* reuseCompGraphCacheHandler);
+						CCalculationTableauCompletionTaskHandleAlgorithm(CUnsatisfiableCacheHandler* unsatCacheHandler, CSatisfiableExpanderCacheHandler* satExpCacheHandler, CReuseCompletionGraphCacheHandler* reuseCompGraphCacheHandler, CSaturationNodeExpansionCacheHandler* satNodeExpCacheHandler, CComputedConsequencesCacheHandler* compConsCacheHandler);
 
 						//! Destructor
 						virtual ~CCalculationTableauCompletionTaskHandleAlgorithm();
@@ -193,8 +179,15 @@ namespace Konclude {
 
 
 
+						bool installSaturationCachingReactivation(CIndividualProcessNode* indiProcNode, CSaturationNodeAssociatedDependentNominalSet* nominalSet, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool tryInstallSaturationCachingReactivation(CIndividualProcessNode* indiProcNode, CSuccessorConnectedNominalSet* nominalSet, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool reactivateIndividualNodesDueToNominalCachingLoss(CIndividualProcessNode* nominalProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+
+
+
+						bool addCachedComputedTypes(CIndividualProcessNode*& indiProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 
@@ -216,6 +209,10 @@ namespace Konclude {
 
 
 						bool isIndividualNodeValidBlocker(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+						bool rootUnsatisfiabilityWriteCaches(CSatisfiableCalculationTask* task, CCalculationAlgorithmContextBase* calcAlgContext);
+
 
 						void clashedBacktracking(CClashedDependencyDescriptor* clashes, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool cancellationRootTask(CCalculationAlgorithmContextBase* calcAlgContext);
@@ -243,6 +240,9 @@ namespace Konclude {
 						bool reapplySatisfiableCachedAbsorbedGeneratingConcepts(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool reapplySatisfiableCachedAbsorbedDisjunctionConcepts(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
+
+						void checkValueSpaceDistinctSatisfiability(CIndividualProcessNode* processIndi, CCalculationAlgorithmContextBase* calcAlgContext);
+						void triggerValueSpaceConcepts(CIndividualProcessNode* processIndi, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						void tryCompletionGraphReuse(CIndividualProcessNode* processIndi, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -312,7 +312,7 @@ namespace Konclude {
 						bool writeSatisfiableCachedIndividualNodesOfUnsatisfiableBranch(CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testAllSuccessorsProcessedAndWriteSatisfiableCache(CIndividualProcessNode* indiNode, CPROCESSINGSET<CIndividualProcessNode*>* processedNodeSet, CSatisfiableExpanderCacheHandler* satExpHandler, CCalculationAlgorithmContextBase* calcAlgContext);
 
-						bool writeSatisfiableCachedIndividualNodes(CCalculationAlgorithmContextBase* calcAlgContext);
+						bool cacheSatisfiableIndividualNodes(CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isSatisfiableCachedProcessingBlocked(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isSatisfiableCachedCompatible(CIndividualProcessNode*& individualNode, CExpanderBranchedLinker* satBranchLinker, CIndividualProcessNode* ancestorIndiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isSatisfiableCachedAutomatConceptCompatible(CIndividualProcessNode*& individualNode, CConcept* concept, bool negated, CIndividualProcessNode* ancestorIndiNode, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -463,6 +463,9 @@ namespace Konclude {
 						void applyNOMINALRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
 						void applyVALUERule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
 						void applyIMPLICATIONRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
+						void applyDATALITERALRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
+						void applyDATARESTRICTIONRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
+						void applyDATATYPERule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						void applyNegAutomatChooseRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -561,7 +564,7 @@ namespace Konclude {
 						bool mergeMergingIndividualNodes(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, cint64 linkCount, cint64 cardinality, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool mergeMergingIndividualNodesPairwise(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, cint64 linkCount, cint64 cardinality, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext);
 						CSatisfiableCalculationTask* createMergeBranchingTask(CIndividualProcessNode*& processIndiNode, CConceptProcessDescriptor*& conProDes, CIndividualProcessNode*& distinctIndiNode, CIndividualProcessNode*& mergingIndiNode, CNonDeterministicDependencyNode* mergeDependencyNode, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext);
-						CSatisfiableCalculationTask* createDistinctBranchingTask(CIndividualProcessNode*& processIndiNode, CConceptProcessDescriptor*& conProDes, CIndividualProcessNode*& distinctIndiNode, CNonDeterministicDependencyNode* mergeDependencyNode, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext);
+						CSatisfiableCalculationTask* createDistinctBranchingTask(CIndividualProcessNode*& processIndiNode, CConceptProcessDescriptor*& conProDes, CIndividualProcessNode*& distinctIndiNode, bool createAsNominal, CNonDeterministicDependencyNode* mergeDependencyNode, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						
 						bool hasSaturatedClashedFlagForConcept(CConcept* concept, bool negation, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -586,6 +589,7 @@ namespace Konclude {
 						bool insertConceptsToIndividualConceptSet(CConceptDescriptor* conceptDescriptor, CDependencyTrackPoint* dependencyTrackPoint, CIndividualProcessNode*& processIndi, CReapplyConceptLabelSet* conLabelSet, CCondensedReapplyQueueIterator* reapplyIt, bool allowInitalization, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool addBlockingCoreConcept(CConceptDescriptor* conceptDescriptor, CIndividualProcessNode*& processIndi, CReapplyConceptLabelSet* conLabelSet, CCalculationAlgorithmContextBase* calcAlgContext);
 
+						bool isConceptUnsatisfiabilitySaturated(CConcept* concept, bool negation, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						bool needsProcessingForConcept(CConceptDescriptor *conceptDescriptor, CDependencyTrackPoint* depTrackPoint, CIndividualProcessNode*& processIndi, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -741,7 +745,7 @@ namespace Konclude {
 
 						CIndividualProcessNode* createNewEmptyIndividual(CCalculationAlgorithmContextBase* calcAlgContext);
 
-						CIndividualProcessNode* createNewIndividual(CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						CIndividualProcessNode* createNewIndividual(CDependencyTrackPoint* depTrackPoint, bool dataNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualLinkEdge* createNewIndividualsLink(CIndividualProcessNode*& indiCreator, CIndividualProcessNode*& indiSource, CIndividualProcessNode*& indiDestination, CRole* ancRole, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualLinkEdge* createNewIndividualsLinkReapplyed(CIndividualProcessNode*& indiCreator, CIndividualProcessNode*& indiSource, CIndividualProcessNode*& indiDestination, CRole* role, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualLinkEdge* createNewIndividualsLinks(CIndividualProcessNode*& indiSource, CIndividualProcessNode*& indiDestination, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -761,20 +765,29 @@ namespace Konclude {
 						CIndividualLinkEdge* getLinkProcessingRestriction(CConceptProcessDescriptor*& conProDes);
 
 
+						void propagateIndividualNodeNewNominalConnectionToAncestors(CIndividualProcessNode*& indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						void propagateIndividualNodeNominalConnectionToAncestors(CIndividualProcessNode*& indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						void propagateIndividualNodeNeighboursNominalConnectionToAncestors(CIndividualProcessNode*& indi, CCalculationAlgorithmContextBase* calcAlgContext);
+						
+						void propagateIndividualNodeNominalConnectionFlagsToAncestors(CIndividualProcessNode*& indi, cint64 nominalPropagationFlags, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						void propagateIndividualNodeConnectedNominalToAncestors(CIndividualProcessNode*& indi, cint64 nominalID, CCalculationAlgorithmContextBase* calcAlgContext);
+						void propagateIndividualNodeNominalConnectionStatusToAncestors(CIndividualProcessNode*& indi, CIndividualProcessNode* copyFromIndiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool isIndividualNodesMergeable(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CClashedDependencyDescriptor*& clashDescriptors, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						CIndividualProcessNode* getMergedIndividualNodes(CIndividualProcessNode*& preferedMergeIntoIndividualNode, CIndividualProcessNode*& individual2, CDependencyTrackPoint* mergeDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 						void mergeIndividualNodeInto(CIndividualProcessNode*& mergeIntoIndividualNode, CIndividualProcessNode*& individual, CDependencyTrackPoint* mergeDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
-						CIndividualProcessNode* getIntoEmptyMergedIndividualNode(CIndividualProcessNode*& mergingIndividualNode, CDependencyTrackPoint* mergeDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						CIndividualProcessNode* getIntoEmptyMergedIndividualNode(CIndividualProcessNode*& mergingIndividualNode, bool createAsNominal, CIndividualProcessNode* mergerNode, CDependencyTrackPoint* mergeDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						QString generateDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext);
 						QString generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext);
 						QString generateDebugIndiStatusString(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
+						QString generateDebugDependentNominalsString(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						QString generateDebugDependencyString(CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 						QStringList generateExtendedDebugConceptSetStringList(CReapplyConceptLabelSet* conSet, CConceptPropagationBindingSetHash* propBindSetHash, CConceptVariableBindingPathSetHash* varBindPathSetHash, CCalculationAlgorithmContextBase* calcAlgContext);
 						void debugTestCriticalConceptSet(QStringList& conSetList, CCalculationAlgorithmContextBase* calcAlgContext);
 
@@ -806,8 +819,10 @@ namespace Konclude {
 						CIndividualConceptBatchProcessingQueue* mVarBindConBatchProcessingQueue;
 						CIndividualUnsortedProcessingQueue* mDelayedNominalProcessingQueue;
 						CIndividualUnsortedProcessingQueue* mRoleAssertionProcessingQueue;
+						CIndividualDepthProcessingQueue* mValueSpaceTriggeringProQueue;
+						CIndividualDepthProcessingQueue* mValueSpaceSatCheckingQueue;
 
-						enum INDINODEQUEUETYPE { INQT_CACHETEST, INQT_IMMEDIATE, INQT_ROLEASS, INQT_DETEXP, INQT_BLOCKREACT, INQT_COMPCACHEDREACT, INQT_BLOCKUP, INQT_DEPTHNORMAL, INQT_NOMINAL, INQT_NOMINALCACHINGLOSSREACTIVATION, INQT_DEPTHFIRST, INQT_OUTDATED, INQT_VARBINDBATCHQUE, INQT_DELAYEDNOMINAL };
+						enum INDINODEQUEUETYPE { INQT_CACHETEST, INQT_IMMEDIATE, INQT_ROLEASS, INQT_DETEXP, INQT_VSTSATTESTING, INQT_VSTRIGGERING, INQT_BLOCKREACT, INQT_COMPCACHEDREACT, INQT_BLOCKUP, INQT_DEPTHNORMAL, INQT_NOMINAL, INQT_NOMINALCACHINGLOSSREACTIVATION, INQT_DEPTHFIRST, INQT_OUTDATED, INQT_VARBINDBATCHQUE, INQT_DELAYEDNOMINAL };
 						INDINODEQUEUETYPE mIndiNodeFromQueueType;
 
 						double mMinConceptProcessingPriorityLevel;
@@ -837,6 +852,9 @@ namespace Konclude {
 						CReuseCompletionGraphCacheHandler* mReuseCompGraphCacheHandler;
 						CConceptNominalSchemaGroundingHandler* mGroundingHandler;
 						CUnsatisfiableCacheRetrievalStrategy* mUnsatCachRetStrategy;
+						CSaturationNodeExpansionCacheHandler* mSatNodeExpCacheHandler;
+						CDatatypeIndividualProcessNodeHandler* mDatatypeHandler;
+						CComputedConsequencesCacheHandler* mCompConsCacheHandler;
 
 						CIndividualProcessNode* mLastUnsatCacheTestedIndiNode;
 						cint64 mLastUnsatCacheTestedIndiNodeConceptSetSize;
@@ -932,6 +950,21 @@ namespace Konclude {
 						bool mConfCompGraphNonDeterministicReuse;
 
 						bool mConfSaturationCachingWithNominals;
+						bool mConfExactNominalDependencyTracking;
+						bool mConfConceptUnsatisfiabilitySaturatedTesting;
+						bool mConfSaturationSatisfiabilitiyExpansionCacheWriting;
+						bool mConfSaturationExpansionCacheReading;
+						bool mConfSaturationCachingTestingDuringBlockingTests;
+						bool mConfSaturationConceptUnsatisfiabilitySaturatedCacheWriting;
+						bool mConfSaturationIncompleteExpansionFromCache;
+
+
+						bool mConfDatatypeReasoning;
+
+
+						bool mConfCacheComputedConsequences;
+						bool mConfAddCachedComputedConsequences;
+
 
 
 						bool mConfDebuggingWriteData;
@@ -1077,6 +1110,8 @@ namespace Konclude {
 						QTime mComplGraphReuseCacheRetrieval;
 
 
+						bool mNominalMerged;
+						cint64 mNominalMergedCount;
 
 					// private methods
 					private:

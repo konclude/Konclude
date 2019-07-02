@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -100,6 +100,12 @@ namespace Konclude {
 					virtual CDeclarationAxiomExpression* getDeclaration(CExpressionEntity* entity);
 
 
+
+					virtual bool addOntologyImport(const QStringRef& name);
+					virtual bool addOntologyImport(const QString& name);
+
+
+
 					// virtual methods from CTBoxAxiomBuilder
 					virtual CClassExpression* getClass(const QString& className);
 					virtual CClassExpression* getClass(const QStringRef& className);
@@ -108,6 +114,61 @@ namespace Konclude {
 
 					virtual CObjectIndividualVariableExpression* getIndividualVariable(const QString &individualVariableName, cint64 axiomNumber);
 					virtual CObjectIndividualVariableExpression* getIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber);
+
+
+					virtual CDataLiteralExpression* getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype);
+
+
+					virtual CDatatypeExpression* getDatatype(const QString& datatypeName);
+					virtual CDatatypeExpression* getDatatype(const QStringRef& datatypeName);
+					virtual CDataLexicalValueExpression* getDataLexicalValue(const QString& dataLexicalValue);
+					virtual CDataLexicalValueExpression* getDataLexicalValue(const QStringRef& dataLexicalValue);
+					virtual CDataPropertyExpression* getDataProberty(const QString& dataPropertyName);
+					virtual CDataPropertyExpression* getDataProberty(const QStringRef& dataPropertyName);
+
+					virtual CDataFacetExpression* getDataFacet(const QString& dataFacetIRI);
+					virtual CDataFacetExpression* getDataFacet(const QStringRef& dataFacetIRI);
+
+					virtual CDataFacetRestrictionExpression* getDataFacetRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataFacetRestrictionExpression* getDataFacetRestriction(CBuildExpression* expression1, CBuildExpression* expression2);
+
+
+					virtual CDataFacetRestrictionExpression* getDataFacetRestriction(CDataLiteralExpression* dataLiteralExpression, CDataFacetExpression* dataFacet);
+
+					virtual CDataHasValueExpression* getDataHasValue(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataHasValueExpression* getDataHasValue(CBuildExpression* expression1, CBuildExpression* expression2);
+
+					virtual CDataSomeValuesFromExpression* getDataSomeValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataSomeValuesFromExpression* getDataSomeValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataAllValuesFromExpression* getDataAllValuesFrom(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataAllValuesFromExpression* getDataAllValuesFrom(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataIntersectionOfExpression* getDataIntersectionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataIntersectionOfExpression* getDataIntersectionOf(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataOneOfExpression* getDataOneOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataOneOfExpression* getDataOneOf(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataUnionOfExpression* getDataUnionOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataUnionOfExpression* getDataUnionOf(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataComplementOfExpression* getDataComplementOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataComplementOfExpression* getDataComplementOf(CBuildExpression* expression);
+					virtual CDatatypeRestrictionExpression* getDatatypeRestriction(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDatatypeRestrictionExpression* getDatatypeRestriction(CBuildExpression* expression1, CBuildExpression* expression2);
+
+
+					virtual CDataMaxCardinalityExpression* getDataMaxCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality);
+					virtual CDataMaxCardinalityExpression* getDataMaxCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality);
+
+					virtual CDataMinCardinalityExpression* getDataMinCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality);
+					virtual CDataMinCardinalityExpression* getDataMinCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality);
+
+					virtual CDataExactCardinalityExpression* getDataExactCardinality(const CEXPRESSIONLIST<CBuildExpression*>& expressions, int cardinality);
+					virtual CDataExactCardinalityExpression* getDataExactCardinality(CBuildExpression* expression1, CBuildExpression* expression2, int cardinality);
+
+					virtual CDataPropertyAssertionExpression* getDataPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataPropertyAssertionExpression* getDataPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3);
+					virtual CNegativeDataPropertyAssertionExpression* getNegativeDataPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CNegativeDataPropertyAssertionExpression* getNegativeDataPropertyAssertion(CBuildExpression* expression1, CBuildExpression* expression2, CBuildExpression* expression3);
+
+
 
 
 					virtual CEquivalentClassesExpression* getEquivalentClasses(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
@@ -136,6 +197,7 @@ namespace Konclude {
 					virtual CObjectHasValueExpression *getObjectHasValue(CBuildExpression *expression1, CBuildExpression *expression2);
 					virtual CObjectHasSelfExpression *getObjectHasSelf(const CEXPRESSIONLIST<CBuildExpression *> &expressions);
 					virtual CObjectHasSelfExpression *getObjectHasSelf(CBuildExpression *expression);
+				
 
 
 					virtual CEquivalentClassesExpression* getEquivalentClasses(const CEXPRESSIONLIST<CClassTermExpression*>& expressions);
@@ -157,12 +219,29 @@ namespace Konclude {
 
 
 
+					virtual CDataHasValueExpression* getDataHasValue(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2);
+					virtual CDataSomeValuesFromExpression* getDataSomeValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2);
+					virtual CDataAllValuesFromExpression* getDataAllValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2);
+					virtual CDataIntersectionOfExpression* getDataIntersectionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions);
+					virtual CDataOneOfExpression* getDataOneOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions);
+					virtual CDataUnionOfExpression* getDataUnionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions);
+					virtual CDataComplementOfExpression* getDataComplementOf(CDataRangeTermExpression* expressions);
+					virtual CDatatypeRestrictionExpression* getDatatypeRestriction(CDatatypeExpression* datatypeExpression, const CEXPRESSIONLIST<CDataFacetRestrictionExpression*>& expressions);
+					
+					virtual CDataMaxCardinalityExpression* getDataMaxCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality);
+					virtual CDataMinCardinalityExpression* getDataMinCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality);
+					virtual CDataExactCardinalityExpression* getDataExactCardinality(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2, int cardinality);
+
+
+					virtual CDataRangeTermExpression* getTopDataRange();
+					virtual CDataRangeTermExpression* getBottomDataRange();
 
 
 					// virtual methods from CRBoxAxiomBuilder
 					virtual CObjectPropertyExpression* getObjectProberty(const QString& probertyName);
 					virtual CObjectPropertyExpression* getObjectProberty(const QStringRef& probertyName);
 					virtual CObjectPropertyTermExpression* getTopObjectProberty();
+
 
 					virtual CSubObjectPropertyOfExpression* getSubObjectPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
 					virtual CSubObjectPropertyOfExpression* getSubObjectPropertyOf(CBuildExpression* expression1, CBuildExpression* expression2);
@@ -217,6 +296,45 @@ namespace Konclude {
 					CObjectPropertyTermExpression* getCorrectedInverseObjectPropertyOf(CObjectPropertyTermExpression* expression);
 
 
+
+
+					virtual CSubDataPropertyOfExpression* getSubDataPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CSubDataPropertyOfExpression* getSubDataPropertyOf(CBuildExpression* expression1, CBuildExpression* expression2);
+
+					virtual CEquivalentDataPropertiesExpression* getEquivalentDataProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CEquivalentDataPropertiesExpression* getEquivalentDataProperties(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDisjointDataPropertiesExpression* getDisjointDataProperties(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDisjointDataPropertiesExpression* getDisjointDataProperties(CBuildExpression* expression1, CBuildExpression* expression2);
+
+					virtual CDataPropertyDomainExpression* getDataPropertyDomainExpression(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataPropertyDomainExpression* getDataPropertyDomainExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CDataPropertyRangeExpression* getDataPropertyRangeExpression(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataPropertyRangeExpression* getDataPropertyRangeExpression(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+
+					virtual CFunctionalDataPropertyExpression* getFunctionalDataProperty(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
+					virtual CFunctionalDataPropertyExpression* getFunctionalDataProperty(CBuildExpression* expression);
+
+
+
+					virtual CSubDataPropertyOfExpression* getSubDataPropertyOf(CDataPropertyTermExpression* expression1, CDataPropertyTermExpression* expression2);
+
+					virtual CEquivalentDataPropertiesExpression* getEquivalentDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions);
+					virtual CDisjointDataPropertiesExpression* getDisjointDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions);
+
+
+					virtual CDataPropertyDomainExpression* getDataPropertyDomainExpression(CDataPropertyTermExpression* expression1, CClassTermExpression* expression2);
+					virtual CDataPropertyRangeExpression* getDataPropertyRangeExpression(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2);
+					virtual CFunctionalDataPropertyExpression* getFunctionalDataProperty(CDataPropertyTermExpression* expression);
+
+
+
+
+
+
+
+
+
+
 					// virtual methods from CABoxAxiomBuilder
 					virtual CNamedIndividualExpression* getNamedIndividual(const QString& individualName);
 					virtual CNamedIndividualExpression* getNamedIndividual(const QStringRef& individualName);
@@ -238,6 +356,10 @@ namespace Konclude {
 					virtual CNegativeObjectPropertyAssertionExpression* getNegativeObjectPropertyAssertion(CIndividualTermExpression* expression1, CIndividualTermExpression* expression2, CObjectPropertyTermExpression* expression3);
 					virtual CSameIndividualExpression* getSameIndividual(const CEXPRESSIONLIST<CIndividualTermExpression*>& expressions);
 					virtual CDifferentIndividualsExpression* getDifferentIndividuals(const CEXPRESSIONLIST<CIndividualTermExpression*>& expressions);
+
+
+					virtual CDataPropertyAssertionExpression* getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3);
+					virtual CNegativeDataPropertyAssertionExpression* getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3);
 
 				// protected functions
 				protected:
@@ -265,6 +387,11 @@ namespace Konclude {
 					CObjectPropertyTermExpression* mTopObjPropExpression;
 					CObjectPropertyTermExpression* mBottomObjPropExpression;
 
+					CDataPropertyTermExpression* mTopDataPropExpression;
+					CDataPropertyTermExpression* mBottomDataPropExpression;
+
+					CDataRangeTermExpression* mTopDataRangeExpression;
+					CDataRangeTermExpression* mBottomDataRangeExpression;
 
 
 					CBUILDLIST<CBuildExpression*>* mExpressionBuildContainerList;
@@ -286,10 +413,12 @@ namespace Konclude {
 					CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>* mIndividualBuildHash;
 					CBUILDHASH<QPair<CStringRefStringHasher,CStringRefStringHasher>,CAnonymousIndividualExpression*>* mAnoIndividualBuildHash;
 
+					CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>* mDatatypeBuildHash;
+					CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* mDataLexicalValueBuildHash;
+					CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* mDataPropertyBuildHash;
+					CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>* mDataFacetBuildHash;
 
-					CMAPPINGHASH<CStringRefStringHasher,CConcept*>* mClassNameConceptMapHash;
-					CMAPPINGHASH<CStringRefStringHasher,CRole*>* mPropertyNameRoleMapHash;
-					CMAPPINGHASH<CStringRefStringHasher,CIndividual*>* mIndividualNameIndividualMapHash;
+
 
 					CMAPPINGHASH<QString,CNamePrefix*>* mAbbreviatedNamePrefixMapHash;
 					CMAPPINGHASH<QString,CNamePrefix*>* mNamePrefixMapHash;
@@ -297,15 +426,24 @@ namespace Konclude {
 
 
 					CBUILDSET<CClassTermExpression*>* mBuildConceptSet;
-					CBUILDSET<CObjectPropertyTermExpression*>* mBuildRoleSet;
+					CBUILDSET<CObjectPropertyTermExpression*>* mBuildObjectRoleSet;
 					CBUILDSET<CIndividualTermExpression*>* mBuildIndividualSet;
+					CBUILDSET<CDataRangeTermExpression*>* mBuildDataRangeSet;
+					CBUILDSET<CDataPropertyTermExpression*>* mBuildDataRoleSet;
+					CBUILDSET<CDatatypeExpression*>* mBuildDatatypeSet;
 
 					CBUILDLIST<CIndividualTermExpression*>* mBuildIndividualList;
-					CBUILDLIST<CObjectPropertyTermExpression*>* mBuildRoleList;
+					CBUILDLIST<CObjectPropertyTermExpression*>* mBuildObjectRoleList;
 					CBUILDLIST<CClassTermExpression*>* mBuildConceptList;
+					CBUILDLIST<CDataRangeTermExpression*>* mBuildDataRangeList;
+					CBUILDLIST<CDataPropertyTermExpression*>* mBuildDataRoleList;
+					CBUILDLIST<CDatatypeExpression*>* mBuildDatatypeList;
 
 
 
+
+
+					CBUILDHASH<CStringRefStringHasher,COntologyImportData*>* mImportDataHash;
 
 
 

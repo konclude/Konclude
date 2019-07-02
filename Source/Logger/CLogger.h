@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 #ifndef KONCLUDE_LOGGER_CLOGGER_H
@@ -26,6 +26,7 @@
 #include <QThread>
 #include <QEvent>
 #include <QLinkedList>
+#include <QLinkedListIterator>
 #include <QFile>
 #include <QTimerEvent>
 #include <QLinkedListIterator>
@@ -48,9 +49,10 @@
 #include "LoggerSettings.h"
 
 
-#include "Events/CRequestLogMessagesEvent.h"
 #include "Events/CLoggingEvent.h"
+#include "Events/CRequestLogMessagesEvent.h"
 #include "Events/CReleaseLogMessagesEvent.h"
+#include "Events/CConfigureLoggerEvent.h"
 
 
 using namespace std;
@@ -60,25 +62,25 @@ using namespace std;
 // define which messages are in fact logged
 #ifdef LOGGER_DEBUG
 
-#define LOGNOTICELEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,20,domain,object);
-#define LOGINFOLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,30,domain,object);
-#define LOGWARNINGLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,60,domain,object);
-#define LOGERRORLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,70,domain,object);
-#define LOGEXCEPTIONLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,80,domain,object);
-#define LOGCATASTROPHICLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,90,domain,object);
+#define LOGNOTICELEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(20)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,20,domain,object);
+#define LOGINFOLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(30)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,30,domain,object);
+#define LOGWARNINGLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(60)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,60,domain,object);
+#define LOGERRORLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(70)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,70,domain,object);
+#define LOGEXCEPTIONLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(80)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,80,domain,object);
+#define LOGCATASTROPHICLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(90)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,90,domain,object);
 
 #else 
  
 #define LOGNOTICELEVEL(domain,message,object)
-#define LOGINFOLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,30,domain,object);
-#define LOGWARNINGLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,60,domain,object);
-#define LOGERRORLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,70,domain,object);
-#define LOGEXCEPTIONLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,80,domain,object);
-#define LOGCATASTROPHICLEVEL(domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,90,domain,object);
+#define LOGINFOLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(30)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,30,domain,object);
+#define LOGWARNINGLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(60)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,60,domain,object);
+#define LOGERRORLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(70)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,70,domain,object);
+#define LOGEXCEPTIONLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(80)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,80,domain,object);
+#define LOGCATASTROPHICLEVEL(domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(90)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,90,domain,object);
 
 #endif
 
-#define LOGCUSTOMLEVEL(level,domain,message,object) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,level,domain,object);
+#define LOGCUSTOMLEVEL(level,domain,message,object) if (Konclude::Logger::CLogger::getInstance()->hasMinLoggingLevel(level)) Konclude::Logger::CLogger::getInstance()->addLogMessage(message,level,domain,object);
 
 // simplifications (only name mapping to previous defined)
 #define LOGINFO(domain,message,object) LOGINFOLEVEL(domain,message,object)
@@ -137,8 +139,8 @@ using namespace std;
 						-	Use EXCEPTION to log exception messages, which is may also called from an exception constructor.
 						-	Use CATASTROPHIC to log catastrophic messages, which should mean the program isn't able to continue the execution and a crash is probably unavoidable.
 		\param domain	Identifies the log domain, the most global domain is '::'. Separate each domain with another '::'.
-		\param message	The literal message which schould be logged.
-		\param object	Identifies the object where the log message is occured. This may helps to tracking/monitor a faulty object.
+		\param message	The literal message which should be logged.
+		\param object	Identifies the object where the log message is occurred. This may helps to tracking/monitor a faulty object.
  */
 #define LOG(LOGTYPE,domain,message,object) LOG##LOGTYPE(domain,message,object)
 
@@ -151,12 +153,12 @@ QString logTr(const char *sourceText, const char *comment = 0, int n = -1);
 
 namespace Konclude {
 
+	using namespace Concurrent;
+	using namespace Callback;
+
 	namespace Logger {
 
 		using namespace Events;
-		using namespace Konclude;
-		using namespace Concurrent;
-		using namespace Callback;
 		
 
 		/*! 
@@ -164,7 +166,6 @@ namespace Konclude {
 		 *	\version	0.3
 		 *	\author		Andreas Steigmiller
 		 *	\brief		Logs messages and posts them to connected Log Observers. The Logger is running in an own Thread. Use LOG(...) to add log messages.
-		 *				The Logger supports domains, continuous log levels and 
 		 */
 		class CLogger : public CIntervalThread {
 				
@@ -186,6 +187,10 @@ namespace Konclude {
 
 				static void shutdownLogger();
 
+				void configureLogger(qint64 maxLogMessages, double minLoggingLevel);
+				double getMinLoggingLevel();
+				bool hasMinLoggingLevel(double level);
+
 			protected:
 				virtual void threadStarted();
 				virtual void threadStopped();
@@ -194,12 +199,13 @@ namespace Konclude {
 
 				virtual bool processTimer(qint64 timerID);
 			
+				bool deleteOldLogMessages();
 
 			private:
 				CLogger();
 				virtual ~CLogger();
 
-				void addLogMessageToDomainHash(QString domain, CLogMessage *message);
+				void propagateLogMessageToDomain(QString domain, CLogMessage *message);
 
 
 				void addObserverToDomains(CLogObserverData *obsData, QStringList domains);
@@ -207,7 +213,7 @@ namespace Konclude {
 
 			private:
 				//! Singleton-Instance
-				static CLogger *instance;
+				static CLogger* mInstance;
 
 
 				QMutex observerSyncMutex;
@@ -216,7 +222,6 @@ namespace Konclude {
 
 
 				QHash<qint64,CLogMessage *> idMessageHash;
-				QHash<qint64,CLogDomain *> messageDomainHash;
 
 
 				//! Log-Entry-List
@@ -226,9 +231,14 @@ namespace Konclude {
 				//! Filename for saving
 				QString saveFileName;
 
-				//! Necessary to mustn't save always the complete list
+				//! Necessary to not always save the complete list
 				QLinkedList<CLogMessage *>::const_iterator listSaveIt;
-				//! Necessary to mustn't save always the complete list
+
+
+				qint64 mCurrentLogMessageCount;
+				qint64 mMaxLogMessageCount;
+				qint64 mMinLoggingLevel;
+
 				qint64 unsavedMessagesCount;
 				qint64 savedMessageCount;
 				qint64 totalMessageCount;
@@ -237,7 +247,7 @@ namespace Konclude {
 				qint64 nextMessageID;
 
 
-				static QMutex *lockCreatingMoreInstances;
+				static QMutex* mInstanceCreationMutex;
 						
 				static const qint64 SAVETOFILETIMERID = 1;
 				

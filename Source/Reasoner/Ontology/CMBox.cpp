@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -36,6 +36,7 @@ namespace Konclude {
 				mBranchTriggVector = nullptr;
 				mImpRepVector = nullptr;
 				mNomSchemaTemplVector = nullptr;
+				mValueSpacesTriggers = nullptr;
 
 				mBoxContext = boxContext;
 				mMemMan = CContext::getMemoryAllocationManager(mBoxContext);
@@ -52,6 +53,7 @@ namespace Konclude {
 				COPADestroyAndRelease(mBranchTriggVector,mMemMan);
 				COPADestroyAndRelease(mImpRepVector,mMemMan);
 				COPADestroyAndRelease(mNomSchemaTemplVector,mMemMan);
+				COPADestroyAndRelease(mValueSpacesTriggers,mMemMan);
 			}
 
 
@@ -156,6 +158,16 @@ namespace Konclude {
 				return mNomSchemaTemplVector;
 			}
 
+
+			CDatatypeValueSpacesTriggers* CMBox::getValueSpacesTriggers(bool create) {
+				if (!mValueSpacesTriggers && create) {
+					mValueSpacesTriggers = CObjectParameterizingAllocator<CDatatypeValueSpacesTriggers,CBoxContext*>::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+					mValueSpacesTriggers->initValueSpacesTriggers(nullptr);
+				}
+				return mValueSpacesTriggers;
+			}
+
+
 			CMBox *CMBox::setNominalSchemaTemplateVector(CNominalSchemaTemplateVector* nomSchTemplVector) {
 				COPADestroyAndRelease(mNomSchemaTemplVector,mMemMan);
 				mNomSchemaTemplVector = nomSchTemplVector;
@@ -204,6 +216,12 @@ namespace Konclude {
 					mNomSchemaTemplVector->referenceVector(mBox->mNomSchemaTemplVector);
 				} else if (mNomSchemaTemplVector) {					
 					mNomSchemaTemplVector->clear();
+				}
+				if (mBox->mValueSpacesTriggers) {
+					getValueSpacesTriggers();
+					mValueSpacesTriggers->initValueSpacesTriggers(mBox->mValueSpacesTriggers);
+				} else if (mValueSpacesTriggers) {					
+					mValueSpacesTriggers->initValueSpacesTriggers(nullptr);
 				}
 				return this;
 			}

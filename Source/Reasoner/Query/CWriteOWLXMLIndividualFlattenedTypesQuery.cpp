@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -40,6 +40,8 @@ namespace Konclude {
 
 				mUseAbbreviatedIRIs = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.AbbreviatedIRIs",false);
 				mWriteDeclarations = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.WriteDeclarations",false);
+				mWriteOnlyDirectTypes = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.WriteOnlyDirectTypes",false);
+				mWriteSubClassOfInconsistency = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.WriteReducedInconsistency",false);
 
 				mRealizationCalcError = false;
 				mQueryConstructError = false;
@@ -70,8 +72,11 @@ namespace Konclude {
 
 			void CWriteOWLXMLIndividualFlattenedTypesQuery::forcedPathCreated(const QString& filePath) {
 				QString path = filePath;
-				if (path.contains("/")) {
-					path = path.mid(0,path.lastIndexOf("/"));
+				if (path.contains("/") || path.contains("\\")) {
+					int lastSlash = path.lastIndexOf("/");
+					int lastBackSlash = path.lastIndexOf("\\");
+					int lastSeparator = qMax(lastBackSlash,lastSlash);
+					path = path.mid(0,lastSeparator);
 					if (!path.isEmpty()) {
 						QDir dir;
 						dir.mkpath(path);
@@ -91,37 +96,51 @@ namespace Konclude {
 
 					writeOntologyStart(&outputStreamWriter);
 
-					CConcept* mBottomConcept = mOntology->getTBox()->getTopConcept();
+					CConcept* bottomConcept = mOntology->getTBox()->getBottomConcept();
 
 					CBOXSET<CIndividual*>* activeIndividualSet = mOntology->getABox()->getActiveIndividualSet();
 
-					QString bottomClassName = CIRIName::getRecentIRIName(mBottomConcept->getClassNameLinker());
+					QString bottomClassName = CIRIName::getRecentIRIName(bottomConcept->getClassNameLinker());
 					if (mUseAbbreviatedIRIs) {
-						bottomClassName = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(mBottomConcept->getClassNameLinker());
+						bottomClassName = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(bottomConcept->getClassNameLinker());
 					}
 
 					if (mWriteDeclarations) {
 						writeClassDeclaration(bottomClassName,&outputStreamWriter);
 					}
 
-					if (mIndividualNameString.isEmpty()) {
-						QStringList incClassNameList;
-						for (CBOXSET<CIndividual*>::const_iterator it = activeIndividualSet->constBegin(), itEnd = activeIndividualSet->constEnd(); it != itEnd; ++it) {
-							CIndividual* individual(*it);
-							QString individualName = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
-							if (mUseAbbreviatedIRIs) {
-								individualName = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
-							}
-							if (mWriteDeclarations) {
-								writeIndividualDeclaration(individualName,&outputStreamWriter);
-							}
-							writeIndividualType(individualName,bottomClassName,&outputStreamWriter);
+					if (mWriteSubClassOfInconsistency) {
+
+						CConcept* topConcept = mOntology->getTBox()->getTopConcept();
+						QString topClassName = CIRIName::getRecentIRIName(topConcept->getClassNameLinker());
+						if (mUseAbbreviatedIRIs) {
+							topClassName = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(topConcept->getClassNameLinker());
 						}
-					} else {
 						if (mWriteDeclarations) {
-							writeIndividualDeclaration(mIndividualNameString,&outputStreamWriter);
+							writeClassDeclaration(topClassName,&outputStreamWriter);
 						}
-						writeIndividualType(mIndividualNameString,bottomClassName,&outputStreamWriter);
+						writeSubClassRelation(topClassName,bottomClassName,&outputStreamWriter);
+
+					} else {
+						if (mIndividualNameString.isEmpty()) {
+							QStringList incClassNameList;
+							for (CBOXSET<CIndividual*>::const_iterator it = activeIndividualSet->constBegin(), itEnd = activeIndividualSet->constEnd(); it != itEnd; ++it) {
+								CIndividual* individual(*it);
+								QString individualName = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
+								if (mUseAbbreviatedIRIs) {
+									individualName = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
+								}
+								if (mWriteDeclarations) {
+									writeIndividualDeclaration(individualName,&outputStreamWriter);
+								}
+								writeIndividualType(individualName,bottomClassName,&outputStreamWriter);
+							}
+						} else {
+							if (mWriteDeclarations) {
+								writeIndividualDeclaration(mIndividualNameString,&outputStreamWriter);
+							}
+							writeIndividualType(mIndividualNameString,bottomClassName,&outputStreamWriter);
+						}
 					}
 
 					writeOntologyEnd(&outputStreamWriter);
@@ -204,7 +223,7 @@ namespace Konclude {
 							if (mWriteDeclarations) {
 								writeIndividualDeclaration(mCurrentIndividualName,&outputStreamWriter);
 							}
-							conRealization->visitTypes(individual,false,this);
+							conRealization->visitTypes(individual,mWriteOnlyDirectTypes,this);
 						}
 					}
 
@@ -219,6 +238,16 @@ namespace Konclude {
 
 
 
+			void CWriteOWLXMLIndividualFlattenedTypesQuery::writeSubClassRelation(const QString& subClassName, const QString& superClassName, QXmlStreamWriter* outputStreamWriter) {
+				outputStreamWriter->writeStartElement("SubClassOf");
+				outputStreamWriter->writeStartElement("Class");
+				outputStreamWriter->writeAttribute("IRI",subClassName);
+				outputStreamWriter->writeEndElement();
+				outputStreamWriter->writeStartElement("Class");
+				outputStreamWriter->writeAttribute("IRI",superClassName);
+				outputStreamWriter->writeEndElement();
+				outputStreamWriter->writeEndElement();
+			}
 
 
 			void CWriteOWLXMLIndividualFlattenedTypesQuery::writeIndividualDeclaration(const QString& className, QXmlStreamWriter* outputStreamWriter) {
@@ -273,11 +302,11 @@ namespace Konclude {
 
 			void CWriteOWLXMLIndividualFlattenedTypesQuery::writeIndividualType(const QString& individualName, const QString& className, QXmlStreamWriter* outputStreamWriter) {
 				outputStreamWriter->writeStartElement("ClassAssertion");
-				outputStreamWriter->writeStartElement("NamedIndividual");
-				outputStreamWriter->writeAttribute("IRI",individualName);
-				outputStreamWriter->writeEndElement();
 				outputStreamWriter->writeStartElement("Class");
 				outputStreamWriter->writeAttribute("IRI",className);
+				outputStreamWriter->writeEndElement();
+				outputStreamWriter->writeStartElement("NamedIndividual");
+				outputStreamWriter->writeAttribute("IRI",individualName);
 				outputStreamWriter->writeEndElement();
 				outputStreamWriter->writeEndElement();
 			}

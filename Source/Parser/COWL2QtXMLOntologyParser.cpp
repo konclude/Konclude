@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -297,6 +297,58 @@ namespace Konclude {
 			mParseFunctionJumpHash.insert("ObjectHasSelf",&COWL2QtXMLOntologyParser::jumpFunctionParseObjectHasSelfNode);
 			mParseFunctionJumpHash.insert("owl:ObjectHasSelf",&COWL2QtXMLOntologyParser::jumpFunctionParseObjectHasSelfNode);
 
+			mParseFunctionJumpHash.insert("Datatype",&COWL2QtXMLOntologyParser::jumpFunctionParseDatatypeNode);
+			mParseFunctionJumpHash.insert("owl:Datatype",&COWL2QtXMLOntologyParser::jumpFunctionParseDatatypeNode);
+			mParseFunctionJumpHash.insert("DataProperty",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyNode);
+			mParseFunctionJumpHash.insert("owl:DataProperty",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyNode);
+			mParseFunctionJumpHash.insert("DataSomeValuesFrom",&COWL2QtXMLOntologyParser::jumpFunctionParseDataSomeValuesFromNode);
+			mParseFunctionJumpHash.insert("owl:DataSomeValuesFrom",&COWL2QtXMLOntologyParser::jumpFunctionParseDataSomeValuesFromNode);
+			mParseFunctionJumpHash.insert("Literal",&COWL2QtXMLOntologyParser::jumpFunctionParseDataLiteralNode);
+			mParseFunctionJumpHash.insert("owl:Literal",&COWL2QtXMLOntologyParser::jumpFunctionParseDataLiteralNode);
+
+
+
+			mParseFunctionJumpHash.insert("DataAllValuesFrom",&COWL2QtXMLOntologyParser::jumpFunctionParseDataAllValuesFromNode);
+			mParseFunctionJumpHash.insert("owl:DataAllValuesFrom",&COWL2QtXMLOntologyParser::jumpFunctionParseDataAllValuesFromNode);
+			mParseFunctionJumpHash.insert("DataHasValue",&COWL2QtXMLOntologyParser::jumpFunctionParseDataHasValueNode);
+			mParseFunctionJumpHash.insert("owl:DataHasValue",&COWL2QtXMLOntologyParser::jumpFunctionParseDataHasValueNode);
+			mParseFunctionJumpHash.insert("DataIntersectionOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataIntersectionOfNode);
+			mParseFunctionJumpHash.insert("owl:DataIntersectionOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataIntersectionOfNode);
+			mParseFunctionJumpHash.insert("DataOneOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataOneOfNode);
+			mParseFunctionJumpHash.insert("owl:DataOneOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataOneOfNode);
+			mParseFunctionJumpHash.insert("DataUnionOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataUnionOfNode);
+			mParseFunctionJumpHash.insert("owl:DataUnionOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataUnionOfNode);
+			mParseFunctionJumpHash.insert("DataComplementOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataComplementOfNode);
+			mParseFunctionJumpHash.insert("owl:DataComplementOf",&COWL2QtXMLOntologyParser::jumpFunctionParseDataComplementOfNode);
+			mParseFunctionJumpHash.insert("DatatypeRestriction",&COWL2QtXMLOntologyParser::jumpFunctionParseDatatypeRestrictionNode);
+			mParseFunctionJumpHash.insert("owl:DatatypeRestriction",&COWL2QtXMLOntologyParser::jumpFunctionParseDatatypeRestrictionNode);
+			mParseFunctionJumpHash.insert("DataMaxCardinality",&COWL2QtXMLOntologyParser::jumpFunctionParseDataMaxCardinalityNode);
+			mParseFunctionJumpHash.insert("owl:DataMaxCardinality",&COWL2QtXMLOntologyParser::jumpFunctionParseDataMaxCardinalityNode);
+			mParseFunctionJumpHash.insert("DataMinCardinality",&COWL2QtXMLOntologyParser::jumpFunctionParseDataMinCardinalityNode);
+			mParseFunctionJumpHash.insert("owl:DataMinCardinality",&COWL2QtXMLOntologyParser::jumpFunctionParseDataMinCardinalityNode);
+			mParseFunctionJumpHash.insert("DataExactCardinality",&COWL2QtXMLOntologyParser::jumpFunctionParseDataExactCardinalityNode);
+			mParseFunctionJumpHash.insert("owl:DataExactCardinality",&COWL2QtXMLOntologyParser::jumpFunctionParseDataExactCardinalityNode);
+			mParseFunctionJumpHash.insert("DataPropertyAssertion",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyAssertionNode);
+			mParseFunctionJumpHash.insert("owl:DataPropertyAssertion",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyAssertionNode);
+			mParseFunctionJumpHash.insert("NegativeDataPropertyAssertion",&COWL2QtXMLOntologyParser::jumpFunctionParseNegativeDataPropertyAssertionNode);
+			mParseFunctionJumpHash.insert("owl:NegativeDataPropertyAssertion",&COWL2QtXMLOntologyParser::jumpFunctionParseNegativeDataPropertyAssertionNode);
+			mParseFunctionJumpHash.insert("SubDataPropertyOf",&COWL2QtXMLOntologyParser::jumpFunctionParseSubDataPropertyOfNode);
+			mParseFunctionJumpHash.insert("owl:SubDataPropertyOf",&COWL2QtXMLOntologyParser::jumpFunctionParseSubDataPropertyOfNode);
+			mParseFunctionJumpHash.insert("EquivalentDataProperties",&COWL2QtXMLOntologyParser::jumpFunctionParseEquivalentDataPropertiesNode);
+			mParseFunctionJumpHash.insert("owl:EquivalentDataProperties",&COWL2QtXMLOntologyParser::jumpFunctionParseEquivalentDataPropertiesNode);
+			mParseFunctionJumpHash.insert("DisjointDataProperties",&COWL2QtXMLOntologyParser::jumpFunctionParseDisjointDataPropertiesNode);
+			mParseFunctionJumpHash.insert("owl:DisjointDataProperties",&COWL2QtXMLOntologyParser::jumpFunctionParseDisjointDataPropertiesNode);
+			mParseFunctionJumpHash.insert("DataPropertyDomain",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyDomainNode);
+			mParseFunctionJumpHash.insert("owl:DataPropertyDomain",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyDomainNode);
+			mParseFunctionJumpHash.insert("DataPropertyRange",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyRangeNode);
+			mParseFunctionJumpHash.insert("owl:DataPropertyRange",&COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyRangeNode);
+			mParseFunctionJumpHash.insert("FunctionalDataProperty",&COWL2QtXMLOntologyParser::jumpFunctionParseFunctionalDataPropertyNode);
+			mParseFunctionJumpHash.insert("owl:FunctionalDataProperty",&COWL2QtXMLOntologyParser::jumpFunctionParseFunctionalDataPropertyNode);
+			mParseFunctionJumpHash.insert("FacetRestriction",&COWL2QtXMLOntologyParser::jumpFunctionParseDataFacetRestrictionNode);
+			mParseFunctionJumpHash.insert("owl:FacetRestriction",&COWL2QtXMLOntologyParser::jumpFunctionParseDataFacetRestrictionNode);
+
+
+
 			mParseFunctionJumpHash.insert("NamedIndividual",&COWL2QtXMLOntologyParser::jumpFunctionParseNamedIndividualNode);
 			mParseFunctionJumpHash.insert("owl:NamedIndividual",&COWL2QtXMLOntologyParser::jumpFunctionParseNamedIndividualNode);
 			mParseFunctionJumpHash.insert("AnonymousIndividual",&COWL2QtXMLOntologyParser::jumpFunctionParseAnonymousIndividualNode);
@@ -322,6 +374,8 @@ namespace Konclude {
 			mParseFunctionJumpHash.insert("Where",&COWL2QtXMLOntologyParser::jumpFunctionTellOntologyAxiomNode);
 			mParseFunctionJumpHash.insert("Retract",&COWL2QtXMLOntologyParser::jumpFunctionRetractOntologyAxiomNode);
 
+			mParseFunctionJumpHash.insert("Import",&COWL2QtXMLOntologyParser::jumpFunctionParseImportNode);
+			mParseFunctionJumpHash.insert("owl:Import",&COWL2QtXMLOntologyParser::jumpFunctionParseImportNode);
 
 			mParseFunctionJumpHash.insert("DLSafeRule",&COWL2QtXMLOntologyParser::jumpFunctionParseIgnoredNode);
 			mParseFunctionJumpHash.insert("owl:DLSafeRule",&COWL2QtXMLOntologyParser::jumpFunctionParseIgnoredNode);
@@ -711,6 +765,56 @@ namespace Konclude {
 			} else if (nodeString == "DifferentIndividuals" || nodeString == "owl:DifferentIndividuals") {
 				expression = parseDifferentIndividualsNode(node);
 
+
+
+			} else if (nodeString == "Datatype" || nodeString == "owl:Datatype") {
+				expression = jumpFunctionParseDatatypeNode(node);
+			} else if (nodeString == "DataProperty" || nodeString == "owl:DataProperty") {
+				expression = jumpFunctionParseDataPropertyNode(node);
+			} else if (nodeString == "DataSomeValuesFrom" || nodeString == "owl:DataSomeValuesFrom") {
+				expression = jumpFunctionParseDataSomeValuesFromNode(node);
+			} else if (nodeString == "Literal" || nodeString == "owl:Literal") {
+				expression = jumpFunctionParseDataLiteralNode(node);
+
+			} else if (nodeString == "DataAllValuesFrom" || nodeString == "owl:DataAllValuesFrom") {
+				expression = jumpFunctionParseDataAllValuesFromNode(node);
+			} else if (nodeString == "DataHasValue" || nodeString == "owl:DataHasValue") {
+				expression = jumpFunctionParseDataHasValueNode(node);
+			} else if (nodeString == "DataIntersectionOf" || nodeString == "owl:DataIntersectionOf") {
+				expression = jumpFunctionParseDataIntersectionOfNode(node);
+			} else if (nodeString == "DataOneOf" || nodeString == "owl:DataOneOf") {
+				expression = jumpFunctionParseDataOneOfNode(node);
+			} else if (nodeString == "DataUnionOf" || nodeString == "owl:DataUnionOf") {
+				expression = jumpFunctionParseDataUnionOfNode(node);
+			} else if (nodeString == "DataComplementOf" || nodeString == "owl:DataComplementOf") {
+				expression = jumpFunctionParseDataComplementOfNode(node);
+			} else if (nodeString == "DatatypeRestriction" || nodeString == "owl:DatatypeRestriction") {
+				expression = jumpFunctionParseDatatypeRestrictionNode(node);
+			} else if (nodeString == "DataMaxCardinality" || nodeString == "owl:DataMaxCardinality") {
+				expression = jumpFunctionParseDataMaxCardinalityNode(node);
+			} else if (nodeString == "DataMinCardinality" || nodeString == "owl:DataMinCardinality") {
+				expression = jumpFunctionParseDataMinCardinalityNode(node);
+			} else if (nodeString == "DataExactCardinality" || nodeString == "owl:DataExactCardinality") {
+				expression = jumpFunctionParseDataExactCardinalityNode(node);
+			} else if (nodeString == "DataPropertyAssertion" || nodeString == "owl:DataPropertyAssertion") {
+				expression = jumpFunctionParseDataPropertyAssertionNode(node);
+			} else if (nodeString == "NegativeDataPropertyAssertion" || nodeString == "owl:NegativeDataPropertyAssertion") {
+				expression = jumpFunctionParseNegativeDataPropertyAssertionNode(node);
+			} else if (nodeString == "SubDataPropertyOf" || nodeString == "owl:SubDataPropertyOf") {
+				expression = jumpFunctionParseSubDataPropertyOfNode(node);
+			} else if (nodeString == "EquivalentDataProperties" || nodeString == "owl:EquivalentDataProperties") {
+				expression = jumpFunctionParseEquivalentDataPropertiesNode(node);
+			} else if (nodeString == "DisjointDataProperties" || nodeString == "owl:DisjointDataProperties") {
+				expression = jumpFunctionParseDisjointDataPropertiesNode(node);
+			} else if (nodeString == "DataPropertyDomain" || nodeString == "owl:DataPropertyDomain") {
+				expression = jumpFunctionParseDataPropertyDomainNode(node);
+			} else if (nodeString == "DataPropertyRange" || nodeString == "owl:DataPropertyRange") {
+				expression = jumpFunctionParseDataPropertyRangeNode(node);
+			} else if (nodeString == "FunctionalDataProperty" || nodeString == "owl:FunctionalDataProperty") {
+				expression = jumpFunctionParseFunctionalDataPropertyNode(node);
+
+
+
 			} else if (nodeString == "#text") {
 				// ignoring text nodes
 			} else if (nodeString == "#comment") {
@@ -721,6 +825,10 @@ namespace Konclude {
 				parseRetractOntologyAxiomNode(node);
 			} else if (nodeString == "Tell" || nodeString == "Whereby") {
 				parseTellOntologyAxiomNode(node);
+
+			} else if (nodeString == "Import" || nodeString == "owl:Import") {
+				expression = jumpFunctionParseImportNode(node);
+
 			} else {
 				if (mReportErrorCount > 0) {
 					--mReportErrorCount;
@@ -920,7 +1028,7 @@ namespace Konclude {
 		CObjectIntersectionOfExpression *COWL2QtXMLOntologyParser::parseObjectIntersectionOfNode(QDomElement *node) {
 			// parse <ObjectIntersectionOf> <...> <...> <...> ... </ObjectIntersectionOf>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectIntersectionOfExpression *exp = 0;
+			CObjectIntersectionOfExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getObjectIntersectionOf(builds);
 			return exp;
@@ -929,24 +1037,34 @@ namespace Konclude {
 		CObjectUnionOfExpression *COWL2QtXMLOntologyParser::parseObjectUnionOfNode(QDomElement *node) {
 			// parse <ObjectUnionOf> <...> <...> <...> ... </ObjectUnionOf>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectUnionOfExpression *exp = 0;
+			CObjectUnionOfExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getObjectUnionOf(builds);
 			return exp;
 		}
 
+
+		cint64 COWL2QtXMLOntologyParser::parseCardinality(QDomElement* node) {
+			cint64 cardinality = 0;
+			QString cardinalityString = node->attribute(QString("cardinality"));
+			if (cardinalityString.isEmpty()) {
+				cardinalityString = node->attribute(QString("owl:cardinality"));
+			}
+			if (!cardinalityString.isEmpty()) {
+				cardinality = cardinalityString.toLongLong();
+			}
+			return cardinality;
+		}
+
+
 		CObjectMaxCardinalityExpression *COWL2QtXMLOntologyParser::parseObjectMaxCardinalityNode(QDomElement *node) {
 			// parse <ObjectMaxCardinality cardinality="xxx"> <...> <...> <...> ... </ObjectMaxCardinality>
 
-			QString cardinalityName = node->attribute(QString("cardinality"));
-			if (cardinalityName.isEmpty()) {
-				cardinalityName = node->attribute(QString("owl:cardinality"));
-			}
-			CObjectMaxCardinalityExpression *exp = 0;
-			if (!cardinalityName.isEmpty()) {
+			CObjectMaxCardinalityExpression* exp = nullptr;
+			cint64 cardinality = parseCardinality(node);
+			if (mOntoBuilder) {
 				QList<CBuildExpression *> builds = parseChildNodes(node);
-
-				exp = mOntoBuilder->getObjectMaxCardinality(builds,cardinalityName.toInt());
+				exp = mOntoBuilder->getObjectMaxCardinality(builds,cardinality);
 			}
 			return exp;
 		}
@@ -954,15 +1072,11 @@ namespace Konclude {
 		CObjectMinCardinalityExpression *COWL2QtXMLOntologyParser::parseObjectMinCardinalityNode(QDomElement *node) {
 			// parse <ObjectMinCardinality cardinality="xxx"> <...> <...> <...> ... </ObjectMinCardinality>
 
-			QString cardinalityName = node->attribute(QString("cardinality"));
-			if (cardinalityName.isEmpty()) {
-				cardinalityName = node->attribute(QString("owl:cardinality"));
-			}
-			CObjectMinCardinalityExpression *exp = 0;
-			if (!cardinalityName.isEmpty()) {
+			CObjectMinCardinalityExpression* exp = nullptr;
+			cint64 cardinality = parseCardinality(node);
+			if (mOntoBuilder) {
 				QList<CBuildExpression *> builds = parseChildNodes(node);
-
-				exp = mOntoBuilder->getObjectMinCardinality(builds,cardinalityName.toInt());
+				exp = mOntoBuilder->getObjectMinCardinality(builds,cardinality);
 			}
 			return exp;
 		}
@@ -970,15 +1084,11 @@ namespace Konclude {
 		CObjectExactlyCardinalityExpression *COWL2QtXMLOntologyParser::parseObjectExactlyCardinalityNode(QDomElement *node) {
 			// parse <ObjectExactlyCardinality cardinality="xxx"> <...> <...> <...> ... </ObjectExactlyCardinality>
 
-			QString cardinalityName = node->attribute(QString("cardinality"));
-			if (cardinalityName.isEmpty()) {
-				cardinalityName = node->attribute(QString("owl:cardinality"));
-			}
-			CObjectExactlyCardinalityExpression *exp = 0;
-			if (!cardinalityName.isEmpty()) {
+			CObjectExactlyCardinalityExpression* exp = nullptr;
+			cint64 cardinality = parseCardinality(node);
+			if (mOntoBuilder) {
 				QList<CBuildExpression *> builds = parseChildNodes(node);
-
-				exp = mOntoBuilder->getObjectExactlyCardinality(builds,cardinalityName.toInt());
+				exp = mOntoBuilder->getObjectExactlyCardinality(builds,cardinality);
 			}
 			return exp;
 		}
@@ -986,8 +1096,7 @@ namespace Konclude {
 		CObjectSomeValuesFromExpression *COWL2QtXMLOntologyParser::parseObjectSomeValuesFromNode(QDomElement *node) {
 			// parse <ObjectSomeValueFrom> <...> <...> <...> ... </ObjectSomeValueFrom>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectSomeValuesFromExpression *exp = 0;
-
+			CObjectSomeValuesFromExpression* exp = nullptr;
 			exp = mOntoBuilder->getObjectSomeValuesFrom(builds);
 			return exp;
 		}
@@ -995,7 +1104,7 @@ namespace Konclude {
 		CObjectHasValueExpression* COWL2QtXMLOntologyParser::parseObjectHasValueNode(QDomElement* node) {
 			// parse <ObjectHasValue> <...> <...> <...> ... </ObjectHasValue>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectHasValueExpression *exp = 0;
+			CObjectHasValueExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getObjectHasValue(builds);
 			return exp;
@@ -1004,7 +1113,7 @@ namespace Konclude {
 		CObjectHasSelfExpression* COWL2QtXMLOntologyParser::parseObjectHasSelfNode(QDomElement* node) {
 			// parse <ObjectHasSelf> <...> <...> <...> ... </ObjectHasSelf>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectHasSelfExpression *exp = 0;
+			CObjectHasSelfExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getObjectHasSelf(builds);
 			return exp;
@@ -1014,7 +1123,7 @@ namespace Konclude {
 		CObjectAllValuesFromExpression *COWL2QtXMLOntologyParser::parseObjectAllValuesFromNode(QDomElement *node) {
 			// parse <ObjectAllValueFrom> <...> <...> <...> ... </ObjectAllValueFrom>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectAllValuesFromExpression *exp = 0;
+			CObjectAllValuesFromExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getObjectAllValuesFrom(builds);
 			return exp;
@@ -1024,7 +1133,7 @@ namespace Konclude {
 		CObjectComplementOfExpression *COWL2QtXMLOntologyParser::parseObjectComplementOfNode(QDomElement *node) {
 			// parse <ObjectComplementOf> <...> </ObjectComplementOf>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectComplementOfExpression *exp = 0;
+			CObjectComplementOfExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getObjectComplementOf(builds);
 			return exp;
@@ -1033,7 +1142,7 @@ namespace Konclude {
 		CObjectOneOfExpression *COWL2QtXMLOntologyParser::parseObjectOneOfNode(QDomElement *node) {
 			// parse <ObjectOneOf> <...> </ObjectOneOf>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectOneOfExpression *exp = 0;
+			CObjectOneOfExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getObjectOneOf(builds);
 			return exp;
@@ -1042,7 +1151,7 @@ namespace Konclude {
 
 		CTransetiveObjectPropertyExpression *COWL2QtXMLOntologyParser::parseTransetiveObjectPropertyNode(QDomElement *node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CTransetiveObjectPropertyExpression *exp = 0;
+			CTransetiveObjectPropertyExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getTransetiveObjectProperty(builds);
 			++mAxiomNumber;
@@ -1052,7 +1161,7 @@ namespace Konclude {
 
 		CFunctionalObjectPropertyExpression *COWL2QtXMLOntologyParser::parseFunctionalObjectPropertyNode(QDomElement *node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CFunctionalObjectPropertyExpression *exp = 0;
+			CFunctionalObjectPropertyExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getFunctionalObjectProperty(builds);
 			++mAxiomNumber;
@@ -1062,7 +1171,7 @@ namespace Konclude {
 
 		CSymmetricObjectPropertyExpression* COWL2QtXMLOntologyParser::parseSymmetricObjectPropertyNode(QDomElement* node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CSymmetricObjectPropertyExpression *exp = 0;
+			CSymmetricObjectPropertyExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getSymmetricObjectProperty(builds);
 			++mAxiomNumber;
@@ -1071,7 +1180,7 @@ namespace Konclude {
 
 		CAsymmetricObjectPropertyExpression* COWL2QtXMLOntologyParser::parseAsymmetricObjectPropertyNode(QDomElement* node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CAsymmetricObjectPropertyExpression *exp = 0;
+			CAsymmetricObjectPropertyExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getAsymmetricObjectProperty(builds);
 			++mAxiomNumber;
@@ -1080,7 +1189,7 @@ namespace Konclude {
 
 		CReflexiveObjectPropertyExpression* COWL2QtXMLOntologyParser::parseReflexiveObjectPropertyNode(QDomElement* node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CReflexiveObjectPropertyExpression *exp = 0;
+			CReflexiveObjectPropertyExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getReflexiveObjectProperty(builds);
 			++mAxiomNumber;
@@ -1089,7 +1198,7 @@ namespace Konclude {
 
 		CIrreflexiveObjectPropertyExpression* COWL2QtXMLOntologyParser::parseIrreflexiveObjectPropertyNode(QDomElement* node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CIrreflexiveObjectPropertyExpression *exp = 0;
+			CIrreflexiveObjectPropertyExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getIrreflexiveObjectProperty(builds);
 			++mAxiomNumber;
@@ -1098,7 +1207,7 @@ namespace Konclude {
 
 		CInverseFunctionalObjectPropertyExpression* COWL2QtXMLOntologyParser::parseInverseFunctionalObjectPropertyNode(QDomElement* node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CInverseFunctionalObjectPropertyExpression *exp = 0;
+			CInverseFunctionalObjectPropertyExpression* exp = nullptr;
 
 			exp = mOntoBuilder->getInverseFunctionalObjectProperty(builds);
 			++mAxiomNumber;
@@ -1112,7 +1221,7 @@ namespace Konclude {
 		CClassAssertionExpression *COWL2QtXMLOntologyParser::parseClassAssertionNode(QDomElement *node) {
 			// parse <ClassAssertion> <...> </ClassAssertion>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CClassAssertionExpression *exp = 0;
+			CClassAssertionExpression* exp = nullptr;
 
 			if (mOntoBuilder) {
 				exp = mOntoBuilder->getClassAssertion(builds);
@@ -1125,7 +1234,7 @@ namespace Konclude {
 		CSameIndividualExpression *COWL2QtXMLOntologyParser::parseSameIndividualNode(QDomElement *node) {
 			// parse <SameIndividual> <...> </SameIndividual>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CSameIndividualExpression *exp = 0;
+			CSameIndividualExpression* exp = nullptr;
 			if (mOntoBuilder) {
 				exp = mOntoBuilder->getSameIndividual(builds);
 			}
@@ -1136,7 +1245,7 @@ namespace Konclude {
 		CDifferentIndividualsExpression *COWL2QtXMLOntologyParser::parseDifferentIndividualsNode(QDomElement *node) {
 			// parse <DifferentIndividuals> <...> </DifferentIndividuals>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CDifferentIndividualsExpression *exp = 0;
+			CDifferentIndividualsExpression* exp = nullptr;
 			if (mOntoBuilder) {
 				exp = mOntoBuilder->getDifferentIndividuals(builds);
 			}
@@ -1148,7 +1257,7 @@ namespace Konclude {
 		CNamedIndividualExpression *COWL2QtXMLOntologyParser::parseNamedIndividualNode(QDomElement *node) {
 			// parse <NamedIndividual> <...> </NamedIndividual>
 			QString indiNameName = getEntityName(node);
-			CNamedIndividualExpression *exp = 0;
+			CNamedIndividualExpression* exp = nullptr;
 			if (!indiNameName.isEmpty()) {
 				if (mOntoBuilder) {
 					exp = mOntoBuilder->getNamedIndividual(indiNameName);
@@ -1164,7 +1273,7 @@ namespace Konclude {
 				mOntologyName = mOntoBuilder->getOntologyName();
 			}
 			QString indiNameName = node->attribute(QString("nodeID"));
-			CAnonymousIndividualExpression *exp = 0;
+			CAnonymousIndividualExpression* exp = nullptr;
 			if (!indiNameName.isEmpty()) {
 				if (mOntoBuilder) {
 					exp = mOntoBuilder->getAnonymousIndividual(mOntologyName,indiNameName);
@@ -1176,7 +1285,7 @@ namespace Konclude {
 		CObjectPropertyAssertionExpression *COWL2QtXMLOntologyParser::parseObjectPropertyAssertionNode(QDomElement *node) {
 			// parse <ObjectPropertyAssertion> <...> </ObjectPropertyAssertion>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CObjectPropertyAssertionExpression *exp = 0;
+			CObjectPropertyAssertionExpression* exp = nullptr;
 
 			if (mOntoBuilder) {
 				exp = mOntoBuilder->getObjectPropertyAssertion(builds);
@@ -1188,7 +1297,7 @@ namespace Konclude {
 		CNegativeObjectPropertyAssertionExpression *COWL2QtXMLOntologyParser::parseNegativeObjectPropertyAssertionNode(QDomElement *node) {
 			// parse <NegativeObjectPropertyAssertion> <...> </NegativeObjectPropertyAssertion>
 			QList<CBuildExpression *> builds = parseChildNodes(node);
-			CNegativeObjectPropertyAssertionExpression *exp = 0;
+			CNegativeObjectPropertyAssertionExpression* exp = nullptr;
 
 			if (mOntoBuilder) {
 				exp = mOntoBuilder->getNegativeObjectPropertyAssertion(builds);
@@ -1196,6 +1305,374 @@ namespace Konclude {
 			++mAxiomNumber;
 			return exp;
 		}
+
+
+
+
+
+
+		CDatatypeExpression *COWL2QtXMLOntologyParser::parseDatatypeNode(QDomElement *node) {
+			QString datatypeName = getEntityName(node);
+			CDatatypeExpression* datatypeExpression = nullptr;
+			if (!datatypeName.isEmpty()) {
+				datatypeExpression = mOntoBuilder->getDatatype(datatypeName);
+			}
+			return datatypeExpression;
+		}
+
+
+		CDataPropertyExpression* COWL2QtXMLOntologyParser::parseDataPropertyNode(QDomElement* node) {
+			QString dataPropertyName = getEntityName(node);
+			CDataPropertyExpression* dataPropertyExpression = nullptr;
+			if (!dataPropertyName.isEmpty()) {
+				dataPropertyExpression = mOntoBuilder->getDataProberty(dataPropertyName);
+			}
+			return dataPropertyExpression;
+		}
+
+
+		CDataSomeValuesFromExpression* COWL2QtXMLOntologyParser::parseDataSomeValuesFromNode(QDomElement* node) {
+			CDataSomeValuesFromExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataSomeValuesFrom(builds);
+			}
+			return exp;
+		}
+
+		CDataLiteralExpression* COWL2QtXMLOntologyParser::parseDataLiteralNode(QDomElement* node) {
+			CDataLiteralExpression* exp = nullptr;
+			if (mOntoBuilder) {
+				QDomNode chNode = node->firstChild();
+				QString lexicalValueString = chNode.nodeValue();
+				QString appendixString = node->attribute("lang");
+				if (appendixString.isEmpty()) {
+					appendixString = node->attribute("xml:lang");
+				}
+				if (!appendixString.isEmpty()) {
+					lexicalValueString = lexicalValueString+"@"+appendixString;
+				}
+				CDataLexicalValueExpression* dataLexValueExp = mOntoBuilder->getDataLexicalValue(lexicalValueString);
+				QString datatypeIRIString = node->attribute("datatypeIRI");
+				if (datatypeIRIString.isEmpty()) {
+					datatypeIRIString = node->attribute("owl:datatypeIRI");
+				}
+				CDatatypeExpression* datatypeExp = mOntoBuilder->getDatatype(datatypeIRIString);
+				exp = mOntoBuilder->getDataLiteral(dataLexValueExp,datatypeExp);
+			}
+			return exp;
+		}
+
+
+		CDataFacetRestrictionExpression* COWL2QtXMLOntologyParser::parseDataFacetRestrictionNode(QDomElement* node) {
+			CDataFacetRestrictionExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				QString facetIRIString = node->attribute("facet");
+				if (facetIRIString.isEmpty()) {
+					facetIRIString = node->attribute("owl:facet");
+				}
+				if (facetIRIString.isEmpty()) {
+					facetIRIString = node->attribute("facetIRI");
+				}
+				if (facetIRIString.isEmpty()) {
+					facetIRIString = node->attribute("owl:facetIRI");
+				}
+				CDataFacetExpression* facetExp = mOntoBuilder->getDataFacet(facetIRIString);
+				builds.append(facetExp);
+				exp = mOntoBuilder->getDataFacetRestriction(builds);
+			}
+			return exp;
+		}
+
+
+
+		CDataAllValuesFromExpression* COWL2QtXMLOntologyParser::parseDataAllValuesFromNode(QDomElement* node) {
+			CDataAllValuesFromExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataAllValuesFrom(builds);
+			}
+			return exp;
+		}
+
+		CDataHasValueExpression* COWL2QtXMLOntologyParser::parseDataHasValueNode(QDomElement* node) {
+			CDataHasValueExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataHasValue(builds);
+			}
+			return exp;
+		}
+
+		CDataIntersectionOfExpression* COWL2QtXMLOntologyParser::parseDataIntersectionOfNode(QDomElement* node) {
+			CDataIntersectionOfExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataIntersectionOf(builds);
+			}
+			return exp;
+		}
+
+		CDataOneOfExpression* COWL2QtXMLOntologyParser::parseDataOneOfNode(QDomElement* node) {
+			CDataOneOfExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataOneOf(builds);
+			}
+			return exp;
+		}
+
+		CDataUnionOfExpression* COWL2QtXMLOntologyParser::parseDataUnionOfNode(QDomElement* node) {
+			CDataUnionOfExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataUnionOf(builds);
+			}
+			return exp;
+		}
+
+		CDataComplementOfExpression* COWL2QtXMLOntologyParser::parseDataComplementOfNode(QDomElement* node) {
+			CDataComplementOfExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataComplementOf(builds);
+			}
+			return exp;
+		}
+
+		CDatatypeRestrictionExpression* COWL2QtXMLOntologyParser::parseDatatypeRestrictionNode(QDomElement* node) {
+			CDatatypeRestrictionExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDatatypeRestriction(builds);
+			}
+			return exp;
+		}
+
+		CDataMaxCardinalityExpression* COWL2QtXMLOntologyParser::parseDataMaxCardinalityNode(QDomElement* node) {
+			CDataMaxCardinalityExpression* exp = nullptr;
+			cint64 cardinality = parseCardinality(node);
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataMaxCardinality(builds,cardinality);
+			}
+			return exp;
+		}
+
+		CDataMinCardinalityExpression* COWL2QtXMLOntologyParser::parseDataMinCardinalityNode(QDomElement* node) {
+			CDataMinCardinalityExpression* exp = nullptr;
+			cint64 cardinality = parseCardinality(node);
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataMinCardinality(builds,cardinality);
+			}
+			return exp;
+		}
+
+		CDataExactCardinalityExpression* COWL2QtXMLOntologyParser::parseDataExactCardinalityNode(QDomElement* node) {
+			CDataExactCardinalityExpression* exp = nullptr;
+			cint64 cardinality = parseCardinality(node);
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataExactCardinality(builds,cardinality);
+			}
+			return exp;
+		}
+
+		CDataPropertyAssertionExpression* COWL2QtXMLOntologyParser::parseDataPropertyAssertionNode(QDomElement* node) {
+			CDataPropertyAssertionExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataPropertyAssertion(builds);
+			}
+			return exp;
+		}
+
+		CNegativeDataPropertyAssertionExpression* COWL2QtXMLOntologyParser::parseNegativeDataPropertyAssertionNode(QDomElement* node) {
+			CNegativeDataPropertyAssertionExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getNegativeDataPropertyAssertion(builds);
+			}
+			return exp;
+		}
+
+		CSubDataPropertyOfExpression* COWL2QtXMLOntologyParser::parseSubDataPropertyOfNode(QDomElement* node) {
+			CSubDataPropertyOfExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getSubDataPropertyOf(builds);
+			}
+			return exp;
+		}
+
+		CEquivalentDataPropertiesExpression* COWL2QtXMLOntologyParser::parseEquivalentDataPropertiesNode(QDomElement* node) {
+			CEquivalentDataPropertiesExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getEquivalentDataProperties(builds);
+			}
+			return exp;
+		}
+
+		CDisjointDataPropertiesExpression* COWL2QtXMLOntologyParser::parseDisjointDataPropertiesNode(QDomElement* node) {
+			CDisjointDataPropertiesExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDisjointDataProperties(builds);
+			}
+			return exp;
+		}
+
+		CDataPropertyDomainExpression* COWL2QtXMLOntologyParser::parseDataPropertyDomainNode(QDomElement* node) {
+			CDataPropertyDomainExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataPropertyDomainExpression(builds);
+			}
+			return exp;
+		}
+
+		CDataPropertyRangeExpression* COWL2QtXMLOntologyParser::parseDataPropertyRangeNode(QDomElement* node) {
+			CDataPropertyRangeExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getDataPropertyRangeExpression(builds);
+			}
+			return exp;
+		}
+
+		CFunctionalDataPropertyExpression* COWL2QtXMLOntologyParser::parseFunctionalDataPropertyNode(QDomElement* node) {
+			CFunctionalDataPropertyExpression* exp = nullptr;
+			QList<CBuildExpression*> builds = parseChildNodes(node);
+			if (mOntoBuilder) {
+				exp = mOntoBuilder->getFunctionalDataProperty(builds);
+			}
+			return exp;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDatatypeNode(QDomElement* node) {
+			return parseDatatypeNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyNode(QDomElement* node) {
+			return parseDataPropertyNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataSomeValuesFromNode(QDomElement* node) {
+			return parseDataSomeValuesFromNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataLiteralNode(QDomElement* node) {
+			return parseDataLiteralNode(node);
+		}
+
+
+
+
+
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataAllValuesFromNode(QDomElement* node) {
+			return parseDataAllValuesFromNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataHasValueNode(QDomElement* node) {
+			return parseDataHasValueNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataIntersectionOfNode(QDomElement* node) {
+			return parseDataIntersectionOfNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataOneOfNode(QDomElement* node) {
+			return parseDataOneOfNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataUnionOfNode(QDomElement* node) {
+			return parseDataUnionOfNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataComplementOfNode(QDomElement* node) {
+			return parseDataComplementOfNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDatatypeRestrictionNode(QDomElement* node) {
+			return parseDatatypeRestrictionNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataMaxCardinalityNode(QDomElement* node) {
+			return parseDataMaxCardinalityNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataMinCardinalityNode(QDomElement* node) {
+			return parseDataMinCardinalityNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataExactCardinalityNode(QDomElement* node) {
+			return parseDataExactCardinalityNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyAssertionNode(QDomElement* node) {
+			return parseDataPropertyAssertionNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseNegativeDataPropertyAssertionNode(QDomElement* node) {
+			return parseNegativeDataPropertyAssertionNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseSubDataPropertyOfNode(QDomElement* node) {
+			return parseSubDataPropertyOfNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseEquivalentDataPropertiesNode(QDomElement* node) {
+			return parseEquivalentDataPropertiesNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDisjointDataPropertiesNode(QDomElement* node) {
+			return parseDisjointDataPropertiesNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyDomainNode(QDomElement* node) {
+			return parseDataPropertyDomainNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataPropertyRangeNode(QDomElement* node) {
+			return parseDataPropertyRangeNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseFunctionalDataPropertyNode(QDomElement* node) {
+			return parseFunctionalDataPropertyNode(node);
+		}
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseDataFacetRestrictionNode(QDomElement* node) {
+			return parseDataFacetRestrictionNode(node);
+		}
+
+
+
+
+
+
+
 
 
 		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionOntologyNode(QDomElement* node) {
@@ -1395,6 +1872,14 @@ namespace Konclude {
 			return nullptr;
 		}
 
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionParseImportNode(QDomElement* node) {
+			QString importIRIString = node->text();
+			if (!importIRIString.isEmpty()) {
+				mOntoBuilder->addOntologyImport(importIRIString);
+			}
+			return nullptr;
+		}
 
 
 	}; // end namespace Parser

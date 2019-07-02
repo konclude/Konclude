@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -31,13 +31,15 @@ namespace Konclude {
 
 
 
-				CReapplyConceptSaturationLabelSet::CReapplyConceptSaturationLabelSet(CProcessContext* processContext) : mProcessContext(processContext),mConceptDesDepMap(processContext) {
+				CReapplyConceptSaturationLabelSet::CReapplyConceptSaturationLabelSet(CProcessContext* processContext) : mProcessContext(processContext) {
 				}
 
 
 				CReapplyConceptSaturationLabelSet* CReapplyConceptSaturationLabelSet::initReapplyConceptSaturationLabelSet() {
-					mConceptDesDepMap.clear();
+					mConceptDesDepHash = nullptr;
+					mAdditionalConceptDesDepHash = nullptr;
 					mConceptSatDesLinker = nullptr;
+					mConceptDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 					mConceptCount = 0;
 					mTotelCount = 0;
 					mModifiedUpdateLinker = nullptr;
@@ -47,8 +49,53 @@ namespace Konclude {
 				CReapplyConceptSaturationLabelSet* CReapplyConceptSaturationLabelSet::copyReapplyConceptSaturationLabelSet(CReapplyConceptSaturationLabelSet* copyConceptSaturationLabelSet) {
 					mConceptCount = copyConceptSaturationLabelSet->mConceptCount;
 					mTotelCount = copyConceptSaturationLabelSet->mTotelCount;
-					mConceptDesDepMap = copyConceptSaturationLabelSet->mConceptDesDepMap;
-					mConceptDesDepMap.detach();
+					mConceptDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+					if (copyConceptSaturationLabelSet->mConceptDesDepHash->count() >= ADDITIONALCOPYSIZE) {
+
+						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* tmpAdditionalConDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						if (copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash) {
+							if (copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->count() > copyConceptSaturationLabelSet->mConceptDesDepHash->count()) {
+								*tmpAdditionalConDesDepHash = *copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash;
+								tmpAdditionalConDesDepHash->detach();
+
+								for (CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator it = copyConceptSaturationLabelSet->mConceptDesDepHash->constBegin(), itEnd = copyConceptSaturationLabelSet->mConceptDesDepHash->constEnd(); it != itEnd; ++it) {
+									cint64 conTag = it.key();
+									const CConceptSaturationDescriptorReapplyData& conDesReapplyData(it.value());
+									CConceptSaturationDescriptorReapplyData& newConDesReapplyData = (*tmpAdditionalConDesDepHash)[conTag];
+									if (conDesReapplyData.mConSatDes) {
+										newConDesReapplyData.mConSatDes = conDesReapplyData.mConSatDes;
+									}
+									if (conDesReapplyData.mImpReapplyConSatDes) {
+										newConDesReapplyData.mImpReapplyConSatDes = conDesReapplyData.mImpReapplyConSatDes;
+									}
+								}
+							} else {
+								*tmpAdditionalConDesDepHash = *copyConceptSaturationLabelSet->mConceptDesDepHash;
+								tmpAdditionalConDesDepHash->detach();
+
+								for (CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator it = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->constBegin(), itEnd = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->constEnd(); it != itEnd; ++it) {
+									cint64 conTag = it.key();
+									const CConceptSaturationDescriptorReapplyData& conDesReapplyData(it.value());
+									CConceptSaturationDescriptorReapplyData& newConDesReapplyData = (*tmpAdditionalConDesDepHash)[conTag];
+									if (conDesReapplyData.mConSatDes) {
+										newConDesReapplyData.mConSatDes = conDesReapplyData.mConSatDes;
+									}
+									if (conDesReapplyData.mImpReapplyConSatDes) {
+										newConDesReapplyData.mImpReapplyConSatDes = conDesReapplyData.mImpReapplyConSatDes;
+									}
+								}
+							}
+							copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash = tmpAdditionalConDesDepHash;
+						} else {
+							copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash = copyConceptSaturationLabelSet->mConceptDesDepHash;
+						}
+						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* tmpNewConDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						copyConceptSaturationLabelSet->mConceptDesDepHash = tmpNewConDesDepHash;
+					}
+
+					*mConceptDesDepHash = *copyConceptSaturationLabelSet->mConceptDesDepHash;
+					mConceptDesDepHash->detach();
+					mAdditionalConceptDesDepHash = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash;
 					mConceptSatDesLinker = copyConceptSaturationLabelSet->mConceptSatDesLinker;
 					return this;
 				}
@@ -60,7 +107,10 @@ namespace Konclude {
 
 				bool CReapplyConceptSaturationLabelSet::getConceptDescriptorAndReapplyQueue(cint64 conTag, CConceptSaturationDescriptor*& conSatDes, CImplicationReapplyConceptSaturationDescriptor*& impReapplyConSatDes) {
 					CConceptSaturationDescriptorReapplyData* conDesDepData = nullptr;
-					bool contained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					bool contained = mConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					if (!contained && mAdditionalConceptDesDepHash) {
+						contained = mAdditionalConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (contained)  {
 						conSatDes = conDesDepData->mConSatDes;
 						impReapplyConSatDes = conDesDepData->mImpReapplyConSatDes;
@@ -72,7 +122,10 @@ namespace Konclude {
 
 				bool CReapplyConceptSaturationLabelSet::containsConceptOrReapllyQueue(cint64 conTag) {
 					CConceptSaturationDescriptorReapplyData* conDesDepData = nullptr;
-					bool contained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					bool contained = mConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					if (!contained && mAdditionalConceptDesDepHash) {
+						contained = mAdditionalConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (contained)  {
 						return conDesDepData->mConSatDes || conDesDepData->mImpReapplyConSatDes;
 					}
@@ -91,7 +144,10 @@ namespace Konclude {
 
 				bool CReapplyConceptSaturationLabelSet::getConceptSaturationDescriptor(cint64 conTag, CConceptSaturationDescriptor*& conSatDes, CImplicationReapplyConceptSaturationDescriptor*& impReapplyConSatDes) {
 					CConceptSaturationDescriptorReapplyData* conDesDepData = nullptr;
-					bool contained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					bool contained = mConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					if (!contained && mAdditionalConceptDesDepHash) {
+						contained = mAdditionalConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (contained)  {
 						conSatDes = conDesDepData->mConSatDes;
 						if (conSatDes) {
@@ -118,7 +174,10 @@ namespace Konclude {
 
 				bool CReapplyConceptSaturationLabelSet::hasConcept(cint64 conTag, bool negated) {
 					CConceptSaturationDescriptorReapplyData* conDesDepData = nullptr;
-					bool isContained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					bool isContained = mConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					if (!isContained && mAdditionalConceptDesDepHash) {
+						isContained = mAdditionalConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					}
 					return isContained && conDesDepData->mConSatDes && conDesDepData->mConSatDes->isNegated() == negated;
 				}
 
@@ -130,7 +189,10 @@ namespace Konclude {
 
 				bool CReapplyConceptSaturationLabelSet::hasConcept(cint64 conTag, bool* containsNegated) {
 					CConceptSaturationDescriptorReapplyData* conDesDepData = nullptr;
-					bool isContained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					bool isContained = mConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					if (!isContained && mAdditionalConceptDesDepHash) {
+						isContained = mAdditionalConceptDesDepHash->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (isContained && containsNegated) {
 						*containsNegated = conDesDepData->mConSatDes && conDesDepData->mConSatDes->isNegated();
 					}
@@ -170,7 +232,19 @@ namespace Konclude {
 
 				bool CReapplyConceptSaturationLabelSet::insertConceptReturnClashed(CConceptSaturationDescriptor* conSatDes, bool* newInsertion, CImplicationReapplyConceptSaturationDescriptor*** impReapplyConSatDesPtr) {
 					cint64 conTag = conSatDes->getConceptTag();
-					CConceptSaturationDescriptorReapplyData& conDesDepData = mConceptDesDepMap[conTag];
+					CConceptSaturationDescriptorReapplyData& conDesDepData = (*mConceptDesDepHash)[conTag];
+					if (!conDesDepData.mConSatDes && !conDesDepData.mImpReapplyConSatDes && mAdditionalConceptDesDepHash) {
+						CConceptSaturationDescriptorReapplyData* prevConDesDepData = nullptr;
+						bool contained = mAdditionalConceptDesDepHash->tryGetValuePointer(conTag,prevConDesDepData);
+						if (contained && prevConDesDepData) {
+							if (prevConDesDepData->mConSatDes) {
+								conDesDepData.mConSatDes = prevConDesDepData->mConSatDes;
+							}
+							if (prevConDesDepData->mImpReapplyConSatDes) {
+								conDesDepData.mImpReapplyConSatDes = prevConDesDepData->mImpReapplyConSatDes;
+							}
+						}
+					}
 					bool inserted = false;
 					if (!conDesDepData.mConSatDes) {
 						conDesDepData.mConSatDes = conSatDes;
@@ -194,7 +268,19 @@ namespace Konclude {
 
 
 				bool CReapplyConceptSaturationLabelSet::insertConceptReapplicationReturnTriggered(cint64 conTag, CImplicationReapplyConceptSaturationDescriptor* reapplyImpReapplyConSatDes, CConceptSaturationDescriptor** conSatDes) {
-					CConceptSaturationDescriptorReapplyData& conDesDepData = mConceptDesDepMap[conTag];
+					CConceptSaturationDescriptorReapplyData& conDesDepData = (*mConceptDesDepHash)[conTag];
+					if (!conDesDepData.mConSatDes && !conDesDepData.mImpReapplyConSatDes && mAdditionalConceptDesDepHash) {
+						CConceptSaturationDescriptorReapplyData* prevConDesDepData = nullptr;
+						bool contained = mAdditionalConceptDesDepHash->tryGetValuePointer(conTag,prevConDesDepData);
+						if (contained && prevConDesDepData) {
+							if (prevConDesDepData->mConSatDes) {
+								conDesDepData.mConSatDes = prevConDesDepData->mConSatDes;
+							}
+							if (prevConDesDepData->mImpReapplyConSatDes) {
+								conDesDepData.mImpReapplyConSatDes = prevConDesDepData->mImpReapplyConSatDes;
+							}
+						}
+					}
 					bool triggered = conDesDepData.mConSatDes && !conDesDepData.mConSatDes->isNegated();
 					if (triggered) {
 						if (conSatDes) {
@@ -212,7 +298,11 @@ namespace Konclude {
 
 
 				CReapplyConceptSaturationLabelSetIterator CReapplyConceptSaturationLabelSet::getIterator(bool iterateConSatDes, bool iterateReapplies) {
-					return CReapplyConceptSaturationLabelSetIterator(mConceptDesDepMap.begin(),mConceptDesDepMap.end(),iterateConSatDes,iterateReapplies);
+					if (mAdditionalConceptDesDepHash) {
+						return CReapplyConceptSaturationLabelSetIterator(mConceptDesDepHash->begin(),mConceptDesDepHash->end(),mAdditionalConceptDesDepHash->begin(),mAdditionalConceptDesDepHash->end(),iterateConSatDes,iterateReapplies);
+					} else {
+						return CReapplyConceptSaturationLabelSetIterator(mConceptDesDepHash->begin(),mConceptDesDepHash->end(),mConceptDesDepHash->end(),mConceptDesDepHash->end(),iterateConSatDes,iterateReapplies);
+					}
 				}
 
 

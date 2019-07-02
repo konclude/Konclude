@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -30,6 +30,7 @@
 #include "CConcept.h"
 #include "CRole.h"
 #include "CIndividual.h"
+#include "COntologyImportData.h"
 
 
 // Other includes
@@ -46,6 +47,12 @@
 #include "Parser/Expressions/CDeclarationAxiomExpression.h"
 #include "Parser/Expressions/CAssertionAxiomExpression.h"
 #include "Parser/Expressions/CObjectIndividualVariableExpression.h"
+#include "Parser/Expressions/CDataPropertyTermExpression.h"
+#include "Parser/Expressions/CDataRangeTermExpression.h"
+#include "Parser/Expressions/CDatatypeExpression.h"
+#include "Parser/Expressions/CDataLexicalValueExpression.h"
+#include "Parser/Expressions/CDataPropertyExpression.h"
+#include "Parser/Expressions/CDataFacetExpression.h"
 
 #include "Reasoner/Generator/CExpressionHasher.h"
 
@@ -99,6 +106,9 @@ namespace Konclude {
 					CClassTermExpression* getTopClassExpression();
 					CClassTermExpression* getBottomClassExpression();
 
+					CDataRangeTermExpression* getTopDataRangeExpression();
+					CDataRangeTermExpression* getBottomDataRangeExpression();
+
 
 					CBUILDSET<CDeclarationAxiomExpression*>* getDeclarationAxiomSet();
 
@@ -106,13 +116,20 @@ namespace Konclude {
 					CObjectPropertyTermExpression* getTopObjectPropertyExpression();
 					CObjectPropertyTermExpression* getBottomObjectPropertyExpression();
 
+					CDataPropertyTermExpression* getTopDataPropertyExpression();
+					CDataPropertyTermExpression* getBottomDataPropertyExpression();
 
 					COntologyBuildData* setTopClassExpression(CClassTermExpression* topClassExp);
 					COntologyBuildData* setBottomClassExpression(CClassTermExpression* bottomClassExp);
 
+					COntologyBuildData* setTopDataRangeExpression(CDataRangeTermExpression* dataRangeExp);
+					COntologyBuildData* setBottomDataRangeExpression(CDataRangeTermExpression* dataRangeExp);
 
 					COntologyBuildData* setTopObjectPropertyExpression(CObjectPropertyTermExpression* topObjectPropertyExp);
 					COntologyBuildData* setBottomObjectPropertyExpression(CObjectPropertyTermExpression* bottomObjectPropertyExp);
+
+					COntologyBuildData* setTopDataPropertyExpression(CDataPropertyTermExpression* dataPropertyExp);
+					COntologyBuildData* setBottomDataPropertyExpression(CDataPropertyTermExpression* dataPropertyExp);
 
 
 					CBUILDHASH<CExpressionHasher,CBuildExpression*>* getStructuralExpressionBuildHash();
@@ -124,6 +141,10 @@ namespace Konclude {
 					CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>* getIndividualEntityBuildHash();
 					CBUILDHASH<QPair<CStringRefStringHasher,CStringRefStringHasher>,CAnonymousIndividualExpression*>* getAnonymousIndividualBuildHash();
 					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* getIndividualVariableBuildHash();
+					CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>* getDatatypeIRIBuildHash();
+					CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>* getFacetIRIBuildHash();
+					CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* getDataPropertyEntityBuildHash();
+					CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* getDataLexicalValueBuildHash();
 
 
 
@@ -135,19 +156,31 @@ namespace Konclude {
 
 
 					CBUILDSET<CClassTermExpression*>* getBuildConceptSet();
-					CBUILDSET<CObjectPropertyTermExpression*>* getBuildRoleSet();
+					CBUILDSET<CObjectPropertyTermExpression*>* getBuildObjectRoleSet();
 					CBUILDSET<CIndividualTermExpression*>* getBuildIndividualSet();
+					CBUILDSET<CDataPropertyTermExpression*>* getBuildDataRoleSet();
+					CBUILDSET<CDataRangeTermExpression*>* getBuildDataRangeSet();
+					CBUILDSET<CDatatypeExpression*>* getBuildDatatypeSet();
 
 
 					CBUILDLIST<CClassTermExpression*>* getBuildConceptList();
-					CBUILDLIST<CObjectPropertyTermExpression*>* getBuildRoleList();
+					CBUILDLIST<CObjectPropertyTermExpression*>* getBuildObjectRoleList();
+					CBUILDLIST<CDataPropertyTermExpression*>* getBuildDataRoleList();
 					CBUILDLIST<CIndividualTermExpression*>* getBuildIndividualList();
+					CBUILDLIST<CDataRangeTermExpression*>* getBuildDataRangeList();
+					CBUILDLIST<CDatatypeExpression*>* getBuildDatatypeList();
 
 					cint64 getNextAxiomNumber(bool moveNext = false);	
 					COntologyBuildData* setNextAxiomNumber(cint64 axiomNumber);
 
 					cint64 getNextEntityNumber(bool moveNext = false);	
 					COntologyBuildData* setNextEntityNumber(cint64 entityNumber);
+
+
+
+					CBUILDHASH<CStringRefStringHasher,COntologyImportData*>* getImportDataHash();
+
+
 
 				// protected methods
 				protected:
@@ -187,6 +220,11 @@ namespace Konclude {
 					CObjectPropertyTermExpression* mTopObjPropExpression;
 					CObjectPropertyTermExpression* mBottomObjPropExpression;
 
+					CDataRangeTermExpression* mTopDataRangeExpression;
+					CDataRangeTermExpression* mBottomDataRangeExpression;
+
+					CDataPropertyTermExpression* mTopDataPropExpression;
+					CDataPropertyTermExpression* mBottomDataPropExpression;
 
 					CBUILDHASH<CExpressionHasher,CBuildExpression*>* mExpressionBuildHash;
 
@@ -195,6 +233,14 @@ namespace Konclude {
 					CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>* mIndividualBuildHash;
 					CBUILDHASH<QPair<CStringRefStringHasher,CStringRefStringHasher>,CAnonymousIndividualExpression*>* mAnoIndividualBuildHash;
 					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* mIndividualVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>* mDatatypeIRIDatatypeBuildHash;
+					CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* mDataPropertyBuildHash;
+					CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* mDataLexicalValueBuildHash;
+					CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>* mFacetIRIFacetBuildHash;
+
+					
+					
+					CBUILDHASH<CStringRefStringHasher,COntologyImportData*>* mImportDataHash;
 
 					// mapping hashes and container
 					CBUILDLIST<CBuildExpression*>* mExpressionBuildListContainer;
@@ -205,12 +251,18 @@ namespace Konclude {
 
 
 					CBUILDSET<CClassTermExpression*>* mBuildConceptSet;
-					CBUILDSET<CObjectPropertyTermExpression*>* mBuildRoleSet;
+					CBUILDSET<CObjectPropertyTermExpression*>* mBuildObjectRoleSet;
+					CBUILDSET<CDataPropertyTermExpression*>* mBuildDataRoleSet;
 					CBUILDSET<CIndividualTermExpression*>* mBuildIndividualSet;
+					CBUILDSET<CDatatypeExpression*>* mBuildDatatypeSet;
+					CBUILDSET<CDataRangeTermExpression*>* mBuildDataRangesSet;
 
 					CBUILDLIST<CIndividualTermExpression*>* mBuildIndividualList;
-					CBUILDLIST<CObjectPropertyTermExpression*>* mBuildRoleList;
+					CBUILDLIST<CObjectPropertyTermExpression*>* mBuildObjectRoleList;
+					CBUILDLIST<CDataPropertyTermExpression*>* mBuildDataRoleList;
 					CBUILDLIST<CClassTermExpression*>* mBuildConceptList;
+					CBUILDLIST<CDatatypeExpression*>* mBuildDatatypeList;
+					CBUILDLIST<CDataRangeTermExpression*>* mBuildDataRangesList;
 
 				// private methods
 				private:

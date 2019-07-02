@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -44,6 +44,8 @@ namespace Konclude {
 				mBottomConceptIndex = 0;
 				mTopConceptIndex = 1;
 				mIndividualTriggerConceptIndex = 2;
+				mTopDataRangeConceptIndex = 3;
+				mDatatypeVector = nullptr;
 			}
 
 
@@ -57,6 +59,7 @@ namespace Konclude {
 				COPADestroyAndRelease(mCandidateEquivConHash,mMemMan);
 				COPADestroyAndRelease(mEquivConNonCandidateSet,mMemMan);
 				COPADestroyAndRelease(mRoleDomainTriggerConceptHash,mMemMan);
+				COPADestroyAndRelease(mDatatypeVector,mMemMan);
 
 			}
 
@@ -73,10 +76,24 @@ namespace Konclude {
 			}
 
 
+			cint64 CTBox::getTopDataRangeConceptIndex() {
+				return mTopDataRangeConceptIndex;
+			}
+
 			CConcept* CTBox::getTopConcept() {
 				CConcept* concept = nullptr;
 				if (concepts) {
 					concept = concepts->getData(mTopConceptIndex);
+				}
+				return concept;
+			}
+
+
+
+			CConcept* CTBox::getTopDataRangeConcept() {
+				CConcept* concept = nullptr;
+				if (concepts) {
+					concept = concepts->getData(mTopDataRangeConceptIndex);
 				}
 				return concept;
 			}
@@ -112,6 +129,11 @@ namespace Konclude {
 				return this;
 			}
 
+
+			CTBox* CTBox::setTopDataRangeConcept(CConcept* topDataRangeConcept) {
+				getConceptVector(true)->setData(mTopDataRangeConceptIndex,topDataRangeConcept);
+				return this;
+			}
 
 			CBOXSET<CConcept*>* CTBox::getGCIConceptSet() {
 				return gciConceptSet;
@@ -215,12 +237,33 @@ namespace Konclude {
 			}
 
 
+			CDatatypeVector *CTBox::getDatatypeVector(bool create) {
+				if (!mDatatypeVector && create) {
+					mDatatypeVector = CObjectParameterizingAllocator<CDatatypeVector,CBoxContext*>::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+				}
+				return mDatatypeVector;
+			}
+
+
+			CTBox *CTBox::setDatatypeVector(CDatatypeVector* datatypeVector) {
+				COPADestroyAndRelease(mDatatypeVector,mMemMan);
+				mDatatypeVector = datatypeVector;
+				return this;
+			}
+
+
 			CTBox *CTBox::referenceTBox(CTBox *tBox) {
 				if (tBox->concepts) {
 					getConceptVector();
 					concepts->referenceVector(tBox->concepts);
 				} else if (concepts) {					
 					concepts->clear();
+				}
+				if (tBox->mDatatypeVector) {
+					getDatatypeVector();
+					mDatatypeVector->referenceVector(tBox->mDatatypeVector);
+				} else if (mDatatypeVector) {					
+					mDatatypeVector->clear();
 				}
 				if (tBox->gciConceptSet) {
 					if (!gciConceptSet) {

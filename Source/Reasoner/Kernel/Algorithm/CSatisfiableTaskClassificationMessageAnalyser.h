@@ -1,12 +1,12 @@
 /*
- *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is released as free software, i.e., you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
- *		published by the Free Software Foundation.
+ *		Konclude is free software: you can redistribute it and/or modify it under
+ *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
+ *		as published by the Free Software Foundation.
  *
  *		You should have received a copy of the GNU Lesser General Public License
  *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details see GNU Lesser General Public License.
+ *		details, see GNU Lesser General Public License.
  *
  */
 
@@ -124,11 +124,13 @@ namespace Konclude {
 									mTriggerFlag = false;
 									mNegationFlag = false;
 									mConcept = nullptr;
+									mIndiSatNode = nullptr;
 								}
 							public:
 								bool mTriggerFlag;
 								bool mNegationFlag;
 								CConcept* mConcept;
+								CIndividualSaturationProcessNode* mIndiSatNode;
 						};
 
 
@@ -172,10 +174,14 @@ namespace Konclude {
 						};
 
 
+						typedef QPair<CConcept*,bool> TConceptNegationPair;
+
+
 						bool mConfAnalyseSubSumptions;
 						bool mConfAnalyseAllSubSumptions;
 						bool mConfAnalyseIdentifierOccurence;
 						bool mConfAnalysePossibleSubSumptions;
+						bool mEquivalentAlternativesSaturationMerging;
 
 
 						bool mConfStopAnalyseWhenNotChanging;
@@ -206,6 +212,9 @@ namespace Konclude {
 						cint64 mStatConsideredOtherNodeCount;
 						cint64 mStatExtractedPossibleSubsumerOtherNodeCount;
 
+						cint64 mStatSuccessorModelMergingTestCount;
+
+
 
 						CPROCESSINGHASH< QPair<CConcept*,bool>,CSaturatedMergedTestItem >* mTestSaturatedMergedHash;
 						CIndividualProcessNode* mLastMergingTestNode;
@@ -216,12 +225,16 @@ namespace Konclude {
 						bool hasDependencyToAncestor(CIndividualProcessNode* individualNode, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 
 
-						bool testSubsumerCandidatePossibleWithMergedSaturatedModel(CIndividualProcessNode* indiNode, CConcept* candidateConcept, CCalculationAlgorithmContext* calcAlgContext);
+						bool testSubsumerCandidatePossibleWithMergedSaturatedModel(CIndividualProcessNode* indiNode, CConcept* equivConcept, CCalculationAlgorithmContext* calcAlgContext);
 
 						bool testSubsumerCandidatePossibleWithMergedSaturatedModel(CIndividualProcessNode* indiNode, CConcept* testConcept, bool negation, bool& mergeSatisfieableFlag, CCalculationAlgorithmContext* calcAlgContext);
 						bool testConceptSetWithSaturatedModelMergable(CIndividualProcessNode* indiNode, CIndividualSaturationProcessNode* saturationIndiNode, bool& mergeClashedFlag, CCalculationAlgorithmContext* calcAlgContext);
 						bool testRoleSuccessorsWithSaturatedModelMergable(CIndividualProcessNode* indiNode, CIndividualSaturationProcessNode* saturationIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 						bool testSaturatedExistentialsModelMergable(CIndividualProcessNode* indiNode, CIndividualSaturationProcessNode* saturationIndiNode, CCalculationAlgorithmContext* calcAlgContext);
+
+
+						bool collectSuccessorMergingNodesAndConcepts(CIndividualProcessNode* indiNode, CIndividualSaturationProcessNode* saturationIndiNode, CReapplyRoleSuccessorHash* roleSuccHash, CRole* role, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>& trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, CCalculationAlgorithmContext* calcAlgContext);
+						bool collectSuccessorMergingNodesAndConcepts(CIndividualSaturationProcessNode* excludeSaturationIndiNode, CRole* role, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>& trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& nextSuccessorList, CPROCESSINGLIST<TConceptNegationPair>& nextTrivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& nextBackwardRoleSet, CPROCESSINGHASH<CRole*,TConceptNegationPair>& successorInfluenceConceptsHash, CCalculationAlgorithmContext* calcAlgContext);
 
 
 						bool collectEquivalenceConceptAlternatives(CIndividualProcessNode* indiNode, CConcept* testConcept, bool testConceptNegation, CPROCESSINGSET< QPair<CConcept*,bool> >& alternativesSet, CPROCESSINGHASH< QPair<CConcept*,bool>,CSaturatedMergedTestItem >* testSaturatedMergedHash, bool& oneMergeSatisfieableFlag, bool& allMergeUnsatisfieableFlag, CCalculationAlgorithmContext* calcAlgContext);
@@ -230,7 +243,15 @@ namespace Konclude {
 						CIndividualSaturationProcessNode* getSaturatedIndividualNodeForConcept(CConcept* concept, bool conceptNegation, CCalculationAlgorithmContext* calcAlgContext);
 						CIndividualSaturationProcessNode* getExistentialSaturatedIndividualNodeForConcept(CConcept* concept, CCalculationAlgorithmContext* calcAlgContext);
 
-						bool testSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext);
+						bool testSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>* trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext);
+						bool testSingleSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>* trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext);
+						bool testMultipleSaturatedSuccessorModelMergable(CIndividualSaturationProcessNode* existentialIndiNode, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>* trivialSuccessorPropagatedConceptList, CPROCESSINGSET<CRole*>& backwardRoleSet, cint64 remainingMergingDepth, cint64& remainingMergingCount, CCalculationAlgorithmContext* calcAlgContext);
+						
+
+
+
+						bool addAutomateTransactionConcepts(CConcept* concept, bool negation, CRole* role, CPROCESSINGLIST<CIndividualSaturationProcessNode*>& successorList, CPROCESSINGLIST<TConceptNegationPair>& trivialConceptTestingList, CCalculationAlgorithmContext* calcAlgContext);
+						bool collectTrivialPropagationTestingConcepts(CConcept* concept, bool negation, CPROCESSINGLIST<TConceptNegationPair>& trivialConceptTestingList, CCalculationAlgorithmContext* calcAlgContext);
 
 
 					// private variables
