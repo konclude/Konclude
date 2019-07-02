@@ -1,0 +1,9 @@
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xsi:schemaLocation="http://www.owllink.org/owllink# http://www.owllink.org/owllink-20091116.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:owl="http://www.w3.org/2002/07/owl#">
+ <CreateKB kb="http://te.st/roberts-family"/>
+ <LoadOntologies kb="http://te.st/roberts-family">
+  <OntologyIRI IRI="file:./Tests/roberts-family-full-D.owl.xml"/>
+ </LoadOntologies>
+ <Classify kb="http://te.st/roberts-family"/>
+ <Realize kb="http://te.st/roberts-family"/>
+ <ReleaseKB kb="http://te.st/roberts-family"/>
+</RequestMessage>

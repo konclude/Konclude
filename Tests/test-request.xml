@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xsi:schemaLocation="http://www.owllink.org/owllink# http://www.owllink.org/owllink-20091116.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:owl="http://www.w3.org/2002/07/owl#">
+
+    <CreateKB kb="http://www.konclude.com/test" />
+
+    <Tell kb="http://www.konclude.com/test">
+        <owl:Declaration>
+            <owl:Class IRI="#A" />
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="#B" />
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="#C" />
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#r" />
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i" />
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#j" />
+        </owl:Declaration>
+        <owl:EquivalentClasses>
+            <owl:Class IRI="#A" />
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="#B" />
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="#r" />
+                    <owl:Class abbreviatedIRI="owl:Thing" />
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+        <owl:EquivalentClasses>
+            <owl:Class IRI="#C" />
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="#r" />
+                <owl:Class abbreviatedIRI="owl:Thing" />
+            </owl:ObjectSomeValuesFrom>
+        </owl:EquivalentClasses>
+        <owl:ClassAssertion>
+            <owl:Class IRI="#B" />
+            <owl:NamedIndividual IRI="#i" />
+        </owl:ClassAssertion>
+        <owl:ObjectPropertyAssertion>
+            <owl:ObjectProperty IRI="#r" />
+            <owl:NamedIndividual IRI="#i" />
+            <owl:NamedIndividual IRI="#j" />
+        </owl:ObjectPropertyAssertion>
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.konclude.com/test">
+        <owl:Class IRI="#A" />
+    </IsClassSatisfiable>
+   
+    <GetSubClassHierarchy kb="http://www.konclude.com/test" />
+       
+    <GetFlattenedTypes kb="http://www.konclude.com/test">
+        <owl:NamedIndividual IRI="#i" />
+    </GetFlattenedTypes>
+    
+    <ReleaseKB kb="http://www.konclude.com/test" />
+
+</RequestMessage>

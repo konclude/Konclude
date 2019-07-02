@@ -1,0 +1,95 @@
+/*
+ *		Copyright (C) 2011, 2012, 2013 by the Konclude Developer Team
+ *
+ *		This file is part of the reasoning system Konclude.
+ *		For details and support, see <http://konclude.com/>.
+ *
+ *		Konclude is released as free software, i.e., you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU Lesser General Public License (LGPL3) as
+ *		published by the Free Software Foundation.
+ *
+ *		You should have received a copy of the GNU Lesser General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *		Konclude is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
+ *		details see GNU Lesser General Public License.
+ *
+ */
+
+#include "CClassificationStatisticsCollectionStrings.h"
+
+
+namespace Konclude {
+
+	namespace Reasoner {
+
+		namespace Classification {
+
+
+			CClassificationStatisticsCollectionStrings::CClassificationStatisticsCollectionStrings() {
+				mCalcStatCollLinker = nullptr;
+				mStatStringsCollected = false;
+			}
+
+
+			CClassificationStatisticsCollectionStrings::~CClassificationStatisticsCollectionStrings() {
+				CClassificationCalculationStatisticsCollection* mCalcStatCollLinkerIt = mCalcStatCollLinker;
+				while (mCalcStatCollLinkerIt) {
+					CClassificationCalculationStatisticsCollection* tmpCalcStatCollLinker = mCalcStatCollLinkerIt;
+					mCalcStatCollLinkerIt = mCalcStatCollLinkerIt->getNext();
+					delete tmpCalcStatCollLinker;
+				}
+			}
+
+
+			CClassificationCalculationStatisticsCollection* CClassificationStatisticsCollectionStrings::getCalculationStatisticsCollectorLinker() {
+				return mCalcStatCollLinker;
+			}
+
+			CClassificationCalculationStatisticsCollection* CClassificationStatisticsCollectionStrings::createCalculationStatisticsCollection() {
+				CClassificationCalculationStatisticsCollection* tmpCalcStatCollLinker = new CClassificationCalculationStatisticsCollection();
+				mCalcStatCollLinker = tmpCalcStatCollLinker->append(mCalcStatCollLinker);
+				return tmpCalcStatCollLinker;
+			}
+
+
+			bool CClassificationStatisticsCollectionStrings::addProcessingStatistics(const QString& statName, cint64 statValue) {
+				mStatNameStringsValueHash.insert(statName,statValue);
+				return true;
+			}
+
+
+
+			QList<QString> CClassificationStatisticsCollectionStrings::getStatisticsNameStringList() {
+				if (!mStatStringsCollected) {
+					CClassificationCalculationStatisticsCollection* mCalcStatCollLinkerIt = mCalcStatCollLinker;
+					while (mCalcStatCollLinkerIt) {
+						mCalcStatCollLinkerIt->appendStatisticsStringNames(&mStatNameStrings);
+						mCalcStatCollLinkerIt = mCalcStatCollLinkerIt->getNext();
+					}
+					foreach (QString statName, mStatNameStringsValueHash.keys()) {
+						mStatNameStrings.insert(statName);
+					}
+					mStatStringsCollected = true;
+				}
+				return mStatNameStrings.toList();
+			}
+
+			cint64 CClassificationStatisticsCollectionStrings::getStatisticIntegerValue(const QString& statName) {
+				cint64 statValue = mStatNameStringsValueHash.value(statName,0);
+				CClassificationCalculationStatisticsCollection* mCalcStatCollLinkerIt = mCalcStatCollLinker;
+				while (mCalcStatCollLinkerIt) {
+					statValue += mCalcStatCollLinkerIt->getStatisticIntegerValue(statName);
+					mCalcStatCollLinkerIt = mCalcStatCollLinkerIt->getNext();
+				}
+				return statValue;
+			}
+
+
+		}; // end namespace Classification
+
+	}; // end namespace Reasoner
+
+}; // end namespace Konclude

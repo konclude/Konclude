@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xml:base="http://www.owllink.org/testsuite/1b#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+    
+    <CreateKB kb="http://www.owllink.org/testsuite/1b"/>
+    
+    <Tell kb="http://www.owllink.org/testsuite/1b">
+        
+        <owl:Declaration>
+            <owl:Class IRI="A"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="C"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="D"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="E"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="F"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="H"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rs1"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rs2"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rs3"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rs4"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rs5"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rs6"/>
+        </owl:Declaration>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rs1"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rs2"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rs3"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rs4"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rs5"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="rs6"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:InverseObjectProperties>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rs1"/>
+            <owl:Class IRI="C"/>
+        </owl:ObjectPropertyRange>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rs2"/>
+            <owl:Class IRI="D"/>
+        </owl:ObjectPropertyRange>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rs3"/>
+            <owl:Class IRI="H"/>
+        </owl:ObjectPropertyRange>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rs4"/>
+            <owl:ObjectUnionOf>
+                <owl:Class IRI="E"/>
+                <owl:Class IRI="H"/>
+            </owl:ObjectUnionOf>
+        </owl:ObjectPropertyRange>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rs5"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="E"/>
+                <owl:ObjectComplementOf>
+                    <owl:ObjectIntersectionOf>
+                        <owl:Class IRI="C"/>
+                        <owl:Class IRI="D"/>
+                    </owl:ObjectIntersectionOf>
+                </owl:ObjectComplementOf>
+            </owl:ObjectIntersectionOf>
+        </owl:ObjectPropertyRange>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="G"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:Class IRI="A"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:ObjectIntersectionOf>
+                        <owl:Class IRI="C"/>
+                        <owl:Class IRI="D"/>
+                        <owl:Class IRI="E"/>
+                    </owl:ObjectIntersectionOf>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:ObjectAllValuesFrom>
+                        <owl:ObjectProperty IRI="r"/>
+                        <owl:ObjectAllValuesFrom>
+                            <owl:ObjectProperty IRI="rs6"/>
+                            <owl:ObjectUnionOf>
+                                <owl:Class IRI="A"/>
+                                <owl:Class IRI="C"/>
+                            </owl:ObjectUnionOf>
+                        </owl:ObjectAllValuesFrom>
+                    </owl:ObjectAllValuesFrom>
+                </owl:ObjectAllValuesFrom>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:ObjectMinCardinality cardinality="1">
+                        <owl:ObjectProperty IRI="r"/>
+                    </owl:ObjectMinCardinality>
+                </owl:ObjectAllValuesFrom>
+                <owl:ObjectMinCardinality cardinality="3">
+                    <owl:ObjectProperty IRI="rs1"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMinCardinality cardinality="3">
+                    <owl:ObjectProperty IRI="rs2"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMinCardinality cardinality="3">
+                    <owl:ObjectProperty IRI="rs3"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMinCardinality cardinality="3">
+                    <owl:ObjectProperty IRI="rs5"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectExactCardinality cardinality="4">
+                    <owl:ObjectProperty IRI="rs4"/>
+                </owl:ObjectExactCardinality>
+                <owl:ObjectMaxCardinality cardinality="4">
+                    <owl:ObjectProperty IRI="r"/>
+                </owl:ObjectMaxCardinality>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+        
+    </Tell>
+    
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/1b" timing="simple">
+        <owl:Class IRI="G"/>
+        <!-- should be false -->
+ 		<ExpectedResult>
+			 <BooleanResponse result="false"/>
+		</ExpectedResult>
+   </IsClassSatisfiable>
+    
+    <ReleaseKB kb="http://www.owllink.org/testsuite/1b"/>
+
+</RequestMessage>

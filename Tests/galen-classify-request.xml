@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+
+	<CreateKB kb="http://ex.test/galen"/>
+	
+	<LoadOntologies kb="http://ex.test/galen">
+		<OntologyIRI IRI="file:./Tests/galen.owl.xml"/>
+	</LoadOntologies>	
+
+    <GetSubClassHierarchy kb="http://ex.test/galen"/>	
+	
+    <ReleaseKB kb="http://ex.test/galen"/>
+
+</RequestMessage>
