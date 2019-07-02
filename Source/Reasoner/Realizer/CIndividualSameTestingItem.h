@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -54,12 +54,12 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CIndividualSameTestingItem(COntologyRealizingItem* preproItem, COptimizedKPSetConceptInstantiatedItem* instantiatedItem1, COptimizedKPSetConceptInstantiatedItem* instantiatedItem2);
+					CIndividualSameTestingItem(COntologyRealizingItem* preproItem, COptimizedKPSetIndividualItem* instantiatedItem1, COptimizedKPSetIndividualItem* instantiatedItem2);
 
 					virtual REALIZINGTESTINGTYPE getRealizingTestingType();
 
-					COptimizedKPSetConceptInstantiatedItem* getInstantiatedItem1();
-					COptimizedKPSetConceptInstantiatedItem* getInstantiatedItem2();
+					COptimizedKPSetIndividualItem* getInstantiatedItem1();
+					COptimizedKPSetIndividualItem* getInstantiatedItem2();
 
 				// protected methods
 				protected:
@@ -67,8 +67,8 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COntologyRealizingItem* mOntologyPreproItem;
-					COptimizedKPSetConceptInstantiatedItem* mInstantiatedItem1;
-					COptimizedKPSetConceptInstantiatedItem* mInstantiatedItem2;
+					COptimizedKPSetIndividualItem* mInstantiatedItem1;
+					COptimizedKPSetIndividualItem* mInstantiatedItem2;
 
 				// private methods
 				private:

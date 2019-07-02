@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,8 +28,11 @@
 #include "ProcessSettings.h"
 #include "CProcessContext.h"
 #include "CRoleSaturationProcessLinker.h"
+#include "CConceptSaturationProcessLinker.h"
 #include "CSaturationSuccessorFUNCTIONALConceptExtensionData.h"
 #include "CSaturationLinkedSuccessorRoleFUNCTIONALConceptsExtensionHash.h"
+#include "CSaturationPredecessorRoleFUNCTIONALConceptsExtensionHash.h"
+#include "CSaturationPredecessorFUNCTIONALConceptExtensionData.h"
 
 // Other includes
 #include "Reasoner/Ontology/CConcept.h"
@@ -92,13 +95,52 @@ namespace Konclude {
 
 
 						CSaturationLinkedSuccessorRoleFUNCTIONALConceptsExtensionHash* getLinkedSuccessorRoleFUNCTIONALConceptsExtensionHash();
-						CSaturationSuccessorFUNCTIONALConceptExtensionData* getFUNCTIONALConceptsExtensionData(CRole* role, bool create = true);
+						CSaturationSuccessorFUNCTIONALConceptExtensionData* getSuccessorFUNCTIONALConceptsExtensionData(CRole* role, bool create = true);
 
 
-						bool hasExtensionProcessData();
-						CSaturationSuccessorFUNCTIONALConceptExtensionData* takeNextExtensionProcessData();
-						CSaturationSuccessorFUNCTIONALConceptExtensionData* getExtensionProcessDataLinker();
-						CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* addExtensionProcessData(CSaturationSuccessorFUNCTIONALConceptExtensionData* processData);
+						bool hasSuccessorExtensionProcessData();
+						CSaturationSuccessorFUNCTIONALConceptExtensionData* takeNextSuccessorExtensionProcessData();
+						CSaturationSuccessorFUNCTIONALConceptExtensionData* getSuccessorExtensionProcessDataLinker();
+						CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* addSuccessorExtensionProcessData(CSaturationSuccessorFUNCTIONALConceptExtensionData* processData);
+
+
+
+
+
+
+						CRoleSaturationProcessLinker* getLinkedPredecessorAddedRoleProcessLinker();
+						CRoleSaturationProcessLinker* takeLinkedPredecessorAddedRoleProcessLinker();
+						CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* addLinkedPredecessorAddedRoleProcessLinker(CRoleSaturationProcessLinker* roleProcessLinker);
+						bool hasLinkedPredecessorAddedProcessLinkerForRole(CRole* role);
+
+
+						CSaturationPredecessorRoleFUNCTIONALConceptsExtensionHash* getPredecessorRoleFUNCTIONALConceptsExtensionHash();
+						CSaturationPredecessorFUNCTIONALConceptExtensionData* getPredecessorFUNCTIONALConceptsExtensionData(CRole* role, bool create = true);
+
+
+						bool hasPredecessorExtensionProcessData();
+						CSaturationPredecessorFUNCTIONALConceptExtensionData* takeNextPredecessorExtensionProcessData();
+						CSaturationPredecessorFUNCTIONALConceptExtensionData* getPredecessorExtensionProcessDataLinker();
+						CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* addPredecessorExtensionProcessData(CSaturationPredecessorFUNCTIONALConceptExtensionData* processData);
+
+
+
+
+						CPROCESSHASH<CIndividualSaturationProcessNode*,CRole*>* getForwardingPredecessorMergedHash(bool create = true);
+						bool hasIndividualNodeForwardingPredecessorMerged(CIndividualSaturationProcessNode* indiNode, CRole* role);
+						bool hasIndividualNodeForwardingPredecessorMerged(CIndividualSaturationProcessNode* indiNode);
+						CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* setIndividualNodeForwardingPredecessorMerged(CIndividualSaturationProcessNode* indiNode, CRole* role);
+
+
+
+
+
+
+						CConceptSaturationProcessLinker* getQualifiedFunctionalAtmostConceptProcessLinker();
+						CConceptSaturationProcessLinker* takeQualifiedFunctionalAtmostConceptProcessLinker();
+						CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* addQualifiedFunctionalAtmostConceptProcessLinker(CConceptSaturationProcessLinker* conceptProcessLinker);
+						bool hasQualifiedFunctionalAtmostConceptProcessLinkerForConcept(CConceptSaturationDescriptor* conDes);
+
 
 					// protected methods
 					protected:
@@ -111,10 +153,19 @@ namespace Konclude {
 						CRoleSaturationProcessLinker* mLinkedSuccessorAddedRoleProcessLinker;
 						CRoleSaturationProcessLinker* mFunctionalityAddedRoleProcessLinker;
 						CRoleSaturationProcessLinker* mCopyingInitializingRoleProcessLinker;
+						CConceptSaturationProcessLinker* mQualFuncAtmostConProcessLinker;
 						CIndividualSaturationProcessNode* mIndiProcessNode;
-						CSaturationLinkedSuccessorRoleFUNCTIONALConceptsExtensionHash mLinkedSuccRoleFUNCTIONALConceptExtHash;
-						CSaturationSuccessorFUNCTIONALConceptExtensionData* mExtensionProcessLinker;
 
+						CSaturationLinkedSuccessorRoleFUNCTIONALConceptsExtensionHash mLinkedSuccRoleFUNCTIONALConceptExtHash;
+						CSaturationSuccessorFUNCTIONALConceptExtensionData* mSuccessorExtensionProcessLinker;
+
+						CRoleSaturationProcessLinker* mLinkedPredecessorAddedRoleProcessLinker;
+						CSaturationPredecessorRoleFUNCTIONALConceptsExtensionHash mLinkedPredRoleFUNCTIONALConceptExtHash;
+						CSaturationPredecessorFUNCTIONALConceptExtensionData* mPredecessorExtensionProcessLinker;
+
+						CPROCESSHASH<CIndividualSaturationProcessNode*,CRole*>* mForwardingPredMergedHash;
+
+						CPROCESSSET<CConceptSaturationDescriptor*>* mQualifiedFunctionalAtmostConceptProcessSet;
 
 					// private methods
 					private:

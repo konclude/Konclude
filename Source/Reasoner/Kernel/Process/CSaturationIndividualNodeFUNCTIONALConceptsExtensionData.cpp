@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,19 +30,25 @@ namespace Konclude {
 			namespace Process {
 
 
-				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::CSaturationIndividualNodeFUNCTIONALConceptsExtensionData(CProcessContext* processContext) : mLinkedSuccRoleFUNCTIONALConceptExtHash(processContext) {
+				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::CSaturationIndividualNodeFUNCTIONALConceptsExtensionData(CProcessContext* processContext) : mLinkedSuccRoleFUNCTIONALConceptExtHash(processContext), mLinkedPredRoleFUNCTIONALConceptExtHash(processContext) {
 					mProcessContext = processContext;
 				}
 
 				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::initFUNCTIONALConceptsExtensionData(CIndividualSaturationProcessNode* indiProcessNode) {
 					mLinkedSuccRoleFUNCTIONALConceptExtHash.initLinkedSuccessorRoleFUNCTIONALConceptsExtensionHash();
+					mLinkedPredRoleFUNCTIONALConceptExtHash.initLinkedPredecessorRoleFUNCTIONALConceptsExtensionHash();
 					mIndiProcessNode = indiProcessNode;
 					mLinkedSuccessorAddedRoleProcessLinker = nullptr;
+					mLinkedPredecessorAddedRoleProcessLinker = nullptr;
+					mQualFuncAtmostConProcessLinker = nullptr;
 					mFunctionalityAddedRoleProcessLinker = nullptr;
 					mCopyingInitializingRoleProcessLinker = nullptr;
 					mSuccessorExtensionInitialized = false;
 					mExtensionProcessingQueued = false;
-					mExtensionProcessLinker = nullptr;
+					mSuccessorExtensionProcessLinker = nullptr;
+					mPredecessorExtensionProcessLinker = nullptr;
+					mForwardingPredMergedHash = nullptr;
+					mQualifiedFunctionalAtmostConceptProcessSet = nullptr;
 					return this;
 				}
 
@@ -162,31 +168,183 @@ namespace Konclude {
 					return &mLinkedSuccRoleFUNCTIONALConceptExtHash;
 				}
 
-				CSaturationSuccessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getFUNCTIONALConceptsExtensionData(CRole* role, bool create) {
-					return mLinkedSuccRoleFUNCTIONALConceptExtHash.getFunctionalConceptsExtensionData(role);
+				CSaturationSuccessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getSuccessorFUNCTIONALConceptsExtensionData(CRole* role, bool create) {
+					return mLinkedSuccRoleFUNCTIONALConceptExtHash.getSuccessorFunctionalConceptsExtensionData(role);
 				}
 
-				bool CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::hasExtensionProcessData() {
-					return mExtensionProcessLinker != nullptr;
+				bool CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::hasSuccessorExtensionProcessData() {
+					return mSuccessorExtensionProcessLinker != nullptr;
 				}
 
-				CSaturationSuccessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::takeNextExtensionProcessData() {
-					CSaturationSuccessorFUNCTIONALConceptExtensionData* tmpExtProcessLinker = mExtensionProcessLinker;
-					if (mExtensionProcessLinker) {
-						mExtensionProcessLinker = mExtensionProcessLinker->getNext();
+				CSaturationSuccessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::takeNextSuccessorExtensionProcessData() {
+					CSaturationSuccessorFUNCTIONALConceptExtensionData* tmpExtProcessLinker = mSuccessorExtensionProcessLinker;
+					if (mSuccessorExtensionProcessLinker) {
+						mSuccessorExtensionProcessLinker = mSuccessorExtensionProcessLinker->getNext();
 						tmpExtProcessLinker->clearNext();
 					}
 					return tmpExtProcessLinker;
 				}
 
-				CSaturationSuccessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getExtensionProcessDataLinker() {
-					return mExtensionProcessLinker;
+				CSaturationSuccessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getSuccessorExtensionProcessDataLinker() {
+					return mSuccessorExtensionProcessLinker;
 				}
 
-				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::addExtensionProcessData(CSaturationSuccessorFUNCTIONALConceptExtensionData* processData) {
-					mExtensionProcessLinker = processData->append(mExtensionProcessLinker);
+				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::addSuccessorExtensionProcessData(CSaturationSuccessorFUNCTIONALConceptExtensionData* processData) {
+					mSuccessorExtensionProcessLinker = processData->append(mSuccessorExtensionProcessLinker);
 					return this;
 				}
+
+
+
+
+
+
+
+
+
+				CRoleSaturationProcessLinker* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getLinkedPredecessorAddedRoleProcessLinker() {
+					return mLinkedPredecessorAddedRoleProcessLinker;
+				}
+
+				CRoleSaturationProcessLinker* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::takeLinkedPredecessorAddedRoleProcessLinker() {
+					CRoleSaturationProcessLinker* tmpRoleProcessLinker = mLinkedPredecessorAddedRoleProcessLinker;
+					mLinkedPredecessorAddedRoleProcessLinker = nullptr;
+					return tmpRoleProcessLinker;
+				}
+
+				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::addLinkedPredecessorAddedRoleProcessLinker(CRoleSaturationProcessLinker* roleProcessLinker) {
+					if (roleProcessLinker) {
+						mLinkedPredecessorAddedRoleProcessLinker = roleProcessLinker->append(mLinkedPredecessorAddedRoleProcessLinker);
+					}
+					return this;
+				}
+
+				bool CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::hasLinkedPredecessorAddedProcessLinkerForRole(CRole* role) {
+					cint64 maxTestCount = 10;
+					for (CRoleSaturationProcessLinker* roleProcessLinkerIt = mLinkedPredecessorAddedRoleProcessLinker; roleProcessLinkerIt && --maxTestCount > 0; roleProcessLinkerIt = roleProcessLinkerIt->getNext()) {
+						if (roleProcessLinkerIt->getRole() == role) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+
+				CSaturationPredecessorRoleFUNCTIONALConceptsExtensionHash* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getPredecessorRoleFUNCTIONALConceptsExtensionHash() {
+					return &mLinkedPredRoleFUNCTIONALConceptExtHash;
+				}
+
+				CSaturationPredecessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getPredecessorFUNCTIONALConceptsExtensionData(CRole* role, bool create) {
+					return mLinkedPredRoleFUNCTIONALConceptExtHash.getPredecessorFunctionalConceptsExtensionData(role);
+				}
+
+				bool CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::hasPredecessorExtensionProcessData() {
+					return mPredecessorExtensionProcessLinker != nullptr;
+				}
+
+				CSaturationPredecessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::takeNextPredecessorExtensionProcessData() {
+					CSaturationPredecessorFUNCTIONALConceptExtensionData* tmpExtProcessLinker = mPredecessorExtensionProcessLinker;
+					if (mPredecessorExtensionProcessLinker) {
+						mPredecessorExtensionProcessLinker = mPredecessorExtensionProcessLinker->getNext();
+						tmpExtProcessLinker->clearNext();
+					}
+					return tmpExtProcessLinker;
+				}
+
+				CSaturationPredecessorFUNCTIONALConceptExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getPredecessorExtensionProcessDataLinker() {
+					return mPredecessorExtensionProcessLinker;
+				}
+
+				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::addPredecessorExtensionProcessData(CSaturationPredecessorFUNCTIONALConceptExtensionData* processData) {
+					mPredecessorExtensionProcessLinker = processData->append(mPredecessorExtensionProcessLinker);
+					return this;
+				}
+
+
+
+
+
+				CPROCESSHASH<CIndividualSaturationProcessNode*,CRole*>* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getForwardingPredecessorMergedHash(bool create) {
+					if (create && !mForwardingPredMergedHash) {
+						mForwardingPredMergedHash = CObjectParameterizingAllocator< CPROCESSHASH<CIndividualSaturationProcessNode*,CRole*>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+					}
+					return mForwardingPredMergedHash;
+				}
+
+
+
+				bool CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::hasIndividualNodeForwardingPredecessorMerged(CIndividualSaturationProcessNode* indiNode) {
+					if (mForwardingPredMergedHash) {
+						return mForwardingPredMergedHash->contains(indiNode);
+					}
+					return false;
+				}
+
+
+				bool CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::hasIndividualNodeForwardingPredecessorMerged(CIndividualSaturationProcessNode* indiNode, CRole* role) {
+					if (!mForwardingPredMergedHash) {
+						return false;
+					}
+					for (CPROCESSHASH<CIndividualSaturationProcessNode*,CRole*>::const_iterator it = mForwardingPredMergedHash->constFind(indiNode), itEnd = mForwardingPredMergedHash->constEnd(); it != itEnd; ++it) {
+						if (it.key() == indiNode) {							
+							if (it.value() == role) {
+								return true;
+							}
+						} else {
+							break;
+						}
+					}
+					return false;
+				}
+
+
+
+				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::setIndividualNodeForwardingPredecessorMerged(CIndividualSaturationProcessNode* indiNode, CRole* role) {
+					if (!hasIndividualNodeForwardingPredecessorMerged(indiNode,role)) {
+						getForwardingPredecessorMergedHash(true)->insertMulti(indiNode,role);
+					}
+					return this;
+				}
+
+
+
+
+
+
+
+
+
+
+				CConceptSaturationProcessLinker* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::getQualifiedFunctionalAtmostConceptProcessLinker() {
+					return mQualFuncAtmostConProcessLinker;
+				}
+
+				CConceptSaturationProcessLinker* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::takeQualifiedFunctionalAtmostConceptProcessLinker() {
+					CConceptSaturationProcessLinker* tmpConProcessLinker = mQualFuncAtmostConProcessLinker;
+					mQualFuncAtmostConProcessLinker = nullptr;
+					return tmpConProcessLinker;
+				}
+
+				CSaturationIndividualNodeFUNCTIONALConceptsExtensionData* CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::addQualifiedFunctionalAtmostConceptProcessLinker(CConceptSaturationProcessLinker* conceptProcessLinker) {
+					if (conceptProcessLinker) {
+						if (!mQualifiedFunctionalAtmostConceptProcessSet) {
+							mQualifiedFunctionalAtmostConceptProcessSet = CObjectParameterizingAllocator< CPROCESSSET<CConceptSaturationDescriptor*>,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						}
+						mQualifiedFunctionalAtmostConceptProcessSet->insert(conceptProcessLinker->getConceptSaturationDescriptor());
+						mQualFuncAtmostConProcessLinker = conceptProcessLinker->append(mQualFuncAtmostConProcessLinker);
+					}
+					return this;
+				}
+
+				bool CSaturationIndividualNodeFUNCTIONALConceptsExtensionData::hasQualifiedFunctionalAtmostConceptProcessLinkerForConcept(CConceptSaturationDescriptor* conDes) {
+					if (mQualifiedFunctionalAtmostConceptProcessSet && mQualifiedFunctionalAtmostConceptProcessSet->contains(conDes)) {
+						return true;
+					}
+					return false;
+				}
+
+
+
 
 			}; // end namespace Process
 

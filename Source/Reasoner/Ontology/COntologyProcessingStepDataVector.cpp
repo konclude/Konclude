@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -37,7 +37,7 @@ namespace Konclude {
 				mPrStCount = stepCount;
 				mPrStepDataVector = CObjectAllocator<COntologyProcessingStepData*>::allocateArray(memMan,stepCount);
 				for (cint64 i = 0; i < stepCount; ++i) {
-					COntologyProcessingStepData* stepData = CObjectAllocator<COntologyProcessingStepData>::allocateAndConstruct(memMan);
+					COntologyProcessingStepData* stepData = CObjectParameterizingAllocator< COntologyProcessingStepData,COntologyContext* >::allocateAndConstructAndParameterize(memMan,mContext);
 					stepData->initProcessingStepData(mPrStepVector->getProcessingStep(i));
 					mPrStepDataVector[i] = stepData;
 				}

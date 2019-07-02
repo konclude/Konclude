@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -22,6 +22,8 @@
 #define KONCLUDE_TEST_EVALUATION_CREASONEREVALUATIONMANAGERTHREAD_H
 
 // Libraries includes
+#include <QString>
+#include <QSet>
 
 
 // Namespace includes
@@ -57,6 +59,10 @@
 #include "CReasonerEvaluationGroupRequestReasonerBucketCSVComparisonAnalyser.h"
 #include "CReasonerEvaluationGroupRequestReasonerAccumulatedCountCSVComparisonAnalyser.h"
 #include "CReasonerEvaluationGroupRequestStatisticsCSVComparisonAnalyser.h"
+#include "CReasonerEvaluationStatisticsValueExtractor.h"
+#include "CReasonerEvaluationStatisticsNameCollectingExtractor.h"
+#include "CReasonerEvaluationGroupRequestReasonerStatisticValueCSVComparisonAnalyser.h"
+#include "CReasonerEvaluationGroupRequestReasonerStatisticValueCollectingCSVComparisonAnalyser.h"
 
 // Other includes
 #include "Config/CConfiguration.h"

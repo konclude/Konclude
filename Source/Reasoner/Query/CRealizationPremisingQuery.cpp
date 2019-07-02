@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,9 @@ namespace Konclude {
 				mOntology = ontology;
 				mConfig = configuration;
 				mQueryStats = nullptr;
+				mRequiresSameIndividualRealisation = false;
+				mRequiresConceptRealisation = false;
+				mRequiresRoleRealisation = false;
 			}
 
 			CRealizationPremisingQuery::~CRealizationPremisingQuery() {
@@ -53,6 +56,19 @@ namespace Konclude {
 			CQueryStatistics* CRealizationPremisingQuery::getQueryStatistics() {
 				return mQueryStats;
 			}
+
+			bool CRealizationPremisingQuery::isConceptRealisationRequired() {
+				return mRequiresConceptRealisation;
+			}
+
+			bool CRealizationPremisingQuery::isRoleRealisationRequired() {
+				return mRequiresRoleRealisation;
+			}
+
+			bool CRealizationPremisingQuery::isSameIndividualRealisationRequired() {
+				return mRequiresSameIndividualRealisation;
+			}
+
 
 		}; // end namespace Query
 

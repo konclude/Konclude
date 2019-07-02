@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -37,7 +37,11 @@
 #include "Reasoner/Ontology/CConceptProcessData.h"
 #include "Reasoner/Ontology/CConceptSatisfiableReferenceLinkingData.h"
 
+#include "Reasoner/Consistiser/CIndividualDependenceTrackingMarker.h"
+
 #include "Reasoner/Taxonomy/CHierarchyNode.h"
+
+#include "Reasoner/Kernel/Cache/CCacheEntry.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -49,6 +53,8 @@ namespace Konclude {
 
 		using namespace Ontology;
 		using namespace Taxonomy;
+		using namespace Consistiser;
+		using namespace Kernel::Cache;
 
 		namespace Classifier {
 
@@ -61,7 +67,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedKPSetClassTestingItem : public CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking, public CConceptSubsumerObserver {
+			class COptimizedKPSetClassTestingItem : public CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking, public CConceptSubsumerObserver, public CIndividualDependenceTrackingMarker {
 				// public methods
 				public:
 					//! Constructor
@@ -69,7 +75,7 @@ namespace Konclude {
 					~COptimizedKPSetClassTestingItem();
 
 
-					COptimizedKPSetClassTestingItem* initSatisfiableTestingItem(CConcept* satTestConcept);
+					COptimizedKPSetClassTestingItem* initSatisfiableTestingItem(CConcept* satTestConcept, QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash);
 					CConcept* getTestingConcept();
 
 
@@ -144,6 +150,18 @@ namespace Konclude {
 					COptimizedKPSetClassTestingItem* setPossibleSubsumedList(QList<COptimizedKPSetClassTestingItem*>* possSubsumedList);
 					bool hasRemainingPossibleSubsumedItems();
 
+
+
+
+					CCacheEntry* getFastSatisfiabilityTestedSaturationCacheEntry();
+					COptimizedKPSetClassTestingItem* setFastSatisfiabilityTestedSaturationCacheEntry(CCacheEntry* cacheEntry);
+					
+					bool hasSuccessfullyFastSatisfiabilityTested();
+					COptimizedKPSetClassTestingItem* setSuccessfullyFastSatisfiabilityTested(bool successfullyTested);
+
+					virtual CIndividualDependenceTrackingMarker* setIndividualDependenceTracked();
+					bool hasIndividualDependenceTracked();
+
 				// protected methods
 				protected:
 
@@ -162,7 +180,7 @@ namespace Konclude {
 					bool mSatTestOrdered;
 					// true, if the satisfiability testing has finished
 					bool mTestedSat;
-					// true, if for a subsumer concept the unsatisfiability has been discovered
+					// true, if for a super concept the unsatisfiability has been discovered
 					bool mUnsatDerivated;
 					// true, if for the concept the satisfiability has been extracted from a completion graph
 					bool mSatDerivated;
@@ -187,6 +205,13 @@ namespace Konclude {
 					//QString mSubsumingConceptString;
 					CClassificationClassPseudoModel mPseudoModel;
 					bool mPseudoModelInitialized;
+
+					CCacheEntry* mFastSatCacheEntry;
+					bool mSuccFastSatTested;
+
+					bool mIndiDepTracked;
+
+					QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* mConRefLinkDataHash;
 
 				// private methods
 				private:

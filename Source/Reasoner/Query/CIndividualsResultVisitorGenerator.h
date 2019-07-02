@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,6 +30,7 @@
 // Other includes
 #include "Reasoner/Realization/CRealization.h"
 #include "Reasoner/Realization/CConceptRealizationInstanceToIndividualVisitor.h"
+#include "Reasoner/Realization/CRoleRealizationInstanceToIndividualVisitor.h"
 
 #include "Reasoner/Ontology/CConcreteOntology.h"
 #include "Reasoner/Ontology/CAbbreviatedIRIName.h"
@@ -54,13 +55,15 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CIndividualsResultVisitorGenerator : public CConceptRealizationInstanceToIndividualVisitor {
+			class CIndividualsResultVisitorGenerator : public CConceptRealizationInstanceToIndividualVisitor, public CRoleRealizationInstanceToIndividualVisitor, public CSameRealizationIndividualVisitor {
 				// public methods
 				public:
 					//! Constructor
 					CIndividualsResultVisitorGenerator(CIndividualsResult* individualsResult, bool abbreviatedIRIs);
 
 					virtual bool visitIndividual(CIndividual* individual, CConceptRealization* conRealization);
+					virtual bool visitIndividual(CIndividual* individual, CRoleRealization* roleRealization);
+					virtual bool visitIndividual(CIndividual* individual, CSameRealization* conRealization);
 
 				// protected methods
 				protected:

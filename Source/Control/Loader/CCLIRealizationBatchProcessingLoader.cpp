@@ -56,7 +56,7 @@ namespace Konclude {
 				ontoIRIList.append(mRequestFileString);
 				//CLoadKnowledgeBaseOWLXMLOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLXMLOntologyCommand(testKB,ontoIRIList);
 				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(testKB,ontoIRIList);
-				CKnowledgeBaseRealizeCommand* realizeKBCommand = new CKnowledgeBaseRealizeCommand(testKB);
+				CRealizeQueryCommand* realizeKBCommand = new CRealizeQueryCommand(testKB);
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
 				addProcessingCommand(realizeKBCommand);

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,28 +30,50 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeFloatValueSpaceData::CDatatypeFloatValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext),mFloatValueSpaceMap(processContext) {
-					mValueSpaceMap = &mFloatValueSpaceMap;
+				CDatatypeFloatValueSpaceData::CDatatypeFloatValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext) {
+					mFloatValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeFloatValueSpaceData* CDatatypeFloatValueSpaceData::initFloatValueSpaceData(CDatatypeValueSpaceFloatType* valueSpaceType) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(nullptr);
-					mFloatValueSpaceMap.initDatatypeCompareValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mFloatValueSpaceMap) {
+						mFloatValueSpaceMap->initDatatypeCompareValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeFloatValueSpaceData* CDatatypeFloatValueSpaceData::copyFloatValueSpaceData(CDatatypeFloatValueSpaceData* spaceData) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(spaceData);
-					mFloatValueSpaceMap.initDatatypeCompareValueSpaceMap(spaceData->getFloatValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mFloatValueSpaceMap && !mFloatValueSpaceMap) {
+						getFloatValueSpaceMap(true);
+						mFloatValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mFloatValueSpaceMap);
+					} else if (mFloatValueSpaceMap) {
+						if (spaceData->mFloatValueSpaceMap) {
+							mFloatValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mFloatValueSpaceMap);
+						} else {
+							mFloatValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
 
-				CDatatypeFloatValueSpaceMap* CDatatypeFloatValueSpaceData::getFloatValueSpaceMap() {
-					return &mFloatValueSpaceMap;
+				CDatatypeFloatValueSpaceMap* CDatatypeFloatValueSpaceData::getFloatValueSpaceMap(bool create) {
+					if (create && !mFloatValueSpaceMap) {
+						mFloatValueSpaceMap = CObjectParameterizingAllocator< CDatatypeFloatValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mFloatValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+					}
+					return mFloatValueSpaceMap;
 				}
+
+				CDatatypeCompareValueSpaceMap* CDatatypeFloatValueSpaceData::createValueSpaceMap() {
+					return getFloatValueSpaceMap(true);
+				}
+
 
 			}; // end namespace Process
 

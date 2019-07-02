@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -42,6 +42,8 @@ namespace Konclude {
 				CConcreteOntologyBuildDataUpdater::initializeBuilding();
 
 
+				mNominalConceptCreationRequired = false;
+				mLateIndiNominalConceptCreationList.clear();
 
 				mTellAxiomSet = mOntoBuild->getTellAxiomSet();
 				mRetractAxiomSet = mOntoBuild->getRetractAxiomSet();
@@ -194,15 +196,18 @@ namespace Konclude {
 				CONTOLOGYAXIOMSET<CAxiomExpression*> newTellUpdatedAxiomSet;
 				CONTOLOGYAXIOMSET<CAxiomExpression*> newRetractUpdatedAxiomSet;
 
-				FOREACHIT (CAxiomExpression* axiomExp, *mRetractUpdatedAxiomSet) {
+				if (!mRetractUpdatedAxiomSet->isEmpty()) {
 					mConstructFlags->setRetractionUsed();
-					mChangeUpdatedAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,false) );
-					mChangeAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,false) );
 				}
-				FOREACHIT (CAxiomExpression* axiomExp, *mTellUpdatedAxiomSet) {
-					mChangeUpdatedAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,true) );
-					mChangeAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,true) );
-				}
+				//FOREACHIT (CAxiomExpression* axiomExp, *mRetractUpdatedAxiomSet) {
+				//	mConstructFlags->setRetractionUsed();
+				//	mChangeUpdatedAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,false) );
+				//	mChangeAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,false) );
+				//}
+				//FOREACHIT (CAxiomExpression* axiomExp, *mTellUpdatedAxiomSet) {
+				//	mChangeUpdatedAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,true) );
+				//	mChangeAxiomList->append( QPair<CAxiomExpression*,bool>(axiomExp,true) );
+				//}
 
 				if (mLastProcessedChangedAxiom <= 0) {
 					mLastProcessedChangedAxiom = mChangeAxiomList->size();
@@ -356,6 +361,11 @@ namespace Konclude {
 
 
 
+				//mUpdateClassAxiomHash->reserve(mTellAxiomSet->size());
+				//mUpdateObjectPropertyAxiomHash->reserve(mTellAxiomSet->size());
+				//mUpdateDataPropertyAxiomHash->reserve(mTellAxiomSet->size());
+				//mDeclarationAxiomSet->reserve(mTellAxiomSet->size());
+				//mUpdateAssertionAxiomHash->reserve(mTellAxiomSet->size());
 
 				FOREACHIT (CAxiomExpression* axiomExp, newTellUpdatedAxiomSet) {
 					CClassAxiomExpression* classAxiomExp = dynamic_cast<CClassAxiomExpression*>(axiomExp);
@@ -405,6 +415,9 @@ namespace Konclude {
 
 
 
+				//mIndiTermAssertionAxiomSet->reserve(mUpdateAssertionAxiomHash->size());
+				//mNewBuildIndividualSet.reserve(mUpdateAssertionAxiomHash->size());
+				//mIndiTermAssertionAxiomHash->reserve(mUpdateAssertionAxiomHash->size());
 				FOREACHHASHIT (CAssertionAxiomExpression* assAxiomExp, bool tellAxiom, *mUpdateAssertionAxiomHash) {
 					CBuildExpression::ExpressionType expType = assAxiomExp->getType();
 					if (expType == CBuildExpression::BETCLASSASSERTION) {
@@ -1221,6 +1234,7 @@ namespace Konclude {
 								} else if (expType == CBuildExpression::BETINDIVIDUALVARIABLE) {
 									mConstructFlags->setNonELConstructUsed();
 									mConstructFlags->setNominalSchemaUsed();
+									mNominalConceptCreationRequired = true;
 									CObjectIndividualVariableExpression* objExp = (CObjectIndividualVariableExpression*)classTermExp;
 									cint64 indiVarID = getIndividualVariableID(concept,objExp);
 									concept->setParameter(indiVarID);
@@ -1231,8 +1245,8 @@ namespace Konclude {
 									CEXPRESSIONLIST<CIndividualTermExpression*>* indiExpList = objExp->getIndividualTermExpressionList();
 									if (indiExpList->count() == 1) {
 										CIndividualTermExpression* indiTermExp = indiExpList->first();
-										setConceptIndividualFromIndividualTerm(concept,indiTermExp);
 										concept->setOperatorCode(CCNOMINAL);
+										setConceptNominalIndividualFromIndividualTerm(concept,indiTermExp);
 									} else {
 										CEXPRESSIONLIST<CClassTermExpression*> nominalClassTermList;
 										FOREACHIT (CIndividualTermExpression* indiTermExp, *indiExpList) {
@@ -1248,6 +1262,16 @@ namespace Konclude {
 								// build class
 								buildClassConcept(classTermExp);
 							}
+						}
+
+						if (mNominalConceptCreationRequired && !mLateIndiNominalConceptCreationList.isEmpty()) {
+							for (QList<CIndividualTermExpression*>::const_iterator it = mLateIndiNominalConceptCreationList.constBegin(), itEnd = mLateIndiNominalConceptCreationList.constEnd(); it != itEnd; ++it) {
+								CIndividualTermExpression* indiTermExp(*it);
+								CIndividual* individual = getIndividualForIndividualTerm(indiTermExp,true);
+								CClassTermExpression* nominalAssClassTermExp = getObjectOneOf(indiTermExp);
+								setIndividualAssertionNominalFromClassTerm(individual,nominalAssClassTermExp,false);
+							}
+							mLateIndiNominalConceptCreationList.clear();
 						}
 
 						if (mRebuildTopConcept) {
@@ -1351,7 +1375,7 @@ namespace Konclude {
 
 			bool CConcreteOntologyUpdateBuilder::buildIndividualIndi(CIndividualTermExpression* indiTermExp) {
 
-				CClassTermExpression* nominalAssClassTermExp = getObjectOneOf(indiTermExp);
+				//CClassTermExpression* nominalAssClassTermExp = nullptr; 
 				bool nominalAssClass = false;
 
 				CIndividual* individual = getIndividualForIndividualTerm(indiTermExp,true);
@@ -1370,8 +1394,15 @@ namespace Konclude {
 								CClassAssertionExpression* classAssExp = (CClassAssertionExpression*)assAxiom;
 								CClassTermExpression* classTermExp = classAssExp->getClassTermExpression();
 								setIndividualAssertionConceptFromClassTerm(individual,classTermExp,false);
-								if (classTermExp == nominalAssClassTermExp) {
-									nominalAssClass = true;
+								if (classTermExp->getType() == CBuildExpression::BETOBJECTONEOF) {
+									CObjectOneOfExpression* objectOneOfExp = (CObjectOneOfExpression*)classTermExp;
+									CEXPRESSIONLIST<CIndividualTermExpression*>* indiTermExpList = objectOneOfExp->getIndividualTermExpressionList();
+									if (indiTermExpList->count() == 1) {
+										CIndividualTermExpression* indiTerm = indiTermExpList->first();
+										if (indiTerm == indiTermExp) {
+											nominalAssClass = true;
+										}
+									}
 								}
 							} else if (expType == CBuildExpression::BETOBJECTPROPERTYASSERTION) {	
 								CObjectPropertyAssertionExpression* propAssExp = (CObjectPropertyAssertionExpression*)assAxiom;
@@ -1422,10 +1453,19 @@ namespace Konclude {
 						}
 					}
 				}
-
 				if (!nominalAssClass) {
-					setIndividualAssertionNominalFromClassTerm(individual,nominalAssClassTermExp,false);
+					if (mConstructFlags->isNominalSchemaUsed()) {
+						CClassTermExpression* nominalAssClassTermExp = getObjectOneOf(indiTermExp);
+						setIndividualAssertionNominalFromClassTerm(individual,nominalAssClassTermExp,false);
+					} else {
+						mLateIndiNominalConceptCreationList.append(indiTermExp);
+					}
 				}
+
+				//if (!nominalAssClass && mConstructFlags->isNominalSchemaUsed()) {
+				//	CClassTermExpression* nominalAssClassTermExp = getObjectOneOf(indiTermExp);
+				//	setIndividualAssertionNominalFromClassTerm(individual,nominalAssClassTermExp,false);
+				//}
 				if (!individual->isAnonymousIndividual()) {
 					CConceptAssertionLinker* opConLinker = CObjectAllocator< CConceptAssertionLinker >::allocateAndConstruct(mMemManager);
 					opConLinker->initNegLinker(tBox->getIndividualTriggerConcept(),false);
@@ -1959,7 +1999,7 @@ namespace Konclude {
 			CConcept* CConcreteOntologyUpdateBuilder::getConceptForClassTerm(CClassTermExpression* classTermExp, bool forceLocalisation) {
 				CConcept* concept = nullptr;
 				bool forceCreation = false;
-				if (classTermExp == mTopClassExpression || classTermExp == mBottomClassExpression) {
+				if (mInitialBuild && (classTermExp == mTopClassExpression || classTermExp == mBottomClassExpression)) {
 					forceLocalisation = true;
 				}
 				concept = mClassTermConceptHash->value(classTermExp);
@@ -2132,10 +2172,10 @@ namespace Konclude {
 				CRole* role = nullptr;
 				role = mDataPropTermRoleHash->value(dataPropTermExp);
 				bool forceCreation = false;
-				if (dataPropTermExp == mTopDataPropExpression) {
+				if (mInitialBuild && dataPropTermExp == mTopDataPropExpression) {
 					mConstructFlags->setTopDataRoleUsed();
 					forceLocalisation = true;
-				} else if (dataPropTermExp == mBottomDataPropExpression) {
+				} else if (mInitialBuild && dataPropTermExp == mBottomDataPropExpression) {
 					mConstructFlags->setBottomDataRoleUsed();
 					forceLocalisation = true;
 				}
@@ -2181,10 +2221,10 @@ namespace Konclude {
 				CRole* role = nullptr;
 				role = mObjPropTermRoleHash->value(objPropTermExp);
 				bool forceCreation = false;
-				if (objPropTermExp == mTopObjPropExpression) {
+				if (mInitialBuild && objPropTermExp == mTopObjPropExpression) {
 					mConstructFlags->setTopObjectRoleUsed();
 					forceLocalisation = true;
-				} else if (objPropTermExp == mBottomObjPropExpression) {
+				} else if (mInitialBuild && objPropTermExp == mBottomObjPropExpression) {
 					mConstructFlags->setBottomObjectRoleUsed();
 					forceLocalisation = true;
 				}
@@ -2223,6 +2263,16 @@ namespace Konclude {
 
 				}
 				return role;
+			}
+
+
+			bool CConcreteOntologyUpdateBuilder::setConceptNominalIndividualFromIndividualTerm(CConcept* concept, CIndividualTermExpression* indiTermExp) {
+				CIndividual* opIndi = getIndividualForIndividualTerm(indiTermExp,false);
+				concept->setNominalIndividual(opIndi);
+				if (!opIndi->getIndividualNominalConcept()) {
+					opIndi->setIndividualNominalConcept(concept);
+				}
+				return true;
 			}
 
 

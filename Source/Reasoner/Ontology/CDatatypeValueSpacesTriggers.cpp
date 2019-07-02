@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -110,26 +110,28 @@ namespace Konclude {
 
 
 			CDatatypeValueSpaceTriggers* CDatatypeValueSpacesTriggers::getValueSpaceTriggers(CDatatypeValueSpaceType* valueSpaceType) {
-				if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEREALTYPE) {
-					return &mRealValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACESTRINGTYPE) {
-					return &mStringValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEBOOLEANTYPE) {
-					return &mBooleanValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEDOUBLETYPE) {
-					return &mDoubleValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEFLOATTYPE) {
-					return &mFloatValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEIRITYPE) {
-					return &mIRIValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEXMLTYPE) {
-					return &mXMLValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEDATETIMETYPE) {
-					return &mDateTimeValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEHEXDATATYPE) {
-					return &mBinaryHexDataValueSpaceTriggers;
-				} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEBASE64DATATYPE) {
-					return &mBinaryBase64DataValueSpaceTriggers;
+				if (valueSpaceType) {
+					if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEREALTYPE) {
+						return &mRealValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACESTRINGTYPE) {
+						return &mStringValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEBOOLEANTYPE) {
+						return &mBooleanValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEDOUBLETYPE) {
+						return &mDoubleValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEFLOATTYPE) {
+						return &mFloatValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEIRITYPE) {
+						return &mIRIValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEXMLTYPE) {
+						return &mXMLValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEDATETIMETYPE) {
+						return &mDateTimeValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEHEXDATATYPE) {
+						return &mBinaryHexDataValueSpaceTriggers;
+					} else if (valueSpaceType->getValueSpaceType() == CDatatypeValueSpaceType::VALUESPACEBASE64DATATYPE) {
+						return &mBinaryBase64DataValueSpaceTriggers;
+					}
 				}
 				return nullptr;
 			}

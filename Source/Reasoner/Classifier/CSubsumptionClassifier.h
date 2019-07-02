@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -26,10 +26,7 @@
 
 // Namespace includes
 #include "ClassifierSettings.h"
-#include "CConceptSubsumptionRelationObserver.h"
-#include "CConceptSatisfiableObserver.h"
 #include "CClassifierStatistics.h"
-#include "CClassificationCalculationSupport.h"
 #include "CClassificationProgress.h"
 #include "CClassificationMessageDataObserver.h"
 
@@ -67,7 +64,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CSubsumptionClassifier : public CConceptSubsumptionRelationObserver, public CConceptSatisfiableObserver, public CClassificationMessageDataObserver {
+			class CSubsumptionClassifier : public CClassificationMessageDataObserver {
 				// public methods
 				public:
 					//! Constructor
@@ -79,9 +76,6 @@ namespace Konclude {
 					virtual bool classify(CConcreteOntology *ontology, CConfigurationBase *config, const QList<COntologyProcessingRequirement*>& requirementList, CCallbackData* callback) = 0;
 					virtual bool classify(CConcreteOntology *ontology, CConfigurationBase *config, const QList<COntologyProcessingRequirement*>& requirementList) = 0;
 					virtual bool callbackClassified(CConcreteOntology *ontology, CCallbackData *callback) = 0;
-
-					virtual bool inteceptSatisfiableTest(CConcreteOntology *ontology, CConcept *concept, bool *satisfiable = 0) = 0;
-					virtual bool inteceptSubsumptionTest(CConcreteOntology *ontology, CConcept *subsumerConcept, CConcept *subsumedConcept, bool *subsumed = 0) = 0;
 
 					virtual CClassifierStatistics *getClassificationStatistics() = 0;
 					virtual QString getStatusString() = 0;

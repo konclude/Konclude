@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,7 @@
 // Other includes
 #include "Reasoner/Taxonomy/CTaxonomy.h"
 
+#include "Reasoner/Ontology/CIndividualDependenceTracking.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -40,6 +41,7 @@ namespace Konclude {
 
 	namespace Reasoner {
 
+		using namespace Ontology;
 		using namespace Taxonomy;
 
 		namespace Classification {
@@ -58,6 +60,8 @@ namespace Konclude {
 					//! Constructor
 					CClassConceptClassification();
 
+					virtual ~CClassConceptClassification();
+
 					bool hasClassConceptTaxonomy();
 					CTaxonomy* getClassConceptTaxonomy();
 					CClassConceptClassification* setClassConceptTaxonomy(CTaxonomy* taxonomy);
@@ -66,6 +70,12 @@ namespace Konclude {
 					CClassificationStatistics* getClassificationStatistics();
 					CClassConceptClassification* setClassificationStatistics(CClassificationStatistics* statColl);
 
+
+					bool hasDependentIndividualsTracking();
+					bool isIndividualDependentTrackingSet();
+					CIndividualDependenceTracking* getDependentIndividualsTracking();
+					CClassConceptClassification* setDependentIndividualsTracking(CIndividualDependenceTracking* indiDepTracking);
+
 				// protected methods
 				protected:
 
@@ -73,6 +83,8 @@ namespace Konclude {
 				protected:
 					CTaxonomy* mClassConceptTaxonomy;
 					CClassificationStatistics* mStatsColl;
+					CIndividualDependenceTracking* mIndiDepTracking;
+					bool mIndiDepTrackingSet;
 
 				// private methods
 				private:

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -22,6 +22,7 @@
 #include "CReasonerManager.h"
 
 #include "Reasoner/Realizer/COptimizedKPSetOntologyConceptRealizingThread.h"
+#include "Reasoner/Realizer/CIncrementalKPSetOntologyConceptRealizingThread.h"
 
 
 namespace Konclude {
@@ -48,10 +49,19 @@ namespace Konclude {
 					mReadWriteLock.unlock();
 
 					if (!realizer) {
+
+						bool onlyChangedABoxAxioms = ontology->getIncrementalRevisionData()->getAxiomChangeData()->hasOnlyChangedABoxAxioms();
+						bool previousRealizedOntologyVersion = ontology->getIncrementalRevisionData()->getPreviousClassTypesRealizedOntology() != nullptr;
+
 						mReadWriteLock.lockForWrite();
 						realizer = mOntoRealizerHash.value(ontology);
 						if (!realizer) {
-							realizer = new COptimizedKPSetOntologyConceptRealizingThread(mReasonerManager);
+
+							if (previousRealizedOntologyVersion && onlyChangedABoxAxioms) {
+								realizer = new CIncrementalKPSetOntologyConceptRealizingThread(mReasonerManager);
+							} else {
+								realizer = new COptimizedKPSetOntologyConceptRealizingThread(mReasonerManager);
+							}
 							mOntoRealizerHash.insert(ontology,realizer);
 							mRealizerSet.insert(realizer);
 						}

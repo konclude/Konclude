@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -77,6 +77,9 @@ namespace Konclude {
 						bool hasCardinalityProplematicFlag();
 						CIndividualSaturationProcessNodeStatusFlags* setCardinalityProplematicFlag(bool value);
 
+						bool hasCardinalityRestrictedFlag();
+						CIndividualSaturationProcessNodeStatusFlags* setCardinalityRestrictedFlag(bool value);
+
 						bool hasInitializedFlag();
 						CIndividualSaturationProcessNodeStatusFlags* setInitializedFlag(bool value);
 
@@ -88,6 +91,11 @@ namespace Konclude {
 
 						bool hasSuccessorNodeExtensionsFlag();
 						CIndividualSaturationProcessNodeStatusFlags* setSuccessorNodeExtensionsFlag(bool value);
+
+
+						bool hasUnprocessedFlag();
+						CIndividualSaturationProcessNodeStatusFlags* setUnprocessedFlag(bool value);
+
 
 						bool hasFlags(cint64 flags, bool checkAllFlags);
 						bool hasFlags(CIndividualSaturationProcessNodeStatusFlags* flags, bool checkAllFlags);
@@ -104,13 +112,15 @@ namespace Konclude {
 						const static cint64 INDSATFLAGNOMINALCONNECTION			= 0x0008;
 
 						const static cint64 INDSATFLAGEQCANDPROPLEMATIC			= 0x0010;
-						const static cint64 INDSATFLAGCARDINALITYPROPLEMATIC	= 0x0020;
-						const static cint64 INDMISSEDABOXCONSISTENCYDATA		= 0x0040;
-						const static cint64 INDSUCCESSORNODEEXTENSIONS			= 0x0080;
+						const static cint64 INDSATFLAGCARDINALITYRESTRICTED		= 0x0020;
+						const static cint64 INDSATFLAGCARDINALITYPROPLEMATIC	= 0x0040;
+						const static cint64 INDMISSEDABOXCONSISTENCYDATA		= 0x0080;
+						const static cint64 INDSUCCESSORNODEEXTENSIONS			= 0x0100;
 
 
-						const static cint64 INDSATFLAGINITIALIZED				= 0x0100;
-						const static cint64 INDSATFLAGCOMPLETED					= 0x0200;
+						const static cint64 INDSATFLAGINITIALIZED				= 0x1000;
+						const static cint64 INDSATFLAGCOMPLETED					= 0x2000;
+						const static cint64 INDSATFLAGUNPROCESSED				= 0x4000;
 
 					// protected methods
 					protected:

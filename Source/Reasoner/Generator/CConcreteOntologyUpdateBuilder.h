@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -103,6 +103,7 @@ namespace Konclude {
 					bool setConceptRoleFromObjectPropertyTerm(CConcept* concept, CObjectPropertyTermExpression* objectPropertyTermExp);
 					bool setConceptRoleFromDataPropertyTerm(CConcept* concept, CDataPropertyTermExpression* dataPropertyTermExp);
 					bool setConceptIndividualFromIndividualTerm(CConcept* concept, CIndividualTermExpression* indiTermExp);
+					bool setConceptNominalIndividualFromIndividualTerm(CConcept* concept, CIndividualTermExpression* indiTermExp);
 					bool setIndividualAssertionConceptFromClassTerm(CIndividual* individual, CClassTermExpression* classTermExp, bool negate = false);
 					bool setIndividualAssertionNominalFromClassTerm(CIndividual* individual, CClassTermExpression* classTermExp, bool negate = false);
 					bool setIndividualAssertionRoleFromObjectPropertyTerm(CIndividual* individual, CObjectPropertyTermExpression* objPropTermExp, CIndividualTermExpression* destIndiTermExp);
@@ -310,6 +311,9 @@ namespace Konclude {
 
 
 					CBUILDSET<CBuildExpression*> mELExceptionExpressionSet;
+
+					QList<CIndividualTermExpression*> mLateIndiNominalConceptCreationList;
+					bool mNominalConceptCreationRequired;
 
 
 			};

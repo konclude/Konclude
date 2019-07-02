@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,6 +32,7 @@ namespace Konclude {
 				CCompletionGraphCacheHandler::CCompletionGraphCacheHandler() {
 					mLastOntology = nullptr;
 					mLastLoadedCachedCompletionGraph = false;
+					mPreviousConsistencyCachedCompletionGraph = false;
 				}
 
 
@@ -46,7 +47,10 @@ namespace Konclude {
 					mIndiProcNodeVec = mCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
 					if (mLastOntology != ontology) {
 						mLastOntology = ontology;
+						mIncrementalExpansionCaching = false;
 						mLastLoadedCachedCompletionGraph = false;
+						mPreviousConsistencyCachedCompletionGraph = false;
+						mCurrentIncrementalExpansionID = 0;
 						CConsistence* consistence = ontology->getConsistence();
 						if (consistence) {
 							CConsistenceData* consData = consistence->getConsistenceModelData();
@@ -64,6 +68,31 @@ namespace Konclude {
 								}
 							}
 						}
+						if (!mLastLoadedCachedCompletionGraph) {
+							CSatisfiableTaskIncrementalConsistencyTestingAdapter* incConsTestAd = mCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter();
+							if (incConsTestAd) {
+								CConcreteOntology* prevConsOntology = incConsTestAd->getPreviousConsistentOntology();
+								CConsistence* prevConsistence = prevConsOntology->getConsistence();
+								if (prevConsistence) {
+									CConsistenceData* prevConsData = prevConsistence->getConsistenceModelData();
+									if (prevConsData) {
+										CConsistenceTaskData* prevConsTaskData = dynamic_cast<CConsistenceTaskData*>(prevConsData);
+										if (prevConsTaskData) {
+											mDetSatCalcTask = prevConsTaskData->getDeterministicSatisfiableTask();
+											mCompGraphCachedCalcTask = prevConsTaskData->getCompletionGraphCachedSatisfiableTask();
+											if (mDetSatCalcTask && mCompGraphCachedCalcTask) {
+												mDetSatProcNodeVec = mDetSatCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
+												mCompGraphCachedProcNodeVec = mCompGraphCachedCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
+												mPreviousConsistencyCachedCompletionGraph = true;
+												mIncrementalExpansionCaching = true;
+												mCurrentIncrementalExpansionID = mCalcTask->getProcessingDataBox()->getIncrementalExpansionID();
+												mDetLocalizationTag = mDetSatCalcTask->getProcessingDataBox()->getProcessContext()->getProcessTagger()->getCurrentLocalizationTag();
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 					return mLastLoadedCachedCompletionGraph;
 				}
@@ -74,44 +103,68 @@ namespace Konclude {
 					bool addedReactivationIndi = false;
 					cint64 indiID = individualNode->getIndividualID();
 					CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(indiID);
+					CIndividualProcessNode* detCompGraphCachedIndiNode = mDetSatProcNodeVec->getData(indiID);
 
-					cint64 detSatIndiCount = mDetSatProcNodeVec->getItemCount()-1;
+					if (compGraphCachedIndiNode && compGraphCachedIndiNode != detCompGraphCachedIndiNode) {
+						cint64 detSatIndiCount = mDetSatProcNodeVec->getItemCount()-1;
 
-					CPROCESSINGLIST<cint64> reactivateComplGraphCachedIndiList(calcAlgContext->getTaskProcessorContext());
-					CPROCESSINGSET<cint64> reactivateComplGraphCachedIndiSet(calcAlgContext->getTaskProcessorContext());
-					CConnectionSuccessorSetIterator connSuccSetIt(compGraphCachedIndiNode->getConnectionSuccessorIterator());
-					while (connSuccSetIt.hasNext()) {
-						cint64 connIndiID = connSuccSetIt.next();
-						CIndividualProcessNode* detSatConnIndiNode = nullptr;
-						if (connIndiID <= detSatIndiCount) {
-							detSatConnIndiNode = mDetSatProcNodeVec->getData(connIndiID);
-						}
-						if (detSatConnIndiNode) {
-							addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatConnIndiNode,false);
-						} else {
-							reactivateComplGraphCachedIndiList.append(connIndiID);
-							reactivateComplGraphCachedIndiSet.insert(connIndiID);
-						}
-					}
+						CPROCESSINGLIST<cint64> reactivateComplGraphCachedIndiList(calcAlgContext->getTaskProcessorContext());
+						CPROCESSINGSET<cint64> reactivateComplGraphCachedIndiSet(calcAlgContext->getTaskProcessorContext());
 
-					while (!reactivateComplGraphCachedIndiList.isEmpty()) {
-						cint64 connIndiID = reactivateComplGraphCachedIndiList.takeFirst();
-						CIndividualProcessNode* detSatConnIndiNode = nullptr;
-						if (connIndiID <= detSatIndiCount) {
-							detSatConnIndiNode = mDetSatProcNodeVec->getData(connIndiID);
-						}
-						if (!detSatConnIndiNode) {
-							CIndividualProcessNode* compGraphCachedConnIndiNode = mCompGraphCachedProcNodeVec->getData(connIndiID);
-							CConnectionSuccessorSetIterator connSuccSetIt(compGraphCachedConnIndiNode->getConnectionSuccessorIterator());
-							while (connSuccSetIt.hasNext()) {
-								cint64 connIndiID = connSuccSetIt.next();
-								if (!reactivateComplGraphCachedIndiSet.contains(connIndiID)) {
-									reactivateComplGraphCachedIndiSet.insert(connIndiID);
-									reactivateComplGraphCachedIndiList.append(connIndiID);
+						CIndividualMergingHash* mergingHash = compGraphCachedIndiNode->getIndividualMergingHash(false);
+						if (mergingHash) {
+							for (CIndividualMergingHash::const_iterator it = mergingHash->constBegin(), itEnd = mergingHash->constEnd(); it != itEnd; ++it) {
+								CIndividual* mergedIndi = it.key();
+								cint64 mergedIndiID = mergedIndi->getIndividualID();
+								CIndividualProcessNode* compGraphCachedMergedIndiNode = mCompGraphCachedProcNodeVec->getData(mergedIndiID);
+								CIndividualProcessNode* detSatMergedIndiNode = nullptr;
+								if (mergedIndiID <= detSatIndiCount) {
+									detSatMergedIndiNode = mDetSatProcNodeVec->getData(mergedIndiID);
+								}
+								if (compGraphCachedMergedIndiNode != detSatMergedIndiNode) {
+									addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatMergedIndiNode,true);
 								}
 							}
-						} else {
-							addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatConnIndiNode,true);
+						}
+
+
+						CConnectionSuccessorSetIterator connSuccSetIt(compGraphCachedIndiNode->getConnectionSuccessorIterator());
+						while (connSuccSetIt.hasNext()) {
+							cint64 connIndiID = connSuccSetIt.next();
+							CIndividualProcessNode* detSatConnIndiNode = nullptr;
+							if (connIndiID <= detSatIndiCount) {
+								detSatConnIndiNode = mDetSatProcNodeVec->getData(connIndiID);
+							}
+							if (detSatConnIndiNode) {
+								CIndividualProcessNode* compGraphCachedConnIndiNode = mCompGraphCachedProcNodeVec->getData(connIndiID);
+								if (compGraphCachedConnIndiNode != detSatConnIndiNode) {
+									addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatConnIndiNode,false);
+								}
+							} else {
+								reactivateComplGraphCachedIndiList.append(connIndiID);
+								reactivateComplGraphCachedIndiSet.insert(connIndiID);
+							}
+						}
+
+						while (!reactivateComplGraphCachedIndiList.isEmpty()) {
+							cint64 connIndiID = reactivateComplGraphCachedIndiList.takeFirst();
+							CIndividualProcessNode* detSatConnIndiNode = nullptr;
+							if (connIndiID <= detSatIndiCount) {
+								detSatConnIndiNode = mDetSatProcNodeVec->getData(connIndiID);
+							}
+							if (!detSatConnIndiNode) {
+								CIndividualProcessNode* compGraphCachedConnIndiNode = mCompGraphCachedProcNodeVec->getData(connIndiID);
+								CConnectionSuccessorSetIterator connSuccSetIt(compGraphCachedConnIndiNode->getConnectionSuccessorIterator());
+								while (connSuccSetIt.hasNext()) {
+									cint64 connIndiID = connSuccSetIt.next();
+									if (!reactivateComplGraphCachedIndiSet.contains(connIndiID)) {
+										reactivateComplGraphCachedIndiSet.insert(connIndiID);
+										reactivateComplGraphCachedIndiList.append(connIndiID);
+									}
+								}
+							} else {
+								addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatConnIndiNode,true);
+							}
 						}
 					}
 					return addedReactivationIndi;
@@ -121,17 +174,24 @@ namespace Konclude {
 				bool CCompletionGraphCacheHandler::isIndividualNodeCompletionGraphConsistenceBlocked(CIndividualProcessNode* individualNode, bool& conceptSetExtended, CCalculationAlgorithmContext* calcAlgContext) {
 					conceptSetExtended = false;
 					if (loadConsistenceModelData(calcAlgContext)) {
+						if (mIncrementalExpansionCaching) {
+							if (individualNode->getIncrementalExpansionID() >= mCurrentIncrementalExpansionID) {
+								return false;
+							}
+						}
 						cint64 detSatIndiCount = mDetSatProcNodeVec->getItemCount()-1;
 						cint64 indiID = individualNode->getIndividualID();
 						if (indiID <= detSatIndiCount) {
 							CIndividualProcessNode* detSatIndiNode = mDetSatProcNodeVec->getData(indiID);
-							CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(indiID);
-							while (compGraphCachedIndiNode->getMergedIntoIndividualNodeID() != compGraphCachedIndiNode->getIndividualID()) {
-								compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(compGraphCachedIndiNode->getMergedIntoIndividualNodeID());
-							}
-							if (testCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext)) {
-								conceptSetExtended = testConceptLabelExtended(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
-								return true;
+							if (detSatIndiNode) {
+								CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(indiID);
+								while (compGraphCachedIndiNode->getMergedIntoIndividualNodeID() != compGraphCachedIndiNode->getIndividualID()) {
+									compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(compGraphCachedIndiNode->getMergedIntoIndividualNodeID());
+								}
+								if (testCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext)) {
+									conceptSetExtended = testConceptLabelExtended(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
+									return true;
+								}
 							}
 						}
 					}
@@ -159,12 +219,19 @@ namespace Konclude {
 						cached &= testDistinctSubSetCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
 					}
 					if (cached) {
+						cached &= testMergingSubSetCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
+					}
+					if (cached) {
 						cached &= testBindingSubSetCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
 					}
 					return cached;
 				}
 
 
+
+				bool CCompletionGraphCacheHandler::testMergingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext) {
+					return true;
+				}
 
 
 				bool CCompletionGraphCacheHandler::testDistinctSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext) {
@@ -450,10 +517,26 @@ namespace Konclude {
 							CIndividualLinkEdge* link = succLinkIt.next();
 							CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList();
 							if (!opConLinkerIt) {
-								++updatedCardinality;
+
+								CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
+								if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
+									succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
+								}
+								//CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualID());
+								//while (corrCachedSuccIndi && corrCachedSuccIndi->getMergedIntoIndividualNodeID() != corrCachedSuccIndi->getIndividualID()) {
+								//	corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(corrCachedSuccIndi->getMergedIntoIndividualNodeID());
+								//}
+								if (succIndi->getLocalizationTag() > mDetLocalizationTag) {
+									if (succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+										CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualID());
+										if (corrCachedSuccIndi->getMergedIntoIndividualNodeID() != succIndi->getIndividualID() || corrCachedSuccIndi->getLastMergedIntoIndividualNode() != succIndi->getLastMergedIntoIndividualNode()) {
+											++updatedCardinality;
+										}
+									}
+								}
+
 								if (nominalIndiNode) {
 									if (link->getCreatorIndividualID() != individualNode->getIndividualID()) {
-										CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
 										if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
 											succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
 										}
@@ -477,25 +560,61 @@ namespace Konclude {
 									}
 								}
 								if (succIndi->getLocalizationTag() > mDetLocalizationTag) {
-									bool containsSomeOps = false;
-									while (opConLinkerIt && !containsSomeOps) {
-										bool opNegated = opConLinkerIt->isNegated()^conNegation;
-										CConcept* opCon = opConLinkerIt->getData();
-										bool containsNegated = false;
-										CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
-										if (succConSet) {
-											if (succConSet->containsConcept(opCon,&containsNegated)) {
-												if (containsNegated == opNegated) {
+									if (succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+										bool containsSomeOps = false;
+										while (opConLinkerIt && !containsSomeOps) {
+											bool opNegated = opConLinkerIt->isNegated()^conNegation;
+											CConcept* opCon = opConLinkerIt->getData();
+											bool containsNegated = false;
+											CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
+											if (succConSet) {
+												if (succConSet->containsConcept(opCon,&containsNegated)) {
+													if (containsNegated == opNegated) {
+														containsSomeOps = true;
+													}
+												} else {
 													containsSomeOps = true;
 												}
-											} else {
-												containsSomeOps = true;
+											}
+											opConLinkerIt = opConLinkerIt->getNext();
+										}
+										if (containsSomeOps) {
+											CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualID());
+											if (corrCachedSuccIndi->getMergedIntoIndividualNodeID() != succIndi->getIndividualID() || corrCachedSuccIndi->getLastMergedIntoIndividualNode() != succIndi->getLastMergedIntoIndividualNode()) {
+												++updatedCardinality;
 											}
 										}
-										opConLinkerIt = opConLinkerIt->getNext();
-									}
-									if (containsSomeOps) {
-										++updatedCardinality;
+
+										//CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
+										//CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualID());
+										//while (corrCachedSuccIndi && corrCachedSuccIndi->getMergedIntoIndividualNodeID() != corrCachedSuccIndi->getIndividualID()) {
+										//	corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(corrCachedSuccIndi->getMergedIntoIndividualNodeID());
+										//}
+										//if (!corrCachedSuccIndi) {
+										//	++updatedCardinality;
+										//} else {
+										//	bool cachedContainsSomeOps = false;
+										//	CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList();
+										//	while (opConLinkerIt && !cachedContainsSomeOps) {
+										//		bool opNegated = opConLinkerIt->isNegated()^conNegation;
+										//		CConcept* opCon = opConLinkerIt->getData();
+										//		bool containsNegated = false;
+										//		CReapplyConceptLabelSet* cachedSuccConSet = corrCachedSuccIndi->getReapplyConceptLabelSet(false);
+										//		if (cachedSuccConSet) {
+										//			if (cachedSuccConSet->containsConcept(opCon,&containsNegated)) {
+										//				if (containsNegated == opNegated) {
+										//					cachedContainsSomeOps = true;
+										//				}
+										//			} else {
+										//				cachedContainsSomeOps = true;
+										//			}
+										//		}
+										//		opConLinkerIt = opConLinkerIt->getNext();
+										//	}
+										//	if (!cachedContainsSomeOps) {
+										//		++updatedCardinality;
+										//	}
+										//}
 									}
 								}
 							}
@@ -519,7 +638,7 @@ namespace Konclude {
 										++cachedCardinality;
 									} else {
 										CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
-										if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
+										if (link->isLocalizationTagUpdated(mCompGraphCachedCalcTask->getProcessingDataBox()->getProcessContext()->getUsedProcessTagger())) {
 											succIndi = mCompGraphCachedProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
 										}
 										bool containsSomeOps = false;

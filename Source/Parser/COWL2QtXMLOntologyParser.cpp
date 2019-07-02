@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -136,7 +136,15 @@ namespace Konclude {
 
 		bool COWL2QtXMLOntologyParser::parseOntologyNode(QDomElement* ontologyNode) {
 			mOntologyName = ontologyNode->attribute("ontologyIRI");
-			parseTellOntologyAxiomNode(ontologyNode);
+			QString addDelSring = ontologyNode->localName();
+			if (addDelSring.isEmpty()) {
+				addDelSring = ontologyNode->tagName();
+			}
+			if (addDelSring == "Retract") {
+				parseRetractOntologyAxiomNode(ontologyNode);
+			} else {
+				parseTellOntologyAxiomNode(ontologyNode);
+			}
 			return true;
 		}
 
@@ -373,6 +381,7 @@ namespace Konclude {
 			mParseFunctionJumpHash.insert("Whereby",&COWL2QtXMLOntologyParser::jumpFunctionTellOntologyAxiomNode);
 			mParseFunctionJumpHash.insert("Where",&COWL2QtXMLOntologyParser::jumpFunctionTellOntologyAxiomNode);
 			mParseFunctionJumpHash.insert("Retract",&COWL2QtXMLOntologyParser::jumpFunctionRetractOntologyAxiomNode);
+			mParseFunctionJumpHash.insert("rec:Retract",&COWL2QtXMLOntologyParser::jumpFunctionRetractOntologyAxiomNode);
 
 			mParseFunctionJumpHash.insert("Import",&COWL2QtXMLOntologyParser::jumpFunctionParseImportNode);
 			mParseFunctionJumpHash.insert("owl:Import",&COWL2QtXMLOntologyParser::jumpFunctionParseImportNode);
@@ -796,10 +805,12 @@ namespace Konclude {
 				expression = jumpFunctionParseDataMinCardinalityNode(node);
 			} else if (nodeString == "DataExactCardinality" || nodeString == "owl:DataExactCardinality") {
 				expression = jumpFunctionParseDataExactCardinalityNode(node);
+
 			} else if (nodeString == "DataPropertyAssertion" || nodeString == "owl:DataPropertyAssertion") {
 				expression = jumpFunctionParseDataPropertyAssertionNode(node);
 			} else if (nodeString == "NegativeDataPropertyAssertion" || nodeString == "owl:NegativeDataPropertyAssertion") {
 				expression = jumpFunctionParseNegativeDataPropertyAssertionNode(node);
+
 			} else if (nodeString == "SubDataPropertyOf" || nodeString == "owl:SubDataPropertyOf") {
 				expression = jumpFunctionParseSubDataPropertyOfNode(node);
 			} else if (nodeString == "EquivalentDataProperties" || nodeString == "owl:EquivalentDataProperties") {
@@ -823,7 +834,7 @@ namespace Konclude {
 				// ignoring expected results nodes
 			} else if (nodeString == "Retract") {
 				parseRetractOntologyAxiomNode(node);
-			} else if (nodeString == "Tell" || nodeString == "Whereby") {
+			} else if (nodeString == "Tell" || nodeString == "Whereby" || nodeString == "Ontology") {
 				parseTellOntologyAxiomNode(node);
 
 			} else if (nodeString == "Import" || nodeString == "owl:Import") {

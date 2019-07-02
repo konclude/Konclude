@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -62,6 +62,11 @@ namespace Konclude {
 				return visitTypes(individualItem,direct,visitor);;
 			}
 
+			
+			bool CConceptRealization::visitSameIndividuals(CIndividual* individual, CConceptRealizationIndividualVisitor* visitor) {
+				CConceptInstanceItem* individualItem = getInstanceItem(individual);
+				return visitIndividuals(individualItem,visitor);
+			}
 
 			bool CConceptRealization::visitTypes(CConceptInstanceItem* item, bool direct, CConceptRealizationInstantiatedVisitor* visitor) {
 				if (direct) {

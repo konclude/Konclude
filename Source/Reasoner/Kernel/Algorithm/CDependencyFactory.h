@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -33,6 +33,7 @@
 #include "Reasoner/Kernel/Process/Dependency/CANDDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CSOMEDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CVALUEDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CROLEASSERTIONDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CNEGVALUEDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CALLDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CATLEASTDependencyNode.h"
@@ -48,6 +49,7 @@
 #include "Reasoner/Kernel/Process/Dependency/CQUALIFYDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CMERGEDCONCEPTDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CMERGEDLINKDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CMERGEDIndividualDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CIMPLICATIONDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CEXPANDEDDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CCONNECTIONDependencyNode.h"
@@ -153,6 +155,7 @@ namespace Konclude {
 						CSOMEDependencyNode* createSOMEDependency(CDependencyTrackPoint*& someContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CSELFDependencyNode* createSELFDependency(CDependencyTrackPoint*& selfContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CVALUEDependencyNode* createVALUEDependency(CDependencyTrackPoint*& valueContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+						CROLEASSERTIONDependencyNode* createROLEASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CALLDependencyNode* createALLDependency(CDependencyTrackPoint*& allContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* linkDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CATLEASTDependencyNode* createATLEASTDependency(CDependencyTrackPoint*& atleastContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CAUTOMATTRANSACTIONDependencyNode* createAUTOMATTRANSACTIONDependency(CDependencyTrackPoint*& allContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* linkDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
@@ -175,8 +178,7 @@ namespace Konclude {
 						CCONNECTIONDependencyNode* createCONNECTIONDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CDATATYPETRIGGERDependencyNode* createDATATYPETRIGGERDependency(CDependencyTrackPoint*& triggerContinueDepTrackPoint, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext);
 						CDATATYPECONNECTIONDependencyNode* createDATATYPECONNECTIONDependency(CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
-
-
+						CMERGEDIndividualDependencyNode* createMERGEDINDIVIDUALDependency(CDependencyTrackPoint*& mergedIndividualContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* individualPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 
 					// protected methods
 					protected:

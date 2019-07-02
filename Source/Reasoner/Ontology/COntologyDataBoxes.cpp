@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -39,6 +39,9 @@ namespace Konclude {
 				mBasicBuild = false;
 				mInitialBuild = false;
 				mIterationBuild = false;
+				mPrevOntBasicBuild = false;
+				mPrevOntInitialBuild = false;
+				mPrevOntIterationBuild = false;
 
 				mValueSpaceTypes = CDatatypeValueSpaceTypes::getValueSpaceTypes();
 			}
@@ -60,10 +63,12 @@ namespace Konclude {
 				mABox->referenceABox(dataBoxes->mABox);
 				mMBox->referenceMBox(dataBoxes->mMBox);
 				mExpDataBoxMapping->referenceDataBoxMapping(dataBoxes->mExpDataBoxMapping);
-				mBasicBuild = false;
-				mInitialBuild = false;
-				mIterationBuild = false;
-				setDataBoxesContinuation(dataBoxes);
+				mBasicBuild = dataBoxes->mBasicBuild;
+				mInitialBuild = dataBoxes->mInitialBuild;
+				mIterationBuild = dataBoxes->mIterationBuild;
+				mPrevOntBasicBuild = mBasicBuild;
+				mPrevOntInitialBuild = mInitialBuild;
+				mPrevOntIterationBuild = mIterationBuild;
 				return this;
 			}
 
@@ -133,12 +138,15 @@ namespace Konclude {
 				return this;
 			}
 
-			COntologyDataBoxes* COntologyDataBoxes::setDataBoxesContinuation(COntologyDataBoxes* dataBoxes) {
-				if (dataBoxes->mIterationBuild) {
+			COntologyDataBoxes* COntologyDataBoxes::setBuildContinuation() {
+				mBasicBuild = false;
+				mInitialBuild = false;
+				mIterationBuild = false;
+				if (mPrevOntIterationBuild) {
 					mIterationBuild = true;
-				} else if (dataBoxes->mInitialBuild) {
+				} else if (mPrevOntInitialBuild) {
 					mIterationBuild = true;
-				} else if (dataBoxes->mBasicBuild) {
+				} else if (mPrevOntBasicBuild) {
 					mInitialBuild = true;
 				}
 				return this;

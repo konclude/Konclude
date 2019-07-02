@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -77,6 +77,7 @@ namespace Konclude {
 
 				// protected methods
 				protected:
+					bool assistTermination(Q_PID processID);
 
 				public slots:
 					void processError(QProcess::ProcessError error);
@@ -94,6 +95,7 @@ namespace Konclude {
 					bool mProcessFinished;
 
 					cint64 mKillTimeout;
+					QString mKillScriptString;
 
 				// private methods
 				private:

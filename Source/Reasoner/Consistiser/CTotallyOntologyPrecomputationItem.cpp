@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -44,26 +44,51 @@ namespace Konclude {
 				mConceptSaturationPrecomputationChecked = false;
 				mConceptSaturationPrecomputationCreated = false;
 				mSaturationTestRunning = false;
+				mIndividualPrecomputationCreated = false;
+				mIndividualPrecomputationChecked = false;
 
 				COntologyProcessingStepDataVector* ontProStepDataVec = mOntology->getProcessingSteps()->getOntologyProcessingStepDataVector();
 
 				mConsistencePrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::CONSISTENCYPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSCONSISTENCY),this);
 				mCyclePrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::CYCLEPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSPRECOMPUTECYCLES),this);
 				mSaturationPrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::SATURATIONPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSPRECOMPUTESATURATION),this);
+				mIndividualPrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::INDIVIDUALPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSPRECOMPUTEINDIVIDUAL),this);
 				mProcessingSteps.append(mCyclePrecomputationStep);
 				mProcessingSteps.append(mConsistencePrecomputationStep);
 				mProcessingSteps.append(mSaturationPrecomputationStep);
+				mProcessingSteps.append(mIndividualPrecomputationStep);
 
 				mApproxSatCalcJob = nullptr;
 				mLastSaturData = nullptr;
 				mAllConSatRequired = false;
 				mAllConSatOrdered = false;
-				mNomDelayedConSatUp = false;
+				mNomDelayedConSatUpRequired = false;
+				mNomDelayedConSatUpdated = false;
 				mSaturationComputationRunning = false;
+				mIndividualComputationRunning = false;
+
+				mAllAssertionIndividual = nullptr;
+				mAllAssertionIndividualSaturated = false;
+				mAllAssertionIndividualSufficientSaturationChecked = false;
+				mAllAssertionIndividualSaturationSufficient = false;
+
+				mIndividualSaturationClashed = false;
+				mIndividualSaturationInsufficient = false;
+				mIndividualSaturated = false;
+				mAllIndividualSaturaturationOrderd = false;
+
+				mIndividualSaturationRunningCount = 0;
+
+				mFreeItemLinker = nullptr;
+				mNextSaturationID = 1;
+				mIndividualTestRunning = false;
+				mIndividualsSaturationCacheSynchronisation = false;
 
 				mFailAfterConsistencyConceptSaturation = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConsistencyConceptSaturation",false);
 				mFailAfterConsistencyChecking = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConsistencyCheck",false);
 				mFailAfterConceptSaturation = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConceptSaturation",false);
+
+				mInitTime.start();
 				return this;
 			}
 
@@ -73,6 +98,24 @@ namespace Konclude {
 				delete mConsistencePrecomputationStep;
 				delete mCyclePrecomputationStep;
 				delete mSaturationPrecomputationStep;
+				delete mIndividualPrecomputationStep;
+
+				if (mAllAssertionIndividual) {
+					CConceptAssertionLinker* conAssLinker = mAllAssertionIndividual->getAssertionConceptLinker();
+					while (conAssLinker) {
+						CConceptAssertionLinker* tmpConAssLinker = conAssLinker;
+						conAssLinker = conAssLinker->getNext();
+						delete tmpConAssLinker;
+					}
+
+					CRoleAssertionLinker* roleAssLinker = mAllAssertionIndividual->getAssertionRoleLinker();
+					while (roleAssLinker) {
+						CRoleAssertionLinker* tmpRoleAssLinker = roleAssLinker;
+						roleAssLinker = roleAssLinker->getNext();
+						delete tmpRoleAssLinker;
+					}
+					delete mAllAssertionIndividual;
+				}
 			}
 
 
@@ -108,6 +151,10 @@ namespace Konclude {
 					}
 					if (stepProcRequirement->getRequiredProcessingStep()->getOntologyProcessingType() == COntologyProcessingStep::OPSPRECOMPUTECYCLES) {
 						mCyclePrecomputationStep->addProcessingRequirement(stepProcRequirement);
+						supportRequirement = true;
+					}
+					if (stepProcRequirement->getRequiredProcessingStep()->getOntologyProcessingType() == COntologyProcessingStep::OPSPRECOMPUTEINDIVIDUAL) {
+						mIndividualPrecomputationStep->addProcessingRequirement(stepProcRequirement);
 						supportRequirement = true;
 					}
 				} 
@@ -258,11 +305,11 @@ namespace Konclude {
 
 
 			bool CTotallyOntologyPrecomputationItem::requiresNominalDelayedConceptsSaturationUpdate() {
-				return mNomDelayedConSatUp;
+				return mNomDelayedConSatUpRequired;
 			}
 
 			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setNominalDelayedConceptsSaturationUpdateRequired(bool updateRequired) {
-				mNomDelayedConSatUp = updateRequired;
+				mNomDelayedConSatUpRequired = updateRequired;
 				return this;
 			}
 
@@ -275,7 +322,7 @@ namespace Konclude {
 
 
 			bool CTotallyOntologyPrecomputationItem::hasRemainingRequiredSaturationConcepts() {
-				return !mRemainingReqSatConList.isEmpty() || mAllConSatRequired && !mAllConSatOrdered || mNomDelayedConSatUp;
+				return !mRemainingReqSatConList.isEmpty() || mAllConSatRequired && !mAllConSatOrdered || mNomDelayedConSatUpRequired && !mNomDelayedConSatUpdated;
 			}
 
 			QList<TConceptNegPair>* CTotallyOntologyPrecomputationItem::getRemainingRequiredSaturationConceptList() {
@@ -306,6 +353,23 @@ namespace Konclude {
 			}
 
 
+
+
+
+
+
+			bool CTotallyOntologyPrecomputationItem::hasRemainingConsistencyRequiredSaturationIndividuals() {
+				return !mRemainingABoxSatConList.isEmpty();
+			}
+
+			QList<CIndividual*>* CTotallyOntologyPrecomputationItem::getRemainingConsistencyRequiredSaturationIndividuals() {
+				return &mRemainingABoxSatConList;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::addConsistencyRequiredSaturationIndividual(CIndividual* individual) {
+				mRemainingABoxSatConList.append(individual);
+				return this;
+			}
 
 
 
@@ -393,6 +457,23 @@ namespace Konclude {
 				return this;
 			}
 
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::incIndividualSaturationRunningCount(cint64 incCount) {
+				mIndividualSaturationRunningCount += incCount;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::decIndividualSaturationRunningCount(cint64 decCount) {
+				mIndividualSaturationRunningCount -= decCount;
+				return this;
+			}
+
+			cint64 CTotallyOntologyPrecomputationItem::getIndividualSaturationRunningCount() {
+				return mIndividualSaturationRunningCount;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasIndividualSaturationRunning() {
+				return mIndividualSaturationRunningCount > 0;
+			}
 
 
 			bool CTotallyOntologyPrecomputationItem::isSaturationStepFinished() {
@@ -469,6 +550,224 @@ namespace Konclude {
 			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::addSaturatedDisjunction(CConcept* disjunctionConcept) {
 				mDisjunctionSaturationSet.insert(disjunctionConcept);
 				return this;
+			}
+
+
+			CIndividual* CTotallyOntologyPrecomputationItem::getAllAssertionIndividual() {
+				return mAllAssertionIndividual;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setAllAssertionIndividual(CIndividual* individual) {
+				mAllAssertionIndividual = individual;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::isAllAssertionIndividualSaturated() {
+				return mAllAssertionIndividualSaturated;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setAllAssertionIndividualSaturated(bool saturated) {
+				mAllAssertionIndividualSaturated = saturated;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasAllAssertionIndividualSufficientSaturationChecked() {
+				return mAllAssertionIndividualSufficientSaturationChecked;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setAllAssertionIndividualSufficientSaturationChecked(bool sufficientSaturatedChecked) {
+				mAllAssertionIndividualSufficientSaturationChecked = sufficientSaturatedChecked;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::isAllAssertionIndividualSaturationSufficient() {
+				return mAllAssertionIndividualSaturationSufficient;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setAllAssertionIndividualSaturationSufficient(bool sufficientSaturated) {
+				mAllAssertionIndividualSaturationSufficient = sufficientSaturated;
+				return this;
+			}
+
+
+			CSaturationIndividualDataItem* CTotallyOntologyPrecomputationItem::takeFreeSaturationIndividualDataItem(bool create) {
+				CSaturationIndividualDataItem* item = mFreeItemLinker;
+				if (mFreeItemLinker) {
+					mFreeItemLinker = mFreeItemLinker->getNext();
+				}
+				if (item) {
+					item->clearNext();
+				}
+				if (!item) {
+					item = new CSaturationIndividualDataItem();
+				}
+				return item;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::addFreeSaturationIndividualDataItem(CSaturationIndividualDataItem* item) {
+				if (item) {
+					for (CSaturationIndividualDataItem* itemIt = item; itemIt; itemIt = itemIt->getNext()) {
+						itemIt->initConceptSaturationTestingItem(nullptr,0);
+					}
+					mFreeItemLinker = item->append(mFreeItemLinker);
+				}
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setSaturationIDIndividualDataItems(cint64 saturationID, CSaturationIndividualDataItem* items) {
+				mSatIDIndividualItemsHash.insert(saturationID,items);
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::releaseSaturationIDIndividualDataItems(cint64 saturationID) {
+				CSaturationIndividualDataItem* items = mSatIDIndividualItemsHash.value(saturationID);
+				mSatIDIndividualItemsHash.insert(saturationID,nullptr);
+				addFreeSaturationIndividualDataItem(items);
+				return this;
+			}
+
+			cint64 CTotallyOntologyPrecomputationItem::getNextSaturationID(bool moveNext) {
+				cint64 nextID = mNextSaturationID;
+				if (moveNext) {
+					++mNextSaturationID;
+				}
+				return nextID;
+			}
+
+
+
+			CSaturationIndividualAnalysationObserver* CTotallyOntologyPrecomputationItem::notifyClashedIndividual() {
+				mIndividualSaturationClashed = true;
+				return this;
+			}
+
+			CSaturationIndividualAnalysationObserver* CTotallyOntologyPrecomputationItem::notifyInsufficientIndividual() {
+				mIndividualSaturationInsufficient = true;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasClashedSaturationIndividuals() {
+				return mIndividualSaturationClashed;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasInsufficientSaturationIndividuals() {
+				return mIndividualSaturationInsufficient;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasIndividualsSaturated() {
+				return mIndividualSaturated;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualsSaturated(bool saturated) {
+				mIndividualSaturated = saturated;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasALLIndividualsSaturationOrderd() {
+				return mAllIndividualSaturaturationOrderd;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setALLIndividualsSaturationOrderd(bool allSaturationOrderd) {
+				mAllIndividualSaturaturationOrderd = allSaturationOrderd;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasNominalDelayedConceptsSaturationUpdated() {
+				return mNomDelayedConSatUpdated;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setNominalDelayedConceptsSaturationUpdated(bool updated) {
+				mNomDelayedConSatUpdated = updated;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasIndividualsSaturationCacheSynchronisation() {
+				return mIndividualsSaturationCacheSynchronisation;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualsSaturationCacheSynchronisation(bool synchronized) {
+				mIndividualsSaturationCacheSynchronisation = synchronized;
+				return this;
+			}
+
+			QSet<CIndividual*>* CTotallyOntologyPrecomputationItem::getIncompletelySaturatedIndividuaSet() {
+				return &mIncompIndiSatSet;
+			}
+
+
+
+			bool CTotallyOntologyPrecomputationItem::areIndividualStepProcessingRequirementSatisfied() {
+				return mIndividualPrecomputationStep->areStepProcessingRequirementSatisfied();
+			}
+
+			CPrecomputationTestingStep* CTotallyOntologyPrecomputationItem::getIndividualPrecomputationStep() {
+				return mIndividualPrecomputationStep;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::isIndividualStepRunning() {
+				return mIndividualTestRunning;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualStepRunning(bool satStepRunning) {
+				mIndividualTestRunning = satStepRunning;
+				return this;
+			}
+
+
+
+			bool CTotallyOntologyPrecomputationItem::isIndividualComputationRunning() {
+				return mIndividualComputationRunning;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualComputationRunning(bool indiCompRunning) {
+				mIndividualComputationRunning = indiCompRunning;
+				return this;
+			}
+
+
+
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualPrecomputationCreated(bool initialized) {
+				mIndividualPrecomputationCreated = initialized;
+				return this;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasIndividualPrecomputationCreated() {
+				return mIndividualPrecomputationCreated;
+			}
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualPrecomputationChecked(bool checked) {
+				mIndividualPrecomputationChecked = checked;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasIndividualPrecomputationChecked() {
+				return mIndividualPrecomputationChecked;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::isIndividualStepFinished() {
+				return mIndividualPrecomputationStep->isStepFinished();
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::isIndividualStepRequired() {
+				return mIndividualPrecomputationStep->hasRequirements();
+			}
+
+
+			QTime* CTotallyOntologyPrecomputationItem::getInitializationTime() {
+				return &mInitTime;
 			}
 
 		}; // end namespace Consistiser

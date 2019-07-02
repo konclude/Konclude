@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,6 +32,8 @@
 #include "CCriticalSaturationConceptTypeQueues.h"
 #include "CSaturationIndividualNodeSuccessorExtensionData.h"
 #include "CSaturationIndividualNodeNominalHandlingData.h"
+#include "CCriticalPredecessorRoleCardinalityHash.h"
+#include "CSaturationIndividualNodeDatatypeData.h"
 
 
 // Other includes
@@ -74,6 +76,15 @@ namespace Konclude {
 
 						CSaturationIndividualNodeNominalHandlingData* getNominalHandlingData(bool create = true);
 
+						CCriticalPredecessorRoleCardinalityHash* getCriticalPredecessorRoleCardinalityHash(bool create = true);
+
+						CSaturationIndividualNodeDatatypeData* getAppliedDatatypeData(bool create = true);
+
+
+						CSaturationSuccessorRoleAssertionLinker* getRoleAssertionLinker();
+						CIndividualSaturationProcessNodeExtensionData* addRoleAssertionLinker(CSaturationSuccessorRoleAssertionLinker* roleAssertionLinker);
+						CIndividualSaturationProcessNodeExtensionData* addRoleAssertion(CIndividualSaturationProcessNode* destinationNode, CRole* role, bool roleNegation);
+
 
 					// protected methods
 					protected:
@@ -89,6 +100,12 @@ namespace Konclude {
 						CCriticalSaturationConceptTypeQueues* mCriticalConceptTypeQueues;
 						CSaturationIndividualNodeSuccessorExtensionData* mSuccessorExtensionData;
 						CSaturationIndividualNodeNominalHandlingData* mNominalHandlingData;
+
+						CCriticalPredecessorRoleCardinalityHash* mCriticalPredRoleCardHash;
+
+						CSaturationSuccessorRoleAssertionLinker* mRoleAssertionLinker;
+
+						CSaturationIndividualNodeDatatypeData* mAppliedDatatypeData;
 
 					// private methods
 					private:

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -124,6 +124,8 @@ namespace Konclude {
 					const static cint64 CCF_DATATYPE			= Q_UINT64_C(0x0100000000000000);
 					const static cint64 CCF_DATALITERAL			= Q_UINT64_C(0x0200000000000000);
 					const static cint64 CCF_DATARESTRICTION		= Q_UINT64_C(0x0400000000000000);
+
+					const static cint64 CCF_MARKER				= Q_UINT64_C(0x0800000000000000);
 
 
 

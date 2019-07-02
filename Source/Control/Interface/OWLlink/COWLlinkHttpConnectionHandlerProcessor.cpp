@@ -32,7 +32,8 @@ namespace Konclude {
 
 				COWLlinkHttpConnectionHandlerProcessor::COWLlinkHttpConnectionHandlerProcessor(CConfiguration* loaderConfig, CQtHttpConnectionHandlerReleaser* releaser) : COWLlinkProcessor(false) {
 					mReleaser = releaser;
-					reasonerCommander = CConfigManagerReader::readCommanderManagerConfig(loaderConfig);
+					mLoaderConfig = loaderConfig;
+					reasonerCommander = CConfigManagerReader::readCommanderManagerConfig(mLoaderConfig);
 					mSocket = nullptr;
 					mQueued = false;
 					mProcessingCommand = nullptr;
@@ -109,7 +110,7 @@ namespace Konclude {
 									LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully parsed, %1 Bytes received.").arg(mProcessingByteArray->count()),this);
 
 									COWLlinkQtXMLCommandParser *owllinkCommandParser = new COWLlinkQtXMLCommandParser();
-									mOwllinkInterpreter = new COWLLinkRecordInterpreter(preSynchronizer);
+									mOwllinkInterpreter = new COWLLinkRecordInterpreter(preSynchronizer,mLoaderConfig);
 									defaultCommandDelegater = mOwllinkInterpreter;
 
 									CParseOWLlinkCommandsCommand *parseCommand = new CParseOWLlinkCommandsCommand(mProcessingByteArray,mSocket->peerAddress().toString());

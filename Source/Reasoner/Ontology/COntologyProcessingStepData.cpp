@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,8 +28,10 @@ namespace Konclude {
 		namespace Ontology {
 
 
-			COntologyProcessingStepData::COntologyProcessingStepData() {
+			COntologyProcessingStepData::COntologyProcessingStepData(COntologyContext* ontContext) {
+				mOntContext = ontContext;
 				mProcessingStep = nullptr;
+				mProcessingStatistics = nullptr;
 			}
 
 
@@ -51,6 +53,12 @@ namespace Konclude {
 				return &mProcessingStatus;
 			}
 
+			COntologyProcessingStatistics* COntologyProcessingStepData::getProcessingStatistics(bool create) {
+				if (create && !mProcessingStatistics) {
+					mProcessingStatistics = CObjectAllocator< COntologyProcessingStatistics >::allocateAndConstruct(mOntContext->getMemoryAllocationManager());
+				}
+				return mProcessingStatistics;
+			}
 
 		}; // end namespace Ontology
 

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -48,6 +48,8 @@ namespace Konclude {
 				mReasonerBinaryArguments = CConfigDataReader::readConfigString(config,"Konclude.Evaluation.Reasoner.Execution.Binary.Arguments");
 				mReasonerPort = CConfigDataReader::readConfigInteger(config,"Konclude.Evaluation.Reasoner.Address.Port");
 
+				mKillScriptString = CConfigDataReader::readConfigString(config,"Konclude.Evaluation.TerminateAssistProgram");
+
 				QString argString = QString("%1").arg(mReasonerBinaryArguments);
 				QString appString = QString("%1 %2").arg(mReasonerBinaryFile).arg(argString);
 
@@ -87,6 +89,7 @@ namespace Konclude {
 				disconnect(mProcess);
 				disconnect(this);
 				if (!mProcessFinished) {
+					assistTermination(mProcess->pid());
 					mProcessFinished = true;
 					forcedTermination = true;
 					mProcess->terminate();
@@ -101,6 +104,28 @@ namespace Konclude {
 				mProcess = nullptr;
 				result->initResult(mProcessError,finishedInTime,forcedTermination,errorString,stdOutText,stdErrText);
 				return result;
+			}
+
+
+
+			bool CReasonerExecutableEvaluationProvider::assistTermination(Q_PID processID) {
+				if (!mKillScriptString.isEmpty()) {
+					QProcess killProcess;
+					QStringList argumentList;
+					argumentList += QString::number((cint64)processID);
+					LOG(INFO,"::Konclude::Test::ReasonerEvaluationProvider",logTr("Executing '%1' to assist termination of process with id '%2'.").arg(mKillScriptString).arg((cint64)processID),this);
+					killProcess.start(mKillScriptString,argumentList);
+					if (!killProcess.waitForStarted()) {
+						return false;
+					}
+					if (!killProcess.waitForFinished()) {
+						return false;
+					}
+					if (killProcess.exitCode() != 0) {
+						return true;
+					}
+				}
+				return false;
 			}
 
 			void CReasonerExecutableEvaluationProvider::processError(QProcess::ProcessError error) {

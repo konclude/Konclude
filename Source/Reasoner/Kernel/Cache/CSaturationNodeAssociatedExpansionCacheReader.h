@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -34,7 +34,6 @@
 
 #include "Reasoner/Kernel/Process/ProcessSettings.h"
 
-
 // Logger includes
 #include "Logger/CLogger.h"
 
@@ -65,6 +64,7 @@ namespace Konclude {
 
 						CSaturationNodeAssociatedExpansionCacheEntry* getCacheEntry(CIndividualSaturationProcessNode* saturationNode);
 
+						const CCacheValue getCacheValue(CConcept* concept, bool negation);
 
 					// protected methods
 					protected:

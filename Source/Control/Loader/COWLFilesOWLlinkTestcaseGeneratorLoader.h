@@ -35,6 +35,9 @@
 #include "Test/COWLFileOWLlinkConsistencyRequestGenerator.h"
 #include "Test/COWLFileOWLlinkSatisfiabilityRequestGenerator.h"
 #include "Test/COWLFileOWLlinkTypesRequestGenerator.h"
+#include "Test/COWLFileOWLlinkIncrementalAssertionConsistencyRequestGenerator.h"
+#include "Test/COWLFileOWLlinkIncrementalAssertionClassificationRequestGenerator.h"
+#include "Test/COWLFileOWLlinkIncrementalAssertionRealizationRequestGenerator.h"
 
 
 // Logger includes
@@ -88,18 +91,53 @@ namespace Konclude {
 				protected:
 					QString mInputDir;
 					QString mOutputDir;
+					QString mFilterDir;
 					QString mOutputDirClassify;
 					QString mOutputDirConsistency;
 					QString mOutputDirSatisfiability;
 					QString mOutputDirTypes;
 
+
 					cint64 mSatisfiabilityTestCount;
 					cint64 mTypesTestCount;
+
+
+					cint64 mIncAssConsTestCount;
+					cint64 mIncAssConsistencyAdditionCount;
+					cint64 mIncAssConsistencyRemovalCount;
+					cint64 mIncAssConsistencyAdditionCountRatioDenominator;
+					cint64 mIncAssConsistencyRemovalCountRatioDenominator;
+					bool mConfCreateIncAssConsistencyTests;
+					bool mConfCreateIncAssConsistencyByRatio;
+					QString mOutputDirIncAssConsistency;
+
+
+					cint64 mIncAssClassificationTestCount;
+					cint64 mIncAssClassificationAdditionCount;
+					cint64 mIncAssClassificationRemovalCount;
+					cint64 mIncAssClassificationAdditionCountRatioDenominator;
+					cint64 mIncAssClassificationRemovalCountRatioDenominator;
+					bool mConfCreateIncAssClassificationTests;
+					bool mConfCreateIncAssClassificationByRatio;
+					QString mOutputDirIncAssClassification;
+
+
+
+					cint64 mIncAssRealizationTestCount;
+					cint64 mIncAssRealizationAdditionCount;
+					cint64 mIncAssRealizationRemovalCount;
+					cint64 mIncAssRealizationAdditionCountRatioDenominator;
+					cint64 mIncAssRealizationRemovalCountRatioDenominator;
+					bool mConfCreateIncAssRealizationTests;
+					bool mConfCreateIncAssRealizationByRatio;
+					QString mOutputDirIncAssRealization;
+
 
 					bool mConfCreateClassifyTests;
 					bool mConfCreateConsistencyTests;
 					bool mConfCreateSatisfiabilityTests;
 					bool mConfCreateTypeTests;
+
 
 
 					CConfiguration *loaderConfig;
@@ -108,6 +146,9 @@ namespace Konclude {
 					COWLFileOWLlinkConsistencyRequestGenerator* mConsistencyGen;
 					COWLFileOWLlinkSatisfiabilityRequestGenerator* mSatisfiabilityGen;
 					COWLFileOWLlinkTypesRequestGenerator* mTypesGen;
+					COWLFileOWLlinkIncrementalAssertionConsistencyRequestGenerator* mIncAssConsistencyGen;
+					COWLFileOWLlinkIncrementalAssertionClassificationRequestGenerator* mIncAssClassificationGen;
+					COWLFileOWLlinkIncrementalAssertionRealizationRequestGenerator* mIncAssRealizationGen;
 
 
 				// private methods

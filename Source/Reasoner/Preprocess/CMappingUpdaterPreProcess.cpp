@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -155,14 +155,14 @@ namespace Konclude {
 									}
 								} else {
 									CObjectPropertyExpression* objPropertyExpression = dynamic_cast<CObjectPropertyExpression*>(expressionEntity);
-									if (anoIndiExpression) {
+									if (objPropertyExpression) {
 										CRole* role = mObjPropTermRoleHash->value(objPropertyExpression);
 										if (role) {
 											activeRoleSet->insert(role);
 										}
 									} else {
 										CDataPropertyExpression* dataPropertyExpression = dynamic_cast<CDataPropertyExpression*>(expressionEntity);
-										if (anoIndiExpression) {
+										if (dataPropertyExpression) {
 											CRole* role = mDataPropTermRoleHash->value(dataPropertyExpression);
 											if (role) {
 												activeRoleSet->insert(role);

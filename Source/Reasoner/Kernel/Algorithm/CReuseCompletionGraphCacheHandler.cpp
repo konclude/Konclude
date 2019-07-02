@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -49,7 +49,7 @@ namespace Konclude {
 						CProcessingDataBox* dataBox = calcAlgContext->getUsedProcessingDataBox();
 						if (indiProcNode) {
 							CConcept* initConcept = nullptr;
-							CXSortedNegLinker<CConcept*>* initConceptLinkerIt = indiProcNode->getProcessInitializingConceptLinkerIt();
+							CXSortedNegLinker<CConcept*>* initConceptLinkerIt = indiProcNode->getProcessInitializingConceptLinker();
 								
 							while (!initConcept && initConceptLinkerIt) {
 								if (!initConceptLinkerIt->isNegated()) {

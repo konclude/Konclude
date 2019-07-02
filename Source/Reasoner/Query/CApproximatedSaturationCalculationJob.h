@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -35,6 +35,7 @@
 #include "Reasoner/Kernel/Task/CCalculationStatisticsCollector.h"
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationJobInstantiation.h"
 
+#include "Reasoner/Kernel/Task/CSaturationIndividualsAnalysingAdapter.h"
 #include "Reasoner/Kernel/Task/CTaskPreyingAdapter.h"
 
 #include "Reasoner/Consistence/CSaturationData.h"
@@ -92,6 +93,12 @@ namespace Konclude {
 					CSaturationData* getContinueSaturationData();
 					CApproximatedSaturationCalculationJob* setContinueSaturationData(CSaturationData* saturationData);
 
+					bool isSeparateSaturation();
+					CApproximatedSaturationCalculationJob* setSeparateSaturation(bool separateSaturation);
+
+					CApproximatedSaturationCalculationJob* setSaturationIndividualsAnalysationObserver(CSaturationIndividualsAnalysingAdapter* indiAnalAdapter);
+					CSaturationIndividualsAnalysingAdapter* getSaturationIndividualsAnalysationObserver();
+
 				// protected methods
 				protected:
 
@@ -104,6 +111,8 @@ namespace Konclude {
 					CCalculationStatisticsCollector* mCalclulationStatisticsCollector;
 					CTaskPreyingAdapter* mPreyingAdapter;
 					CSaturationData* mContinueSaturationData;
+					bool mSeparateSaturation;
+					CSaturationIndividualsAnalysingAdapter* mIndiAnalAdapter;
 
 				// private methods
 				private:

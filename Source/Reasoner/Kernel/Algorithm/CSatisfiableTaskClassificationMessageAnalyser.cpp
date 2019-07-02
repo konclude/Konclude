@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -62,9 +62,14 @@ namespace Konclude {
 				}
 
 
-				CIndividualProcessNode* CSatisfiableTaskClassificationMessageAnalyser::getCorrectedIndividualID(CIndividualProcessNode* baseIndiNode, CIndividualProcessNodeVector* indiNodeVec) {
+				CIndividualProcessNode* CSatisfiableTaskClassificationMessageAnalyser::getCorrectedIndividualID(CIndividualProcessNode* baseIndiNode, CIndividualProcessNodeVector* indiNodeVec, bool* nondetMergedFlag) {
 					CIndividualProcessNode* indi = indiNodeVec->getData(baseIndiNode->getIndividualID());
 					while (indi->hasMergedIntoIndividualNodeID()) {
+						if (nondetMergedFlag && *nondetMergedFlag == false) {
+							if (!indi->getMergedDependencyTrackPoint() || indi->getMergedDependencyTrackPoint()->getBranchingTag() > 0) {
+								*nondetMergedFlag = true;
+							}
+						}
 						indi = indiNodeVec->getData(indi->getMergedIntoIndividualNodeID());
 					}
 					return indi;
@@ -1149,71 +1154,91 @@ namespace Konclude {
 							conRefLinking = conProcData->getConceptReferenceLinking();
 						}
 					}
-					if (!conRefLinking) {
-						conRefLinking = mConRefLinkDataHash->value(testingConcept);
-					}
+					CClassificationConceptReferenceLinking* classConRefLinkData = nullptr;
 					if (conRefLinking) {
 						CConceptSatisfiableReferenceLinkingData* conSatRefLinkData = (CConceptSatisfiableReferenceLinkingData*)conRefLinking;
-						CClassificationConceptReferenceLinking* classConRefLinkData = conSatRefLinkData->getClassifierReferenceLinkingData();
-						if (classConRefLinkData) {
-							CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking* possSubsumRefLinkData = (CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking*)classConRefLinkData;
-							if (possSubsumRefLinkData) {
-								if (!possSubsumRefLinkData->isPossibleSubsumptionMapInitialized()) {
-									// initialize possible subsumption list
-									CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* possSubsumerList = nullptr;
+						classConRefLinkData = conSatRefLinkData->getClassifierReferenceLinkingData();
+					} else {
+						classConRefLinkData = mConRefLinkDataHash->value(testingConcept);
+					}
+					if (classConRefLinkData) {
+						CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking* possSubsumRefLinkData = (CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking*)classConRefLinkData;
+						if (possSubsumRefLinkData) {
+							if (!possSubsumRefLinkData->isPossibleSubsumptionMapInitialized()) {
+								// initialize possible subsumption list
+								CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* possSubsumerList = nullptr;
 
-									if (!mMultiplePossSubsumInitAvoidHash) {
-										mMultiplePossSubsumInitAvoidHash = CObjectParameterizingAllocator< CPROCESSINGHASH< CConcept*,CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* >,CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getTemporaryMemoryAllocationManager(),calcAlgContext->getTaskProcessorContext());
-									}
-									possSubsumerList = mMultiplePossSubsumInitAvoidHash->value(testingConcept);
+								if (!mMultiplePossSubsumInitAvoidHash) {
+									mMultiplePossSubsumInitAvoidHash = CObjectParameterizingAllocator< CPROCESSINGHASH< CConcept*,CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* >,CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getTemporaryMemoryAllocationManager(),calcAlgContext->getTaskProcessorContext());
+								}
+								possSubsumerList = mMultiplePossSubsumInitAvoidHash->value(testingConcept);
 
-									CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true,true,false);
-									if (possSubsumerList) {
+								CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true,true,false);
+								if (possSubsumerList) {
 
-										// prune already initialization list for possible subsumers
-										CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::iterator itPossSubsum = possSubsumerList->begin(), itPossSubsumEnd = possSubsumerList->end();
-										while (conSetIt.hasNext() && itPossSubsum != itPossSubsumEnd) {
-											CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
-											CConcept* concept = conDes->getConcept();
-											bool negated = conDes->getNegation();
+									// prune already initialization list for possible subsumers
+									CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::iterator itPossSubsum = possSubsumerList->begin(), itPossSubsumEnd = possSubsumerList->end();
+									while (conSetIt.hasNext() && itPossSubsum != itPossSubsumEnd) {
+										CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
+										CConcept* concept = conDes->getConcept();
+										bool negated = conDes->getNegation();
 
-											CClassificationInitializePossibleSubsumptionData* possSubsumConData = *itPossSubsum;
-											CConcept* possSubsumConcept = possSubsumConData->getPossibleSubsumerConcept();
-											cint64 conDesTag = conDes->getConceptTag();
-											cint64 possSubsumConTag = possSubsumConcept->getConceptTag();
+										CClassificationInitializePossibleSubsumptionData* possSubsumConData = *itPossSubsum;
+										CConcept* possSubsumConcept = possSubsumConData->getPossibleSubsumerConcept();
+										cint64 conDesTag = conDes->getConceptTag();
+										cint64 possSubsumConTag = possSubsumConcept->getConceptTag();
 
-											if (conDesTag < possSubsumConTag) {
-												conSetIt.moveNext();
-											} else if (conDesTag == possSubsumConTag) {
+										if (conDesTag < possSubsumConTag) {
+											conSetIt.moveNext();
+										} else if (conDesTag == possSubsumConTag) {
 
-												//if (concept->getOperatorCode() == CCEQCAND) {
-												//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept->getOperandList()->getData(),calcAlgContext)) {
-												//		possSubsumConData->setPossibleSubsumerInvalid();
-												//	}
-												//}
+											//if (concept->getOperatorCode() == CCEQCAND) {
+											//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept->getOperandList()->getData(),calcAlgContext)) {
+											//		possSubsumConData->setPossibleSubsumerInvalid();
+											//	}
+											//}
 
-												conSetIt.moveNext();
-												++itPossSubsum;
-											} else {
-												possSubsumConData->setPossibleSubsumerInvalid();
-												++itPossSubsum;
-											}
-										}
-										while (itPossSubsum != itPossSubsumEnd) {
-											CClassificationInitializePossibleSubsumptionData* subsumData(*itPossSubsum);
-											subsumData->setPossibleSubsumerInvalid();
+											conSetIt.moveNext();
+											++itPossSubsum;
+										} else {
+											possSubsumConData->setPossibleSubsumerInvalid();
 											++itPossSubsum;
 										}
+									}
+									while (itPossSubsum != itPossSubsumEnd) {
+										CClassificationInitializePossibleSubsumptionData* subsumData(*itPossSubsum);
+										subsumData->setPossibleSubsumerInvalid();
+										++itPossSubsum;
+									}
 
-									} else {
-										// create new initialization list for possible subsumers
-										while (conSetIt.hasNext()) {
-											CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
-											CConcept* concept = conDes->getConcept();
-											bool negated = conDes->getNegation();
+								} else {
+									// create new initialization list for possible subsumers
+									while (conSetIt.hasNext()) {
+										CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
+										CConcept* concept = conDes->getConcept();
+										bool negated = conDes->getNegation();
 
 
-											if (!negated && (concept->hasClassName() && concept->getConceptTag() != 1 && concept != testingConcept)) {
+										if (!negated && (concept->hasClassName() && concept->getConceptTag() != 1 && concept != testingConcept)) {
+											if (!possSubsumerList) {
+												possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
+											}
+											CClassificationInitializePossibleSubsumptionData* possSubsumData = CObjectAllocator< CClassificationInitializePossibleSubsumptionData >::allocateAndConstruct(mTempMemAllocMan);
+											possSubsumData->initClassificationPossibleSubsumptionData(concept);
+											possSubsumerList->append(possSubsumData);
+										}
+										if (concept->getOperatorCode() == CCEQCAND) {
+											CConcept* eqConcept = concept->getOperandList()->getData();
+
+											//if (CIRIName::getRecentIRIName(testingConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
+											//	if (CIRIName::getRecentIRIName(eqConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students") {
+											//		bool bug = true;
+											//	}
+											//}
+
+
+
+											if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,eqConcept,calcAlgContext)) {
 												if (!possSubsumerList) {
 													possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
 												}
@@ -1221,113 +1246,93 @@ namespace Konclude {
 												possSubsumData->initClassificationPossibleSubsumptionData(concept);
 												possSubsumerList->append(possSubsumData);
 											}
-											if (concept->getOperatorCode() == CCEQCAND) {
-												CConcept* eqConcept = concept->getOperandList()->getData();
-
-												//if (CIRIName::getRecentIRIName(testingConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
-												//	if (CIRIName::getRecentIRIName(eqConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students") {
-												//		bool bug = true;
-												//	}
-												//}
-
-
-
-												if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,eqConcept,calcAlgContext)) {
-													if (!possSubsumerList) {
-														possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
-													}
-													CClassificationInitializePossibleSubsumptionData* possSubsumData = CObjectAllocator< CClassificationInitializePossibleSubsumptionData >::allocateAndConstruct(mTempMemAllocMan);
-													possSubsumData->initClassificationPossibleSubsumptionData(concept);
-													possSubsumerList->append(possSubsumData);
-												}
-											}
-											conSetIt.moveNext();
 										}
-
-										CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>* eqConNonCandPossSubsumerList = nullptr;
-
-										bool eqConceptsNonCandidatePossSubsumers = false;
-										QSet<CConcept*>* equivConceptNonCandidateSet = calcAlgContext->getUsedProcessingDataBox()->getOntology()->getTBox()->getEquivalentConceptNonCandidateSet(false);
-										if (equivConceptNonCandidateSet) {
-											eqConceptsNonCandidatePossSubsumers = true;
-											for (QSet<CConcept*>::const_iterator it = equivConceptNonCandidateSet->constBegin(), itEnd = equivConceptNonCandidateSet->constEnd(); it != itEnd; ++it) {
-												CConcept* eqConcept = *it;
-
-												//if (CIRIName::getRecentIRIName(testingConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
-												//	if (CIRIName::getRecentIRIName(eqConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students") {
-												//		bool bug = true;
-												//	}
-												//}
-
-												if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,eqConcept,calcAlgContext)) {
-													if (!eqConNonCandPossSubsumerList) {
-														eqConNonCandPossSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
-													}
-													eqConNonCandPossSubsumerList->append(eqConcept);
-												}
-											}
-										}
-
-										if (possSubsumerList) {
-											mMultiplePossSubsumInitAvoidHash->insert(testingConcept,possSubsumerList);
-										}
-
-										CClassificationInitializePossibleSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationInitializePossibleSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
-										possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept,possSubsumerList,eqConceptsNonCandidatePossSubsumers,eqConNonCandPossSubsumerList);
-										messageDataLinker = possSubsumMessageData->append(messageDataLinker);
+										conSetIt.moveNext();
 									}
-								} else {
-									CClassPossibleSubsumptionMap* possSubsumMap = possSubsumRefLinkData->getClassPossibleSubsumptionMap();
-									if (possSubsumMap && possSubsumMap->hasRemainingPossibleSubsumptions()) {
-										// update / prune possible subsumer list
 
-										bool updatedPossSubsumptions = false;
+									CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>* eqConNonCandPossSubsumerList = nullptr;
 
-										CClassPossibleSubsumptionMapIterator* possSubsumIt = possSubsumMap->getIterator(mReusePossSubsumMapIterator,calcAlgContext);
-										mReusePossSubsumMapIterator = possSubsumIt;
-										CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true,true,false);
-										while (possSubsumIt->hasNext() && conSetIt.hasNext()) {
-											CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
-											CConcept* concept = conDes->getConcept();
-											bool negated = conDes->getNegation();
-											CConcept* possSubCon = possSubsumIt->getSubsumptionConcept();
-											cint64 conDesTag = conDes->getConceptTag();
-											cint64 possSubsumConTag = possSubCon->getConceptTag();
+									bool eqConceptsNonCandidatePossSubsumers = false;
+									QSet<CConcept*>* equivConceptNonCandidateSet = calcAlgContext->getUsedProcessingDataBox()->getOntology()->getTBox()->getEquivalentConceptNonCandidateSet(false);
+									if (equivConceptNonCandidateSet) {
+										eqConceptsNonCandidatePossSubsumers = true;
+										for (QSet<CConcept*>::const_iterator it = equivConceptNonCandidateSet->constBegin(), itEnd = equivConceptNonCandidateSet->constEnd(); it != itEnd; ++it) {
+											CConcept* eqConcept = *it;
 
-											if (conDesTag == possSubsumConTag) {
+											//if (CIRIName::getRecentIRIName(testingConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
+											//	if (CIRIName::getRecentIRIName(eqConcept->getClassNameLinker()) == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students") {
+											//		bool bug = true;
+											//	}
+											//}
 
-												//if (concept->getOperatorCode() == CCEQCAND) {
-												//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept->getOperandList()->getData(),calcAlgContext)) {
-												//		updatedPossSubsumptions |= possSubsumIt->invalidateSubsumption();
-												//	}
-												//}
-
-												possSubsumIt->moveNext();
-												conSetIt.moveNext();
-											} else if (conDesTag < possSubsumConTag) {
-												conSetIt.moveNext();
-											} else if (possSubsumConTag < conDesTag) {
-												if (possSubCon->getOperatorCode() != CCEQ) {
-													updatedPossSubsumptions |= possSubsumIt->invalidateSubsumption();
+											if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,eqConcept,calcAlgContext)) {
+												if (!eqConNonCandPossSubsumerList) {
+													eqConNonCandPossSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
 												}
-												possSubsumIt->moveNext();
+												eqConNonCandPossSubsumerList->append(eqConcept);
 											}
 										}
-										while (possSubsumIt->hasNext()) {
-											CConcept* possSubCon = possSubsumIt->getSubsumptionConcept();
+									}
+
+									if (possSubsumerList) {
+										mMultiplePossSubsumInitAvoidHash->insert(testingConcept,possSubsumerList);
+									}
+
+									CClassificationInitializePossibleSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationInitializePossibleSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
+									possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept,possSubsumerList,eqConceptsNonCandidatePossSubsumers,eqConNonCandPossSubsumerList);
+									messageDataLinker = possSubsumMessageData->append(messageDataLinker);
+								}
+							} else {
+								CClassPossibleSubsumptionMap* possSubsumMap = possSubsumRefLinkData->getClassPossibleSubsumptionMap();
+								if (possSubsumMap && possSubsumMap->hasRemainingPossibleSubsumptions()) {
+									// update / prune possible subsumer list
+
+									bool updatedPossSubsumptions = false;
+
+									CClassPossibleSubsumptionMapIterator* possSubsumIt = possSubsumMap->getIterator(mReusePossSubsumMapIterator,calcAlgContext);
+									mReusePossSubsumMapIterator = possSubsumIt;
+									CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true,true,false);
+									while (possSubsumIt->hasNext() && conSetIt.hasNext()) {
+										CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
+										CConcept* concept = conDes->getConcept();
+										bool negated = conDes->getNegation();
+										CConcept* possSubCon = possSubsumIt->getSubsumptionConcept();
+										cint64 conDesTag = conDes->getConceptTag();
+										cint64 possSubsumConTag = possSubCon->getConceptTag();
+
+										if (conDesTag == possSubsumConTag) {
+
+											//if (concept->getOperatorCode() == CCEQCAND) {
+											//	if (!testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,concept->getOperandList()->getData(),calcAlgContext)) {
+											//		updatedPossSubsumptions |= possSubsumIt->invalidateSubsumption();
+											//	}
+											//}
+
+											possSubsumIt->moveNext();
+											conSetIt.moveNext();
+										} else if (conDesTag < possSubsumConTag) {
+											conSetIt.moveNext();
+										} else if (possSubsumConTag < conDesTag) {
 											if (possSubCon->getOperatorCode() != CCEQ) {
-												possSubsumIt->invalidateSubsumption();
+												updatedPossSubsumptions |= possSubsumIt->invalidateSubsumption();
 											}
 											possSubsumIt->moveNext();
 										}
-
-										if (updatedPossSubsumptions) {
-											CClassificationUpdatePossibleSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationUpdatePossibleSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
-											possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept);
-											messageDataLinker = possSubsumMessageData->append(messageDataLinker);
-										}
-
 									}
+									while (possSubsumIt->hasNext()) {
+										CConcept* possSubCon = possSubsumIt->getSubsumptionConcept();
+										if (possSubCon->getOperatorCode() != CCEQ) {
+											possSubsumIt->invalidateSubsumption();
+										}
+										possSubsumIt->moveNext();
+									}
+
+									if (updatedPossSubsumptions) {
+										CClassificationUpdatePossibleSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationUpdatePossibleSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
+										possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept);
+										messageDataLinker = possSubsumMessageData->append(messageDataLinker);
+									}
+
 								}
 							}
 						}
@@ -1516,6 +1521,7 @@ namespace Konclude {
 					mReusePossSubsumMapIterator = nullptr;
 					CSatisfiableTaskClassificationMessageAdapter* classMessAdapter = statCalcTask->getClassificationMessageAdapter();
 					if (classMessAdapter) {
+						mConRefLinkDataHash = classMessAdapter->getConceptReferenceLinkingDataHash();
 						CClassificationMessageDataObserver* classMessObserver = classMessAdapter->getClassificationMessageDataObserver();
 						CClassificationMessageData* subsumMessageDataLinker = nullptr;
 						CClassificationMessageData* possSubsumMessageDataLinker = nullptr;
@@ -1553,7 +1559,6 @@ namespace Konclude {
 						//considerOtherNode = false;
 
 						CConcreteOntology* testOntology = classMessAdapter->getTestingOntology();
-						mConRefLinkDataHash = classMessAdapter->getConceptReferenceLinkingDataHash();
 						CProcessingDataBox* processingDataBox = statCalcTask->getProcessingDataBox();
 						CIndividualProcessNode* constructedIndiNode = processingDataBox->getConstructedIndividualNode();
 						CIndividualProcessNodeVector* indiNodeVec = processingDataBox->getIndividualProcessNodeVector();
@@ -1569,8 +1574,12 @@ namespace Konclude {
 
 						if (testOntology && testingConcept && constructedIndiNode) {
 							cint64 constructedID = constructedIndiNode->getIndividualID();
-							CIndividualProcessNode* baseIndi = getCorrectedIndividualID(constructedIndiNode,indiNodeVec);
+							bool nondetMerged = false;
+							CIndividualProcessNode* baseIndi = getCorrectedIndividualID(constructedIndiNode,indiNodeVec,&nondetMerged);
 							cint64 baseIndiID = baseIndi->getIndividualID();
+							if (nondetMerged) {
+								maxDetBranchTag = 0;
+							}
 
 							CPROCESSINGSET<CConcept*>* analysedConceptSet = nullptr;
 
@@ -1636,7 +1645,7 @@ namespace Konclude {
 								cint64 consideredOtherNodeCount = 0;
 								cint64 extractedPossibleSubsumerOtherNodeCount = 0;
 
-								CSuccessorIterator succIt(constructedIndiNode->getSuccessorIterator());
+								CSuccessorIterator succIt(baseIndi->getSuccessorIterator());
 								if (succIt.hasNext()) {
 
 									CPROCESSINGHASH<cint64,CIndividualAnalyseProcessItem*> succIndiProcHash(taskProcessorContext);
@@ -1699,11 +1708,13 @@ namespace Konclude {
 															conRefLinking = conProcData->getConceptReferenceLinking();
 														}
 													}
+													CClassificationConceptReferenceLinking* classConRefLinkData = nullptr;
 													if (!conRefLinking) {
-														conRefLinking = mConRefLinkDataHash->value(analyseConcept);
+														classConRefLinkData = mConRefLinkDataHash->value(analyseConcept);
+													} else {
+														CConceptSatisfiableReferenceLinkingData* conSatRefLinkData = (CConceptSatisfiableReferenceLinkingData*)conRefLinking;
+														classConRefLinkData = conSatRefLinkData->getClassifierReferenceLinkingData();
 													}
-													CConceptSatisfiableReferenceLinkingData* conSatRefLinkData = (CConceptSatisfiableReferenceLinkingData*)conRefLinking;
-													CClassificationConceptReferenceLinking* classConRefLinkData = conSatRefLinkData->getClassifierReferenceLinkingData();
 													if (classConRefLinkData) {
 														CClassificationSatisfiableCalculationConceptReferenceLinking* classSatCalcConRefLinkData = (CClassificationSatisfiableCalculationConceptReferenceLinking*)classConRefLinkData;
 														analysationRequired = classSatCalcConRefLinkData->isMoreConceptClassificationInformationRequired();
@@ -1833,246 +1844,246 @@ namespace Konclude {
 										conRefLinking = conProcData->getConceptReferenceLinking();
 									}
 								}
+								CClassificationConceptReferenceLinking* classConRefLinkData = nullptr;
 								if (!conRefLinking) {
-									conRefLinking = mConRefLinkDataHash->value(testingConcept);
-								}
-								if (conRefLinking) {
+									classConRefLinkData = mConRefLinkDataHash->value(testingConcept);
+								} else {
 									CConceptSatisfiableReferenceLinkingData* conSatRefLinkData = (CConceptSatisfiableReferenceLinkingData*)conRefLinking;
-									CClassificationConceptReferenceLinking* classConRefLinkData = conSatRefLinkData->getClassifierReferenceLinkingData();
-									if (classConRefLinkData) {
-										CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking* possSubsumRefLinkData = (CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking*)classConRefLinkData;
-										if (possSubsumRefLinkData) {
+									classConRefLinkData = conSatRefLinkData->getClassifierReferenceLinkingData();
+								}
+								if (classConRefLinkData) {
+									CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking* possSubsumRefLinkData = (CClassificationSatisfiablePossibleSubsumptionCalculationConceptReferenceLinking*)classConRefLinkData;
+									if (possSubsumRefLinkData) {
 
-											CMemoryPoolContainer pmMemPoolCon;
-											CTaskMemoryPoolAllocationManager classMessMemManCreaterMemMan(&pmMemPoolCon,calcAlgContext->getTemporaryMemoryAllocationManager());
-											mPMTempMemAllocMan = CObjectAllocator<CTaskMemoryPoolAllocationManager>::allocateAndConstruct(&classMessMemManCreaterMemMan);
-											mPMTempMemAllocMan->initTaskMemoryPoolAllocationManager(&pmMemPoolCon,calcAlgContext->getTemporaryMemoryAllocationManager());
-											mPMTmpContext = CObjectParameterizingAllocator< CContextBase,CMemoryAllocationManager* >::allocateAndConstructAndParameterize(mPMTempMemAllocMan,mPMTempMemAllocMan);
-
-
-											CClassificationClassPseudoModel* pmModel = possSubsumRefLinkData->getClassPseudoModel();
-											CClassificationClassPseudoModelHash* pmModelHash = CObjectParameterizingAllocator< CClassificationClassPseudoModelHash,CContext* >::allocateAndConstructAndParameterize(mPMTempMemAllocMan,mPMTmpContext);
-											cint64 nextModelID = 1;
-
-											CPseudoModelAnalyseProcessItem* basePMItem = CObjectAllocator<CPseudoModelAnalyseProcessItem>::allocateAndConstruct(taskMemMan);
-											basePMItem->initPseudoModelAnalyseProcessItem(0,0);
-											CXNegLinker<CIndividualProcessNode*>* pmBaseNodeLinker = CObjectAllocator< CXNegLinker<CIndividualProcessNode*> >::allocateAndConstruct(taskMemMan);
-											pmBaseNodeLinker->initNegLinker(baseIndi,false);
-											basePMItem->addNodeLinker(pmBaseNodeLinker);
-
-											CXLinker<CPseudoModelAnalyseProcessItem*>* processItemLinker = CObjectAllocator< CXLinker<CPseudoModelAnalyseProcessItem*> >::allocateAndConstruct(taskMemMan);
-											processItemLinker->initLinker(basePMItem);
+										CMemoryPoolContainer pmMemPoolCon;
+										CTaskMemoryPoolAllocationManager classMessMemManCreaterMemMan(&pmMemPoolCon,calcAlgContext->getTemporaryMemoryAllocationManager());
+										mPMTempMemAllocMan = CObjectAllocator<CTaskMemoryPoolAllocationManager>::allocateAndConstruct(&classMessMemManCreaterMemMan);
+										mPMTempMemAllocMan->initTaskMemoryPoolAllocationManager(&pmMemPoolCon,calcAlgContext->getTemporaryMemoryAllocationManager());
+										mPMTmpContext = CObjectParameterizingAllocator< CContextBase,CMemoryAllocationManager* >::allocateAndConstructAndParameterize(mPMTempMemAllocMan,mPMTempMemAllocMan);
 
 
-											while (processItemLinker) {
-												++currentPMModelNodesCount;
-												CXLinker<CPseudoModelAnalyseProcessItem*>* tmpItemLinker = processItemLinker;
-												processItemLinker = processItemLinker->getNext();
+										CClassificationClassPseudoModel* pmModel = possSubsumRefLinkData->getClassPseudoModel();
+										CClassificationClassPseudoModelHash* pmModelHash = CObjectParameterizingAllocator< CClassificationClassPseudoModelHash,CContext* >::allocateAndConstructAndParameterize(mPMTempMemAllocMan,mPMTmpContext);
+										cint64 nextModelID = 1;
+
+										CPseudoModelAnalyseProcessItem* basePMItem = CObjectAllocator<CPseudoModelAnalyseProcessItem>::allocateAndConstruct(taskMemMan);
+										basePMItem->initPseudoModelAnalyseProcessItem(0,0);
+										CXNegLinker<CIndividualProcessNode*>* pmBaseNodeLinker = CObjectAllocator< CXNegLinker<CIndividualProcessNode*> >::allocateAndConstruct(taskMemMan);
+										pmBaseNodeLinker->initNegLinker(baseIndi,false);
+										basePMItem->addNodeLinker(pmBaseNodeLinker);
+
+										CXLinker<CPseudoModelAnalyseProcessItem*>* processItemLinker = CObjectAllocator< CXLinker<CPseudoModelAnalyseProcessItem*> >::allocateAndConstruct(taskMemMan);
+										processItemLinker->initLinker(basePMItem);
 
 
-												CPseudoModelAnalyseProcessItem* pmAnalyseProcessItem = tmpItemLinker->getData();
-												cint64 pmModelID = pmAnalyseProcessItem->mPMModelID;
-												CClassificationClassPseudoModelData* pmModel = pmModelHash->getPseudoModelData(pmModelID,true);
+										while (processItemLinker) {
+											++currentPMModelNodesCount;
+											CXLinker<CPseudoModelAnalyseProcessItem*>* tmpItemLinker = processItemLinker;
+											processItemLinker = processItemLinker->getNext();
 
 
-												bool vaidConcepts = true;
-												bool vaidSuccessors = true;
+											CPseudoModelAnalyseProcessItem* pmAnalyseProcessItem = tmpItemLinker->getData();
+											cint64 pmModelID = pmAnalyseProcessItem->mPMModelID;
+											CClassificationClassPseudoModelData* pmModel = pmModelHash->getPseudoModelData(pmModelID,true);
 
 
-												for (CXNegLinker<CIndividualProcessNode*>* nodeIt = pmAnalyseProcessItem->mNodeLinker; nodeIt; nodeIt = nodeIt->getNext()) {
-													CIndividualProcessNode* node = nodeIt->getData();
+											bool vaidConcepts = true;
+											bool vaidSuccessors = true;
 
-													bool blockedOrCached = node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION | CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED) || node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) && !node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID |CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
-													if (blockedOrCached) {
-														vaidConcepts = false;
-														vaidSuccessors = false;
-													}
-													bool nominalNode = node->isNominalIndividual();
-													if (nominalNode) {
-														vaidSuccessors = false;
-													}
-												}
-												if (pmAnalyseProcessItem->mRootDistance > mMaxPseudoModelDepth || currentPMModelNodesCount > mMaxPseudoModelNodes) {
+
+											for (CXNegLinker<CIndividualProcessNode*>* nodeIt = pmAnalyseProcessItem->mNodeLinker; nodeIt; nodeIt = nodeIt->getNext()) {
+												CIndividualProcessNode* node = nodeIt->getData();
+
+												bool blockedOrCached = node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION | CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED) || node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) && !node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID |CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
+												if (blockedOrCached) {
+													vaidConcepts = false;
 													vaidSuccessors = false;
 												}
-
-												pmModel->setValidConceptMap(vaidConcepts);
-												pmModel->setValidRoleMap(vaidSuccessors);
-
-												if (vaidConcepts) {
-													// update pseudo model concept map
-													CClassificationClassPseudoModelConceptMap* pmModelConMap = pmModel->getPseudoModelConceptMap(true);
-													for (CXNegLinker<CIndividualProcessNode*>* nodeIt = pmAnalyseProcessItem->mNodeLinker; nodeIt; nodeIt = nodeIt->getNext()) {
-														bool nonDeterministicConnected = nodeIt->isNegated();
-														CIndividualProcessNode* node = nodeIt->getData();
-														CReapplyConceptLabelSet* conSet = node->getReapplyConceptLabelSet(false);
-														if (conSet) {
-															CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true,true,false);
-															while (conSetIt.hasNext()) {
-																CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
-																if (conDes) {
-																	CDependencyTrackPoint* depTrackPoint = conSetIt.getDependencyTrackPoint();
-																	bool deterministic = false;
-																	if (depTrackPoint) {
-																		if (depTrackPoint->getBranchingTag() <= maxDetBranchTag) {
-																			if (!nonDeterministicConnected) {
-																				deterministic = true;
-																			}
-																		}
-																	}
-																	CConcept* concept = conDes->getConcept();
-																	cint64 conOpCode = concept->getOperatorCode();
-																	bool insertCon = false;
-																	if (!conDes->isNegated()) {
-																		if ((concept->hasClassName() && conOpCode == CCATOM) || conOpCode == CCSUB || conOpCode == CCIMPLTRIG || conOpCode == CCEQCAND) {
-																			insertCon = true;
-																		}	
-																	}
-
-																	if (insertCon) {
-																		pmModelConMap->insert(CConceptTagComparer(concept),CClassificationClassPseudoModelConceptData(deterministic));
-																	}
-																}
-																conSetIt.moveNext();
-															}
-														}
-													}
+												bool nominalNode = node->isNominalIndividual();
+												if (nominalNode) {
+													vaidSuccessors = false;
 												}
-
-												if (vaidSuccessors) {
-													// update pseudo model role map
-													CPROCESSINGSET<CRole*> processedRoles(taskProcessorContext);
-													CClassificationClassPseudoModelRoleMap* pmModelRoleMap = pmModel->getPseudoModelRoleMap(true);
-													for (CXNegLinker<CIndividualProcessNode*>* nodeIt = pmAnalyseProcessItem->mNodeLinker; nodeIt; nodeIt = nodeIt->getNext()) {
-														bool nonDeterministicConnected = nodeIt->isNegated();
-														CIndividualProcessNode* node = nodeIt->getData();
-														CRoleSuccessorIterator roleIt = node->getRoleIterator();
-														while (roleIt.hasNext()) {
-															CRole* role = roleIt.next();
-															if (!role->isComplexRole()) {
-																// do not analyze complex roles
-																if (!processedRoles.contains(role)) {
-																	processedRoles.insert(role);
-
-
-																	CPROCESSINGSET<cint64> roleSuccessorIDSet(taskProcessorContext);
-																	// collect all successors for this role over all nodes
-
-																	cint64 lowerDetAtLeastBound = 0;
-																	cint64 upperAtLeastBound = 0;
-
-																	cint64 upperDetAtMostBound = CINT64_MAX;
-																	cint64 lowerAtMostBound = CINT64_MAX;
-
-																	CXNegLinker<CIndividualProcessNode*>* succNodeLinker = nullptr;
-
-																	bool hasDeterministicSuccessor = false;
-
-
-																	for (CXNegLinker<CIndividualProcessNode*>* nodeIt2 = pmAnalyseProcessItem->mNodeLinker; nodeIt2; nodeIt2 = nodeIt2->getNext()) {
-																		CIndividualProcessNode* node2 = nodeIt2->getData();
-
-																		CReapplyRoleSuccessorHash* roleSuccHash = node2->getReapplyRoleSuccessorHash(false);
-																		if (roleSuccHash) {
-																			cint64 linkCount = 0;
-																			CRoleSuccessorLinkIterator roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role,&linkCount);
-																			upperAtLeastBound = qMax(upperAtLeastBound,linkCount);
-																			lowerAtMostBound = qMin(lowerAtMostBound,linkCount);
-																			while (roleSuccIt.hasNext()) {
-																				CIndividualLinkEdge* succLink = roleSuccIt.next();
-																				cint64 succIndiID = succLink->getOppositeIndividualID(node2);
-																				if (!roleSuccessorIDSet.contains(succIndiID)) {
-																					roleSuccessorIDSet.insert(succIndiID);
-
-																					bool deterministicLink = !nonDeterministicConnected;
-																					CDependencyTrackPoint* depTrackPoint = succLink->getDependencyTrackPoint();
-																					if (depTrackPoint && depTrackPoint->getBranchingTag() <= maxDetBranchTag) {
-																						lowerDetAtLeastBound = qMax(lowerDetAtLeastBound,(cint64)1);
-																						if (!nonDeterministicConnected) {
-																							hasDeterministicSuccessor = true;
-																						}
-																						deterministicLink = false;
-																					}
-
-																					CIndividualProcessNode* succIndiNode = indiNodeVec->getData(succIndiID);
-																					CXNegLinker<CIndividualProcessNode*>* nextSuccNodeLinker = CObjectAllocator< CXNegLinker<CIndividualProcessNode*> >::allocateAndConstruct(taskMemMan);
-																					nextSuccNodeLinker->initNegLinker(succIndiNode,deterministicLink);
-																					succNodeLinker = nextSuccNodeLinker->append(succNodeLinker);
-
-																				}
-																			}
-																		} else {
-																			lowerAtMostBound = 0;
-																		}
-
-
-																		CReapplyConceptLabelSet* conSet = node2->getReapplyConceptLabelSet(false);
-																		if (conSet) {
-																			for (CConceptDescriptor* conDesLinkerIt = conSet->getAddingSortedConceptDescriptionLinker(); conDesLinkerIt; conDesLinkerIt = conDesLinkerIt->getNextConceptDesciptor()) {
-																				CConcept* concept = conDesLinkerIt->getConcept();
-																				if (concept->getRole() == role) {
-																					bool conNegation = conDesLinkerIt->getNegation();
-																					cint64 opCode = concept->getOperatorCode();
-																					CDependencyTrackPoint* depTrackPoint = conDesLinkerIt->getDependencyTrackPoint();
-																					if (depTrackPoint && depTrackPoint->getBranchingTag() <= maxDetBranchTag) {
-																						if (!conNegation && opCode == CCATLEAST || conNegation && opCode == CCATMOST) {
-																							cint64 atLeastParam = concept->getParameter() + 1 * conNegation;
-																							if (atLeastParam >= 0) {
-																								lowerDetAtLeastBound = qMax(lowerDetAtLeastBound,atLeastParam);
-																							}
-																						} else if (conNegation && opCode == CCATLEAST || !conNegation && opCode == CCATMOST && concept->getOperandList() == nullptr) {
-																							cint64 atMostParam = concept->getParameter() - 1 * conNegation;
-																							if (atMostParam >= 0) {
-																								upperDetAtMostBound = qMin(upperDetAtMostBound,atMostParam);
-																							}
-																						}
-																					}
-																				}
-																			}
-																		}
-																	}
-
-
-																	cint64 succPMModelID = 0;
-
-
-																	if (succPMModelID == 0) {
-																		succPMModelID = nextModelID++;
-																	}
-
-																	CClassificationClassPseudoModelRoleData& roleSuccModelData = (*pmModelRoleMap)[CRoleTagComparer(role)];
-																	roleSuccModelData.setSuccessorModelID(succPMModelID);
-																	roleSuccModelData.setDeterministic(hasDeterministicSuccessor);
-																	roleSuccModelData.setLowerAtLeastBound(lowerDetAtLeastBound);
-																	roleSuccModelData.setUpperAtLeastBound(upperAtLeastBound);
-																	roleSuccModelData.setUpperAtMostBound(upperDetAtMostBound);
-																	roleSuccModelData.setLowerAtMostBound(lowerAtMostBound);
-																	
-																	CPseudoModelAnalyseProcessItem* roleSuccessorsPMItem = CObjectAllocator<CPseudoModelAnalyseProcessItem>::allocateAndConstruct(taskMemMan);
-																	roleSuccessorsPMItem->initPseudoModelAnalyseProcessItem(succPMModelID,pmAnalyseProcessItem->mRootDistance+1);
-																	roleSuccessorsPMItem->addNodeLinker(succNodeLinker);
-
-																	CXLinker<CPseudoModelAnalyseProcessItem*>* nextProcessItemLinker = CObjectAllocator< CXLinker<CPseudoModelAnalyseProcessItem*> >::allocateAndConstruct(taskMemMan);
-																	nextProcessItemLinker->initLinker(roleSuccessorsPMItem);
-																	processItemLinker = nextProcessItemLinker->append(processItemLinker);
-
-
-																}
-															}
-														}
-													}
-												}
-
+											}
+											if (pmAnalyseProcessItem->mRootDistance > mMaxPseudoModelDepth || currentPMModelNodesCount > mMaxPseudoModelNodes) {
+												vaidSuccessors = false;
 											}
 
-											STATINC(ANALYSEPSEUDOMODELCOUNT,calcAlgContext);
+											pmModel->setValidConceptMap(vaidConcepts);
+											pmModel->setValidRoleMap(vaidSuccessors);
 
-											CClassificationPseudoModelIdentifierMessageData* pmMessageData = CObjectAllocator<CClassificationPseudoModelIdentifierMessageData>::allocateAndConstruct(mTempMemAllocMan);
-											pmMessageData->initClassificationPseudoModelIdentifierMessageData(testingConcept,pmModelHash,pmMemPoolCon.takeMemoryPools());
-											pmMessageDataLinker = pmMessageData->append(pmMessageDataLinker);
+											if (vaidConcepts) {
+												// update pseudo model concept map
+												CClassificationClassPseudoModelConceptMap* pmModelConMap = pmModel->getPseudoModelConceptMap(true);
+												for (CXNegLinker<CIndividualProcessNode*>* nodeIt = pmAnalyseProcessItem->mNodeLinker; nodeIt; nodeIt = nodeIt->getNext()) {
+													bool nonDeterministicConnected = nodeIt->isNegated();
+													CIndividualProcessNode* node = nodeIt->getData();
+													CReapplyConceptLabelSet* conSet = node->getReapplyConceptLabelSet(false);
+													if (conSet) {
+														CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true,true,false);
+														while (conSetIt.hasNext()) {
+															CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
+															if (conDes) {
+																CDependencyTrackPoint* depTrackPoint = conSetIt.getDependencyTrackPoint();
+																bool deterministic = false;
+																if (depTrackPoint) {
+																	if (depTrackPoint->getBranchingTag() <= maxDetBranchTag) {
+																		if (!nonDeterministicConnected) {
+																			deterministic = true;
+																		}
+																	}
+																}
+																CConcept* concept = conDes->getConcept();
+																cint64 conOpCode = concept->getOperatorCode();
+																bool insertCon = false;
+																if (!conDes->isNegated()) {
+																	if ((concept->hasClassName() && conOpCode == CCATOM) || conOpCode == CCSUB || conOpCode == CCIMPLTRIG || conOpCode == CCEQCAND) {
+																		insertCon = true;
+																	}	
+																}
 
+																if (insertCon) {
+																	pmModelConMap->insert(CConceptTagComparer(concept),CClassificationClassPseudoModelConceptData(deterministic));
+																}
+															}
+															conSetIt.moveNext();
+														}
+													}
+												}
+											}
+
+											if (vaidSuccessors) {
+												// update pseudo model role map
+												CPROCESSINGSET<CRole*> processedRoles(taskProcessorContext);
+												CClassificationClassPseudoModelRoleMap* pmModelRoleMap = pmModel->getPseudoModelRoleMap(true);
+												for (CXNegLinker<CIndividualProcessNode*>* nodeIt = pmAnalyseProcessItem->mNodeLinker; nodeIt; nodeIt = nodeIt->getNext()) {
+													bool nonDeterministicConnected = nodeIt->isNegated();
+													CIndividualProcessNode* node = nodeIt->getData();
+													CRoleSuccessorIterator roleIt = node->getRoleIterator();
+													while (roleIt.hasNext()) {
+														CRole* role = roleIt.next();
+														if (!role->isComplexRole()) {
+															// do not analyze complex roles
+															if (!processedRoles.contains(role)) {
+																processedRoles.insert(role);
+
+
+																CPROCESSINGSET<cint64> roleSuccessorIDSet(taskProcessorContext);
+																// collect all successors for this role over all nodes
+
+																cint64 lowerDetAtLeastBound = 0;
+																cint64 upperAtLeastBound = 0;
+
+																cint64 upperDetAtMostBound = CINT64_MAX;
+																cint64 lowerAtMostBound = CINT64_MAX;
+
+																CXNegLinker<CIndividualProcessNode*>* succNodeLinker = nullptr;
+
+																bool hasDeterministicSuccessor = false;
+
+
+																for (CXNegLinker<CIndividualProcessNode*>* nodeIt2 = pmAnalyseProcessItem->mNodeLinker; nodeIt2; nodeIt2 = nodeIt2->getNext()) {
+																	CIndividualProcessNode* node2 = nodeIt2->getData();
+
+																	CReapplyRoleSuccessorHash* roleSuccHash = node2->getReapplyRoleSuccessorHash(false);
+																	if (roleSuccHash) {
+																		cint64 linkCount = 0;
+																		CRoleSuccessorLinkIterator roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role,&linkCount);
+																		upperAtLeastBound = qMax(upperAtLeastBound,linkCount);
+																		lowerAtMostBound = qMin(lowerAtMostBound,linkCount);
+																		while (roleSuccIt.hasNext()) {
+																			CIndividualLinkEdge* succLink = roleSuccIt.next();
+																			cint64 succIndiID = succLink->getOppositeIndividualID(node2);
+																			if (!roleSuccessorIDSet.contains(succIndiID)) {
+																				roleSuccessorIDSet.insert(succIndiID);
+
+																				bool deterministicLink = !nonDeterministicConnected;
+																				CDependencyTrackPoint* depTrackPoint = succLink->getDependencyTrackPoint();
+																				if (depTrackPoint && depTrackPoint->getBranchingTag() <= maxDetBranchTag) {
+																					lowerDetAtLeastBound = qMax(lowerDetAtLeastBound,(cint64)1);
+																					if (!nonDeterministicConnected) {
+																						hasDeterministicSuccessor = true;
+																					}
+																					deterministicLink = false;
+																				}
+
+																				CIndividualProcessNode* succIndiNode = indiNodeVec->getData(succIndiID);
+																				CXNegLinker<CIndividualProcessNode*>* nextSuccNodeLinker = CObjectAllocator< CXNegLinker<CIndividualProcessNode*> >::allocateAndConstruct(taskMemMan);
+																				nextSuccNodeLinker->initNegLinker(succIndiNode,deterministicLink);
+																				succNodeLinker = nextSuccNodeLinker->append(succNodeLinker);
+
+																			}
+																		}
+																	} else {
+																		lowerAtMostBound = 0;
+																	}
+
+
+																	CReapplyConceptLabelSet* conSet = node2->getReapplyConceptLabelSet(false);
+																	if (conSet) {
+																		for (CConceptDescriptor* conDesLinkerIt = conSet->getAddingSortedConceptDescriptionLinker(); conDesLinkerIt; conDesLinkerIt = conDesLinkerIt->getNextConceptDesciptor()) {
+																			CConcept* concept = conDesLinkerIt->getConcept();
+																			if (concept->getRole() == role) {
+																				bool conNegation = conDesLinkerIt->getNegation();
+																				cint64 opCode = concept->getOperatorCode();
+																				CDependencyTrackPoint* depTrackPoint = conDesLinkerIt->getDependencyTrackPoint();
+																				if (depTrackPoint && depTrackPoint->getBranchingTag() <= maxDetBranchTag) {
+																					if (!conNegation && opCode == CCATLEAST || conNegation && opCode == CCATMOST) {
+																						cint64 atLeastParam = concept->getParameter() + 1 * conNegation;
+																						if (atLeastParam >= 0) {
+																							lowerDetAtLeastBound = qMax(lowerDetAtLeastBound,atLeastParam);
+																						}
+																					} else if (conNegation && opCode == CCATLEAST || !conNegation && opCode == CCATMOST && concept->getOperandList() == nullptr) {
+																						cint64 atMostParam = concept->getParameter() - 1 * conNegation;
+																						if (atMostParam >= 0) {
+																							upperDetAtMostBound = qMin(upperDetAtMostBound,atMostParam);
+																						}
+																					}
+																				}
+																			}
+																		}
+																	}
+																}
+
+
+																cint64 succPMModelID = 0;
+
+
+																if (succPMModelID == 0) {
+																	succPMModelID = nextModelID++;
+																}
+
+																CClassificationClassPseudoModelRoleData& roleSuccModelData = (*pmModelRoleMap)[CRoleTagComparer(role)];
+																roleSuccModelData.setSuccessorModelID(succPMModelID);
+																roleSuccModelData.setDeterministic(hasDeterministicSuccessor);
+																roleSuccModelData.setLowerAtLeastBound(lowerDetAtLeastBound);
+																roleSuccModelData.setUpperAtLeastBound(upperAtLeastBound);
+																roleSuccModelData.setUpperAtMostBound(upperDetAtMostBound);
+																roleSuccModelData.setLowerAtMostBound(lowerAtMostBound);
+																
+																CPseudoModelAnalyseProcessItem* roleSuccessorsPMItem = CObjectAllocator<CPseudoModelAnalyseProcessItem>::allocateAndConstruct(taskMemMan);
+																roleSuccessorsPMItem->initPseudoModelAnalyseProcessItem(succPMModelID,pmAnalyseProcessItem->mRootDistance+1);
+																roleSuccessorsPMItem->addNodeLinker(succNodeLinker);
+
+																CXLinker<CPseudoModelAnalyseProcessItem*>* nextProcessItemLinker = CObjectAllocator< CXLinker<CPseudoModelAnalyseProcessItem*> >::allocateAndConstruct(taskMemMan);
+																nextProcessItemLinker->initLinker(roleSuccessorsPMItem);
+																processItemLinker = nextProcessItemLinker->append(processItemLinker);
+
+
+															}
+														}
+													}
+												}
+											}
 
 										}
+
+										STATINC(ANALYSEPSEUDOMODELCOUNT,calcAlgContext);
+
+										CClassificationPseudoModelIdentifierMessageData* pmMessageData = CObjectAllocator<CClassificationPseudoModelIdentifierMessageData>::allocateAndConstruct(mTempMemAllocMan);
+										pmMessageData->initClassificationPseudoModelIdentifierMessageData(testingConcept,pmModelHash,pmMemPoolCon.takeMemoryPools());
+										pmMessageDataLinker = pmMessageData->append(pmMessageDataLinker);
+
+
 									}
 								}
 							}

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -50,6 +50,16 @@ namespace Konclude {
 			CDataLiteralCompareValue* CDatatypeValueSpaceBinaryBase64DataType::getMaximumDataLiteralCompareValue() {
 				return mMaxValue;
 			}
+
+
+			bool CDatatypeValueSpaceBinaryBase64DataType::hasInfiniteManyValues() {
+				return true;
+			}
+
+			cint64 CDatatypeValueSpaceBinaryBase64DataType::getMaximumValueCount() {
+				return CINT64_MAX;
+			}
+
 
 		}; // end namespace Ontology
 

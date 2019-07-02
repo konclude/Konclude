@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -78,6 +78,8 @@ namespace Konclude {
 					stepName = QString("Consistency-Checking");
 				} else if (mProcessingType == OPSPRECOMPUTESATURATION) {
 					stepName = QString("Saturation-Precomputing");
+				} else if (mProcessingType == OPSPRECOMPUTEINDIVIDUAL) {
+					stepName = QString("Individual-Precomputing");
 				} else if (mProcessingType == OPSPRECOMPUTECYCLES) {
 					stepName = QString("Cycles-Precomputing");
 				} else if (mProcessingType == OPSCLASSCLASSIFY) {
@@ -86,6 +88,8 @@ namespace Konclude {
 					stepName = QString("Types-Realization");
 				} else if (mProcessingType == OPSSAMEINDIVIDUALSREALIZE) {
 					stepName = QString("Same-Individual-Realization");
+				} else if (mProcessingType == OPSROLEREALIZE) {
+					stepName = QString("Role-Realization");
 				}
 				return stepName;
 			}

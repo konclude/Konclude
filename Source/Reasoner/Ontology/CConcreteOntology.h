@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -36,6 +36,7 @@
 #include "COntologyCoreConceptCyclesData.h"
 #include "CExpressionDataBoxMapping.h"
 #include "COntologyProcessingSteps.h"
+#include "COntologyIncrementalRevisionData.h"
 
 // Other includes
 #include "Parser/Expressions/CAxiomExpression.h"
@@ -146,6 +147,11 @@ namespace Konclude {
 					COntologyProcessingSteps* getProcessingSteps();
 					CConcreteOntology* setProcessingSteps(COntologyProcessingSteps* stepDatas);
 
+
+
+					COntologyIncrementalRevisionData* getIncrementalRevisionData();
+					CConcreteOntology* setIncrementalRevisionData(COntologyIncrementalRevisionData* incRevData);
+
 				// protected methods
 				protected:
 
@@ -164,6 +170,7 @@ namespace Konclude {
 					COntologyBuildData* mBuildData;
 					COntologyCoreConceptCyclesData* mConceptCyclesData;
 					COntologyProcessingSteps* mProcessingSteps;
+					COntologyIncrementalRevisionData* mIncRevisionData;
 
 					CPrecomputation* mPrecomputation;
 

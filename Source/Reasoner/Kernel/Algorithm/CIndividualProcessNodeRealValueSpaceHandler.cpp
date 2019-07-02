@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -48,7 +48,7 @@ namespace Konclude {
 					bool newValuesPotentiallyExcluded = false;
 
 					if (!realValueSpaceData->isValueSpaceClashed() && dataLitRealValue) {
-						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap();
+						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap(true);
 						if (!negated) {
 							newValuesPotentiallyExcluded |= realValueSpaceMap->restrictToValue(dataLitRealValue,depTrackPoint);
 						} else {
@@ -87,7 +87,7 @@ namespace Konclude {
 						return false;
 					}
 
-					CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap();
+					CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap(true);
 
 					bool newValuesPotentiallyExcluded = false;
 					if (!negated) {
@@ -152,12 +152,14 @@ namespace Konclude {
 						if (realValueSpaceData->isValueSpaceClashed()) {
 							return true;
 						}
-						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap();
-						bool clashed = realValueSpaceMap->testValueSpaceReturnClashed();
-						if (clashed) {
-							realValueSpaceMap->addValueSpaceDependencies(realValueSpaceData->getClashDependencyTrackPointCollection());
-							realValueSpaceData->setValueSpaceClashed(true);
-							return true;
+						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap(false);
+						if (realValueSpaceMap) {
+							bool clashed = realValueSpaceMap->testValueSpaceReturnClashed();
+							if (clashed) {
+								realValueSpaceMap->addValueSpaceDependencies(realValueSpaceData->getClashDependencyTrackPointCollection());
+								realValueSpaceData->setValueSpaceClashed(true);
+								return true;
+							}
 						}
 					}
 					return false;
@@ -171,8 +173,10 @@ namespace Konclude {
 					CDatatypeRealValueSpaceData* realValueSpaceData = datatypesSpaceValue->getRealValueSpace(mRealValueSpaceType,false);
 					if (realValueSpaceData) {
 						if (!realValueSpaceData->isValueSpaceClashed()) {
-							CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap();
-							return realValueSpaceMap->addValueSpaceDependencies(depCollection);
+							CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap(false);
+							if (realValueSpaceMap) {
+								return realValueSpaceMap->addValueSpaceDependencies(depCollection);
+							}
 						} else {
 							return realValueSpaceData->getClashDependencyTrackPointCollection()->addCollectionDependencies(depCollection);
 						}
@@ -191,8 +195,12 @@ namespace Konclude {
 								realValueSpaceData = datatypesSpaceValue->getRealValueSpace(mRealValueSpaceType,true);
 								CDatatypeValueSpaceValuesCounter* valueSpaceValueCounter = realValueSpaceData->getValuesCounter();
 								valueSpaceValueCounter->resetValueCounter();
-								CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap();
-								realValueSpaceMap->countAllValues(valueSpaceValueCounter);
+								CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap(false);
+								if (realValueSpaceMap) {
+									realValueSpaceMap->countAllValues(valueSpaceValueCounter);
+								} else {
+									valueSpaceValueCounter->incInfinite();
+								}
 								realValueSpaceData->setValueSpaceCounted(true);
 								realValueSpaceData->setValueSpaceCountingRequired(false);
 								if (valueCounter) {
@@ -228,7 +236,7 @@ namespace Konclude {
 						if (!realValueSpaceData->isValueSpaceTriggeringStarted()) {
 							realValueSpaceData->setValueSpaceTriggeringStarted(true);
 						}
-						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap();
+						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap(false);
 
 						CDatatypeValueSpacesTriggers* valueSpacesTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
 						if (valueSpacesTriggers) {
@@ -245,310 +253,314 @@ namespace Konclude {
 
 
 
+							if (realValueSpaceMap) {
 
-							CDataLiteralRealValue* minValue = nullptr;
-							bool minValueInclusive = false;
-							CDependencyTrackPoint* minValueDepTrackPoint = nullptr;
-
-
-
-
-							if (realValueSpaceMap->getAbsoluteMinimumValue(minValue,minValueInclusive,&minValueDepTrackPoint)) {
-
-								CDatatypeDependencyCollection minValueDepCollection(depCollection,calcAlgContext);
-
-								bool minDatatypeDepAdded = false;
-
-								CDatatypeValueSpaceTriggeringIterator leftTriggerIt = realValueSpaceTriggerMap->getLeftTriggeringIterator(minValue,!minValueInclusive);
-								while (leftTriggerIt.hasNext()) {
-									CDatatypeValueSpaceTriggeringData* triggeringData = leftTriggerIt.next();
-									CDatatypeValueSpaceConceptTriggeringData* minExcTriggeringConceptData = triggeringData->getMinExclusiveTriggeringData();
-									CDatatypeValueSpaceConceptTriggeringData* minIncTriggeringConceptData = triggeringData->getMinInclusiveTriggeringData();
-									if (minExcTriggeringConceptData->hasPartialConceptTriggers() || minIncTriggeringConceptData->hasPartialConceptTriggers()) {
-										if (!minDatatypeDepAdded && minValueDepTrackPoint) {
-											minDatatypeDepAdded = true;
-											minValueDepCollection.addDependency(minValueDepTrackPoint);
-										}
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minExcTriggeringConceptData->getPartialConceptTriggerLinker(),&minValueDepCollection,calcAlgContext);
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minIncTriggeringConceptData->getPartialConceptTriggerLinker(),&minValueDepCollection,calcAlgContext);
-									}
-								}
-
-								CDatatypeValueSpaceTriggeringData* minValueTriggerData = realValueSpaceTriggerMap->getDatatypeValueTriggeringData(minValue,false);
-								if (minValueTriggerData) {
-									CDatatypeValueSpaceConceptTriggeringData* minTriggeringConceptData = nullptr;
-									if (!minValueInclusive) {
-										minTriggeringConceptData = minValueTriggerData->getMinExclusiveTriggeringData();
-									} else {
-										minTriggeringConceptData = minValueTriggerData->getMinInclusiveTriggeringData();
-									}
-									if (minTriggeringConceptData->hasPartialConceptTriggers()) {
-										if (!minDatatypeDepAdded && minValueDepTrackPoint) {
-											minDatatypeDepAdded = true;
-											minValueDepCollection.addDependency(minValueDepTrackPoint);
-										}
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minTriggeringConceptData->getPartialConceptTriggerLinker(),&minValueDepCollection,calcAlgContext);
-									}
-								}
-							}
+								CDataLiteralRealValue* minValue = nullptr;
+								bool minValueInclusive = false;
+								CDependencyTrackPoint* minValueDepTrackPoint = nullptr;
 
 
 
 
-							CDataLiteralRealValue* maxValue = nullptr;
-							bool maxValueInclusive = false;
-							CDependencyTrackPoint* maxValueDepTrackPoint = nullptr;
-							if (realValueSpaceMap->getAbsoluteMaximumValue(maxValue,maxValueInclusive,&maxValueDepTrackPoint)) {
+								if (realValueSpaceMap->getAbsoluteMinimumValue(minValue,minValueInclusive,&minValueDepTrackPoint)) {
 
-								CDatatypeDependencyCollection maxValueDepCollection(depCollection,calcAlgContext);
+									CDatatypeDependencyCollection minValueDepCollection(depCollection,calcAlgContext);
 
-								bool maxDatatypeDepAdded = false;
+									bool minDatatypeDepAdded = false;
 
-								CDatatypeValueSpaceTriggeringIterator rightTriggerIt = realValueSpaceTriggerMap->getRightTriggeringIterator(maxValue,!maxValueInclusive);
-								while (rightTriggerIt.hasNext()) {
-									CDatatypeValueSpaceTriggeringData* triggeringData = rightTriggerIt.next();
-									CDatatypeValueSpaceConceptTriggeringData* maxExcTriggeringConceptData = triggeringData->getMaxExclusiveTriggeringData();
-									CDatatypeValueSpaceConceptTriggeringData* maxIncTriggeringConceptData = triggeringData->getMaxInclusiveTriggeringData();
-									if (maxExcTriggeringConceptData->hasPartialConceptTriggers() || maxIncTriggeringConceptData->hasPartialConceptTriggers()) {
-										if (!maxDatatypeDepAdded && maxValueDepTrackPoint) {
-											maxDatatypeDepAdded = true;
-											maxValueDepCollection.addDependency(minValueDepTrackPoint);
-										}
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxExcTriggeringConceptData->getPartialConceptTriggerLinker(),&maxValueDepCollection,calcAlgContext);
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxIncTriggeringConceptData->getPartialConceptTriggerLinker(),&maxValueDepCollection,calcAlgContext);
-									}
-								}
-
-
-								CDatatypeValueSpaceTriggeringData* maxValueTriggerData = realValueSpaceTriggerMap->getDatatypeValueTriggeringData(maxValue,false);
-								if (maxValueTriggerData) {
-									CDatatypeValueSpaceConceptTriggeringData* maxTriggeringConceptData = nullptr;
-									if (!maxValueInclusive) {
-										maxTriggeringConceptData = maxValueTriggerData->getMaxExclusiveTriggeringData();
-									} else {
-										maxTriggeringConceptData = maxValueTriggerData->getMaxInclusiveTriggeringData();
-									}
-									if (maxTriggeringConceptData->hasPartialConceptTriggers()) {
-										if (!maxDatatypeDepAdded && maxValueDepTrackPoint) {
-											maxDatatypeDepAdded = true;
-											maxValueDepCollection.addDependency(maxValueDepTrackPoint);
-										}
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxTriggeringConceptData->getPartialConceptTriggerLinker(),&maxValueDepCollection,calcAlgContext);
-									}
-								}
-							}
-
-
-
-							if (minValue && maxValue) {
-
-								CDatatypeValueSpaceRealValuesCounter valueCounter;
-
-
-								CDataLiteralCompareValue* freeLeftValue = nullptr;
-								CDataLiteralCompareValue* freeRightValue = nullptr;
-								bool freeLeftValueInclusive = false;
-								bool freeRightValueInclusive = false;
-
-								if (realValueSpaceTriggerMap->getIntervalMinMaxTriggerFreeInterval(minValue,minValueInclusive,maxValue,maxValueInclusive,freeLeftValue,freeLeftValueInclusive,freeRightValue,freeRightValueInclusive)) {
-									CDataLiteralRealValue* freeLeftRealValue = dynamic_cast<CDataLiteralRealValue*>(freeLeftValue);
-									CDataLiteralRealValue* freeRightRealValue = dynamic_cast<CDataLiteralRealValue*>(freeRightValue);
-									if (freeLeftRealValue && freeRightRealValue) {
-										CDatatypeValueSpaceRealValuesCounter tmpValueCounter;
-										if (realValueSpaceMap->countIntervalValues(freeLeftRealValue,freeLeftValueInclusive,freeRightRealValue,freeRightValueInclusive,&tmpValueCounter)) {
-											cint64 triggerValueCount = 0;
-											if (realValueSpaceTriggerMap->countIntervalValueTriggers(minValue,minValueInclusive,maxValue,maxValueInclusive,triggerValueCount)) {
-												valueCounter.combineWithValueCounter(&tmpValueCounter,triggerValueCount);
+									CDatatypeValueSpaceTriggeringIterator leftTriggerIt = realValueSpaceTriggerMap->getLeftTriggeringIterator(minValue,!minValueInclusive);
+									while (leftTriggerIt.hasNext()) {
+										CDatatypeValueSpaceTriggeringData* triggeringData = leftTriggerIt.next();
+										CDatatypeValueSpaceConceptTriggeringData* minExcTriggeringConceptData = triggeringData->getMinExclusiveTriggeringData();
+										CDatatypeValueSpaceConceptTriggeringData* minIncTriggeringConceptData = triggeringData->getMinInclusiveTriggeringData();
+										if (minExcTriggeringConceptData->hasPartialConceptTriggers() || minIncTriggeringConceptData->hasPartialConceptTriggers()) {
+											if (!minDatatypeDepAdded && minValueDepTrackPoint) {
+												minDatatypeDepAdded = true;
+												minValueDepCollection.addDependency(minValueDepTrackPoint);
 											}
-										}
-									}
-								}
-
-
-								if (!valueCounter.hasValueAchieved(remainingRequiredValuesCount)) {
-
-
-									bool minToMaxTriggerDirection = true;
-
-									cint64 minTriggerCount = 0;
-									cint64 maxTriggerCount = 0;
-									cint64 valueTriggerCount = 0;
-									realValueSpaceTriggerMap->countIntervalMinMaxValueTriggers(minValue,minValueInclusive,maxValue,maxValueInclusive,minTriggerCount,maxTriggerCount,valueTriggerCount);
-
-									if (minTriggerCount < maxTriggerCount) {
-										minToMaxTriggerDirection = false;
-									}
-
-									depCollection->addDependency(minValueDepTrackPoint);
-									depCollection->addDependency(maxValueDepTrackPoint);
-
-									CDatatypeValueSpaceTriggeringIterator triggerIt = realValueSpaceTriggerMap->getIntervalTriggeringIterator(minValue,minValueInclusive,maxValue,maxValueInclusive,minToMaxTriggerDirection);
-
-									if (minTriggerCount > 0 && maxTriggerCount > 0) {
-
-
-										CDatatypeValueSpaceTriggeringIterator minMaxDirectionTriggerIt = triggerIt;
-										while (minMaxDirectionTriggerIt.hasNext()) {
-
-											CDatatypeValueSpaceTriggeringData* triggeringData = minMaxDirectionTriggerIt.next();
-											if (minToMaxTriggerDirection) {
-												CDatatypeValueSpaceConceptTriggeringData* maxExcTriggeringConceptData = triggeringData->getMaxExclusiveTriggeringData();
-												CDatatypeValueSpaceConceptTriggeringData* maxIncTriggeringConceptData = triggeringData->getMaxInclusiveTriggeringData();
-												if (maxExcTriggeringConceptData->hasPartialConceptTriggers() || maxIncTriggeringConceptData->hasPartialConceptTriggers()) {
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-												}
-
-											} else {
-
-												CDatatypeValueSpaceConceptTriggeringData* minExcTriggeringConceptData = triggeringData->getMinExclusiveTriggeringData();
-												CDatatypeValueSpaceConceptTriggeringData* minIncTriggeringConceptData = triggeringData->getMinInclusiveTriggeringData();
-												if (minExcTriggeringConceptData->hasPartialConceptTriggers() || minIncTriggeringConceptData->hasPartialConceptTriggers()) {
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-												}
-
-											}
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minExcTriggeringConceptData->getPartialConceptTriggerLinker(),&minValueDepCollection,calcAlgContext);
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minIncTriggeringConceptData->getPartialConceptTriggerLinker(),&minValueDepCollection,calcAlgContext);
 										}
 									}
 
-
-									if (!minValue->isEqualTo(maxValue)) {
-										CDataLiteralRealValue* lastRealValue = nullptr;
-										if (minToMaxTriggerDirection) {
-											lastRealValue = minValue;
+									CDatatypeValueSpaceTriggeringData* minValueTriggerData = realValueSpaceTriggerMap->getDatatypeValueTriggeringData(minValue,false);
+									if (minValueTriggerData) {
+										CDatatypeValueSpaceConceptTriggeringData* minTriggeringConceptData = nullptr;
+										if (!minValueInclusive) {
+											minTriggeringConceptData = minValueTriggerData->getMinExclusiveTriggeringData();
 										} else {
-											lastRealValue = maxValue;
+											minTriggeringConceptData = minValueTriggerData->getMinInclusiveTriggeringData();
+										}
+										if (minTriggeringConceptData->hasPartialConceptTriggers()) {
+											if (!minDatatypeDepAdded && minValueDepTrackPoint) {
+												minDatatypeDepAdded = true;
+												minValueDepCollection.addDependency(minValueDepTrackPoint);
+											}
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minTriggeringConceptData->getPartialConceptTriggerLinker(),&minValueDepCollection,calcAlgContext);
+										}
+									}
+								}
+
+
+
+
+								CDataLiteralRealValue* maxValue = nullptr;
+								bool maxValueInclusive = false;
+								CDependencyTrackPoint* maxValueDepTrackPoint = nullptr;
+								if (realValueSpaceMap->getAbsoluteMaximumValue(maxValue,maxValueInclusive,&maxValueDepTrackPoint)) {
+
+									CDatatypeDependencyCollection maxValueDepCollection(depCollection,calcAlgContext);
+
+									bool maxDatatypeDepAdded = false;
+
+									CDatatypeValueSpaceTriggeringIterator rightTriggerIt = realValueSpaceTriggerMap->getRightTriggeringIterator(maxValue,!maxValueInclusive);
+									while (rightTriggerIt.hasNext()) {
+										CDatatypeValueSpaceTriggeringData* triggeringData = rightTriggerIt.next();
+										CDatatypeValueSpaceConceptTriggeringData* maxExcTriggeringConceptData = triggeringData->getMaxExclusiveTriggeringData();
+										CDatatypeValueSpaceConceptTriggeringData* maxIncTriggeringConceptData = triggeringData->getMaxInclusiveTriggeringData();
+										if (maxExcTriggeringConceptData->hasPartialConceptTriggers() || maxIncTriggeringConceptData->hasPartialConceptTriggers()) {
+											if (!maxDatatypeDepAdded && maxValueDepTrackPoint) {
+												maxDatatypeDepAdded = true;
+												maxValueDepCollection.addDependency(minValueDepTrackPoint);
+											}
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxExcTriggeringConceptData->getPartialConceptTriggerLinker(),&maxValueDepCollection,calcAlgContext);
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxIncTriggeringConceptData->getPartialConceptTriggerLinker(),&maxValueDepCollection,calcAlgContext);
+										}
+									}
+
+
+									CDatatypeValueSpaceTriggeringData* maxValueTriggerData = realValueSpaceTriggerMap->getDatatypeValueTriggeringData(maxValue,false);
+									if (maxValueTriggerData) {
+										CDatatypeValueSpaceConceptTriggeringData* maxTriggeringConceptData = nullptr;
+										if (!maxValueInclusive) {
+											maxTriggeringConceptData = maxValueTriggerData->getMaxExclusiveTriggeringData();
+										} else {
+											maxTriggeringConceptData = maxValueTriggerData->getMaxInclusiveTriggeringData();
+										}
+										if (maxTriggeringConceptData->hasPartialConceptTriggers()) {
+											if (!maxDatatypeDepAdded && maxValueDepTrackPoint) {
+												maxDatatypeDepAdded = true;
+												maxValueDepCollection.addDependency(maxValueDepTrackPoint);
+											}
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxTriggeringConceptData->getPartialConceptTriggerLinker(),&maxValueDepCollection,calcAlgContext);
+										}
+									}
+								}
+
+
+
+								if (minValue && maxValue) {
+
+									CDatatypeValueSpaceRealValuesCounter valueCounter;
+
+
+									CDataLiteralCompareValue* freeLeftValue = nullptr;
+									CDataLiteralCompareValue* freeRightValue = nullptr;
+									bool freeLeftValueInclusive = false;
+									bool freeRightValueInclusive = false;
+
+									if (realValueSpaceTriggerMap->getIntervalMinMaxTriggerFreeInterval(minValue,minValueInclusive,maxValue,maxValueInclusive,freeLeftValue,freeLeftValueInclusive,freeRightValue,freeRightValueInclusive)) {
+										CDataLiteralRealValue* freeLeftRealValue = dynamic_cast<CDataLiteralRealValue*>(freeLeftValue);
+										CDataLiteralRealValue* freeRightRealValue = dynamic_cast<CDataLiteralRealValue*>(freeRightValue);
+										if (freeLeftRealValue && freeRightRealValue) {
+											CDatatypeValueSpaceRealValuesCounter tmpValueCounter;
+											if (realValueSpaceMap->countIntervalValues(freeLeftRealValue,freeLeftValueInclusive,freeRightRealValue,freeRightValueInclusive,&tmpValueCounter)) {
+												cint64 triggerValueCount = 0;
+												if (realValueSpaceTriggerMap->countIntervalValueTriggers(minValue,minValueInclusive,maxValue,maxValueInclusive,triggerValueCount)) {
+													valueCounter.combineWithValueCounter(&tmpValueCounter,triggerValueCount);
+												}
+											}
+										}
+									}
+
+
+									if (!valueCounter.hasValueAchieved(remainingRequiredValuesCount)) {
+
+
+										bool minToMaxTriggerDirection = true;
+
+										cint64 minTriggerCount = 0;
+										cint64 maxTriggerCount = 0;
+										cint64 valueTriggerCount = 0;
+										realValueSpaceTriggerMap->countIntervalMinMaxValueTriggers(minValue,minValueInclusive,maxValue,maxValueInclusive,minTriggerCount,maxTriggerCount,valueTriggerCount);
+
+										if (minTriggerCount < maxTriggerCount) {
+											minToMaxTriggerDirection = false;
+										}
+
+										depCollection->addDependency(minValueDepTrackPoint);
+										depCollection->addDependency(maxValueDepTrackPoint);
+
+										CDatatypeValueSpaceTriggeringIterator triggerIt = realValueSpaceTriggerMap->getIntervalTriggeringIterator(minValue,minValueInclusive,maxValue,maxValueInclusive,minToMaxTriggerDirection);
+
+										if (minTriggerCount > 0 && maxTriggerCount > 0) {
+
+
+											CDatatypeValueSpaceTriggeringIterator minMaxDirectionTriggerIt = triggerIt;
+											while (minMaxDirectionTriggerIt.hasNext()) {
+
+												CDatatypeValueSpaceTriggeringData* triggeringData = minMaxDirectionTriggerIt.next();
+												if (minToMaxTriggerDirection) {
+													CDatatypeValueSpaceConceptTriggeringData* maxExcTriggeringConceptData = triggeringData->getMaxExclusiveTriggeringData();
+													CDatatypeValueSpaceConceptTriggeringData* maxIncTriggeringConceptData = triggeringData->getMaxInclusiveTriggeringData();
+													if (maxExcTriggeringConceptData->hasPartialConceptTriggers() || maxIncTriggeringConceptData->hasPartialConceptTriggers()) {
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+													}
+
+												} else {
+
+													CDatatypeValueSpaceConceptTriggeringData* minExcTriggeringConceptData = triggeringData->getMinExclusiveTriggeringData();
+													CDatatypeValueSpaceConceptTriggeringData* minIncTriggeringConceptData = triggeringData->getMinInclusiveTriggeringData();
+													if (minExcTriggeringConceptData->hasPartialConceptTriggers() || minIncTriggeringConceptData->hasPartialConceptTriggers()) {
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+													}
+
+												}
+											}
 										}
 
 
-										CDatatypeValueSpaceTriggeringIterator stepMinMaxDirectionTriggerIt = triggerIt;
-										while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && stepMinMaxDirectionTriggerIt.hasNext()) {
+										if (!minValue->isEqualTo(maxValue)) {
+											CDataLiteralRealValue* lastRealValue = nullptr;
+											if (minToMaxTriggerDirection) {
+												lastRealValue = minValue;
+											} else {
+												lastRealValue = maxValue;
+											}
 
-											CDatatypeValueSpaceTriggeringData* triggeringData = stepMinMaxDirectionTriggerIt.next();
+
+											CDatatypeValueSpaceTriggeringIterator stepMinMaxDirectionTriggerIt = triggerIt;
+											while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && stepMinMaxDirectionTriggerIt.hasNext()) {
+
+												CDatatypeValueSpaceTriggeringData* triggeringData = stepMinMaxDirectionTriggerIt.next();
+												CDataLiteralCompareValue* currentValue = triggeringData->getValue();
+												CDataLiteralRealValue* currentRealValue = dynamic_cast<CDataLiteralRealValue*>(currentValue);
+
+
+												if (lastRealValue && !lastRealValue->isEqualTo(currentRealValue)) {
+													if (minToMaxTriggerDirection) {
+														realValueSpaceMap->countIntervalValues(lastRealValue,false,currentRealValue,false,&valueCounter);
+														realValueSpaceMap->addIntervalExclusionDependencies(lastRealValue,false,currentRealValue,false,depCollection);
+													} else {
+														realValueSpaceMap->countIntervalValues(currentRealValue,false,lastRealValue,false,&valueCounter);
+														realValueSpaceMap->addIntervalExclusionDependencies(currentRealValue,false,lastRealValue,false,depCollection);
+													}											
+												}
+
+												if (minToMaxTriggerDirection) {
+													CDatatypeValueSpaceConceptTriggeringData* minExcTriggeringConceptData = triggeringData->getMinExclusiveTriggeringData();
+													if (minExcTriggeringConceptData->hasPartialConceptTriggers()) {
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+													}
+												} else {
+													CDatatypeValueSpaceConceptTriggeringData* maxExcTriggeringConceptData = triggeringData->getMaxExclusiveTriggeringData();
+													if (maxExcTriggeringConceptData->hasPartialConceptTriggers()) {
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+													}
+												}
+
+												if (!triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+													realValueSpaceMap->countValueValues(currentRealValue,&valueCounter);
+													realValueSpaceMap->addValueExclusionDependencies(currentRealValue,depCollection);
+												}
+
+
+												if (!valueCounter.hasValueAchieved(remainingRequiredValuesCount)) {
+
+													if (minToMaxTriggerDirection) {
+														CDatatypeValueSpaceConceptTriggeringData* minIncTriggeringConceptData = triggeringData->getMinInclusiveTriggeringData();
+														if (minIncTriggeringConceptData->hasPartialConceptTriggers()) {
+															conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+														}
+													} else {
+														CDatatypeValueSpaceConceptTriggeringData* maxIncTriggeringConceptData = triggeringData->getMaxInclusiveTriggeringData();
+														if (maxIncTriggeringConceptData->hasPartialConceptTriggers()) {
+															conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+														}
+													}
+												}
+											}
+										}
+
+
+										CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
+										while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && valueDirectionTriggerIt.hasNext()) {
+
+											CDatatypeValueSpaceTriggeringData* triggeringData = valueDirectionTriggerIt.next();
 											CDataLiteralCompareValue* currentValue = triggeringData->getValue();
 											CDataLiteralRealValue* currentRealValue = dynamic_cast<CDataLiteralRealValue*>(currentValue);
 
-
-											if (lastRealValue && !lastRealValue->isEqualTo(currentRealValue)) {
-												if (minToMaxTriggerDirection) {
-													realValueSpaceMap->countIntervalValues(lastRealValue,false,currentRealValue,false,&valueCounter);
-													realValueSpaceMap->addIntervalExclusionDependencies(lastRealValue,false,currentRealValue,false,depCollection);
-												} else {
-													realValueSpaceMap->countIntervalValues(currentRealValue,false,lastRealValue,false,&valueCounter);
-													realValueSpaceMap->addIntervalExclusionDependencies(currentRealValue,false,lastRealValue,false,depCollection);
-												}											
-											}
-
-											if (minToMaxTriggerDirection) {
-												CDatatypeValueSpaceConceptTriggeringData* minExcTriggeringConceptData = triggeringData->getMinExclusiveTriggeringData();
-												if (minExcTriggeringConceptData->hasPartialConceptTriggers()) {
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-												}
-											} else {
-												CDatatypeValueSpaceConceptTriggeringData* maxExcTriggeringConceptData = triggeringData->getMaxExclusiveTriggeringData();
-												if (maxExcTriggeringConceptData->hasPartialConceptTriggers()) {
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxExcTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-												}
-											}
-
-											if (!triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
-												realValueSpaceMap->countValueValues(currentRealValue,&valueCounter);
+											if (triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
 												realValueSpaceMap->addValueExclusionDependencies(currentRealValue,depCollection);
-											}
+												if (!realValueSpaceMap->isValueExcluded(currentRealValue,nullptr)) {
+													realValueSpaceMap->countValueValues(currentRealValue,&valueCounter);
 
-
-											if (!valueCounter.hasValueAchieved(remainingRequiredValuesCount)) {
-
-												if (minToMaxTriggerDirection) {
-													CDatatypeValueSpaceConceptTriggeringData* minIncTriggeringConceptData = triggeringData->getMinInclusiveTriggeringData();
-													if (minIncTriggeringConceptData->hasPartialConceptTriggers()) {
-														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,minIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-													}
-												} else {
-													CDatatypeValueSpaceConceptTriggeringData* maxIncTriggeringConceptData = triggeringData->getMaxInclusiveTriggeringData();
-													if (maxIncTriggeringConceptData->hasPartialConceptTriggers()) {
-														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,maxIncTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+													CDatatypeValueSpaceConceptTriggeringData* directValueTriggeringConceptData = triggeringData->getDirectValueTriggeringData();
+													if (directValueTriggeringConceptData->hasPartialConceptTriggers()) {
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,directValueTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
 													}
 												}
 											}
 										}
+
+
+
 									}
 
 
-									CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
-									while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && valueDirectionTriggerIt.hasNext()) {
 
-										CDatatypeValueSpaceTriggeringData* triggeringData = valueDirectionTriggerIt.next();
-										CDataLiteralCompareValue* currentValue = triggeringData->getValue();
-										CDataLiteralRealValue* currentRealValue = dynamic_cast<CDataLiteralRealValue*>(currentValue);
 
-										if (triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
-											realValueSpaceMap->addValueExclusionDependencies(currentRealValue,depCollection);
-											if (!realValueSpaceMap->isValueExcluded(currentRealValue,nullptr)) {
-												realValueSpaceMap->countValueValues(currentRealValue,&valueCounter);
 
-												CDatatypeValueSpaceConceptTriggeringData* directValueTriggeringConceptData = triggeringData->getDirectValueTriggeringData();
-												if (directValueTriggeringConceptData->hasPartialConceptTriggers()) {
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,directValueTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
-												}
+									if (!valueCounter.hasValueAchieved(CDatatypeValueSpaceRealValuesCounter::RVT_NON_RATIONAL_ONLY_COUNT,remainingRequiredValuesCount)) {
+										// trigger integers
+										CDatatypeValueSpaceConceptTriggeringData* conceptTriggeringData = realValueSpaceTriggers->getRationalConceptTriggeringData();
+										if (conceptTriggeringData->hasPartialConceptTriggers()) {
+											if (depCollection && !depCollection->hasDependencies()) {
+												realValueSpaceMap->addValueSpaceDependencies(depCollection);
 											}
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,conceptTriggeringData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+										}
+									}
+									if (!valueCounter.hasValueAchieved(CDatatypeValueSpaceRealValuesCounter::RVT_NON_DECIMAL_ONLY_COUNT,remainingRequiredValuesCount)) {
+										// trigger integers
+										CDatatypeValueSpaceConceptTriggeringData* conceptTriggeringData = realValueSpaceTriggers->getDecimalConceptTriggeringData();
+										if (conceptTriggeringData->hasPartialConceptTriggers()) {
+											if (depCollection && !depCollection->hasDependencies()) {
+												realValueSpaceMap->addValueSpaceDependencies(depCollection);
+											}
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,conceptTriggeringData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+										}
+									}
+									if (!valueCounter.hasValueAchieved(CDatatypeValueSpaceRealValuesCounter::RVT_NON_INTEGER_ONLY_COUNT,remainingRequiredValuesCount)) {
+										// trigger integers
+										CDatatypeValueSpaceConceptTriggeringData* conceptTriggeringData = realValueSpaceTriggers->getIntegerConceptTriggeringData();
+										if (conceptTriggeringData->hasPartialConceptTriggers()) {
+											if (depCollection && !depCollection->hasDependencies()) {
+												realValueSpaceMap->addValueSpaceDependencies(depCollection);
+											}
+											conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,conceptTriggeringData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
 										}
 									}
 
 
-
-								}
-
-
-
-
-
-								if (!valueCounter.hasValueAchieved(CDatatypeValueSpaceRealValuesCounter::RVT_NON_RATIONAL_ONLY_COUNT,remainingRequiredValuesCount)) {
-									// trigger integers
-									CDatatypeValueSpaceConceptTriggeringData* conceptTriggeringData = realValueSpaceTriggers->getRationalConceptTriggeringData();
-									if (conceptTriggeringData->hasPartialConceptTriggers()) {
-										if (depCollection && !depCollection->hasDependencies()) {
-											realValueSpaceMap->addValueSpaceDependencies(depCollection);
-										}
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,conceptTriggeringData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+									remainingRequiredValuesCount -= valueCounter.getValueCount();
+									if (valueCounter.isInfinite()) {
+										remainingRequiredValuesCount = 0;
 									}
-								}
-								if (!valueCounter.hasValueAchieved(CDatatypeValueSpaceRealValuesCounter::RVT_NON_DECIMAL_ONLY_COUNT,remainingRequiredValuesCount)) {
-									// trigger integers
-									CDatatypeValueSpaceConceptTriggeringData* conceptTriggeringData = realValueSpaceTriggers->getDecimalConceptTriggeringData();
-									if (conceptTriggeringData->hasPartialConceptTriggers()) {
-										if (depCollection && !depCollection->hasDependencies()) {
-											realValueSpaceMap->addValueSpaceDependencies(depCollection);
-										}
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,conceptTriggeringData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+									if (remainingRequiredValuesCount < 0) {
+										remainingRequiredValuesCount = 0;
 									}
-								}
-								if (!valueCounter.hasValueAchieved(CDatatypeValueSpaceRealValuesCounter::RVT_NON_INTEGER_ONLY_COUNT,remainingRequiredValuesCount)) {
-									// trigger integers
-									CDatatypeValueSpaceConceptTriggeringData* conceptTriggeringData = realValueSpaceTriggers->getIntegerConceptTriggeringData();
-									if (conceptTriggeringData->hasPartialConceptTriggers()) {
-										if (depCollection && !depCollection->hasDependencies()) {
-											realValueSpaceMap->addValueSpaceDependencies(depCollection);
-										}
-										conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,conceptTriggeringData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+
+									if (remainingRequiredValuesCount > 0) {
+										valueSpaceTriggeringFinished = true;
 									}
+
+
 								}
-
-
-								remainingRequiredValuesCount -= valueCounter.getValueCount();
-								if (valueCounter.isInfinite()) {
-									remainingRequiredValuesCount = 0;
-								}
-								if (remainingRequiredValuesCount < 0) {
-									remainingRequiredValuesCount = 0;
-								}
-
-								if (remainingRequiredValuesCount > 0) {
-									valueSpaceTriggeringFinished = true;
-								}
-
-
+							} else {
+								remainingRequiredValuesCount = 0;
 							}
 
 						} else {
@@ -611,7 +623,7 @@ namespace Konclude {
 							tmpLastRealValue->initValue(lastRealValue);
 						}
 
-						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap();
+						CDatatypeRealValueSpaceMap* realValueSpaceMap = realValueSpaceData->getValueSpaceMap(true);
 						bool searchNextValue = true;
 						while (searchNextValue) {
 							if (realValueSpaceMap->getNextPossibleDataValue(nextRealValue,tmpLastRealValue)) {

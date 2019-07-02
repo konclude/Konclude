@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -323,7 +323,8 @@ namespace Konclude {
 
 			void CConcreteOntologyMergingBuilder::parseSubClassOfStart(CMergeExpressionStackObject* mergeStackObj) {
 				CSubClassOfExpression* expression = (CSubClassOfExpression*)mergeStackObj->mExpression;
-				addExpressions(mergeStackObj,expression->getExpressionList());
+				addExpressions(mergeStackObj,expression->getSubClassTermExpression());
+				addExpressions(mergeStackObj,expression->getSuperClassTermExpression());
 			}
 
 			void CConcreteOntologyMergingBuilder::parseDisjointClassesStart(CMergeExpressionStackObject* mergeStackObj) {

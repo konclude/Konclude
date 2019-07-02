@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -26,7 +26,9 @@
 
 // Namespace includes
 #include "OntologySettings.h"
+#include "COntologyContext.h"
 #include "COntologyProcessingStatus.h"
+#include "COntologyProcessingStatistics.h"
 
 
 // Other includes
@@ -54,7 +56,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COntologyProcessingStepData();
+					COntologyProcessingStepData(COntologyContext* ontContext);
 
 					COntologyProcessingStepData* initProcessingStepData(COntologyProcessingStep* requiredProcessingStep);
 
@@ -66,13 +68,17 @@ namespace Konclude {
 					COntologyProcessingStatus* getProcessingStatus();
 
 
+					COntologyProcessingStatistics* getProcessingStatistics(bool create = true);
+
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					COntologyContext* mOntContext;
 					COntologyProcessingStep* mProcessingStep;
 					COntologyProcessingStatus mProcessingStatus;
+					COntologyProcessingStatistics* mProcessingStatistics;
 
 				// private methods
 				private:

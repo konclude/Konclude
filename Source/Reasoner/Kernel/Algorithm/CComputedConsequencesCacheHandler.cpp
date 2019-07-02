@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -56,7 +56,7 @@ namespace Konclude {
 									CIndividualProcessNodeVector* detSatProcNodeVec = detSatCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
 									CIndividualProcessNode* detIndiNode = detSatProcNodeVec->getData(individual->getIndividualID());
 									while (detIndiNode->getIndividualID() != detIndiNode->getMergedIntoIndividualNodeID()) {
-										detIndiNode = detSatProcNodeVec->getData(detIndiNode->getIndividualID());
+										detIndiNode = detSatProcNodeVec->getData(detIndiNode->getMergedIntoIndividualNodeID());
 									}
 									CReapplyConceptLabelSet* detConSet = detIndiNode->getReapplyConceptLabelSet(false);
 									if (detConSet && !detConSet->containsConcept(concept,negation)) {

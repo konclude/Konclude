@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -26,8 +26,6 @@
 
 // Namespace includes
 #include "ClassifierSettings.h"
-#include "CSubsumptionCalculationSponsor.h"
-#include "CSatisfiableCalculationSponsor.h"
 
 
 // Other includes
@@ -62,23 +60,11 @@ namespace Konclude {
 					virtual ~CClassificationCalculationSupport();
 
 
-					virtual CClassificationCalculationSupport *setSubsumptionCalculationSponsor(CSubsumptionCalculationSponsor *takeSubsumptionCalculationSponsor);
-					virtual CClassificationCalculationSupport *useSubsumptionCalculationSponsor(CSubsumptionCalculationSponsor *subsumptionCalculationSponsor);
-					virtual CSubsumptionCalculationSponsor *getSubsumptionCalculationSponsor();
-
-					virtual CClassificationCalculationSupport *setSatisfiableCalculationSponsor(CSatisfiableCalculationSponsor *takeSatisfiableCalculationSponsor);
-					virtual CClassificationCalculationSupport *useSatisfiableCalculationSponsor(CSatisfiableCalculationSponsor *satisfiableCalculationSponsor);
-					virtual CSatisfiableCalculationSponsor *getSatisfiableCalculationSponsor();
-
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
-					CSubsumptionCalculationSponsor *subsumCalcSponsor;
-					CSubsumptionCalculationSponsor *delSubsumCalcSponsor;
-					CSatisfiableCalculationSponsor *satisCalcSponsor;
-					CSatisfiableCalculationSponsor *delSatisCalcSponsor;
 
 				// private methods
 				private:

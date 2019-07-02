@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,27 +30,48 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeBinaryHexDataValueSpaceData::CDatatypeBinaryHexDataValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext),mBinaryHexDataValueSpaceMap(processContext) {
-					mValueSpaceMap = &mBinaryHexDataValueSpaceMap;
+				CDatatypeBinaryHexDataValueSpaceData::CDatatypeBinaryHexDataValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext) {
+					mBinaryHexDataValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeBinaryHexDataValueSpaceData* CDatatypeBinaryHexDataValueSpaceData::initBinaryHexDataValueSpaceData(CDatatypeValueSpaceBinaryHexDataType* valueSpaceType) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(nullptr);
-					mBinaryHexDataValueSpaceMap.initDatatypeCompareValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mBinaryHexDataValueSpaceMap) {
+						mBinaryHexDataValueSpaceMap->initDatatypeCompareValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeBinaryHexDataValueSpaceData* CDatatypeBinaryHexDataValueSpaceData::copyBinaryHexDataValueSpaceData(CDatatypeBinaryHexDataValueSpaceData* spaceData) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(spaceData);
-					mBinaryHexDataValueSpaceMap.initDatatypeCompareValueSpaceMap(spaceData->getBinaryHexDataValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mBinaryHexDataValueSpaceMap && !mBinaryHexDataValueSpaceMap) {
+						getBinaryHexDataValueSpaceMap(true);
+						mBinaryHexDataValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mBinaryHexDataValueSpaceMap);
+					} else if (mBinaryHexDataValueSpaceMap) {
+						if (spaceData->mBinaryHexDataValueSpaceMap) {
+							mBinaryHexDataValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mBinaryHexDataValueSpaceMap);
+						} else {
+							mBinaryHexDataValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
 
-				CDatatypeBinaryDataValueSpaceMap* CDatatypeBinaryHexDataValueSpaceData::getBinaryHexDataValueSpaceMap() {
-					return &mBinaryHexDataValueSpaceMap;
+				CDatatypeBinaryDataValueSpaceMap* CDatatypeBinaryHexDataValueSpaceData::getBinaryHexDataValueSpaceMap(bool create) {
+					if (create && !mBinaryHexDataValueSpaceMap) {
+						mBinaryHexDataValueSpaceMap = CObjectParameterizingAllocator< CDatatypeBinaryDataValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mBinaryHexDataValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+					}
+					return mBinaryHexDataValueSpaceMap;
+				}
+
+				CDatatypeCompareValueSpaceMap* CDatatypeBinaryHexDataValueSpaceData::createValueSpaceMap() {
+					return getBinaryHexDataValueSpaceMap(true);
 				}
 
 			}; // end namespace Process

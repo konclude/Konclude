@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -45,6 +45,8 @@ namespace Konclude {
 		typedef quint64 cuint64;
 		typedef int cint;
 
+#define CINT_MAX std::numeric_limits<cint>::max();
+#define CINT_MIN std::numeric_limits<cint>::min();
 
 #define CINT64_MAX std::numeric_limits<cint64>::max();
 #define CINT64_MIN std::numeric_limits<cint64>::min();

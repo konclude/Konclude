@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -41,6 +41,9 @@ namespace Konclude {
 					mCriticalConceptTypeQueues = nullptr;
 					mSuccessorExtensionData = nullptr;
 					mNominalHandlingData = nullptr;
+					mCriticalPredRoleCardHash = nullptr;
+					mRoleAssertionLinker = nullptr;
+					mAppliedDatatypeData = nullptr;
 					return this;
 				}
 
@@ -86,6 +89,43 @@ namespace Konclude {
 					}
 					return mNominalHandlingData;
 				}
+
+
+				CCriticalPredecessorRoleCardinalityHash* CIndividualSaturationProcessNodeExtensionData::getCriticalPredecessorRoleCardinalityHash(bool create) {
+					if (!mCriticalPredRoleCardHash && create) {
+						mCriticalPredRoleCardHash = CObjectParameterizingAllocator< CCriticalPredecessorRoleCardinalityHash,CProcessContext* >::allocateAndConstructAndParameterize(mMemAllocMan,mProcessContext);
+						mCriticalPredRoleCardHash->initCriticalPredecessorRoleCardinalityHash();
+					}
+					return mCriticalPredRoleCardHash;
+				}
+
+				CSaturationIndividualNodeDatatypeData* CIndividualSaturationProcessNodeExtensionData::getAppliedDatatypeData(bool create) {
+					if (!mAppliedDatatypeData && create) {
+						mAppliedDatatypeData = CObjectParameterizingAllocator< CSaturationIndividualNodeDatatypeData,CProcessContext* >::allocateAndConstructAndParameterize(mMemAllocMan,mProcessContext);
+						mAppliedDatatypeData->initExtensionData(mIndiNode);
+					}
+					return mAppliedDatatypeData;
+				}
+
+				CSaturationSuccessorRoleAssertionLinker* CIndividualSaturationProcessNodeExtensionData::getRoleAssertionLinker() {
+					return mRoleAssertionLinker;
+				}
+
+
+				CIndividualSaturationProcessNodeExtensionData* CIndividualSaturationProcessNodeExtensionData::addRoleAssertionLinker(CSaturationSuccessorRoleAssertionLinker* roleAssertionLinker) {
+					if (roleAssertionLinker) {
+						mRoleAssertionLinker = roleAssertionLinker->append(mRoleAssertionLinker);
+					}
+					return this;
+				}
+
+				CIndividualSaturationProcessNodeExtensionData* CIndividualSaturationProcessNodeExtensionData::addRoleAssertion(CIndividualSaturationProcessNode* destinationNode, CRole* role, bool roleNegation) {
+					CSaturationSuccessorRoleAssertionLinker* roleAssertionLinker = CObjectAllocator<CSaturationSuccessorRoleAssertionLinker>::allocateAndConstruct(mMemAllocMan);
+					roleAssertionLinker->initSaturationSuccessorRoleAssertionLinker(destinationNode,role,roleNegation);
+					addRoleAssertionLinker(roleAssertionLinker);
+					return this;
+				}
+
 
 			}; // end namespace Process
 

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -76,8 +76,6 @@ namespace Konclude {
 					qint64 roleCount = rbox->getRoleCount();
 
 
-					QSet<CConcept *> negateConceptsSet;
-
 					for (qint64 i = 0; i < conceptCount; ++i) {
 						CConcept *concept = concepts->getLocalData(i);
 
@@ -86,12 +84,10 @@ namespace Konclude {
 							qint64 cOpCode = concept->getDefinitionOperatorTag();
 
 							if (cOpCode == CCOR) {
-								negateConceptsSet.insert(concept);
 								concept->setMappingNegation(true);
 								concept->setOperatorTag(CCAND);
 								negateOperandConcepts(concept,0);
 							} else if (cOpCode == CCSOME) {
-								negateConceptsSet.insert(concept);
 								concept->setMappingNegation(true);
 								concept->setOperatorTag(CCALL);
 								negateOperandConcepts(concept,0);
@@ -109,7 +105,7 @@ namespace Konclude {
 							CSortedNegLinker<CConcept *> *operands = concept->getOperandList();
 							while (operands) {
 								CConcept *opConcept = operands->getData();
-								if (negateConceptsSet.contains(opConcept)) {
+								if (opConcept->hasMappingNegation()) {
 									operands->setNegated(!operands->isNegated());
 								} 
 								if (opConcept->getDefinitionOperatorTag() == CCBOTTOM) {
@@ -120,7 +116,7 @@ namespace Konclude {
 									if (opConcept->getOperatorCode() == CCNOMTEMPLREF || opConcept->getOperatorCode() == CCPBINDGROUND || opConcept->getOperatorCode() == CCVARBINDGROUND) {
 										CNominalSchemaTemplate* nsTemplate = nomSchTemplVector->getData(opConcept->getParameter());
 										if (nsTemplate) {
-											if (negateConceptsSet.contains(nsTemplate->getTemplateConcept())) {
+											if (nsTemplate->getTemplateConcept()->hasMappingNegation()) {
 												operands->setNegated(!operands->isNegated());
 											}
 										}
@@ -136,7 +132,7 @@ namespace Konclude {
 							CSortedNegLinker<CConcept *> *domainConIt = role->getDomainConceptList();
 							while (domainConIt) {
 								CConcept *domainConcept = domainConIt->getData();
-								if (negateConceptsSet.contains(domainConcept)) {
+								if (domainConcept->hasMappingNegation()) {
 									domainConIt->setNegated(!domainConIt->isNegated());
 								}
 								domainConIt = domainConIt->getNext();
@@ -144,7 +140,7 @@ namespace Konclude {
 							CSortedNegLinker<CConcept *> *rangeConIt = role->getRangeConceptList();
 							while (rangeConIt) {						
 								CConcept *rangeConcept = rangeConIt->getData();
-								if (negateConceptsSet.contains(rangeConcept)) {
+								if (rangeConcept->hasMappingNegation()) {
 									rangeConIt->setNegated(!rangeConIt->isNegated());
 								}
 								rangeConIt = rangeConIt->getNext();
@@ -161,7 +157,7 @@ namespace Konclude {
 							if (indi) {
 								CConceptAssertionLinker* assertionConLinker = indi->getAssertionConceptLinker();
 								while (assertionConLinker) {
-									if (negateConceptsSet.contains(assertionConLinker->getData())) {
+									if (assertionConLinker->getData()->hasMappingNegation()) {
 										assertionConLinker->setNegation(!assertionConLinker->isNegated());
 									}
 									assertionConLinker = assertionConLinker->getNext();

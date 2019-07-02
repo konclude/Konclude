@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -55,7 +55,7 @@ namespace Konclude {
 
 								CConceptSaturationReferenceLinkingData* confSatRefLinkingData = (CConceptSaturationReferenceLinkingData*)disjConProData->getConceptReferenceLinking();
 								if (confSatRefLinkingData) {
-									CExtendedConceptReferenceLinkingData* disjunctConceptRefLinkData = confSatRefLinkingData->getConceptSaturationReferenceLinkingData(disjunctionNegation);
+									CSaturationConceptReferenceLinking* disjunctConceptRefLinkData = confSatRefLinkingData->getConceptSaturationReferenceLinkingData(disjunctionNegation);
 									if (disjunctConceptRefLinkData) {
 										CIndividualSaturationProcessNode* satIndiNode = (CIndividualSaturationProcessNode*)disjunctConceptRefLinkData->getIndividualProcessNodeForConcept();
 										if (satIndiNode && satIndiNode->isCompleted()) {

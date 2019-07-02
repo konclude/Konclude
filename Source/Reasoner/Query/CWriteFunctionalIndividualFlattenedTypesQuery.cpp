@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -50,6 +50,10 @@ namespace Konclude {
 				mTopClassNameString = QString("http://www.w3.org/2002/07/owl#Thing");
 				mOutputFileNameString = outputFileString;
 				mQueryAnswered = false;
+
+				mRequiresSameIndividualRealisation = true;
+				mRequiresConceptRealisation = true;
+
 			}
 
 

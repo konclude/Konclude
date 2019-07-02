@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -57,6 +57,7 @@ namespace Konclude {
 				public:
 
 					enum DATATYPE_BASIC_TYPE { DBT_NON, DBT_REAL, DBT_STRING, DBT_BOOLEAN, DBT_DOUBLE, DBT_FLOAT, DBT_IRI, DBT_HEXBINARY, DBT_BASE64BINARY, DBT_XML, DBT_DATETIME };
+					enum DATATYPE_TYPE { DT_NON, DT_REAL, DT_DECIMAL, DT_INTEGER, DT_RATIONAL, DT_PLAINLITERAL, DT_STRING, DT_BOOLEAN, DT_DOUBLE, DT_FLOAT, DT_IRI, DT_XML };
 
 					//! Constructor
 					CDatatype();
@@ -77,6 +78,8 @@ namespace Konclude {
 					DATATYPE_BASIC_TYPE getBasicDatatypeType();
 					CDatatype* setBasicDatatypeType(DATATYPE_BASIC_TYPE basicDatatpyeType);
 
+					DATATYPE_TYPE getDatatypeType();
+					CDatatype* setDatatypeType(DATATYPE_TYPE datatpyeType);
 
 					const QString& getDatatypeIRI();
 
@@ -106,6 +109,7 @@ namespace Konclude {
 					CDatatypeValueSpaceType* mValueSpaceType;
 					CDatatype* mDatatpyeBasic;
 					DATATYPE_BASIC_TYPE mBasicDatatpyeType;
+					DATATYPE_TYPE mDatatpyeType;
 
 
 				// private methods

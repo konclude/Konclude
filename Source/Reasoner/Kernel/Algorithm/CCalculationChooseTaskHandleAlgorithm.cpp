@@ -29,22 +29,16 @@ namespace Konclude {
 
 			namespace Algorithm {
 
-				CCalculationChooseTaskHandleAlgorithm::CCalculationChooseTaskHandleAlgorithm(CTaskHandleAlgorithm* tableauCompTaskHandleAlg, CTaskHandleAlgorithm* tableauDefaultSaturTaskHandleAlg, CTaskHandleAlgorithm* tableauPilingSaturTaskHandleAlg, CTaskHandleAlgorithm* tableauApproxSaturTaskHandleAlg) {
+				CCalculationChooseTaskHandleAlgorithm::CCalculationChooseTaskHandleAlgorithm(CTaskHandleAlgorithm* tableauCompTaskHandleAlg, CTaskHandleAlgorithm* tableauApproxSaturTaskHandleAlg) {
 					mTableauCompTaskHandleAlg = tableauCompTaskHandleAlg;
-					mTableauDefaultSaturTaskHandleAlg = tableauDefaultSaturTaskHandleAlg;
-					mTableauPilingSaturTaskHandleAlg = tableauPilingSaturTaskHandleAlg;
 					mTableauApproxSaturTaskHandleAlg = tableauApproxSaturTaskHandleAlg;
 				}
 
 				bool CCalculationChooseTaskHandleAlgorithm::handleTask(CTaskProcessorContext *processorContext, CTask* task) {
 					if (mTableauCompTaskHandleAlg && task->getTaskType() == CSatisfiableCalculationTask::CALCULATIONTABLEAUCOMPLETIONTASK) {
 						return mTableauCompTaskHandleAlg->handleTask(processorContext,task);
-					} else if (mTableauDefaultSaturTaskHandleAlg && task->getTaskType() == CSatisfiableCalculationTask::CALCULATIONTABLEAUAPPROXIMATEDSATURATIONTASK) {
+					} else if (mTableauApproxSaturTaskHandleAlg && task->getTaskType() == CSatisfiableCalculationTask::CALCULATIONTABLEAUAPPROXIMATEDSATURATIONTASK) {
 						return mTableauApproxSaturTaskHandleAlg->handleTask(processorContext,task);
-					} else if (mTableauDefaultSaturTaskHandleAlg && task->getTaskType() == CSatisfiableCalculationTask::CALCULATIONTABLEAUDEFAULTSATURATIONTASK) {
-						return mTableauDefaultSaturTaskHandleAlg->handleTask(processorContext,task);
-					} else if (mTableauPilingSaturTaskHandleAlg && task->getTaskType() == CSatisfiableCalculationTask::CALCULATIONTABLEAUPILINGSATURATIONTASK) {
-						return mTableauPilingSaturTaskHandleAlg->handleTask(processorContext,task);
 					}
 					return false;
 				}

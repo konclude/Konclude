@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -56,6 +56,14 @@ namespace Konclude {
 			class CConceptInstanceItem;
 			class CConceptInstantiatedItem;
 			class CConceptRealizationInstanceVisitor;
+			class CRoleRealization;
+			class CRoleInstanceItem;
+			class CRoleInstantiatedItem;
+			class CRoleRealizationInstanceVisitor;
+			class CRoleRealizationIndividualVisitor;
+			class CSameRealization;
+			class CSameInstanceItem;
+			class CSameRealizationIndividualVisitor;
 
 
 			// Custom Events >= 2000

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -213,16 +213,16 @@ namespace Konclude {
 						if (param <= 1 && !opConLinkerIt) {
 							priority = 5.5;
 						} else {
-							double priorityOffset = (exp(-param / 10.)) * 0.5;
+							double priorityOffset = (exp(-param / 1000.)) * 0.5;
 							priority += priorityOffset;
 						}
 					} else if (cCode == CCATLEAST) {
 						qint64 param = conceptDescriptor->getData()->getParameter();
 						param = param + 1*negated;
 						if (param <= 2 && !opConLinkerIt) {
-							priority = 5.5;
+							priority = 5.0;
 						} else {
-							double priorityOffset = (1. - exp(-param / 10.)) * 0.5;
+							double priorityOffset = (1. - exp(-param / 1000.)) * 0.5;
 							priority += priorityOffset;
 						}
 					}

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -94,6 +94,14 @@ namespace Konclude {
 					return this;
 				}
 
+				bool CIndividualSaturationProcessNodeStatusFlags::hasCardinalityRestrictedFlag() {
+					return hasFlags(INDSATFLAGCARDINALITYRESTRICTED,false);
+				}
+
+				CIndividualSaturationProcessNodeStatusFlags* CIndividualSaturationProcessNodeStatusFlags::setCardinalityRestrictedFlag(bool value) {
+					setFlags(INDSATFLAGCARDINALITYRESTRICTED,value);
+					return this;
+				}
 
 
 				bool CIndividualSaturationProcessNodeStatusFlags::hasInitializedFlag() {
@@ -136,6 +144,17 @@ namespace Konclude {
 
 				CIndividualSaturationProcessNodeStatusFlags* CIndividualSaturationProcessNodeStatusFlags::setSuccessorNodeExtensionsFlag(bool value) {
 					setFlags(INDSUCCESSORNODEEXTENSIONS,value);
+					return this;
+				}
+
+
+
+				bool CIndividualSaturationProcessNodeStatusFlags::hasUnprocessedFlag() {
+					return hasFlags(INDSATFLAGUNPROCESSED,false);
+				}
+
+				CIndividualSaturationProcessNodeStatusFlags* CIndividualSaturationProcessNodeStatusFlags::setUnprocessedFlag(bool value) {
+					setFlags(INDSATFLAGUNPROCESSED,value);
 					return this;
 				}
 

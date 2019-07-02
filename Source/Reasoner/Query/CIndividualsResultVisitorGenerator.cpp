@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -47,6 +47,35 @@ namespace Konclude {
 				return true;
 			}
 
+
+			bool CIndividualsResultVisitorGenerator::visitIndividual(CIndividual* individual, CRoleRealization* roleRealization) {
+				QString individualString;
+				if (mAbbreviatedIRIs) {
+					individualString = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
+				} 
+				if (individualString.isEmpty()) {
+					individualString = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
+				}
+				if (!individualString.isEmpty()) {
+					mIndividualsResult->addIndividual(individualString);
+				}
+				return true;
+			}
+
+
+			bool CIndividualsResultVisitorGenerator::visitIndividual(CIndividual* individual, CSameRealization* sameRealization) {
+				QString individualString;
+				if (mAbbreviatedIRIs) {
+					individualString = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
+				} 
+				if (individualString.isEmpty()) {
+					individualString = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
+				}
+				if (!individualString.isEmpty()) {
+					mIndividualsResult->addIndividual(individualString);
+				}
+				return true;
+			}
 
 		}; // end namespace Query
 

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -74,6 +74,10 @@ namespace Konclude {
 					CRealizationPremisingQuery* setQueryStatistics(CQueryStatistics* stats);
 					virtual CQueryStatistics* getQueryStatistics();
 
+					bool isConceptRealisationRequired();
+					bool isRoleRealisationRequired();
+					bool isSameIndividualRealisationRequired();
+
 				// protected methods
 				protected:
 
@@ -82,6 +86,10 @@ namespace Konclude {
 					CConcreteOntology* mOntology;
 					CConfigurationBase* mConfig;
 					CQueryStatistics* mQueryStats;
+
+					bool mRequiresConceptRealisation;
+					bool mRequiresRoleRealisation;
+					bool mRequiresSameIndividualRealisation;
 
 				// private methods
 				private:

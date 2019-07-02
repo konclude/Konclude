@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -41,6 +41,7 @@
 
 #include "Reasoner/Kernel/Cache/CReuseCompletionGraphCacheWriter.h"
 #include "Reasoner/Kernel/Cache/CReuseCompletionGraphCacheEntryExpandWriteData.h"
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCache.h"
 
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
 
@@ -132,6 +133,7 @@ namespace Konclude {
 					virtual bool precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CPrecomputationCalculatedCallbackEvent* pcce);
 					virtual bool precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CSaturationPrecomputationCalculatedCallbackEvent* pcce);
 
+					bool createIndividualPrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					bool createConsistencePrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					bool createConceptCyclePrecomputation(CConceptCycleData* conceptCycleData, CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
@@ -146,15 +148,20 @@ namespace Konclude {
 
 					void extendDisjunctionsCandidateAlternativesItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem, CSaturationConceptDataItem* ontConSatDataItem, QList<CSaturationConceptDataItem*>* newDisjunctionCandidateAlternativeList);
 
+					bool isAllAssertionIndividualSaturationSufficient(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
 
 
-					void createSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, bool allowAllSaturation);
+					void createMarkedConceptSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, bool allowAllSaturation);
+					void createIndividualSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, const QList<CIndividual*>& individualList);
+
 					bool saturateRemainingRequiredItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					cint64 markSaturationProcessingItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem, CSaturationConceptDataItem* startMarkingItem, CConcept* startMarkingConcept, bool startMarkingConceptNegation);
-					bool saturateRemainingConsistencyRequiredItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+					bool saturateRemainingConsistencyRequiredConcepts(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+					bool saturateRemainingConsistencyRequiredIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					bool addIdentifiedRemainingConsistencyRequiredConcepts(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
+					bool addConsistencyRequiredSaturationIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
 
 					void extractCommonDisjunctConceptsFromPrecomputedSaturation(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
@@ -164,6 +171,10 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CReuseCompletionGraphCacheWriter* mReuseCompletionGraphCacheWriter;
+					CBackendRepresentativeMemoryCache* mBackendAssocCache;
+
+					cint64 mIndividualSaturationCount;
+					bool mConfForceFullCompletionGraphConstruction;
 
 
 				// private methods

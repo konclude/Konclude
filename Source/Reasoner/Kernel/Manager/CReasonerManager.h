@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -38,6 +38,8 @@
 #include "Reasoner/Kernel/Cache/CUnsatisfiableCache.h"
 #include "Reasoner/Kernel/Cache/CSatisfiableCache.h"
 #include "Reasoner/Kernel/Cache/CCompletionGraphCache.h"
+#include "Reasoner/Kernel/Cache/CBackendCache.h"
+#include "Reasoner/Kernel/Cache/CSaturationCache.h"
 
 #include "Config/CConfigurationProvider.h"
 
@@ -92,6 +94,8 @@ namespace Konclude {
 
 						virtual CUnsatisfiableCache *getUnsatisfiableCache() = 0;
 						virtual CCompletionGraphCache *getCompletionGraphCache() = 0;
+						virtual CBackendCache* getBackendAssociationCache() = 0;
+						virtual CSaturationCache* getSaturationAssociationExpansionCache() = 0;
 
 						virtual CCalculationManager *getCalculationManager() = 0;
 						virtual CPrecomputationManager* getPrecomputationManager() = 0;

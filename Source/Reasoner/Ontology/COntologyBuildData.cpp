@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Ontology {
 
 
-			COntologyBuildData::COntologyBuildData(COntologyContext* ontoContext) {
+			COntologyBuildData::COntologyBuildData(COntologyContext* ontoContext) : mExpressionCounter(ontoContext) {
 				mOntoContext = ontoContext;
 				
 				CMemoryAllocationManager* memAllocMan = CContext::getMemoryAllocationManager(mOntoContext);
@@ -205,6 +205,7 @@ namespace Konclude {
 				mAxiomNumber = buildData->mAxiomNumber;
 				mEntityNumber = buildData->mEntityNumber;
 
+				mExpressionCounter.referenceBuildExpressionCounter(&buildData->mExpressionCounter);
 
 				return this;
 			}
@@ -478,6 +479,13 @@ namespace Konclude {
 				mEntityNumber = entityNumber;
 				return this;
 			}
+
+
+
+			COntologyBuildExpressionCounter* COntologyBuildData::getBuildExpressionCounter() {
+				return &mExpressionCounter;
+			}
+
 
 		}; // end namespace Ontology
 

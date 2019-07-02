@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -37,6 +37,7 @@ namespace Konclude {
 
 				CLinkedRoleSaturationSuccessorHash* CLinkedRoleSaturationSuccessorHash::initRoleSuccessorHash() {
 					mLastExaminedConDes = nullptr;
+					mLastExaminedRoleAssLinker = nullptr;
 					mRoleSuccDataHash.clear();
 					return this;
 				}
@@ -113,17 +114,39 @@ namespace Konclude {
 
 
 
-				CLinkedRoleSaturationSuccessorHash* CLinkedRoleSaturationSuccessorHash::addLinkedSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole, cint64 linkCount) {
+				bool CLinkedRoleSaturationSuccessorHash::hasActiveCreationRole(CSaturationSuccessorData* succData, CRole* creationRole) {
+					for (CXNegLinker<CRole*>* creationRoleLinkerIt = succData->mCreationRoleLinker; creationRoleLinkerIt; creationRoleLinkerIt = creationRoleLinkerIt->getNext()) {
+						if (!creationRoleLinkerIt->isNegated()) {
+							if (creationRoleLinkerIt->getData() == creationRole) {
+								return true;
+							}
+						}
+					}
+					return false;
+				}
+
+
+
+				CLinkedRoleSaturationSuccessorHash* CLinkedRoleSaturationSuccessorHash::addLinkedSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole, cint64 linkCount, bool forceAddLink) {
 					CLinkedRoleSaturationSuccessorData*& roleSuccData = getLinkedRoleSuccessorData(role,true);
 					if (roleSuccData) {
 						CSaturationSuccessorData*& succData = getLinkedRoleSuccessorData(roleSuccData,linkedIndi->getIndividualID(),true);
-						++succData->mActiveCount;
+						bool creationRoleAlreadyExists = hasActiveCreationRole(succData,creationRole);
+						if (!creationRoleAlreadyExists) {
+							++succData->mActiveCount;
+						}
 						succData->mExtension = false;
 						succData->mSuccIndiNode = linkedIndi;
-						succData->mCreationRoleLinker = CObjectAllocator< CXNegLinker<CRole*> >::allocateAndConstruct(mContext->getUsedMemoryAllocationManager())->initNegLinker(creationRole,false)->append(succData->mCreationRoleLinker);
+						if (!creationRoleAlreadyExists) {
+							succData->mCreationRoleLinker = CObjectAllocator< CXNegLinker<CRole*> >::allocateAndConstruct(mContext->getUsedMemoryAllocationManager())->initNegLinker(creationRole,false)->append(succData->mCreationRoleLinker);
+						}
 						cint64 linkCountDiff = 0;
-						if (succData->mSuccCount < linkCount) {
-							linkCountDiff = linkCount-succData->mSuccCount;
+						if (forceAddLink) {
+							linkCountDiff += linkCount;
+						} else {
+							if (succData->mSuccCount < linkCount) {
+								linkCountDiff = linkCount-succData->mSuccCount;
+							}
 						}
 						succData->mSuccCount += linkCountDiff;
 						roleSuccData->mSuccCount += linkCountDiff;
@@ -137,11 +160,16 @@ namespace Konclude {
 					CLinkedRoleSaturationSuccessorData*& roleSuccData = getLinkedRoleSuccessorData(role,true);
 					if (roleSuccData) {
 						CSaturationSuccessorData*& succData = getLinkedRoleSuccessorData(roleSuccData,-nominalID,true);
-						++succData->mActiveCount;
+						bool creationRoleAlreadyExists = hasActiveCreationRole(succData,creationRole);
+						if (!creationRoleAlreadyExists) {
+							++succData->mActiveCount;
+						}
 						succData->mExtension = false;
 						succData->mVALUENominalConnection = true;
 						succData->mVALUENominalID = nominalID;
-						succData->mCreationRoleLinker = CObjectAllocator< CXNegLinker<CRole*> >::allocateAndConstruct(mContext->getUsedMemoryAllocationManager())->initNegLinker(creationRole,false)->append(succData->mCreationRoleLinker);
+						if (!creationRoleAlreadyExists) {
+							succData->mCreationRoleLinker = CObjectAllocator< CXNegLinker<CRole*> >::allocateAndConstruct(mContext->getUsedMemoryAllocationManager())->initNegLinker(creationRole,false)->append(succData->mCreationRoleLinker);
+						}
 						cint64 linkCountDiff = 0;
 						if (succData->mSuccCount < 1) {
 							linkCountDiff = 1;
@@ -159,17 +187,33 @@ namespace Konclude {
 				CLinkedRoleSaturationSuccessorHash* CLinkedRoleSaturationSuccessorHash::addExtensionSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole, cint64 linkCount) {
 					CLinkedRoleSaturationSuccessorData*& roleSuccData = getLinkedRoleSuccessorData(role,true);
 					if (roleSuccData) {
-						CSaturationSuccessorData*& succData = getLinkedRoleSuccessorData(roleSuccData,linkedIndi->getIndividualID());
-						++succData->mActiveCount;
+						CSaturationSuccessorData*& succData = getLinkedRoleSuccessorData(roleSuccData,linkedIndi->getIndividualID(),true);
+						bool creationRoleAlreadyExists = hasActiveCreationRole(succData,creationRole);
+						if (!creationRoleAlreadyExists) {
+							++succData->mActiveCount;
+						}
 						succData->mExtension = true;
 						succData->mSuccIndiNode = linkedIndi;
-						succData->mCreationRoleLinker = CObjectAllocator< CXNegLinker<CRole*> >::allocateAndConstruct(mContext->getUsedMemoryAllocationManager())->initNegLinker(creationRole,false)->append(succData->mCreationRoleLinker);
+						if (!creationRoleAlreadyExists) {
+							succData->mCreationRoleLinker = CObjectAllocator< CXNegLinker<CRole*> >::allocateAndConstruct(mContext->getUsedMemoryAllocationManager())->initNegLinker(creationRole,false)->append(succData->mCreationRoleLinker);
+						}
 						cint64 linkCountDiff = 0;
 						if (succData->mSuccCount < linkCount) {
 							linkCountDiff = linkCount-succData->mSuccCount;
 						}
 						succData->mSuccCount += linkCountDiff;
 						roleSuccData->mSuccCount += linkCountDiff;
+					}
+					return this;
+				}
+
+
+
+				CLinkedRoleSaturationSuccessorHash* CLinkedRoleSaturationSuccessorHash::setSuccessorMergedCreation(CRole* role, CIndividualSaturationProcessNode* linkedIndi) {
+					CLinkedRoleSaturationSuccessorData*& roleSuccData = getLinkedRoleSuccessorData(role,true);
+					if (roleSuccData) {
+						CSaturationSuccessorData*& succData = getLinkedRoleSuccessorData(roleSuccData,linkedIndi->getIndividualID());
+						//succData->mMergedCreation = true;
 					}
 					return this;
 				}
@@ -184,7 +228,7 @@ namespace Konclude {
 							--succData->mActiveCount;
 							for (CXNegLinker<CRole*>* creationRoleIt = succData->mCreationRoleLinker; creationRoleIt; creationRoleIt = creationRoleIt->getNext()) {
 								if (creationRoleIt->getData() == creationRole && !creationRoleIt->isNegated()) {
-									creationRoleIt->setNegation(false);
+									creationRoleIt->setNegation(true);
 									break;
 								}
 							}
@@ -210,6 +254,13 @@ namespace Konclude {
 					return roleSuccData;
 				}
 
+				bool CLinkedRoleSaturationSuccessorHash::hasLinkedRoleSuccessorData(CRole* role) {
+					CLinkedRoleSaturationSuccessorData* roleSuccData = mRoleSuccDataHash.value(role);
+					if (roleSuccData && roleSuccData->mSuccCount > 0) {
+						return true;
+					}
+					return false;
+				}
 
 				CConceptSaturationDescriptor* CLinkedRoleSaturationSuccessorHash::getLastExaminedConceptDescriptor() {
 					return mLastExaminedConDes;
@@ -220,6 +271,14 @@ namespace Konclude {
 					return this;
 				}
 
+				CSaturationSuccessorRoleAssertionLinker* CLinkedRoleSaturationSuccessorHash::getLastExaminedRoleAssertionLinker() {
+					return mLastExaminedRoleAssLinker;
+				}
+
+				CLinkedRoleSaturationSuccessorHash* CLinkedRoleSaturationSuccessorHash::setLastExaminedRoleAssertionLinker(CSaturationSuccessorRoleAssertionLinker* roleAssLinker) {
+					mLastExaminedRoleAssLinker = roleAssLinker;
+					return this;
+				}
 
 			}; // end namespace Process
 

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -66,6 +66,13 @@ namespace Konclude {
 					bool hasConsistenceModelData();
 					CConsistence* setConsistenceModelData(CConsistenceData* consData);
 
+
+					bool areIndividualsRepresentativelyStored();
+					bool areAllIndividualsRepresentativelyStored();
+
+					CConsistence* setIndividualsRepresentativelyStored(bool representativelyStored);
+					CConsistence* setAllIndividualsRepresentativelyStored(bool representativelyStored);
+
 				// protected methods
 				protected:
 
@@ -73,6 +80,8 @@ namespace Konclude {
 				protected:
 					bool mConsistent;
 					CConsistenceData* mConsData;
+					bool mRepresentativelyStored;
+					bool mAllRepresentativelyStored;
 
 				// private methods
 				private:

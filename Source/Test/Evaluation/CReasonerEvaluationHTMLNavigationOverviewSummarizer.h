@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -74,7 +74,7 @@ namespace Konclude {
 					bool loadFiltersFromFile(const QString& fileString, QSet<QString>* filterSet);
 					QString loadTemplateFromFile(const QString& fileString);
 
-					QString createHTMLForDirectory(const QString& directory, const QString& relativePathString, const QString& groupFilterString);
+					QString createHTMLForDirectory(const QString& directory, const QString& relativePathString, const QString& groupFilterString, cint64* addContentCounter = nullptr);
 
 
 					bool isAcceptedByFilters(const QString& name);

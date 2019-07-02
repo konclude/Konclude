@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,12 +28,19 @@ namespace Konclude {
 		namespace Consistiser {
 
 
-			CSaturationPrecomputationTestingItem::CSaturationPrecomputationTestingItem(COntologyPrecomputationItem* preCompItem) : CPrecomputationTestingItem(preCompItem) {
+			CSaturationPrecomputationTestingItem::CSaturationPrecomputationTestingItem(COntologyPrecomputationItem* preCompItem, CPrecomputationTestingItem::PRECOMPUTATIONTYPE precomputationType, cint64 saturationID) : CPrecomputationTestingItem(preCompItem),mSaturationID(saturationID) {
+				mPrecomputationType = precomputationType;
 			}
 
 			CPrecomputationTestingItem::PRECOMPUTATIONTYPE CSaturationPrecomputationTestingItem::getPrecomputationTestingType() {
-				return CONCEPTSATURATIONPRECOMPUTATIONTYPE;
+				return mPrecomputationType;
 			}
+
+
+			cint64 CSaturationPrecomputationTestingItem::getSaturationID() {
+				return mSaturationID;
+			}
+
 
 
 		}; // end namespace Consistiser

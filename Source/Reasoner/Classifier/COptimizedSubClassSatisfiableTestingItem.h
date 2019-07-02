@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -35,7 +35,11 @@
 #include "Reasoner/Ontology/CConceptProcessData.h"
 #include "Reasoner/Ontology/CConceptSatisfiableReferenceLinkingData.h"
 
+#include "Reasoner/Consistiser/CIndividualDependenceTrackingMarker.h"
+
 #include "Reasoner/Taxonomy/CHierarchyNode.h"
+
+#include "Reasoner/Kernel/Cache/CCacheEntry.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -47,6 +51,8 @@ namespace Konclude {
 
 		using namespace Ontology;
 		using namespace Taxonomy;
+		using namespace Consistiser;
+		using namespace Kernel::Cache;
 
 		namespace Classifier {
 
@@ -59,7 +65,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedSubClassSatisfiableTestingItem : public CClassificationSatisfiableCalculationConceptReferenceLinking, public CConceptSubsumerObserver {
+			class COptimizedSubClassSatisfiableTestingItem : public CClassificationSatisfiableCalculationConceptReferenceLinking, public CConceptSubsumerObserver, public CIndividualDependenceTrackingMarker {
 				// public methods
 				public:
 					//! Constructor
@@ -113,6 +119,17 @@ namespace Konclude {
 
 					bool isMoreConceptClassificationInformationRequired();
 
+
+
+					CCacheEntry* getFastSatisfiabilityTestedSaturationCacheEntry();
+					COptimizedSubClassSatisfiableTestingItem* setFastSatisfiabilityTestedSaturationCacheEntry(CCacheEntry* cacheEntry);
+
+					bool hasSuccessfullyFastSatisfiabilityTested();
+					COptimizedSubClassSatisfiableTestingItem* setSuccessfullyFastSatisfiabilityTested(bool successfullyTested);
+
+					virtual CIndividualDependenceTrackingMarker* setIndividualDependenceTracked();
+					bool hasIndividualDependenceTracked();
+
 				// protected methods
 				protected:
 
@@ -138,6 +155,10 @@ namespace Konclude {
 
 					//QString mSubsumingConceptString;
 
+					CCacheEntry* mFastSatCacheEntry;
+					bool mSuccFastSatTested;
+
+					bool mIndiDepTracked;
 
 				// private methods
 				private:

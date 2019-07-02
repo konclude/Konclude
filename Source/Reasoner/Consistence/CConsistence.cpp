@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,8 @@ namespace Konclude {
 			CConsistence::CConsistence() {
 				mConsistent = false;
 				mConsData = nullptr;
+				mRepresentativelyStored = false;
+				mAllRepresentativelyStored = false;
 			}
 
 
@@ -59,6 +61,24 @@ namespace Konclude {
 
 			CConsistence* CConsistence::setConsistenceModelData(CConsistenceData* consData) {
 				mConsData = consData;
+				return this;
+			}
+
+			bool CConsistence::areIndividualsRepresentativelyStored() {
+				return mRepresentativelyStored;
+			}
+
+			bool CConsistence::areAllIndividualsRepresentativelyStored() {
+				return mAllRepresentativelyStored;
+			}
+
+			CConsistence* CConsistence::setIndividualsRepresentativelyStored(bool representativelyStored) {
+				mRepresentativelyStored = representativelyStored;
+				return this;
+			}
+
+			CConsistence* CConsistence::setAllIndividualsRepresentativelyStored(bool representativelyStored) {
+				mAllRepresentativelyStored = representativelyStored;
 				return this;
 			}
 

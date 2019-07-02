@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -57,20 +57,36 @@ namespace Konclude {
 
 
 			CConcreteOntology* CSPOntologyRevisionManager::getBasementOntology(CCommandRecordRouter& commandRecordRouter) {
-				if (!mBaseOnto) {
-					CUnspecifiedMessageInformationRecord::makeRecord("Creating ontology basement.",&commandRecordRouter);
-					mBaseOnto = new CConcreteOntology(confProvider->getCurrentConfiguration());
-					CConcreteOntologyBasementBuilder* basementOntoBuilder = new CConcreteOntologyBasementBuilder(mBaseOnto);
-					basementOntoBuilder->initializeBuilding();
-					basementOntoBuilder->buildOntologyBasement();
-					basementOntoBuilder->completeBuilding();
-					delete basementOntoBuilder;
-					COntologyConfigDependedPreProcesser* preProcessor = new COntologyConfigDependedPreProcesser(commandRecordRouter);
-					preProcessor->preprocess(mBaseOnto,confProvider->getCurrentConfiguration());
-					delete preProcessor;
-					CUnspecifiedMessageInformationRecord::makeRecord("Ontology basement created.",&commandRecordRouter);
+				CConcreteOntology* usedBasementOntology = nullptr;
+
+				if (mBaseOnto) {
+					QString resolveBasementKBNameString = CConfigDataReader::readConfigString(confProvider,"Konclude.Ontology.Revision.BasementResolveKBName");
+					if (!resolveBasementKBNameString.isEmpty()) {
+						qint64 revPath = nameIDHash.value(resolveBasementKBNameString);
+						COntologyRevision *currOntologyRev = revisionHash.value(revPath,0);
+						if (currOntologyRev) {
+							usedBasementOntology = currOntologyRev->getOntology();
+						}
+					}
 				}
-				return mBaseOnto;
+
+				if (!usedBasementOntology) {
+					if (!mBaseOnto) {
+						CUnspecifiedMessageInformationRecord::makeRecord("Creating ontology basement.",&commandRecordRouter);
+						mBaseOnto = new CConcreteOntology(confProvider->getCurrentConfiguration());
+						CConcreteOntologyBasementBuilder* basementOntoBuilder = new CConcreteOntologyBasementBuilder(mBaseOnto);
+						basementOntoBuilder->initializeBuilding();
+						basementOntoBuilder->buildOntologyBasement();
+						basementOntoBuilder->completeBuilding();
+						delete basementOntoBuilder;
+						COntologyConfigDependedPreProcesser* preProcessor = new COntologyConfigDependedPreProcesser(commandRecordRouter);
+						preProcessor->preprocess(mBaseOnto,confProvider->getCurrentConfiguration());
+						delete preProcessor;
+						CUnspecifiedMessageInformationRecord::makeRecord("Ontology basement created.",&commandRecordRouter);
+					}
+					usedBasementOntology = mBaseOnto;
+				}
+				return usedBasementOntology;
 			}
 
 
@@ -157,11 +173,6 @@ namespace Konclude {
 							ont->setOntologyID(ontologyID);
 
 							COntologyRevision *nextOntologyRev = new COntologyRevision(ont,currOntologyRev,nextOntConfig);
-
-							bool incRebuild = CConfigDataReader::readConfigBoolean(nextOntConfig,"Konclude.Ontology.Revision.IncrementalRebuild");
-							if (!incRebuild) {
-								ont->getDataBoxes()->referenceDataBoxes(mBaseOnto->getDataBoxes());
-							}
 
 
 							cKBRevUpC->setOntologyRevision(nextOntologyRev);

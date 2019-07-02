@@ -117,6 +117,8 @@
 #include "Control/Command/Instructions/CImportKnowledgeBaseOWLAutoOntologyCommand.h"
 #include "Control/Command/Instructions/CWriteFunctionalIndividualTypesQueryCommand.h"
 #include "Control/Command/Instructions/CConstructWriteFunctionalIndividualTypesQueryCommand.h"
+#include "Control/Command/Instructions/CIsTriviallyConsistentQueryCommand.h"
+#include "Control/Command/Instructions/CConstructIsTriviallyConsistentQueryCommand.h"
 
 
 #include "Reasoner/Query/CWriteFunctionalIndividualFlattenedTypesQuery.h"
@@ -124,6 +126,7 @@
 #include "Reasoner/Query/CWriteOWLXMLIndividualFlattenedTypesQuery.h"
 #include "Reasoner/Query/CWriteOWLXMLClassSubsumptionsHierarchyQuery.h"
 #include "Reasoner/Query/CIsConsistentQuery.h"
+#include "Reasoner/Query/CIsTriviallyConsistentQuery.h"
 #include "Reasoner/Query/CRealizeQuery.h"
 #include "Reasoner/Query/CClassifyQuery.h"
 

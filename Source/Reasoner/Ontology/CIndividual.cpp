@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,7 @@ namespace Konclude {
 			CIndividual::CIndividual(qint64 id) : CTagItem(id) {
 				mAssertionConceptLinker = nullptr;
 				mAssertionRoleLinker = nullptr;
+				mReverseAssertionRoleLinker = nullptr;
 				mNominalConcept = nullptr;
 				mAnonymousIndividual = false;
 				mIndividualData = nullptr;
@@ -95,6 +96,24 @@ namespace Konclude {
 				mAssertionRoleLinker = assRoleLinker;
 				return this;
 			}
+
+
+
+
+			CReverseRoleAssertionLinker* CIndividual::getReverseAssertionRoleLinker() {
+				return mReverseAssertionRoleLinker;
+			}
+
+			CIndividual* CIndividual::addReverseAssertionRoleLinker(CReverseRoleAssertionLinker* revAssRoleLinker) {
+				mReverseAssertionRoleLinker = revAssRoleLinker->append(mReverseAssertionRoleLinker);
+				return this;
+			}
+
+			CIndividual* CIndividual::setReverseAssertionRoleLinker(CReverseRoleAssertionLinker* revAssRoleLinker) {
+				mReverseAssertionRoleLinker = revAssRoleLinker;
+				return this;
+			}
+
 
 			CIndividual* CIndividual::initIndividual(qint64 indiID) {
 				mTag = indiID;

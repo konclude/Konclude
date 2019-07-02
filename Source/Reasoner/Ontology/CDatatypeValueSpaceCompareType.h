@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,6 +32,7 @@
 
 
 // Other includes
+#include "Utilities/UtilitiesSettings.h"
 
 
 // Logger includes
@@ -39,6 +40,8 @@
 
 
 namespace Konclude {
+
+	using namespace Utilities;
 
 	namespace Reasoner {
 
@@ -61,6 +64,9 @@ namespace Konclude {
 
 					virtual CDataLiteralCompareValue* getMinimumDataLiteralCompareValue() = 0;
 					virtual CDataLiteralCompareValue* getMaximumDataLiteralCompareValue() = 0;
+
+					virtual bool hasInfiniteManyValues() = 0;
+					virtual cint64 getMaximumValueCount() = 0;
 
 
 				// protected methods

@@ -50,6 +50,12 @@ namespace Konclude {
 
 				mInfoConsoleObserver = nullptr;
 				mErrorFileObserver = nullptr;
+
+				mConsistencyKBCommand = nullptr;
+				mTriviallyConsistencyKBCommand = nullptr;
+				mAdditionalCheckingTime = nullptr;
+
+				mReportAllTime = false;
 			}
 
 
@@ -76,6 +82,11 @@ namespace Konclude {
 				mIRINameString = CConfigDataReader::readConfigString(config,"Konclude.ORE.IRIName");
 				mCloseAfterOutput = CConfigDataReader::readConfigBoolean(config,"Konclude.ORE.CloseAfterProcessed");
 				mOutputMeasuredTimeInSeconds = CConfigDataReader::readConfigBoolean(config,"Konclude.ORE.OutputTimeMeasurementInSeconds");
+
+				mReportParsingTimeForConsistency = CConfigDataReader::readConfigBoolean(config,"Konclude.ORE.ReportParsingTimeForConsistency");
+				mReportParsingTimeForSatisfiability = CConfigDataReader::readConfigBoolean(config,"Konclude.ORE.ReportParsingTimeForSatisfiability");
+				mReportParsingTimeForRealisation = CConfigDataReader::readConfigBoolean(config,"Konclude.ORE.ReportParsingTimeForRealization");
+				mReportParsingTimeForClassification = CConfigDataReader::readConfigBoolean(config,"Konclude.ORE.ReportParsingTimeForClassification");
 
 				mInfoConsoleObserver = new COREConsolePrintLogObserver(QStringList()<<mORELogIdentifier.getLogDomain());
 				mErrorFileObserver = new COREFilePrintLogObserver(mResponseFileString+"_err");
@@ -120,6 +131,9 @@ namespace Konclude {
 				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
 				CKnowledgeBaseClassifyCommand* classifyKBCommand = new CKnowledgeBaseClassifyCommand(oreTestKB);
 				CWriteFunctionalSubClassHierarchyQueryCommand* writeHierarchyCommand = new CWriteFunctionalSubClassHierarchyQueryCommand(oreTestKB,mResponseFileString);
+				if (mReportParsingTimeForClassification) {
+					mReportAllTime = true;
+				}
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
 				addProcessingCommand(classifyKBCommand,true,mOperationTimeOutputString);
@@ -136,6 +150,9 @@ namespace Konclude {
 				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
 				CKnowledgeBaseRealizeCommand* realizeKBCommand = new CKnowledgeBaseRealizeCommand(oreTestKB);
 				CWriteFunctionalIndividualTypesQueryCommand* writeIndividualTypesCommand = new CWriteFunctionalIndividualTypesQueryCommand(oreTestKB,mResponseFileString);
+				if (mReportParsingTimeForRealisation) {
+					mReportAllTime = true;
+				}
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
 				addProcessingCommand(realizeKBCommand,true,mOperationTimeOutputString);
@@ -151,10 +168,14 @@ namespace Konclude {
 				QStringList ontoIRIList;
 				ontoIRIList.append(mOntologyFileString);
 				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
-				CIsConsistentQueryCommand* consistencyKBCommand = new CIsConsistentQueryCommand(oreTestKB);
+				mConsistencyKBCommand = new CIsConsistentQueryCommand(oreTestKB);
+				mTriviallyConsistencyKBCommand = new CIsTriviallyConsistentQueryCommand(oreTestKB);
+				if (mReportParsingTimeForConsistency) {
+					mReportAllTime = true;
+				}
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
-				addProcessingCommand(consistencyKBCommand,true,mOperationTimeOutputString,true,mResponseFileString);
+				addProcessingCommand(mTriviallyConsistencyKBCommand,true,mOperationTimeOutputString,true,mResponseFileString);
 				processNextCommand();
 			}
 
@@ -168,6 +189,9 @@ namespace Konclude {
 				mWriteSatisfiabilityPrefixString = mIRINameString+QString(",");
 				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(oreTestKB,ontoIRIList);
 				CProcessClassNameSatisfiableQueryCommand* consistencyKBCommand = new CProcessClassNameSatisfiableQueryCommand(oreTestKB,mIRINameString);
+				if (mReportParsingTimeForSatisfiability) {
+					mReportAllTime = true;
+				}
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
 				addProcessingCommand(consistencyKBCommand,true,mOperationTimeOutputString,true,mResponseFileString);
@@ -265,6 +289,7 @@ namespace Konclude {
 
 			void COREBatchProcessingLoader::writeSatisfiabilityResult(const QString& outputFileName, CCommand* processedCommand) {
 				bool outputWritten = false;
+				bool calculationCompleted = false;
 				CKnowledgeBaseQueryCommand* kbQueryCommand = dynamic_cast<CKnowledgeBaseQueryCommand*>(processedCommand);
 				if (kbQueryCommand) {
 					CQuery* query = kbQueryCommand->getCalculateQueryCommand()->getQuery();
@@ -273,6 +298,7 @@ namespace Konclude {
 						if (queryResult) {
 							CBooleanQueryResult* boolQueryResult = dynamic_cast<CBooleanQueryResult*>(queryResult);
 							if (boolQueryResult) {
+								calculationCompleted = true;
 								forcedPathCreated(outputFileName);
 								QFile outputFile(outputFileName);
 								if (outputFile.open(QIODevice::Append)) {
@@ -292,25 +318,53 @@ namespace Konclude {
 						}
 					}
 				}
-				if (!outputWritten) {
+				if (!calculationCompleted) {
 					logOutputError("Calculation failed");
 				}
 			}
 
 			void COREBatchProcessingLoader::finishCommandProcessing() {
 				if (mProcessingCommandData) {
-					if (mProcessingCommandData->mMeasureTime) {
-						QString outputString = mProcessingCommandData->mMeasuredOutputString;
-						cint64 timeElapsed = mMeasurementTime.elapsed();
-						if (mOutputMeasuredTimeInSeconds) {
-							logOutputMessage(outputString+QString("%1").arg(timeElapsed/1000.));
-						} else {
-							logOutputMessage(outputString+QString("%1").arg(timeElapsed));
+					bool writeResults = true;
+					if (mProcessingCommandData->mCommand == mTriviallyConsistencyKBCommand) {
+						CKnowledgeBaseQueryCommand* kbQueryCommand = dynamic_cast<CKnowledgeBaseQueryCommand*>(mProcessingCommandData->mCommand);
+						if (kbQueryCommand) {
+							CQuery* query = kbQueryCommand->getCalculateQueryCommand()->getQuery();
+							if (query) {
+								CQueryResult* queryResult = query->getQueryResult();
+								if (queryResult) {
+									CBooleanQueryResult* boolQueryResult = dynamic_cast<CBooleanQueryResult*>(queryResult);
+									if (boolQueryResult) {
+										if (!boolQueryResult->getResult()) {
+											writeResults = false;
+											mAdditionalCheckingTime += mMeasurementTime.elapsed();
+											addProcessingCommand(mConsistencyKBCommand,true,mOperationTimeOutputString,true,mResponseFileString);
+										}
+									}
+								}
+							}
 						}
 					}
-					if (mProcessingCommandData->mWriteSatisfiableOutput) {
-						QString outputFile = mProcessingCommandData->mWriteOutputFile;
-						writeSatisfiabilityResult(outputFile,mProcessingCommandData->mCommand);
+
+					if (writeResults) {
+						if (mProcessingCommandData->mMeasureTime) {
+							QString outputString = mProcessingCommandData->mMeasuredOutputString;
+							cint64 timeElapsed = mMeasurementTime.elapsed();
+							timeElapsed += mAdditionalCheckingTime;
+							if (mOutputMeasuredTimeInSeconds) {
+								logOutputMessage(outputString+QString("%1").arg(timeElapsed/1000.));
+							} else {
+								logOutputMessage(outputString+QString("%1").arg(timeElapsed));
+							}
+						} else {
+							if (mReportAllTime) {
+								mAdditionalCheckingTime += mMeasurementTime.elapsed();
+							}
+						}
+						if (mProcessingCommandData->mWriteSatisfiableOutput) {
+							QString outputFile = mProcessingCommandData->mWriteOutputFile;
+							writeSatisfiabilityResult(outputFile,mProcessingCommandData->mCommand);
+						}
 					}
 					mProcessingCommandData = nullptr;
 				}

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -62,7 +62,10 @@ namespace Konclude {
 					//! Destructor
 					virtual ~CQueryStatisticsCollectionStrings();
 
+					virtual bool addProcessingStatistics(COntologyProcessingStatistics* ontProcStats);
+
 					virtual bool addProcessingStatistics(const QString& statName, cint64 statValue);
+					virtual bool incProcessingStatistics(const QString& statName, cint64 incStatValue = 1);
 					CQueryCalculationStatisticsCollection* getCalculationStatisticsCollectorLinker();
 					CQueryCalculationStatisticsCollection* createCalculationStatisticsCollection();
 

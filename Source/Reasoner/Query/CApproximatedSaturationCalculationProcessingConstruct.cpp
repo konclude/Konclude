@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,6 +30,7 @@ namespace Konclude {
 
 			CApproximatedSaturationCalculationProcessingConstruct::CApproximatedSaturationCalculationProcessingConstruct() : CLinkerBase<CApproximatedSaturationCalculationProcessingConstruct*,CApproximatedSaturationCalculationProcessingConstruct>(this) {
 				mSatConRefLinking = nullptr;
+				mSatIndiRefLinking = nullptr;
 			}
 
 			CApproximatedSaturationCalculationProcessingConstruct* CApproximatedSaturationCalculationProcessingConstruct::getNextConstruct() {
@@ -43,6 +44,15 @@ namespace Konclude {
 
 			CApproximatedSaturationCalculationProcessingConstruct* CApproximatedSaturationCalculationProcessingConstruct::setSaturationConceptReferenceLinking(CSaturationConceptReferenceLinking* satConRefLinking) {
 				mSatConRefLinking = satConRefLinking;
+				return this;
+			}
+
+			CSaturationIndividualReferenceLinking* CApproximatedSaturationCalculationProcessingConstruct::getSaturationIndividualReferenceLinking() {
+				return mSatIndiRefLinking;
+			}
+
+			CApproximatedSaturationCalculationProcessingConstruct* CApproximatedSaturationCalculationProcessingConstruct::setSaturationConceptReferenceLinking(CSaturationIndividualReferenceLinking* satIndiRefLinking) {
+				mSatIndiRefLinking = satIndiRefLinking;
 				return this;
 			}
 

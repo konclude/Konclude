@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -92,7 +92,7 @@ namespace Konclude {
 						if (conSet->getConceptDescriptor(concept,conDes,depTrackPoint)) {
 							bool conNegated = conDes->isNegated();
 							bool cacheNegated = cacheValue->getCacheValueIdentifier() == CCacheValue::CACHEVALTAGANDNEGATEDCONCEPT;
-							if (conNegated != cacheNegated) {
+							if (conNegated != cacheNegated || conDes->getConcept() != concept) {
 								return false;
 							}
 						} else {

@@ -52,16 +52,18 @@ namespace Konclude {
 				ontoIRIList.append(mRequestFileString);
 				//CLoadKnowledgeBaseOWLXMLOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLXMLOntologyCommand(testKB,ontoIRIList);
 				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(testKB,ontoIRIList);
-				CIsConsistentQueryCommand* consistencyKBCommand = new CIsConsistentQueryCommand(testKB);
+				mConsistencyKBCommand = new CIsConsistentQueryCommand(testKB);
+				mTriviallyConsistencyKBCommand = new CIsTriviallyConsistentQueryCommand(testKB);
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
-				addProcessingCommand(consistencyKBCommand,false,"",true,mResponseFileString);
+				addProcessingCommand(mTriviallyConsistencyKBCommand,false,"",true,mResponseFileString);
 				processNextCommand();
 			}
 
 
 			void CCLIConsistencyBatchProcessingLoader::writeCommandOutput(const QString& outputFileName, CCommand* processedCommand) {
 				bool outputWritten = false;
+				bool requiresDetailedConsistencyChecking = true;
 				CKnowledgeBaseQueryCommand* kbQueryCommand = dynamic_cast<CKnowledgeBaseQueryCommand*>(processedCommand);
 				if (kbQueryCommand) {
 					CQuery* query = kbQueryCommand->getCalculateQueryCommand()->getQuery();
@@ -70,34 +72,45 @@ namespace Konclude {
 						if (queryResult) {
 							CBooleanQueryResult* boolQueryResult = dynamic_cast<CBooleanQueryResult*>(queryResult);
 							if (boolQueryResult) {
-								outputWritten = true;
+								bool writeOutput = false;
 								if (boolQueryResult->getResult() == true) {
+									requiresDetailedConsistencyChecking = false;
+									writeOutput = true;
 									logOutputMessage(QString("Ontology '%1' is consistent.").arg(mRequestFileString));
 								} else {
-									logOutputMessage(QString("Ontology '%1' is not consistent.").arg(mRequestFileString));
+									if (processedCommand == mConsistencyKBCommand) {
+										requiresDetailedConsistencyChecking = false;
+										writeOutput = true;
+										logOutputMessage(QString("Ontology '%1' is inconsistent.").arg(mRequestFileString));
+									}
 								}
 
-								if (!outputFileName.isEmpty()) {
-									forcedPathCreated(outputFileName);
-									QFile outputFile(outputFileName);
-									if (outputFile.open(QIODevice::WriteOnly)) {
-										QString outputData;
-										if (boolQueryResult->getResult() == true) {
-											outputData = QString("true\n");
+								if (writeOutput) {
+									outputWritten = true;
+									if (!outputFileName.isEmpty()) {
+										forcedPathCreated(outputFileName);
+										QFile outputFile(outputFileName);
+										if (outputFile.open(QIODevice::WriteOnly)) {
+											QString outputData;
+											if (boolQueryResult->getResult() == true) {
+												outputData = QString("true\n");
+											} else {
+												outputData = QString("false\n");
+											}
+											outputFile.write(outputData.toUtf8());
+											outputFile.close();
 										} else {
-											outputData = QString("false\n");
+											logOutputError(QString("Failed writing output to file '%1'.").arg(outputFileName));
 										}
-										outputFile.write(outputData.toUtf8());
-										outputFile.close();
-									} else {
-										logOutputError(QString("Failed writing output to file '%1'.").arg(outputFileName));
 									}
 								}
 							}
 						}
 					}
 				}
-				if (!outputWritten) {
+				if (requiresDetailedConsistencyChecking) {
+					addProcessingCommand(mConsistencyKBCommand,false,"",true,mResponseFileString);
+				} else if (!outputWritten) {
 					logOutputError("Consistency checking failed.");
 				}
 			}

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -37,7 +37,7 @@ namespace Konclude {
 				}
 
 
-				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::initIndividualSaturationProcessNode(cint64 individualID, CExtendedConceptReferenceLinkingData* conSatRefLinkData) {
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::initIndividualSaturationProcessNode(cint64 individualID, CExtendedConceptReferenceLinkingData* conSatRefLinkData, CIndividualSaturationReferenceLinkingData* indSatRefLinkData) {
 					mRoleBackPropHash = nullptr;
 					mReapplyConSatLabelSet = nullptr;
 					mIndiProcessLinker = nullptr;
@@ -59,33 +59,48 @@ namespace Konclude {
 					mClashedConSatDesLinker = nullptr;
 					mIndiCompletionLinker = nullptr;
 					mReferenceMode = 0;
-					mSaturationLinkRefData = conSatRefLinkData;
-					mIntegratedNominal = false;
+					mConceptSaturationLinkRefData = conSatRefLinkData;
+					mIndividualSaturationLinkRefData = indSatRefLinkData;
+					mIntegratedNominalIndi = nullptr;
+					mDataValueApplied = false;
 					mCacheData = nullptr;
+					mNominalIndi = nullptr;
+					mSeparatedSaturation = false;
 					return this;
 				}
 
 				CExtendedConceptReferenceLinkingData* CIndividualSaturationProcessNode::getSaturationConceptReferenceLinking() {
-					return mSaturationLinkRefData;
+					return mConceptSaturationLinkRefData;
 				}
+
+				CIndividualSaturationReferenceLinkingData* CIndividualSaturationProcessNode::getSaturationIndividualReferenceLinking() {
+					return mIndividualSaturationLinkRefData;
+				}
+
 
 				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::initRootIndividualSaturationProcessNode() {
 					return this;
 				}
 
 
-				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::initCopingIndividualSaturationProcessNode(CIndividualSaturationProcessNode* indiNode) {
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::initCopingIndividualSaturationProcessNode(CIndividualSaturationProcessNode* indiNode, bool tryFlatLabelCopy) {
 					if (indiNode->getRoleBackwardPropagationHash(false)) {
 						getRoleBackwardPropagationHash(true)->copyRoleBackwardSaturationPropagationHash(indiNode->getRoleBackwardPropagationHash(false),this);
 					}
 					if (indiNode->getReapplyConceptSaturationLabelSet(false)) {
-						getReapplyConceptSaturationLabelSet(true)->copyReapplyConceptSaturationLabelSet(indiNode->getReapplyConceptSaturationLabelSet(false));
+						getReapplyConceptSaturationLabelSet(true)->copyReapplyConceptSaturationLabelSet(indiNode->getReapplyConceptSaturationLabelSet(false),tryFlatLabelCopy);
 					}
 					if (indiNode->getSuccessorConnectedNominalSet(false)) {
 						getSuccessorConnectedNominalSet(true)->copySuccessorConnectedNominalSet(indiNode->getSuccessorConnectedNominalSet(false));
 					}
 
-					mIntegratedNominal = indiNode->mIntegratedNominal;
+					mIntegratedNominalIndi = indiNode->mIntegratedNominalIndi;
+					mDataValueApplied = indiNode->mDataValueApplied;
+
+					if (indiNode->getAppliedDatatypeData(false)) {
+						getAppliedDatatypeData(true)->setAppliedDataLiteral(indiNode->getAppliedDatatypeData(false)->getAppliedDataLiteral());
+						getAppliedDatatypeData(true)->setAppliedDatatype(indiNode->getAppliedDatatypeData(false)->getAppliedDatatype());
+					}
 
 
 					CXNegLinker<CIndividualSaturationProcessNode*>* depCopyLinker = CObjectAllocator< CXNegLinker<CIndividualSaturationProcessNode*> >::allocateAndConstruct(mMemAllocMan);
@@ -146,6 +161,18 @@ namespace Konclude {
 				}
 
 
+
+				CCriticalPredecessorRoleCardinalityHash* CIndividualSaturationProcessNode::getCriticalPredecessorRoleCardinalityHash(bool create) {
+					if (create) {
+						return getIndividualExtensionData(true)->getCriticalPredecessorRoleCardinalityHash(true);
+					}
+					if (mIndiExtensionData) {
+						return mIndiExtensionData->getCriticalPredecessorRoleCardinalityHash(false);
+					}
+					return nullptr;
+				}
+
+
 				CLinkedRoleSaturationSuccessorHash* CIndividualSaturationProcessNode::getLinkedRoleSuccessorHash(bool create) {
 					if (create) {
 						return getIndividualExtensionData(true)->getLinkedRoleSuccessorHash(true);
@@ -190,6 +217,16 @@ namespace Konclude {
 				}
 
 
+				CSaturationIndividualNodeDatatypeData* CIndividualSaturationProcessNode::getAppliedDatatypeData(bool create) {
+					if (create) {
+						return getIndividualExtensionData(true)->getAppliedDatatypeData(true);
+					}
+					if (mIndiExtensionData) {
+						return mIndiExtensionData->getAppliedDatatypeData(false);
+					}
+					return nullptr;
+				}
+
 				CIndividualSaturationProcessNodeLinker* CIndividualSaturationProcessNode::getIndividualSaturationProcessNodeLinker() {
 					return mIndiProcessLinker;
 				}
@@ -225,6 +262,28 @@ namespace Konclude {
 					mConceptSaturationProcessLinker = nullptr;
 					return this;
 				}
+
+
+
+				CSaturationSuccessorRoleAssertionLinker* CIndividualSaturationProcessNode::getRoleAssertionLinker() {
+					if (mIndiExtensionData) {
+						return mIndiExtensionData->getRoleAssertionLinker();
+					}
+					return nullptr;
+				}
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::addRoleAssertionLinker(CSaturationSuccessorRoleAssertionLinker* roleAssertionLinker) {
+					getIndividualExtensionData(true)->addRoleAssertionLinker(roleAssertionLinker);
+					return this;
+				}
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::addRoleAssertion(CIndividualSaturationProcessNode* destinationNode, CRole* role, bool roleNegation) {
+					getIndividualExtensionData(true)->addRoleAssertion(destinationNode,role,roleNegation);
+					return this;
+				}
+
+
+
 
 				bool CIndividualSaturationProcessNode::getRequiredBackwardPropagation() {
 					return mRequiredBackProp;
@@ -427,13 +486,30 @@ namespace Konclude {
 
 
 				bool CIndividualSaturationProcessNode::hasNominalIntegrated() {
-					return mIntegratedNominal;
+					return mIntegratedNominalIndi;
 				}
 
-				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setNominalIntegrated(bool integrated) {
-					mIntegratedNominal = integrated;
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setIntegratedNominal(CIndividual* nominalIndi) {
+					mIntegratedNominalIndi = nominalIndi;
 					return this;
 				}
+
+				CIndividual* CIndividualSaturationProcessNode::getIntegratedNominalIndividual() {
+					return mIntegratedNominalIndi;
+				}
+
+
+
+
+				bool CIndividualSaturationProcessNode::hasDataValueApplied() {
+					return mDataValueApplied;
+				}
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setDataValueApplied(bool dataApplied) {
+					mDataValueApplied = dataApplied;
+					return this;
+				}
+
 
 
 
@@ -459,6 +535,14 @@ namespace Konclude {
 				}
 
 
+				CIndividual* CIndividualSaturationProcessNode::getNominalIndividual() {
+					return mNominalIndi;
+				}
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setNominalIndividual(CIndividual* nominalIndi) {
+					mNominalIndi = nominalIndi;
+					return this;
+				}
 
 
 
@@ -493,6 +577,15 @@ namespace Konclude {
 					return this;
 				}
 
+
+				bool CIndividualSaturationProcessNode::isSeparated() {
+					return mSeparatedSaturation;
+				}
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setSeparated(bool separated) {
+					mSeparatedSaturation = separated;
+					return this;
+				}
 
 			}; // end namespace Process
 

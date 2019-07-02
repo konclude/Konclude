@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -191,6 +191,15 @@ namespace Konclude {
 						reportLog("Stopped processing data extender preprocessing.");
 						delete onPreProc;
 					}
+
+					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.ReverseRoleAssertionGeneration",true)) {
+						COntologyPreProcess *onPreProc = new CReverseRoleAssertionGeneratorPreProcess();
+						reportLog("Starting reverse role assertion generation.");
+						onPreProc->preprocess(ontology,&preprocessingContext);
+						reportLog("Stopped reverse role assertion generation.");
+						delete onPreProc;
+					}
+
 					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.OntologyStructureInspection",true)) {
 						COntologyPreProcess *onPreProc = new COntologyStructureInspectionPreProcess();
 						reportLog("Starting ontology structure inspection preprocessing.");

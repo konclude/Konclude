@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,6 +28,8 @@
 #include "OntologySettings.h"
 #include "CIndividualData.h"
 #include "CComputedConsequencesCachingData.h"
+#include "CIndividualSaturationReferenceLinkingData.h"
+#include "CIndividualBackendCachingData.h"
 
 
 // Other includes
@@ -65,6 +67,11 @@ namespace Konclude {
 					CComputedConsequencesCachingData* getComputedConsequencesCachingData();
 					CIndividualProcessData* setComputedConsequencesCachingData(CComputedConsequencesCachingData* computedConsequencesCachingData);
 
+					CIndividualSaturationReferenceLinkingData* getSaturationReferenceLinkingData();
+					CIndividualProcessData* setSaturationReferenceLinkingData(CIndividualSaturationReferenceLinkingData* refLinkingData);
+
+					CIndividualBackendCachingData* getBackendCachingData();
+					CIndividualProcessData* setBackendCachingData(CIndividualBackendCachingData* backendCachingData);
 
 				// protected methods
 				protected:
@@ -72,6 +79,8 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CComputedConsequencesCachingData* mComputedConsequencesCachingData;
+					CIndividualSaturationReferenceLinkingData* mSatRefLinkingData;
+					CIndividualBackendCachingData* mBackendCachingData;
 
 				// private methods
 				private:

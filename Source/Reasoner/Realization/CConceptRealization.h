@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,6 +30,7 @@
 #include "CConceptRealizationInstantiatedVisitor.h"
 #include "CConceptRealizationConceptVisitor.h"
 #include "CConceptRealizationIndividualVisitor.h"
+#include "CPossibleAssertionsCollectionSet.h"
 
 // Other includes
 
@@ -61,6 +62,7 @@ namespace Konclude {
 					virtual bool visitDirectInstances(CConcept* concept, CConceptRealizationInstanceVisitor* visitor);
 					virtual bool visitInstances(CConcept* concept, CConceptRealizationInstanceVisitor* visitor);
 					virtual bool visitInstances(CConcept* concept, bool direct, CConceptRealizationInstanceVisitor* visitor);
+					virtual bool visitSameIndividuals(CIndividual* individual, CConceptRealizationIndividualVisitor* visitor);
 					virtual bool visitDirectTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor);
 					virtual bool visitTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor);
 					virtual bool visitTypes(CIndividual* individual, bool direct, CConceptRealizationInstantiatedVisitor* visitor);
@@ -77,6 +79,10 @@ namespace Konclude {
 
 					virtual CConceptInstantiatedItem* getInstantiatedItem(CConcept* concept) = 0;
 					virtual CConceptInstanceItem* getInstanceItem(CIndividual* individual) = 0;
+
+
+					virtual CPossibleAssertionsCollectionSet* getPossibleAssertionCollectionSet() = 0;
+
 
 				// protected methods
 				protected:

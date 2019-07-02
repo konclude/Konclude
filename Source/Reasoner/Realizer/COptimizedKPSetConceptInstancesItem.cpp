@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -56,11 +56,11 @@ namespace Konclude {
 				return this;
 			}
 
-			QSet<COptimizedKPSetConceptInstantiatedItem*>* COptimizedKPSetConceptInstancesItem::getKnownInstancesSet() {
+			QSet<COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getKnownInstancesSet() {
 				return &mKnownInstancesSet;
 			}
 
-			QSet<COptimizedKPSetConceptInstantiatedItem*>* COptimizedKPSetConceptInstancesItem::getPossibleInstancesSet() {
+			QSet<COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getPossibleInstancesSet() {
 				return &mPossibleInstancesSet;
 			}
 
@@ -72,26 +72,26 @@ namespace Konclude {
 				return &mSuccessorItemList;
 			}
 
-			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addKnownInstance(COptimizedKPSetConceptInstantiatedItem* item) {
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addKnownInstance(COptimizedKPSetIndividualItem* item) {
 				mKnownInstancesSet.insert(item);
 				return this;
 			}
 
-			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::removeKnownInstance(COptimizedKPSetConceptInstantiatedItem* item) {
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::removeKnownInstance(COptimizedKPSetIndividualItem* item) {
 				mKnownInstancesSet.remove(item);
 				return this;
 			}
 
-			bool COptimizedKPSetConceptInstancesItem::hasKnownInstance(COptimizedKPSetConceptInstantiatedItem* item) {
+			bool COptimizedKPSetConceptInstancesItem::hasKnownInstance(COptimizedKPSetIndividualItem* item) {
 				return mKnownInstancesSet.contains(item);
 			}
 
 
-			bool COptimizedKPSetConceptInstancesItem::hasPossibleInstance(COptimizedKPSetConceptInstantiatedItem* item) {
+			bool COptimizedKPSetConceptInstancesItem::hasPossibleInstance(COptimizedKPSetIndividualItem* item) {
 				return mPossibleInstancesSet.contains(item);
 			}
 
-			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addPossibleInstance(COptimizedKPSetConceptInstantiatedItem* item) {
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addPossibleInstance(COptimizedKPSetIndividualItem* item) {
 				mPossibleInstancesSet.insert(item);
 				return this;
 			}
@@ -188,10 +188,10 @@ namespace Konclude {
 				return !mPossibleInstancesSet.isEmpty();
 			}
 
-			COptimizedKPSetConceptInstantiatedItem* COptimizedKPSetConceptInstancesItem::takeNextTestingPossibleInstance() {
-				COptimizedKPSetConceptInstantiatedItem* nextItem = nullptr;
+			COptimizedKPSetIndividualItem* COptimizedKPSetConceptInstancesItem::takeNextTestingPossibleInstance() {
+				COptimizedKPSetIndividualItem* nextItem = nullptr;
 				if (hasPossibleInstances()) {
-					QSet<COptimizedKPSetConceptInstantiatedItem*>::iterator it = mPossibleInstancesSet.begin();
+					QSet<COptimizedKPSetIndividualItem*>::iterator it = mPossibleInstancesSet.begin();
 					nextItem = *it;
 					mPossibleInstancesSet.erase(it);
 				}

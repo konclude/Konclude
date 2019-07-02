@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -138,8 +138,30 @@ namespace Konclude {
 			}
 
 
+
+
+
+			CRealizationMessageObserver* CRealizerThread::tellRealizationMessage(CConcreteOntology *ontology, CRealizationMessageData* messageData, CMemoryPool* memoryPool) {
+				postEvent(new CRealizationMessageEvent(ontology,messageData,memoryPool));
+				return this;
+			}
+
+
+
 			bool CRealizerThread::processCustomsEvents(QEvent::Type type, CCustomEvent* event) {
 				if (CThread::processCustomsEvents(type,event)) {
+					return true;
+				} else if (type == CRealizationMessageEvent::EVENTTYPE) {
+					CRealizationMessageEvent* otcme = (CRealizationMessageEvent *)event;
+					CConcreteOntology* ontology = otcme->getOntology();
+					COntologyRealizingItem* ontRealItem = mOntItemHash.value(ontology,0);
+					if (ontRealItem) {
+						CRealizationMessageData* messageData = otcme->getMessageData();
+						CMemoryPool* memoryPools = otcme->getMemoryPool();
+						processRealizationMessage(ontRealItem,messageData,memoryPools);
+						mContext.getMemoryPoolAllocationManager()->releaseTemporaryMemoryPools(memoryPools);
+					}
+					doNextPendingTests();
 					return true;
 				} else if (type == CRealizeOntologyEvent::EVENTTYPE) {
 					CRealizeOntologyEvent* poe = (CRealizeOntologyEvent*)event;

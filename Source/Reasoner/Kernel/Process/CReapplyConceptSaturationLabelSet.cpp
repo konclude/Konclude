@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -43,14 +43,15 @@ namespace Konclude {
 					mConceptCount = 0;
 					mTotelCount = 0;
 					mModifiedUpdateLinker = nullptr;
+					mLastNominalIndepConSatDes = nullptr;
 					return this;
 				}
 
-				CReapplyConceptSaturationLabelSet* CReapplyConceptSaturationLabelSet::copyReapplyConceptSaturationLabelSet(CReapplyConceptSaturationLabelSet* copyConceptSaturationLabelSet) {
+				CReapplyConceptSaturationLabelSet* CReapplyConceptSaturationLabelSet::copyReapplyConceptSaturationLabelSet(CReapplyConceptSaturationLabelSet* copyConceptSaturationLabelSet, bool tryFlatLabelCopy) {
 					mConceptCount = copyConceptSaturationLabelSet->mConceptCount;
 					mTotelCount = copyConceptSaturationLabelSet->mTotelCount;
 					mConceptDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
-					if (copyConceptSaturationLabelSet->mConceptDesDepHash->count() >= ADDITIONALCOPYSIZE) {
+					if (copyConceptSaturationLabelSet->mConceptDesDepHash->count() >= ADDITIONALCOPYSIZE || tryFlatLabelCopy && copyConceptSaturationLabelSet->mConceptDesDepHash->count() > 0) {
 
 						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* tmpAdditionalConDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 						if (copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash) {
@@ -97,6 +98,7 @@ namespace Konclude {
 					mConceptDesDepHash->detach();
 					mAdditionalConceptDesDepHash = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash;
 					mConceptSatDesLinker = copyConceptSaturationLabelSet->mConceptSatDesLinker;
+					mLastNominalIndepConSatDes = copyConceptSaturationLabelSet->mLastNominalIndepConSatDes;
 					return this;
 				}
 
@@ -136,6 +138,9 @@ namespace Konclude {
 					return mConceptCount;
 				}
 
+				cint64 CReapplyConceptSaturationLabelSet::getTotalCount() {
+					return mTotelCount;
+				}
 
 				bool CReapplyConceptSaturationLabelSet::getConceptSaturationDescriptor(CConcept* concept, CConceptSaturationDescriptor*& conSatDes, CImplicationReapplyConceptSaturationDescriptor*& impReapplyConSatDes) {
 					return getConceptSaturationDescriptor(concept->getConceptTag(),conSatDes,impReapplyConSatDes);
@@ -255,6 +260,7 @@ namespace Konclude {
 						}
 						mConceptSatDesLinker = conSatDes->append(mConceptSatDesLinker);
 						++mConceptCount;
+						++mTotelCount;
 					} else if (conDesDepData.mConSatDes->isNegated() != conSatDes->isNegated()) {
 						return true;
 					} 
@@ -282,6 +288,9 @@ namespace Konclude {
 						}
 					}
 					bool triggered = conDesDepData.mConSatDes && !conDesDepData.mConSatDes->isNegated();
+					if (!conDesDepData.mImpReapplyConSatDes) {
+						++mTotelCount;
+					}
 					if (triggered) {
 						if (conSatDes) {
 							*conSatDes = conDesDepData.mConSatDes;
@@ -303,6 +312,22 @@ namespace Konclude {
 					} else {
 						return CReapplyConceptSaturationLabelSetIterator(mConceptDesDepHash->begin(),mConceptDesDepHash->end(),mConceptDesDepHash->end(),mConceptDesDepHash->end(),iterateConSatDes,iterateReapplies);
 					}
+				}
+
+
+				bool CReapplyConceptSaturationLabelSet::areAllConceptsInAdditionalHash() {
+					return mConceptDesDepHash->isEmpty();
+				}
+
+
+
+				CConceptSaturationDescriptor* CReapplyConceptSaturationLabelSet::getLastNominalIndependentConceptSaturationDescriptorLinker() {
+					return mLastNominalIndepConSatDes;
+				}
+
+				CReapplyConceptSaturationLabelSet* CReapplyConceptSaturationLabelSet::setLastNominalIndependentConceptSaturationDescriptorLinker(CConceptSaturationDescriptor* conSatDes) {
+					mLastNominalIndepConSatDes = conSatDes;
+					return this;
 				}
 
 

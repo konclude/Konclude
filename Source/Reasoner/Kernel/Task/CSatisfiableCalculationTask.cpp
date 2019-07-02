@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -71,8 +71,12 @@ namespace Konclude {
 					depSatCalcTask->mProcessingDataBox->initProcessingDataBox(mProcessingDataBox);
 					depSatCalcTask->mProcessContext->referenceProcessContext(mProcessContext);
 					depSatCalcTask->mConsAdapter = mConsAdapter;
-					depSatCalcTask->mSatSubIdAdapter = mSatSubIdAdapter;
 					depSatCalcTask->mClassMessAdapter = mClassMessAdapter;
+					depSatCalcTask->mIndiAnalAdapter = mIndiAnalAdapter;
+					depSatCalcTask->mRealMessAdapter = mRealMessAdapter;
+					depSatCalcTask->mSatIncConsTestingAdapter = mSatIncConsTestingAdapter;
+					depSatCalcTask->mSatIndDepTrackAdapter = mSatIndDepTrackAdapter;
+					depSatCalcTask->mPossAssCollAdapter = mPossAssCollAdapter;
 					return this;
 				}
 
@@ -80,8 +84,11 @@ namespace Konclude {
 					mProcessContext = nullptr;
 					mProcessingDataBox = nullptr;
 					mConsAdapter = nullptr;
-					mSatSubIdAdapter = nullptr;
+					mIndiAnalAdapter = nullptr;
 					mClassMessAdapter = nullptr;
+					mRealMessAdapter = nullptr;
+					mPossAssCollAdapter = nullptr;
+					mSatIncConsTestingAdapter = nullptr;
 					getProcessContext(context);
 					mProcessingDataBox = CObjectParameterizingAllocator< CProcessingDataBox,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 					CTask::initTask(parentTask,context);
@@ -91,8 +98,12 @@ namespace Konclude {
 				CSatisfiableCalculationTask* CSatisfiableCalculationTask::initSatisfiableCalculationTask(CConcreteOntology* ontology, CCalculationConfigurationExtension* calculationConfig, CCalculationStatisticsCollector* calcStatCollector, CTaskHandleContext* context) {
 					initTask(nullptr,context);
 					mConsAdapter = nullptr;
-					mSatSubIdAdapter = nullptr;
+					mIndiAnalAdapter = nullptr;
 					mClassMessAdapter = nullptr;
+					mRealMessAdapter = nullptr;
+					mPossAssCollAdapter = nullptr;
+					mSatIncConsTestingAdapter = nullptr;
+					mSatIndDepTrackAdapter = nullptr;
 					mCalcStatColl = calcStatCollector;
 					mCalculationConfig = calculationConfig;
 					mProcessingDataBox->initProcessingDataBox(ontology);
@@ -103,8 +114,11 @@ namespace Konclude {
 				CSatisfiableCalculationTask* CSatisfiableCalculationTask::initUndependedSatisfiableCalculationTask(CSatisfiableCalculationTask* baseTask, CCalculationConfigurationExtension* calculationConfig, CCalculationStatisticsCollector* calcStatCollector, CTaskHandleContext* context) {
 					initTask(nullptr,context);
 					mConsAdapter = nullptr;
-					mSatSubIdAdapter = nullptr;
+					mIndiAnalAdapter = nullptr;
 					mClassMessAdapter = nullptr;
+					mRealMessAdapter = nullptr;
+					mSatIncConsTestingAdapter = nullptr;
+					mSatIndDepTrackAdapter = nullptr;
 					mCalcStatColl = calcStatCollector;
 					mCalculationConfig = calculationConfig;
 					mProcessingDataBox->initProcessingDataBox(baseTask->mProcessingDataBox);
@@ -164,14 +178,13 @@ namespace Konclude {
 					return mConsAdapter;
 				}
 
-
-				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setSatisfiableSubsumptionIdentifierAdapter(CSatisfiableSubsumptionIdentifierAdapter* satSubIdObserver) {
-					mSatSubIdAdapter = satSubIdObserver;
+				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setSaturationIndividualsAnalysationObserver(CSaturationIndividualsAnalysingAdapter* indiAnalAdapter) {
+					mIndiAnalAdapter = indiAnalAdapter;
 					return this;
 				}
 
-				CSatisfiableSubsumptionIdentifierAdapter* CSatisfiableCalculationTask::getSatisfiableSubsumptionIdentifierAdapter() {
-					return mSatSubIdAdapter;
+				CSaturationIndividualsAnalysingAdapter* CSatisfiableCalculationTask::getSaturationIndividualsAnalysationObserver() {
+					return mIndiAnalAdapter;
 				}
 
 				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setClassificationMessageAdapter(CSatisfiableTaskClassificationMessageAdapter* classMessAdapter) {
@@ -189,7 +202,7 @@ namespace Konclude {
 				}
 
 				bool CSatisfiableCalculationTask::isCalculationTableauSaturationTask() {
-					return getTaskType() == CALCULATIONTABLEAUDEFAULTSATURATIONTASK;
+					return getTaskType() == CALCULATIONTABLEAUAPPROXIMATEDSATURATIONTASK;
 				}
 
 				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setCalculationTaskType(cint64 taskType) {
@@ -201,6 +214,42 @@ namespace Konclude {
 					return getTaskType();
 				}
 
+				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setRealizationMarkedCandidatesMessageAdapter(CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* realMessObserver) {
+					mRealMessAdapter = realMessObserver;
+					return this;
+				}
+
+				CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* CSatisfiableCalculationTask::getRealizationMarkedCandidatesMessageAdapter() {
+					return mRealMessAdapter;
+				}
+
+
+				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setSatisfiableTaskIncrementalConsistencyTestingAdapter(CSatisfiableTaskIncrementalConsistencyTestingAdapter* incConsTestAdaptor) {
+					mSatIncConsTestingAdapter = incConsTestAdaptor;
+					return this;
+				}
+
+				CSatisfiableTaskIncrementalConsistencyTestingAdapter* CSatisfiableCalculationTask::getSatisfiableTaskIncrementalConsistencyTestingAdapter() {
+					return mSatIncConsTestingAdapter;
+				}
+
+				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setSatisfiableTaskIndividualDependenceTrackingAdapter(CSatisfiableTaskIndividualDependenceTrackingAdapter* indDepTrackAdaptor) {
+					mSatIndDepTrackAdapter = indDepTrackAdaptor;
+					return this;
+				}
+
+				CSatisfiableTaskIndividualDependenceTrackingAdapter* CSatisfiableCalculationTask::getSatisfiableTaskIndividualDependenceTrackingAdapter() {
+					return mSatIndDepTrackAdapter;
+				}
+
+				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setPossibleAssertionCollectionAdapter(CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* possAssCollAdapter) {
+					mPossAssCollAdapter = possAssCollAdapter;
+					return this;
+				}
+
+				CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* CSatisfiableCalculationTask::getPossibleAssertionCollectionAdapter() {
+					return mPossAssCollAdapter;
+				}
 
 			}; // end namespace Task
 

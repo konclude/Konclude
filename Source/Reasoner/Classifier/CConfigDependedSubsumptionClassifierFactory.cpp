@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -40,8 +40,13 @@ namespace Konclude {
 				CSubsumptionClassifier *classifier = 0;
 				bool automatedClassifierSelection = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.AutomatedOptimizedClassifierSelection",true);
 				if (automatedClassifierSelection) {
-					if (isClassificationBySaturationCalculationSufficient(ontology,config)) {
-						LOG(INFO,"::Konclude::Reasoner::Classifier::Factory",logTr("Ontology '%1' has EL structure, using tableau saturation for classification.").arg(ontology->getOntologyName()),this);
+
+					bool onlyChangedABoxAxioms = ontology->getIncrementalRevisionData()->getAxiomChangeData()->hasOnlyChangedABoxAxioms();
+					bool previousClassifiedOntologyVersion = ontology->getIncrementalRevisionData()->getPreviousClassesClassifiedOntology() != nullptr;
+					if (previousClassifiedOntologyVersion && onlyChangedABoxAxioms) {
+						classifier = new CIncrementalKPSetClassSubsumptionClassifierThread(reasonerMan);
+					} else if (isClassificationBySaturationCalculationSufficient(ontology,config)) {
+						LOG(INFO,"::Konclude::Reasoner::Classifier::Factory",logTr("Ontology '%1' has been sufficiently saturated, extracting data for classification.").arg(ontology->getOntologyName()),this);
 						classifier = new COptimizedClassExtractedSaturationSubsumptionClassifierThread(reasonerMan);
 					} else if (isClassificationBySatisfiableCalculationSufficient(ontology,config)) {
 						LOG(INFO,"::Konclude::Reasoner::Classifier::Factory",logTr("Ontology '%1' is deterministic, using satisfiable tests for classification.").arg(ontology->getOntologyName()),this);
@@ -51,9 +56,7 @@ namespace Konclude {
 				if (!classifier) {
 					QString classifierName = CConfigDataReader::readConfigString(config,"Konclude.Calculation.Classification.Classifier","Konclude.Calculation.Classification.Classifier.OptimizedKPSetClassClassifier");
 
-					if (classifierName == "Konclude.Calculation.Classification.Classifier.OptimizedClassSaturationClassifier") {
-						classifier = new COptimizedClassSaturationSubsumptionClassifierThread(reasonerMan);
-					} else if (classifierName == "Konclude.Calculation.Classification.Classifier.OptimizedSubClassClassifier") {
+					if (classifierName == "Konclude.Calculation.Classification.Classifier.OptimizedSubClassClassifier") {
 						classifier = new COptimizedSubClassSubsumptionClassifierThread(reasonerMan);
 					} else if (classifierName == "Konclude.Calculation.Classification.Classifier.OptimizedKPSetClassClassifier") {
 						classifier = new COptimizedKPSetClassSubsumptionClassifierThread(reasonerMan);

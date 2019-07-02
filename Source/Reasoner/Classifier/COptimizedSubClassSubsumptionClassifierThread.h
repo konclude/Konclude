@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,7 +30,6 @@
 #include "CSubsumptionClassifierThread.h"
 #include "CPartialPruningTaxonomy.h"
 #include "CClassificationWorkItem.h"
-#include "CInterceptResultCallbackDataContext.h"
 #include "COptimizedSubClassOntologyClassificationItem.h"
 #include "CClassificationSubsumptionMessageData.h"
 #include "CPrecomputedSaturationSubsumerExtractor.h"
@@ -43,6 +42,9 @@
 #include "Reasoner/Ontology/CConceptSaturationReferenceLinkingData.h"
 
 #include "Reasoner/Generator/CSatisfiableCalculationJobGenerator.h"
+
+#include "Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCache.h"
+#include "Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheReader.h"
 
 #include "KoncludeSettings.h"
 
@@ -66,6 +68,7 @@ namespace Konclude {
 
 		using namespace Kernel;
 		using namespace Task;
+		using namespace Cache;
 
 		namespace Classifier {
 
@@ -114,8 +117,6 @@ namespace Konclude {
 
 					virtual bool interpreteTestResults(CTestCalculatedCallbackEvent *testResult);
 					
-					virtual bool interceptTestResults(CInterceptOntologyTestResultEvent *interceptResult);
-
 					virtual bool createNextSubsumtionTest();
 					virtual CTaxonomy *createEmptyTaxonomyForOntology(CConcreteOntology *ontology, CConfigurationBase *config);
 
@@ -131,6 +132,11 @@ namespace Konclude {
 
 					virtual bool processToldClassificationMessage(COntologyClassificationItem *ontClassItem, CClassificationMessageData* messageData, CMemoryPool* memoryPools);
 
+					CIndividualSaturationProcessNode* getSaturationIndividualNodeForConcept(CConcept* concept, bool negated);
+					bool hasCachedSaturationIndividualNodeAssociatedExpansionProplematicConcept(CCacheEntry* cacheEntry, CConcept* testingConcept);
+					CCacheEntry* getAssociatedSaturationCacheEntry(COptimizedSubClassSatisfiableTestingItem* classConItem);
+
+
 				// protected variables
 				protected:
 					QHash<CClassificationWorkItem *, COntologyClassificationItem *> workOntItemHash;
@@ -145,6 +151,12 @@ namespace Konclude {
 					QTime classStartTime;
 
 					QSet<QPair<CConcept *, CConcept *> > subsumCalcedSet;
+
+					CSaturationNodeAssociatedExpansionCache* mSatNodeExpCache;
+					CSaturationNodeAssociatedExpansionCacheReader* mSatNodeExpCacheReader;
+
+					cint64 mStatFastSubClassCheckCacheTryCount;
+					cint64 mStatFastSubClassCheckCacheSuccCount;
 
 
 				// private methods

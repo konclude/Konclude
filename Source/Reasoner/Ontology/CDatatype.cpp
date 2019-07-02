@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -41,6 +41,7 @@ namespace Konclude {
 				mValueSpaceType = nullptr;
 				mNormalized = false;
 				mBasicDatatpyeType = DBT_NON;
+				mDatatpyeType = DT_NON;
 				return this;
 			}
 
@@ -52,6 +53,7 @@ namespace Konclude {
 				mValueSpaceType = nullptr;
 				mNormalized = false;
 				mBasicDatatpyeType = DBT_NON;
+				mDatatpyeType = DT_NON;
 				return this;
 			}
 
@@ -65,6 +67,14 @@ namespace Konclude {
 				return this;
 			}
 
+			CDatatype::DATATYPE_TYPE CDatatype::getDatatypeType() {
+				return mDatatpyeType;
+			}
+
+			CDatatype* CDatatype::setDatatypeType(CDatatype::DATATYPE_TYPE datatpyeType) {
+				mDatatpyeType = datatpyeType;
+				return this;
+			}
 
 			CDatatype* CDatatype::setDatatypeTag(qint64 datatypeTag) {
 				CTagItem::setTag(datatypeTag);

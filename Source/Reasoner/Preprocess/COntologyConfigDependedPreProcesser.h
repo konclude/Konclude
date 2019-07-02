@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -50,6 +50,7 @@
 #include "CDisjunctSortingPreProcess.h"
 #include "CDataLiteralNormalizerPreProcess.h"
 #include "CDatatypeNormalizerPreProcess.h"
+#include "CReverseRoleAssertionGeneratorPreProcess.h"
 
 // Other includes
 #include "Config/CConfigDataReader.h"

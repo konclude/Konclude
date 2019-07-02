@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -34,45 +34,6 @@ namespace Konclude {
 		COWLlinkQueryExtensionParser::~COWLlinkQueryExtensionParser() {
 		}
 
-
-
-		CTaxonomyPremisingQuerySupport *COWLlinkQueryExtensionParser::parseTaxonomyQuerySupport(CConcreteOntology *ontology, QDomElement *queryNode) {
-			CTaxonomyPremisingQuerySupport *taxSupport = 0;
-			QDomElement calcSupportNode = queryNode->firstChildElement("TaxonomyCalculationSupport");
-			if (!calcSupportNode.isNull()) {
-				CClassificationCalculationSupport *calcSupp = parseTaxonomyCalculationSupport(ontology,&calcSupportNode);
-				if (calcSupp && !taxSupport) {
-					taxSupport = new CTaxonomyPremisingQuerySupport(calcSupp);
-				}
-			}
-			return taxSupport;
-		}
-
-		CClassificationCalculationSupport *COWLlinkQueryExtensionParser::parseTaxonomyCalculationSupport(CConcreteOntology *ontology, QDomElement *node) {
-			CConcreteOntology* conOnto = dynamic_cast<CConcreteOntology*>(ontology);
-			CClassificationCalculationSupport *calcSupp = 0;
-			COWLlinkQtXMLResultParser restultParser;
-			CQueryResult *queryResult = restultParser.parseQueryResult(node);
-			if (queryResult) {
-				CClassHierarchyResult *classHierarchyResult = dynamic_cast<CClassHierarchyResult *>(queryResult);
-				if (classHierarchyResult) {
-					QString completeTaxAttString = node->attribute("completeness");
-					bool x = node->hasAttribute("completeness");
-					QString name = node->tagName();
-					bool completeTax = completeTaxAttString.toUpper() == "ALLEXISTINGSUBSUMPTIONSLISTED";
-					calcSupp = new CClassificationCalculationSupport();
-					CPartialPruningTaxonomy *tax = new CPartialPruningTaxonomy(conOnto->getDataBoxes()->getTBox()->getTopConcept(),conOnto->getDataBoxes()->getTBox()->getBottomConcept());
-					classHierarchyResult->fillTaxonomy(ontology,tax);
-					if (completeTax) {
-						tax->completeUnknownAsNonSubsumptions();
-					}
-					CTaxonomySatisfiableSubsumptionCalculationSponsor *satisSubsumSponsor = new CTaxonomySatisfiableSubsumptionCalculationSponsor(tax);
-					calcSupp->setSubsumptionCalculationSponsor(satisSubsumSponsor);
-					calcSupp->useSatisfiableCalculationSponsor(satisSubsumSponsor);
-				}
-			}
-			return calcSupp;
-		}
 
 
 

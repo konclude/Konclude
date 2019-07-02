@@ -1614,6 +1614,30 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetClassAssertionsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetClassAssertionsExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetDeterministicClassAssertionsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetDeterministicClassAssertionsExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetDeterministicIndividualsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetDeterministicIndividualsExpression.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Parser\Expressions\CQueryGetEquivalentClassesExpression.cpp"
 							>
 						</File>
@@ -1630,6 +1654,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetFlattenedObjectPropertyTargetsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetFlattenedObjectPropertyTargetsExpression.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Parser\Expressions\CQueryGetFlattenedTypesExpression.cpp"
 							>
 						</File>
@@ -1643,6 +1675,38 @@
 						</File>
 						<File
 							RelativePath=".\Source\Parser\Expressions\CQueryGetInstancesExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetNondeterministicClassAssertionsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetNondeterministicClassAssertionsExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetNondeterministicIndividualsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetNondeterministicIndividualsExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetObjectPropertyTargetsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetObjectPropertyTargetsExpression.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetSameIndividualsExpression.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Parser\Expressions\CQueryGetSameIndividualsExpression.h"
 							>
 						</File>
 						<File
@@ -2858,6 +2922,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\CConceptNegationPair.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CConceptNegationPair.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\CConceptOperator.cpp"
 							>
 						</File>
@@ -3386,6 +3458,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualBackendCachingData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualBackendCachingData.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\CIndividualData.cpp"
 							>
 						</File>
@@ -3402,6 +3482,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualDependenceTracking.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualDependenceTracking.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\CIndividualDependenceVector.cpp"
 							>
 						</File>
@@ -3415,6 +3503,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Ontology\CIndividualProcessData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualSaturationReferenceLinkingData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CIndividualSaturationReferenceLinkingData.h"
 							>
 						</File>
 						<File
@@ -3506,6 +3602,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyBuildExpressionCounter.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyBuildExpressionCounter.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\COntologyContext.cpp"
 							>
 						</File>
@@ -3546,6 +3650,22 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyIncrementalAxiomChangeData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyIncrementalAxiomChangeData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyIncrementalRevisionData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyIncrementalRevisionData.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Ontology\COntologyInspector.cpp"
 							>
 						</File>
@@ -3583,6 +3703,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Ontology\COntologyProcessingRequirementExpander.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyProcessingStatistics.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\COntologyProcessingStatistics.h"
 							>
 						</File>
 						<File
@@ -3687,6 +3815,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Ontology\CReplacementData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CReverseRoleAssertionLinker.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Ontology\CReverseRoleAssertionLinker.h"
 							>
 						</File>
 						<File
@@ -3954,6 +4090,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Query\CClassAssertionQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CClassAssertionQuery.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Query\CClassesResult.cpp"
 							>
 						</File>
@@ -4034,6 +4178,30 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Query\CDeterministicClassAssertionQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CDeterministicClassAssertionQuery.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CDeterministicIndividualsQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CDeterministicIndividualsQuery.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CDeterministicNondeterministicIndividualsQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CDeterministicNondeterministicIndividualsQuery.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Query\CEquivalentClassesQuery.cpp"
 							>
 						</File>
@@ -4050,11 +4218,27 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Query\CFlattenedObjectPropertyTargetsQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CFlattenedObjectPropertyTargetsQuery.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Query\CFlattenedTypesQuery.cpp"
 							>
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Query\CFlattenedTypesQuery.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CIndividualClassAssertionsResult.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CIndividualClassAssertionsResult.h"
 							>
 						</File>
 						<File
@@ -4071,6 +4255,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Query\CIndividualsResultVisitorGenerator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CIndividualSynonymsResult.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CIndividualSynonymsResult.h"
 							>
 						</File>
 						<File
@@ -4138,6 +4330,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Query\CIsTriviallyConsistentQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CIsTriviallyConsistentQuery.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Query\CJobProvidedQuery.cpp"
 							>
 						</File>
@@ -4159,6 +4359,30 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Query\CJobSatisfiableResult.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CNondeterministicClassAssertionQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CNondeterministicClassAssertionQuery.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CNondeterministicIndividualsQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CNondeterministicIndividualsQuery.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CObjectPropertyTargetsQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CObjectPropertyTargetsQuery.h"
 							>
 						</File>
 						<File
@@ -4266,6 +4490,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Query\CSameIndividualsQuery.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Query\CSameIndividualsQuery.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Query\CSatisfiableCalculationConceptConstruct.cpp"
 							>
 						</File>
@@ -4311,14 +4543,6 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Query\CSaturationCalculationConstruct.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Query\CSaturationCalculationJob.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Query\CSaturationCalculationJob.h"
 							>
 						</File>
 						<File
@@ -4426,6 +4650,158 @@
 							>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Cache\CacheSettings.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendCache.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendCache.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendCacheWriteData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendCacheWriteData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCache.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCache.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheContext.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheContext.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheIndividualAssociationData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheIndividualAssociationData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheLabelAssociationWriteData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheLabelAssociationWriteData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheReader.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheReader.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheSlotItem.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheSlotItem.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheWriteData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheWriteData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheWriter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheWriter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCardinalityCacheItem.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCardinalityCacheItem.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCardinalityValueLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCardinalityValueLinker.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryLabelCacheItem.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryLabelCacheItem.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryLabelSignatureResolveCacheItem.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryLabelSignatureResolveCacheItem.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryLabelValueLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryLabelValueLinker.h"
 								>
 							</File>
 							<File
@@ -4741,6 +5117,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationCache.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationCache.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Cache\CSaturationNodeAssociatedConceptExpansion.cpp"
 								>
 							</File>
@@ -4968,6 +5352,22 @@
 								Name="Events"
 								>
 								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CRetrieveIncompletelyAssociationCachedEvent.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CRetrieveIncompletelyAssociationCachedEvent.h"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteBackendAssociationCachedEvent.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteBackendAssociationCachedEvent.h"
+									>
+								</File>
+								<File
 									RelativePath=".\Source\Reasoner\Kernel\Cache\Events\CWriteCachedDataEvent.cpp"
 									>
 								</File>
@@ -5129,6 +5529,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CIncrementalConsistenceTaskData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CIncrementalConsistenceTaskData.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableCalculationJobInstantiation.cpp"
 								>
 							</File>
@@ -5161,19 +5569,51 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableSubsumptionIdentifierAdapter.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableSubsumptionIdentifierAdapter.h"
-								>
-							</File>
-							<File
 								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskClassificationMessageAdapter.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskClassificationMessageAdapter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskIncrementalConsistencyTestingAdapter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskIncrementalConsistencyTestingAdapter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskIndividualDependenceTrackingAdapter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskIndividualDependenceTrackingAdapter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSaturationIndividualsAnalysingAdapter.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Task\CSaturationIndividualsAnalysingAdapter.h"
 								>
 							</File>
 							<File
@@ -5277,22 +5717,6 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CCalculationTableauPilingSaturationTaskHandleAlgorithm.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CCalculationTableauPilingSaturationTaskHandleAlgorithm.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CCalculationTableauSaturationTaskHandleAlgorithm.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CCalculationTableauSaturationTaskHandleAlgorithm.h"
-								>
-							</File>
-							<File
 								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CClashDescriptorFactory.cpp"
 								>
 							</File>
@@ -5354,6 +5778,22 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CDependencyFactory.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIncrementalCompletionGraphCompatibleExpansionHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIncrementalCompletionGraphCompatibleExpansionHandler.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualNodeBackendCacheHandler.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CIndividualNodeBackendCacheHandler.h"
 								>
 							</File>
 							<File
@@ -5509,19 +5949,35 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskMultiSubsumptionIdentifierAnalyser.cpp"
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskIncrementalConsistencyPreyingAnalyser.cpp"
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskMultiSubsumptionIdentifierAnalyser.h"
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskIncrementalConsistencyPreyingAnalyser.h"
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskPilingSaturationSubsumptionIdentifierAnalyser.cpp"
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskMarkerIndividualPropagationAnalyser.cpp"
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskPilingSaturationSubsumptionIdentifierAnalyser.h"
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskMarkerIndividualPropagationAnalyser.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskPossibleAssertionCollectingAnalyser.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskPossibleAssertionCollectingAnalyser.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskSaturationIndividualsAnalyser.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskSaturationIndividualsAnalyser.h"
 								>
 							</File>
 							<File
@@ -5533,11 +5989,11 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskSaturationSubsumptionIdentifierAnalyser.cpp"
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSaturationNodeBackendAssociationCacheHandler.cpp"
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSatisfiableTaskSaturationSubsumptionIdentifierAnalyser.h"
+								RelativePath=".\Source\Reasoner\Kernel\Algorithm\CSaturationNodeBackendAssociationCacheHandler.h"
 								>
 							</File>
 							<File
@@ -5585,27 +6041,19 @@
 							Name="Process"
 							>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CAdditionalProcessRoleAssertionsLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CAdditionalProcessRoleAssertionsLinker.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CAnalizedConceptExpansionLinker.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CAnalizedConceptExpansionLinker.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CBackwardPilingPropagationLink.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CBackwardPilingPropagationLink.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CBackwardPilingPropagationReapplyDescriptor.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CBackwardPilingPropagationReapplyDescriptor.h"
 								>
 							</File>
 							<File
@@ -5878,30 +6326,6 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CConceptNominalSchemaGroundingHasher.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CConceptPilingDescriptor.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CConceptPilingDescriptor.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CConceptPilingDescriptorReapplyData.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CConceptPilingDescriptorReapplyData.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CConceptPilingProcessLinker.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CConceptPilingProcessLinker.h"
 								>
 							</File>
 							<File
@@ -6226,6 +6650,22 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CCriticalIndividualNodeProcessingQueue.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CCriticalPredecessorRoleCardinalityData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CCriticalPredecessorRoleCardinalityData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CCriticalPredecessorRoleCardinalityHash.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CCriticalPredecessorRoleCardinalityHash.h"
 								>
 							</File>
 							<File
@@ -6637,14 +7077,6 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CImplicationReapplyConceptPilingDescriptor.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CImplicationReapplyConceptPilingDescriptor.h"
-								>
-							</File>
-							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CImplicationReapplyConceptSaturationDescriptor.cpp"
 								>
 							</File>
@@ -6666,6 +7098,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualConceptBatchProcessingQueue.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualCustomPriorityProcessingQueue.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualCustomPriorityProcessingQueue.h"
 								>
 							</File>
 							<File
@@ -6709,11 +7149,27 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualMergingHash.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualMergingHash.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeAnalizedConceptExpansionData.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeAnalizedConceptExpansionData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeBackendCacheSynchronisationData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeBackendCacheSynchronisationData.h"
 								>
 							</File>
 							<File
@@ -6741,11 +7197,27 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeIncrementalExpansionData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeIncrementalExpansionData.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeModelData.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeModelData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData.h"
 								>
 							</File>
 							<File
@@ -6838,30 +7310,6 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualNodeUnsatisfiableOccurenceCacheRetrievalData.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualPilingProcessNode.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualPilingProcessNode.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualPilingProcessNodeLinker.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualPilingProcessNodeLinker.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualPilingProcessNodeVector.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualPilingProcessNodeVector.h"
 								>
 							</File>
 							<File
@@ -7021,6 +7469,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualSaturationSuccessorLinkDataLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualSaturationSuccessorLinkDataLinker.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CIndividualUnsortedProcessingQueue.cpp"
 								>
 							</File>
@@ -7034,14 +7490,6 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CLinkEdge.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CLinkedRolePilingSuccessorHash.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CLinkedRolePilingSuccessorHash.h"
 								>
 							</File>
 							<File
@@ -7074,6 +7522,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CLocalizationTag.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CMarkerIndividualNodeHash.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CMarkerIndividualNodeHash.h"
 								>
 							</File>
 							<File
@@ -7130,14 +7586,6 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CNominalCachingLossReactivationHashData.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CPilingDepth.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CPilingDepth.h"
 								>
 							</File>
 							<File
@@ -7393,22 +7841,6 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CReapplyConceptPilingLabelSet.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CReapplyConceptPilingLabelSet.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CReapplyConceptPilingLabelSetIterator.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CReapplyConceptPilingLabelSetIterator.h"
-								>
-							</File>
-							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CReapplyConceptSaturationLabelSet.cpp"
 								>
 							</File>
@@ -7490,6 +7922,22 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CReapplyRoleSuccessorHash.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CReferredIndividualTrackingData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CReferredIndividualTrackingData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CReferredIndividualTrackingVector.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CReferredIndividualTrackingVector.h"
 								>
 							</File>
 							<File
@@ -7757,22 +8205,6 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CRoleBackwardPilingPropagationHash.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CRoleBackwardPilingPropagationHash.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CRoleBackwardPilingPropagationHashData.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Kernel\Process\CRoleBackwardPilingPropagationHashData.h"
-								>
-							</File>
-							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CRoleBackwardPropagationHash.cpp"
 								>
 							</File>
@@ -7957,6 +8389,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationIndividualNodeDatatypeData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationIndividualNodeDatatypeData.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationIndividualNodeExtensionResolveData.cpp"
 								>
 							</File>
@@ -8077,6 +8517,22 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationPredecessorFUNCTIONALConceptExtensionData.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationPredecessorFUNCTIONALConceptExtensionData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationPredecessorRoleFUNCTIONALConceptsExtensionHash.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationPredecessorRoleFUNCTIONALConceptsExtensionHash.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationSuccessorALLConceptExtensionData.cpp"
 								>
 							</File>
@@ -8130,6 +8586,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationSuccessorFUNCTIONALConceptExtensionData.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationSuccessorRoleAssertionLinker.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Kernel\Process\CSaturationSuccessorRoleAssertionLinker.h"
 								>
 							</File>
 							<File
@@ -8748,6 +9212,14 @@
 									>
 								</File>
 								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CMERGEDIndividualDependencyNode.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CMERGEDIndividualDependencyNode.h"
+									>
+								</File>
+								<File
 									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CMERGEDLINKDependencyNode.cpp"
 									>
 								</File>
@@ -8989,6 +9461,14 @@
 								</File>
 								<File
 									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CREUSEINDIVIDUALDependencyNode.h"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CROLEASSERTIONDependencyNode.cpp"
+									>
+								</File>
+								<File
+									RelativePath=".\Source\Reasoner\Kernel\Process\Dependency\CROLEASSERTIONDependencyNode.h"
 									>
 								</File>
 								<File
@@ -9638,6 +10118,14 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Preprocess\CReverseRoleAssertionGeneratorPreProcess.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Preprocess\CReverseRoleAssertionGeneratorPreProcess.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Preprocess\CRoleChainAutomataTransformationPreProcess.cpp"
 							>
 						</File>
@@ -9970,35 +10458,11 @@
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptNecessaryIdentifierOccurrenceObserver.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptNecessaryIdentifierOccurrenceObserver.h"
-							>
-						</File>
-						<File
 							RelativePath=".\Source\Reasoner\Classifier\CConceptNegationOverRoleTuble.cpp"
 							>
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Classifier\CConceptNegationOverRoleTuble.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptNegationPair.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptNegationPair.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptPossibleSubsumptionsOccurrenceObserver.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptPossibleSubsumptionsOccurrenceObserver.h"
 							>
 						</File>
 						<File
@@ -10018,14 +10482,6 @@
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptSubsumptionRelationObserver.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CConceptSubsumptionRelationObserver.h"
-							>
-						</File>
-						<File
 							RelativePath=".\Source\Reasoner\Classifier\CConfigDependedSubsumptionClassifierFactory.cpp"
 							>
 						</File>
@@ -10034,11 +10490,19 @@
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Classifier\CInterceptResultCallbackDataContext.cpp"
+							RelativePath=".\Source\Reasoner\Classifier\CIncrementalKPSetClassOntologyClassificationItem.cpp"
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Classifier\CInterceptResultCallbackDataContext.h"
+							RelativePath=".\Source\Reasoner\Classifier\CIncrementalKPSetClassOntologyClassificationItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\CIncrementalKPSetClassSubsumptionClassifierThread.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\CIncrementalKPSetClassSubsumptionClassifierThread.h"
 							>
 						</File>
 						<File
@@ -10126,30 +10590,6 @@
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Classifier\COptimizedClassSaturationOntologyClassificationItem.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\COptimizedClassSaturationOntologyClassificationItem.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\COptimizedClassSaturationSatisfiableTestingItem.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\COptimizedClassSaturationSatisfiableTestingItem.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\COptimizedClassSaturationSubsumptionClassifierThread.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\COptimizedClassSaturationSubsumptionClassifierThread.h"
-							>
-						</File>
-						<File
 							RelativePath=".\Source\Reasoner\Classifier\COptimizedConceptSaturationSatisfiableTestingItem.cpp"
 							>
 						</File>
@@ -10206,6 +10646,54 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRoleOntologyClassificationItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRoleOntologyClassificationItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRolePossibleSubsumptionData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRolePossibleSubsumptionData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRolePossibleSubsumptionMap.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRolePossibleSubsumptionMap.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRolePossibleSubsumptionMapIterator.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRolePossibleSubsumptionMapIterator.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRoleSubsumptionClassifierThread.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRoleSubsumptionClassifierThread.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRoleTestingItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Classifier\COptimizedKPSetRoleTestingItem.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Classifier\COptimizedSubClassOntologyClassificationItem.cpp"
 							>
 						</File>
@@ -10254,30 +10742,6 @@
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Classifier\CQuasiOrderingSubsumptionClassifierThread.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CQuasiOrderingSubsumptionClassifierThread.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CSatisfiableCalculationSponsor.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CSatisfiableCalculationSponsor.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CSubsumptionCalculationSponsor.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CSubsumptionCalculationSponsor.h"
-							>
-						</File>
-						<File
 							RelativePath=".\Source\Reasoner\Classifier\CSubsumptionClassifier.cpp"
 							>
 						</File>
@@ -10301,14 +10765,6 @@
 							RelativePath=".\Source\Reasoner\Classifier\CSubsumptionClassifierThread.h"
 							>
 						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CTaxonomySatisfiableSubsumptionCalculationSponsor.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Classifier\CTaxonomySatisfiableSubsumptionCalculationSponsor.h"
-							>
-						</File>
 						<Filter
 							Name="Events"
 							>
@@ -10329,67 +10785,11 @@
 								>
 							</File>
 							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\CInterceptOntologyTestResultEvent.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\CInterceptOntologyTestResultEvent.h"
-								>
-							</File>
-							<File
 								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellClassificationMessageEvent.cpp"
 								>
 							</File>
 							<File
 								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellClassificationMessageEvent.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptDisjointEvent.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptDisjointEvent.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptNecessaryIdentifierOccurrenceEvent.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptNecessaryIdentifierOccurrenceEvent.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptPossibleSubsumptionsOccurrenceEvent.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptPossibleSubsumptionsOccurrenceEvent.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptSatisfiableEvent.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptSatisfiableEvent.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptSubsumtionEvent.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\COntologyTellConceptSubsumtionEvent.h"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\CSaturationCalculatedCallbackEvent.cpp"
-								>
-							</File>
-							<File
-								RelativePath=".\Source\Reasoner\Classifier\Events\CSaturationCalculatedCallbackEvent.h"
 								>
 							</File>
 							<File
@@ -10558,11 +10958,43 @@
 						Name="Realizer"
 						>
 						<File
-							RelativePath=".\Source\Reasoner\Realizer\CIndividualInstanceTestingItem.cpp"
+							RelativePath=".\Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingItem.cpp"
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Realizer\CIndividualInstanceTestingItem.h"
+							RelativePath=".\Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingThread.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingThread.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualConceptInstanceTestingItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualConceptInstanceTestingItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualPairRoleInstanceTestingItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualPairRoleInstanceTestingItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualRoleCandidateTestingItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualRoleCandidateTestingItem.h"
 							>
 						</File>
 						<File
@@ -10571,6 +11003,14 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Realizer\CIndividualSameTestingItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualsConsistencyTestingItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CIndividualsConsistencyTestingItem.h"
 							>
 						</File>
 						<File
@@ -10614,11 +11054,19 @@
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetConceptInstantiatedItem.cpp"
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetIndividualItem.cpp"
 							>
 						</File>
 						<File
-							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetConceptInstantiatedItem.h"
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetIndividualItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetIndividualItemPair.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetIndividualItemPair.h"
 							>
 						</File>
 						<File
@@ -10635,6 +11083,86 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetOntologyConceptRealizingThread.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesHash.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesHash.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesHashData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesHashData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesRedirectionItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleInstancesRedirectionItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleNeighbourInstancesHash.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleNeighbourInstancesHash.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleNeighbourInstancesHashData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\COptimizedKPSetRoleNeighbourInstancesHashData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CRealizationMarkerCandidatesMessageData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CRealizationMarkerCandidatesMessageData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CRealizationMessageData.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CRealizationMessageData.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CRealizationMessageObserver.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realizer\CRealizationMessageObserver.h"
 							>
 						</File>
 						<File
@@ -10709,6 +11237,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Reasoner\Realizer\Events\CRealizationMessageEvent.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Reasoner\Realizer\Events\CRealizationMessageEvent.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Reasoner\Realizer\Events\CRealizeOntologyEvent.cpp"
 								>
 							</File>
@@ -10767,6 +11303,54 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Consistiser\CDirectBlockedProcessingConsistiser.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIncrementalConsistencePrecomputationTestingItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIncrementalConsistencePrecomputationTestingItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIncrementalOntologyPrecomputationItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIncrementalOntologyPrecomputationItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIncrementalPrecomputationThread.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIncrementalPrecomputationThread.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIndividualDependenceTrackingCollector.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIndividualDependenceTrackingCollector.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIndividualDependenceTrackingMarker.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIndividualDependenceTrackingMarker.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIndividualDependenceTrackingObserver.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CIndividualDependenceTrackingObserver.h"
 							>
 						</File>
 						<File
@@ -10851,6 +11435,30 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Consistiser\CSaturationConceptReferenceLinking.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CSaturationIndividualAnalysationObserver.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CSaturationIndividualAnalysationObserver.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CSaturationIndividualDataItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CSaturationIndividualDataItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CSaturationIndividualReferenceLinking.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Consistiser\CSaturationIndividualReferenceLinking.h"
 							>
 						</File>
 						<File
@@ -11118,11 +11726,99 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Reasoner\Realization\CIndividualConceptAssertionSetCollector.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CIndividualConceptAssertionSetCollector.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CPossibleAssertionsCollectionSet.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CPossibleAssertionsCollectionSet.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Reasoner\Realization\CRealization.cpp"
 							>
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Realization\CRealization.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleInstanceItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleInstanceItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleInstantiatedItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleInstantiatedItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealization.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealization.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealizationIndividualVisitor.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealizationIndividualVisitor.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealizationInstanceToIndividualVisitor.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealizationInstanceToIndividualVisitor.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealizationInstanceVisitor.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CRoleRealizationInstanceVisitor.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CSameInstanceItem.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CSameInstanceItem.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CSameRealization.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CSameRealization.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CSameRealizationIndividualVisitor.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Reasoner\Realization\CSameRealizationIndividualVisitor.h"
 							>
 						</File>
 						<File
@@ -11323,14 +12019,6 @@
 						</File>
 						<File
 							RelativePath=".\Source\Reasoner\Generator\CSatisfiableCalculationTaskFromCalculationJobGenerator.h"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Generator\CSaturationCalculationJobGenerator.cpp"
-							>
-						</File>
-						<File
-							RelativePath=".\Source\Reasoner\Generator\CSaturationCalculationJobGenerator.h"
 							>
 						</File>
 						<File
@@ -12381,6 +13069,14 @@
 								>
 							</File>
 							<File
+								RelativePath=".\Source\Control\Command\Instructions\CConstructIsTriviallyConsistentQueryCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CConstructIsTriviallyConsistentQueryCommand.h"
+								>
+							</File>
+							<File
 								RelativePath=".\Source\Control\Command\Instructions\CConstructRealizeQueryCommand.cpp"
 								>
 							</File>
@@ -12738,6 +13434,14 @@
 							</File>
 							<File
 								RelativePath=".\Source\Control\Command\Instructions\CIsSatisfiableQueryOWL2XMLNodeCommand.h"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CIsTriviallyConsistentQueryCommand.cpp"
+								>
+							</File>
+							<File
+								RelativePath=".\Source\Control\Command\Instructions\CIsTriviallyConsistentQueryCommand.h"
 								>
 							</File>
 							<File
@@ -13971,6 +14675,38 @@
 						>
 					</File>
 					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionClassificationRequestGenerator.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionClassificationRequestGenerator.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionConsistencyRequestGenerator.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionConsistencyRequestGenerator.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionRealizationRequestGenerator.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionRealizationRequestGenerator.h"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionRequestGenerator.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkIncrementalAssertionRequestGenerator.h"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Test\COWLFileOWLlinkSatisfiabilityRequestGenerator.cpp"
 						>
 					</File>
@@ -14990,6 +15726,22 @@
 							>
 						</File>
 						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationGroupRequestReasonerStatisticValueCollectingCSVComparisonAnalyser.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationGroupRequestReasonerStatisticValueCollectingCSVComparisonAnalyser.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationGroupRequestReasonerStatisticValueCSVComparisonAnalyser.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationGroupRequestReasonerStatisticValueCSVComparisonAnalyser.h"
+							>
+						</File>
+						<File
 							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationGroupRequestReasonerWithMeanMinMaxCSVComparisonAnalyser.cpp"
 							>
 						</File>
@@ -15207,6 +15959,22 @@
 						</File>
 						<File
 							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationSpecifiedTimeExtractor.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationStatisticsNameCollectingExtractor.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationStatisticsNameCollectingExtractor.h"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationStatisticsValueExtractor.cpp"
+							>
+						</File>
+						<File
+							RelativePath=".\Source\Test\Evaluation\CReasonerEvaluationStatisticsValueExtractor.h"
 							>
 						</File>
 						<File
@@ -16399,6 +17167,26 @@
 			SourceControlFiles="false"
 			>
 			<File
+				RelativePath=".\generatedfiles\release\moc_COWLlinkHttpConnectionHandlerProcessor.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\generatedfiles\debug\moc_COWLlinkHttpConnectionHandlerProcessor.cpp"
 				>
 				<FileConfiguration
@@ -16419,7 +17207,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\generatedfiles\release\moc_COWLlinkHttpConnectionHandlerProcessor.cpp"
+				RelativePath=".\generatedfiles\release\moc_CQtHttpTransactionManager.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -16481,7 +17269,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\generatedfiles\release\moc_CQtHttpTransactionManager.cpp"
+				RelativePath=".\generatedfiles\release\moc_CReasonerEvaluationUpdaterThread.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -16539,26 +17327,6 @@
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)\$(InputName)1.obj"
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\generatedfiles\release\moc_CReasonerEvaluationUpdaterThread.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
 			</File>
@@ -16625,26 +17393,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\generatedfiles\release\moc_CReasonerKoncludeEvaluationProvider.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\generatedfiles\debug\moc_CReasonerKoncludeEvaluationProvider.cpp"
 				>
 				<FileConfiguration
@@ -16683,6 +17431,46 @@
 						Name="VCCLCompilerTool"
 						ObjectFile="$(IntDir)\$(InputName)1.obj"
 						XMLDocumentationFileName="$(IntDir)\$(InputName)1.xdc"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\generatedfiles\release\moc_CReasonerKoncludeEvaluationProvider.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\generatedfiles\release\moc_CReasonerOWLlinkEvaluationProvider.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
 			</File>
@@ -16729,10 +17517,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\generatedfiles\release\moc_CReasonerOWLlinkEvaluationProvider.cpp"
+				RelativePath=".\GeneratedFiles\debug\moc_CReasonerTestfileTester.cpp"
 				>
 				<FileConfiguration
-					Name="Debug|Win32"
+					Name="Release|Win32"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -16740,7 +17528,7 @@
 					/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Debug|x64"
+					Name="Release|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool
@@ -16761,26 +17549,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|x64"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\GeneratedFiles\debug\moc_CReasonerTestfileTester.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
 					ExcludedFromBuild="true"
 					>
 					<Tool

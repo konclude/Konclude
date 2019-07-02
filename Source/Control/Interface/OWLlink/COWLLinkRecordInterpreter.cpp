@@ -29,7 +29,7 @@ namespace Konclude {
 
 			namespace OWLlink {
 
-				COWLLinkRecordInterpreter::COWLLinkRecordInterpreter(CCommandDelegater *commandDelegater) 
+				COWLLinkRecordInterpreter::COWLLinkRecordInterpreter(CCommandDelegater *commandDelegater, CConfiguration* config) 
 						: CCommandRecorder(),document("ResponseMessage") {
 					delegater = commandDelegater;
 					nextSeqNumber = 0;
@@ -49,7 +49,7 @@ namespace Konclude {
 					rootNode.setAttribute("xmlns:xsd","http://www.w3.org/2001/XMLSchema#");
 					document.appendChild(rootNode);
 
-					mConfFileAppendSimpleStats = true;
+					mConfFileAppendSimpleStats = false;
 					mStatFileString = "reasoning-statistics.txt";
 					mStatStringList.append("calculation-reasoning-time");
 					mStatStringList.append("task-process-change-count");
@@ -59,7 +59,10 @@ namespace Konclude {
 					mStatStringList.append("created-successor-individual-node-count");
 					mStatVector.resize(mStatStringList.count());
 					mCalculatedWrongResult = false;
-					mRespondQueryStatistics = false;
+					mRespondQueryStatistics = true;
+					mConfig = config;
+
+					mConfExtendedErrorReporting = CConfigDataReader::readConfigBoolean(mConfig,"Konclude.OWLlink.ExtendedErrorReporting",false);
 				}
 
 
@@ -412,15 +415,47 @@ namespace Konclude {
 														}
 
 
-														CIndividualsResult* individualResult = dynamic_cast<CIndividualsResult*>(queryResult);
-														if (individualResult) {
-															queryResultNode = document.createElement("Individuals");
-															QSet<QString>* individualsSet = individualResult->getIndividualsSet();
+														CIndividualSynonymsResult* individualSynonymsResult = dynamic_cast<CIndividualSynonymsResult*>(queryResult);
+														if (individualSynonymsResult) {
+															queryResultNode = document.createElement("IndividualSynonyms");
+															QSet<QString>* individualsSet = individualSynonymsResult->getIndividualsSet();
 															for (QSet<QString>::const_iterator it = individualsSet->constBegin(), itEnd = individualsSet->constEnd(); it != itEnd; ++it) {
 																const QString& indiName(*it);
 																QDomElement indiNameNode = document.createElement("owl:NamedIndividual");
 																indiNameNode.setAttribute("IRI",indiName);
 																queryResultNode.appendChild(indiNameNode);
+															}
+															domEl = queryResultNode;
+														} else {
+															CIndividualsResult* individualResult = dynamic_cast<CIndividualsResult*>(queryResult);
+															if (individualResult) {
+																queryResultNode = document.createElement("SetOfIndividuals");
+																QSet<QString>* individualsSet = individualResult->getIndividualsSet();
+																for (QSet<QString>::const_iterator it = individualsSet->constBegin(), itEnd = individualsSet->constEnd(); it != itEnd; ++it) {
+																	const QString& indiName(*it);
+																	QDomElement indiNameNode = document.createElement("owl:NamedIndividual");
+																	indiNameNode.setAttribute("IRI",indiName);
+																	queryResultNode.appendChild(indiNameNode);
+																}
+																domEl = queryResultNode;
+															}
+														}
+
+
+														CIndividualClassAssertionsResult* classAssertionResult = dynamic_cast<CIndividualClassAssertionsResult*>(queryResult);
+														if (classAssertionResult) {
+															queryResultNode = document.createElement("SetOfClassAssertions");
+															QSet< QPair<QString,QString> >* individualClassAssSet = classAssertionResult->getIndividualConceptAssertionSet();
+															for (QSet< QPair<QString,QString> >::const_iterator it = individualClassAssSet->constBegin(), itEnd = individualClassAssSet->constEnd(); it != itEnd; ++it) {
+																const QPair<QString,QString>& indiClassNamePair(*it);
+																QDomElement classAssNode = document.createElement("owl:ClassAssertion");
+																QDomElement indiNameNode = document.createElement("owl:NamedIndividual");
+																QDomElement classNode = document.createElement("owl:Class");
+																indiNameNode.setAttribute("IRI",indiClassNamePair.first);
+																classNode.setAttribute("IRI",indiClassNamePair.second);
+																classAssNode.appendChild(classNode);
+																classAssNode.appendChild(indiNameNode);
+																queryResultNode.appendChild(classAssNode);
 															}
 															domEl = queryResultNode;
 														}

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,6 +32,8 @@ namespace Konclude {
 
 			CIndividualProcessData* CIndividualProcessData::initIndividualProcessExtensionData() {
 				mComputedConsequencesCachingData = nullptr;
+				mSatRefLinkingData = nullptr;
+				mBackendCachingData = nullptr;
 				return this;
 			}
 
@@ -41,6 +43,25 @@ namespace Konclude {
 
 			CIndividualProcessData* CIndividualProcessData::setComputedConsequencesCachingData(CComputedConsequencesCachingData* computedConsequencesCachingData) {
 				mComputedConsequencesCachingData = computedConsequencesCachingData;
+				return this;
+			}
+
+
+			CIndividualSaturationReferenceLinkingData* CIndividualProcessData::getSaturationReferenceLinkingData() {
+				return mSatRefLinkingData;
+			}
+
+			CIndividualProcessData* CIndividualProcessData::setSaturationReferenceLinkingData(CIndividualSaturationReferenceLinkingData* refLinkingData) {
+				mSatRefLinkingData = refLinkingData;
+				return this;
+			}
+
+			CIndividualBackendCachingData* CIndividualProcessData::getBackendCachingData() {
+				return mBackendCachingData;
+			}
+
+			CIndividualProcessData* CIndividualProcessData::setBackendCachingData(CIndividualBackendCachingData* backendCachingData) {
+				mBackendCachingData = backendCachingData;
 				return this;
 			}
 

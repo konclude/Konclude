@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -71,6 +71,7 @@ namespace Konclude {
 						bool isUnsatisfiableCacheRetrievalActivated();
 						bool isSatisfiableCacheRetrievalActivated();
 						bool isSingleLevelUnsatisfiableCacheWritingActivated();
+						bool isTestedConceptUnsatisfiableCacheWritingActivated();
 						bool isSingleLevelSatisfiableCacheWritingActivated();
 						bool isProxyIndividualsActivated();
 						bool isMinimizeMergingBranchesActivated();
@@ -105,6 +106,10 @@ namespace Konclude {
 						bool isSkipANDConceptsActivated();
 
 						bool isCompletionGraphCachingActivated();
+						bool isAvoidRepeatedIndividualProcessingActivated();
+						bool isDelayedCompletionGraphCachingReactivationActivated();
+						bool isForceNodesRecreationForRepeatedIndividualProcessingActivated();
+						bool isIndividualsBackendCacheLoadingActivated();
 
 						bool isUnsatisfiableCachingFullDependencyActivated();
 						bool isUnsatisfiableCachingFullSignatureActivated();
@@ -139,6 +144,23 @@ namespace Konclude {
 
 						bool isDatatypeReasoningActivated();
 
+						bool isComputedTypesCachingActivated();
+
+						bool isConstructionIndividualNodeMergingActivated();
+
+
+						cint64 getMaximumRecursiveProcessingConceptCount();
+
+
+						cint64 getSaturationReferredNodeManyConceptCount();
+						cint64 getSaturationManyConceptReferredNodeCountProcessLimit();
+						cint64 getSaturationReferredNodeConceptCountProcessLimit();
+						cint64 getSaturationReferredNodeUnprocessedCountProcessLimit();
+						cint64 getSaturationReferredNodeCheckingDepth();
+
+
+						bool isForceManyConceptSaturationActivated();
+
 					// protected methods
 					protected:
 
@@ -149,6 +171,7 @@ namespace Konclude {
 						bool mConfUnsatCachingActivated;
 						bool mConfSatCachingActivated;
 						bool mConfUnsatCacheSingleLevelWritingActivated;
+						bool mConfUnsatCacheTestedConceptWritingActivated;
 						bool mConfSatCacheSingleLevelWritingActivated;
 						bool mConfProxyIndividualsActivated;
 						bool mConfMinimizeMergingBranchesActivated;
@@ -183,6 +206,9 @@ namespace Konclude {
 						bool mConfSkipANDConceptsActivated;
 
 						bool mConfCompletionGraphCachingActivated;
+						bool mConfAvoidRepeatedIndividualProcessingActivated;
+						bool mConfDelayedCompletionGraphCachingReactivationActivated;
+						bool mConfForceNodesRecreationForRepeatedIndividualProcessingActivated;
 
 
 						bool mConfUnsatCachingUseFullNodeDependencyActivated;
@@ -211,10 +237,23 @@ namespace Konclude {
 						bool mConfNominalSaturationActivated;
 						bool mConfSaturationExpansionSatisfiabilityCacheWritingActivated;
 						bool mConfSaturationUnsatisfiabilityCacheWritingActivated;
+						bool mConfIndividualsBackendCacheLoadingActivated;
 
 						bool mEquivalentAlternativesSaturationMergingActivated;
 						bool mDatatypeReasoningActivated;
+						bool mComputedTypesCachingActivated;
+						bool mConstructionIndividualNodeMergingActivated;
 
+						cint64 mSaturationReferredNodeManyConceptCount;
+						cint64 mSaturationManyConceptReferredNodeCountProcessLimit;
+						cint64 mSaturationReferredNodeConceptCountProcessLimit;
+						cint64 mSaturationReferredNodeUnprocessedCountProcessLimit;
+						cint64 mSaturationReferredNodeCheckingDepth;
+
+						bool mConfForceManyConceptSaturationActivated;
+
+
+						cint64 mMaxRecProConceptCount;
 
 
 						bool mConfDependencyTrackingChecked;
@@ -222,6 +261,7 @@ namespace Konclude {
 						bool mConfUnsatCachingChecked;
 						bool mConfSatCachingChecked;
 						bool mConfUnsatCacheSingleLevelWritingChecked;
+						bool mConfUnsatCacheTestedConceptWritingChecked;
 						bool mConfSatCacheSingleLevelWritingChecked;
 						bool mConfProxyIndividualsChecked;
 						bool mConfMinimizeMergingBranchesChecked;
@@ -256,6 +296,10 @@ namespace Konclude {
 						bool mConfSkipANDConceptsChecked;
 
 						bool mConfCompletionGraphCachingChecked;
+						bool mConfAvoidRepeatedIndividualProcessingChecked;
+						bool mConfDelayedCompletionGraphCachingReactivationChecked;
+						bool mConfForceNodesRecreationForRepeatedIndividualProcessingChecked;
+						bool mConfIndividualsBackendCacheLoadingChecked;
 
 						bool mConfUnsatCachingUseFullNodeDependencyChecked;
 						bool mConfUnsatCachingUseNodeSignatureSetChecked;
@@ -284,6 +328,21 @@ namespace Konclude {
 
 						bool mEquivalentAlternativesSaturationMergingChecked;
 						bool mDatatypeReasoningChecked;
+
+						bool mComputedTypesCachingChecked;
+						bool mConstructionIndividualNodeMergingChecked;
+
+						bool mSaturationReferredNodeManyConceptCountChecked;
+						bool mSaturationManyConceptReferredNodeCountProcessLimitChecked;
+						bool mSaturationReferredNodeConceptCountProcessLimitChecked;
+						bool mSaturationReferredNodeUnprocessedCountProcessLimitChecked;
+						bool mSaturationReferredNodeCheckingDepthChecked;
+
+						bool mConfForceManyConceptSaturationChecked;
+
+
+
+						bool mMaxRecProConceptCountChecked;
 
 					// private methods
 					private:

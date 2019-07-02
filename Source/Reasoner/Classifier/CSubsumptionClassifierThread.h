@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,18 +28,13 @@
 #include "ClassifierSettings.h"
 #include "CSubsumptionClassifier.h"
 #include "COntologyClassificationItem.h"
-#include "CInterceptResultCallbackDataContext.h"
 #include "CClassifyingCallbackDataContext.h"
 #include "CClassSubsumptionClassifierContext.h"
 
 // Other includes
 #include "Reasoner/Classifier/Events/CClassifyOntologyEvent.h"
 #include "Reasoner/Classifier/Events/CTestCalculatedCallbackEvent.h"
-#include "Reasoner/Classifier/Events/CInterceptOntologyTestResultEvent.h"
 #include "Reasoner/Classifier/Events/CCallbackClassifiedOntologyEvent.h"
-#include "Reasoner/Classifier/Events/COntologyTellConceptSubsumtionEvent.h"
-#include "Reasoner/Classifier/Events/COntologyTellConceptDisjointEvent.h"
-#include "Reasoner/Classifier/Events/COntologyTellConceptSatisfiableEvent.h"
 #include "Reasoner/Classifier/Events/COntologyTellClassificationMessageEvent.h"
 
 #include "Reasoner/Ontology/CConcept.h"
@@ -92,14 +87,6 @@ namespace Konclude {
 					virtual bool classify(CConcreteOntology *ontology, CConfigurationBase *config, const QList<COntologyProcessingRequirement*>& requirementList);
 					virtual bool callbackClassified(CConcreteOntology *ontology, CCallbackData *callback);
 
-					virtual bool inteceptSatisfiableTest(CConcreteOntology *ontology, CConcept *concept, bool *satisfiable = 0);
-					virtual bool inteceptSubsumptionTest(CConcreteOntology *ontology, CConcept *subsumerConcept, CConcept *subsumedConcept, bool *subsumed = 0);
-
-					virtual CConceptSubsumptionRelationObserver *tellConceptSupsumptionRelation(CConcreteOntology *ontology, const QList<QPair<CConcept *,CConcept *> > &subsumptionList, bool isSupsumption = true);
-					
-					virtual CConceptSubsumptionRelationObserver *tellConceptDisjointRelation(CConcreteOntology *ontology, const QList<QPair<CConcept *,CConcept *> > &disjointList);
-					
-					virtual CConceptSatisfiableObserver *tellConceptSatisfiable(CConcreteOntology *ontology, const QList<CConcept *> &satisfiableConceptList, bool isSatisfiable = true);
 
 					virtual CClassifierStatistics *getClassificationStatistics();
 
@@ -127,16 +114,12 @@ namespace Konclude {
 					virtual CSubsumptionClassifierThread* processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassificationItem *ontClassItem, CCallbackData* callback, bool directlySubmit = true);
 					virtual CSubsumptionClassifierThread* submitCalculationJobs();
 
+					virtual bool interpreteTestResults(CTestCalculatedCallbackEvent *testResult) = 0;
 
 					virtual bool startProcessMoreTests();
 					virtual bool canProcessMoreTests();
 					virtual bool doNextPendingTests();
-					virtual bool interpreteTestResults(CTestCalculatedCallbackEvent *testResult) = 0;
-					virtual bool interceptTestResults(CInterceptOntologyTestResultEvent *interceptResult) = 0;
 
-					virtual bool interpreteToldSubsumptionResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubsumption);
-					virtual bool interpreteToldDisjointResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &disjointRelList);
-					virtual bool interpreteToldSatisfiable(COntologyClassificationItem *ontClassItem, const QList<CConcept *> &satisfiableConceptList, bool isSatisfiable);
 
 					virtual bool processToldClassificationMessage(COntologyClassificationItem *ontClassItem, CClassificationMessageData* messageData, CMemoryPool* memoryPools);
 

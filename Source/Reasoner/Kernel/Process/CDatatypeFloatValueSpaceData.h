@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -68,14 +68,16 @@ namespace Konclude {
 						CDatatypeFloatValueSpaceData* copyFloatValueSpaceData(CDatatypeFloatValueSpaceData* spaceData);
 						CDatatypeFloatValueSpaceData* initFloatValueSpaceData(CDatatypeValueSpaceFloatType* valueSpaceType);
 
-						CDatatypeFloatValueSpaceMap* getFloatValueSpaceMap();
+						CDatatypeFloatValueSpaceMap* getFloatValueSpaceMap(bool create);
 
 					// protected methods
 					protected:
+						virtual CDatatypeCompareValueSpaceMap* createValueSpaceMap();
 
 					// protected variables
 					protected:
-						CDatatypeFloatValueSpaceMap mFloatValueSpaceMap;
+						CDatatypeFloatValueSpaceMap* mFloatValueSpaceMap;
+						CDatatypeValueSpaceFloatType* mValueSpaceType;
 
 					// private methods
 					private:

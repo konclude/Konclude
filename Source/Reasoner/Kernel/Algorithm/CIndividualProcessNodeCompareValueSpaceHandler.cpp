@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -48,7 +48,7 @@ namespace Konclude {
 					bool newValuesPotentiallyExcluded = false;
 
 					if (!compareValueSpaceData->isValueSpaceClashed() && dataLitCompareValue) {
-						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap();
+						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(true);
 						if (!negated) {
 							newValuesPotentiallyExcluded |= compareValueSpaceMap->restrictToValue(dataLitCompareValue,depTrackPoint);
 						} else {
@@ -87,7 +87,7 @@ namespace Konclude {
 						return false;
 					}
 
-					CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap();
+					CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(true);
 
 					bool newValuesPotentiallyExcluded = false;
 					if (restrictionDataLitCompareValue) {
@@ -138,12 +138,14 @@ namespace Konclude {
 						if (compareValueSpaceData->isValueSpaceClashed()) {
 							return true;
 						}
-						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap();
-						bool clashed = compareValueSpaceMap->testValueSpaceReturnClashed();
-						if (clashed) {
-							compareValueSpaceMap->addValueSpaceDependencies(compareValueSpaceData->getClashDependencyTrackPointCollection());
-							compareValueSpaceData->setValueSpaceClashed(true);
-							return true;
+						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(false);
+						if (compareValueSpaceMap) {
+							bool clashed = compareValueSpaceMap->testValueSpaceReturnClashed();
+							if (clashed) {
+								compareValueSpaceMap->addValueSpaceDependencies(compareValueSpaceData->getClashDependencyTrackPointCollection());
+								compareValueSpaceData->setValueSpaceClashed(true);
+								return true;
+							}
 						}
 					}
 					return false;
@@ -157,8 +159,10 @@ namespace Konclude {
 					CDatatypeCompareValueSpaceData* compareValueSpaceData = (CDatatypeCompareValueSpaceData*)datatypesSpaceValue->getValueSpace(mCompareValueSpaceType,false);
 					if (compareValueSpaceData) {
 						if (!compareValueSpaceData->isValueSpaceClashed()) {
-							CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap();
-							return compareValueSpaceMap->addValueSpaceDependencies(depCollection);
+							CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(false);
+							if (compareValueSpaceMap) {
+								return compareValueSpaceMap->addValueSpaceDependencies(depCollection);
+							}
 						} else {
 							return compareValueSpaceData->getClashDependencyTrackPointCollection()->addCollectionDependencies(depCollection);
 						}
@@ -177,8 +181,16 @@ namespace Konclude {
 								compareValueSpaceData = (CDatatypeCompareValueSpaceData*)datatypesSpaceValue->getValueSpace(mCompareValueSpaceType,true);
 								CDatatypeValueSpaceValuesCounter* valueSpaceValueCounter = compareValueSpaceData->getValuesCounter();
 								valueSpaceValueCounter->resetValueCounter();
-								CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap();
-								compareValueSpaceMap->countAllValues(valueSpaceValueCounter);
+								CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(false);
+								if (compareValueSpaceMap) {
+									compareValueSpaceMap->countAllValues(valueSpaceValueCounter);
+								} else {
+									if (mCompareValueSpaceType->hasInfiniteManyValues()) {
+										valueSpaceValueCounter->incInfinite();
+									} else {
+										valueSpaceValueCounter->incValueCount(mCompareValueSpaceType->getMaximumValueCount());
+									}
+								}
 								compareValueSpaceData->setValueSpaceCounted(true);
 								compareValueSpaceData->setValueSpaceCountingRequired(false);
 								if (valueCounter) {
@@ -214,7 +226,7 @@ namespace Konclude {
 						if (!compareValueSpaceData->isValueSpaceTriggeringStarted()) {
 							compareValueSpaceData->setValueSpaceTriggeringStarted(true);
 						}
-						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap();
+						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(true);
 
 						CDatatypeValueSpacesTriggers* valueSpacesTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
 						if (valueSpacesTriggers) {
@@ -558,7 +570,7 @@ namespace Konclude {
 							tmpLastCompareValue->initValue(lastCompareValue);
 						}
 
-						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap();
+						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(true);
 						bool searchNextValue = true;
 						while (searchNextValue) {
 							if (compareValueSpaceMap->getNextPossibleDataValue(nextCompareValue,tmpLastCompareValue)) {

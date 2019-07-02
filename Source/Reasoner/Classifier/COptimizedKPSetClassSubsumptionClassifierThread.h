@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,7 +30,6 @@
 #include "CSubsumptionClassifierThread.h"
 #include "CPartialPruningTaxonomy.h"
 #include "CClassificationWorkItem.h"
-#include "CInterceptResultCallbackDataContext.h"
 #include "COptimizedKPSetClassOntologyClassificationItem.h"
 #include "CClassificationPseudoModelIdentifierMessageData.h"
 #include "COptimizedKPSetClassPossibleSubsumptionData.h"
@@ -48,9 +47,15 @@
 #include "Reasoner/Ontology/CConceptProcessData.h"
 #include "Reasoner/Ontology/CConceptSaturationReferenceLinkingData.h"
 
+#include "Reasoner/Consistiser/CSaturationConceptReferenceLinking.h"
+
 #include "Reasoner/Generator/CSatisfiableCalculationJobGenerator.h"
 
 #include "Utilities/Memory/CTempMemoryPoolContainerAllocationManager.h"
+
+#include "Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCache.h"
+#include "Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCacheReader.h"
+
 
 #include "KoncludeSettings.h"
 
@@ -75,7 +80,9 @@ namespace Konclude {
 		using namespace Generator;
 
 		using namespace Kernel;
+		using namespace Cache;
 		using namespace Task;
+		using namespace Consistiser;
 
 		namespace Classifier {
 
@@ -112,8 +119,13 @@ namespace Konclude {
 
 				// protected methods
 				protected:
+
+					virtual bool addClassificationStatistics(COntologyClassificationItem *ontClassItem, CClassConceptClassification* classConClassification);
+					COptimizedKPSetClassSubsumptionClassifierThread* addIndividualDependencyTrackingStatistics(COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem, const QString& classificationTypeString = "class-classification");
+
 					virtual bool finishOntologyClassification(COntologyClassificationItem *ontClassItem);
-					virtual CSubsumptionClassifierThread *scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config);
+					virtual CSubsumptionClassifierThread* scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config);
+					virtual COptimizedKPSetClassOntologyClassificationItem* createOntologyClassificationItem(CConcreteOntology *ontology, CConfigurationBase *config);
 
 					virtual CSubsumptionClassifierThread *processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassificationItem *ontClassItem, CClassificationWorkItem* workItem);
 
@@ -124,8 +136,6 @@ namespace Konclude {
 
 					virtual bool interpreteTestResults(CTestCalculatedCallbackEvent *testResult);
 					
-					virtual bool interceptTestResults(CInterceptOntologyTestResultEvent *interceptResult);
-
 					virtual bool createNextSubsumtionTest();
 					virtual CTaxonomy *createEmptyTaxonomyForOntology(CConcreteOntology *ontology, CConfigurationBase *config);
 
@@ -133,6 +143,7 @@ namespace Konclude {
 
 					void createObviousSubsumptionSatisfiableTestingOrder(COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
 					
+					QSet<CConcept*> getSubsumerSetFromBuildData(CConcept* concept, COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
 					void createObviousSubsumptionSatisfiableTestingOrderFromBuildData(COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
 					void createObviousSubsumptionSatisfiableTestingOrderFromSaturationData(COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
 
@@ -165,6 +176,11 @@ namespace Konclude {
 
 					void incRemainingPossibleSubsumptionTestingCount(COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetClassPossibleSubsumptionMap* posSubsumMap);
 					void decRemainingPossibleSubsumptionTestingCount(COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetClassPossibleSubsumptionMap* posSubsumMap, bool subsumptionConfirmed);
+
+
+					CIndividualSaturationProcessNode* getSaturationIndividualNodeForConcept(CConcept* concept, bool negated);
+					bool hasCachedSaturationIndividualNodeAssociatedExpansionProplematicConcept(CCacheEntry* cacheEntry, CConcept* testingConcept);
+					CCacheEntry* getAssociatedSaturationCacheEntry(COptimizedKPSetClassTestingItem* classConItem);
 
 				// protected variables
 				protected:
@@ -207,6 +223,11 @@ namespace Konclude {
 					cint64 mPseudoModelPretestSubsumptionCalculationCount;
 					cint64 mCreatedCalculationTaskCount;
 					cint64 mRecievedCallbackCount;
+
+
+					CSaturationNodeAssociatedExpansionCache* mSatNodeExpCache;
+					CSaturationNodeAssociatedExpansionCacheReader* mSatNodeExpCacheReader;
+
 
 				// private methods
 				private:

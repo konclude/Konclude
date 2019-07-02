@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,9 +30,6 @@ namespace Konclude {
 
 			COrderedPairIndividualTermExpressionAssociator::COrderedPairIndividualTermExpressionAssociator(CIndividualTermExpression *expression1, CIndividualTermExpression *expression2) 
 					: COrderedPairExpressionAssociator(expression1,expression2) {
-			}
-
-			COrderedPairIndividualTermExpressionAssociator::~COrderedPairIndividualTermExpressionAssociator() {
 			}
 
 			CIndividualTermExpression* COrderedPairIndividualTermExpressionAssociator::getFirstIndividualTermExpression() {

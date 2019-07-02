@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -94,7 +94,7 @@ namespace Konclude {
 								role = mRoleVec->getData(role->getRoleTag());
 								if (role->isComplexRole()) {
 									concept = CConceptRoleIndividualLocator::getLocatedConcept(concept,ontology);
-									// translate into concept role automat
+									// translate into concept role automate
 									++mStatAutomateTransformedConceptCount;
 									convertAutomatConcept(concept);
 								}
@@ -111,6 +111,65 @@ namespace Konclude {
 
 				return ontology;
 			}
+
+
+
+			CConcreteOntology* CRoleChainAutomataTransformationPreProcess::preprocess(CConcreteOntology *ontology, QSet<CConcept*>* transformConceptSet, CPreProcessContext* context) {
+				mOntology = ontology;
+				CTBox* tbox = ontology->getDataBoxes()->getTBox();
+				CABox *abox = ontology->getDataBoxes()->getABox();
+				CRBox *rbox = ontology->getDataBoxes()->getRBox();
+				CMBox* mBox = ontology->getDataBoxes()->getMBox();
+
+				mStatAutomateTransitionConceptCount = 0;
+				mStatAutomateStateConceptCount = 0;
+				mStatAutomateTransformedConceptCount = 0;
+				mStatAutomateTransitiveSavedCount = 0;
+				mStatCreatedDomainPropagationCount = 0;
+				mStatCreatedRangePropagationCount = 0;
+				mStatPropagatedAlreadyInDomainRangeCount = 0;
+				mStatPropagationAlreadyInDomainRangeCount = 0;
+				mStatDomainPropagationCount = 0;
+				mStatRangePropagationCount = 0;
+
+
+				mRoleVec = rbox->getRoleVector();
+				mConVec = tbox->getConceptVector();
+				mNextConceptTag = mConVec->getItemCount();
+
+				mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
+
+				mRoleObjPropTermHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
+				mObjPropTermRoleHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getObjectPropertyTermRoleMappingHash();
+				mExpressionBuildContainerList = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getExpressionBuildListContainer();
+				mInverseObjectPropertyHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getInverseObjectPropertyHash();
+				mExpressionBuildHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getStructuralExpressionBuildHash();
+
+
+				collectSubRoleChains();
+
+				createRecursiveTraversalData();
+
+
+				for (QSet<CConcept*>::const_iterator conIt = transformConceptSet->constBegin(), conItEnd = transformConceptSet->constEnd(); conIt != conItEnd; ++conIt) {
+					CConcept *concept(*conIt);
+					if (concept) {
+						cint64 opCode = concept->getOperatorCode();
+						if (opCode == CCALL || opCode == CCSOME || opCode == CCIMPLALL || opCode == CCBRANCHALL || opCode == CCVARBINDALL || opCode == CCPBINDALL || opCode == CCVARPBACKALL) {
+							CRole* role = concept->getRole();
+							role = mRoleVec->getData(role->getRoleTag());
+							if (role->isComplexRole()) {
+								concept = CConceptRoleIndividualLocator::getLocatedConcept(concept,ontology);
+								// translate into concept role automate
+								++mStatAutomateTransformedConceptCount;
+								convertAutomatConcept(concept);
+							}
+						}
+					}
+				}
+				return mOntology;
+			}
+
 
 
 			CRoleChainAutomataTransformationPreProcess* CRoleChainAutomataTransformationPreProcess::transformVALUERestrictions() {
@@ -137,6 +196,9 @@ namespace Konclude {
 							concept->setOperatorCode(CCSOME);
 							concept->setNominalIndividual(nullptr);
 							CConcept* nomIndividualConcept = nomIndividual->getIndividualNominalConcept();
+							if (!nomIndividualConcept) {
+								nomIndividualConcept = createNominalConcept(nomIndividual);
+							}
 							CSortedNegLinker<CConcept*>* opLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
 							opLinker->init(nomIndividualConcept,false);
 							concept->setOperandList(opLinker);
@@ -1097,6 +1159,23 @@ namespace Konclude {
 				}
 				concept->setOperatorCode(opCode);
 				++mStatAutomateTransitionConceptCount;
+				return concept;
+			}
+
+
+			CConcept* CRoleChainAutomataTransformationPreProcess::createNominalConcept(CIndividual* individual) {
+				individual = CConceptRoleIndividualLocator::getLocatedIndividual(individual,mOntology);
+				CConcept* concept = individual->getIndividualNominalConcept();
+				if (!concept) {
+					concept = CObjectAllocator<CConcept>::allocateAndConstruct(mMemMan);
+					concept->initConcept();
+					cint64 conTag = mNextConceptTag++;
+					concept->setConceptTag(conTag);
+					mConVec->setData(conTag,concept);
+					concept->setOperatorCode(CCNOMINAL);
+					concept->setNominalIndividual(individual);
+					individual->setIndividualNominalConcept(concept);
+				}
 				return concept;
 			}
 

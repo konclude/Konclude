@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -22,6 +22,7 @@
 #include "CReasonerManager.h"
 
 #include "Reasoner/Consistiser/CTotallyPrecomputationThread.h"
+#include "Reasoner/Consistiser/CIncrementalPrecomputationThread.h"
 
 
 namespace Konclude {
@@ -47,11 +48,18 @@ namespace Konclude {
 					precomputator = mOntoPrecomputatorHash.value(ontology);
 					mReadWriteLock.unlock();
 
+					bool onlyChangedABoxAxioms = ontology->getIncrementalRevisionData()->getAxiomChangeData()->hasOnlyChangedABoxAxioms();
+					bool previousConsistentOntologyVersion = ontology->getIncrementalRevisionData()->getPreviousConsistentOntology() != nullptr;
+
 					if (!precomputator) {
 						mReadWriteLock.lockForWrite();
 						precomputator = mOntoPrecomputatorHash.value(ontology);
 						if (!precomputator) {
-							precomputator = new CTotallyPrecomputationThread(mReasonerManager);
+							if (onlyChangedABoxAxioms && previousConsistentOntologyVersion) {
+								precomputator = new CIncrementalPrecomputationThread(mReasonerManager);
+							} else {
+								precomputator = new CTotallyPrecomputationThread(mReasonerManager);
+							}
 							mOntoPrecomputatorHash.insert(ontology,precomputator);
 						}
 						mReadWriteLock.unlock();

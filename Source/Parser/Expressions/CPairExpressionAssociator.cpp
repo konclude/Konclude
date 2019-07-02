@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,34 +29,76 @@ namespace Konclude {
 
 
 			CPairExpressionAssociator::CPairExpressionAssociator(CBuildExpression *expression1, CBuildExpression *expression2) 
-					: CListExpressionAssociator() {
-
-				mExpressionList.append(expression1);
-				mExpressionList.append(expression2);
-			}
-
-
-			CPairExpressionAssociator::~CPairExpressionAssociator() {
+					: mFirstExpression(expression1),mSecondExpression(expression2) {
 			}
 
 
 			CPairExpressionAssociator* CPairExpressionAssociator::setFirstExpression(CBuildExpression *expression1) {
-				mExpressionList.replace(0,expression1);
+				mFirstExpression = expression1;
 				return this;
 			}
 
 			CBuildExpression *CPairExpressionAssociator::getFirstExpression() const {
-				return mExpressionList.first();
+				return mFirstExpression;
 			}
 
 			CPairExpressionAssociator* CPairExpressionAssociator::setSecondExpression(CBuildExpression *expression2) {
-				mExpressionList.replace(0,expression2);
+				mSecondExpression = expression2;
 				return this;
 			}
 
 			CBuildExpression *CPairExpressionAssociator::getSecondExpression() const {
-				return mExpressionList.at(1);
+				return mSecondExpression;
 			}
+
+
+
+			cint64 CPairExpressionAssociator::getStructuralHashValue() {
+				cint64 hashValue = 0;
+				cint64 tmpValue1 = 0;
+				cint64 tmpValue2 = 1;
+				if (mFirstExpression) {
+					tmpValue1 += cint64(mFirstExpression);
+					tmpValue2 *= cint64(mFirstExpression);
+				}
+				if (mSecondExpression) {
+					tmpValue1 += cint64(mSecondExpression);
+					tmpValue2 *= cint64(mSecondExpression);
+				}
+				hashValue = tmpValue1*tmpValue2;
+				return hashValue;
+			}
+
+			bool CPairExpressionAssociator::compareStructuralEquivalence(const CPairExpressionAssociator& pairExpressionAssociator) {
+				if (mFirstExpression != pairExpressionAssociator.mFirstExpression) {
+					if (mFirstExpression != pairExpressionAssociator.mSecondExpression) {
+						return false;
+					}
+					if (mSecondExpression != pairExpressionAssociator.mFirstExpression) {
+						return false;
+					}
+				} else {
+					if (mSecondExpression != pairExpressionAssociator.mSecondExpression) {
+						return false;
+					}
+				}
+				return true;
+			}
+
+			bool CPairExpressionAssociator::visitSubExpressions(CBuildExpression* expression, CSubExpressionVisitor* subExpressionVisitor) {
+				if (subExpressionVisitor) {
+					if (mFirstExpression) {
+						subExpressionVisitor->visitSubExpression(expression,mFirstExpression,subExpressionVisitor);
+					}
+					if (mSecondExpression) {
+						subExpressionVisitor->visitSubExpression(expression,mSecondExpression,subExpressionVisitor);
+					}
+					return true;
+				}
+				return false;
+			}
+
+
 
 		}; // end namespace Expression
 

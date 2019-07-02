@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -153,6 +153,17 @@ namespace Konclude {
 					return mReuseCompGraphCache;
 				}
 
+
+				CSaturationCache* CReasonerManagerThread::getSaturationAssociationExpansionCache() {
+					return mSatNodeExpCache;
+				}
+
+
+				CBackendCache* CReasonerManagerThread::getBackendAssociationCache() {
+					return mBackendAssCache;
+				}
+
+
 				CCalculationManager *CReasonerManagerThread::getCalculationManager() {
 					return mCalculationManager;
 				}
@@ -181,6 +192,8 @@ namespace Konclude {
 					CReuseCompletionGraphCacheHandler* reuseCompGraphCacheHandler = nullptr;
 					CSaturationNodeExpansionCacheHandler* satNodeCacheHandler = nullptr;
 					CComputedConsequencesCacheHandler* compConsCachHandler = nullptr;
+					CSaturationNodeBackendAssociationCacheHandler* backendAssCacheHandler = nullptr;
+					CIndividualNodeBackendCacheHandler* backendCacheHandler = nullptr;
 					if (unsatCache) {
 						unsatCacheHandler = new CUnsatisfiableCacheHandler(unsatCache->getCacheReader(),unsatCache->getCacheWriter());
 					}
@@ -196,11 +209,13 @@ namespace Konclude {
 					if (mCompConsCache) {
 						compConsCachHandler = new CComputedConsequencesCacheHandler(mCompConsCache->createCacheReader(),mCompConsCache->createCacheWriter());
 					}
-					CCalculationTableauApproximationSaturationTaskHandleAlgorithm* approxSatHandleAlg = new CCalculationTableauApproximationSaturationTaskHandleAlgorithm();;
-					CCalculationTableauSaturationTaskHandleAlgorithm* satTaskHandleAlg = new CCalculationTableauSaturationTaskHandleAlgorithm();
-					CCalculationTableauPilingSaturationTaskHandleAlgorithm* pilSatTaskHandleAlg = new CCalculationTableauPilingSaturationTaskHandleAlgorithm();
-					CCalculationTableauCompletionTaskHandleAlgorithm* compTaskHandleAlg = new CCalculationTableauCompletionTaskHandleAlgorithm(unsatCacheHandler,satExpCacheHandler,reuseCompGraphCacheHandler,satNodeCacheHandler,compConsCachHandler);
-					return new CCalculationChooseTaskHandleAlgorithm(compTaskHandleAlg,satTaskHandleAlg,pilSatTaskHandleAlg,approxSatHandleAlg);
+					if (mBackendAssCache) {
+						backendAssCacheHandler = new CSaturationNodeBackendAssociationCacheHandler(mBackendAssCache->createCacheReader(),mBackendAssCache->createCacheWriter());
+						backendCacheHandler = new CIndividualNodeBackendCacheHandler(mBackendAssCache->createCacheReader(),mBackendAssCache->createCacheWriter());
+					}
+					CCalculationTableauApproximationSaturationTaskHandleAlgorithm* approxSatHandleAlg = new CCalculationTableauApproximationSaturationTaskHandleAlgorithm(backendAssCacheHandler);
+					CCalculationTableauCompletionTaskHandleAlgorithm* compTaskHandleAlg = new CCalculationTableauCompletionTaskHandleAlgorithm(unsatCacheHandler,satExpCacheHandler,reuseCompGraphCacheHandler,satNodeCacheHandler,compConsCachHandler,backendCacheHandler);
+					return new CCalculationChooseTaskHandleAlgorithm(compTaskHandleAlg,approxSatHandleAlg);
 				}
 
 
@@ -211,10 +226,11 @@ namespace Konclude {
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Initializing reasoner. Creating calculation context."),this);
 
 					unsatCache = new COccurrenceUnsatisfiableCache(mWorkControllerCount+2);
-					mSatExpCache = new CSignatureSatisfiableExpanderCache();
+					mSatExpCache = new CSignatureSatisfiableExpanderCache(configProvider->getCurrentConfiguration());
 					mReuseCompGraphCache = new CReuseCompletionGraphCache();
 					mSatNodeExpCache = new CSaturationNodeAssociatedExpansionCache(configProvider->getCurrentConfiguration());
 					mCompConsCache = new CComputedConsequencesCache(configProvider->getCurrentConfiguration());
+					mBackendAssCache = new CBackendRepresentativeMemoryCache(configProvider->getCurrentConfiguration());
 
 					CConfigDependedCalculationFactory* calcFactory = new CConfigDependedCalculationFactory(this);
 					CCalculationManager* calculationManager = calcFactory->createCalculationManager(configProvider);
@@ -280,7 +296,7 @@ namespace Konclude {
 					CSatisfiableCalculationJobsQuery* jobQuery = dynamic_cast<CSatisfiableCalculationJobsQuery*>(query);
 					if (jobQuery) {
 						QList<COntologyProcessingRequirement*> reqList;
-						reqList.append(mRequirementExpander->getRequiredConsistencyOntologyProcessingStepRequirement());
+						reqList.append(mRequirementExpander->getRequiredIndividualPrecomputationOntologyProcessingStepRequirement());
 						CQUERYLIST<CCalculationJob*> jobList(jobQuery->getJobList());
 						foreach (CCalculationJob* calcJob, jobList) {
 							CConcreteOntology* ontology = calcJob->getOntology();
@@ -331,8 +347,15 @@ namespace Konclude {
 					if (realQuery) {
 						CConcreteOntology* ontology = realQuery->getOntology();
 						QList<COntologyProcessingRequirement*> reqList;
-						reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
-						reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCONCEPTREALIZE));
+						if (realQuery->isSameIndividualRealisationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+						}
+						if (realQuery->isConceptRealisationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCONCEPTREALIZE));
+						}
+						if (realQuery->isRoleRealisationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSROLEREALIZE));
+						}
 						reqList = mRequirementExpander->getUnsatisfiedRequirementsExpanded(reqList,ontology);
 						foreach (COntologyProcessingRequirement* ontReq, reqList) {
 							ontReqList.append(COntologyRequirementPair(ontology,ontReq));
@@ -363,9 +386,9 @@ namespace Konclude {
 								mProcessingEndMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCLASSCLASSIFIER));
 								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished classification in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
 							}
-						} else if (ontReqPrepData->mCheckingProcessorType == COntologyProcessingStep::OPCONCEPTREALIZER) {
-							if (!mProcessingEndMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCONCEPTREALIZER))) {
-								mProcessingEndMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCONCEPTREALIZER));
+						} else if (ontReqPrepData->mCheckingProcessorType == COntologyProcessingStep::OPREALIZER) {
+							if (!mProcessingEndMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPREALIZER))) {
+								mProcessingEndMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPREALIZER));
 								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished realization in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
 							}
 						}
@@ -441,8 +464,8 @@ namespace Konclude {
 							ontReqPrepData->mClassifierReqList.clear();
 						} else if (!ontReqPrepData->mRealizerReqList.isEmpty()) {
 							QString exprString = QString(", expressiveness '%2'").arg(ontology->getStructureSummary()->getExpressivenessString());
-							if (!mProcessingStartMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCONCEPTREALIZER))) {
-								mProcessingStartMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCONCEPTREALIZER));
+							if (!mProcessingStartMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPREALIZER))) {
+								mProcessingStartMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPREALIZER));
 								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Realizing ontology '%1'%2.").arg(ontology->getOntologyName()).arg(exprString),this);
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
@@ -450,7 +473,7 @@ namespace Konclude {
 							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
 							realizer->realize(ontology,config,ontReqPrepData->mRealizerReqList,reqProcCallbackEvent);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mRealizerReqList;
-							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPCONCEPTREALIZER;
+							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPREALIZER;
 							ontReqPrepData->mCheckingTimer.start();
 							ontReqPrepData->mRealizerReqList.clear();
 						} else {
@@ -466,8 +489,8 @@ namespace Konclude {
 							if (callback) {
 								callback->doCallback();
 							}
+							delete reqData;
 						}
-						delete reqData;
 					}
 				}
 
@@ -516,6 +539,7 @@ namespace Konclude {
 					} else {
 						// satisfy query requirements first
 						CRequirementPreparingData* reqPrepData = new CRequirementPreparingData(callbackData,query,reasoningData);
+						reasoningData->mReqPrepData = reqPrepData;
 						for (QList<COntologyRequirementPair>::const_iterator it = reqList.constBegin(), itEnd = reqList.constEnd(); it != itEnd; ++it) {
 							COntologyRequirementPair ontReqPair(*it);
 							CConcreteOntology* ontology = ontReqPair.mOntology;
@@ -528,7 +552,6 @@ namespace Konclude {
 
 						if (reqPrepData->mDepCount <= 0) {
 							initiateQueryReasoning(query,callbackData,reasoningData,reqPrepData->mFailedReqList);
-							delete reqPrepData;
 						} else {
 							for (QHash<CConcreteOntology*,COntologyRequirementPreparingData*>::const_iterator it = reqPrepData->mOntoReqDataHash.constBegin(), itEnd = reqPrepData->mOntoReqDataHash.constEnd(); it != itEnd; ++it) {
 								CConcreteOntology* ontology = it.key();
@@ -547,8 +570,9 @@ namespace Konclude {
 					updateBeginingCalculationStatistics(reasoningData);
 
 					if (!failedRequirementList.isEmpty()) {
+						CConcreteOntology* ontology = nullptr;
 						for (QList<COntologyRequirementPair>::const_iterator it = failedRequirementList.constBegin(), itEnd = failedRequirementList.constEnd(); it != itEnd; ++it) {
-							CConcreteOntology* ontology(it->mOntology);
+							ontology = it->mOntology;
 							COntologyProcessingRequirement* requirement(it->mRequirement);
 							query->addErrorString(QString("Processing requirements for Ontology '%1' for Query '%2' failed.").arg(ontology->getOntologyName()).arg(query->getQueryName()));
 
@@ -563,7 +587,11 @@ namespace Konclude {
 								}
 							}
 						}
-						updateFinishingCalculationStatistics(reasoningData,query->getQueryStatistics());
+						if (ontology) {
+							updateFinishingCalculationStatistics(reasoningData,query->getQueryStatistics(),ontology->getConfiguration());
+						} else {
+							updateFinishingCalculationStatistics(reasoningData,query->getQueryStatistics());
+						}
 
 						CCallbackData* callback = callbackData;
 						if (callback) {
@@ -608,6 +636,24 @@ namespace Konclude {
 
 						} 
 
+
+
+						CIsTriviallyConsistentQuery* trivConsQuery = dynamic_cast<CIsTriviallyConsistentQuery *>(query);
+						if (trivConsQuery) {
+							reasoningData->mCallback = callbackData;
+							CConcreteOntology* ontology = trivConsQuery->getOntology();
+							trivConsQuery->constructResult(ontology->getBuildData());
+
+							qint64 mSecs = reasoningData->mStartTime.elapsed();
+							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' ms.").arg(trivConsQuery->getQueryName()).arg(mSecs),this);
+
+							CCallbackData* callback = reasoningData->mCallback;
+							if (callback) {
+								callback->doCallback();
+							}
+							delete reasoningData;
+						}
+
 						CConsistencePremisingQuery* consQuery = dynamic_cast<CConsistencePremisingQuery *>(query);
 						if (consQuery) {
 							reasoningData->mCallback = callbackData;
@@ -625,7 +671,7 @@ namespace Konclude {
 									}
 								}
 							}
-							updateFinishingCalculationStatistics(reasoningData,queryStats);
+							updateFinishingCalculationStatistics(reasoningData,queryStats,ontology->getConfiguration());
 
 							consQuery->constructResult(ontology->getConsistence());
 
@@ -658,7 +704,7 @@ namespace Konclude {
 									}
 								}
 							}
-							updateFinishingCalculationStatistics(reasoningData,queryStats);
+							updateFinishingCalculationStatistics(reasoningData,queryStats,ontology->getConfiguration());
 
 							taxQuery->constructResult(ontology->getClassification()->getClassConceptClassification()->getClassConceptTaxonomy());
 
@@ -680,7 +726,7 @@ namespace Konclude {
 							CQueryStatistics* queryStats = realQuery->getQueryStatistics();
 							CConcreteOntology* ontology = realQuery->getOntology();
 
-							updateFinishingCalculationStatistics(reasoningData,queryStats);
+							updateFinishingCalculationStatistics(reasoningData,queryStats,ontology->getConfiguration());
 
 							realQuery->constructResult(ontology->getRealization());
 
@@ -721,27 +767,58 @@ namespace Konclude {
 
 
 
-				bool CReasonerManagerThread::updateBeginingCalculationStatistics(CReasoningTaskData* reaTaskData) {
-					QHash<QString,cint64>* mBeginStatHash = mCalculationManager->getCalculationStatistics();
-					reaTaskData->mCalcStat = mBeginStatHash;
-					return true;
+				bool CReasonerManagerThread::updateBeginingCalculationStatistics(CReasoningTaskData* reaTaskData, CConfiguration* config) {
+					if (!config) {
+						config = configProvider->getCurrentConfiguration();
+					}
+					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Query.Statistics.CollectCalculationStatistics",false)) {
+						QHash<QString,cint64>* mBeginStatHash = mCalculationManager->getCalculationStatistics();
+						reaTaskData->mCalcStat = mBeginStatHash;
+						return true;
+					}
+					return false;
 				}
 
 
 
-				bool CReasonerManagerThread::updateFinishingCalculationStatistics(CReasoningTaskData* reaTaskData, CQueryStatistics* queryStat) {
-					if (queryStat) {
-						QHash<QString,cint64>* mBeginStatHash = reaTaskData->mCalcStat;
-						if (mBeginStatHash) {
-							QHash<QString,cint64>* mFinishStatHash = mCalculationManager->getCalculationStatistics();
-							for (QHash<QString,cint64>::const_iterator itF = mFinishStatHash->constBegin(), itFEnd = mFinishStatHash->constEnd(); itF != itFEnd; ++itF) {
-								QString statName = itF.key();
-								cint64 finVal = itF.value();
-								queryStat->addProcessingStatistics(statName,finVal);
-							}
-							delete mFinishStatHash;
+				bool CReasonerManagerThread::updateFinishingCalculationStatistics(CReasoningTaskData* reaTaskData, CQueryStatistics* queryStat, CConfiguration* config) {
+					if (queryStat) {		
+						if (!config) {
+							config = configProvider->getCurrentConfiguration();
 						}
-						queryStat->addProcessingStatistics("calculation-reasoning-time",reaTaskData->mStartTime.elapsed());
+						if (CConfigDataReader::readConfigBoolean(config,"Konclude.Query.Statistics.CollectCalculationStatistics",false)) {
+							QHash<QString,cint64>* mBeginStatHash = reaTaskData->mCalcStat;
+							if (mBeginStatHash) {
+								QHash<QString,cint64>* mFinishStatHash = mCalculationManager->getCalculationStatistics();
+								for (QHash<QString,cint64>::const_iterator itF = mFinishStatHash->constBegin(), itFEnd = mFinishStatHash->constEnd(); itF != itFEnd; ++itF) {
+									QString statName = itF.key();
+									cint64 finVal = itF.value();
+									cint64 begVal = 0;//mBeginStatHash->value(statName);
+									queryStat->addProcessingStatistics(statName,finVal-begVal);
+								}
+								delete mFinishStatHash;
+							}
+							queryStat->addProcessingStatistics("calculation-reasoning-time",reaTaskData->mStartTime.elapsed());
+						}
+						if (CConfigDataReader::readConfigBoolean(config,"Konclude.Query.Statistics.CollectProcessingStepsStatistics",false)) {
+							QSet<COntologyProcessingStatistics*> addedStatSet;
+							for (QList<COntologyRequirementPair>::const_iterator it = reaTaskData->mReqPrepData->mSatisfiedReqList.constBegin(), itEnd = reaTaskData->mReqPrepData->mSatisfiedReqList.constEnd(); it != itEnd; ++it) {
+								COntologyRequirementPair ontReqPair(*it);
+								CConcreteOntology* ontology = ontReqPair.mOntology;
+								COntologyProcessingRequirement* requirement = ontReqPair.mRequirement;
+								COntologyProcessingStepRequirement* ontProcStepRequirement = dynamic_cast<COntologyProcessingStepRequirement*>(requirement);
+								if (ontProcStepRequirement) {								
+									COntologyProcessingStepData* procStepData = ontology->getProcessingSteps()->getOntologyProcessingStepDataVector()->getProcessingStepData(ontProcStepRequirement->getRequiredProcessingStep()->getOntologyProcessingType());
+									if (procStepData) {
+										COntologyProcessingStatistics* procStepStatistics = procStepData->getProcessingStatistics(false);
+										if (procStepStatistics && !addedStatSet.contains(procStepStatistics)) {
+											addedStatSet.insert(procStepStatistics);
+											queryStat->addProcessingStatistics(procStepStatistics);
+										}
+									}
+								}
+							}
+						}
 						return true;
 					}
 					return false;

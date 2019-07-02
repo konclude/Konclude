@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,30 +29,50 @@ namespace Konclude {
 
 
 			CExpressionAssociator::CExpressionAssociator(CBuildExpression *expression) 
-					: CListExpressionAssociator() {
+					: mExpression(expression) {
 
-				if (expression) {
-					mExpressionList.append(expression);
-				}
 			}
-
-
-			CExpressionAssociator::~CExpressionAssociator() {
-			}
-
 
 			CExpressionAssociator* CExpressionAssociator::setExpression(CBuildExpression *expression) {
-				mExpressionList.replace(0,expression);
+				mExpression = expression;
 				return this;
 			}
 
 			CBuildExpression *CExpressionAssociator::getExpression() {
-				if (!mExpressionList.isEmpty()) {
-					return mExpressionList.first();
-				}
-				return nullptr;
+				return mExpression;
 			}
 
+
+			cint64 CExpressionAssociator::getStructuralHashValue() {
+				cint64 hashValue = 0;
+				cint64 tmpValue1 = 0;
+				cint64 tmpValue2 = 1;
+				if (mExpression) {
+					tmpValue1 += cint64(mExpression);
+					tmpValue2 *= cint64(mExpression);
+				}
+				hashValue = tmpValue1*tmpValue2;
+				return hashValue;
+			}
+
+
+			bool CExpressionAssociator::visitSubExpressions(CBuildExpression* expression, CSubExpressionVisitor* subExpressionVisitor) {
+				if (subExpressionVisitor) {		
+					if (mExpression) {
+						subExpressionVisitor->visitSubExpression(expression,mExpression,subExpressionVisitor);
+						return true;
+					}
+				}
+				return false;
+			}
+
+
+			bool CExpressionAssociator::compareStructuralEquivalence(const CExpressionAssociator& expressionAssociator) {
+				if (mExpression != expressionAssociator.mExpression) {
+					return false;
+				}
+				return true;
+			}
 
 		}; // end namespace Expression
 

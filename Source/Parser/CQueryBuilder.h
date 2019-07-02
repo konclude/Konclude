@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -47,6 +47,13 @@
 #include "Expressions/CQueryGetSubClassesExpression.h"
 #include "Expressions/CQueryGetEquivalentClassesExpression.h"
 #include "Expressions/CQueryIsEntailedExpression.h"
+#include "Expressions/CQueryGetObjectPropertyTargetsExpression.h"
+#include "Expressions/CQueryGetFlattenedObjectPropertyTargetsExpression.h"
+#include "Expressions/CQueryGetDeterministicIndividualsExpression.h"
+#include "Expressions/CQueryGetNondeterministicIndividualsExpression.h"
+#include "Expressions/CQueryGetDeterministicClassAssertionsExpression.h"
+#include "Expressions/CQueryGetNondeterministicClassAssertionsExpression.h"
+#include "Expressions/CQueryGetSameIndividualsExpression.h"
 
 
 // Logger includes
@@ -87,11 +94,21 @@ namespace Konclude {
 				virtual CQueryGetFlattenedTypesExpression* getGetFlattenedTypesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) = 0;
 				virtual CQueryGetFlattenedInstancesExpression* getGetFlattenedInstancesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) = 0;
 				virtual CQueryGetTypesExpression* getGetTypesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) = 0;
+				virtual CQueryGetSameIndividualsExpression* getGetSameIndividualsQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) = 0;
 				virtual CQueryGetInstancesExpression* getGetInstancesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) = 0;
 				virtual CQueryGetSubClassesExpression* getGetSubClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) = 0;
 				virtual CQueryGetSuperClassesExpression* getGetSuperClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) = 0;
 				virtual CQueryGetEquivalentClassesExpression* getGetEquivalentClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) = 0;
 				virtual CQueryIsEntailedExpression* getIsEntailedQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) = 0;
+				virtual CQueryGetObjectPropertyTargetsExpression* getGetObjectPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) = 0;
+				virtual CQueryGetFlattenedObjectPropertyTargetsExpression* getGetFlattenedObjectPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) = 0;
+
+
+				virtual CQueryGetDeterministicIndividualsExpression* getGetDeterministicIndividualsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) = 0;
+				virtual CQueryGetNondeterministicIndividualsExpression* getGetNondeterministicIndividualsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) = 0;
+				virtual CQueryGetDeterministicClassAssertionsExpression* getGetDeterministicClassAssertionsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) = 0;
+				virtual CQueryGetNondeterministicClassAssertionsExpression* getGetNondeterministicClassAssertionsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) = 0;
+
 
 			// protected methods
 			protected:

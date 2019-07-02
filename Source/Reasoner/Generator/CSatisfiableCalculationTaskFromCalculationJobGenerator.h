@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,7 +31,6 @@
 #include "Reasoner/Query/CCalculationJob.h"
 #include "Reasoner/Query/CSatisfiableCalculationJob.h"
 #include "Reasoner/Query/CSatisfiableCalculationConstruct.h"
-#include "Reasoner/Query/CSaturationCalculationJob.h"
 #include "Reasoner/Query/CApproximatedSaturationCalculationJob.h"
 #include "Reasoner/Query/CSatisfiableCalculationConceptConstruct.h"
 
@@ -88,8 +87,6 @@ namespace Konclude {
 					CSatisfiableCalculationTask* createSatisfiableCalculationTaskExtension(CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, CCallbackData* additionalCalculatedCallback = nullptr);
 					CSatisfiableCalculationTask* createSatisfiableCalculationTaskExtension(CConcreteOntology *ontology, CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, CCallbackData* additionalCalculatedCallback = nullptr);
 
-					CSatisfiableCalculationTask* createDefaultSaturationCalculationTask(CConcreteOntology *ontology, CSaturationCalculationJob* saturCalcJob, CCallbackData* additionalCalculatedCallback);
-					CSatisfiableCalculationTask* createPilingSaturationCalculationTask(CConcreteOntology *ontology, CSaturationCalculationJob* saturCalcJob, CCallbackData* additionalCalculatedCallback);
 					CSatisfiableCalculationTask* createApproximatedSaturationCalculationTask(CConcreteOntology *ontology, CApproximatedSaturationCalculationJob* approxSaturCalcJob, CCallbackData* additionalCalculatedCallback);
 				// protected methods
 				protected:

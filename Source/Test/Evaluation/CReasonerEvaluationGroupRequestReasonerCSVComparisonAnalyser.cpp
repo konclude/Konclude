@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -60,7 +60,7 @@ namespace Konclude {
 
 					QDir outDir(outputDirectory);
 					outDir.mkpath(mOutputFileName);
-					QFile outputFile(outputDirectory+mOutputFileName+"time-table.csv");
+					QFile outputFile(outputDirectory+mOutputFileName+context->getAdditionalFileString()+"time-table.csv");
 					if (outputFile.open(QIODevice::WriteOnly)) {
 
 						QString reasonerTabList("OntologyRequest");

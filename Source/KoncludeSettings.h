@@ -48,10 +48,10 @@ namespace Konclude {
 
 	#define KONCLUDE_VERSION_MAJOR				0
 	#define KONCLUDE_VERSION_MINOR				6
-	#define KONCLUDE_VERSION_BUILD				0
-	#define KONCLUDE_VERSION_REVISION			408
+	#define KONCLUDE_VERSION_BUILD				1
+	#define KONCLUDE_VERSION_REVISION			527
 
-	#define KONCLUDE_VERSION_STRING				"0.6.0-408"
+	#define KONCLUDE_VERSION_STRING				"0.6.1-527"
 
 	#define KONCLUDE_NAME						"Konclude"
 	#define KONCLUDE_NAME_EXTENSION				"Uni Ulm Parallel Reasoner"

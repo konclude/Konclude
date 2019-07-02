@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Realizer {
 
 
-			CIndividualSameTestingItem::CIndividualSameTestingItem(COntologyRealizingItem* preproItem, COptimizedKPSetConceptInstantiatedItem* instantiatedItem1, COptimizedKPSetConceptInstantiatedItem* instantiatedItem2) : CRealizingTestingItem(preproItem) {
+			CIndividualSameTestingItem::CIndividualSameTestingItem(COntologyRealizingItem* preproItem, COptimizedKPSetIndividualItem* instantiatedItem1, COptimizedKPSetIndividualItem* instantiatedItem2) : CRealizingTestingItem(preproItem) {
 				mOntologyPreproItem = preproItem;
 				mInstantiatedItem1 = instantiatedItem1;
 				mInstantiatedItem2 = instantiatedItem2;
@@ -40,11 +40,11 @@ namespace Konclude {
 			}
 
 
-			COptimizedKPSetConceptInstantiatedItem* CIndividualSameTestingItem::getInstantiatedItem1() {
+			COptimizedKPSetIndividualItem* CIndividualSameTestingItem::getInstantiatedItem1() {
 				return mInstantiatedItem1;
 			}
 
-			COptimizedKPSetConceptInstantiatedItem* CIndividualSameTestingItem::getInstantiatedItem2() {
+			COptimizedKPSetIndividualItem* CIndividualSameTestingItem::getInstantiatedItem2() {
 				return mInstantiatedItem2;
 			}
 		}; // end namespace Realizer

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -66,7 +66,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CCalculationChooseTaskHandleAlgorithm(CTaskHandleAlgorithm* tableauCompTaskHandleAlg = nullptr, CTaskHandleAlgorithm* tableauDefaultSaturTaskHandleAlg = nullptr, CTaskHandleAlgorithm* tableauPilingSaturTaskHandleAlg = nullptr, CTaskHandleAlgorithm* tableauApproxSaturTaskHandleAlg = nullptr);
+						CCalculationChooseTaskHandleAlgorithm(CTaskHandleAlgorithm* tableauCompTaskHandleAlg = nullptr, CTaskHandleAlgorithm* tableauApproxSaturTaskHandleAlg = nullptr);
 
 						virtual bool handleTask(CTaskProcessorContext *processorContext, CTask* task);
 
@@ -76,8 +76,6 @@ namespace Konclude {
 					// protected variables
 					protected:
 						CTaskHandleAlgorithm* mTableauCompTaskHandleAlg;
-						CTaskHandleAlgorithm* mTableauDefaultSaturTaskHandleAlg;
-						CTaskHandleAlgorithm* mTableauPilingSaturTaskHandleAlg;
 						CTaskHandleAlgorithm* mTableauApproxSaturTaskHandleAlg;
 						
 

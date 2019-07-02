@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -44,10 +44,11 @@ namespace Konclude {
 					LOG(WARNING,"::Konclude::Reasoner::Kernel::ExperimentalReasonerManager",logTr("Initializing EXPERIMENTAL Reasoner."),this);
 
 					unsatCache = new COccurrenceUnsatisfiableCache(mWorkControllerCount+2);
-					mSatExpCache = new CSignatureSatisfiableExpanderCache();
+					mSatExpCache = new CSignatureSatisfiableExpanderCache(configProvider->getCurrentConfiguration());
 					mReuseCompGraphCache = new CReuseCompletionGraphCache();
 					mSatNodeExpCache = new CSaturationNodeAssociatedExpansionCache(configProvider->getCurrentConfiguration());
 					mCompConsCache = new CComputedConsequencesCache(configProvider->getCurrentConfiguration());
+					mBackendAssCache = new CBackendRepresentativeMemoryCache(configProvider->getCurrentConfiguration());
 
 					CConfigDependedCalculationFactory* calcFactory = new CConfigDependedCalculationFactory(this);
 					CCalculationManager* calculationManager = calcFactory->createCalculationManager(configProvider);

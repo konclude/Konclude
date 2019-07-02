@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,7 +31,10 @@ namespace Konclude {
 			namespace Cache {
 
 
-				CSignatureSatisfiableExpanderCache::CSignatureSatisfiableExpanderCache(QString threadIdentifierName, CWatchDog *watchDogThread) : CThread(threadIdentifierName,watchDogThread) {
+				CSignatureSatisfiableExpanderCache::CSignatureSatisfiableExpanderCache(CConfiguration* config, QString threadIdentifierName, CWatchDog *watchDogThread) : CThread(threadIdentifierName,watchDogThread) {
+
+					mConfig = config;
+
 					mWriteDataCount = 0;
 					mNextWriteCollectCount = 0;
 					mCollectCount = 0;
@@ -47,7 +50,14 @@ namespace Konclude {
 					mSigItemHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64,CSignatureSatisfiableExpanderCacheRedirectionItem*>,CContext* >::allocateAndConstructAndParameterize(memMan,&mContext);
 					mIncompatibleSigSet = CObjectParameterizingAllocator< CCACHINGSET<cint64>,CContext* >::allocateAndConstructAndParameterize(memMan,&mContext);
 					mAlreadyExpSigSet = CObjectParameterizingAllocator< CCACHINGSET<cint64>,CContext* >::allocateAndConstructAndParameterize(memMan,&mContext);
+					mSignatureReferCountSet = CObjectParameterizingAllocator< CCACHINGHASH<cint64,cint64>,CContext* >::allocateAndConstructAndParameterize(memMan,&mContext);
 					
+
+					mNextMemoryLevelRequiredSignatureRefCount = CConfigDataReader::readConfigInteger(config,"Konclude.Cache.SatisfiableExpander.InitialMemoryLevelForIncreaseRequiredSignatureReferenceCount",200*1024*1024);
+					mNextMemoryLevelIncreaseForRequiredSignatureReferenceCount = CConfigDataReader::readConfigInteger(config,"Konclude.Cache.SatisfiableExpander.NextMemoryLevelIncreaseForIncreaseRequiredSignatureReferenceCount",100*1024*1024);
+					mNextCacheEntryRequiredSignatureRefCount = CConfigDataReader::readConfigInteger(config,"Konclude.Cache.SatisfiableExpander.RequiredSignatureReferenceCountIncrease",1);
+					mNextCacheEntryRequiredSignatureReferenceCountIncrease = CConfigDataReader::readConfigInteger(config,"Konclude.Cache.SatisfiableExpander.RequiredSignatureReferenceCountIncrease",1);
+
 					startThread(QThread::HighestPriority);
 				}
 
@@ -62,37 +72,39 @@ namespace Konclude {
 				}
 
 				bool CSignatureSatisfiableExpanderCache::writeExpanderCachingData(CSignatureSatisfiableExpanderCacheContext* context, cint64 prevSignature, cint64 newSignature, CCACHINGLIST<CCacheValue>* cacheValueList, CCACHINGHASH<cint64,cint64>* depHash) {
-					if (!mSigItemHash->contains(newSignature)) {
-						CMemoryAllocationManager* memMan = context->getMemoryAllocationManager();
-						CSignatureSatisfiableExpanderCacheEntry* entry = nullptr;
-						if (prevSignature != 0) {
-							CSignatureSatisfiableExpanderCacheRedirectionItem* prevSigItem = mSigItemHash->value(prevSignature);
-							if (prevSigItem) {
-								entry = prevSigItem->getCacheEntry();
-								if (!isCachingDataExpandable(context,entry,prevSignature,cacheValueList)) {
-									// not compatible, only identical signatures
-									mIncompatibleSigSet->insert(prevSignature);
-									return false;
-								}
-								if (mAlreadyExpSigSet->contains(prevSignature)) {
-									entry->setMultipleExpanded(true);
+					if (canCreateCacheEntryForSignature(newSignature,context)) {
+						if (!mSigItemHash->contains(newSignature)) {
+							CMemoryAllocationManager* memMan = context->getMemoryAllocationManager();
+							CSignatureSatisfiableExpanderCacheEntry* entry = nullptr;
+							if (prevSignature != 0) {
+								CSignatureSatisfiableExpanderCacheRedirectionItem* prevSigItem = mSigItemHash->value(prevSignature);
+								if (prevSigItem) {
+									entry = prevSigItem->getCacheEntry();
+									if (!isCachingDataExpandable(context,entry,prevSignature,cacheValueList)) {
+										// not compatible, only identical signatures
+										mIncompatibleSigSet->insert(prevSignature);
+										return false;
+									}
+									if (mAlreadyExpSigSet->contains(prevSignature)) {
+										entry->setMultipleExpanded(true);
+									}
 								}
 							}
-						}
 
-						if (!entry) {
-							entry = CObjectParameterizingAllocator< CSignatureSatisfiableExpanderCacheEntry,CSignatureSatisfiableExpanderCacheContext* >::allocateAndConstructAndParameterize(memMan,context);
+							if (!entry) {
+								entry = CObjectParameterizingAllocator< CSignatureSatisfiableExpanderCacheEntry,CSignatureSatisfiableExpanderCacheContext* >::allocateAndConstructAndParameterize(memMan,context);
+							}
+							
+							writeExpanderCachingData(context,entry,prevSignature != 0,cacheValueList,depHash);
+							CSignatureSatisfiableExpanderCacheRedirectionItem* sigItem = CObjectAllocator< CSignatureSatisfiableExpanderCacheRedirectionItem >::allocateAndConstruct(memMan);
+							sigItem->initRedirectionItem(entry,newSignature,entry->getExpanderCacheValueCount());
+							mSigItemHash->insert(newSignature,sigItem);
+							mAlreadyExpSigSet->insert(prevSignature);
+							//mHasherItemHash.insert(CSignatureSatisfiableExpanderCacheHasher(entry->getExpanderCacheValueLinker(),entry->getExpanderCacheValueCount()),sigItem);
+							return true;
+						} else {
+							mIncompatibleSigSet->insert(newSignature);
 						}
-						
-						writeExpanderCachingData(context,entry,prevSignature != 0,cacheValueList,depHash);
-						CSignatureSatisfiableExpanderCacheRedirectionItem* sigItem = CObjectAllocator< CSignatureSatisfiableExpanderCacheRedirectionItem >::allocateAndConstruct(memMan);
-						sigItem->initRedirectionItem(entry,newSignature,entry->getExpanderCacheValueCount());
-						mSigItemHash->insert(newSignature,sigItem);
-						mAlreadyExpSigSet->insert(prevSignature);
-						//mHasherItemHash.insert(CSignatureSatisfiableExpanderCacheHasher(entry->getExpanderCacheValueLinker(),entry->getExpanderCacheValueCount()),sigItem);
-						return true;
-					} else {
-						mIncompatibleSigSet->insert(newSignature);
 					}
 					return false;
 				}
@@ -106,7 +118,8 @@ namespace Konclude {
 						while (prevCount-- > 0 && !cacheValueList->isEmpty()) { 
 							const CCacheValue& cacheValue = cacheValueList->takeFirst();
 							cint64 tag = cacheValue.getTag();
-							if (!tagHash->contains(tag)) {
+							CExpanderCacheValueLinker* contCacheValue = tagHash->value(tag);
+							if (!contCacheValue || *contCacheValue->getCacheValue() != cacheValue) {
 								return false;
 							}
 						}
@@ -497,6 +510,25 @@ namespace Konclude {
 					return false;
 				}
 
+
+
+
+				cint64 CSignatureSatisfiableExpanderCache::getRequiredSignatureReferCountForNextCacheEntryCreation(CSignatureSatisfiableExpanderCacheContext* context) {
+					if (context->getMemoryConsumption() >= mNextMemoryLevelRequiredSignatureRefCount) {
+						mNextCacheEntryRequiredSignatureRefCount += mNextCacheEntryRequiredSignatureReferenceCountIncrease;
+						mNextMemoryLevelRequiredSignatureRefCount += mNextMemoryLevelIncreaseForRequiredSignatureReferenceCount;
+					}
+					return mNextCacheEntryRequiredSignatureRefCount;
+				}
+
+				cint64 CSignatureSatisfiableExpanderCache::canCreateCacheEntryForSignature(cint64 singature, CSignatureSatisfiableExpanderCacheContext* context) {
+					cint64& refCount = (*mSignatureReferCountSet)[singature];
+					++refCount;
+					if (refCount >= getRequiredSignatureReferCountForNextCacheEntryCreation(context)) {
+						return true;
+					}
+					return false;
+				}
 
 			}; // end namespace Cache
 

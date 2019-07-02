@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -1366,6 +1366,7 @@ namespace Konclude {
 					expression = new CDeclarationAxiomExpression(entity);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDECLARATION);
 				}
 				return expression;
 			}
@@ -1380,6 +1381,7 @@ namespace Konclude {
 					expression = new CEquivalentClassesExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETEQUIVALENTCLASSES);
 				}
 				return expression;
 			}
@@ -1392,6 +1394,7 @@ namespace Konclude {
 					expression = new CSubClassOfExpression(expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETESUBCLASSOF);
 				}
 				return expression;
 			}
@@ -1404,6 +1407,7 @@ namespace Konclude {
 					expression = new CDisjointClassesExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTCLASSES);
 				}
 				return expression;
 			}
@@ -1417,6 +1421,7 @@ namespace Konclude {
 					expression = new CDisjointUnionExpression(classExpression,expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTUNION);
 				}
 				return expression;
 			}
@@ -1432,6 +1437,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTCOMPLEMENTOF);
 				}
 				return expression;
 			}
@@ -1446,6 +1452,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTINTERSECTION);
 				}
 				return expression;
 			}
@@ -1460,6 +1467,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTUNION);
 				}
 				return expression;
 			}
@@ -1478,6 +1486,8 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTMAXCARDINALITY);
+					mBuildExpCounter->setMaxObjectCardinalityMinimumMaximumCandidate(cardinality);
 				}
 				return expression;
 			}
@@ -1495,6 +1505,8 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTMINCARDINALITY);
+					mBuildExpCounter->setMinObjectCardinalityMinimumMaximumCandidate(cardinality);
 				}
 				return expression;
 			}
@@ -1512,6 +1524,9 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTEXACTLYCARDINALITY);
+					mBuildExpCounter->setMaxObjectCardinalityMinimumMaximumCandidate(cardinality);
+					mBuildExpCounter->setMinObjectCardinalityMinimumMaximumCandidate(cardinality);
 				}
 				return expression;
 			}
@@ -1526,6 +1541,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTALLVALUEFROM);
 				}
 				return expression;
 			}
@@ -1540,6 +1556,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTONEOF);
 				}
 				return expression;
 			}
@@ -1558,6 +1575,7 @@ namespace Konclude {
 					mBuildConceptList->append(mTmpObjectOneOfExpression);
 					expression = mTmpObjectOneOfExpression;
 					mTmpObjectOneOfExpression = nullptr;
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTONEOF);
 				}
 				return (CObjectOneOfExpression*)expression;
 			}
@@ -1576,6 +1594,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALITERAL);
 				}
 				return expression;
 			}
@@ -1594,6 +1613,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATASOMEVALUEFROM);
 				}
 				return expression;
 			}
@@ -1610,6 +1630,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAHASVALUE);
 				}
 				return expression;
 			}
@@ -1625,6 +1646,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAALLVALUEFROM);
 				}
 				return expression;
 			}
@@ -1644,6 +1666,8 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAMAXCARDINALITY);
+					mBuildExpCounter->setMaxDataCardinalityMinimumMaximumCandidate(cardinality);
 				}
 				return expression;
 			}
@@ -1662,6 +1686,8 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAMINCARDINALITY);
+					mBuildExpCounter->setMinDataCardinalityMinimumMaximumCandidate(cardinality);
 				}
 				return expression;
 			}
@@ -1682,6 +1708,9 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAEXACTCARDINALITY);
+					mBuildExpCounter->setMaxDataCardinalityMinimumMaximumCandidate(cardinality);
+					mBuildExpCounter->setMinDataCardinalityMinimumMaximumCandidate(cardinality);
 				}
 				return expression;
 			}
@@ -1696,6 +1725,7 @@ namespace Konclude {
 					expression = new CDataFacetRestrictionExpression(dataLiteralExpression,dataFacet);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATATYPERESTRICTION);
 				}
 				return expression;
 			}
@@ -1715,6 +1745,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAINTERSECTIONOF);
 				}
 				return expression;
 			}
@@ -1729,6 +1760,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAONEOF);
 				}
 				return expression;
 			}
@@ -1743,6 +1775,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAUNIONOF);
 				}
 				return expression;
 			}
@@ -1757,6 +1790,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATACOMPLEMENTOF);
 				}
 				return expression;
 			}
@@ -1771,6 +1805,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAFACETRESTRICION);
 				}
 				return expression;
 			}
@@ -1803,6 +1838,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTSOMEVALUEFROM);
 				}
 				return expression;
 			}
@@ -1817,6 +1853,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTHASVALUE);
 				}
 				return expression;
 			}
@@ -1831,6 +1868,7 @@ namespace Konclude {
 					mExpressionBuildContainerList->append(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTHASSELF);
 				}
 				return expression;
 			}
@@ -1844,6 +1882,7 @@ namespace Konclude {
 					expression = new CSubObjectPropertyOfExpression(subExpressions,superExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSUBOBJECTPROPERTYOF);
 				}
 				return expression;
 			}
@@ -1863,6 +1902,7 @@ namespace Konclude {
 					expression = new CObjectPropertyChainExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYCHAIN);
 				}
 				return expression;
 			}
@@ -1875,6 +1915,7 @@ namespace Konclude {
 					expression = new CEquivalentObjectPropertiesExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETEQUIVALENTOBJECTPROPERTIES);
 				}
 				return expression;
 			}
@@ -1887,6 +1928,7 @@ namespace Konclude {
 					expression = new CDisjointObjectPropertiesExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTOBJECTPROPERTIES);
 				}
 				return expression;
 			}
@@ -1900,6 +1942,7 @@ namespace Konclude {
 					expression = new CObjectPropertyDomainExpression(expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYDOMAIN);
 				}
 				return expression;
 			}
@@ -1912,6 +1955,7 @@ namespace Konclude {
 					expression = new CObjectPropertyRangeExpression(expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYRANGE);
 				}
 				return expression;
 			}
@@ -1931,6 +1975,7 @@ namespace Konclude {
 					expression = new CSubDataPropertyOfExpression(subExpression,superExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSUBDATAPROPERTYOF);
 				}
 				return expression;
 			}
@@ -1943,6 +1988,7 @@ namespace Konclude {
 					expression = new CEquivalentDataPropertiesExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETEQUIVALENTDATAPROPERTIES);
 				}
 				return expression;
 			}
@@ -1955,6 +2001,7 @@ namespace Konclude {
 					expression = new CDisjointDataPropertiesExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTDATAPROPERTIES);
 				}
 				return expression;
 			}
@@ -1968,6 +2015,7 @@ namespace Konclude {
 					expression = new CDataPropertyDomainExpression(expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTYDOMAIN);
 				}
 				return expression;
 			}
@@ -1980,6 +2028,7 @@ namespace Konclude {
 					expression = new CDataPropertyRangeExpression(expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTYRANGE);
 				}
 				return expression;
 			}
@@ -1992,6 +2041,7 @@ namespace Konclude {
 					expression = new CFunctionalDataPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETFUNCTIONALPROPERTYOF);
 				}
 				return expression;
 			}
@@ -2011,6 +2061,7 @@ namespace Konclude {
 					expression = new CInverseObjectPropertiesExpression(expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINVERSEOBJECTPROPERTIES);
 				}
 				return expression;
 			}
@@ -2023,6 +2074,7 @@ namespace Konclude {
 					expression = new CTransetiveObjectPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETTRANSETIVEPROPERTYOF);
 				}
 				return expression;
 			}
@@ -2035,6 +2087,7 @@ namespace Konclude {
 					expression = new CFunctionalObjectPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETFUNCTIONALOBJECTPROPERTY);
 				}
 				return expression;
 			}
@@ -2048,6 +2101,7 @@ namespace Konclude {
 					expression = new CInverseFunctionalObjectPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINVERSEFUNCTIONALPROPERTY);
 				}
 				return expression;
 			}
@@ -2060,6 +2114,7 @@ namespace Konclude {
 					expression = new CSymmetricObjectPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSYMMETRICPROPERTY);
 				}
 				return expression;
 			}
@@ -2072,6 +2127,7 @@ namespace Konclude {
 					expression = new CAsymmetricObjectPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETASYMMETRICPROPERTY);
 				}
 				return expression;
 			}
@@ -2084,6 +2140,7 @@ namespace Konclude {
 					expression = new CReflexiveObjectPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETREFLEXIVEPROPERTY);
 				}
 				return expression;
 			}
@@ -2097,6 +2154,7 @@ namespace Konclude {
 					expression = new CIrreflexiveObjectPropertyExpression(buildExpression);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETIRREFLEXIVEPROPERTY);
 				}
 				return expression;
 			}
@@ -2114,6 +2172,7 @@ namespace Konclude {
 					mInverseObjectPropertyHash->insert(expression,buildExpression);
 					mInverseObjectPropertyList->append( QPair<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>(expression,buildExpression) );
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINVERSEOBJECTPROPERTYOF);
 				}
 				return expression;
 			}
@@ -2139,6 +2198,7 @@ namespace Konclude {
 					expression = new CClassAssertionExpression(expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETCLASSASSERTION);
 				}
 				return expression;
 			}
@@ -2151,6 +2211,7 @@ namespace Konclude {
 					expression = new CObjectPropertyAssertionExpression(expression3,expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYASSERTION);
 				}
 				return expression;
 			}
@@ -2163,6 +2224,7 @@ namespace Konclude {
 					expression = new CNegativeObjectPropertyAssertionExpression(expression3,expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNEGATIVEOBJECTPROPERTYASSERTION);
 				}
 				return expression;
 			}
@@ -2175,6 +2237,7 @@ namespace Konclude {
 					expression = new CSameIndividualExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSAMEINDIVIDUAL);
 				}
 				return expression;
 			}
@@ -2187,6 +2250,7 @@ namespace Konclude {
 					expression = new CDifferentIndividualsExpression(expressions);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDIFFERENTINDIVIDUAL);
 				}
 				return expression;
 			}
@@ -2201,6 +2265,7 @@ namespace Konclude {
 					expression = new CDataPropertyAssertionExpression(expression3,expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTYASSERTION);
 				}
 				return expression;
 			}
@@ -2213,6 +2278,7 @@ namespace Konclude {
 					expression = new CNegativeDataPropertyAssertionExpression(expression3,expression1,expression2);
 					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
 					mExpressionBuildContainerList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNEGATIVEDATAPROPERTYASSERTION);
 				}
 				return expression;
 			}
@@ -2229,6 +2295,8 @@ namespace Konclude {
 
 				mOntoStrings = mOnto->getStringMapping();
 				mOntoBuild = mOnto->getBuildData();
+
+				mBuildExpCounter = mOntoBuild->getBuildExpressionCounter();
 
 				mDeclarationAxiomSet = mOntoBuild->getDeclarationAxiomSet();
 
@@ -2410,6 +2478,11 @@ namespace Konclude {
 					mClassBuildHash->insert(className,expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETCLASS);
+				} else {
+					if (expression == mBottomClassExpression) {
+						mBuildExpCounter->incRefferedBottomClassCount();
+					}
 				}
 				return expression;
 			}
@@ -2424,6 +2497,11 @@ namespace Konclude {
 					mClassBuildHash->insert(classNameString,expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETCLASS);
+				} else {
+					if (expression == mBottomClassExpression) {
+						mBuildExpCounter->incRefferedBottomClassCount();
+					}
 				}
 				return expression;
 			}
@@ -2439,6 +2517,7 @@ namespace Konclude {
 					mDatatypeBuildHash->insert(datatypeName,expression);
 					mBuildDatatypeSet->insert(expression);
 					mBuildDatatypeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATATYPE);
 				}
 				return expression;
 			}
@@ -2453,6 +2532,7 @@ namespace Konclude {
 					mDatatypeBuildHash->insert(datatypeNameString,expression);
 					mBuildDatatypeSet->insert(expression);
 					mBuildDatatypeList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATATYPE);
 				}
 				return expression;
 			}
@@ -2470,6 +2550,7 @@ namespace Konclude {
 					expression = new CDataFacetExpression(dataFacetIRI);
 					expression->setEntityID(mNextEntityNumber++);
 					mDataFacetBuildHash->insert(dataFacetIRI,expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAFACETIRI);
 				}
 				return expression;
 			}
@@ -2482,6 +2563,7 @@ namespace Konclude {
 					expression = new CDataFacetExpression(datatypeNameString);
 					expression->setEntityID(mNextEntityNumber++);
 					mDataFacetBuildHash->insert(dataFacetIRI,expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAFACETIRI);
 				}
 				return expression;
 			}
@@ -2496,12 +2578,10 @@ namespace Konclude {
 				CDataLexicalValueExpression* expression = nullptr;
 				expression = mDataLexicalValueBuildHash->value(dataLexicalValue);
 				if (!expression) {
-					if (dataLexicalValue == "an ancient site of significant religious importance") {
-						bool bug = true;
-					}
 					expression = new CDataLexicalValueExpression(dataLexicalValue);
 					expression->setEntityID(mNextEntityNumber++);
 					mDataLexicalValueBuildHash->insert(dataLexicalValue,expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALEXICALVALUE);
 				}
 				return expression;
 			}
@@ -2514,6 +2594,7 @@ namespace Konclude {
 					expression = new CDataLexicalValueExpression(dataLexicalValueString);
 					expression->setEntityID(mNextEntityNumber++);
 					mDataLexicalValueBuildHash->insert(dataLexicalValueString,expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALEXICALVALUE);
 				}
 				return expression;
 			}
@@ -2533,6 +2614,11 @@ namespace Konclude {
 					mDataPropertyBuildHash->insert(dataPropertyName,expression);
 					mBuildDataRoleSet->insert(expression);
 					mBuildDataRoleList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTY);
+				} else {
+					if (expression == mBottomDataPropExpression) {
+						mBuildExpCounter->incRefferedBottomDataPropertyCount();
+					}
 				}
 				return expression;
 			}
@@ -2547,6 +2633,11 @@ namespace Konclude {
 					mDataPropertyBuildHash->insert(dataPropertyNameString,expression);
 					mBuildDataRoleSet->insert(expression);
 					mBuildDataRoleList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTY);
+				} else {
+					if (expression == mBottomDataPropExpression) {
+						mBuildExpCounter->incRefferedBottomDataPropertyCount();
+					}
 				}
 				return expression;
 			}
@@ -2567,6 +2658,7 @@ namespace Konclude {
 					mIndividualVariableBuildHash->insert(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber),expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINDIVIDUALVARIABLE);
 				}
 				return expression;
 			}
@@ -2582,6 +2674,7 @@ namespace Konclude {
 					mIndividualVariableBuildHash->insert(QPair<CStringRefStringHasher,cint64>(individualVariableNameString,axiomNumber),expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINDIVIDUALVARIABLE);
 				}
 				return expression;
 			}
@@ -2595,6 +2688,11 @@ namespace Konclude {
 					mObjectPropertyBuildHash->insert(probertyName,expression);
 					mBuildObjectRoleSet->insert(expression);
 					mBuildObjectRoleList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTY);
+				} else {
+					if (expression == mBottomObjPropExpression) {
+						mBuildExpCounter->incRefferedBottomObjectPropertyCount();
+					}
 				}
 				return expression;
 			}
@@ -2609,6 +2707,11 @@ namespace Konclude {
 					mObjectPropertyBuildHash->insert(propertyNameString,expression);
 					mBuildObjectRoleSet->insert(expression);
 					mBuildObjectRoleList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTY);
+				} else {
+					if (expression == mBottomObjPropExpression) {
+						mBuildExpCounter->incRefferedBottomObjectPropertyCount();
+					}
 				}
 				return expression;
 			}
@@ -2622,6 +2725,7 @@ namespace Konclude {
 					mIndividualBuildHash->insert(individualName,expression);
 					mBuildIndividualSet->insert(expression);
 					mBuildIndividualList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNAMEDINDIVIDUAL);
 				}
 				return expression;
 			}
@@ -2636,6 +2740,7 @@ namespace Konclude {
 					mIndividualBuildHash->insert(individualNameString,expression);
 					mBuildIndividualSet->insert(expression);
 					mBuildIndividualList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNAMEDINDIVIDUAL);
 				}
 				return expression;
 			}
@@ -2652,6 +2757,7 @@ namespace Konclude {
 					mAnoIndividualBuildHash->insert(namePair,expression);
 					mBuildIndividualSet->insert(expression);
 					mBuildIndividualList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETANONYMOUSINDIVIDUAL);
 				}
 				return expression;
 			}
@@ -2669,6 +2775,7 @@ namespace Konclude {
 					mAnoIndividualBuildHash->insert(QPair<CStringRefStringHasher,CStringRefStringHasher>(ontologyNameString,individualNameString),expression);
 					mBuildIndividualSet->insert(expression);
 					mBuildIndividualList->append(expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETANONYMOUSINDIVIDUAL);
 				}
 				return expression;
 			}

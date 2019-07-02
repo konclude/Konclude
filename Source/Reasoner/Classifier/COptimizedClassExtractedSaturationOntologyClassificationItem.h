@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,7 +31,7 @@
 
 
 // Other includes
-#include "Reasoner/Query/CSaturationCalculationJob.h"
+
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -40,8 +40,6 @@
 namespace Konclude {
 
 	namespace Reasoner {
-
-		using namespace Query;
 
 		namespace Classifier {
 

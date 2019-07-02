@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -81,64 +81,11 @@ namespace Konclude {
 			}
 
 
-			CConceptSubsumptionRelationObserver *CSubsumptionClassifierThread::tellConceptSupsumptionRelation(CConcreteOntology *ontology, const QList<QPair<CConcept *,CConcept *> > &subsumptionList, bool isSupsumption) {
-				postEvent(new COntologyTellConceptSubsumtionEvent(ontology,subsumptionList,isSupsumption));
-				return this;
-			}
-
-
-
-			CConceptSubsumptionRelationObserver *CSubsumptionClassifierThread::tellConceptDisjointRelation(CConcreteOntology *ontology, const QList<QPair<CConcept *,CConcept *> > &disjointList) {
-				postEvent(new COntologyTellConceptDisjointEvent(ontology,disjointList));
-				return this;
-			}
-
-
-			CConceptSatisfiableObserver *CSubsumptionClassifierThread::tellConceptSatisfiable(CConcreteOntology *ontology, const QList<CConcept *> &satisfiableConceptList, bool isSatisfiable) {
-				postEvent(new COntologyTellConceptSatisfiableEvent(ontology,satisfiableConceptList,isSatisfiable));
-				return this;
-			}
-
-
 			CClassificationMessageDataObserver* CSubsumptionClassifierThread::tellClassificationMessage(CConcreteOntology *ontology, CClassificationMessageData* messageData, CMemoryPool* memoryPool) {
 				postEvent(new COntologyTellClassificationMessageEvent(ontology,messageData,memoryPool));
 				return this;
 			}
 
-
-
-
-			bool CSubsumptionClassifierThread::inteceptSatisfiableTest(CConcreteOntology *ontology, CConcept *concept, bool *satisfiable) {
-				bool tested = false;
-				CBlockingCallbackData callbackBlock;
-				CInterceptOntologyTestResultEvent *interceptEvent = new CInterceptOntologyTestResultEvent(ontology,concept,&callbackBlock);
-				postEvent(interceptEvent,Qt::HighEventPriority);
-				callbackBlock.waitForCallback();
-				CInterceptResultCallbackDataContext *interceptContext = dynamic_cast<CInterceptResultCallbackDataContext *>(callbackBlock.getCallbackDataContext());
-				if (interceptContext) {
-					tested = interceptContext->hasTested();
-					if (satisfiable) {
-						*satisfiable = interceptContext->getResult();
-					}
-				}
-				return tested;
-			}
-
-			bool CSubsumptionClassifierThread::inteceptSubsumptionTest(CConcreteOntology *ontology, CConcept *subsumerConcept, CConcept *subsumedConcept, bool *subsumed) {
-				bool tested = false;
-				CBlockingCallbackData callbackBlock;
-				CInterceptOntologyTestResultEvent *interceptEvent = new CInterceptOntologyTestResultEvent(ontology,subsumerConcept,subsumedConcept,&callbackBlock);
-				postEvent(interceptEvent);
-				callbackBlock.waitForCallback();
-				CInterceptResultCallbackDataContext *interceptContext = dynamic_cast<CInterceptResultCallbackDataContext *>(callbackBlock.getCallbackDataContext());
-				if (interceptContext) {
-					tested = interceptContext->hasTested();
-					if (subsumed) {
-						*subsumed = interceptContext->getResult();
-					}
-				}
-				return tested;
-			}
 
 
 
@@ -160,7 +107,6 @@ namespace Konclude {
 
 			CSubsumptionClassifierThread *CSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 				COntologyClassificationItem *ontClassItem = new COntologyClassificationItem(config,statistics);
-				ontClassItem->setClassificationCalculationSupport(classificationSupport);
 				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
 				ontItemList.append(ontClassItem);
 				processingOntItemList.append(ontClassItem);
@@ -267,42 +213,6 @@ namespace Konclude {
 					}
 					doNextPendingTests();
 					return true;
-				} else if (type == CTestCalculatedCallbackEvent::EVENTTYPE) {
-					CTestCalculatedCallbackEvent *tcue = (CTestCalculatedCallbackEvent *)event;
-					interpreteTestResults(tcue);
-					currRunningTestParallelCount--;
-					doNextPendingTests();
-					return true;
-				} else if (type == CInterceptOntologyTestResultEvent::EVENTTYPE) {
-					CInterceptOntologyTestResultEvent *iotre = (CInterceptOntologyTestResultEvent *)event;
-					interceptTestResults(iotre);
-					return true;
-				} else if (type == COntologyTellConceptSubsumtionEvent::EVENTTYPE) {
-					COntologyTellConceptSubsumtionEvent *otcse = (COntologyTellConceptSubsumtionEvent *)event;
-					CConcreteOntology *ontology = otcse->getOntology();
-					COntologyClassificationItem *ontClassItem = ontItemHash.value(ontology,0);
-					if (ontClassItem) {
-						QList<QPair<CConcept *,CConcept *> > subSumRelList = otcse->getSubsumptionRelationList();
-						bool isSubSum = otcse->isSubsumption();
-
-						interpreteToldSubsumptionResult(ontClassItem,subSumRelList,isSubSum);
-
-					}
-					doNextPendingTests();
-					return true;
-				} else if (type == COntologyTellConceptSatisfiableEvent::EVENTTYPE) {
-					COntologyTellConceptSatisfiableEvent *otcse = (COntologyTellConceptSatisfiableEvent *)event;
-					CConcreteOntology *ontology = otcse->getOntology();
-					COntologyClassificationItem *ontClassItem = ontItemHash.value(ontology,0);
-					if (ontClassItem) {
-						QList<CConcept *> satList = otcse->getSatisfiableList();
-						bool isSatis = otcse->isSatisfiable();
-
-						interpreteToldSatisfiable(ontClassItem,satList,isSatis);
-
-					}
-					doNextPendingTests();
-					return true;
 				} else if (type == COntologyTellClassificationMessageEvent::EVENTTYPE) {
 					COntologyTellClassificationMessageEvent *otcme = (COntologyTellClassificationMessageEvent *)event;
 					CConcreteOntology *ontology = otcme->getOntology();
@@ -315,16 +225,10 @@ namespace Konclude {
 					}
 					doNextPendingTests();
 					return true;
-				} else if (type == COntologyTellConceptDisjointEvent::EVENTTYPE) {
-					COntologyTellConceptDisjointEvent *otcde = (COntologyTellConceptDisjointEvent *)event;
-					CConcreteOntology *ontology = otcde->getOntology();
-					COntologyClassificationItem *ontClassItem = ontItemHash.value(ontology,0);
-					if (ontClassItem) {
-						QList<QPair<CConcept *,CConcept *> > disjointRelList = otcde->getDisjointRelationList();
-
-						interpreteToldDisjointResult(ontClassItem,disjointRelList);
-
-					}
+				} else if (type == CTestCalculatedCallbackEvent::EVENTTYPE) {
+					CTestCalculatedCallbackEvent *tcue = (CTestCalculatedCallbackEvent *)event;
+					interpreteTestResults(tcue);
+					currRunningTestParallelCount--;
 					doNextPendingTests();
 					return true;
 				} else if (type == CCallbackClassifiedOntologyEvent::EVENTTYPE) {
@@ -365,17 +269,6 @@ namespace Konclude {
 			}
 
 			
-			bool CSubsumptionClassifierThread::interpreteToldSubsumptionResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubsumption) {
-				return false;
-			}
-
-			bool CSubsumptionClassifierThread::interpreteToldDisjointResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &disjointRelList) {
-				return false;
-			}
-
-			bool CSubsumptionClassifierThread::interpreteToldSatisfiable(COntologyClassificationItem *ontClassItem, const QList<CConcept *> &satisfiableConceptList, bool isSatisfiable) {
-				return false;
-			}
 
 
 		}; // end namespace Classifier

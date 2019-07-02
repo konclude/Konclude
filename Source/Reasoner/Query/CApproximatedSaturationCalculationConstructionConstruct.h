@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -34,6 +34,7 @@
 #include "Utilities/Container/CSortedNegLinker.h"
 
 #include "Reasoner/Consistiser/CSaturationConceptReferenceLinking.h"
+#include "Reasoner/Consistiser/CSaturationIndividualReferenceLinking.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -87,6 +88,9 @@ namespace Konclude {
 
 					CSaturationConceptReferenceLinking* getSaturationConceptReferenceLinking();
 					CApproximatedSaturationCalculationConstructionConstruct* setSaturationConceptReferenceLinking(CSaturationConceptReferenceLinking* satConRefLinking);
+					
+					CSaturationIndividualReferenceLinking* getSaturationIndividualReferenceLinking();
+					CApproximatedSaturationCalculationConstructionConstruct* setSaturationIndividualReferenceLinking(CSaturationIndividualReferenceLinking* satIndiRefLinking);
 
 				// protected methods
 				protected:
@@ -94,6 +98,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CSaturationConceptReferenceLinking* mSatConRefLinking;
+					CSaturationIndividualReferenceLinking* mSatIndiRefLinking;
 					CConcept* mConstructConcept;
 					bool mConstructConceptNegation;
 					CIndividual* mIndividual;

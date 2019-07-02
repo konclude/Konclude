@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -66,6 +66,12 @@ namespace Konclude {
 					return this;
 				}
 
+
+
+				CProcessTagger* CProcessTagger::setCurrentLocalizationTag(cint64 locTag) {
+					mLocalizationTag = locTag;
+					return this;
+				}
 
 				cint64 CProcessTagger::getCurrentLocalizationTag() {
 					return mLocalizationTag;

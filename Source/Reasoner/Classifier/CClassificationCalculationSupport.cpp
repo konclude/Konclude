@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,58 +29,12 @@ namespace Konclude {
 
 
 			CClassificationCalculationSupport::CClassificationCalculationSupport() {
-				subsumCalcSponsor = 0;
-				satisCalcSponsor = 0;
-				delSubsumCalcSponsor = 0;
-				delSatisCalcSponsor = 0;
 			}
 
 
 			CClassificationCalculationSupport::~CClassificationCalculationSupport() {
-				if (delSubsumCalcSponsor) {
-					delete delSubsumCalcSponsor;
-				}
-				if (delSatisCalcSponsor) {
-					delete delSatisCalcSponsor;
-				}
 			}
 
-
-			CClassificationCalculationSupport *CClassificationCalculationSupport::useSubsumptionCalculationSponsor(CSubsumptionCalculationSponsor *subsumptionCalculationSponsor) {
-				subsumCalcSponsor = subsumptionCalculationSponsor;
-				return this;
-			}
-
-			CClassificationCalculationSupport *CClassificationCalculationSupport::setSubsumptionCalculationSponsor(CSubsumptionCalculationSponsor *takeSubsumptionCalculationSponsor) {
-				subsumCalcSponsor = takeSubsumptionCalculationSponsor;
-				if (delSubsumCalcSponsor) {
-					delete delSubsumCalcSponsor;
-				}
-				delSubsumCalcSponsor = takeSubsumptionCalculationSponsor;
-				return this;
-			}
-
-			CSubsumptionCalculationSponsor *CClassificationCalculationSupport::getSubsumptionCalculationSponsor() {
-				return subsumCalcSponsor;
-			}
-
-			CClassificationCalculationSupport *CClassificationCalculationSupport::useSatisfiableCalculationSponsor(CSatisfiableCalculationSponsor *satisfiableCalculationSponsor) {
-				satisCalcSponsor = satisfiableCalculationSponsor;
-				return this;
-			}
-
-			CClassificationCalculationSupport *CClassificationCalculationSupport::setSatisfiableCalculationSponsor(CSatisfiableCalculationSponsor *takeSatisfiableCalculationSponsor) {
-				satisCalcSponsor = takeSatisfiableCalculationSponsor;
-				if (delSatisCalcSponsor) {
-					delete delSatisCalcSponsor;
-				}
-				delSatisCalcSponsor = takeSatisfiableCalculationSponsor;
-				return this;
-			}
-
-			CSatisfiableCalculationSponsor *CClassificationCalculationSupport::getSatisfiableCalculationSponsor() {
-				return satisCalcSponsor;
-			}
 
 
 

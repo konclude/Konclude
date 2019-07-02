@@ -45,6 +45,7 @@
 #include "Reasoner/Ontology/CRole.h"
 #include "Reasoner/Ontology/CIndividual.h"
 #include "Reasoner/Ontology/CExtendedConceptReferenceLinkingData.h"
+#include "Reasoner/Ontology/CIndividualSaturationReferenceLinkingData.h"
 
 
 #include "Utilities/Memory/CObjectParameterizingAllocator.h"
@@ -84,12 +85,13 @@ namespace Konclude {
 						//! Constructor
 						CIndividualSaturationProcessNode(CProcessContext* processContext = nullptr);
 
-						CIndividualSaturationProcessNode* initIndividualSaturationProcessNode(cint64 individualID, CExtendedConceptReferenceLinkingData* conSatRefLinkData);
+						CIndividualSaturationProcessNode* initIndividualSaturationProcessNode(cint64 individualID, CExtendedConceptReferenceLinkingData* conSatRefLinkData, CIndividualSaturationReferenceLinkingData* indSatRefLinkData);
 						CIndividualSaturationProcessNode* initRootIndividualSaturationProcessNode();
-						CIndividualSaturationProcessNode* initCopingIndividualSaturationProcessNode(CIndividualSaturationProcessNode* indiNode);
+						CIndividualSaturationProcessNode* initCopingIndividualSaturationProcessNode(CIndividualSaturationProcessNode* indiNode, bool tryFlatLabelCopy);
 						CIndividualSaturationProcessNode* initSubstituitingIndividualSaturationProcessNode(CIndividualSaturationProcessNode* indiNode);
 
 						CExtendedConceptReferenceLinkingData* getSaturationConceptReferenceLinking();
+						CIndividualSaturationReferenceLinkingData* getSaturationIndividualReferenceLinking();
 
 						CReapplyConceptSaturationLabelSet* getReapplyConceptSaturationLabelSet(bool create = true);
 						
@@ -99,6 +101,8 @@ namespace Konclude {
 						CCriticalSaturationConceptTypeQueues* getCriticalConceptTypeQueues(bool create = true);
 						CSaturationIndividualNodeSuccessorExtensionData* getSuccessorExtensionData(bool create = true);
 						CSaturationIndividualNodeNominalHandlingData* getNominalHandlingData(bool create = true);
+						CCriticalPredecessorRoleCardinalityHash* getCriticalPredecessorRoleCardinalityHash(bool create = true);
+						CSaturationIndividualNodeDatatypeData* getAppliedDatatypeData(bool create = true);
 
 						CRoleBackwardSaturationPropagationHash* getRoleBackwardPropagationHash(bool create = true);
 						CIndividualSaturationProcessNodeLinker* getIndividualSaturationProcessNodeLinker();
@@ -109,6 +113,13 @@ namespace Konclude {
 						CIndividualSaturationProcessNode* setConceptSaturationProcessLinker(CConceptSaturationProcessLinker* conProcessLinker);
 						CIndividualSaturationProcessNode* addConceptSaturationProcessLinker(CConceptSaturationProcessLinker* conProcessLinker);
 						CIndividualSaturationProcessNode* clearConceptSaturationProcessLinker();
+
+
+						CSaturationSuccessorRoleAssertionLinker* getRoleAssertionLinker();
+						CIndividualSaturationProcessNode* addRoleAssertionLinker(CSaturationSuccessorRoleAssertionLinker* roleAssertionLinker);
+						CIndividualSaturationProcessNode* addRoleAssertion(CIndividualSaturationProcessNode* destinationNode, CRole* role, bool roleNegation);
+
+
 
 						bool getRequiredBackwardPropagation();
 						CIndividualSaturationProcessNode* setRequiredBackwardPropagation(bool requiredBackProp);
@@ -143,6 +154,9 @@ namespace Konclude {
 						bool isCompleted();
 						CIndividualSaturationProcessNode* setCompleted(bool completed);
 
+						CIndividual* getNominalIndividual();
+						CIndividualSaturationProcessNode* setNominalIndividual(CIndividual* nominalIndi);
+
 
 						CBackwardSaturationPropagationLink* getInitializingBackwardPropagationLinks();
 						CIndividualSaturationProcessNode* setInitializingBackwardPropagationLinks(CBackwardSaturationPropagationLink* backwardPropLinks);
@@ -171,7 +185,11 @@ namespace Konclude {
 						CSuccessorConnectedNominalSet* getSuccessorConnectedNominalSet(bool create = true);
 
 						bool hasNominalIntegrated();
-						CIndividualSaturationProcessNode* setNominalIntegrated(bool integrated);
+						CIndividualSaturationProcessNode* setIntegratedNominal(CIndividual* nominalIndi);
+						CIndividual* getIntegratedNominalIndividual();
+
+						bool hasDataValueApplied();
+						CIndividualSaturationProcessNode* setDataValueApplied(bool dataApplied);
 
 						bool hasMultipleCardinalityAncestorNodesLinker();
 						CXLinker<CIndividualSaturationProcessNode*>* getMultipleCardinalityAncestorNodesLinker();
@@ -189,6 +207,8 @@ namespace Konclude {
 						CIndividualSaturationProcessNodeCacheData* getCacheExpansionData();
 						CIndividualSaturationProcessNode* setCacheExpansionData(CIndividualSaturationProcessNodeCacheData* cacheData);
 
+						bool isSeparated();
+						CIndividualSaturationProcessNode* setSeparated(bool separated);
 
 					// protected methods
 					protected:
@@ -198,7 +218,8 @@ namespace Konclude {
 						CProcessContext* mProcessContext;
 						CMemoryAllocationManager* mMemAllocMan;
 
-						CExtendedConceptReferenceLinkingData* mSaturationLinkRefData;
+						CExtendedConceptReferenceLinkingData* mConceptSaturationLinkRefData;
+						CIndividualSaturationReferenceLinkingData* mIndividualSaturationLinkRefData;
 						CRoleBackwardSaturationPropagationHash* mRoleBackPropHash;
 						CReapplyConceptSaturationLabelSet* mReapplyConSatLabelSet;
 						CIndividualSaturationProcessNodeExtensionData* mIndiExtensionData;
@@ -211,6 +232,7 @@ namespace Konclude {
 						CIndividualSaturationProcessNodeStatusFlags mIndirectStatusFlags;
 						bool mRequiredBackProp;
 						bool mIntegratedNominal;
+						bool mDataValueApplied;
 						CConceptSaturationDescriptor* mClashedConSatDesLinker;
 
 						CXNegLinker<CIndividualSaturationProcessNode*>* mDependingIndiNodeLinker;
@@ -224,6 +246,8 @@ namespace Konclude {
 
 						cint64 mIndiID;
 						CBackwardSaturationPropagationLink* mInitBackwardPropLinks;
+						CIndividual* mNominalIndi;
+						CIndividual* mIntegratedNominalIndi;
 
 
 						CIndividualSaturationProcessNodeCacheData* mCacheData;
@@ -231,6 +255,9 @@ namespace Konclude {
 
 						CIndividualSaturationProcessNode* mReferenceIndiNode;
 						cint64 mReferenceMode;
+
+
+						bool mSeparatedSaturation;
 
 					// private methods
 					private:

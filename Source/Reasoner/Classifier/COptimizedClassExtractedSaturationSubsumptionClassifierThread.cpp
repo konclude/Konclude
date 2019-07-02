@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -59,7 +59,6 @@ namespace Konclude {
 			CSubsumptionClassifierThread *COptimizedClassExtractedSaturationSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 
 				COptimizedClassExtractedSaturationOntologyClassificationItem *ontClassItem = new COptimizedClassExtractedSaturationOntologyClassificationItem(config,statistics);
-				ontClassItem->setClassificationCalculationSupport(classificationSupport);
 				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
 				ontItemList.append(ontClassItem);
 				processingOntItemList.append(ontClassItem);
@@ -68,6 +67,10 @@ namespace Konclude {
 				CCalculationConfigurationExtension* calcConfig = ontClassItem->getCalculationConfiguration();
 
 				readCalculationConfig(calcConfig);
+
+				if (CConfigDataReader::readConfigBoolean(ontClassItem->getCalculationConfiguration(),"Konclude.Calculation.Classification.IndividualDependenceTracking",true)) {
+					ontClassItem->setIndividualDependenceTrackingCollector(new CIndividualDependenceTrackingCollector());
+				}
 
 				CPartialPruningTaxonomy *parTax = dynamic_cast<CPartialPruningTaxonomy *>(taxonomy);
 				if (parTax) {
@@ -127,7 +130,8 @@ namespace Konclude {
 							if (concept->hasClassName() && conceptHash->contains(concept)) {
 								bool unsatFlag = false;
 								bool insuffFlag = false;
-								precSatSubsumerExtractor.getConceptFlags(concept,&unsatFlag,&insuffFlag);
+								bool incProcFlag = false;
+								precSatSubsumerExtractor.getConceptFlags(concept,&unsatFlag,&insuffFlag,&incProcFlag);
 
 								if (unsatFlag) {
 									bottomHierNode->addEquivalentConcept(concept);
@@ -266,22 +270,9 @@ namespace Konclude {
 
 
 
-
-			bool COptimizedClassExtractedSaturationSubsumptionClassifierThread::interpreteSubsumptionResult(COntologyClassificationItem *ontClassItem, CConcept *subsumerConcept, CConcept *subsumedConcept, bool isSubsumption) {
-				return false;
-			}
-
-
-			bool COptimizedClassExtractedSaturationSubsumptionClassifierThread::interpreteSatisfiableResult(COntologyClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis) {
-				return false;
-			}
-
 			bool COptimizedClassExtractedSaturationSubsumptionClassifierThread::interpreteTestResults(CTestCalculatedCallbackEvent *testResult) {
 				return false;
 			}
-
-
-
 
 
 
@@ -508,6 +499,9 @@ namespace Konclude {
 						classifStatCollStrings->addProcessingStatistics("class-classification-total-satisfiable-test-count",classifierStats->getTotalSatisfiableCount());
 						classConClassification->setClassConceptTaxonomy(taxonomy);
 						classConClassification->setClassificationStatistics(classifStatCollStrings);
+						if (ontClassItem->getIndividualDependenceTrackingCollector()) {
+							classConClassification->setDependentIndividualsTracking(ontClassItem->getIndividualDependenceTrackingCollector()->getExtendingIndividualDependenceTracking());
+						}
 						classification->setClassConceptClassification(classConClassification);
 					}
 					ontology->setConceptTaxonomy(taxonomy);
@@ -534,10 +528,6 @@ namespace Konclude {
 				return false;
 			}
 
-
-			bool COptimizedClassExtractedSaturationSubsumptionClassifierThread::interceptTestResults(CInterceptOntologyTestResultEvent *interceptResult) {
-				return true;
-			}
 
 
 			cint64 COptimizedClassExtractedSaturationSubsumptionClassifierThread::makeParentAddPredeccessors(COptimizedClassExtractedSaturationSatisfiableTestingItem* conceptItem, COptimizedClassExtractedSaturationSatisfiableTestingItem* subsumedConceptItem, cint64 remainingSubsumingResolvingCount, bool firstResolve) {				

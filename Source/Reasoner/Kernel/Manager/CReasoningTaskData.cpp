@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -36,11 +36,14 @@ namespace Konclude {
 					mAnswered = false;
 					mStartTime.start();
 					mCalcStat = 0;
+					mReqPrepData = nullptr;
+					mFinQueryCallback = nullptr;
 				}
 
 
 				CReasoningTaskData::~CReasoningTaskData() {
 					delete mCalcStat;
+					delete mReqPrepData;
 				}
 
 

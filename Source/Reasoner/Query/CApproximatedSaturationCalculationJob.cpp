@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -36,6 +36,8 @@ namespace Konclude {
 				mCalclulationStatisticsCollector = nullptr;
 				mPreyingAdapter = nullptr;
 				mContinueSaturationData = nullptr;
+				mSeparateSaturation = false;
+				mIndiAnalAdapter = nullptr;
 			}
 
 
@@ -126,6 +128,23 @@ namespace Konclude {
 				return this;
 			}
 
+			bool CApproximatedSaturationCalculationJob::isSeparateSaturation() {
+				return mSeparateSaturation;
+			}
+
+			CApproximatedSaturationCalculationJob* CApproximatedSaturationCalculationJob::setSeparateSaturation(bool separateSaturation) {
+				mSeparateSaturation = separateSaturation;
+				return this;
+			}
+
+			CApproximatedSaturationCalculationJob* CApproximatedSaturationCalculationJob::setSaturationIndividualsAnalysationObserver(CSaturationIndividualsAnalysingAdapter* indiAnalAdapter) {
+				mIndiAnalAdapter = indiAnalAdapter;
+				return this;
+			}
+
+			CSaturationIndividualsAnalysingAdapter* CApproximatedSaturationCalculationJob::getSaturationIndividualsAnalysationObserver() {
+				return mIndiAnalAdapter;
+			}
 
 		}; // end namespace Query
 

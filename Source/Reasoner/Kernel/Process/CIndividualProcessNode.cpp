@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -48,6 +48,8 @@ namespace Konclude {
 					mUseReapplyRoleSuccHash = nullptr;
 					mPrevReapplyRoleSuccHash = nullptr;
 
+					mLastAddedLink = nullptr;
+
 					mConceptPropBindingSetHash = nullptr;
 					mUseConceptPropBindingSetHash = nullptr;
 					mPrevConceptPropBindingSetHash = nullptr;
@@ -71,11 +73,15 @@ namespace Konclude {
 					mDisjointSuccRoleHash = nullptr;
 					mUseDisjointSuccRoleHash = nullptr;
 					mPrevDisjointSuccRoleHash = nullptr;
+					mDisjointRoleConnections = false;
 
 
 					mDistinctHash = nullptr;
 					mUseDistinctHash = nullptr;
 					mPrevDistinctHash = nullptr;
+
+					mBackendSyncData = nullptr;
+					mPrevBackendSyncData = nullptr;
 
 					indiModel = nullptr;
 					mSatCacheRetData = nullptr;
@@ -103,6 +109,10 @@ namespace Konclude {
 					mAssertionConceptLinkerIt = nullptr;
 					mAssertionRoleLinkerIt = nullptr;
 					mBlockedIndividualsLinker = nullptr;
+					mReverseAssertionRoleLinkerIt = nullptr;
+					mAdditionalRoleAssertionsLinker = nullptr;
+					mRoleAssertionsInitialized = false;
+					mReverseRoleAssertionsInitialized = false;
 
 					mInitConceptDescriptor = nullptr;
 
@@ -128,6 +138,7 @@ namespace Konclude {
 					mMergeIntoID = 0;
 					mIndiID = 0;
 					mNomIndi = nullptr;
+					mMergedDepTrackPoint = nullptr;
 
 					mInvalidSignatureBlocking = false;
 					mProcessingQueued = false;
@@ -138,6 +149,9 @@ namespace Konclude {
 					mBlockedReactProcessingQueued = false;
 					mDelayedNominalProcessingQueued = false;
 					mNominalProcessingDelayingChecked = false;
+					mBackendSynchronRetestProcessingQueued = false;
+					mIncrementalCompatibilityCheckingQueued = false;
+					mIncrementalExpansionQueued = false;
 
 					mAssertionInitialisationSignatureValue = 0;
 
@@ -156,7 +170,6 @@ namespace Konclude {
 					mSubstituteIndiNode = nullptr;
 					setLocalizationTag(mProcessContext->getUsedProcessTagger());
 
-					mDebugBlockerIndi = nullptr;
 					mDebugBlockerLastConceptDes = nullptr;
 					mCachingLossNodeReactivationInstalled = false;
 
@@ -166,7 +179,16 @@ namespace Konclude {
 					mLocNominalConnectionSet = nullptr;
 					mUseNominalConnectionSet = nullptr;
 					mUseDatatypesValueSpaceData = nullptr;
+					mUseIncExpData = nullptr;
+					mIncExpID = 0;
+					mBlockerIndiNode = nullptr;
+					mFollowingIndiNode = nullptr;
 					mLocDatatypesValueSpaceData = nullptr;
+					mLocIncExpData = nullptr;
+					mLocIndividualMergingHash = nullptr;
+					mUseIndividualMergingHash = nullptr;
+					mRoleAssertionCreationID = 0;
+					mLastMergedIntoIndividualNode = nullptr;
 				}
 
 
@@ -179,9 +201,11 @@ namespace Konclude {
 					mLocReactivationData = nullptr;
 					mLocNominalConnectionSet = nullptr;
 					mLocDatatypesValueSpaceData = nullptr;
+					mLocIncExpData = nullptr;
+					mLocIndividualMergingHash = nullptr;
+					mBackendSyncData = nullptr;
 					setBlockedTestTag(prevIndividual->getBlockedTestTag());
 					mPrevIndividual = prevIndividual;
-					mDebugBlockerIndi = prevIndividual->mDebugBlockerIndi;
 					mDebugBlockerLastConceptDes = prevIndividual->mDebugBlockerLastConceptDes;
 					mPrevConceptProcessingQueue = prevIndividual->mUseConceptProcessingQueue;
 					mUseConceptProcessingQueue = mPrevConceptProcessingQueue;
@@ -189,6 +213,7 @@ namespace Konclude {
 					mUseReapplyConLabelSet = mPrevReapplyConLabelSet;
 					mPrevReapplyRoleSuccHash = prevIndividual->mUseReapplyRoleSuccHash;
 					mUseReapplyRoleSuccHash = mPrevReapplyRoleSuccHash;
+					mLastAddedLink = prevIndividual->mLastAddedLink;
 					mPrevConceptPropBindingSetHash = prevIndividual->mUseConceptPropBindingSetHash;
 					mUseConceptPropBindingSetHash = mPrevConceptPropBindingSetHash;
 					mPrevConceptVarBindPathSetHash = prevIndividual->mUseConceptVarBindPathSetHash;
@@ -199,12 +224,18 @@ namespace Konclude {
 					mUseSuccRoleHash = mPrevSuccRoleHash;
 					mPrevDisjointSuccRoleHash = prevIndividual->mUseDisjointSuccRoleHash;
 					mUseDisjointSuccRoleHash = mPrevDisjointSuccRoleHash;
+					mDisjointRoleConnections = prevIndividual->mDisjointRoleConnections;
 					mPrevConnSuccSet = prevIndividual->mUseConnSuccSet;
 					mUseConnSuccSet = mPrevConnSuccSet;
 					mPrevDistinctHash = prevIndividual->mUseDistinctHash;
 					mUseDistinctHash = mPrevDistinctHash;
 					mInitializingConceptLinkerIt = prevIndividual->mInitializingConceptLinkerIt;
 					mProcessInitializingConceptLinkerIt = prevIndividual->mProcessInitializingConceptLinkerIt;
+					mAssertionRoleLinkerIt = prevIndividual->mAssertionRoleLinkerIt;
+					mReverseAssertionRoleLinkerIt = prevIndividual->mReverseAssertionRoleLinkerIt;
+					mAdditionalRoleAssertionsLinker = prevIndividual->mAdditionalRoleAssertionsLinker;
+					mRoleAssertionsInitialized = prevIndividual->mRoleAssertionsInitialized;
+					mReverseRoleAssertionsInitialized = prevIndividual->mReverseRoleAssertionsInitialized;
 					mBlockedIndividualsLinker = prevIndividual->mBlockedIndividualsLinker;
 					mSuccessorIndiNodeBackwardDependencyLinker = prevIndividual->mSuccessorIndiNodeBackwardDependencyLinker;
 					mBackwardDependencyToAncestorIndividualNode = prevIndividual->mBackwardDependencyToAncestorIndividualNode;
@@ -216,6 +247,7 @@ namespace Konclude {
 					mPrevSigBlockConExpData = prevIndividual->mPrevSigBlockConExpData;
 					mPrevReusingConExpData = prevIndividual->mPrevReusingConExpData;
 					mPrevSatCacheRetData = prevIndividual->mPrevSatCacheRetData;
+					mPrevBackendSyncData = prevIndividual->mPrevBackendSyncData;
 					mPrevSigBlockIndExplData = prevIndividual->mUseSigBlockIndExplData;
 					mUseSigBlockIndExplData = mPrevSigBlockIndExplData;
 					mPrevSigBlockFollowSet = prevIndividual->mUseSigBlockFollowSet;
@@ -224,6 +256,7 @@ namespace Konclude {
 					indiAncDepth = prevIndividual->indiAncDepth;
 					mNominalLevel = prevIndividual->mNominalLevel;
 					mMergeIntoID = prevIndividual->mMergeIntoID;
+					mMergedDepTrackPoint = prevIndividual->mMergedDepTrackPoint;
 					mIndiID = prevIndividual->mIndiID;
 					mIndiType = prevIndividual->mIndiType;
 					mProcessingBlockedIndi = prevIndividual->mProcessingBlockedIndi;
@@ -238,6 +271,9 @@ namespace Konclude {
 					mDetExpProcessingQueued = prevIndividual->mDetExpProcessingQueued;
 					mDepthProcessingQueued = prevIndividual->mDepthProcessingQueued;
 					mBlockedReactProcessingQueued = prevIndividual->mBlockedReactProcessingQueued;
+					mBackendSynchronRetestProcessingQueued = prevIndividual->mBackendSynchronRetestProcessingQueued;
+					mIncrementalCompatibilityCheckingQueued = prevIndividual->mIncrementalCompatibilityCheckingQueued;
+					mIncrementalExpansionQueued = prevIndividual->mIncrementalExpansionQueued;
 					mDelayedNominalProcessingQueued = prevIndividual->mDelayedNominalProcessingQueued;
 					mNominalProcessingDelayingChecked = prevIndividual->mNominalProcessingDelayingChecked;
 					mAssertionInitialisationSignatureValue = prevIndividual->mAssertionInitialisationSignatureValue;
@@ -255,6 +291,13 @@ namespace Konclude {
 					mUseReactivationData = prevIndividual->mUseReactivationData;
 					mUseNominalConnectionSet = prevIndividual->mUseNominalConnectionSet;
 					mUseDatatypesValueSpaceData = prevIndividual->mUseDatatypesValueSpaceData;
+					mUseIncExpData = prevIndividual->mUseIncExpData;
+					mIncExpID = prevIndividual->mIncExpID;
+					mRoleAssertionCreationID = prevIndividual->mRoleAssertionCreationID;
+					mUseIndividualMergingHash = prevIndividual->mUseIndividualMergingHash;
+					mBlockerIndiNode = prevIndividual->mBlockerIndiNode;
+					mFollowingIndiNode = prevIndividual->mFollowingIndiNode;
+					mLastMergedIntoIndividualNode = prevIndividual->mLastMergedIntoIndividualNode;
 					return this;
 				}
 
@@ -268,17 +311,20 @@ namespace Konclude {
 					mLocReactivationData = nullptr;
 					mLocNominalConnectionSet = nullptr;
 					mLocDatatypesValueSpaceData = nullptr;
+					mLocIncExpData = nullptr;
+					mLocIndividualMergingHash = nullptr;
 					prevIndividual->setRelocalized();
 					if (adobtStatus) {
 						setBlockedTestTag(prevIndividual->getBlockedTestTag());
 					}
+					mBackendSyncData = nullptr;
 					mPrevIndividual = prevIndividual;
 					mPrevConceptProcessingQueue = prevIndividual->mUseConceptProcessingQueue;
 					mUseConceptProcessingQueue = mPrevConceptProcessingQueue;
 					mDependencyTrackPoint = prevIndividual->mDependencyTrackPoint;
-					mDebugBlockerIndi = prevIndividual->mDebugBlockerIndi;
 					mDebugBlockerLastConceptDes = prevIndividual->mDebugBlockerLastConceptDes;
 					mCachingLossNodeReactivationInstalled = prevIndividual->mCachingLossNodeReactivationInstalled;
+					mLastMergedIntoIndividualNode = prevIndividual->mLastMergedIntoIndividualNode;
 
 					if (adobtConceptLabels) {
 						mPrevReapplyConLabelSet = prevIndividual->mUseReapplyConLabelSet;
@@ -287,6 +333,7 @@ namespace Konclude {
 					if (adobtRoleSuccessors) {
 						mPrevReapplyRoleSuccHash = prevIndividual->mUseReapplyRoleSuccHash;
 						mUseReapplyRoleSuccHash = mPrevReapplyRoleSuccHash;
+						mLastAddedLink = prevIndividual->mLastAddedLink;
 						mPrevConceptPropBindingSetHash = prevIndividual->mUseConceptPropBindingSetHash;
 						mUseConceptPropBindingSetHash = mPrevConceptPropBindingSetHash;
 						mPrevConceptVarBindPathSetHash = prevIndividual->mUseConceptVarBindPathSetHash;
@@ -297,6 +344,7 @@ namespace Konclude {
 						mUseSuccRoleHash = mPrevSuccRoleHash;
 						mPrevDisjointSuccRoleHash = prevIndividual->mUseDisjointSuccRoleHash;
 						mUseDisjointSuccRoleHash = mPrevDisjointSuccRoleHash;
+						mDisjointRoleConnections = prevIndividual->mDisjointRoleConnections;
 						mPrevConnSuccSet = prevIndividual->mUseConnSuccSet;
 						mUseConnSuccSet = mPrevConnSuccSet;
 						mPrevDistinctHash = prevIndividual->mUseDistinctHash;
@@ -305,10 +353,21 @@ namespace Konclude {
 						mUseNominalConnectionSet = prevIndividual->mUseNominalConnectionSet;
 						mNominalProcessingDelayingChecked = prevIndividual->mNominalProcessingDelayingChecked;
 						mUseDatatypesValueSpaceData = prevIndividual->mUseDatatypesValueSpaceData;
+						mUseIndividualMergingHash = prevIndividual->mUseIndividualMergingHash;
 					}
 					if (adobtStatus) {
+						mRoleAssertionCreationID = prevIndividual->mRoleAssertionCreationID;
+						mIncExpID = prevIndividual->mIncExpID;
+						mUseIncExpData = prevIndividual->mUseIncExpData;
+						mFollowingIndiNode = prevIndividual->mFollowingIndiNode;
+						mBlockerIndiNode = prevIndividual->mBlockerIndiNode;
 						mInitializingConceptLinkerIt = prevIndividual->mInitializingConceptLinkerIt;
 						mProcessInitializingConceptLinkerIt = prevIndividual->mProcessInitializingConceptLinkerIt;
+						mAssertionRoleLinkerIt = prevIndividual->mAssertionRoleLinkerIt;
+						mReverseAssertionRoleLinkerIt = prevIndividual->mReverseAssertionRoleLinkerIt;
+						mAdditionalRoleAssertionsLinker = prevIndividual->mAdditionalRoleAssertionsLinker;
+						mRoleAssertionsInitialized = prevIndividual->mRoleAssertionsInitialized;
+						mReverseRoleAssertionsInitialized = prevIndividual->mReverseRoleAssertionsInitialized;
 						mBlockedIndividualsLinker = prevIndividual->mBlockedIndividualsLinker;
 						mSuccessorIndiNodeBackwardDependencyLinker = prevIndividual->mSuccessorIndiNodeBackwardDependencyLinker;
 						mBackwardDependencyToAncestorIndividualNode = prevIndividual->mBackwardDependencyToAncestorIndividualNode;
@@ -320,6 +379,7 @@ namespace Konclude {
 						mPrevSigBlockConExpData = prevIndividual->mPrevSigBlockConExpData;
 						mPrevReusingConExpData = prevIndividual->mPrevReusingConExpData;
 						mPrevSatCacheRetData = prevIndividual->mPrevSatCacheRetData;
+						mPrevBackendSyncData = prevIndividual->mPrevBackendSyncData;
 						mPrevSigBlockIndExplData = prevIndividual->mUseSigBlockIndExplData;
 						mUseSigBlockIndExplData = mPrevSigBlockIndExplData;
 						mPrevSigBlockFollowSet = prevIndividual->mUseSigBlockFollowSet;
@@ -331,6 +391,7 @@ namespace Konclude {
 						mProcessingRestrictionFlags = prevIndividual->mProcessingRestrictionFlags;
 						mIndiID = prevIndividual->mIndiID;
 						mMergeIntoID = prevIndividual->mMergeIntoID;
+						mMergedDepTrackPoint = prevIndividual->mMergedDepTrackPoint;
 						mNomIndi = prevIndividual->mNomIndi;
 						mSatCachedAbsorbedDisjunctionsReapplyConDes = prevIndividual->mSatCachedAbsorbedDisjunctionsReapplyConDes;
 						mSatCachedAbsorbedSuccessorReapplyConDes = prevIndividual->mSatCachedAbsorbedSuccessorReapplyConDes;
@@ -347,6 +408,9 @@ namespace Konclude {
 						mDetExpProcessingQueued = prevIndividual->mDetExpProcessingQueued;
 						mDepthProcessingQueued = prevIndividual->mDepthProcessingQueued;
 						mBlockedReactProcessingQueued = prevIndividual->mBlockedReactProcessingQueued;
+						mBackendSynchronRetestProcessingQueued = prevIndividual->mBackendSynchronRetestProcessingQueued;
+						mIncrementalCompatibilityCheckingQueued = prevIndividual->mIncrementalCompatibilityCheckingQueued;
+						mIncrementalExpansionQueued = prevIndividual->mIncrementalExpansionQueued;
 						mDelayedNominalProcessingQueued = prevIndividual->mDelayedNominalProcessingQueued;
 						mAssertionInitialisationSignatureValue = prevIndividual->mAssertionInitialisationSignatureValue;
 					}
@@ -384,20 +448,20 @@ namespace Konclude {
 				}
 
 
-				CXSortedNegLinker<CConcept*>* CIndividualProcessNode::getProcessInitializingConceptLinkerIt() {
+				CXSortedNegLinker<CConcept*>* CIndividualProcessNode::getProcessInitializingConceptLinker() {
 					return mProcessInitializingConceptLinkerIt;
 				}
 
-				CXSortedNegLinker<CConcept*>* CIndividualProcessNode::getInitializingConceptLinkerIt() {
+				CXSortedNegLinker<CConcept*>* CIndividualProcessNode::getInitializingConceptLinker() {
 					return mInitializingConceptLinkerIt;
 				}
 
-				CIndividualProcessNode* CIndividualProcessNode::setInitializingConceptLinkerIt(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt) {
+				CIndividualProcessNode* CIndividualProcessNode::setInitializingConceptLinker(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt) {
 					mInitializingConceptLinkerIt = initializingConceptLinkerIt;
 					return this;
 				}
 
-				CIndividualProcessNode* CIndividualProcessNode::addInitializingConceptLinkerIt(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt) {
+				CIndividualProcessNode* CIndividualProcessNode::addInitializingConceptLinker(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt) {
 					if (initializingConceptLinkerIt) {
 						mInitializingConceptLinkerIt = initializingConceptLinkerIt->append(mInitializingConceptLinkerIt);
 						mProcessInitializingConceptLinkerIt = mInitializingConceptLinkerIt;
@@ -415,11 +479,11 @@ namespace Konclude {
 				}
 
 
-				CConceptAssertionLinker* CIndividualProcessNode::getAssertionConceptLinkerIt() {
+				CConceptAssertionLinker* CIndividualProcessNode::getAssertionConceptLinker() {
 					return mAssertionConceptLinkerIt;
 				}
 
-				CIndividualProcessNode* CIndividualProcessNode::setAssertionConceptLinkerIt(CConceptAssertionLinker* assertionConceptLinkerIt) {
+				CIndividualProcessNode* CIndividualProcessNode::setAssertionConceptLinker(CConceptAssertionLinker* assertionConceptLinkerIt) {
 					mAssertionConceptLinkerIt = assertionConceptLinkerIt;
 					return this;
 				}
@@ -436,15 +500,99 @@ namespace Konclude {
 					return this;
 				}
 
-				CRoleAssertionLinker* CIndividualProcessNode::getAssertionRoleLinkerIt() {
+				CRoleAssertionLinker* CIndividualProcessNode::getAssertionRoleLinker() {
 					return mAssertionRoleLinkerIt;
 				}
 
-				CIndividualProcessNode* CIndividualProcessNode::setAssertionRoleLinkerIt(CRoleAssertionLinker* assertionRoleLinkerIt) {
+				CIndividualProcessNode* CIndividualProcessNode::setAssertionRoleLinker(CRoleAssertionLinker* assertionRoleLinkerIt) {
 					mAssertionRoleLinkerIt = assertionRoleLinkerIt;
 					return this;
 				}
 
+
+
+				cint64 CIndividualProcessNode::getRoleAssertionCreationID() {
+					return mRoleAssertionCreationID;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setRoleAssertionCreationID(cint64 creationID) {
+					mRoleAssertionCreationID = creationID;
+					return this;
+				}
+
+
+
+				bool CIndividualProcessNode::hasReverseAssertionRoles() {
+					return mReverseAssertionRoleLinkerIt != nullptr;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::clearReverseAssertionRoles() {
+					mReverseAssertionRoleLinkerIt = nullptr;
+					return this;
+				}
+
+				CReverseRoleAssertionLinker* CIndividualProcessNode::getReverseAssertionRoleLinker() {
+					return mReverseAssertionRoleLinkerIt;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setReverseAssertionRoleLinker(CReverseRoleAssertionLinker* reverseAssertionRoleLinkerIt) {
+					mReverseAssertionRoleLinkerIt = reverseAssertionRoleLinkerIt;
+					return this;
+				}
+
+
+
+
+
+
+
+
+				bool CIndividualProcessNode::hasAdditionalRoleAssertionsLinker() {
+					return mAdditionalRoleAssertionsLinker != nullptr;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::clearAdditionalRoleAssertionsLinker() {
+					mAdditionalRoleAssertionsLinker = nullptr;
+					return this;
+				}
+
+				CAdditionalProcessRoleAssertionsLinker* CIndividualProcessNode::getAdditionalRoleAssertionsLinker() {
+					return mAdditionalRoleAssertionsLinker;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setAdditionalRoleAssertionsLinker(CAdditionalProcessRoleAssertionsLinker* reverseRoleAssertionsLinker) {
+					mAdditionalRoleAssertionsLinker = reverseRoleAssertionsLinker;
+					return this;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::addAdditionalRoleAssertionsLinker(CAdditionalProcessRoleAssertionsLinker* reverseRoleAssertionsLinker) {
+					mAdditionalRoleAssertionsLinker = reverseRoleAssertionsLinker->append(mAdditionalRoleAssertionsLinker);
+					return this;
+				}
+
+
+
+
+
+				bool CIndividualProcessNode::hasRoleAssertionsInitialized() {
+					return mRoleAssertionsInitialized;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setRoleAssertionsInitialized(bool initialized) {
+					mRoleAssertionsInitialized = initialized;
+					return this;
+				}
+
+
+
+				bool CIndividualProcessNode::hasReverseRoleAssertionsInitialized() {
+					return mReverseRoleAssertionsInitialized;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setReverseRoleAssertionsInitialized(bool initialized) {
+					mReverseRoleAssertionsInitialized = initialized;
+					return this;
+				}
 
 
 				cint64 CIndividualProcessNode::getIndividualID() {
@@ -469,6 +617,12 @@ namespace Konclude {
 					return this;
 				}
 
+				CIndividualProcessNode* CIndividualProcessNode::setReapplyConceptLabelSet(CReapplyConceptLabelSet* reapplyConSet) {
+					mUseReapplyConLabelSet = reapplyConSet;
+					mReapplyConLabelSet = reapplyConSet;
+					mPrevReapplyConLabelSet = reapplyConSet;
+					return this;
+				}
 
 				CReapplyConceptLabelSet* CIndividualProcessNode::getReapplyConceptLabelSet(bool create) {
 					if (create && !mReapplyConLabelSet) {
@@ -590,6 +744,18 @@ namespace Konclude {
 				bool CIndividualProcessNode::hasNegationDisjointToIndividual(CRole* role, CIndividualProcessNode* desIndi) {
 					return hasNegationDisjointToIndividual(role,desIndi->getIndividualID());
 				}
+
+
+
+				bool CIndividualProcessNode::hasDisjointRoleConnections() {
+					return mDisjointRoleConnections;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setDisjointRoleConnections(bool disjointRoleConnections) {
+					mDisjointRoleConnections = disjointRoleConnections;
+					return this;
+				}
+
 
 
 				CDisjointSuccessorRoleHash* CIndividualProcessNode::getDisjointSuccessorRoleHash(bool create) {
@@ -825,6 +991,11 @@ namespace Konclude {
 				}
 
 
+				CIndividualLinkEdge* CIndividualProcessNode::getLastAddedRoleLink() {
+					return mLastAddedLink;
+				}
+
+
 				CIndividualProcessNode* CIndividualProcessNode::installIndividualLink(CIndividualLinkEdge* link, CReapplyQueueIterator* reapplyQueueIt) {
 					if (!mReapplyRoleSuccHash) {
 						getReapplyRoleSuccessorHash(true);
@@ -835,6 +1006,7 @@ namespace Konclude {
 					mUseReapplyRoleSuccHash->insertRoleSuccessorLink(link->getLinkRole(),link,reapplyQueueIt);
 					cint64 oppIndiID = link->getOppositeIndividualID(mIndiID);
 					mUseSuccRoleHash->insertSuccessorRoleLink(oppIndiID,link);
+					mLastAddedLink = link;
 					return this;
 				}
 
@@ -905,6 +1077,25 @@ namespace Konclude {
 					mPrevSatCacheRetData = mSatCacheRetData;
 					return this;
 				}
+
+
+
+
+				CIndividualNodeBackendCacheSynchronisationData* CIndividualProcessNode::getIndividualBackendCacheSynchronisationData(bool localCacheData) {
+					if (localCacheData) {
+						return mBackendSyncData;
+					} else {
+						return mPrevBackendSyncData;
+					}
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setIndividualBackendCacheSynchronisationData(CIndividualNodeBackendCacheSynchronisationData* backendSyncData) {
+					mBackendSyncData = backendSyncData;
+					mPrevBackendSyncData = backendSyncData;
+					return this;
+				}
+
+
 
 
 				CIndividualNodeSatisfiableCacheStoringData* CIndividualProcessNode::getIndividualSatisfiableCacheStoringData(bool localCacheData) {
@@ -1416,6 +1607,45 @@ namespace Konclude {
 				}
 
 
+
+				CIndividualProcessNode* CIndividualProcessNode::setBackendSynchronRetestProcessingQueued(bool backendSyncRetest) {
+					mBackendSynchronRetestProcessingQueued = backendSyncRetest;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isBackendSynchronRetestProcessingQueued() {
+					return mBackendSynchronRetestProcessingQueued;
+				}
+
+
+
+
+
+				CIndividualProcessNode* CIndividualProcessNode::setIncrementalCompatibilityCheckingQueued(bool incCompChecking) {
+					mIncrementalCompatibilityCheckingQueued = incCompChecking;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isIncrementalCompatibilityCheckingQueued() {
+					return mIncrementalCompatibilityCheckingQueued;
+				}
+
+
+
+
+				CIndividualProcessNode* CIndividualProcessNode::setIncrementalExpansionQueued(bool incExpQueued) {
+					mIncrementalExpansionQueued = incExpQueued;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isIncrementalExpansionQueued() {
+					return mIncrementalExpansionQueued;
+				}
+
+
 				CIndividualProcessNode* CIndividualProcessNode::clearProcessingQueued() {
 					mBlockedReactProcessingQueued = false;
 					mProcessingQueued = false;
@@ -1423,6 +1653,9 @@ namespace Konclude {
 					mDetExpProcessingQueued = false;
 					mDepthProcessingQueued = false;
 					mDelayedNominalProcessingQueued = false;
+					mBackendSynchronRetestProcessingQueued = false;
+					mIncrementalCompatibilityCheckingQueued = false;
+					mIncrementalExpansionQueued = false;
 					return this;
 				}
 
@@ -1522,14 +1755,88 @@ namespace Konclude {
 
 
 				CDatatypesValueSpaceData* CIndividualProcessNode::getDatatypesValueSpaceData(bool create) {
-					CDatatypesValueSpaceData* nomConnSet = nullptr;
+					CDatatypesValueSpaceData* valueSpaceData = nullptr;
 					if (!mLocDatatypesValueSpaceData && create) {
-						CDatatypesValueSpaceData* nomConnSet = CObjectParameterizingAllocator< CDatatypesValueSpaceData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
-						nomConnSet->initDatatypesValueSpaceData(mUseDatatypesValueSpaceData);
-						mLocDatatypesValueSpaceData = nomConnSet;
-						mUseDatatypesValueSpaceData = nomConnSet;
+						CDatatypesValueSpaceData* valueSpaceData = CObjectParameterizingAllocator< CDatatypesValueSpaceData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						valueSpaceData->initDatatypesValueSpaceData(mUseDatatypesValueSpaceData);
+						mLocDatatypesValueSpaceData = valueSpaceData;
+						mUseDatatypesValueSpaceData = valueSpaceData;
 					}
 					return mUseDatatypesValueSpaceData;
+				}
+
+
+
+				CIndividualNodeIncrementalExpansionData* CIndividualProcessNode::getIncrementalExpansionData(bool create) {
+					CIndividualNodeIncrementalExpansionData* incExpData = nullptr;
+					if (!mLocIncExpData && create) {
+						CIndividualNodeIncrementalExpansionData* incExpData = CObjectParameterizingAllocator< CIndividualNodeIncrementalExpansionData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						incExpData->initIncrementalExpansionData(mUseIncExpData);
+						mLocIncExpData = incExpData;
+						mUseIncExpData = incExpData;
+					}
+					return mUseIncExpData;
+				}
+
+
+				CIndividualMergingHash* CIndividualProcessNode::getIndividualMergingHash(bool create) {
+					CIndividualMergingHash* indiMergHash = nullptr;
+					if (!mLocIndividualMergingHash && create) {
+						CIndividualMergingHash* indiMergHash = CObjectParameterizingAllocator< CIndividualMergingHash,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						indiMergHash->initIndividualMergingHash(mUseIndividualMergingHash);
+						mLocIndividualMergingHash = indiMergHash;
+						mUseIndividualMergingHash = indiMergHash;
+					}
+					return mUseIndividualMergingHash;
+				}
+
+
+				CIndividualProcessNode* CIndividualProcessNode::getLastMergedIntoIndividualNode() {
+					return mLastMergedIntoIndividualNode;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setLastMergedIntoIndividualNode(CIndividualProcessNode* indiNode) {
+					mLastMergedIntoIndividualNode = indiNode;
+					return this;
+				}
+
+
+				CDependencyTrackPoint* CIndividualProcessNode::getMergedDependencyTrackPoint() {
+					return mMergedDepTrackPoint;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setMergedDependencyTrackPoint(CDependencyTrackPoint* depTrackPoint) {
+					mMergedDepTrackPoint = depTrackPoint;
+					return this;
+				}
+
+
+				CIndividualProcessNode* CIndividualProcessNode::setBlockerIndividualNode(CIndividualProcessNode* indiNode) {
+					mBlockerIndiNode = indiNode;
+					return this;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::getBlockerIndividualNode() {
+					return mBlockerIndiNode;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setFollowingIndividualNode(CIndividualProcessNode* indiNode) {
+					mFollowingIndiNode = indiNode;
+					return this;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::getFollowingIndividualNode() {
+					return mFollowingIndiNode;
+				}
+
+
+				CIndividualProcessNode* CIndividualProcessNode::setIncrementalExpansionID(cint64 incExpID) {
+					mIncExpID = incExpID;
+					return this;
+				}
+
+				cint64 CIndividualProcessNode::getIncrementalExpansionID() {
+					return mIncExpID;
 				}
 
 

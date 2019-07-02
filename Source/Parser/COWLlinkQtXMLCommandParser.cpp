@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -104,86 +104,121 @@ namespace Konclude {
 
 				CPreconditionCommand *preComm;
 
-				QString docElemName = node.tagName();
-				if (docElemName == "ImmediatelyExit") {
-					QCoreApplication::exit();
-				} else if (docElemName == "ox:GetDescription" || docElemName == "GetDescription") {
-					preComm = parseGetDescriptionNode(&node);
-				} else if (docElemName == "ox:CreateKB" || docElemName == "CreateKB") {
-					preComm = parseCreateKnowledgeBaseNode(&node);
-				} else if (docElemName == "ox:InsertResponseComment" || docElemName == "InsertResponseComment") {
-					preComm = parseInsertResponseCommentNode(&node);
-				} else if (docElemName == "ox:Tell" || docElemName == "Tell") {
-					preComm = parseTellKnowledgeBaseNode(&node);
-				} else if (docElemName == "ox:LoadKRSSTestConcepts" || docElemName == "LoadKRSSTestConcepts") {
-					preComm = parseLoadKnowledgeBaseKRSSTestConceptNode(&node);
-				} else if (docElemName == "ox:LoadOntology" || docElemName == "LoadOntology") {
-					preComm = parseLoadKnowledgeBaseOntologyNode(&node);
-				} else if (docElemName == "ox:LoadOntologies" || docElemName == "LoadOntologies") {
-					preComm = parseLoadKnowledgeBaseOntologyNode(&node);
-				} else if (docElemName == "ox:SaveExtractedKB" || docElemName == "SaveExtractedKB") {
-					preComm = parseSaveExtractedKnowledgeBaseNode(&node);
-				} else if (docElemName == "ox:SaveExtractedOWLlinkTestCaseKB" || docElemName == "SaveExtractedOWLlinkTestCaseKB") {
-					preComm = parseSaveExtractedOWLlinkTestCaseKnowledgeBaseNode(&node);
-				} else if (docElemName == "ox:IsClassSatisfiable" || docElemName == "IsClassSatisfiable") {
-					preComm = parseProcessQueryNode(&node);
-				} else if (docElemName == "ox:AreClassesEquivalent" || docElemName == "AreClassesEquivalent") {
-					preComm = parseProcessQueryNode(&node);
-				} else if (docElemName == "ox:AreClassesDisjoint" || docElemName == "AreClassesDisjoint") {
-					preComm = parseProcessQueryNode(&node);
-				} else if (docElemName == "ox:IsClassSubsumedBy" || docElemName == "IsClassSubsumedBy") {
-					preComm = parseProcessQueryNode(&node);
-				} else if (docElemName == "ox:IsInstanceOf" || docElemName == "IsInstanceOf") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetFlattenedTypes" || docElemName == "GetFlattenedTypes") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetFlattenedInstances" || docElemName == "GetFlattenedInstances") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetTypes" || docElemName == "GetTypes") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetInstances" || docElemName == "GetInstances") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetSubClasses" || docElemName == "GetSubClasses") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetSuperClasses" || docElemName == "GetSuperClasses") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetEquivalentClasses" || docElemName == "GetEquivalentClasses") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:IsEntailed" || docElemName == "IsEntailed") {
-					preComm = parseProcessQueryNode(&node);
-				}  else if (docElemName == "ox:GetSubClassHierarchy" || docElemName == "GetSubClassHierarchy") {
-					preComm = parseGetSubClassHierarchyNode(&node);
-				}  else if (docElemName == "ox:IsKBSatisfiable" || docElemName == "IsKBSatisfiable") {
-					preComm = parseIsConsistentNode(&node);
-				} else if (docElemName == "ox:ReleaseKB" || docElemName == "ReleaseKB") {
-					preComm = parseReleaseKnowledgeBaseNode(&node);
-				} else if (docElemName == "ox:GetKBLanguage" || docElemName == "GetKBLanguage") {
-					preComm = parseGetKnowledgeBaseLanguageNode(&node);
-				} else if (docElemName == "ox:GetAllClasses" || docElemName == "GetAllClasses") {
-					preComm = parseGetKnowledgeBaseClassEntitiesNode(&node);
-				} else if (docElemName == "ox:GetAllObjectProperties" || docElemName == "GetAllObjectProperties") {
-					preComm = parseGetKnowledgeBaseObjectPropertyEntitiesNode(&node);
-				} else if (docElemName == "ox:GetAllIndividuals" || docElemName == "GetAllIndividuals") {
-					preComm = parseGetKnowledgeBaseIndividualEntitiesNode(&node);
-				} else if (docElemName == "ox:Classify" || docElemName == "Classify") {
-					preComm = parseKnowledgeBaseClassifyNode(&node);
-				} else if (docElemName == "ox:Realize" || docElemName == "Realize" || docElemName == "ox:Realise" || docElemName == "Realise") {
-					preComm = parseKnowledgeBaseRealizeNode(&node);
-				} else if (docElemName == "ox:TestTestsuite" || docElemName == "TestTestsuite") {
-					preComm = parseTestTestsuiteNode(&node);
-				} else if (docElemName == "ox:EvaluateTestsuite" || docElemName == "EvaluateTestsuite") {
-					preComm = parseEvaluateTestsuiteNode(&node);
-				} else if (docElemName == "ox:GetSetting" || docElemName == "GetSetting") {
-					preComm = parseGetSettingNode(&node);
-				} else if (docElemName == "ox:GetSettings" || docElemName == "GetSettings") {
-					preComm = parseGetSettingsNode(&node);
-				} else if (docElemName == "ox:Set" || docElemName == "Set" || docElemName == "ox:SetSetting" || docElemName == "SetSetting") {
-					preComm = parseSetSettingNode(&node);
-				} else {
-					CNotSupportedNodeErrorRecord::makeRecord(docElemName,recorder,getLogDomain(),command);
-					preComm = new CSkipUnsupportedCommandCommand(docElemName);
+				QString namespaceString = node.namespaceURI();
+				QString docElemName = node.localName();
+
+				if (docElemName.isEmpty()) {
+					docElemName = node.tagName();
 				}
 
+				if (namespaceString.isEmpty() || namespaceString == "http://www.owllink.org/owllink-xml#" || namespaceString == "http://www.owllink.org/owllink#" || namespaceString == "http://www.owllink.org/ext/retraction#") {
+
+
+					if (docElemName == "ImmediatelyExit") {
+						QCoreApplication::exit();
+					} else if (docElemName == "ox:GetDescription" || docElemName == "GetDescription") {
+						preComm = parseGetDescriptionNode(&node);
+					} else if (docElemName == "ox:CreateKB" || docElemName == "CreateKB") {
+						preComm = parseCreateKnowledgeBaseNode(&node);
+					} else if (docElemName == "ox:InsertResponseComment" || docElemName == "InsertResponseComment") {
+						preComm = parseInsertResponseCommentNode(&node);
+					} else if (docElemName == "ox:Tell" || docElemName == "Tell") {
+						preComm = parseTellKnowledgeBaseNode(&node);
+					} else if (docElemName == "rec:Retract" || docElemName == "Retract") {
+						preComm = parseRectractKnowledgeBaseNode(&node);
+					} else if (docElemName == "ox:LoadKRSSTestConcepts" || docElemName == "LoadKRSSTestConcepts") {
+						preComm = parseLoadKnowledgeBaseKRSSTestConceptNode(&node);
+					} else if (docElemName == "ox:LoadOntology" || docElemName == "LoadOntology") {
+						preComm = parseLoadKnowledgeBaseOntologyNode(&node);
+					} else if (docElemName == "ox:LoadOntologies" || docElemName == "LoadOntologies") {
+						preComm = parseLoadKnowledgeBaseOntologyNode(&node);
+					} else if (docElemName == "ox:SaveExtractedKB" || docElemName == "SaveExtractedKB") {
+						preComm = parseSaveExtractedKnowledgeBaseNode(&node);
+					} else if (docElemName == "ox:SaveExtractedOWLlinkTestCaseKB" || docElemName == "SaveExtractedOWLlinkTestCaseKB") {
+						preComm = parseSaveExtractedOWLlinkTestCaseKnowledgeBaseNode(&node);
+					} else if (docElemName == "ox:IsClassSatisfiable" || docElemName == "IsClassSatisfiable") {
+						preComm = parseProcessQueryNode(&node);
+					} else if (docElemName == "ox:AreClassesEquivalent" || docElemName == "AreClassesEquivalent") {
+						preComm = parseProcessQueryNode(&node);
+					} else if (docElemName == "ox:AreClassesDisjoint" || docElemName == "AreClassesDisjoint") {
+						preComm = parseProcessQueryNode(&node);
+					} else if (docElemName == "ox:IsClassSubsumedBy" || docElemName == "IsClassSubsumedBy") {
+						preComm = parseProcessQueryNode(&node);
+					} else if (docElemName == "ox:IsInstanceOf" || docElemName == "IsInstanceOf") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetFlattenedTypes" || docElemName == "GetFlattenedTypes") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetFlattenedInstances" || docElemName == "GetFlattenedInstances") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetTypes" || docElemName == "GetTypes") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetSameIndividuals" || docElemName == "GetSameIndividuals") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetInstances" || docElemName == "GetInstances") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetObjectPropertyTargets" || docElemName == "GetObjectPropertyTargets") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetFlattenedObjectPropertyTargets" || docElemName == "GetFlattenedObjectPropertyTargets") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetSubClasses" || docElemName == "GetSubClasses") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetSuperClasses" || docElemName == "GetSuperClasses") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetEquivalentClasses" || docElemName == "GetEquivalentClasses") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:IsEntailed" || docElemName == "IsEntailed") {
+						preComm = parseProcessQueryNode(&node);
+
+					}  else if (docElemName == "ox:GetNondeterministicIndividuals" || docElemName == "GetNondeterministicIndividuals") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetDeterministicIndividuals" || docElemName == "GetDeterministicIndividuals") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetNondeterministicClassAssertions" || docElemName == "GetNondeterministicClassAssertions" || docElemName == "ox:GetPossibleClassAssertions" || docElemName == "GetPossibleClassAssertions") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetDeterministicClassAssertions" || docElemName == "GetDeterministicClassAssertions" || docElemName == "ox:GetKnownClassAssertions" || docElemName == "GetKnownClassAssertions") {
+						preComm = parseProcessQueryNode(&node);
+
+					}  else if (docElemName == "ox:GetSubClassHierarchy" || docElemName == "GetSubClassHierarchy") {
+						preComm = parseGetSubClassHierarchyNode(&node);
+					}  else if (docElemName == "ox:IsKBSatisfiable" || docElemName == "IsKBSatisfiable") {
+						preComm = parseIsConsistentNode(&node);
+					} else if (docElemName == "ox:ReleaseKB" || docElemName == "ReleaseKB") {
+						preComm = parseReleaseKnowledgeBaseNode(&node);
+					} else if (docElemName == "ox:GetKBLanguage" || docElemName == "GetKBLanguage") {
+						preComm = parseGetKnowledgeBaseLanguageNode(&node);
+					} else if (docElemName == "ox:GetAllClasses" || docElemName == "GetAllClasses") {
+						preComm = parseGetKnowledgeBaseClassEntitiesNode(&node);
+					} else if (docElemName == "ox:GetAllObjectProperties" || docElemName == "GetAllObjectProperties") {
+						preComm = parseGetKnowledgeBaseObjectPropertyEntitiesNode(&node);
+					} else if (docElemName == "ox:GetAllIndividuals" || docElemName == "GetAllIndividuals") {
+						preComm = parseGetKnowledgeBaseIndividualEntitiesNode(&node);
+					} else if (docElemName == "ox:Classify" || docElemName == "Classify") {
+						preComm = parseKnowledgeBaseClassifyNode(&node);
+					} else if (docElemName == "ox:Realize" || docElemName == "Realize" || docElemName == "ox:Realise" || docElemName == "Realise") {
+						preComm = parseKnowledgeBaseRealizeNode(&node);
+					} else if (docElemName == "ox:TestTestsuite" || docElemName == "TestTestsuite") {
+						preComm = parseTestTestsuiteNode(&node);
+					} else if (docElemName == "ox:EvaluateTestsuite" || docElemName == "EvaluateTestsuite") {
+						preComm = parseEvaluateTestsuiteNode(&node);
+					} else if (docElemName == "ox:GetSetting" || docElemName == "GetSetting") {
+						preComm = parseGetSettingNode(&node);
+					} else if (docElemName == "ox:GetSettings" || docElemName == "GetSettings") {
+						preComm = parseGetSettingsNode(&node);
+					} else if (docElemName == "ox:Set" || docElemName == "Set" || docElemName == "ox:SetSetting" || docElemName == "SetSetting") {
+						preComm = parseSetSettingNode(&node);
+					} else {
+						CNotSupportedNodeErrorRecord::makeRecord(docElemName,recorder,getLogDomain(),command);
+						preComm = new CSkipUnsupportedCommandCommand(docElemName);
+					}
+
+				} else {
+					QString namespaceNodeName = docElemName;
+					if (!namespaceString.isEmpty()) {
+						namespaceNodeName = namespaceString+":"+docElemName;
+					}
+					CNotSupportedNodeErrorRecord::makeRecord(namespaceNodeName,recorder,getLogDomain(),command);
+					preComm = new CSkipUnsupportedCommandCommand(namespaceNodeName);
+				}
 
 				if (preComm) {
 
@@ -376,6 +411,12 @@ namespace Konclude {
 
 
 		CTellKnowledgeBaseOWL2XMLNodeCommand *COWLlinkQtXMLCommandParser::parseTellKnowledgeBaseNode(QDomElement *node) {
+			QString kbName;
+			kbName = node->attribute(QString("kb"));
+			return new CTellKnowledgeBaseOWL2XMLNodeCommand(kbName,*node);
+		}
+
+		CTellKnowledgeBaseOWL2XMLNodeCommand *COWLlinkQtXMLCommandParser::parseRectractKnowledgeBaseNode(QDomElement *node) {
 			QString kbName;
 			kbName = node->attribute(QString("kb"));
 			return new CTellKnowledgeBaseOWL2XMLNodeCommand(kbName,*node);

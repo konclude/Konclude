@@ -61,7 +61,7 @@ namespace Konclude {
 
 			namespace Algorithm {
 
-				CCalculationTableauCompletionTaskHandleAlgorithm::CCalculationTableauCompletionTaskHandleAlgorithm(CUnsatisfiableCacheHandler* unsatCacheHandler, CSatisfiableExpanderCacheHandler* satExpCacheHandler, CReuseCompletionGraphCacheHandler* reuseCompGraphCacheHandler, CSaturationNodeExpansionCacheHandler* satNodeExpCacheHandler, CComputedConsequencesCacheHandler* compConsCacheHandler) {
+				CCalculationTableauCompletionTaskHandleAlgorithm::CCalculationTableauCompletionTaskHandleAlgorithm(CUnsatisfiableCacheHandler* unsatCacheHandler, CSatisfiableExpanderCacheHandler* satExpCacheHandler, CReuseCompletionGraphCacheHandler* reuseCompGraphCacheHandler, CSaturationNodeExpansionCacheHandler* satNodeExpCacheHandler, CComputedConsequencesCacheHandler* compConsCacheHandler, CIndividualNodeBackendCacheHandler* backendCacheHandler) {
 					mConceptPriorityStrategy = new CConcreteConceptProcessingOperatorPriorityStrategy();
 					mIndiAncDepthMasConProcPriStr = new CIndividualAncestorDepthMaximumConceptProcessingPriorityStrategy();
 					//mTaskProcessingStrategy = new CEqualDepthTaskProcessingPriorityStrategy();
@@ -69,6 +69,7 @@ namespace Konclude {
 					mUnsatCachRetStrategy = new CGenerativeNonDeterministicUnsatisfiableCacheRetrievalStrategy();
 					mGroundingHandler = new CConceptNominalSchemaGroundingHandler();
 					mDatatypeHandler = new CDatatypeIndividualProcessNodeHandler();
+					mIncExpHandler = new CIncrementalCompletionGraphCompatibleExpansionHandler();
 					mProcessingDataBox = nullptr;
 					mCalcAlgContext = nullptr;
 
@@ -80,6 +81,7 @@ namespace Konclude {
 					mSatNodeExpCacheHandler = satNodeExpCacheHandler;
 					mReuseCompGraphCacheHandler = reuseCompGraphCacheHandler;
 					mCompConsCacheHandler = compConsCacheHandler;
+					mBackendCacheHandler = backendCacheHandler;
 
 					mCompGraphCacheHandler = new CCompletionGraphCacheHandler();
 
@@ -120,6 +122,7 @@ namespace Konclude {
 					mConfDependencyBackjumping = true;
 
 					mConfWriteUnsatCaching = true;
+					mConfTestedConceptWriteUnsatCaching = true;
 					mConfTestOccurUnsatCached = true;
 					mConfTestPrecheckUnsatCached = true;
 					mConfMinimizeMerging = true;
@@ -178,10 +181,15 @@ namespace Konclude {
 
 					mConfDatatypeReasoning = true;
 					mConfCompletionGraphCaching = true;
+					mConfDelayCompletionGraphCachingReactivation = false;
+					mConfCollectCachingUpdatedBlockableIndiNodes = true;
 
 
 					mConfAddCachedComputedConsequences = true;
 					mConfCacheComputedConsequences = true;
+					mConfIndividualsBackendCacheLoading = true;
+
+					mConfMergeConstructedIndividualNode = false;
 
 					mIndiAncDepthMasConProcPriStr->configureStrategy(mConfStrictIndiNodeProcessing,mConfIDIndiPriorization);
 
@@ -320,7 +328,8 @@ namespace Konclude {
 
 					mStatBackPropActivationCount = 0;
 
-					mCurrentRecProcDepthLimit = 500;
+					mCurrentRecProcDepth = 0;
+					mCurrentRecProcDepthLimit = 300;
 
 					mMaxBlockingCachingSavedCandidateCount = 50;
 
@@ -384,6 +393,9 @@ namespace Konclude {
 
 					mNominalMerged = false;
 					mNominalMergedCount = 0;
+
+					mOverJumpedNonDeterministicDecisionCount = 0;
+					mRelevantNonDeterministicDecisionCount = 0;
 				}
 
 				CCalculationTableauCompletionTaskHandleAlgorithm::~CCalculationTableauCompletionTaskHandleAlgorithm() {
@@ -416,6 +428,7 @@ namespace Konclude {
 							mConfBuildDependencies = mConfDependencyBacktracking;
 							mConfDependencyBackjumping = config->isBackjumpingActivated();
 							mConfWriteUnsatCaching = config->isSingleLevelUnsatisfiableCacheWritingActivated();
+							mConfTestedConceptWriteUnsatCaching = config->isTestedConceptUnsatisfiableCacheWritingActivated();
 							mConfTestOccurUnsatCached = config->isUnsatisfiableCacheRetrievalActivated();
 							mConfTestPrecheckUnsatCached = mConfTestOccurUnsatCached;
 							mConfMinimizeMerging = config->isMinimizeMergingBranchesActivated();
@@ -442,9 +455,17 @@ namespace Konclude {
 							mConfDatatypeReasoning = config->isDatatypeReasoningActivated();
 
 							mConfCompletionGraphCaching = config->isCompletionGraphCachingActivated();
+							mConfDelayCompletionGraphCachingReactivation = config->isDelayedCompletionGraphCachingReactivationActivated();
+							mConfIndividualsBackendCacheLoading = config->isIndividualsBackendCacheLoadingActivated();
+							mConfAddCachedComputedConsequences = config->isComputedTypesCachingActivated();
+
+
+							mConfMergeConstructedIndividualNode = config->isConstructionIndividualNodeMergingActivated();
+							mCurrentRecProcDepthLimit = config->getMaximumRecursiveProcessingConceptCount();
 
 						} else {
 							mConfCompletionGraphCaching = true;
+							mConfDelayCompletionGraphCachingReactivation = false;
 							mConfSpecializedAutomateRules = true;
 							mConfSubSetBlocking = false;
 							mConfOptimizedSubSetBlocking = true;
@@ -468,6 +489,7 @@ namespace Konclude {
 							mConfDependencyBacktracking = true;
 							mConfDependencyBackjumping = true;
 							mConfWriteUnsatCaching = true;
+							mConfTestedConceptWriteUnsatCaching = true;
 							mConfTestOccurUnsatCached = true;
 							mConfTestPrecheckUnsatCached = true;
 							mConfMinimizeMerging = true;
@@ -490,9 +512,15 @@ namespace Konclude {
 							mConfSaturationConceptUnsatisfiabilitySaturatedCacheWriting = true;
 							mConfSaturationSatisfiabilitiyExpansionCacheWriting = false;
 							mConfDatatypeReasoning = true;
+							mConfIndividualsBackendCacheLoading = true;
+							mConfAddCachedComputedConsequences = true;
+							mConfMergeConstructedIndividualNode = false;
+							mCurrentRecProcDepthLimit = 300;
 
 						}
 						mLastConfig = config;
+
+						mConfCollectCachingUpdatedBlockableIndiNodes = mConfCompletionGraphCaching; 
 
 						mPosJumpFuncVec[CCAQAND] = &CCalculationTableauCompletionTaskHandleAlgorithm::applyANDRule;
 						if (mConfSpecializedAutomateRules) {
@@ -524,11 +552,32 @@ namespace Konclude {
 							mNegJumpFuncVec[CCVARBINDGROUND] = &CCalculationTableauCompletionTaskHandleAlgorithm::applyVARBINDPROPAGATEGROUNDINGRule;
 						}
 
+
+
 					}
 
 
 					bool consPrepProcessing = satCalcTask->getConsistenceAdapter() != nullptr && satCalcTask->getTaskDepth() <= 0;
 					mConfSaveCoreBlockingConceptsCandidates = mConfAnywhereBlockingLinkedCandidateHashSearch;
+
+
+					mOptIncrementalExpansion = false;
+					mOptIncrementalDeterministicExpansion = false;
+					mOptIncrementalNondeterministicExpansion = false;
+					mOptIncrementalCompatibleExpansion = false;
+					mOptIncrementalCachingExpansion = false;
+					if (satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()) {
+						mOptIncrementalCompatibleExpansion = !satCalcTask->getProcessingDataBox()->isIncrementalExpansionCompatibleMerged();
+						mOptIncrementalCachingExpansion = !mOptIncrementalCompatibleExpansion;
+						mOptIncrementalExpansion = true;
+						if (satCalcTask->getTaskDepth() <= 0) {
+							consPrepProcessing = true;
+							mOptIncrementalDeterministicExpansion = true;
+						} else {
+							mOptIncrementalNondeterministicExpansion = true;
+						}
+					}
+
 
 
 					mOptConsistenceNodeMarking = consPrepProcessing && mConfConsRestrictedNonStrictIndiNodeProcessing;
@@ -606,16 +655,21 @@ namespace Konclude {
 						mReusingReviewData = nullptr; 
 						mIndiImmediateProQueue = nullptr; 
 						mIndiDetExpProQueue = nullptr; 
+						mIndiDetDeptFirstExpProQueue = nullptr; 
 						mValueSpaceTriggeringProQueue = nullptr; 
 						mValueSpaceSatCheckingQueue = nullptr; 
 						mNominalProcessingQueue = nullptr; 
 						mDepthProcessingQueue = nullptr; 
-						mIndiReactProcessingQueue = nullptr; 
+						mEarlyIndiReactProcessingQueue = nullptr; 
+						mLateIndiReactProcessingQueue = nullptr; 
 						mIndiBlockReactProQueue = nullptr; 
 						mIndiSigBlockUpdProQueue = nullptr; 
 						mDelayedNominalProcessingQueue = nullptr; 
 						mVarBindConBatchProcessingQueue = nullptr; 
 						mRoleAssertionProcessingQueue = nullptr;
+						mIncrementalExpansionInitializingProcessingQueue = nullptr;
+						mIncrementalExpansionProcessingQueue = nullptr;
+						mIncrementalCompatibilityCheckingQueue = nullptr;
 						mMinConceptProcessingPriorityLevel = 0;
 						mIndiNodeConcludeUnsatCaching = false;
 
@@ -626,11 +680,29 @@ namespace Konclude {
 						//	CConcept* concept = adapter->getTestingConcept();
 						//	if (concept && adapter->hasExtractionFlags(CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTSUBSUMERSROOTNODE)) {
 						//		QString className = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-						//		if (className == "http://www.owllink.org/testsuite/galen#KneeJointRecessus") {
+						//		if (className == "http://reference.data.gov.uk/def/intervals/CalendarYear") {
 						//			bool bug = true;
 						//		}
 						//	}
 						//}
+
+
+						if (satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()) {
+							if (!processingDataBox->isIncrementalExpansionInitialised()) {
+								mIncrementalCompatibilityCheckingQueue = processingDataBox->getIncrementalCompatibilityCheckingQueue(true);
+								CIndividualUnsortedProcessingQueue* indiNodeQueue = processingDataBox->getIndividualImmediatelyProcessingQueue(true);
+								for (CXLinker<CIndividualProcessNode*>* indiNodeLinkerIt = indiNodeQueue->getProcessIndividualNodeLinker(); indiNodeLinkerIt; indiNodeLinkerIt = indiNodeLinkerIt->getNext()) {
+									CIndividualProcessNode* indiNode = indiNodeLinkerIt->getData();
+									CIndividualProcessNode* locIndiNode = getLocalizedIndividual(indiNode,true,calcAlgContext);
+									locIndiNode->getIncrementalExpansionData(true)->setDirectlyChanged(true);
+									locIndiNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANDING | CIndividualProcessNode::PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED);
+									locIndiNode->setIncrementalExpansionID(calcAlgContext->getProcessingDataBox()->getIncrementalExpansionID());
+									mIncrementalCompatibilityCheckingQueue->insertProcessIndiviudal(locIndiNode);
+								}
+								processingDataBox->setIncrementalExpansionInitialised(true);
+							}
+						}
+
 
 
 						if (processingDataBox->isReapplicationLastConceptDesciptorOnLastIndividualNodeRequired()) {
@@ -639,6 +711,7 @@ namespace Konclude {
 							if (processingDataBox->getLastProcessingIndividualNodeAndConceptDescriptor(lastProcessingIndiNode,lastProcessingConDes)) {
 								addCopiedConceptToProcessingQueue(lastProcessingConDes,lastProcessingIndiNode,calcAlgContext);
 							}
+							processingDataBox->setReapplicationLastConceptDesciptorOnLastIndividualNodeRequired(false);
 						}
 
 
@@ -646,6 +719,7 @@ namespace Konclude {
 						CIndividualProcessNode* indiProcNode = takeNextProcessIndividual(calcAlgContext);
 						CConceptProcessDescriptor* conProcDes = nullptr;
 
+						mCurrentRecProcDepth = 0;
 						mProcessRuleToTaskProcessingVerificationCount = 80;
 						mRemainProcessRuleToTaskProcessingVerification = mProcessRuleToTaskProcessingVerificationCount;
 
@@ -733,6 +807,13 @@ namespace Konclude {
 								indiProcNode = takeNextProcessIndividual(calcAlgContext);
 
 							}
+
+
+							if (mOptIncrementalExpansion && !mProcessingDataBox->isIncrementalExpansionCachingMerged()) {
+								incrementalMergeWithPreviousNondeterministicCompletionGraph(calcAlgContext);
+								mProcessingDataBox->setIncrementalExpansionCachingMerged(true);
+							}
+
 
 							//if (task->getTaskDepth() < 100) {
 
@@ -832,7 +913,11 @@ namespace Konclude {
 									if (clashed) {
 										satStopString = QString("clashed");
 									}
-									QFile file(QString("./SATCT/Tasks/task-%1-%2-%3.txt").arg(satCalcTask->getTaskDepth()).arg(satCalcTask->getTaskID()).arg(satStopString));
+									QString incExpAffix;
+									if (satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()) {
+										incExpAffix = QString("-inc-exp-%1").arg(mProcessingDataBox->getIncrementalExpansionID());
+									}
+									QFile file(QString("./SATCT/Tasks/task-%1-%2%4-%3.txt").arg(satCalcTask->getTaskDepth()).arg(satCalcTask->getTaskID()).arg(satStopString).arg(incExpAffix));
 									if (file.open(QIODevice::WriteOnly)) {
 										file.write(mEndTaskDebugIndiModelString.replace("<br>","\r\n").toLocal8Bit());
 										file.close();
@@ -912,17 +997,23 @@ namespace Konclude {
 							STATINC(ROOTTASKSATISFIABLECOUNT,calcAlgContext);
 							satResult->installResult(true);
 
-							if (mSatTaskConsAnalyser.analyseSatisfiableTask(satCalcTask,mCalcAlgContext)) {
+							if (mSatTaskConsAnalyser.analyseSatisfiableTask(satCalcTask,mCalcAlgContext) || mSatTaskIncConsAnalyser.analyseSatisfiableTask(satCalcTask,mCalcAlgContext)) {
 								rebuildSignatureBlockingCandidateHash(mCalcAlgContext);
 							}
 
 							//testProblematicConceptSet(mCalcAlgContext);
 
-							mSatTaskSubSumIdenAnalyser.analyseSatisfiableTask(satCalcTask,mCalcAlgContext);
+							//analyzeABoxCompressionPossibilities(calcAlgContext);
+
 
 							mClassMessAnalyser.readCalculationConfig(satCalcTask->getCalculationConfiguration());
 							mClassMessAnalyser.analyseSatisfiableTask(satCalcTask,mCalcAlgContext);
 
+							mMarkerPropRealMessAnalyser.readCalculationConfig(satCalcTask->getCalculationConfiguration());
+							mMarkerPropRealMessAnalyser.analyseSatisfiableTask(satCalcTask,mCalcAlgContext);
+
+							mPossAssCollAnalyser.readCalculationConfig(satCalcTask->getCalculationConfiguration());
+							mPossAssCollAnalyser.analyseSatisfiableTask(satCalcTask,mCalcAlgContext);
 
 							cacheSatisfiableIndividualNodes(mCalcAlgContext);
 
@@ -1000,7 +1091,9 @@ namespace Konclude {
 						cint64 nominalID(*it);
 						CIndividualProcessNode* nominalNode = getUpToDateIndividual(nominalID,calcAlgContext);
 						if (nominalNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
-							return false;
+							if (!nominalNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND)) {
+								return false;
+							}
 						}
 						nominalNode->setCachingLossNodeReactivationInstalled(true);
 						CNominalCachingLossReactivationData* nominalReactivationData = nominalNode->getNominalCachingLossReactivationData(false);
@@ -1015,6 +1108,15 @@ namespace Konclude {
 				}
 
 
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::checkIndividualNodesReactivationDueToNominalCachingLoss(CIndividualProcessNode* nominalProcNode, CCalculationAlgorithmContextBase* calcAlgContext) {					
+					if (nominalProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+						if (!nominalProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND)) {
+							return reactivateIndividualNodesDueToNominalCachingLoss(nominalProcNode,calcAlgContext);
+						}
+					}
+					return false;
+				}
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::reactivateIndividualNodesDueToNominalCachingLoss(CIndividualProcessNode* nominalProcNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 					bool nodesReactivated = false;
@@ -1048,6 +1150,7 @@ namespace Konclude {
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::takeNextProcessIndividual(CCalculationAlgorithmContextBase* calcAlgContext) {
 					CIndividualProcessNode* indiProcNode = nullptr;
 					mIndiNodeConcludeUnsatCaching = false;
+					mIndiNodeFromQueueType = INQT_NONE;
 
 					if (!indiProcNode) {
 						mMinConceptProcessingPriorityLevel = mImmediatelyProcessPriority;
@@ -1083,6 +1186,14 @@ namespace Konclude {
 						}
 					}
 					if (!indiProcNode) {
+						mIndiDetDeptFirstExpProQueue = mProcessingDataBox->getIndividualDepthFirstDeterministicExpansionProcessingQueue(false);
+						if (mIndiDetDeptFirstExpProQueue && !mIndiDetDeptFirstExpProQueue->isEmpty()) {
+							mIndiDetDeptFirstExpProQueue = mProcessingDataBox->getIndividualDepthFirstDeterministicExpansionProcessingQueue(true);
+							indiProcNode = mIndiDetDeptFirstExpProQueue->takeNextProcessIndividualNode();
+							mIndiNodeFromQueueType = INQT_DEPTHFIRST;
+						}
+					}
+					if (!indiProcNode) {
 						mValueSpaceSatCheckingQueue = mProcessingDataBox->getDistinctValueSpaceSatisfiabilityCheckingQueue(false);
 						if (mValueSpaceSatCheckingQueue && !mValueSpaceSatCheckingQueue->isEmpty()) {
 							mValueSpaceSatCheckingQueue = mProcessingDataBox->getDistinctValueSpaceSatisfiabilityCheckingQueue(true);
@@ -1106,6 +1217,15 @@ namespace Konclude {
 					}
 
 					if (!indiProcNode) {
+						mBackendSyncRetestProcessingQueue = mProcessingDataBox->getBackendCacheSynchronizationProcessingQueue(false);
+						if (mBackendSyncRetestProcessingQueue && !mBackendSyncRetestProcessingQueue->isEmpty()) {
+							mBackendSyncRetestProcessingQueue = mProcessingDataBox->getBackendCacheSynchronizationProcessingQueue(true);
+							indiProcNode = mBackendSyncRetestProcessingQueue->takeNextProcessIndividualNode();
+							mIndiNodeFromQueueType = INQT_BACKENDSYNCRETEST;
+						}
+					}
+
+					if (!indiProcNode) {
 						mVarBindConBatchProcessingQueue = mProcessingDataBox->getVariableBindingConceptBatchProcessingQueue(false);
 						if (mVarBindConBatchProcessingQueue && !mVarBindConBatchProcessingQueue->isEmpty()) {
 							mVarBindConBatchProcessingQueue = mProcessingDataBox->getVariableBindingConceptBatchProcessingQueue(true);
@@ -1123,13 +1243,100 @@ namespace Konclude {
 							}
 						}
 					}
+
+
 					if (!indiProcNode) {
-						mIndiReactProcessingQueue = mProcessingDataBox->getIndividualReactivationProcessingQueue(false);
-						if (mIndiReactProcessingQueue && !mIndiReactProcessingQueue->isEmpty()) {
-							mIndiReactProcessingQueue = mProcessingDataBox->getIndividualReactivationProcessingQueue(true);
+						mIncrementalCompatibilityCheckingQueue = mProcessingDataBox->getIncrementalCompatibilityCheckingQueue(false);
+						if (mIncrementalCompatibilityCheckingQueue && !mIncrementalCompatibilityCheckingQueue->isEmpty()) {
+							mIncrementalCompatibilityCheckingQueue = mProcessingDataBox->getIncrementalCompatibilityCheckingQueue(true);
+
+
+
+
+							while (!mIncrementalCompatibilityCheckingQueue->isEmpty()) {
+								CIndividualProcessNode* compCheckIndiNode = mIncrementalCompatibilityCheckingQueue->takeNextProcessIndividual();
+								compCheckIndiNode = getLocalizedIndividual(compCheckIndiNode,true,calcAlgContext);
+								compCheckIndiNode->setIncrementalCompatibilityCheckingQueued(false);
+								if (compCheckIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED)) {
+									compCheckIndiNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED);
+								}
+								checkCompatibilityUpdateDirectlyChangedPropagation(compCheckIndiNode,calcAlgContext);								
+							}
+						}
+					}
+					if (!indiProcNode) {
+						mIncrementalExpansionInitializingProcessingQueue = mProcessingDataBox->getIncrementalExpansionInitializingProcessingQueue(false);
+						if (mIncrementalExpansionInitializingProcessingQueue && !mIncrementalExpansionInitializingProcessingQueue->isEmpty()) {
+							mIncrementalExpansionInitializingProcessingQueue = mProcessingDataBox->getIncrementalExpansionInitializingProcessingQueue(true);
+
+
+							//if (mIncExpCompIndiModelString.isEmpty()) {
+							//	mIncExpCompIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
+							//	QFile compFile(QString("./SATCT/Tasks/task-inc-exp-check-compatible-%1.txt").arg(mProcessingDataBox->getIncrementalExpansionID()));
+							//	if (compFile.open(QIODevice::WriteOnly)) {
+							//		compFile.write(mIncExpCompIndiModelString.replace("<br>","\r\n").toLocal8Bit());
+							//		compFile.close();
+							//	}
+							//}
+
+							while (!mIncrementalExpansionInitializingProcessingQueue->isEmpty()) {
+								CIndividualProcessNode* incExpInitIndiNode = mIncrementalExpansionInitializingProcessingQueue->takeNextProcessIndividual();
+								incExpInitIndiNode = getLocalizedIndividual(incExpInitIndiNode,true,calcAlgContext);
+								incExpInitIndiNode->setIncrementalExpansionQueued(false);
+								if (requiresIncrementalNodeExpansion(incExpInitIndiNode,calcAlgContext)) {
+									initializeIncrementalIndividualExpansion(incExpInitIndiNode,calcAlgContext);								
+								}
+							}
+						}
+					}
+					if (!indiProcNode) {
+						mIncrementalExpansionProcessingQueue = mProcessingDataBox->getIncrementalExpansionProcessingQueue(false);
+						if (mIncrementalExpansionProcessingQueue && !mIncrementalExpansionProcessingQueue->isEmpty()) {
+							mIncrementalExpansionProcessingQueue = mProcessingDataBox->getIncrementalExpansionProcessingQueue(true);
+							while (!indiProcNode && !mIncrementalExpansionProcessingQueue->isEmpty()) {
+								CIndividualProcessNode* incExpIndiNode = mIncrementalExpansionProcessingQueue->takeNextProcessIndividual();
+								incExpIndiNode = getLocalizedIndividual(incExpIndiNode,true,calcAlgContext);
+								incExpIndiNode->setIncrementalExpansionQueued(false);
+								if (requiresIncrementalNodeExpansion(incExpIndiNode,calcAlgContext)) {
+									indiProcNode = incrementalNodeExpansion(incExpIndiNode,calcAlgContext);		
+								}
+							}
+						}
+					}
+
+					if (!indiProcNode) {
+						if (mOptIncrementalExpansion && !mProcessingDataBox->isIncrementalExpansionCompatibleMerged()) {
+
+							//mIncExpCompIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
+							//QFile compFile(QString("./SATCT/Tasks/task-inc-exp-compatible-%1.txt").arg(mProcessingDataBox->getIncrementalExpansionID()));
+							//if (compFile.open(QIODevice::WriteOnly)) {
+							//	compFile.write(mIncExpCompIndiModelString.replace("<br>","\r\n").toLocal8Bit());
+							//	compFile.close();
+							//}
+
+							incrementalMergeWithPreviousDeterministicCompletionGraph(calcAlgContext);
+							mProcessingDataBox->setIncrementalExpansionCompatibleMerged(true);
+							mOptIncrementalCompatibleExpansion = false;
+							mOptIncrementalCachingExpansion = true;
+
+							//mIncExpMergedIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
+							//QFile mergeFile(QString("./SATCT/Tasks/task-inc-exp-merged-%1.txt").arg(mProcessingDataBox->getIncrementalExpansionID()));
+							//if (mergeFile.open(QIODevice::WriteOnly)) {
+							//	mergeFile.write(mIncExpMergedIndiModelString.replace("<br>","\r\n").toLocal8Bit());
+							//	mergeFile.close();
+							//}
+
+						}
+					}
+
+
+					if (!indiProcNode) {
+						mEarlyIndiReactProcessingQueue = mProcessingDataBox->getEarlyIndividualReactivationProcessingQueue(false);
+						if (mEarlyIndiReactProcessingQueue && !mEarlyIndiReactProcessingQueue->isEmpty()) {
+							mEarlyIndiReactProcessingQueue = mProcessingDataBox->getEarlyIndividualReactivationProcessingQueue(true);
 							CIndividualProcessNode* reactIndiNode = nullptr;
 							bool forceReactivation = false;
-							mIndiReactProcessingQueue->takeNextReactivationIndividual(reactIndiNode,forceReactivation);
+							mEarlyIndiReactProcessingQueue->takeNextReactivationIndividual(reactIndiNode,forceReactivation);
 							indiProcNode = getLocalizedIndividual(reactIndiNode,true,calcAlgContext);
 							if (forceReactivation) {
 								if (indiProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
@@ -1162,6 +1369,7 @@ namespace Konclude {
 							mProcessingDataBox->setNominalNonDeterministicProcessingNodesSorted(true);
 						}
 					}
+
 
 					if (!indiProcNode) {
 						mMinConceptProcessingPriorityLevel = 0;
@@ -1220,6 +1428,29 @@ namespace Konclude {
 							mIndiNodeFromQueueType = INQT_DEPTHFIRST;
 						}
 					}
+
+
+					if (!indiProcNode) {
+						mLateIndiReactProcessingQueue = mProcessingDataBox->getLateIndividualReactivationProcessingQueue(false);
+						if (mLateIndiReactProcessingQueue && !mLateIndiReactProcessingQueue->isEmpty()) {
+							mLateIndiReactProcessingQueue = mProcessingDataBox->getLateIndividualReactivationProcessingQueue(true);
+							CIndividualProcessNode* reactIndiNode = nullptr;
+							bool forceReactivation = false;
+							mLateIndiReactProcessingQueue->takeNextReactivationIndividual(reactIndiNode,forceReactivation);
+							indiProcNode = getLocalizedIndividual(reactIndiNode,true,calcAlgContext);
+							if (forceReactivation) {
+								if (indiProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
+									indiProcNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
+									reapplySatisfiableCachedAbsorbedDisjunctionConcepts(indiProcNode,calcAlgContext);
+									reapplySatisfiableCachedAbsorbedGeneratingConcepts(indiProcNode,calcAlgContext);
+								}
+								indiProcNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
+							}
+							mIndiNodeFromQueueType = INQT_COMPCACHEDREACT;
+						}
+					}
+
+
 					if (!indiProcNode) {
 						mOptDetExpPreporcessing = false;
 						mIndiSigBlockUpdProQueue = mProcessingDataBox->getBlockingUpdateReviewProcessingQueue(false);
@@ -1346,6 +1577,1187 @@ namespace Konclude {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::areAllDependentFactsUnchanged(CIndividualProcessNode* individualNode, CIndividualProcessNode* backtrackedIndividualNode, CDependencyTrackPoint* prevConDepTrackPoint, CIndividualProcessNodeVector* prevIndiNodeVec, cint64& remBacktrackCount, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (--remBacktrackCount < 0) {
+						return false;
+					}
+					CDependencyNode* depNode = prevConDepTrackPoint->getDependencyNode();
+					if (depNode) {
+						CIndividualProcessNode* assocIndiNode = depNode->getAppropriateIndividualNode();
+						if (assocIndiNode) {
+							if (assocIndiNode->isBlockableIndividual()) {
+								return false;
+							}
+							CIndividualProcessNode* locAssIndiNode = calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector()->getData(assocIndiNode->getIndividualID());
+							if (locAssIndiNode) {
+								return false;
+							}
+						}
+						bool addRoleExistDep = false;
+						CDependencyIterator addDepIt = depNode->getAdditionalDependencyIterator(true,true);
+						while (addDepIt.hasNext()) {
+							CDependency* addDep = addDepIt.nextDependency();
+							CDependencyTrackPoint* prevAddDepTrackPoint = addDep->getPreviousDependencyTrackPoint();
+							CDependencyNode* prevAddDepNode = addDep->getPreviousTrackedDependency();
+							if (prevAddDepNode->getDependencyType() == CDependencyNode::DNTROLEASSERTIONDEPENDENCY) {
+								if (addRoleExistDep) {
+									return false;
+								}
+								addRoleExistDep = true;
+							} else if (prevAddDepNode->getDependencyType() == CDependencyNode::DNTSOMEDEPENDENCY) {
+								if (addRoleExistDep) {
+									return false;
+								}
+								CIndividualProcessNode* addAssocIndiNode = prevAddDepNode->getAppropriateIndividualNode();
+								if (addAssocIndiNode && addAssocIndiNode->isBlockableIndividual()) {
+									return false;
+								}
+								if (!areAllDependentFactsUnchanged(individualNode,addAssocIndiNode?addAssocIndiNode:backtrackedIndividualNode,prevAddDepTrackPoint,prevIndiNodeVec,remBacktrackCount,calcAlgContext)) {
+									return false;
+								}
+								addRoleExistDep = true;
+							} else if (prevAddDepTrackPoint) {
+								if (!areAllDependentFactsUnchanged(individualNode,assocIndiNode?assocIndiNode:backtrackedIndividualNode,prevAddDepTrackPoint,prevIndiNodeVec,remBacktrackCount,calcAlgContext)) {
+									return false;
+								}
+							}
+						}
+						if (depNode->getDependencyType() != CDependencyNode::DNTINDEPENDENTBASE) {
+							CDependencyTrackPoint* prevDepTrackPoint = depNode->getPreviousDependencyTrackPoint();
+							if (prevDepTrackPoint) {
+								if (!areAllDependentFactsUnchanged(individualNode,assocIndiNode?assocIndiNode:backtrackedIndividualNode,prevDepTrackPoint,prevIndiNodeVec,remBacktrackCount,calcAlgContext)) {
+									return false;
+								}
+								return true;
+							}
+						} else if (backtrackedIndividualNode && backtrackedIndividualNode != individualNode) {
+							return true;
+						}
+
+					}
+					return false;
+				}
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::initializeIncrementalIndividualExpansion(CIndividualProcessNode* individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualNodeIncrementalExpansionData* incExpData = individualNode->getIncrementalExpansionData(false);
+					if (!incExpData || !incExpData->isIncremetnalExpansionListInitialized()) {
+						incExpData = individualNode->getIncrementalExpansionData(true);
+						CIndividualProcessNodeVector* indiNodeVec = calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector();
+
+						CPROCESSINGSET<cint64>* searchingNodeSet = CObjectParameterizingAllocator< CPROCESSINGSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+						CPROCESSINGLIST<cint64>* searchingNodeList = CObjectParameterizingAllocator< CPROCESSINGLIST<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+
+						CPROCESSLIST<CIndividual*>* expList = nullptr;
+
+						CSatisfiableCalculationTask* prevCalcTask = mIncExpHandler->getPreviousDeterministicCompletionGraphTask(calcAlgContext);
+						CProcessingDataBox* prevDataBox = prevCalcTask->getProcessingDataBox();
+						CIndividualProcessNodeVector* prevIndiNodeVec = prevDataBox->getIndividualProcessNodeVector();
+
+						CIndividualProcessNode* prevIndiNode = incExpData->getPreviousCompletionGraphCorrespondenceIndividualNode();
+						if (prevIndiNode) {
+							CReapplyConceptLabelSet* conSet = individualNode->getReapplyConceptLabelSet(false);
+							CReapplyConceptLabelSet* prevConSet = prevIndiNode->getReapplyConceptLabelSet(false);
+							if (conSet && prevConSet) {
+								CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true);
+								CReapplyConceptLabelSetIterator prevConSetIt = prevConSet->getConceptLabelSetIterator(true);
+								while (conSetIt.hasNext() && prevConSetIt.hasNext()) {
+									cint64 conTag = conSetIt.getDataTag();
+									cint64 prevConTag = prevConSetIt.getDataTag();
+									CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
+									CConceptDescriptor* prevConDes = prevConSetIt.getConceptDescriptor();
+									if (conTag == prevConTag) {
+										conSetIt.moveNext();
+										prevConSetIt.moveNext();
+									} else if (prevConTag < conTag) {
+										// concept is missing, analyse dependencies whether it can be directly added
+										CDependencyTrackPoint* prevConDepTrackPoint = prevConSetIt.getDependencyTrackPoint();
+										cint64 remMaxBacktrackingCount = 15;
+										if (areAllDependentFactsUnchanged(individualNode,nullptr,prevConDepTrackPoint,prevIndiNodeVec,remMaxBacktrackingCount,calcAlgContext)) {
+											addConceptToIndividual(prevConDes->getConcept(),prevConDes->isNegated(),individualNode,prevConDepTrackPoint,false,false,calcAlgContext);
+										}
+										prevConSetIt.moveNext();
+									} else if (conTag < prevConTag) {
+										conSetIt.moveNext();
+									}
+								}
+
+								while (prevConSetIt.hasNext()) {
+									// concept is missing, analyse dependencies whether it can be directly added
+									CConceptDescriptor* prevConDes = prevConSetIt.getConceptDescriptor();
+									CDependencyTrackPoint* prevConDepTrackPoint = prevConSetIt.getDependencyTrackPoint();
+									cint64 remMaxBacktrackingCount = 15;
+									if (areAllDependentFactsUnchanged(individualNode,nullptr,prevConDepTrackPoint,prevIndiNodeVec,remMaxBacktrackingCount,calcAlgContext)) {
+										addConceptToIndividual(prevConDes->getConcept(),prevConDes->isNegated(),individualNode,prevConDepTrackPoint,false,false,calcAlgContext);
+									}
+									prevConSetIt.moveNext();
+								}
+							}
+						}
+
+
+
+						searchingNodeSet->insert(individualNode->getIndividualID());
+						searchingNodeList->append(individualNode->getIndividualID());
+
+						while (!searchingNodeList->isEmpty()) {
+							cint64 searchIndiNodeID = searchingNodeList->takeFirst();
+							CIndividualProcessNode* searchIndiNode = prevIndiNodeVec->getData(searchIndiNodeID);
+
+							if (searchIndiNode) {
+
+								CIndividual* nominalIndi = searchIndiNode->getNominalIndividual();
+								if (searchIndiNode->getIndividualID() != individualNode->getIndividualID()) {
+									if (nominalIndi) {
+										if (!indiNodeVec->getData(nominalIndi->getIndividualID())) {
+											if (!expList) {
+												expList = incExpData->getIncrementalExpansionList(true);
+											}
+											expList->append(nominalIndi);
+										}
+									}
+								}
+
+								if (!nominalIndi && searchIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSUCCESSORNOMINALCONNECTION) || searchIndiNodeID == individualNode->getIndividualID()) {
+									CSuccessorIterator succIt = searchIndiNode->getSuccessorIterator(); 
+									while (succIt.hasNext()) {
+										CIndividualLinkEdge* succLink = succIt.nextLink();
+										cint64 succIndiID = succLink->getOppositeIndividualID(searchIndiNodeID);
+										if (!searchingNodeSet->contains(succIndiID)) {
+											searchingNodeSet->insert(succIndiID);
+											searchingNodeList->append(succIndiID);
+										}
+									}
+									CConnectionSuccessorSetIterator connIt = searchIndiNode->getConnectionSuccessorIterator();
+									while (connIt.hasNext()) {
+										cint64 connIndiID = connIt.next();
+										if (!searchingNodeSet->contains(connIndiID)) {
+											searchingNodeSet->insert(connIndiID);
+											searchingNodeList->append(connIndiID);
+										}
+									}
+									CIndividualMergingHash* mergeHash = searchIndiNode->getIndividualMergingHash(false);
+									if (mergeHash) {
+										for (CPROCESSHASH<CIndividual*,CDependencyTrackPoint*>::const_iterator it = mergeHash->constBegin(), itEnd = mergeHash->constEnd(); it != itEnd; ++it) {
+											CIndividual* mergedIndi = it.key();
+											cint64 mergedIndiID = mergedIndi->getIndividualID();
+											if (!searchingNodeSet->contains(mergedIndiID)) {
+												searchingNodeSet->insert(mergedIndiID);
+												searchingNodeList->append(mergedIndiID);
+											}
+										}
+									}
+								}
+							}
+						}
+						incExpData->setIncremetnalExpansionListInitialized(true);
+						addIndividualToIncrementalExpansionQueue(individualNode,calcAlgContext);
+						return true;
+					}
+					return false;
+				}
+
+
+
+
+
+				CIndividual* CCalculationTableauCompletionTaskHandleAlgorithm::getNextIncrementalExpansionIndividual(CIndividualProcessNode* individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualNodeIncrementalExpansionData* incExpData = individualNode->getIncrementalExpansionData(false);
+					if (incExpData && incExpData->requiresFurtherIncrementalExpansion()) {
+						incExpData = individualNode->getIncrementalExpansionData(true);	
+						while (incExpData->requiresFurtherIncrementalExpansion()) {
+							CIndividual* nextIndi = incExpData->takeNextIncrementalExpansionIndividual();
+							CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+							if (!indiProcNodeVec->getData(nextIndi->getIndividualID())) {
+								return nextIndi;
+							}
+						}
+					}
+					return nullptr;
+				}
+
+
+
+				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::incrementalNodeExpansion(CIndividualProcessNode* expandNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+					CIndividual* expIndi = getNextIncrementalExpansionIndividual(expandNode,calcAlgContext);
+					if (expIndi) {
+						CIndividualProcessNode* expandedIndiNode = getUpToDateIndividual(expIndi->getIndividualID(),calcAlgContext);
+						addIndividualToIncrementalExpansionQueue(expandNode,calcAlgContext);
+						return expandedIndiNode;
+					}
+					return nullptr;
+				}
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::requiresIncrementalNodeExpansion(CIndividualProcessNode* individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualNodeIncrementalExpansionData* incExpData = individualNode->getIncrementalExpansionData(false);
+					if (!incExpData->isPreviousCompletionGraphCompatible() && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+						return true;
+					}
+					return false;
+				}
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::incrementalMergeWithPreviousNondeterministicCompletionGraph(CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualProcessNodeVector* indiNodeVec = calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector();
+					cint64 indiCount = indiNodeVec->getItemCount();
+
+					CSatisfiableCalculationTask* prevDetCalcTask = mIncExpHandler->getPreviousDeterministicCompletionGraphTask(calcAlgContext);
+					CSatisfiableCalculationTask* prevNondetCalcTask = mIncExpHandler->getPreviousNondeterministicCompletionGraphTask(calcAlgContext);
+
+					if (prevDetCalcTask && prevNondetCalcTask && prevDetCalcTask != prevNondetCalcTask) {
+						CProcessingDataBox* prevDetDataBox = prevDetCalcTask->getProcessingDataBox();
+						CIndividualProcessNodeVector* prevDetIndiNodeVec = prevDetDataBox->getIndividualProcessNodeVector();
+						cint64 prevDetIndiNodeCount = prevDetIndiNodeVec->getItemCount();
+
+						CProcessingDataBox* prevNondetDataBox = prevNondetCalcTask->getProcessingDataBox();
+						CIndividualProcessNodeVector* prevNondetIndiNodeVec = prevNondetDataBox->getIndividualProcessNodeVector();
+						cint64 prevNondetIndiNodeCount = prevNondetIndiNodeVec->getItemCount();
+
+
+						CPROCESSINGSET<cint64>* transformNodeSet = CObjectParameterizingAllocator< CPROCESSINGSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+
+
+						CIndividualProcessNodeVector* mergedIndiNodeVec = CObjectParameterizingAllocator< CIndividualProcessNodeVector,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getProcessContext());
+						mergedIndiNodeVec->referenceVector(indiNodeVec);
+						calcAlgContext->getUsedProcessingDataBox()->setIndividualProcessNodeVector(mergedIndiNodeVec);
+
+						for (cint64 i = 0; i < indiCount; ++i) {
+							CIndividualProcessNode* indiNode = indiNodeVec->getData(i);
+							CIndividualProcessNode* prevDetIndiNode = prevDetIndiNodeVec->getData(i);
+							CIndividualProcessNode* prevNondetIndiNode = prevNondetIndiNodeVec->getData(i);
+							if (!indiNode && prevNondetIndiNode) {
+								mergedIndiNodeVec->setLocalData(i,prevNondetIndiNode);
+							} else if (indiNode == prevDetIndiNode) {
+								if (prevNondetIndiNode != prevDetIndiNode) {
+									mergedIndiNodeVec->setLocalData(i,prevNondetIndiNode);
+								}
+							} else {
+								if (!indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+									if (indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) && !indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
+										transformNodeSet->insert(i);
+									}
+								}
+							}
+						}
+
+						for (CPROCESSINGSET<cint64>::const_iterator it = transformNodeSet->constBegin(), itEnd = transformNodeSet->constEnd(); it != itEnd; ++it) {
+							cint64 transformNodeID(*it);
+							CIndividualProcessNode* locIndiNode = getLocalizedIndividual(transformNodeID,calcAlgContext);
+							CIndividualProcessNode* prevNondetIndiNode = prevNondetIndiNodeVec->getData(transformNodeID);
+							locIndiNode->setReapplyConceptLabelSet(prevNondetIndiNode->getReapplyConceptLabelSet(false));
+
+							CSuccessorIterator prevSuccIt = prevNondetIndiNode->getSuccessorIterator();
+							while (prevSuccIt.hasNext()) {
+								CIndividualLinkEdge* succLinkEdge = prevSuccIt.nextLink();
+								cint64 succIndiID = succLinkEdge->getOppositeIndividualID(transformNodeID);
+								CIndividualProcessNode* succIndiNode = getUpToDateIndividual(succIndiID,calcAlgContext);
+								if (!succIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+									CIndividualProcessNode* locSuccIndiNode = getLocalizedIndividual(succIndiNode,false,calcAlgContext);
+									CSuccessorRoleIterator succRoleIt = prevNondetIndiNode->getSuccessorRoleIterator(locSuccIndiNode);
+									while (succRoleIt.hasNext()) {
+										CIndividualLinkEdge* succLink = succRoleIt.next();
+										if (!locSuccIndiNode->hasRoleSuccessorToIndividual(succLink->getLinkRole(),locIndiNode,true)) {
+											CIndividualLinkEdge* newSuccLink = CObjectParameterizingAllocator< CIndividualLinkEdge,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
+											newSuccLink->initIndividualLinkEdge(succLink);
+											CReapplyQueueIterator reapplyIterator = installIndividualNodeRoleLinkReapplied(locIndiNode,locSuccIndiNode,newSuccLink,calcAlgContext);
+											applyReapplyQueueConceptsRestricted(locIndiNode,&reapplyIterator,newSuccLink,calcAlgContext);
+										}
+									}
+								}
+							}
+
+							CConnectionSuccessorSetIterator connIt = prevNondetIndiNode->getConnectionSuccessorIterator();
+							if (connIt.hasNext()) {
+								CConnectionSuccessorSet* connSet = locIndiNode->getConnectionSuccessorSet(false);
+								CConnectionSuccessorSet* locConnSet = nullptr;
+								while (connIt.hasNext()) {
+									cint64 connID = connIt.next();
+									if (!connSet || !connSet->hasConnectionSuccessor(connID)) {
+										CIndividualProcessNode* connIndiNode = getUpToDateIndividual(connID,calcAlgContext);
+										if (!connIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+											if (!locConnSet) {
+												locConnSet = locIndiNode->getConnectionSuccessorSet(true);
+											}
+											locConnSet->insertConnectionSuccessor(connID);
+										}
+									}
+								}
+							}
+
+							CDistinctHash* prevDistinctHash = prevNondetIndiNode->getDistinctHash(false);
+							if (prevDistinctHash) {
+								CDistinctHash* distinctHash = locIndiNode->getDistinctHash(false);
+								CDistinctHash* locDistinctHash = nullptr;
+								for (CDistinctHash::const_iterator it = distinctHash->constBegin(), itEnd = distinctHash->constEnd(); it != itEnd; ++it) {
+									cint64 distinctIndiID(it.key());
+									CDistinctEdge* distinctEdge(it.value());
+									if (!distinctHash || distinctHash->isIndividualDistinct(distinctIndiID)) {
+										CIndividualProcessNode* distinctIndiNode = getUpToDateIndividual(distinctIndiID,calcAlgContext);
+										if (!distinctIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+											if (!locDistinctHash) {
+												locDistinctHash = locIndiNode->getDistinctHash(true);
+											}
+											CDistinctEdge* newDistinctLink = CObjectParameterizingAllocator< CDistinctEdge,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
+											newDistinctLink->initDistinctEdge(locIndiNode,distinctIndiNode,distinctEdge->getDependencyTrackPoint());
+											locDistinctHash->insertDistinctIndividual(distinctIndiID,newDistinctLink);
+										}
+									}
+								}
+							}
+
+							CIndividualMergingHash* prevIndiMergingHash = prevNondetIndiNode->getIndividualMergingHash(false);
+							if (prevIndiMergingHash) {
+								CIndividualMergingHash* indiMergingHash = locIndiNode->getIndividualMergingHash(false);
+								CIndividualMergingHash* locIndiMergingHash = nullptr;
+								for (CIndividualMergingHash::const_iterator it = indiMergingHash->constBegin(), itEnd = indiMergingHash->constEnd(); it != itEnd; ++it) {
+									CIndividual* mergedIndi(it.key());
+									CDependencyTrackPoint* depTrackPoint(it.value());
+									if (!indiMergingHash || indiMergingHash->contains(mergedIndi)) {
+										if (!locIndiMergingHash) {
+											locIndiMergingHash = locIndiNode->getIndividualMergingHash(true);
+										}
+										locIndiMergingHash->insert(mergedIndi,depTrackPoint);
+									}
+								}
+							}
+						}
+						return true;
+
+					}
+					return false;
+				}
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::incrementalMergeWithPreviousDeterministicCompletionGraph(CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualProcessNodeVector* indiNodeVec = calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector();
+					cint64 indiCount = indiNodeVec->getItemCount();
+
+					CSatisfiableCalculationTask* prevCalcTask = mIncExpHandler->getPreviousDeterministicCompletionGraphTask(calcAlgContext);
+					if (prevCalcTask) {
+						CPROCESSINGSET<cint64>* nonCompatibleChangedNominalNodeSet = CObjectParameterizingAllocator< CPROCESSINGSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+						CPROCESSINGSET<cint64>* compatibleNominalNodeSet = CObjectParameterizingAllocator< CPROCESSINGSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+						CPROCESSINGSET<cint64>* redundantNodeSet = CObjectParameterizingAllocator< CPROCESSINGSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+						CPROCESSINGSET<cint64>* newNodeSet = CObjectParameterizingAllocator< CPROCESSINGSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+
+						identifyCompatibilityChangedNominalIndividualNodes(nonCompatibleChangedNominalNodeSet,compatibleNominalNodeSet,redundantNodeSet,newNodeSet,calcAlgContext);
+
+						CPROCESSINGSET<cint64>* pruningNodeSet = CObjectParameterizingAllocator< CPROCESSINGSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+
+
+
+						CProcessingDataBox* prevDataBox = prevCalcTask->getProcessingDataBox();
+						CIndividualProcessNodeVector* prevIndiNodeVec = prevDataBox->getIndividualProcessNodeVector();
+						cint64 prevIndiNodeCount = prevIndiNodeVec->getItemCount();
+
+						for (CPROCESSINGSET<cint64>::const_iterator it = redundantNodeSet->constBegin(), itEnd = redundantNodeSet->constEnd(); it != itEnd; ++it) {
+							cint64 redundantNodeID(*it);
+							CIndividualProcessNode* redundantNode = indiNodeVec->getData(redundantNodeID);
+							if (redundantNode && redundantNode->getNominalIndividual()) {
+								redundantNode = getLocalizedIndividual(redundantNode,false,calcAlgContext);
+								pruneIncrementalRemovedSuccessors(redundantNode,compatibleNominalNodeSet,pruningNodeSet,calcAlgContext);
+							}
+						}
+
+						CIndividualProcessNodeVector* mergedIndiNodeVec = CObjectParameterizingAllocator< CIndividualProcessNodeVector,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getProcessContext());
+						mergedIndiNodeVec->referenceVector(prevIndiNodeVec);
+						calcAlgContext->getUsedProcessingDataBox()->setIndividualProcessNodeVector(mergedIndiNodeVec);
+
+
+						for (CPROCESSINGSET<cint64>::const_iterator it = nonCompatibleChangedNominalNodeSet->constBegin(), itEnd = nonCompatibleChangedNominalNodeSet->constEnd(); it != itEnd; ++it) {
+							cint64 changedNominalID(*it);
+							CIndividualProcessNode* prevChangedNode = mergedIndiNodeVec->getData(changedNominalID);
+							if (prevChangedNode) {
+								prevChangedNode = getLocalizedIndividual(prevChangedNode,false,calcAlgContext);
+								pruneIncrementalRemovedSuccessors(prevChangedNode,compatibleNominalNodeSet,pruningNodeSet,calcAlgContext);
+							}
+						}
+
+						for (CPROCESSINGSET<cint64>::const_iterator it = nonCompatibleChangedNominalNodeSet->constBegin(), itEnd = nonCompatibleChangedNominalNodeSet->constEnd(); it != itEnd; ++it) {
+							cint64 changedNominalID(*it);
+							CIndividualProcessNode* changedNode = indiNodeVec->getData(changedNominalID);
+							mergedIndiNodeVec->setData(changedNominalID,changedNode);
+						}
+
+						for (CPROCESSINGSET<cint64>::const_iterator it = compatibleNominalNodeSet->constBegin(), itEnd = compatibleNominalNodeSet->constEnd(); it != itEnd; ++it) {
+							cint64 compNominalID(*it);
+							CIndividualProcessNode* newCompNode = indiNodeVec->getData(compNominalID);
+							mergedIndiNodeVec->setData(compNominalID,newCompNode);
+
+							// TODO: add nodes to cached completion graph checking queue?
+
+							CIndividualProcessNode* prevCompIndiNode = prevIndiNodeVec->getData(compNominalID);
+							if (prevCompIndiNode) {
+
+								CIndividualProcessNode* locNewCompNode = getLocalizedIndividual(newCompNode,false,calcAlgContext);
+
+								CSuccessorIterator prevSuccIt = prevCompIndiNode->getSuccessorIterator();
+								while (prevSuccIt.hasNext()) {
+									CIndividualLinkEdge* succLinkEdge = prevSuccIt.nextLink();
+									CIndividualProcessNode* succIndiNode = getSuccessorIndividual(prevCompIndiNode,succLinkEdge,calcAlgContext);
+									if (succIndiNode->isNominalIndividual() || succIndiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFSUCCESSORNOMINALCONNECTION)) {
+										cint64 succIndiID = succIndiNode->getIndividualID();
+										if (!compatibleNominalNodeSet->contains(succIndiID) && !nonCompatibleChangedNominalNodeSet->contains(succIndiID) && !pruningNodeSet->contains(succIndiID)) {
+											CSuccessorRoleIterator succRoleIt = prevCompIndiNode->getSuccessorRoleIterator(succIndiNode);
+											while (succRoleIt.hasNext()) {
+												CIndividualLinkEdge* succLink = succRoleIt.next();
+
+												CIndividualLinkEdge* newSuccLink = CObjectParameterizingAllocator< CIndividualLinkEdge,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
+												newSuccLink->initIndividualLinkEdge(succLink);
+
+												CReapplyQueueIterator reapplyIterator = installIndividualNodeRoleLinkReapplied(locNewCompNode,succIndiNode,newSuccLink,calcAlgContext);
+												applyReapplyQueueConceptsRestricted(locNewCompNode,&reapplyIterator,newSuccLink,calcAlgContext);
+											}
+										}
+									}
+								}
+
+								CConnectionSuccessorSetIterator conIt = prevCompIndiNode->getConnectionSuccessorIterator();
+								while (conIt.hasNext()) {
+									cint64 connNodeID = conIt.next();
+									if (!compatibleNominalNodeSet->contains(connNodeID) && !nonCompatibleChangedNominalNodeSet->contains(connNodeID) && !pruningNodeSet->contains(connNodeID)) {
+										locNewCompNode->getConnectionSuccessorSet(true)->insertConnectionSuccessor(connNodeID);
+									}
+								}
+
+								CProcessingDataBox* processingDataBox = calcAlgContext->getProcessingDataBox();
+								CIndividualReactivationProcessingQueue* reactProcQueue = nullptr;
+								if (mConfDelayCompletionGraphCachingReactivation) {
+									reactProcQueue = processingDataBox->getLateIndividualReactivationProcessingQueue(true);
+								} else {
+									reactProcQueue = processingDataBox->getEarlyIndividualReactivationProcessingQueue(true);
+								}
+								reactProcQueue->insertReactivationIndiviudal(locNewCompNode,false);
+
+							}
+						}
+
+						for (cint64 i = prevIndiNodeCount; i < indiCount; ++i) {
+							CIndividualProcessNode* newIndiNode = indiNodeVec->getData(i);
+							if (newIndiNode) {
+								mergedIndiNodeVec->setData(i,newIndiNode);
+							}
+						}
+
+
+						return true;
+					}
+					return false;
+				}
+
+
+
+
+
+
+
+
+
+
+
+				void CCalculationTableauCompletionTaskHandleAlgorithm::pruneIncrementalRemovedSuccessors(CIndividualProcessNode*& indi, CPROCESSINGSET<cint64>* compatibleNominalNodeSet, CPROCESSINGSET<cint64>* pruningNodeSet, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+					CPROCESSINGLIST<CIndividualProcessNode*>* pruningNodeList = CObjectParameterizingAllocator< CPROCESSINGLIST<CIndividualProcessNode*>,CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
+					pruningNodeList->append(indi);
+
+					while (!pruningNodeList->isEmpty()) {
+						CIndividualProcessNode* pruningNode = pruningNodeList->takeFirst();
+
+						if (pruningNode != indi && !pruningNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+							pruningNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED);
+							eliminiateBlockedIndividuals(pruningNode,calcAlgContext);
+						}
+
+						CConnectionSuccessorSet* connSuccSet = pruningNode->getConnectionSuccessorSet(false);
+						if (connSuccSet) {
+							if (connSuccSet->getConnectionSuccessorCount() > 0) {
+								CConnectionSuccessorSetIterator conSuccIt = connSuccSet->getConnectionSuccessorIterator();
+								while (conSuccIt.hasNext()) {
+									cint64 connID = conSuccIt.next(true);
+									if (!pruningNodeSet->contains(connID) && !compatibleNominalNodeSet->contains(connID)) {
+										CIndividualProcessNode* nomIndi = getUpToDateIndividual(connID,calcAlgContext);
+										if (!nomIndi->getNominalIndividual() && !nomIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+											pruningNodeSet->insert(connID);
+											CIndividualProcessNode* locNomIndi = getLocalizedIndividual(nomIndi,false,calcAlgContext);
+											pruningNodeList->append(locNomIndi);
+										}
+									}
+								}
+							}
+						}
+
+
+						CSuccessorIterator succIt = pruningNode->getSuccessorIterator();
+						cint64 ancDepth = pruningNode->getIndividualAncestorDepth();
+						while (succIt.hasNext()) {
+							CIndividualLinkEdge* succLink = succIt.nextLink(true);
+							CIndividualProcessNode* succIndi = getSuccessorIndividual(pruningNode,succLink,calcAlgContext);
+							if (!succIndi->getNominalIndividual() && !succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+								cint64 succIndiID = succIndi->getIndividualID();
+								if (!pruningNodeSet->contains(succIndiID) && !compatibleNominalNodeSet->contains(succIndiID)) {
+									pruningNodeSet->insert(succIndiID);
+									CIndividualProcessNode* locSuccIndi = getLocalizedIndividual(succIndi,false,calcAlgContext);
+									pruningNodeList->append(locSuccIndi);
+								}
+							}
+						}
+					}
+				}
+
+
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::identifyCompatibilityChangedNominalIndividualNodes(CPROCESSINGSET<cint64>* nonCompatibleChangedNominalNodeSet, CPROCESSINGSET<cint64>* compatibleNominalNodeSet, CPROCESSINGSET<cint64>* redundantNodeSet, CPROCESSINGSET<cint64>* newNodeSet, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualProcessNodeVector* indiNodeVec = calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector();
+					cint64 indiCount = indiNodeVec->getItemCount();
+					for (cint64 i = 0; i < indiCount; ++i) {
+						CIndividualProcessNode* indiNode = indiNodeVec->getData(i);
+						if (indiNode) {
+							CIndividualNodeIncrementalExpansionData* incExpData = indiNode->getIncrementalExpansionData(false);
+							if (indiNode->getNominalIndividual()) {
+								if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+									if (!incExpData->isPreviousCompletionGraphCompatible()) {
+										nonCompatibleChangedNominalNodeSet->insert(i);
+									} else {
+										compatibleNominalNodeSet->insert(i);
+									}
+								}
+							} else {
+								if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+									newNodeSet->insert(i);
+								}
+							}
+							if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged())) {
+								redundantNodeSet->insert(i);
+							}
+						}
+					}
+					return true;
+				}
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::checkCompatibilityUpdateDirectlyChangedPropagation(CIndividualProcessNode* individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool compatible = mIncExpHandler->isIndividualNodePreviousCompletionGraphCompatible(individualNode,calcAlgContext);
+					CIndividualNodeIncrementalExpansionData* incExpData = individualNode->getIncrementalExpansionData(false);
+					if (compatible) {
+						clearPropagatedDirectlyChangedNeighbourConnection(individualNode,true,calcAlgContext);
+					} else {
+						if (incExpData->isDirectlyChanged()) {
+							addIndividualToIncrementalExpansionQueue(individualNode,calcAlgContext);
+						}
+						if (!incExpData->isDirectlyChanged() && !incExpData->hasDirectlyChangedNeighbourConnection()) {
+							CIndividualProcessNode* directlyChangedConnNode = searchDirectlyChangedNeighbourNodeConnection(individualNode,calcAlgContext);
+							if (directlyChangedConnNode && establishDirectlyChangedNeighbourConnection(individualNode,directlyChangedConnNode,true,calcAlgContext)) {
+								propagateDirectlyChangedNeighbourNodeConnection(individualNode,true,calcAlgContext);
+							}
+						}
+					}
+					return compatible;
+				}
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::linkCreationDirectlyChangedNeighbourConnectionUpdate(CIndividualProcessNode* sourceIndi, CIndividualProcessNode* destIndi, bool queueIncrementalExpansion, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool updatedNeighbourConnection = false;
+					if (establishDirectlyChangedNeighbourConnection(sourceIndi,destIndi,true,calcAlgContext)) {
+						propagateDirectlyChangedNeighbourNodeConnection(sourceIndi,true,calcAlgContext);
+						updatedNeighbourConnection = true;
+					}
+					if (establishDirectlyChangedNeighbourConnection(destIndi,sourceIndi,true,calcAlgContext)) {
+						propagateDirectlyChangedNeighbourNodeConnection(destIndi,true,calcAlgContext);
+						updatedNeighbourConnection = true;
+					}
+					return updatedNeighbourConnection;
+				}
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::establishDirectlyChangedNeighbourConnection(CIndividualProcessNode* individualNode, CIndividualProcessNode* neighbourNodeCandidate, bool queueIncrementalExpansion, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualNodeIncrementalExpansionData* incExpData = individualNode->getIncrementalExpansionData(false);
+					if (!incExpData || !incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged()) {
+						CIndividualNodeIncrementalExpansionData* candIncExpData = neighbourNodeCandidate->getIncrementalExpansionData(false);
+						if (candIncExpData && (candIncExpData->hasDirectlyChangedNeighbourConnection() || candIncExpData->isDirectlyChanged())) {
+							CIndividualNodeIncrementalExpansionData* locIncExpData = individualNode->getIncrementalExpansionData(true);
+							CIndividualProcessNode* locNeighbourNodeCandidate = getLocalizedIndividual(neighbourNodeCandidate,false,calcAlgContext);
+							locIncExpData->setDirectlyChangedNeighbourConnectionNode(locNeighbourNodeCandidate);
+							CIndividualNodeIncrementalExpansionData* locCandIncExpData = locNeighbourNodeCandidate->getIncrementalExpansionData(true);
+							locCandIncExpData->addNeighbourPropagatedDirectlyChanged(individualNode);
+							if (queueIncrementalExpansion && individualNode->getNominalIndividual()) {
+								addIndividualToIncrementalExpansionQueue(individualNode,calcAlgContext);
+							}
+							return true;
+						}
+					}
+					return false;
+				}
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::propagateDirectlyChangedNeighbourNodeConnection(CIndividualProcessNode* individualNode, bool queueIncrementalExpansion, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+					CPROCESSINGLIST<CIndividualProcessNode*> propNodeList(calcAlgContext->getUsedTaskProcessorContext());
+					propNodeList.append(individualNode);
+					bool propagatedDirectlyChanged = false;
+
+					while (!propNodeList.isEmpty()) {
+						CIndividualProcessNode* propIndiNode = propNodeList.takeFirst();
+
+						CSuccessorIterator succIt(propIndiNode->getSuccessorIterator());
+						while (succIt.hasNext()) {
+							CIndividualLinkEdge* succLink = succIt.nextLink();
+							CIndividualProcessNode* succIndi = getSuccessorIndividual(propIndiNode,succLink,calcAlgContext);
+							CIndividualNodeIncrementalExpansionData* incExpData = succIndi->getIncrementalExpansionData(false);
+							if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged() && !incExpData->isPreviousCompletionGraphCompatible())) {
+								CIndividualProcessNode* locSuccIndi = getLocalizedIndividual(succIndi,false,calcAlgContext);
+								if (establishDirectlyChangedNeighbourConnection(locSuccIndi,propIndiNode,queueIncrementalExpansion,calcAlgContext)) {
+									propagatedDirectlyChanged = true;
+									propNodeList.append(locSuccIndi);
+								}
+							}
+						}
+						CConnectionSuccessorSetIterator connIt(propIndiNode->getConnectionSuccessorIterator());
+						while (connIt.hasNext()) {
+							cint64 connID = connIt.next();
+							CIndividualProcessNode* connIndiNode = getUpToDateIndividual(connID,calcAlgContext);
+							CIndividualNodeIncrementalExpansionData* incExpData = connIndiNode->getIncrementalExpansionData(false);
+							if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged() && !incExpData->isPreviousCompletionGraphCompatible())) {
+								CIndividualProcessNode* locConnIndiNode = getLocalizedIndividual(connIndiNode,false,calcAlgContext);
+								if (establishDirectlyChangedNeighbourConnection(locConnIndiNode,propIndiNode,queueIncrementalExpansion,calcAlgContext)) {
+									propagatedDirectlyChanged = true;
+									propNodeList.append(locConnIndiNode);
+								}
+							}
+						}
+						if (propIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSUCCESSORNOMINALCONNECTION)) {
+							for (CXLinker<CIndividualProcessNode*>* blockedNodeLinkerIt = propIndiNode->getBlockedIndividualsLinker(); blockedNodeLinkerIt; blockedNodeLinkerIt = blockedNodeLinkerIt->getNext()) {
+								CIndividualProcessNode* blockedIndiNode = getUpToDateIndividual(blockedNodeLinkerIt->getData(),calcAlgContext);
+								CIndividualNodeIncrementalExpansionData* incExpData = blockedIndiNode->getIncrementalExpansionData(false);
+								if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged() && !incExpData->isPreviousCompletionGraphCompatible())) {
+									CIndividualProcessNode* locBlockedIndiNode = getLocalizedIndividual(blockedIndiNode,false,calcAlgContext);
+									if (establishDirectlyChangedNeighbourConnection(locBlockedIndiNode,propIndiNode,queueIncrementalExpansion,calcAlgContext)) {
+										propagatedDirectlyChanged = true;
+										propNodeList.append(locBlockedIndiNode);
+									}
+								}
+							}
+							for (CXLinker<CIndividualProcessNode*>* blockedNodeLinkerIt = propIndiNode->getProcessingBlockedIndividualsLinker(); blockedNodeLinkerIt; blockedNodeLinkerIt = blockedNodeLinkerIt->getNext()) {
+								CIndividualProcessNode* blockedIndiNode = getUpToDateIndividual(blockedNodeLinkerIt->getData(),calcAlgContext);
+								CIndividualNodeIncrementalExpansionData* incExpData = blockedIndiNode->getIncrementalExpansionData(false);
+								if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged() && !incExpData->isPreviousCompletionGraphCompatible())) {
+									CIndividualProcessNode* locBlockedIndiNode = getLocalizedIndividual(blockedIndiNode,false,calcAlgContext);
+									if (establishDirectlyChangedNeighbourConnection(locBlockedIndiNode,propIndiNode,queueIncrementalExpansion,calcAlgContext)) {
+										propagatedDirectlyChanged = true;
+										propNodeList.append(locBlockedIndiNode);
+									}
+								}
+							}
+							CBlockingFollowSet* followSet = propIndiNode->getBlockingFollowSet(false);
+							if (followSet) {
+								for (CBlockingFollowSet::const_iterator it = followSet->constBegin(), itEnd = followSet->constEnd(); it != itEnd; ++it) {
+									cint64 blockedIndiNodeID = *it;
+									CIndividualProcessNode* blockedIndiNode = getUpToDateIndividual(blockedIndiNodeID,calcAlgContext);
+									CIndividualNodeIncrementalExpansionData* incExpData = blockedIndiNode->getIncrementalExpansionData(false);
+									if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged() && !incExpData->isPreviousCompletionGraphCompatible())) {
+										CIndividualProcessNode* locBlockedIndiNode = getLocalizedIndividual(blockedIndiNode,false,calcAlgContext);
+										if (establishDirectlyChangedNeighbourConnection(locBlockedIndiNode,propIndiNode,queueIncrementalExpansion,calcAlgContext)) {
+											propagatedDirectlyChanged = true;
+											propNodeList.append(locBlockedIndiNode);
+										}
+									}
+								}
+							}
+							CIndividualProcessNode* blockerIndiNode = propIndiNode->getBlockerIndividualNode();
+							if (blockerIndiNode) {
+								blockerIndiNode = getUpToDateIndividual(blockerIndiNode,calcAlgContext);
+								CIndividualNodeIncrementalExpansionData* incExpData = blockerIndiNode->getIncrementalExpansionData(false);
+								if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged() && !incExpData->isPreviousCompletionGraphCompatible())) {
+									CIndividualProcessNode* locBlockerIndiNode = getLocalizedIndividual(blockerIndiNode,false,calcAlgContext);
+									if (establishDirectlyChangedNeighbourConnection(locBlockerIndiNode,propIndiNode,queueIncrementalExpansion,calcAlgContext)) {
+										propagatedDirectlyChanged = true;
+										propNodeList.append(locBlockerIndiNode);
+									}
+								}
+							}
+							CIndividualProcessNode* followingIndiNode = propIndiNode->getFollowingIndividualNode();
+							if (followingIndiNode) {
+								followingIndiNode = getUpToDateIndividual(followingIndiNode,calcAlgContext);
+								CIndividualNodeIncrementalExpansionData* incExpData = followingIndiNode->getIncrementalExpansionData(false);
+								if (!incExpData || (!incExpData->hasDirectlyChangedNeighbourConnection() && !incExpData->isDirectlyChanged() && !incExpData->isPreviousCompletionGraphCompatible())) {
+									CIndividualProcessNode* locFollowingIndiNode = getLocalizedIndividual(followingIndiNode,false,calcAlgContext);
+									if (establishDirectlyChangedNeighbourConnection(locFollowingIndiNode,propIndiNode,queueIncrementalExpansion,calcAlgContext)) {
+										propagatedDirectlyChanged = true;
+										propNodeList.append(locFollowingIndiNode);
+									}
+								}
+							}
+						}
+					}
+					return propagatedDirectlyChanged;
+				}
+
+
+
+
+				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::searchDirectlyChangedNeighbourNodeConnection(CIndividualProcessNode* individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CSuccessorIterator succIt(individualNode->getSuccessorIterator());
+					while (succIt.hasNext()) {
+						CIndividualLinkEdge* succLink = succIt.nextLink();
+						CIndividualProcessNode* succIndi = getSuccessorIndividual(individualNode,succLink,calcAlgContext);
+						CIndividualNodeIncrementalExpansionData* incExpData = succIndi->getIncrementalExpansionData(false);
+						if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+							return succIndi;
+						}
+					}
+					CConnectionSuccessorSetIterator connIt(individualNode->getConnectionSuccessorIterator());
+					while (connIt.hasNext()) {
+						cint64 connID = connIt.next();
+						CIndividualProcessNode* connIndiNode = getUpToDateIndividual(connID,calcAlgContext);
+						CIndividualNodeIncrementalExpansionData* incExpData = connIndiNode->getIncrementalExpansionData(false);
+						if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+							return connIndiNode;
+						}
+					}
+					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSUCCESSORNOMINALCONNECTION)) {
+						for (CXLinker<CIndividualProcessNode*>* blockedNodeLinkerIt = individualNode->getBlockedIndividualsLinker(); blockedNodeLinkerIt; blockedNodeLinkerIt = blockedNodeLinkerIt->getNext()) {
+							CIndividualProcessNode* blockedIndiNode = getUpToDateIndividual(blockedNodeLinkerIt->getData(),calcAlgContext);
+							CIndividualNodeIncrementalExpansionData* incExpData = blockedIndiNode->getIncrementalExpansionData(false);
+							if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+								return blockedIndiNode;
+							}
+						}
+						for (CXLinker<CIndividualProcessNode*>* blockedNodeLinkerIt = individualNode->getProcessingBlockedIndividualsLinker(); blockedNodeLinkerIt; blockedNodeLinkerIt = blockedNodeLinkerIt->getNext()) {
+							CIndividualProcessNode* blockedIndiNode = getUpToDateIndividual(blockedNodeLinkerIt->getData(),calcAlgContext);
+							CIndividualNodeIncrementalExpansionData* incExpData = blockedIndiNode->getIncrementalExpansionData(false);
+							if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+								return blockedIndiNode;
+							}
+						}
+						CBlockingFollowSet* followSet = individualNode->getBlockingFollowSet(false);
+						if (followSet) {
+							for (CBlockingFollowSet::const_iterator it = followSet->constBegin(), itEnd = followSet->constEnd(); it != itEnd; ++it) {
+								cint64 blockedIndiNodeID = *it;
+								CIndividualProcessNode* blockedIndiNode = getUpToDateIndividual(blockedIndiNodeID,calcAlgContext);
+								CIndividualNodeIncrementalExpansionData* incExpData = blockedIndiNode->getIncrementalExpansionData(false);
+								if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+									return blockedIndiNode;
+								}
+							}
+						}
+						CIndividualProcessNode* blockerIndiNode = individualNode->getBlockerIndividualNode();
+						if (blockerIndiNode) {
+							blockerIndiNode = getUpToDateIndividual(blockerIndiNode,calcAlgContext);
+							CIndividualNodeIncrementalExpansionData* incExpData = blockerIndiNode->getIncrementalExpansionData(false);
+							if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+								return blockerIndiNode;
+							}
+						}
+						CIndividualProcessNode* followingIndiNode = individualNode->getFollowingIndividualNode();
+						if (followingIndiNode) {
+							followingIndiNode = getUpToDateIndividual(followingIndiNode,calcAlgContext);
+							CIndividualNodeIncrementalExpansionData* incExpData = followingIndiNode->getIncrementalExpansionData(false);
+							if (incExpData && (incExpData->hasDirectlyChangedNeighbourConnection() || incExpData->isDirectlyChanged())) {
+								return followingIndiNode;
+							}
+						}
+					}
+					return nullptr;
+				}
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::clearDirectlyChangedNeighbourConnection(CIndividualProcessNode* individualNode, bool queueCompatibilityChecks, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualNodeIncrementalExpansionData* incExpData = individualNode->getIncrementalExpansionData(false);
+					if (incExpData && incExpData->hasDirectlyChangedNeighbourConnection()) {
+						CIndividualNodeIncrementalExpansionData* locIncExpData = individualNode->getIncrementalExpansionData(true);
+						locIncExpData->setDirectlyChangedNeighbourConnectionNode(nullptr);
+						if (queueCompatibilityChecks && individualNode->isNominalIndividual()) {
+							calcAlgContext->getUsedProcessingDataBox()->getIncrementalCompatibilityCheckingQueue(true)->insertProcessIndiviudal(individualNode);
+						}
+						clearPropagatedDirectlyChangedNeighbourConnection(individualNode,true,calcAlgContext);
+						return true;
+					}
+					return false;
+				}
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::clearPropagatedDirectlyChangedNeighbourConnection(CIndividualProcessNode* individualNode, bool queueCompatibilityChecks, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool propCleared = false;
+					CIndividualNodeIncrementalExpansionData* incExpData = individualNode->getIncrementalExpansionData(false);
+					if (incExpData && incExpData->hasNeighbourPropagatedDirectlyChanged()) {
+						CPROCESSINGLIST<CIndividualProcessNode*> clearPropNodeList(calcAlgContext->getUsedTaskProcessorContext());
+						clearPropNodeList.append(individualNode);
+						while (!clearPropNodeList.isEmpty()) {
+							CIndividualProcessNode* clearPropIndiNode = clearPropNodeList.takeFirst();
+							CIndividualNodeIncrementalExpansionData* clearIncExpData = clearPropIndiNode->getIncrementalExpansionData(false);
+
+							CPROCESSLIST<CIndividualProcessNode*>* propIndiNodeList = clearIncExpData->getNeighbourPropagatedDirectlyChangedList(false);
+							if (propIndiNodeList && !propIndiNodeList->isEmpty()) {
+								clearIncExpData = clearPropIndiNode->getIncrementalExpansionData(true);
+								propIndiNodeList = clearIncExpData->getNeighbourPropagatedDirectlyChangedList(true);
+
+								for (CPROCESSLIST<CIndividualProcessNode*>::const_iterator it = propIndiNodeList->constBegin(), itEnd = propIndiNodeList->constEnd(); it != itEnd; ++it) {
+									CIndividualProcessNode* propNode(*it);
+									propNode = getUpToDateIndividual(propNode,calcAlgContext);
+									CIndividualNodeIncrementalExpansionData* propIncExpData = propNode->getIncrementalExpansionData(false);
+									if (propIncExpData && propIncExpData->hasDirectlyChangedNeighbourConnection()) {
+										if (propIncExpData->getDirectlyChangedNeighbourConnectionNode()->getIndividualID() == clearPropIndiNode->getIndividualID()) {
+											propCleared = true;
+											propNode = getLocalizedIndividual(propNode,false,calcAlgContext);
+											propIncExpData = propNode->getIncrementalExpansionData(true);
+											propIncExpData->setDirectlyChangedNeighbourConnectionNode(nullptr);
+											if (propIncExpData->hasNeighbourPropagatedDirectlyChanged()) {
+												clearPropNodeList.append(propNode);
+											}											
+											if (queueCompatibilityChecks && individualNode->isNominalIndividual()) {
+												calcAlgContext->getUsedProcessingDataBox()->getIncrementalCompatibilityCheckingQueue(true)->insertProcessIndiviudal(individualNode);
+											}
+										}
+									}
+								}
+								clearIncExpData->clearNeighbourPropagatedDirectlyChangedList();
+							}
+						}
+					}
+					return false;
+				}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::trackIndividualReferredDependence(cint64 indiID, CCalculationAlgorithmContextBase* calcAlgContext) {
+					return trackIndividualDependence(indiID,true,false,calcAlgContext);
+				}
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::trackIndividualExtendedDependence(cint64 indiID, CCalculationAlgorithmContextBase* calcAlgContext) {
+					return trackIndividualDependence(indiID,false,true,calcAlgContext);
+				}
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::trackIndividualDependence(cint64 indiID, bool indiReferred, bool indiExtended, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (calcAlgContext->getUsedProcessingDataBox()->isIndividualDependenceTrackingRequired()) {
+						CReferredIndividualTrackingVector* indiTrackVec = calcAlgContext->getUsedProcessingDataBox()->getReferredIndividualTrackingVector();
+						if (!indiTrackVec) {
+							CSatisfiableCalculationTask* satCalcTask = calcAlgContext->getSatisfiableCalculationTask();
+							CSatisfiableTaskIndividualDependenceTrackingAdapter* indiDepTrackAdapter = satCalcTask->getSatisfiableTaskIndividualDependenceTrackingAdapter();
+							if (indiDepTrackAdapter) {
+								CIndividualDependenceTrackingMarker* indiDepTrackMarker = indiDepTrackAdapter->getIndividualDependenceTrackingMarker();
+								if (indiDepTrackMarker) {
+									indiDepTrackMarker->setIndividualDependenceTracked();
+								}
+								CIndividualDependenceTrackingObserver* indDepTrackObserver = indiDepTrackAdapter->getIndividualDependenceTrackingObserver();
+								if (indDepTrackObserver) {
+									CIndividualDependenceTracking* extendingIndiDepTrack = indDepTrackObserver->getExtendingIndividualDependenceTracking();
+									CReferredIndividualTrackingVector* extendingRefIndiTrackVec = nullptr;
+									if (extendingIndiDepTrack) {
+										extendingRefIndiTrackVec = dynamic_cast<CReferredIndividualTrackingVector*>(extendingIndiDepTrack);
+									}
+									if (!extendingRefIndiTrackVec) {
+										cint64 trackIndiCount = calcAlgContext->getProcessingDataBox()->getOntology()->getABox()->getIndividualCount();
+										CConsistenceData* consData = calcAlgContext->getProcessingDataBox()->getOntology()->getConsistence()->getConsistenceModelData();
+										if (consData) {
+											CConsistenceTaskData* consTaskData = dynamic_cast<CConsistenceTaskData*>(consData);
+											if (consTaskData) {
+												CSatisfiableCalculationTask* cachedSatTask = consTaskData->getDeterministicSatisfiableTask();
+												if (cachedSatTask) {
+													trackIndiCount = qMax(trackIndiCount,cachedSatTask->getProcessingDataBox()->getIndividualProcessNodeVector()->getItemCount());
+												}
+											}
+										}
+										extendingRefIndiTrackVec = new CReferredIndividualTrackingVector();
+										extendingRefIndiTrackVec->initReferredIndividualTrackingVector(trackIndiCount);
+
+										indiTrackVec = dynamic_cast<CReferredIndividualTrackingVector*>(indDepTrackObserver->installIndividualDependenceTracking(extendingRefIndiTrackVec));
+									} else {
+										indiTrackVec = extendingRefIndiTrackVec;
+									}
+
+									satCalcTask->getProcessingDataBox()->setReferredIndividualTrackingVector(indiTrackVec);
+								}
+							}
+						}
+
+						if (indiTrackVec) {
+
+							//CIndividualProcessNode* indiNode = calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector()->getData(indiID);
+							//if (indiNode->getNominalIndividual()) {
+							//	if (!indiNode->getNominalIndividual()->getIndividualNominalConcept()) {
+							//		bool bug = true;
+							//	}
+							//	if (CIRIName::getRecentIRIName(indiNode->getNominalIndividual()->getIndividualNameLinker()) == "http://www.Department17.University0.edu/SystemsStaff12") {
+							//		bool bug = true;
+							//	}
+							//}
+
+							if (indiExtended) {
+								indiTrackVec->setIndividualReferredAndExtended(indiID);
+							} else if (indiReferred) {
+								indiTrackVec->setIndividualReferred(indiID);
+							}
+							return true;
+						}
+					}
+					return false;
+				}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::isConceptFromPredecessorDependent(CIndividualProcessNode*& individualNode, CConceptDescriptor* conDes, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
 					cint64 ancDepth = individualNode->getIndividualAncestorDepth();
 					bool dependencyToAncestor = false;
@@ -1386,7 +2798,7 @@ namespace Konclude {
 									}  
 										
 									if (indiNode->getIndividualID() <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID() && indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
-										if (!indiNode->isImmediatelyProcessingQueued() && !indiNode->isBlockedReactivationProcessingQueued() && !indiNode->isDeterministicExpandingProcessingQueued() && !indiNode->isRegularDepthProcessingQueued() && !indiNode->isProcessingQueued() && !calcAlgContext->getProcessingDataBox()->getIndividualReactivationProcessingQueue(false)->hasQueuedIndividual(indiNode)) {
+										if (!indiNode->isImmediatelyProcessingQueued() && !indiNode->isBlockedReactivationProcessingQueued() && !indiNode->isDeterministicExpandingProcessingQueued() && !indiNode->isRegularDepthProcessingQueued() && !indiNode->isProcessingQueued() && !calcAlgContext->getProcessingDataBox()->getEarlyIndividualReactivationProcessingQueue(false)->hasQueuedIndividual(indiNode) && !calcAlgContext->getProcessingDataBox()->getLateIndividualReactivationProcessingQueue(false)->hasQueuedIndividual(indiNode)) {
 											mEndTaskDebugIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
 											QFile file(QString("caching-error.txt"));
 											if (file.open(QIODevice::WriteOnly)) {
@@ -1407,6 +2819,70 @@ namespace Konclude {
 							}
 						}
 					}
+				}
+
+
+				void CCalculationTableauCompletionTaskHandleAlgorithm::analyzeABoxCompressionPossibilities(CCalculationAlgorithmContextBase* calcAlgContext) {
+					CProcessingDataBox* dataBox = calcAlgContext->getProcessingDataBox();
+					CIndividualProcessNodeVector* indiProVec = dataBox->getIndividualProcessNodeVector();
+
+					QHash<cint64,cint64> signatureCountHash;
+					QHash<cint64,cint64> signatureLabelSizeHash;
+					QHash<cint64,bool> signatureNonDetHash;
+					QHash<cint64,cint64> signatureFirstIndiNodeHash;
+
+					cint64 indiCount = indiProVec->getItemCount();
+					cint64 nonDetCount = 0;
+					for (cint64 indiID = 0; indiID < indiCount; ++indiID) {
+						CIndividualProcessNode* indiNode = indiProVec->getData(indiID);
+						if (indiNode->isNominalIndividual()) {
+							CIndividual* indiNominal = indiNode->getNominalIndividual();
+							CConcept* nominalConcept = indiNominal->getIndividualNominalConcept();
+							CConceptSetSignature conSetSignature;
+							bool nonDet = false;
+							CReapplyConceptLabelSet* labelSet = indiNode->getReapplyConceptLabelSet(false);
+							if (labelSet) {
+								for (CConceptDescriptor* conDesIt = labelSet->getAddingSortedConceptDescriptionLinker(); conDesIt; conDesIt = conDesIt->getNextConceptDesciptor()) {
+									CConcept* concept = conDesIt->getConcept();
+									bool conNegation = conDesIt->isNegated();
+									if (conDesIt->getDependencyTrackPoint()->getBranchingTag() > 0) {
+										nonDet = true;
+									}
+									if (concept != nominalConcept) {
+										conSetSignature.addConceptSignature(concept,conNegation);
+									}
+								}
+								cint64 signature = conSetSignature.getSignatureValue();
+								cint64& sigCount = signatureCountHash[signature];
+								++sigCount;								
+								if (sigCount <= 1) {
+									signatureLabelSizeHash[signature] = labelSet->getConceptCount();
+									signatureNonDetHash[signature] = nonDet;
+									if (nonDet) {
+										++nonDetCount;
+									}
+									signatureFirstIndiNodeHash[signature] = indiNode->getIndividualID();
+								}
+							}
+						}
+					}
+
+					cout<<"\nNumber of signatures: "<<signatureCountHash.size()<<"\n";
+					for (QHash<cint64,cint64>::const_iterator it = signatureCountHash.constBegin(), itEnd = signatureCountHash.constEnd(); it != itEnd; ++it) {
+						cint64 signature = it.key();
+						cint64 sigCount = it.value();
+						bool nonDet = signatureNonDetHash[signature];
+						cint64 labelSize = signatureLabelSizeHash[signature];
+						cout<<"Count: "<<sigCount<<" \tSize: "<<labelSize<<" \tSignature: "<<signature;
+						if (nonDet) {
+							cout<<" (n)";
+						} else {
+							cout<<" (d)";
+						} 
+						cout<<"\t IndiID: "<<signatureFirstIndiNodeHash[signature]<<"\n";
+						cout<<"\n";
+					}
+					signatureCountHash.clear();
 				}
 
 
@@ -1552,6 +3028,59 @@ namespace Konclude {
 				}
 
 
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::isIndividualNodeBackendCacheSynchronizationProcessingBlocked(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool wasNeigbourExpansionBlocked = individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED);
+					detectIndividualNodeBackendCacheSynchronized(individualNode,calcAlgContext);
+					if (wasNeigbourExpansionBlocked) {
+						if (!individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED)) {
+							if (individualNode->getReverseAssertionRoleLinker() || individualNode->getAssertionRoleLinker()) {
+								calcAlgContext->getProcessingDataBox()->getRoleAssertionProcessingQueue(true)->insertIndiviudalProcessNode(individualNode);
+							}
+						}
+					}
+					return false;
+				}
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::detectIndividualNodeBackendCacheSynchronized(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool synchronized = false;
+					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+						if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED)) {
+							individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED);
+
+							if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND)) {
+								if (!testIndividualNodeBackendCacheSynchronization(individualNode,calcAlgContext)) {
+									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND);
+									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED);
+								}
+							}
+
+							if (!individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND)) {
+
+								if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED)) {
+									if (testIndividualNodeBackendCacheNeighbourExpansionBlockingCritical(individualNode,calcAlgContext)) {
+										individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED);
+									}
+								}
+
+								if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+									if (testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(individualNode,calcAlgContext)) {
+										individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED);
+										individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED);
+									}
+								}
+
+
+								if (individualNode->isCachingLossNodeReactivationInstalled()) {
+									checkIndividualNodesReactivationDueToNominalCachingLoss(individualNode,calcAlgContext);
+								}
+							}
+
+						}
+					}
+					synchronized = individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND);
+					return synchronized;
+				}
 
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::detectIndividualNodeCompletionGraphCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
@@ -1572,6 +3101,14 @@ namespace Konclude {
 								}
 							}
 							if (!indiNodeCompGraphCached) {
+								trackIndividualExtendedDependence(individualNode->getIndividualID(),calcAlgContext);
+
+								if (mConfCollectCachingUpdatedBlockableIndiNodes && individualNode->isBlockableIndividual()) {
+									CXLinker<CIndividualProcessNode*>* updatedCachedIndiNodeLinker = CObjectAllocator< CXLinker<CIndividualProcessNode*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+									updatedCachedIndiNodeLinker->initLinker(individualNode);
+									calcAlgContext->getUsedProcessingDataBox()->addBlockableIndividualNodeUpdatedLinker(updatedCachedIndiNodeLinker);
+								}
+
 								if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
 									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
 									reapplySatisfiableCachedAbsorbedDisjunctionConcepts(individualNode,calcAlgContext);
@@ -1580,12 +3117,17 @@ namespace Konclude {
 								individualNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
 
 								if (individualNode->isCachingLossNodeReactivationInstalled()) {
-									reactivateIndividualNodesDueToNominalCachingLoss(individualNode,calcAlgContext);
+									checkIndividualNodesReactivationDueToNominalCachingLoss(individualNode,calcAlgContext);
 								}
 
 
 								CProcessingDataBox* processingDataBox = calcAlgContext->getProcessingDataBox();
-								CIndividualReactivationProcessingQueue* reactProcQueue = processingDataBox->getIndividualReactivationProcessingQueue(true);
+								CIndividualReactivationProcessingQueue* reactProcQueue = nullptr;
+								if (mConfDelayCompletionGraphCachingReactivation) {
+									reactProcQueue = processingDataBox->getLateIndividualReactivationProcessingQueue(true);
+								} else {
+									reactProcQueue = processingDataBox->getEarlyIndividualReactivationProcessingQueue(true);
+								}
 								bool reactivatedIndis = mCompGraphCacheHandler->getReactivationIndividuals(individualNode,reactProcQueue,calcAlgContext);
 
 							} else {
@@ -1719,6 +3261,36 @@ namespace Konclude {
 						CIndividualProcessNodeVector* indiNodeVec = processingDataBox->getIndividualProcessNodeVector();
 						cint64 indiCount = indiNodeVec->getItemCount();
 						cint64 indiIdx = processingDataBox->getOntology()->getABox()->getIndividualCount();
+						indiIdx = qMax(processingDataBox->getMaxIncrementalPreviousCompletionGraphNodeID(),indiIdx);
+
+						if (mConfCollectCachingUpdatedBlockableIndiNodes) {
+							
+							for (CXLinker<CIndividualProcessNode*>* updatedCachedIndiNodeLinker = processingDataBox->getBlockableIndividualNodeUpdatedLinker(); updatedCachedIndiNodeLinker; updatedCachedIndiNodeLinker = updatedCachedIndiNodeLinker->getNext()) {
+								CIndividualProcessNode* indiNode = updatedCachedIndiNodeLinker->getData();
+								if (indiNode) {
+									indiNode = getUpToDateIndividual(indiIdx,calcAlgContext);
+									if (indiNode && !indiNode->isNominalIndividual()) {
+										if (mConfSatExpCacheWriting && satisfiableExpHandler && !indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION | CIndividualProcessNode::PRFSUCCESSORNOMINALCONNECTION | CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED)) {
+											if (!calcAlgContext->hasCompletionGraphCachedIndividualNodes() || indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED) || indiNode->getIndividualID() > calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
+												indiNode = getLocalizedIndividual(indiNode,false,calcAlgContext);
+												nodeCached |= satisfiableExpHandler->cacheIndividualNodeSatisfiable(indiNode,calcAlgContext);
+											}
+										}
+
+
+
+										if (mConfSaturationSatisfiabilitiyExpansionCacheWriting && saturationExpHandler && !indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION | CIndividualProcessNode::PRFSUCCESSORNEWNOMINALCONNECTION | CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED)) {
+											if (!calcAlgContext->hasCompletionGraphCachedIndividualNodes() || indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED) || indiNode->getIndividualID() > calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
+												nodeCached |= saturationExpHandler->tryNodeSatisfiableCaching(indiNode,calcAlgContext);
+											}
+										}
+									}
+								}
+
+							}
+							indiIdx = qMax(calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()+1,indiIdx);
+						}
+
 						for (; indiIdx < indiCount; ++indiIdx) {
 							CIndividualProcessNode* indiNode = getUpToDateIndividual(indiIdx,calcAlgContext);
 							if (indiNode) {
@@ -2486,6 +4058,7 @@ namespace Konclude {
 						CIndividualProcessNode* locBlockerIndividualNode = getLocalizedIndividual(blockerIndividualNode,true,calcAlgContext);
 						CBlockingFollowSet* followSet = locBlockerIndividualNode->getBlockingFollowSet(true);
 						followSet->insert(individualNode->getIndividualID());
+						individualNode->setFollowingIndividualNode(locBlockerIndividualNode);
 						return true;
 					}
 					return false;
@@ -2493,6 +4066,7 @@ namespace Konclude {
 
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::removeReusingBlockerFollowing(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					individualNode->setFollowingIndividualNode(nullptr);
 					CReusingIndividualNodeConceptExpansionData* reusingData = individualNode->getReusingIndividualNodeConceptExpansionData(false);
 					if (reusingData) {
 						CIndividualProcessNode* blockerIndividualNode = reusingData->getBlockerIndividualNode();
@@ -2653,6 +4227,7 @@ namespace Konclude {
 						CIndividualProcessNode* locBlockerIndividualNode = getLocalizedIndividual(blockerIndividualNode,true,calcAlgContext);
 						CBlockingFollowSet* sigFollowSet = locBlockerIndividualNode->getBlockingFollowSet(true);
 						sigFollowSet->insert(blockingIndividualNode->getIndividualID());
+						blockingIndividualNode->setFollowingIndividualNode(locBlockerIndividualNode);
 						return true;
 					}
 					return false;
@@ -2660,6 +4235,7 @@ namespace Konclude {
 
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::removeSignatureBlockingBlockerFollowing(CIndividualProcessNode*& blockingIndividualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					blockingIndividualNode->setFollowingIndividualNode(nullptr);
 					CSignatureBlockingIndividualNodeConceptExpansionData* sigBlockingData = blockingIndividualNode->getSignatureBlockingIndividualNodeConceptExpansionData(false);
 					if (sigBlockingData) {
 						CIndividualProcessNode* blockerIndividualNode = sigBlockingData->getBlockerIndividualNode();
@@ -3950,6 +5526,7 @@ namespace Konclude {
 
 					//}
 
+
 					KONCLUCE_TASK_ALGORITHM_TIME_MEASURE_INSTRUCTION(mTimerBacktracing.start());
 
 					//mEndTaskDebugIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
@@ -3963,6 +5540,13 @@ namespace Konclude {
 							mBeginBacktrackingClashString = generateDebugTrackedClashedDescriptorSummaryString(trackedClashDescriptors,calcAlgContext);
 						}
 					)
+
+					for (CTrackedClashedDescriptor* trackedClashDesIt = trackedClashDescriptors; trackedClashDesIt; trackedClashDesIt = trackedClashDesIt->getNextDescriptor()) {
+						if (trackedClashDesIt->getAppropriatedIndividualID() <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
+							trackIndividualExtendedDependence(trackedClashDesIt->getAppropriatedIndividualID(),calcAlgContext);
+						}
+					}
+
 
 					CPROCESSINGSET<CTrackedClashedDescriptorHasher> clashedSet(calcAlgContext->getUsedTaskProcessorContext());
 					CTrackedClashedDependencyLine trackingLine(&clashedSet);
@@ -4007,7 +5591,7 @@ namespace Konclude {
 						CConcept* concept = adapter->getTestingConcept();
 						if (concept && adapter->hasExtractionFlags(CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTSUBSUMERSROOTNODE)) {
 							CUnsatisfiableCacheHandler* unsatCacheHandler = calcAlgContext->getUsedUnsatisfiableCacheHandler();
-							if (unsatCacheHandler && mConfWriteUnsatCaching) {
+							if (unsatCacheHandler && mConfTestedConceptWriteUnsatCaching) {
 								unsatCacheHandler->writeUnsatisfiableClashedConcept(concept,calcAlgContext);
 							}
 
@@ -4021,7 +5605,7 @@ namespace Konclude {
 					CProcessingDataBox* processingDataBox = calcAlgContext->getProcessingDataBox();
 					CIndividualProcessNode* constIndiNode = processingDataBox->getConstructedIndividualNode();
 					if (!processingDataBox->hasMultipleConstructionIndividualNodes() && constIndiNode && constIndiNode->isNominalIndividual()) {
-						CXSortedNegLinker<CConcept*>* initConLinker = constIndiNode->getInitializingConceptLinkerIt();
+						CXSortedNegLinker<CConcept*>* initConLinker = constIndiNode->getInitializingConceptLinker();
 						CIndividual* individual = constIndiNode->getNominalIndividual();
 						if (initConLinker && !initConLinker->hasNext()) {
 							CConcept* initConcept = initConLinker->getData();
@@ -4230,6 +5814,11 @@ namespace Konclude {
 
 					cancellationTask(branchAccTask,calcAlgContext);
 
+					//cint64 branchDiff = calcAlgContext->getSatisfiableCalculationTask()->getProcessingDataBox()->getProcessContext()->getProcessTagger()->getCurrentBranchingTag() - branchAccTask->getProcessingDataBox()->getProcessContext()->getProcessTagger()->getCurrentBranchingTag();
+					//if (branchDiff > 0) {
+					//	mOverJumpedNonDeterministicDecisionCount += branchDiff;
+					//}
+
 					if (nonDetDepTrackPoint->isClashedOrIrelevantBranch()) {
 						// perhaps clash set by another thread
 						STATINC(CLASHEDBACKTRACKGNONDETALREADYCLASHFAILEDCOUNT,calcAlgContext);
@@ -4294,6 +5883,9 @@ namespace Konclude {
 					// test whether all branches has clash descriptors
 					bool otherOpenedTrackPoints = nonDetDependencyNode->hasOtherOpenedDependencyTrackingPoints(nonDetDepTrackPoint);
 					if (!otherOpenedTrackPoints) {
+
+						++mRelevantNonDeterministicDecisionCount;
+
 						// collect clash descriptors of all branches and add dependency of closed dependency node
 						STATINC(CLASHEDBACKTRACKGNONDETCLOSEDCOUNT,calcAlgContext);
 						CTrackedClashedDescriptor* collectedTrackedClashedDes = getCollectedFilteredClashedDescriptorsFromBranch(trackedClashedDes,nonDetDependencyNode,trackingLine,calcAlgContext);
@@ -4936,9 +6528,12 @@ namespace Konclude {
 					indi = depNode->getAppropriateIndividualNode();
 					//KONCLUDE_ASSERT_X(indi,"getCoresspondingIndividualNodeFromDependency","individual node not available");
 					if (indi) {
-						indi = getUpToDateIndividual(indi,calcAlgContext);
-						if (indi->hasMergedIntoIndividualNodeID()) {
-							indi = getCorrectedNominalIndividualNode(indi->getMergedIntoIndividualNodeID(),calcAlgContext);
+						CIndividualProcessNode* updIndi = getUpToDateIndividual(indi,calcAlgContext);
+						if (updIndi) {
+							if (updIndi->hasMergedIntoIndividualNodeID()) {
+								updIndi = getCorrectedNominalIndividualNode(updIndi->getMergedIntoIndividualNodeID(),calcAlgContext);
+							}
+							indi = updIndi;
 						}
 					}
 					return indi;
@@ -4960,6 +6555,32 @@ namespace Konclude {
 				}
 
 
+
+				QString CCalculationTableauCompletionTaskHandleAlgorithm::generateDebugIncrementalExpansionString(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext) {
+					QString incExpString;
+					CIndividualNodeIncrementalExpansionData* incExpData = indi->getIncrementalExpansionData(false);
+					if (incExpData) {
+						QStringList statusStringList;
+						if (incExpData->isPreviousCompletionGraphCompatible()) {
+							statusStringList += QString("compatible");
+						}
+						if (incExpData->hasDirectlyChangedNeighbourConnection()) {
+							statusStringList += QString("directly-changed-connection");
+						}
+						if (incExpData->isDirectlyChanged()) {
+							statusStringList += QString("directly-changed-node");
+						}
+						QString dirChangedNeighConnNodeID = "-";
+						if (incExpData->getDirectlyChangedNeighbourConnectionNode()) {
+							dirChangedNeighConnNodeID = QString("%1").arg(incExpData->getDirectlyChangedNeighbourConnectionNode()->getIndividualID());
+						}
+						double expansionPriority = incExpData->getExpansionPriority();
+						incExpString += QString("Incremental-Expansion-Status: %1\r\n Directly-Changed-Connection-Neighbour: %2\r\n Expansion-Priority: %3").arg(statusStringList.join(", ")).arg(dirChangedNeighConnNodeID).arg(expansionPriority);
+					}
+					return incExpString;
+				}
+
+
 				QString CCalculationTableauCompletionTaskHandleAlgorithm::generateDebugIndiStatusString(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext) {
 					QStringList statusStringList;
 					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION)) {
@@ -4978,7 +6599,7 @@ namespace Konclude {
 						statusStringList.append("ancestor-satisfiable-cached");
 					}
 					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFDIRECTBLOCKED)) {
-						cint64 blockerIndiID = indi->mDebugBlockerIndi->getIndividualID();
+						cint64 blockerIndiID = indi->getBlockerIndividualNode()->getIndividualID();
 						cint64 lastConTag = indi->mDebugBlockerLastConceptDes->getConceptTag();
 						statusStringList.append(QString("direct-blocked by %1 (%2)").arg(blockerIndiID).arg(lastConTag));
 					}
@@ -5029,6 +6650,21 @@ namespace Konclude {
 					}
 					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCONCRETEDATAINDINODE)) {
 						statusStringList.append("data-node");
+					}
+					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND)) {
+						statusStringList.append("backend-synchronization");
+					}
+					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED)) {
+						statusStringList.append("backend-synchronized-neighbour-expansion-blocked");
+					}
+					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+						statusStringList.append("backend-synchronized-successor-expansion-blocked");
+					}
+					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANDING)) {
+						statusStringList.append("incremental-expansion");
+					}
+					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED)) {
+						statusStringList.append("incremental-expansion-compatibility-checking-due-to-modification");
 					}
 					if (indi->isNominalIndividual()) {
 						statusStringList.append("nominal");
@@ -5140,6 +6776,10 @@ namespace Konclude {
 									depTypeString = QString("DATATYPETRIGGER");
 									break;
 																					}
+								case CDependencyNode::DNTROLEASSERTIONDEPENDENCY: {
+									depTypeString = QString("ROLEASSERTION");
+									break;
+																					}
 
 						}
 
@@ -5238,7 +6878,7 @@ namespace Konclude {
 					cint64 indiCount = indiVec->getItemCount();
 					QStringList indiStringList;
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi) {
 							CIndividualProcessNode* ancIndi = getAncestorIndividual(indi,calcAlgContext);
 							CReapplyConceptLabelSet* conSet = indi->getReapplyConceptLabelSet(false);
@@ -5263,35 +6903,50 @@ namespace Konclude {
 									indiString += QString("SuccessorDependentNominals: %1<br>\r\n").arg(depNomString);
 								}
 
+								QString incExpString = generateDebugIncrementalExpansionString(indi,calcAlgContext);
+								if (!incExpString.isEmpty()) {
+									indiString += QString("%1<br>\r\n").arg(incExpString);
+								}
+
 
 								QString conSetString(conSetStringList.join("<br>"));
-								indiString += QString("{%1} ").arg(conSetString);
+								indiString += QString("$%1$<br>{%2} ").arg(conSet->getConceptSignatureValue()).arg(conSetString);
 								indiStringList.append(indiString);
 							}
+						} else {
+							indiStringList.append(QString("[ %1, --unused--]<br>").arg(i));
 						}
 					}
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi && indi->hasMergedIntoIndividualNodeID()) {
 							cint64 mergedIntoID = indi->getMergedIntoIndividualNodeID();
 							QString meIndiString = indiStringList.value(mergedIntoID);
 							meIndiString += QString("+%1").arg(i);
-							indiStringList.replace(mergedIntoID,meIndiString);
+							if (mergedIntoID < indiStringList.count()) {
+								indiStringList.replace(mergedIntoID,meIndiString);
+							} else {
+								LOG(ERROR,"::Konclude::Reasoner::Kernel::Algorithm::TableauCompletionAlgorihm",logTr("Merging of individual %1 into %2 cannot be correctly resolved for completion graph printing.").arg(i).arg(mergedIntoID),this);
+							}
 						}
 					}
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi && indi->hasMergedIntoIndividualNodeID()) {
 							cint64 mergedIntoID = indi->getMergedIntoIndividualNodeID();
 							QString indiString = indiStringList.value(i);
 							indiString += QString(" -> %1").arg(mergedIntoID);
-							indiStringList.replace(i,indiString);
+							if (i < indiStringList.count()) {
+								indiStringList.replace(i,indiString);
+							} else {
+								LOG(ERROR,"::Konclude::Reasoner::Kernel::Algorithm::TableauCompletionAlgorihm",logTr("Merging of individual %1 into %2 cannot be correctly resolved for completion graph printing.").arg(i).arg(mergedIntoID),this);
+							}
 						}
 					}
 
 					cint64 succInsertions = 0;
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi) {
 							CSuccessorIterator succIt = indi->getSuccessorIterator();
 							while (succIt.hasNext()) {
@@ -5337,7 +6992,7 @@ namespace Konclude {
 					cint64 indiCount = indiVec->getItemCount();
 					QStringList indiStringList;
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi) {
 							CIndividualProcessNode* ancIndi = getAncestorIndividual(indi,calcAlgContext);
 							CReapplyConceptLabelSet* conSet = indi->getReapplyConceptLabelSet(false);
@@ -5370,7 +7025,7 @@ namespace Konclude {
 						}
 					}
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi && indi->hasMergedIntoIndividualNodeID()) {
 							cint64 mergedIntoID = indi->getMergedIntoIndividualNodeID();
 							QString meIndiString = indiStringList.value(mergedIntoID);
@@ -5379,7 +7034,7 @@ namespace Konclude {
 						}
 					}
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi && indi->hasMergedIntoIndividualNodeID()) {
 							cint64 mergedIntoID = indi->getMergedIntoIndividualNodeID();
 							QString indiString = indiStringList.value(i);
@@ -5390,7 +7045,7 @@ namespace Konclude {
 
 					cint64 succInsertions = 0;
 					for (cint64 i = 0; i < indiCount; ++i) {
-						CIndividualProcessNode* indi = getUpToDateIndividual(i,calcAlgContext);
+						CIndividualProcessNode* indi = getAvailableUpToDateIndividual(i,calcAlgContext);
 						if (indi) {
 							CSuccessorIterator succIt = indi->getSuccessorIterator();
 							while (succIt.hasNext()) {
@@ -5418,9 +7073,11 @@ namespace Konclude {
 				}
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::initialNodeInitialize(CIndividualProcessNode*& indiProcNode, bool allowPreprocess, CCalculationAlgorithmContextBase* calcAlgContext) {
-					CConceptAssertionLinker* assertionConceptLinker = indiProcNode->getAssertionConceptLinkerIt();
-					CRoleAssertionLinker* assertionRoleLinkerIt = indiProcNode->getAssertionRoleLinkerIt();
-					CXSortedNegLinker<CConcept*>* initConceptLinker = indiProcNode->getProcessInitializingConceptLinkerIt();
+					CConceptAssertionLinker* assertionConceptLinker = indiProcNode->getAssertionConceptLinker();
+					CRoleAssertionLinker* assertionRoleLinkerIt = indiProcNode->getAssertionRoleLinker();
+					CReverseRoleAssertionLinker* reverseAssertionRoleLinkerIt = indiProcNode->getReverseAssertionRoleLinker();
+					CAdditionalProcessRoleAssertionsLinker* addProcRoleAssertionsLinker = indiProcNode->getAdditionalRoleAssertionsLinker();
+					CXSortedNegLinker<CConcept*>* initConceptLinker = indiProcNode->getProcessInitializingConceptLinker();
 					CReapplyConceptLabelSet* conSet = indiProcNode->getReapplyConceptLabelSet(false);
 
 					bool initialized = false;
@@ -5450,18 +7107,48 @@ namespace Konclude {
 					}
 
 					if (assertionConceptLinker) {
+
+
+
 						CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
-						addConceptsToIndividual(assertionConceptLinker,false,indiProcNode,depTrackPoint,allowPreprocess,true,nullptr,calcAlgContext);
-						indiProcNode->clearAssertionConcepts();
-						initialized = true;
-						for (CConceptAssertionLinker* assertionConceptLinkerIt = assertionConceptLinker; assertionConceptLinkerIt; assertionConceptLinkerIt = assertionConceptLinkerIt->getNext()) {
-							CConcept* assertionConcept = assertionConceptLinkerIt->getData();
-							bool assertionConceptNegation = assertionConceptLinkerIt->isNegated();
-							if (assertionConcept->getOperatorCode() != CCNOMINAL) {
-								assInitSignature.addConceptSignature(assertionConcept,assertionConceptNegation);
-								assInitSignatureBuilded = true;
+
+						if (!mOptIncrementalCompatibleExpansion && loadIndividualNodeDataFromBackendCache(indiProcNode,calcAlgContext)) {
+
+							CIndividual* nominalIndi = indiProcNode->getNominalIndividual();
+							if (nominalIndi) {
+								CConcept* nominalConcept = nominalIndi->getIndividualNominalConcept();
+								if (nominalConcept) {
+									addConceptToIndividual(nominalConcept,false,indiProcNode,depTrackPoint,true,true,calcAlgContext);
+								}
 							}
+							tryEstablishExpansionBlockingWithBackendCacheSynchronisation(indiProcNode,calcAlgContext);
+
+						} else {
+
+							addConceptsToIndividual(assertionConceptLinker,false,indiProcNode,depTrackPoint,allowPreprocess,true,nullptr,calcAlgContext);
+							for (CConceptAssertionLinker* assertionConceptLinkerIt = assertionConceptLinker; assertionConceptLinkerIt; assertionConceptLinkerIt = assertionConceptLinkerIt->getNext()) {
+								CConcept* assertionConcept = assertionConceptLinkerIt->getData();
+								bool assertionConceptNegation = assertionConceptLinkerIt->isNegated();
+								if (assertionConcept->getOperatorCode() != CCNOMINAL) {
+									assInitSignature.addConceptSignature(assertionConcept,assertionConceptNegation);
+									assInitSignatureBuilded = true;
+								}
+							}
+
+							CIndividual* nominalIndi = indiProcNode->getNominalIndividual();
+							if (nominalIndi) {
+								CConcept* nominalConcept = nominalIndi->getIndividualNominalConcept();
+								if (nominalConcept) {
+									addConceptToIndividual(nominalConcept,false,indiProcNode,depTrackPoint,true,true,calcAlgContext);
+								}
+							}
+
+
 						}
+
+						initialized = true;
+						indiProcNode->clearAssertionConcepts();
+
 					}
 					if (initConceptLinker) {
 
@@ -5471,7 +7158,9 @@ namespace Konclude {
 						}
 
 						CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
-						addConceptsToIndividual(initConceptLinker,false,indiProcNode,depTrackPoint,allowPreprocess,true,nullptr,calcAlgContext);
+						if (!mConfExpandCreatedSuccessorsFromSaturation || !tryInitalizingFromSaturatedData(indiProcNode,initConceptLinker,depTrackPoint,allowPreprocess,calcAlgContext)) {
+							addConceptsToIndividual(initConceptLinker,false,indiProcNode,depTrackPoint,allowPreprocess,true,nullptr,calcAlgContext);
+						}
 						indiProcNode->clearProcessInitializingConcepts();
 						initialized = true;
 						for (CXSortedNegLinker<CConcept*>* initConceptLinkerIt = initConceptLinker; initConceptLinkerIt; initConceptLinkerIt = initConceptLinkerIt->getNext()) {
@@ -5483,20 +7172,47 @@ namespace Konclude {
 							}
 						}
 					}
-					if (assertionRoleLinkerIt) {
 
-						if (allowPreprocess || mCurrentRecProcDepth < mCurrentRecProcDepthLimit) {
-							CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
-							indiProcNode->clearAssertionRoles();
-							while (assertionRoleLinkerIt) {
-								addRoleAssertion(indiProcNode,assertionRoleLinkerIt,depTrackPoint,calcAlgContext);
-								assertionRoleLinkerIt = assertionRoleLinkerIt->getNext();
+					if (assertionRoleLinkerIt || reverseAssertionRoleLinkerIt || addProcRoleAssertionsLinker) {	
+
+						detectIndividualNodeBackendCacheSynchronized(indiProcNode,calcAlgContext);
+
+						if (!indiProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED)) {
+
+							if (allowPreprocess || mCurrentRecProcDepth < mCurrentRecProcDepthLimit) {
+								indiProcNode->clearAssertionRoles();
+								indiProcNode->clearReverseAssertionRoles();
+								indiProcNode->clearAdditionalRoleAssertionsLinker();
+								indiProcNode->clearAdditionalRoleAssertionsLinker();
+
+								CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
+								while (assertionRoleLinkerIt) {
+									addRoleAssertion(indiProcNode,assertionRoleLinkerIt,depTrackPoint,calcAlgContext);
+									assertionRoleLinkerIt = assertionRoleLinkerIt->getNext();
+								}
+								for (CAdditionalProcessRoleAssertionsLinker* addProcRoleAssertionsLinkerIt = addProcRoleAssertionsLinker; addProcRoleAssertionsLinkerIt; addProcRoleAssertionsLinkerIt = addProcRoleAssertionsLinkerIt->getNext()) {
+									if (addProcRoleAssertionsLinkerIt->getRoleAssertionLinker()) {
+										addRoleAssertion(indiProcNode,addProcRoleAssertionsLinkerIt->getRoleAssertionLinker(),depTrackPoint,calcAlgContext);
+									}
+								}
+								indiProcNode->setRoleAssertionsInitialized(true);
+								while (reverseAssertionRoleLinkerIt) {
+									addReverseRoleAssertion(indiProcNode,reverseAssertionRoleLinkerIt,depTrackPoint,calcAlgContext);
+									reverseAssertionRoleLinkerIt = reverseAssertionRoleLinkerIt->getNext();
+								}
+								for (CAdditionalProcessRoleAssertionsLinker* addProcRoleAssertionsLinkerIt = addProcRoleAssertionsLinker; addProcRoleAssertionsLinkerIt; addProcRoleAssertionsLinkerIt = addProcRoleAssertionsLinkerIt->getNext()) {
+									if (addProcRoleAssertionsLinkerIt->getReverseRoleAssertionLinker()) {
+										addReverseRoleAssertion(indiProcNode,addProcRoleAssertionsLinkerIt->getReverseRoleAssertionLinker(),depTrackPoint,calcAlgContext);
+									}
+								}
+								indiProcNode->setReverseRoleAssertionsInitialized(true);
+
+							} else {
+								calcAlgContext->getProcessingDataBox()->getRoleAssertionProcessingQueue(true)->insertIndiviudalProcessNode(indiProcNode);
 							}
-						} else {
-							calcAlgContext->getProcessingDataBox()->getRoleAssertionProcessingQueue(true)->insertIndiviudalProcessNode(indiProcNode);
+							initialized = true;
 						}
 
-						initialized = true;
 					}
 
 					if (assInitSignatureBuilded && mOptDetExpPreporcessing) {
@@ -5509,7 +7225,7 @@ namespace Konclude {
 						sigNomDelCandHash->insertSignatureBlockingCandidate(assInitSigValue,indiProcNode);
 					}
 
-					if (mConfAddCachedComputedConsequences && indiProcNode->isNominalIndividual()) {
+					if (mConfAddCachedComputedConsequences && indiProcNode->isNominalIndividual() && !mOptIncrementalExpansion) {
 						addCachedComputedTypes(indiProcNode,calcAlgContext);
 					}
 
@@ -5555,6 +7271,8 @@ namespace Konclude {
 						indiProcNode->setBlockedReactivationProcessingQueued(false);
 					} else if (mIndiNodeFromQueueType == INQT_DELAYEDNOMINAL) {
 						indiProcNode->setDelayedNominalProcessingQueued(false);
+					} else if (mIndiNodeFromQueueType == INQT_BACKENDSYNCRETEST) {
+						indiProcNode->setBackendSynchronRetestProcessingQueued(false);
 					}
 
 
@@ -5696,7 +7414,7 @@ namespace Konclude {
 
 						if (reuseCompGraphCacheEntry) {
 							STATINC(COMPLETIONGRAPHREUSECACHERETRIEVALSUCCESSCOUNT,calcAlgContext);
-							CXSortedNegLinker<CConcept*>* initConceptLinkerIt = processIndi->getProcessInitializingConceptLinkerIt();
+							CXSortedNegLinker<CConcept*>* initConceptLinkerIt = processIndi->getProcessInitializingConceptLinker();
 							CTaskProcessorContext* processorContext = calcAlgContext->getUsedTaskProcessorContext();
 							CSatisfiableCalculationTask* reuseSatCalcTask = (CSatisfiableCalculationTask*)reuseCompGraphCacheEntry->getJobInstantiation();
 							CProcessingDataBox* reuseProcessingDataBox = reuseSatCalcTask->getProcessingDataBox();
@@ -5927,6 +7645,9 @@ namespace Konclude {
 					}
 
 					if (needsIndividualNodeExpansionBlockingTest(conProcDes,indiProcNode,calcAlgContext)) {
+						if (isIndividualNodeBackendCacheSynchronizationProcessingBlocked(indiProcNode,calcAlgContext)) {
+							return false;
+						}
 						if (isIndividualNodeExpansionBlocked(indiProcNode,calcAlgContext)) {
 							return false;
 						}
@@ -6418,6 +8139,14 @@ namespace Konclude {
 					return depNode;
 				}
 
+				CROLEASSERTIONDependencyNode* CCalculationTableauCompletionTaskHandleAlgorithm::createROLEASSERTIONDependency(CDependencyTrackPoint*& valueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CROLEASSERTIONDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = calcAlgContext->getUsedDependencyFactory()->createROLEASSERTIONDependency(valueDepTrackPoint,processIndi,prevDepTrackPoint,nominalDepTrackPoint,calcAlgContext);
+					}
+					return depNode;
+				}
+
 				CNEGVALUEDependencyNode* CCalculationTableauCompletionTaskHandleAlgorithm::createNEGVALUEDependency(CDependencyTrackPoint*& negValueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CNEGVALUEDependencyNode* depNode = nullptr;
 					if (mConfBuildDependencies) {
@@ -6449,6 +8178,16 @@ namespace Konclude {
 					}
 					return depNode;
 				}
+
+
+				CMERGEDIndividualDependencyNode* CCalculationTableauCompletionTaskHandleAlgorithm::createMERGEDINDIVIDUALDependency(CDependencyTrackPoint*& mergedIndividualContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* individualPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CMERGEDIndividualDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = calcAlgContext->getUsedDependencyFactory()->createMERGEDINDIVIDUALDependency(mergedIndividualContinueDepTrackPoint,processIndi,mergePrevDepTrackPoint,individualPrevDepTrackPoint,calcAlgContext);
+					}
+					return depNode;
+				}
+
 
 				CFUNCTIONALDependencyNode* CCalculationTableauCompletionTaskHandleAlgorithm::createFUNCTIONALDependency(CDependencyTrackPoint*& functionalContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* prevLink1DependencyTrackPoint, CDependencyTrackPoint* prevLink2DependencyTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CFUNCTIONALDependencyNode* depNode = nullptr;
@@ -10298,12 +12037,20 @@ namespace Konclude {
 					CDependencyTrackPoint* depTrackPoint = conProDes->getDependencyTrackPoint();
 					CSortedNegLinker<CConcept*>* conceptOpLinkerIt = concept->getOperandList();
 
+
+					CIndividualSaturationProcessNode* saturationNode = getCreationSuccessorSaturationNode(processIndi,conDes,calcAlgContext);
+
 					if (!conceptOpLinkerIt->hasNext())  {
-						if (!conceptOpLinkerIt->isNegated()^negate) {
+						if (!conceptOpLinkerIt->isNegated()^negate || (saturationNode && saturationNode->hasNominalIntegrated())) {
 							CConcept* nominalConcept = conceptOpLinkerIt->getData();
-							if (nominalConcept->getOperatorCode() == CCNOMINAL) {
+							if (nominalConcept->getOperatorCode() == CCNOMINAL || (saturationNode && saturationNode->hasNominalIntegrated())) {
 								STATINC(VALUERULEAPPLICATIONCOUNT,calcAlgContext);
 								CIndividual* indi = nominalConcept->getNominalIndividual();
+								bool saturationIntegrateNominal = false;
+								if (nominalConcept->getOperatorCode() != CCNOMINAL && saturationNode && saturationNode->hasNominalIntegrated()) {
+									indi = saturationNode->getIntegratedNominalIndividual();
+									saturationIntegrateNominal = true;
+								}
 								CIndividualProcessNode* nominalIndi = getCorrectedNominalIndividualNode(indi->getIndividualID(),calcAlgContext);
 								CIndividualProcessNode* locNominalIndi = getLocalizedIndividual(nominalIndi,false,calcAlgContext);
 								// force initialized
@@ -10323,6 +12070,12 @@ namespace Konclude {
 									CDependencyTrackPoint* nextDepTrackPoint = nullptr;
 									CVALUEDependencyNode* valueDepNode = createVALUEDependency(nextDepTrackPoint,processIndi,conDes,depTrackPoint,nominalConDepTrackPoint,calcAlgContext);
 
+									if (saturationIntegrateNominal) {
+										if (!locNominalIndi->getReapplyConceptLabelSet(false)->containsConcept(conceptOpLinkerIt->getData(),conceptOpLinkerIt->isNegated()^negate)) {
+											addConceptsToIndividual(conceptOpLinkerIt,negate,locNominalIndi,nextDepTrackPoint,true,true,nullptr,calcAlgContext);
+										}
+									}
+
 									// create link
 									createNewIndividualsLinksReapplyed(processIndi,locNominalIndi,role->getIndirectSuperRoleList(),role,nextDepTrackPoint,true,calcAlgContext);
 									
@@ -10334,6 +12087,15 @@ namespace Konclude {
 									propagateIndividualNodeModified(locNominalIndi,calcAlgContext);
 
 									addIndividualToProcessingQueue(locNominalIndi,calcAlgContext);
+
+								} else {
+									if (saturationIntegrateNominal) {
+										if (!locNominalIndi->getReapplyConceptLabelSet(false)->containsConcept(conceptOpLinkerIt->getData(),conceptOpLinkerIt->isNegated()^negate)) {
+											CDependencyTrackPoint* nextDepTrackPoint = nullptr;
+											CVALUEDependencyNode* valueDepNode = createVALUEDependency(nextDepTrackPoint,processIndi,conDes,depTrackPoint,nominalConDepTrackPoint,calcAlgContext);
+											addConceptsToIndividual(conceptOpLinkerIt,negate,locNominalIndi,nextDepTrackPoint,true,true,nullptr,calcAlgContext);
+										}
+									}
 
 								}
 								return;
@@ -10361,9 +12123,9 @@ namespace Konclude {
 
 
 						// generate new role successor
-						CIndividualProcessNode* succIndi = tryExtendFunctionalSuccessorIndividual(processIndi,conDes,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,negate,depTrackPoint,calcAlgContext);
+						CIndividualProcessNode* succIndi = tryExtendFunctionalSuccessorIndividual(processIndi,conDes,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,negate,depTrackPoint,saturationNode,calcAlgContext);
 						if (!succIndi) {
-							succIndi = createSuccessorIndividual(processIndi,conDes,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,negate,depTrackPoint,calcAlgContext);
+							succIndi = createSuccessorIndividual(processIndi,conDes,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,negate,depTrackPoint,saturationNode,calcAlgContext);
 							if (processIndi->isNominalIndividual() && processIndi->getIndividualNominalLevel() <= 0) {
 								succIndi->setExtendedQueueProcessing(true);
 							}
@@ -10415,40 +12177,99 @@ namespace Konclude {
 
 
 
+				void CCalculationTableauCompletionTaskHandleAlgorithm::addReverseRoleAssertion(CIndividualProcessNode*& processIndi, CReverseRoleAssertionLinker* reverseRoleAssertionLinker, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
+					STATINC(VALUERULEAPPLICATIONCOUNT,calcAlgContext);
+					CRole* role = reverseRoleAssertionLinker->getRole();
+					CIndividual* indi = reverseRoleAssertionLinker->getIndividual();
+
+					if (indi) {
+						if (!mOptIncrementalCompatibleExpansion || isNominalIndividualNodeAvailable(indi->getIndividualID(),calcAlgContext)) {
+							CIndividualProcessNode* nominalIndi = getCorrectedNominalIndividualNode(indi->getIndividualID(),calcAlgContext);
+							if (nominalIndi && (!nominalIndi->hasRoleAssertionsInitialized() || processIndi->getRoleAssertionCreationID() > nominalIndi->getRoleAssertionCreationID())) {
+								CIndividualProcessNode* locNominalIndi = getLocalizedIndividual(nominalIndi,false,calcAlgContext);
+
+								if (locNominalIndi != processIndi) {
+									locNominalIndi = getForcedInitializedNominalIndividualNode(locNominalIndi,calcAlgContext);
+								}
+
+								CDependencyTrackPoint* nominalConDepTrackPoint = nullptr;
+								if (indi->getIndividualID() != locNominalIndi->getIndividualID()) {
+									nominalConDepTrackPoint = locNominalIndi->getIndividualMergingHash(false)->value(indi);
+								}
+
+
+								if (!hasIndividualsLink(locNominalIndi,processIndi,role,true,calcAlgContext)) {
+									// create dependency
+									CDependencyTrackPoint* nextDepTrackPoint = nullptr;
+									CROLEASSERTIONDependencyNode* roleAssDepNode = createROLEASSERTIONDependency(nextDepTrackPoint,processIndi,depTrackPoint,nominalConDepTrackPoint,calcAlgContext);
+
+									// create link
+									createNewIndividualsLinksReapplyed(locNominalIndi,processIndi,role->getIndirectSuperRoleList(),role,nextDepTrackPoint,true,calcAlgContext);
+
+									propagateIndividualNodeModified(locNominalIndi,calcAlgContext);
+									addIndividualToProcessingQueue(locNominalIndi,calcAlgContext);
+								}
+							}
+						} else if (mOptIncrementalCompatibleExpansion) {
+
+							for (CSortedNegLinker<CRole*>* roleLinkerIt = role->getIndirectSuperRoleList(); roleLinkerIt; roleLinkerIt = roleLinkerIt->getNext()) {
+								CRole* role = roleLinkerIt->getData();
+								bool invRole = roleLinkerIt->isNegated();
+								CSortedNegLinker<CConcept*>* domainConLinkerIt = role->getDomainRangeConceptList(!invRole);
+								if (domainConLinkerIt) {
+									addConceptsToIndividual(domainConLinkerIt,false,processIndi,depTrackPoint,true,false,nullptr,calcAlgContext);
+								}
+							}
+
+						}
+					}
+				}
+
+
+
 				void CCalculationTableauCompletionTaskHandleAlgorithm::addRoleAssertion(CIndividualProcessNode*& processIndi, CRoleAssertionLinker* roleAssertionLinker, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
 					STATINC(VALUERULEAPPLICATIONCOUNT,calcAlgContext);
 					CRole* role = roleAssertionLinker->getRole();
 					CIndividual* indi = roleAssertionLinker->getIndividual();
 
 					if (indi) {
-						CIndividualProcessNode* nominalIndi = getCorrectedNominalIndividualNode(indi->getIndividualID(),calcAlgContext);
-						CIndividualProcessNode* locNominalIndi = getLocalizedIndividual(nominalIndi,false,calcAlgContext);
+						if (!mOptIncrementalCompatibleExpansion || isNominalIndividualNodeAvailable(indi->getIndividualID(),calcAlgContext)) {
+							CIndividualProcessNode* nominalIndi = getCorrectedNominalIndividualNode(indi->getIndividualID(),calcAlgContext);
+							if (nominalIndi && (!nominalIndi->hasReverseRoleAssertionsInitialized() || processIndi->getRoleAssertionCreationID() > nominalIndi->getRoleAssertionCreationID())) {
+								CIndividualProcessNode* locNominalIndi = getLocalizedIndividual(nominalIndi,false,calcAlgContext);
 
-						if (locNominalIndi != processIndi) {
-							locNominalIndi = getForcedInitializedNominalIndividualNode(locNominalIndi,calcAlgContext);
-						}
+								if (locNominalIndi != processIndi) {
+									locNominalIndi = getForcedInitializedNominalIndividualNode(locNominalIndi,calcAlgContext);
+								}
 
-						CReapplyConceptLabelSet* locNominalNodeConSet = locNominalIndi->getReapplyConceptLabelSet(true);
-						CConcept* nominalConcept = indi->getIndividualNominalConcept();
-						CConceptDescriptor* nominalConDes = nullptr;
-						CDependencyTrackPoint* nominalConDepTrackPoint = nullptr;
-						if (indi->getIndividualID() != locNominalIndi->getIndividualID()) {
-							locNominalNodeConSet->getConceptDescriptor(nominalConcept,nominalConDes,nominalConDepTrackPoint);
-						}
+								CDependencyTrackPoint* nominalConDepTrackPoint = nullptr;
+								if (indi->getIndividualID() != locNominalIndi->getIndividualID()) {
+									nominalConDepTrackPoint = locNominalIndi->getIndividualMergingHash(false)->value(indi);
+								}
 
+								if (!hasIndividualsLink(processIndi,locNominalIndi,role,true,calcAlgContext)) {
+									// create dependency
+									CDependencyTrackPoint* nextDepTrackPoint = nullptr;
+									CROLEASSERTIONDependencyNode* roleAssDepNode = createROLEASSERTIONDependency(nextDepTrackPoint,processIndi,depTrackPoint,nominalConDepTrackPoint,calcAlgContext);
 
-						if (!hasIndividualsLink(processIndi,locNominalIndi,role,true,calcAlgContext)) {
-							// create dependency
-							CDependencyTrackPoint* nextDepTrackPoint = nullptr;
-							CVALUEDependencyNode* valueDepNode = createVALUEDependency(nextDepTrackPoint,processIndi,nullptr,depTrackPoint,nominalConDepTrackPoint,calcAlgContext);
+									// create link
+									createNewIndividualsLinksReapplyed(processIndi,locNominalIndi,role->getIndirectSuperRoleList(),role,nextDepTrackPoint,true,calcAlgContext);
 
-							// create link
-							createNewIndividualsLinksReapplyed(processIndi,locNominalIndi,role->getIndirectSuperRoleList(),role,nextDepTrackPoint,true,calcAlgContext);
-							//propagateIndividualNodeNominalConnectionToAncestors(processIndi,calcAlgContext);
-							//propagateIndividualNodeNominalConnectionStatusToAncestors(processIndi,locNominalIndi,calcAlgContext);
+									propagateIndividualNodeModified(locNominalIndi,calcAlgContext);
+									addIndividualToProcessingQueue(locNominalIndi,calcAlgContext);
+								}
+							}
+						} else if (mOptIncrementalCompatibleExpansion) {
 
-							propagateIndividualNodeModified(locNominalIndi,calcAlgContext);
-							addIndividualToProcessingQueue(locNominalIndi,calcAlgContext);
+							for (CSortedNegLinker<CRole*>* roleLinkerIt = role->getIndirectSuperRoleList(); roleLinkerIt; roleLinkerIt = roleLinkerIt->getNext()) {
+								CRole* role = roleLinkerIt->getData();
+								bool invRole = roleLinkerIt->isNegated();
+								CSortedNegLinker<CConcept*>* domainConLinkerIt = role->getDomainRangeConceptList(invRole);
+								if (domainConLinkerIt) {
+									addConceptsToIndividual(domainConLinkerIt,false,processIndi,depTrackPoint,true,false,nullptr,calcAlgContext);
+								}
+							}
+
 						}
 					}
 				}
@@ -10472,12 +12293,9 @@ namespace Konclude {
 						if (locNominalIndi != processIndi) {
 							locNominalIndi = getForcedInitializedNominalIndividualNode(locNominalIndi,calcAlgContext);
 						}
-						CReapplyConceptLabelSet* locNominalNodeConSet = locNominalIndi->getReapplyConceptLabelSet(true);
-						CConcept* nominalConcept = indi->getIndividualNominalConcept();
-						CConceptDescriptor* nominalConDes = nullptr;
 						CDependencyTrackPoint* nominalConDepTrackPoint = nullptr;
 						if (indi->getIndividualID() != locNominalIndi->getIndividualID()) {
-							locNominalNodeConSet->getConceptDescriptor(nominalConcept,nominalConDes,nominalConDepTrackPoint);
+							nominalConDepTrackPoint = locNominalIndi->getIndividualMergingHash(false)->value(indi);
 						}
 
 
@@ -10585,6 +12403,7 @@ namespace Konclude {
 								CIndividualProcessNode* succIndi = getSuccessorIndividual(processIndi,link,calcAlgContext);
 								CClashedDependencyDescriptor* clashDescriptors = nullptr;
 								if (isIndividualNodesMergeable(firstSuccNode,succIndi,clashDescriptors,calcAlgContext)) {
+									setIndividualNodeConceptLabelSetModified(processIndi,calcAlgContext);
 									if (!locFirstSuccNode) {
 										locFirstSuccNode = getLocalizedIndividual(firstSuccNode,link,calcAlgContext);
 										firstSuccNode = locFirstSuccNode;
@@ -10608,6 +12427,7 @@ namespace Konclude {
 									}
 
 								} else {
+
 									// clash
 									clashDescriptors = createClashedConceptDescriptor(clashDescriptors,processIndi,conDes,depTrackPoint,calcAlgContext);
 									clashDescriptors = createIndividualMergeCausingDescriptors(clashDescriptors,firstSuccNode,firstLink,nullptr,calcAlgContext);
@@ -11048,6 +12868,7 @@ namespace Konclude {
 								locDistinctMergedSet = branchingMergingProcRest->getDistinctMergedNodesSet(true);
 								distinctMergedSet = locDistinctMergedSet;
 							}
+							bool relocated = false;
 
 							for (CPROCESSSET<cint64>::const_iterator disIt = distinctMergedSet->constBegin(), disItEnd = distinctMergedSet->constEnd(); disIt != disItEnd; ++disIt) {
 								cint64 distinctIndiID = *disIt;
@@ -11060,6 +12881,7 @@ namespace Konclude {
 										distinctMergedSet = locDistinctMergedSet;
 									}
 									locDistinctMergedSet->remove(distinctIndiID);
+									relocated = true;
 									if (locDistinctMergedSet->contains(mergedIntoNode->getIndividualID())) {
 										--distinctCount;
 										if (fixedNominalMerging) {
@@ -11070,6 +12892,10 @@ namespace Konclude {
 								} else if (locDistinctMergedSet) {
 									locDistinctMergedSet->insert(distinctIndiID);
 								}
+							}
+
+							if (relocated) {
+								branchingMergingProcRest->setDistinctSetNodeRelocated(true);
 							}
 						}
 
@@ -11224,10 +13050,17 @@ namespace Konclude {
 								} else if (secondMergeableIt == disItEnd && distinctCount >= tmpCardinality) {
 									++mAppliedATMOSTRuleCount;
 									// only one possibility to merge
+									setIndividualNodeConceptLabelSetModified(processIndi,calcAlgContext);
 									CIndividualProcessNode* locDisIndiNode = getLocalizedIndividual(*firstMergeableIt,calcAlgContext);
 									CIndividualProcessNode* locMergingIndiNode = getLocalizedIndividual(mergingIndiNode,false,calcAlgContext);
 
 									CNonDeterministicDependencyTrackPoint* mergeNonDetDepTrackPoint = createNonDeterministicDependencyTrackPointBranch(mergeDependencyNode,true,calcAlgContext);
+
+									if (branchingMergingProcRest->isDistinctSetNodeRelocated()) {
+										branchingMergingProcRest->setDistinctSetNodeRelocated(false);
+										branchingMergingProcRest->initMergingDependencyNode(mergeDependencyNode);
+										branchingMergingProcRest->initDependencyTracker(mergeNonDetDepTrackPoint);
+									}
 
 									CIndividualProcessNode* locMergedIndiNode = getMergedIndividualNodes(locDisIndiNode,locMergingIndiNode,mergeNonDetDepTrackPoint,calcAlgContext);
 									if (locMergedIndiNode->getIndividualID() != locDisIndiNode->getIndividualID()) {
@@ -11237,6 +13070,7 @@ namespace Konclude {
 										}
 										distinctMergedSet->remove(locDisIndiNode->getIndividualID());
 										distinctMergedSet->insert(locMergedIndiNode->getIndividualID());
+										branchingMergingProcRest->setDistinctSetNodeRelocated(true);
 									}
 
 									if (calcAlgContext->getUsedUnsatisfiableCacheRetrievalStrategy()->testUnsatisfiableCacheForMergedIndividualNodes(conProDes,processIndi,locMergedIndiNode)) {
@@ -11255,6 +13089,7 @@ namespace Konclude {
 									++mAppliedATMOSTRuleCount;
 									CSatisfiableCalculationTask* newTaskList = nullptr;
 
+									setIndividualNodeConceptLabelSetModified(processIndi,calcAlgContext);
 									if (firstMergeableIt != disItEnd) {
 										CIndividualProcessNode* firstDistinctIndiNode = getUpToDateIndividual(*firstMergeableIt,calcAlgContext);
 										CSatisfiableCalculationTask* newTask = createMergeBranchingTask(processIndi,conProDes,firstDistinctIndiNode,mergingIndiNode,mergeDependencyNode,branchingMergingProcRest,calcAlgContext);
@@ -11369,6 +13204,13 @@ namespace Konclude {
 					}
 
 
+					if (newBranchingMergingProcRest->isDistinctSetNodeRelocated()) {
+						newBranchingMergingProcRest->setDistinctSetNodeRelocated(false);
+						newBranchingMergingProcRest->initMergingDependencyNode(mergeDependencyNode);
+						newBranchingMergingProcRest->initDependencyTracker(mergeNonDetDepTrackPoint);
+					}
+
+
 					// continue merging
 					CConceptProcessingQueue* conProQueu = locProcessIndiNode->getConceptProcessingQueue(true);
 					addConceptRestrictedToProcessingQueue(conDes,mergeNonDetDepTrackPoint,conProQueu,locProcessIndiNode,true,newBranchingMergingProcRest,newCalcAlgContext);
@@ -11414,11 +13256,18 @@ namespace Konclude {
 					CIndividualProcessNode* newLocMergingIndiNode = getLocalizedIndividual(mergingIndiNode,false,newCalcAlgContext);
 
 
+					if (newBranchingMergingProcRest->isDistinctSetNodeRelocated()) {
+						newBranchingMergingProcRest->setDistinctSetNodeRelocated(false);
+						newBranchingMergingProcRest->initMergingDependencyNode(mergeDependencyNode);
+						newBranchingMergingProcRest->initDependencyTracker(mergeNonDetDepTrackPoint);
+					}
+
 					CIndividualProcessNode* locMergedIndiNode = getMergedIndividualNodes(newLocDistinctIndiNode,newLocMergingIndiNode,mergeNonDetDepTrackPoint,newCalcAlgContext);
 					if (locMergedIndiNode->getIndividualID() != newLocDistinctIndiNode->getIndividualID()) {
 						CPROCESSSET<cint64>* locDistinctMergedSet = newBranchingMergingProcRest->getDistinctMergedNodesSet(true);
 						locDistinctMergedSet->remove(newLocDistinctIndiNode->getIndividualID());
 						locDistinctMergedSet->insert(locMergedIndiNode->getIndividualID());
+						newBranchingMergingProcRest->setDistinctSetNodeRelocated(true);
 					}
 
 
@@ -11478,6 +13327,7 @@ namespace Konclude {
 								}
 
 							} else {
+								setIndividualNodeConceptLabelSetModified(processIndi,calcAlgContext);
 								CClashedDependencyDescriptor* clashDes = createClashedIndividualLinkDescriptor(nullptr,link,link->getDependencyTrackPoint(),calcAlgContext);
 
 								// create dependency
@@ -11876,6 +13726,7 @@ namespace Konclude {
 
 							// force initialized
 							locNominalNode = getForcedInitializedNominalIndividualNode(locNominalNode,calcAlgContext);
+
 							CReapplyConceptLabelSet* locNominalNodeConSet = locNominalNode->getReapplyConceptLabelSet(true);
 							CConcept* nominalConcept = indi->getIndividualNominalConcept();
 							CConceptDescriptor* nominalConDes = nullptr;
@@ -11928,6 +13779,12 @@ namespace Konclude {
 					return indi;
 				}
 
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::isNominalIndividualNodeAvailable(cint64 indiID, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+					return indiProcNodeVec->hasData(indiID);
+				}
 
 
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::getCorrectedNominalIndividualNode(cint64 indiID, CCalculationAlgorithmContextBase* calcAlgContext) {
@@ -13822,6 +15679,7 @@ namespace Konclude {
 								blocked = testAlternativeBlocked(locAncTestIndi,blockAltData,calcAlgContext);
 							}
 							if (!blocked) {
+								locAncTestIndi->setBlockerIndividualNode(nullptr);
 								ancTestIndi = getAncestorIndividual(locAncTestIndi,calcAlgContext);
 							}
 						} else {
@@ -13841,7 +15699,7 @@ namespace Konclude {
 							}
 
 
-							locAncTestIndi->mDebugBlockerIndi = blockingIndi;
+							locAncTestIndi->setBlockerIndividualNode(blockingIndi);
 							locAncTestIndi->mDebugBlockerLastConceptDes = blockingIndi->getReapplyConceptLabelSet(false)->getAddingSortedConceptDescriptionLinker();
 
 
@@ -14088,10 +15946,12 @@ namespace Konclude {
 
 								if (lastConDes) {
 									CBlockingIndividualNodeLinkedCandidateData* blockingCandData = blockingCandHash->getBlockingIndividualCandidateData(lastConDes,false);
-									cint64 blockingIndNodeCandDataCount = blockingCandData->getCandidateCount();
-									if (blockingIndNodeCandDataCount <= lastNodeDiff) {
-										minBlockingIndNodeCandData = blockingCandData;
-										minBlockingIndNodeCandDataCount = blockingIndNodeCandDataCount;
+									if (blockingCandData) {
+										cint64 blockingIndNodeCandDataCount = blockingCandData->getCandidateCount();
+										if (blockingIndNodeCandDataCount <= lastNodeDiff) {
+											minBlockingIndNodeCandData = blockingCandData;
+											minBlockingIndNodeCandDataCount = blockingIndNodeCandDataCount;
+										}
 									}
 								}
 
@@ -14294,7 +16154,7 @@ namespace Konclude {
 							destIndiID = qMax(destIndiID,(cint64)0);
 							for (cint64 indiID = testingIndiID-1; indiID >= destIndiID; --indiID) {
 								CIndividualProcessNode* indi = getUpToDateIndividual(indiID,calcAlgContext);
-								if (indi->isBlockableIndividual() && !indi->hasPurgedBlockedProcessingRestrictionFlags()) {
+								if (indi && indi->isBlockableIndividual() && !indi->hasPurgedBlockedProcessingRestrictionFlags()) {
 									if (indiID >= maxValidIndiID || isIndividualNodeConceptLabelSetModified(indi,conLabelSetModTag,calcAlgContext)) {
 										if (indi->getReapplyConceptLabelSet(false)->containsConceptDescriptor(initializationConceptDes)) {
 											// add to candidate hash
@@ -14352,6 +16212,17 @@ namespace Konclude {
 
 					if (addIndividualToProcessingQueueDueToModification) {
 						addIndividualToBlockingUpdateReviewProcessingQueue(indi,calcAlgContext);
+					}
+
+					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED) && !indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED)) {
+						indi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED);
+						if (!addIndividualToProcessingQueueDueToModification) {
+							addIndividualToBackendSynchronisationRetestQueue(indi,calcAlgContext);
+						}
+					}
+					if (mOptIncrementalCompatibleExpansion && indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANDING) && !indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED)) {
+						indi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED);
+						addIndividualToIncrementalCompatibilityCheckingQueue(indi,calcAlgContext);
 					}
 
 					if (indi->isNominalIndividual() && indi->getNominalIndividual() && indi->isDelayedNominalProcessingQueued()) {
@@ -14416,12 +16287,14 @@ namespace Konclude {
 					cint64 ancDepth = indi->getIndividualAncestorDepth();
 					while (succIt.hasNext()) {
 						CIndividualLinkEdge* succLink = succIt.nextLink(true);
-						CIndividualProcessNode* succIndi = getSuccessorIndividual(indi,succLink,calcAlgContext);
-						cint64 succAncDepth = succIndi->getIndividualAncestorDepth();
-						if (succAncDepth > ancDepth) {
-							if (succIndi->isBlockableIndividual() && !succIndi->hasPurgedBlockedProcessingRestrictionFlags()) {
-								CIndividualProcessNode* locSuccIndi = getLocalizedIndividual(succIndi,false,calcAlgContext);
-								pruneSuccessors(locSuccIndi,indi,true,calcAlgContext);
+						if (succLink->getCreatorIndividual()->getIndividualID() == indi->getIndividualID()) {
+							CIndividualProcessNode* succIndi = getSuccessorIndividual(indi,succLink,calcAlgContext);
+							cint64 succAncDepth = succIndi->getIndividualAncestorDepth();
+							if (succAncDepth > ancDepth) {
+								if (succIndi->isBlockableIndividual() && !succIndi->hasPurgedBlockedProcessingRestrictionFlags()) {
+									CIndividualProcessNode* locSuccIndi = getLocalizedIndividual(succIndi,false,calcAlgContext);
+									pruneSuccessors(locSuccIndi,indi,true,calcAlgContext);
+								}
 							}
 						}
 					}
@@ -14926,6 +16799,8 @@ namespace Konclude {
 								clashDes = createClashedNegationDisjointDescriptor(clashDes,negDisEdge,depTrackPoint,calcAlgContext);
 								throw CCalculationClashProcessingException(clashDes);
 							} else {
+								sourceIndi->setDisjointRoleConnections(true);
+								destinationIndi->setDisjointRoleConnections(true);
 								sourceIndi->installDisjointLink(negDisEdge);
 							}
 							disjointRoleLinkerIt = disjointRoleLinkerIt->getNext();
@@ -14953,6 +16828,8 @@ namespace Konclude {
 					} else {
 						// add negation / disjoint edge
 						sourceIndi->installDisjointLink(negDisEdge);
+						sourceIndi->setDisjointRoleConnections(true);
+						destinationIndi->setDisjointRoleConnections(true);
 						destinationIndi->getConnectionSuccessorSet(true)->insertConnectionSuccessor(sourceIndi->getIndividualID());
 					}
 				}
@@ -15175,11 +17052,13 @@ namespace Konclude {
 
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::areIndividualNodesDisjointRolesMergeable(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CClashedDependencyDescriptor*& clashDescriptors, CCalculationAlgorithmContextBase* calcAlgContext) {
-					if (!isIndividualNodeDisjointRolesMergeable(indi1,indi2,clashDescriptors,calcAlgContext)) {
-						return false;
-					}
-					if (!isIndividualNodeDisjointRolesMergeable(indi2,indi1,clashDescriptors,calcAlgContext)) {
-						return false;
+					if (indi1->hasDisjointRoleConnections() || indi2->hasDisjointRoleConnections()) {
+						if (!isIndividualNodeDisjointRolesMergeable(indi1,indi2,clashDescriptors,calcAlgContext)) {
+							return false;
+						}
+						if (!isIndividualNodeDisjointRolesMergeable(indi2,indi1,clashDescriptors,calcAlgContext)) {
+							return false;
+						}
 					}
 					return true;
 				}
@@ -15338,13 +17217,17 @@ namespace Konclude {
 					CIndividualProcessNode* addingIndividual = nullptr;
 					bool switchNodes = false;
 					CProcessingDataBox* procDataBox = calcAlgContext->getUsedProcessingDataBox();
-					if (procDataBox->getConstructedIndividualNode()->getIndividualID() == preferedMergeIntoIndividualNode->getIndividualID()) {
+					if (!mConfMergeConstructedIndividualNode && procDataBox->getConstructedIndividualNode()->getIndividualID() == preferedMergeIntoIndividualNode->getIndividualID()) {
 						switchNodes = false;
-					} else if (procDataBox->getConstructedIndividualNode()->getIndividualID() == individual2->getIndividualID()) {
+					} else if (!mConfMergeConstructedIndividualNode && procDataBox->getConstructedIndividualNode()->getIndividualID() == individual2->getIndividualID()) {
 						switchNodes = true;
 					} else if (preferedMergeIntoIndividualNode->isNominalIndividual() && individual2->isNominalIndividual()) {
 						if (individual2->getIndividualNominalLevel() < preferedMergeIntoIndividualNode->getIndividualNominalLevel()) {
 							switchNodes = true;
+						} else if (individual2->getIndividualNominalLevel() == preferedMergeIntoIndividualNode->getIndividualNominalLevel()) {
+							if (individual2->getIndividualID() < preferedMergeIntoIndividualNode->getIndividualID()) {
+								switchNodes = true;
+							}
 						}
 					} else if (preferedMergeIntoIndividualNode->isNominalIndividual()) {
 						switchNodes = false;
@@ -15419,6 +17302,11 @@ namespace Konclude {
 					//	}
 
 					//}
+
+
+
+					mergeIntoIndividualNode->setLastMergedIntoIndividualNode(individual);
+					individual->setMergedDependencyTrackPoint(mergeDepTrackPoint);
 
 					bool newLinksAdded = false;
 
@@ -15586,9 +17474,46 @@ namespace Konclude {
 					}
 
 					if (individual->isNominalIndividual()) {
+						CIndividual* nominalIndividual = individual->getNominalIndividual();
 						if (!mergeIntoIndividualNode->isNominalIndividual()) {
 							mergeIntoIndividualNode->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
-							mergeIntoIndividualNode->setNominalIndividual(individual->getNominalIndividual());
+							mergeIntoIndividualNode->setNominalIndividual(nominalIndividual);
+						}
+
+						if (nominalIndividual) {
+
+							CIndividualMergingHash* otherIndiMergingHash = individual->getIndividualMergingHash(false);
+							CIndividualMergingHash* indiMergingHash = mergeIntoIndividualNode->getIndividualMergingHash(true);
+							if (otherIndiMergingHash) {
+								if (indiMergingHash->isEmpty()) {
+									indiMergingHash->initIndividualMergingHash(otherIndiMergingHash);
+									for (CIndividualMergingHash::iterator it = indiMergingHash->begin(), itEnd = indiMergingHash->end(); it != itEnd; ++it) {
+										CIndividual* individual = it.key();
+										CDependencyTrackPoint*& indiDepTrackPoint = it.value();
+										// create dependency
+										CDependencyTrackPoint* newIndiDepTrackPoint = nullptr;
+										CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint,mergeIntoIndividualNode,mergeDepTrackPoint,indiDepTrackPoint,calcAlgContext);
+										indiDepTrackPoint = newIndiDepTrackPoint;
+									}
+								} else {
+									for (CIndividualMergingHash::const_iterator it = otherIndiMergingHash->constBegin(), itEnd = otherIndiMergingHash->constEnd(); it != itEnd; ++it) {
+										CIndividual* individual = it.key();
+										CDependencyTrackPoint* indiDepTrackPoint = it.value();
+										// create dependency
+										CDependencyTrackPoint* newIndiDepTrackPoint = nullptr;
+										CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint,mergeIntoIndividualNode,mergeDepTrackPoint,indiDepTrackPoint,calcAlgContext);
+										indiMergingHash->insert(nominalIndividual,newIndiDepTrackPoint);
+									}
+								}
+							}
+
+							if (nominalIndividual->getIndividualID() == individual->getIndividualID()) {
+								CDependencyTrackPoint* indiDepTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
+								// create dependency
+								CDependencyTrackPoint* newIndiDepTrackPoint = nullptr;
+								CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint,mergeIntoIndividualNode,mergeDepTrackPoint,indiDepTrackPoint,calcAlgContext);
+								indiMergingHash->insert(nominalIndividual,newIndiDepTrackPoint);
+							}
 						}
 					}
 
@@ -15698,17 +17623,30 @@ namespace Konclude {
 					//}
 
 
+
+					CRoleAssertionLinker* roleAssLinker = individual->getAssertionRoleLinker();
+					CReverseRoleAssertionLinker* reverseRoleAssLinker = individual->getReverseAssertionRoleLinker();
+					if (roleAssLinker || reverseRoleAssLinker) {
+						CAdditionalProcessRoleAssertionsLinker* additionalRoleAssLinker = CObjectAllocator< CAdditionalProcessRoleAssertionsLinker >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+						additionalRoleAssLinker->initAdditionalProcessRoleAssertionsLinker(individual->getNominalIndividual(),roleAssLinker,reverseRoleAssLinker);
+						mergeIntoIndividualNode->addAdditionalRoleAssertionsLinker(additionalRoleAssLinker);
+					}
+					for (CAdditionalProcessRoleAssertionsLinker* additionalRoleAssLinkerIt = individual->getAdditionalRoleAssertionsLinker(); additionalRoleAssLinkerIt; additionalRoleAssLinkerIt = additionalRoleAssLinkerIt->getNext()) {
+						CAdditionalProcessRoleAssertionsLinker* additionalRoleAssLinker = CObjectAllocator< CAdditionalProcessRoleAssertionsLinker >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+						additionalRoleAssLinker->initAdditionalProcessRoleAssertionsLinker(additionalRoleAssLinkerIt->getIndividual(),additionalRoleAssLinkerIt->getRoleAssertionLinker(),additionalRoleAssLinkerIt->getReverseRoleAssertionLinker());
+						mergeIntoIndividualNode->addAdditionalRoleAssertionsLinker(additionalRoleAssLinker);
+					}
+
 					KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mAfterMergingTaskDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
 
 				}
 
 
-				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::tryExtendFunctionalSuccessorIndividual(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
+				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::tryExtendFunctionalSuccessorIndividual(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, CIndividualSaturationProcessNode* saturationIndiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CMemoryAllocationManager* taskMemMan = nullptr;
 					taskMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
 					CIndividualProcessNode* succIndi = nullptr;
-					CIndividualSaturationProcessNode* saturationIndiNode = nullptr;
-
+					
 
 					// TODO: test super roles for functional
 					CReapplyRoleSuccessorHash* roleSucc = indi->getReapplyRoleSuccessorHash(false);
@@ -15774,11 +17712,10 @@ namespace Konclude {
 				}
 
 
-				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::createSuccessorIndividual(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext) {
+				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::createSuccessorIndividual(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, CIndividualSaturationProcessNode* saturationIndiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CMemoryAllocationManager* taskMemMan = nullptr;
 					taskMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
 					CIndividualProcessNode* succIndi = nullptr;
-					CIndividualSaturationProcessNode* saturationIndiNode = nullptr;
 
 					// create dependency
 					CDependencyTrackPoint* nextDepTrackPoint = nullptr;
@@ -15866,6 +17803,141 @@ namespace Konclude {
 				}
 
 
+
+
+
+
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::tryInitalizingFromSaturatedData(CIndividualProcessNode*& indi, CXSortedNegLinker<CConcept*>* initConceptLinker, CDependencyTrackPoint* depTrackPoint, bool allowPreprocess, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (initConceptLinker) {
+						CConcept* concept = initConceptLinker->getData();
+						bool conceptNegation = initConceptLinker->isNegated();
+						CConceptData* conceptData = concept->getConceptData();
+						CIndividualSaturationProcessNode* baseSatIndiNode = nullptr;
+						if (conceptData) {
+							CConceptProcessData* conProcData = (CConceptProcessData*)conceptData;
+							CConceptReferenceLinking* conRefLinking = conProcData->getConceptReferenceLinking();
+							if (conRefLinking) {
+								CConceptSaturationReferenceLinkingData* confSatRefLinkingData = (CConceptSaturationReferenceLinkingData*)conRefLinking;
+								CSaturationConceptReferenceLinking* extSatCalcRefLinkData = confSatRefLinkingData->getConceptSaturationReferenceLinkingData(conceptNegation);
+								if (extSatCalcRefLinkData) {
+									baseSatIndiNode = (CIndividualSaturationProcessNode*)extSatCalcRefLinkData->getIndividualProcessNodeForConcept();
+								}
+							}
+						}
+
+						if (baseSatIndiNode && baseSatIndiNode->isInitialized()) {
+							CIndividualSaturationProcessNode* satIndiNode = baseSatIndiNode;
+							while (satIndiNode->hasSubstituteIndividualNode()) {
+								satIndiNode = satIndiNode->getSubstituteIndividualNode();
+							}
+							CReapplyConceptSaturationLabelSet* satConSet = satIndiNode->getReapplyConceptSaturationLabelSet(false);
+							if (satConSet) {
+								if (satIndiNode->getIndirectStatusFlags()->hasClashedFlag() || baseSatIndiNode->getIndirectStatusFlags()->hasClashedFlag()) {
+									CClashedDependencyDescriptor* clashDes = nullptr;
+									addConceptToIndividualSkipANDProcessing(concept,conceptNegation,indi,depTrackPoint,false,false,calcAlgContext);
+									CConceptDescriptor* clashedConDes = nullptr;
+									CDependencyTrackPoint* clashedDepTrackPoint = nullptr;
+									indi->getReapplyConceptLabelSet(false)->getConceptDescriptor(concept,clashedConDes,clashedDepTrackPoint);
+									clashDes = createClashedConceptDescriptor(clashDes,indi,clashedConDes,clashedDepTrackPoint,calcAlgContext);
+									throw CCalculationClashProcessingException(clashDes);
+								} else {
+
+									bool nominalConnectionFlag = satIndiNode->getIndirectStatusFlags()->hasNominalConnectionFlag();
+									if (nominalConnectionFlag) {
+										propagateIndividualNodeNominalConnectionToAncestors(indi,calcAlgContext);
+										if (mConfExactNominalDependencyTracking) {
+											CSuccessorConnectedNominalSet* satSuccConnNomSet = satIndiNode->getSuccessorConnectedNominalSet(false);
+											if (satSuccConnNomSet) {
+												CSuccessorConnectedNominalSet* succConnNomSet = indi->getSuccessorNominalConnectionSet(true);
+												for (CSuccessorConnectedNominalSet::const_iterator it = satSuccConnNomSet->constBegin(), itEnd = satSuccConnNomSet->constEnd(); it != itEnd; ++it) {
+													cint64 nominalID = *it;
+													succConnNomSet->insert(nominalID);
+												}
+											}
+										}
+									}
+
+									bool satCachingPossible = true;
+									CConceptDescriptor* lastSatCachPossibleConDes = nullptr;
+
+									if (satIndiNode = baseSatIndiNode) {
+										addConceptToIndividualSkipANDProcessing(concept,conceptNegation,indi,depTrackPoint,allowPreprocess,false,calcAlgContext);
+									} else {
+										addConceptToIndividual(concept,conceptNegation,indi,depTrackPoint,allowPreprocess,false,calcAlgContext);
+									}
+									CConceptDescriptor* conDes = nullptr;
+									CDependencyTrackPoint* conDepTrackPoint = nullptr;
+									indi->getReapplyConceptLabelSet(false)->getConceptDescriptor(concept,conDes,conDepTrackPoint);
+
+									CDependencyTrackPoint* expandDepTrackPoint = nullptr;
+									CANDDependencyNode* andDepNode = createANDDependency(expandDepTrackPoint,indi,conDes,conDepTrackPoint,calcAlgContext);
+
+									for (CConceptSaturationDescriptor* conSatDesIt = satConSet->getConceptSaturationDescriptionLinker(); conSatDesIt; conSatDesIt = conSatDesIt->getNext()) {
+										CConcept* satConcept = conSatDesIt->getConcept();
+										bool satConceptNegation = conSatDesIt->isNegated();
+										STATINC(SATURATIONCACHECONCEPTEXPANSIONCOUNT,calcAlgContext);
+										if (satConcept != concept || conceptNegation != satConceptNegation) {
+											addConceptToIndividualSkipANDProcessing(satConcept,satConceptNegation,indi,expandDepTrackPoint,allowPreprocess,false,calcAlgContext);
+											validateSaturationCachingPossible(indi,satIndiNode,&satCachingPossible,&lastSatCachPossibleConDes,satConcept,satConceptNegation,calcAlgContext);
+										}
+									}
+
+									CSaturationNodeAssociatedDeterministicConceptExpansion* detExpansion = nullptr;
+									CSaturationNodeExpansionCacheHandler* satCacheHandler = calcAlgContext->getUsedSaturationNodeExpansionCacheHandler();
+									if (satCacheHandler) {
+										if (satCacheHandler->getCachedDeterministicExpansion(baseSatIndiNode,detExpansion,calcAlgContext)) {
+											if (detExpansion && (mConfSaturationIncompleteExpansionFromCache || !detExpansion->requiresNonDeterministicExpansion())) {
+												for (CSaturationNodeAssociatedConceptLinker* conceptExpansionLinkerIt = detExpansion->getConceptExpansionLinker(); conceptExpansionLinkerIt; conceptExpansionLinkerIt = conceptExpansionLinkerIt->getNext()) {
+													CCacheValue* cacheValue = conceptExpansionLinkerIt->getCacheValue();
+
+													CConcept* expansionConcept = (CConcept*)cacheValue->getIdentification();
+													bool expansionConceptNeg = cacheValue->getCacheValueIdentifier() == CCacheValue::CACHEVALTAGANDNEGATEDCONCEPT;
+													addConceptToIndividualSkipANDProcessing(expansionConcept,expansionConceptNeg,indi,expandDepTrackPoint,allowPreprocess,false,calcAlgContext);
+												}
+											}
+										}
+									}
+
+
+
+									cint64 indiConCount = indi->getReapplyConceptLabelSet(false)->getConceptCount();
+									CMemoryAllocationManager* taskMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
+									CIndividualNodeSaturationBlockingData* satBlockingData = CObjectAllocator< CIndividualNodeSaturationBlockingData >::allocateAndConstruct(taskMemMan);
+									satBlockingData->initSaturationBlockingData(indiConCount,lastSatCachPossibleConDes,baseSatIndiNode);
+									indi->setIndividualSaturationBlockingData(satBlockingData);
+
+								}
+
+								CXSortedNegLinker<CConcept*>* nextInitConceptLinker = initConceptLinker;
+								if (baseSatIndiNode == satIndiNode) {
+									nextInitConceptLinker = initConceptLinker->getNext();
+								}
+								for (CXSortedNegLinker<CConcept*>* nextInitConceptLinkerIt = nextInitConceptLinker; nextInitConceptLinkerIt; nextInitConceptLinkerIt = nextInitConceptLinkerIt->getNext()) {
+									CConcept* nextConcept = nextInitConceptLinkerIt->getData();
+									bool nextConceptNegation = nextInitConceptLinkerIt->isNegated();
+									addConceptToIndividual(nextConcept,nextConceptNegation,indi,depTrackPoint,allowPreprocess,true,calcAlgContext);
+								}
+								return true;
+							}
+						}						
+					}
+					return false;
+				}
+
+
+
+
+
+
+
+
 				void CCalculationTableauCompletionTaskHandleAlgorithm::propagateIndirectSuccessorSaturationBlocked(CIndividualProcessNode*& indi, CCalculationAlgorithmContextBase* calcAlgContext) {
 					propagateAddingBlockedProcessingRestrictionToSuccessors(indi,CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHED,true,CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHED,calcAlgContext);
 				}
@@ -15919,7 +17991,10 @@ namespace Konclude {
 				}
 
 
-				bool CCalculationTableauCompletionTaskHandleAlgorithm::tryExpansionFromSaturatedData(CIndividualProcessNode*& indi, CIndividualProcessNode* createdSuccIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* depTrackPoint, CIndividualSaturationProcessNode*& saturationIndiNode, bool* satCachingPossible, CConceptDescriptor** lastSatCachPossibleConDes, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+
+
+				CIndividualSaturationProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::getCreationSuccessorSaturationNode(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CConcept* concept = conDes->getConcept();
 					bool conceptNegation = conDes->isNegated();
 					CConceptData* conceptData = concept->getConceptData();
@@ -15955,61 +18030,67 @@ namespace Konclude {
 							}
 						}
 					}
+					return existIndiNode;
+				}
 
 
-					if (existIndiNode && existIndiNode->isInitialized()) {
-						CReapplyConceptSaturationLabelSet* satConSet = existIndiNode->getReapplyConceptSaturationLabelSet(false);
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::tryExpansionFromSaturatedData(CIndividualProcessNode*& indi, CIndividualProcessNode* createdSuccIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* depTrackPoint, CIndividualSaturationProcessNode*& saturationIndiNode, bool* satCachingPossible, CConceptDescriptor** lastSatCachPossibleConDes, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (saturationIndiNode && saturationIndiNode->isInitialized()) {
+						CReapplyConceptSaturationLabelSet* satConSet = saturationIndiNode->getReapplyConceptSaturationLabelSet(false);
 						if (satConSet) {
-							saturationIndiNode = existIndiNode;
+							bool nominalConnectionFlag = saturationIndiNode->getIndirectStatusFlags()->hasNominalConnectionFlag();
 							if (saturationIndiNode->getIndirectStatusFlags()->hasClashedFlag()) {
-								CClashedDependencyDescriptor* clashDes = nullptr;
-								clashDes = createClashedConceptDescriptor(clashDes,indi,conDes,depTrackPoint,calcAlgContext);
-								throw CCalculationClashProcessingException(clashDes);
+								if (!nominalConnectionFlag || !mOptIncrementalExpansion) {
+									CClashedDependencyDescriptor* clashDes = nullptr;
+									clashDes = createClashedConceptDescriptor(clashDes,indi,conDes,depTrackPoint,calcAlgContext);
+									throw CCalculationClashProcessingException(clashDes);
+								}
 							} else {
+								if (!mOptIncrementalExpansion || !nominalConnectionFlag) {
 
-								bool nominalConnectionFlag = saturationIndiNode->getIndirectStatusFlags()->hasNominalConnectionFlag();
-								if (nominalConnectionFlag) {
-									propagateIndividualNodeNominalConnectionToAncestors(createdSuccIndi,calcAlgContext);
-									if (mConfExactNominalDependencyTracking) {
-										CSuccessorConnectedNominalSet* satSuccConnNomSet = saturationIndiNode->getSuccessorConnectedNominalSet(false);
-										if (satSuccConnNomSet) {
-											CSuccessorConnectedNominalSet* succConnNomSet = createdSuccIndi->getSuccessorNominalConnectionSet(true);
-											for (CSuccessorConnectedNominalSet::const_iterator it = satSuccConnNomSet->constBegin(), itEnd = satSuccConnNomSet->constEnd(); it != itEnd; ++it) {
-												cint64 nominalID = *it;
-												succConnNomSet->insert(nominalID);
+									if (nominalConnectionFlag) {
+										propagateIndividualNodeNominalConnectionToAncestors(createdSuccIndi,calcAlgContext);
+										if (mConfExactNominalDependencyTracking) {
+											CSuccessorConnectedNominalSet* satSuccConnNomSet = saturationIndiNode->getSuccessorConnectedNominalSet(false);
+											if (satSuccConnNomSet) {
+												CSuccessorConnectedNominalSet* succConnNomSet = createdSuccIndi->getSuccessorNominalConnectionSet(true);
+												for (CSuccessorConnectedNominalSet::const_iterator it = satSuccConnNomSet->constBegin(), itEnd = satSuccConnNomSet->constEnd(); it != itEnd; ++it) {
+													cint64 nominalID = *it;
+													succConnNomSet->insert(nominalID);
+												}
+											}
+										}
+										propagateIndividualNodeNominalConnectionStatusToAncestors(indi,createdSuccIndi,calcAlgContext);
+									}
+
+									for (CConceptSaturationDescriptor* conSatDesIt = satConSet->getConceptSaturationDescriptionLinker(); conSatDesIt; conSatDesIt = conSatDesIt->getNext()) {
+										CConcept* satConcept = conSatDesIt->getConcept();
+										bool satConceptNegation = conSatDesIt->isNegated();
+										STATINC(SATURATIONCACHECONCEPTEXPANSIONCOUNT,calcAlgContext);
+										addConceptToIndividualSkipANDProcessing(satConcept,satConceptNegation,createdSuccIndi,depTrackPoint,true,false,calcAlgContext);
+										validateSaturationCachingPossible(createdSuccIndi,saturationIndiNode,satCachingPossible,lastSatCachPossibleConDes,satConcept,satConceptNegation,calcAlgContext);
+									}
+
+									CSaturationNodeAssociatedDeterministicConceptExpansion* detExpansion = nullptr;
+									CSaturationNodeExpansionCacheHandler* satCacheHandler = calcAlgContext->getUsedSaturationNodeExpansionCacheHandler();
+									if (satCacheHandler) {
+										if (satCacheHandler->getCachedDeterministicExpansion(saturationIndiNode,detExpansion,calcAlgContext)) {
+											if (detExpansion && (mConfSaturationIncompleteExpansionFromCache || !detExpansion->requiresNonDeterministicExpansion())) {
+												for (CSaturationNodeAssociatedConceptLinker* conceptExpansionLinkerIt = detExpansion->getConceptExpansionLinker(); conceptExpansionLinkerIt; conceptExpansionLinkerIt = conceptExpansionLinkerIt->getNext()) {
+													CCacheValue* cacheValue = conceptExpansionLinkerIt->getCacheValue();
+
+													CConcept* expansionConcept = (CConcept*)cacheValue->getIdentification();
+													bool expansionConceptNeg = cacheValue->getCacheValueIdentifier() == CCacheValue::CACHEVALTAGANDNEGATEDCONCEPT;
+													addConceptToIndividualSkipANDProcessing(expansionConcept,expansionConceptNeg,createdSuccIndi,depTrackPoint,true,false,calcAlgContext);
+
+												}
 											}
 										}
 									}
-									propagateIndividualNodeNominalConnectionStatusToAncestors(indi,createdSuccIndi,calcAlgContext);
+									return true;
 								}
-
-								for (CConceptSaturationDescriptor* conSatDesIt = satConSet->getConceptSaturationDescriptionLinker(); conSatDesIt; conSatDesIt = conSatDesIt->getNext()) {
-									CConcept* satConcept = conSatDesIt->getConcept();
-									bool satConceptNegation = conSatDesIt->isNegated();
-									STATINC(SATURATIONCACHECONCEPTEXPANSIONCOUNT,calcAlgContext);
-									addConceptToIndividualSkipANDProcessing(satConcept,satConceptNegation,createdSuccIndi,depTrackPoint,true,false,calcAlgContext);
-									validateSaturationCachingPossible(createdSuccIndi,saturationIndiNode,satCachingPossible,lastSatCachPossibleConDes,satConcept,satConceptNegation,calcAlgContext);
-								}
-
-								CSaturationNodeAssociatedDeterministicConceptExpansion* detExpansion = nullptr;
-								CSaturationNodeExpansionCacheHandler* satCacheHandler = calcAlgContext->getUsedSaturationNodeExpansionCacheHandler();
-								if (satCacheHandler) {
-									if (satCacheHandler->getCachedDeterministicExpansion(saturationIndiNode,detExpansion,calcAlgContext)) {
-										if (detExpansion && (mConfSaturationIncompleteExpansionFromCache || !detExpansion->requiresNonDeterministicExpansion())) {
-											for (CSaturationNodeAssociatedConceptLinker* conceptExpansionLinkerIt = detExpansion->getConceptExpansionLinker(); conceptExpansionLinkerIt; conceptExpansionLinkerIt = conceptExpansionLinkerIt->getNext()) {
-												CCacheValue* cacheValue = conceptExpansionLinkerIt->getCacheValue();
-
-												CConcept* expansionConcept = (CConcept*)cacheValue->getIdentification();
-												bool expansionConceptNeg = cacheValue->getCacheValueIdentifier() == CCacheValue::CACHEVALTAGANDNEGATEDCONCEPT;
-												addConceptToIndividualSkipANDProcessing(expansionConcept,expansionConceptNeg,createdSuccIndi,depTrackPoint,true,false,calcAlgContext);
-
-											}
-										}
-									}
-								}
-
 							}
-							return true;
 						}
 					}
 					return false;
@@ -16101,6 +18182,9 @@ namespace Konclude {
 						indiSource->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiDestination->getIndividualID());
 					}
 					indiDestination->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiSource->getIndividualID());
+					if (mOptIncrementalCompatibleExpansion) {
+						linkCreationDirectlyChangedNeighbourConnectionUpdate(indiDestination,indiSource,true,calcAlgContext);
+					}
 					return ancRoleLink;
 				}
 
@@ -16194,6 +18278,9 @@ namespace Konclude {
 						indiSource->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiDestination->getIndividualID());
 					}
 					indiDestination->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiSource->getIndividualID());
+					if (mOptIncrementalCompatibleExpansion) {
+						linkCreationDirectlyChangedNeighbourConnectionUpdate(indiDestination,indiSource,true,calcAlgContext);
+					}
 					return ancRoleLink;
 				}
 
@@ -16208,6 +18295,9 @@ namespace Konclude {
 					//indiSource->installIndividualLink(individualLink);
 					installIndividualNodeRoleLink(indiSource,indiDestination,individualLink,calcAlgContext);
 					indiDestination->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiSource->getIndividualID());
+					if (mOptIncrementalCompatibleExpansion) {
+						linkCreationDirectlyChangedNeighbourConnectionUpdate(indiDestination,indiSource,true,calcAlgContext);
+					}
 					return individualLink;
 				}
 
@@ -16234,6 +18324,9 @@ namespace Konclude {
 					}
 					applyReapplyQueueConceptsRestricted(indiSource,&reapplyIterator,individualLink,calcAlgContext);
 					indiDestination->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiSource->getIndividualID());
+					if (mOptIncrementalCompatibleExpansion) {
+						linkCreationDirectlyChangedNeighbourConnectionUpdate(indiDestination,indiSource,true,calcAlgContext);
+					}
 					return individualLink;
 				}
 
@@ -16282,9 +18375,18 @@ namespace Konclude {
 					taskMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
 					CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
 					CIndividualProcessNode* newIndividual = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,calcAlgContext->getUsedProcessContext());
-					cint64 newIndividualID = indiProcNodeVec->getItemCount();
+					cint64 newIndividualID = calcAlgContext->getProcessingDataBox()->getNextIndividualNodeID();
+					newIndividualID = qMax(indiProcNodeVec->getItemCount(),newIndividualID);
 					newIndividual->setIndividualID(newIndividualID);
 					indiProcNodeVec->setLocalData(newIndividualID,newIndividual);
+
+					if (mOptConsistenceNodeMarking) {
+						newIndividual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCONSNODEPREPARATIONINDINODE);
+					}
+					if (mOptIncrementalCompatibleExpansion) {
+						newIndividual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANDING);
+						newIndividual->setIncrementalExpansionID(calcAlgContext->getProcessingDataBox()->getIncrementalExpansionID());
+					}
 					return newIndividual;
 				}
 
@@ -16292,9 +18394,6 @@ namespace Konclude {
 
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::createNewIndividual(CDependencyTrackPoint* depTrackPoint, bool dataNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CIndividualProcessNode* newIndividual = createNewEmptyIndividual(calcAlgContext);
-					if (mOptConsistenceNodeMarking) {
-						newIndividual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCONSNODEPREPARATIONINDINODE);
-					}
 					newIndividual->initDependencyTracker(depTrackPoint);
 					if (!dataNode) {
 						CConcept* topConcept = calcAlgContext->getProcessingDataBox()->getOntologyTopConcept();
@@ -16303,11 +18402,17 @@ namespace Konclude {
 						newIndividual->setExtendedQueueProcessing(true);
 						CConcept* topDataRangeConcept = calcAlgContext->getProcessingDataBox()->getOntologyTopDataRangeConcept();
 						addConceptToIndividual(topDataRangeConcept,false,newIndividual,depTrackPoint,true,false,calcAlgContext);
-						newIndividual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCONSNODEPREPARATIONINDINODE);
+						newIndividual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCONCRETEDATAINDINODE);
 					}
 					return newIndividual;
 				}
 
+				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::getAvailableUpToDateIndividual(cint64 indiID, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (isNominalIndividualNodeAvailable(indiID,calcAlgContext)) {
+						return getUpToDateIndividual(indiID,calcAlgContext);
+					}
+					return nullptr;
+				}
 
 
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::getUpToDateIndividual(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext) {
@@ -16324,8 +18429,341 @@ namespace Konclude {
 					STATINC(INDINODEUPDATELOADCOUNT,calcAlgContext);
 					CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
 					CIndividualProcessNode* upToDateIndi = indiProcNodeVec->getData(indiID);
+					if (!upToDateIndi) {
+						CIndividualVector* indiVec = calcAlgContext->getProcessingDataBox()->getOntology()->getABox()->getIndividualVector(false);
+						if (indiVec) {
+							if (indiID < indiVec->getItemCount()) {
+								CIndividual* individual = indiVec->getData(indiID);
+								if (individual) {
+
+									trackIndividualReferredDependence(indiID,calcAlgContext);
+
+									STATINC(INDINODELOCALIZEDLOADCOUNT,calcAlgContext);
+									CMemoryAllocationManager* taskMemMan = nullptr;
+									taskMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
+									CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+									CIndividualProcessNode* localicedIndi = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,calcAlgContext->getUsedProcessContext());
+									CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
+									localicedIndi->initDependencyTracker(depTrackPoint);
+									localicedIndi->setNominalIndividual(individual);
+									localicedIndi->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
+									localicedIndi->setIndividualID(indiID);
+									indiProcNodeVec->setLocalData(localicedIndi->getIndividualID(),localicedIndi);
+
+									localicedIndi->setAssertionRoleLinker(individual->getAssertionRoleLinker());
+									localicedIndi->setReverseAssertionRoleLinker(individual->getReverseAssertionRoleLinker());
+									localicedIndi->setRoleAssertionCreationID(calcAlgContext->getUsedProcessingDataBox()->getNextRoleAssertionCreationID());
+
+
+									CConcept* univConnNomValueConcept = calcAlgContext->getProcessingDataBox()->getOntology()->getTBox()->getUniversalConnectionNominalValueConcept();
+									if (univConnNomValueConcept) {
+										addConceptToIndividual(univConnNomValueConcept,false,localicedIndi,depTrackPoint,true,true,calcAlgContext);
+									}
+									CConcept* nominalConcept = individual->getIndividualNominalConcept();
+									if (nominalConcept) {
+										addConceptToIndividual(nominalConcept,false,localicedIndi,depTrackPoint,true,true,calcAlgContext);
+									}
+
+									if (mOptConsistenceNodeMarking) {
+										localicedIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCONSNODEPREPARATIONINDINODE);
+									}
+
+									if (!mOptIncrementalCompatibleExpansion) {
+
+										bool expansionBlocked = false;
+										if (loadIndividualNodeDataFromBackendCache(localicedIndi,calcAlgContext)) {
+											expansionBlocked = tryEstablishExpansionBlockingWithBackendCacheSynchronisation(localicedIndi,calcAlgContext);
+										}
+
+										if (!expansionBlocked) {
+											addIndividualToProcessingQueue(localicedIndi,calcAlgContext);
+										}
+									} else {
+										localicedIndi->setAssertionConceptLinker(individual->getAssertionConceptLinker());
+										localicedIndi->setIncrementalExpansionID(calcAlgContext->getProcessingDataBox()->getIncrementalExpansionID());
+										localicedIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFINCREMENTALEXPANDING);
+
+										CIndividualNodeIncrementalExpansionData* expData = localicedIndi->getIncrementalExpansionData(true);
+										expData->setExpansionID(calcAlgContext->getProcessingDataBox()->getNextIncrementalIndividualExpansionID(true));
+
+									}
+
+									upToDateIndi = localicedIndi;
+
+								}
+							}
+						}
+					}
 					return upToDateIndi;
 				}
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::tryEstablishExpansionBlockingWithBackendCacheSynchronisation(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+					bool expansionBlocked = false;
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
+					if (backendSyncData) {
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
+						bool backendExpBlocking = assocData->isCompletelyHandled() && assocData->isCompletelySaturated();
+						if (backendExpBlocking && testIndividualNodeBackendCacheSynchronization(indiNode,calcAlgContext)) {
+							indiNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED);
+							if (indiNode->getAssertionRoleLinker() || indiNode->getReverseAssertionRoleLinker()) {
+								indiNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED);
+							}
+							expansionBlocked = true;
+						}
+					}
+
+					return expansionBlocked;
+				}
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::loadIndividualNodeDataFromBackendCache(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividual* individual = indiNode->getNominalIndividual();
+					if (mConfIndividualsBackendCacheLoading && mBackendCacheHandler) {
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendCacheHandler->getIndividualAssociationData(individual);
+						if (indiAssData) {
+
+							CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = CObjectAllocator< CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+							backendSyncData->initSynchronisationData(indiAssData);
+							indiNode->setIndividualBackendCacheSynchronisationData(backendSyncData);
+
+							CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
+
+							CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem = indiAssData->getBackendLabelCacheEntry();
+							for (CBackendRepresentativeMemoryLabelValueLinker* labelValueLinker = labelCacheItem->getDeterministicCacheValueLinker(); labelValueLinker; labelValueLinker = labelValueLinker->getNext()) {
+								const CCacheValue& cacheValue = labelValueLinker->getCacheValue();
+								CConcept* concept = (CConcept*)cacheValue.getIdentification();
+								bool conNegation = cacheValue.getCacheValueIdentifier() == CCacheValue::CACHEVALTAGANDNEGATEDCONCEPT;
+								addConceptToIndividualSkipANDProcessing(concept,conNegation,indiNode,depTrackPoint,true,false,calcAlgContext);
+								validateBackendSynchronisationContinued(indiNode,backendSyncData,concept,conNegation,calcAlgContext);											
+							}
+
+							for (CConceptAssertionLinker* conAssLinkerIt = individual->getAssertionConceptLinker(); conAssLinkerIt; conAssLinkerIt = conAssLinkerIt->getNext()) {
+								CConcept* concept = conAssLinkerIt->getData();
+								bool negation = conAssLinkerIt->isNegated();
+								if (concept->getOperatorCode() == CCNOMINAL && (concept->getNominalIndividual() == individual || negation)) {
+									addConceptToIndividual(concept,negation,indiNode,depTrackPoint,true,false,calcAlgContext);
+								}
+							}
+
+							return true;
+						}
+					}
+					return false;
+				}
+
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool expansionBlockingCritical = true;
+
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indi->getIndividualBackendCacheSynchronisationData(false);
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indi->getIndividualBackendCacheSynchronisationData(true);
+
+					if (backendSyncData) {
+						if (!backendSyncData->isCriticalCardinalityExpansionBlocking()) {
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
+
+							expansionBlockingCritical = false;
+
+							CBackendRepresentativeMemoryCardinalityCacheItem* cardCacheItem = assocData->getBackendCardinalityCacheEntry();
+							if (cardCacheItem) {
+								CReapplyRoleSuccessorHash* roleSuccHash = indi->getReapplyRoleSuccessorHash(false);
+								if (roleSuccHash) {
+									CIndividualLinkEdge* lastAddedLinkEdge = indi->getLastAddedRoleLink();
+									CIndividualLinkEdge* lastTestedLinkEdge = backendSyncData->getLastCriticalCardinalityLinkEdge();
+
+									if (lastTestedLinkEdge != lastAddedLinkEdge) {
+
+										for (CBackendRepresentativeMemoryCardinalityValueLinker* cardValueLinkerIt = cardCacheItem->getCardinalityCacheValueLinker(); cardValueLinkerIt && !expansionBlockingCritical; cardValueLinkerIt = cardValueLinkerIt->getNext()) {
+											CRole* role = (CRole*)cardValueLinkerIt->getCacheValue().getIdentification();
+											cint64 freeCardinality = cardValueLinkerIt->getFreeCardinality();
+											cint64 linkCount = roleSuccHash->getRoleSuccessorCount(role);
+											if (linkCount > freeCardinality) {
+												cint64 nonAssertionLinkCount = 0;
+												CRoleSuccessorLinkIterator roleSuccIt(roleSuccHash->getRoleSuccessorLinkIterator(role));
+												while (roleSuccIt.hasNext() && nonAssertionLinkCount <= freeCardinality) {
+													CIndividualLinkEdge* link = roleSuccIt.next();
+													CDependencyTrackPoint* linkDepTrackPoint = link->getDependencyTrackPoint();
+													if (!linkDepTrackPoint || linkDepTrackPoint->getDependencyNode()->getDependencyType() != CDependencyNode::DNTROLEASSERTIONDEPENDENCY) {
+														++nonAssertionLinkCount;
+													}
+												}
+												if (nonAssertionLinkCount > freeCardinality) {
+													expansionBlockingCritical = true;
+												}
+											}
+										}
+
+										if (!locBackendSyncData) {
+											locBackendSyncData = CObjectAllocator< CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+											locBackendSyncData->initSynchronisationData(backendSyncData);
+											indi->setIndividualBackendCacheSynchronisationData(locBackendSyncData);
+										}
+
+										locBackendSyncData->setLastCriticalCardinalityLinkEdge(lastAddedLinkEdge);
+										locBackendSyncData->setCriticalCardinalityExpansionBlocking(expansionBlockingCritical);
+									}
+								}
+							}
+						}
+					}
+
+					return expansionBlockingCritical;
+				}
+
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::testIndividualNodeBackendCacheNeighbourExpansionBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool expansionBlockingCritical = true;
+
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indi->getIndividualBackendCacheSynchronisationData(false);
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indi->getIndividualBackendCacheSynchronisationData(true);
+
+					if (backendSyncData) {
+						if (!backendSyncData->isCriticalNeighbourExpansionBlocking()) {
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
+							if (backendSyncData->isBackendCacheSynchron()) {
+								expansionBlockingCritical = false;
+							} else {
+								CConceptDescriptor* lastTestedConDes = backendSyncData->getLastCriticalNeighbourExpansionTestedConceptDescriptor();
+								CConceptDescriptor* lastSynchedConDes = backendSyncData->getLastSynchronizationTestedConceptDescriptor();
+								CReapplyConceptLabelSet* conSet = indi->getReapplyConceptLabelSet(false);
+								if (conSet) {
+									CConceptDescriptor* conDesLinker = conSet->getAddingSortedConceptDescriptionLinker();
+									if (conDesLinker != lastTestedConDes) {
+										CConceptDescriptor* conDesIt = conDesLinker;
+
+										expansionBlockingCritical = false;
+										while (conDesIt != lastTestedConDes && !expansionBlockingCritical) {
+											CConcept* concept = conDesIt->getConcept();
+											bool conNegation = conDesIt->getNegation();
+											CConceptOperator* conOperator = concept->getConceptOperator();
+											if (!conNegation && conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AQAND_AQALL_TYPE | CConceptOperator::CCFS_ALL_AQALL_TYPE | CConceptOperator::CCFS_PROPAGATION_ALL_TYPE | CConceptOperator::CCF_ATMOST) ||  conNegation && conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_SOME_TYPE | CConceptOperator::CCF_VALUE | CConceptOperator::CCF_ATLEAST)) {
+												if (!mBackendCacheHandler || !mBackendCacheHandler->hasConceptIndividualAssociation(assocData,conDesIt->getConcept(),conDesIt->isNegated(),calcAlgContext)) {
+													expansionBlockingCritical = true;
+												}
+											}
+											conDesIt = conDesIt->getNext();
+										}
+										if (!locBackendSyncData) {
+											locBackendSyncData = CObjectAllocator< CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+											locBackendSyncData->initSynchronisationData(backendSyncData);
+											indi->setIndividualBackendCacheSynchronisationData(locBackendSyncData);
+										}
+										locBackendSyncData->setLastCriticalNeighbourExpansionTestedConceptDescriptor(conDesLinker);
+										locBackendSyncData->setCriticalNeighbourExpansionBlocking(expansionBlockingCritical);
+									}
+								}
+							}
+						}
+					}
+
+					return expansionBlockingCritical;
+				}
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::testIndividualNodeBackendCacheSynchronization(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool backendSynched = true;		
+
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indi->getIndividualBackendCacheSynchronisationData(false);
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indi->getIndividualBackendCacheSynchronisationData(true);
+
+					if (backendSyncData && backendSyncData->isBackendCacheSynchron()) {
+						CConceptDescriptor* lastTestedConDes = backendSyncData->getLastSynchronizationTestedConceptDescriptor();
+						CReapplyConceptLabelSet* conSet = indi->getReapplyConceptLabelSet(false);
+						if (conSet) {
+							CConceptDescriptor* conDesLinker = conSet->getAddingSortedConceptDescriptionLinker();
+							if (conDesLinker != lastTestedConDes) {
+								CConceptDescriptor* conDesIt = conDesLinker;
+								CConceptDescriptor* lastSyncConDes = nullptr;
+								CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
+
+								CConcept* nominalConcept = indi->getNominalIndividual()->getIndividualNominalConcept();
+								while (conDesIt != lastTestedConDes && backendSynched) {
+									if (conDesIt->getConcept() != nominalConcept || conDesIt->isNegated()) {
+										if (!mBackendCacheHandler || !mBackendCacheHandler->hasConceptIndividualAssociation(assocData,conDesIt->getConcept(),conDesIt->isNegated(),calcAlgContext)) {
+											backendSynched = false;
+										}
+									}
+									lastSyncConDes = conDesIt;
+									conDesIt = conDesIt->getNext();
+								}
+								if (!locBackendSyncData) {
+									locBackendSyncData = CObjectAllocator< CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+									locBackendSyncData->initSynchronisationData(backendSyncData);
+									indi->setIndividualBackendCacheSynchronisationData(locBackendSyncData);
+								}
+								locBackendSyncData->setLastSynchronizationTestedConceptDescriptor(conDesLinker);
+								locBackendSyncData->setLastSynchedConceptDescriptor(lastSyncConDes);
+								locBackendSyncData->setBackendCacheSynchron(backendSynched);
+							}
+						} else {
+							backendSynched = false;
+						}
+
+					} else {
+						backendSynched = false;
+					}
+					return backendSynched;
+				}
+
+
+
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::validateBackendSynchronisationContinued(CIndividualProcessNode* indi, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData, CConcept* addedConcept, bool addedConceptNegation, CCalculationAlgorithmContextBase* calcAlgContext) {
+					bool backendSynched = true;			
+
+					if (backendSyncData && backendSyncData->isBackendCacheSynchron()) {
+						CConceptDescriptor* lastTestedConDes = backendSyncData->getLastSynchronizationTestedConceptDescriptor();
+						CReapplyConceptLabelSet* conSet = indi->getReapplyConceptLabelSet(false);
+						if (conSet) {
+							CConceptDescriptor* conDesLinker = conSet->getAddingSortedConceptDescriptionLinker();
+							CConceptDescriptor* conDesIt = conDesLinker;
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
+
+							if (addedConcept && conDesIt != lastTestedConDes) {
+								if (conDesIt->getConcept() == addedConcept || conDesIt->isNegated() == addedConceptNegation) {
+									conDesIt = conDesIt->getNext();
+								}
+							}
+							CConcept* nominalConcept = indi->getNominalIndividual()->getIndividualNominalConcept();
+							while (conDesIt != lastTestedConDes && backendSynched) {
+								if (conDesIt->getConcept() != nominalConcept || conDesIt->isNegated()) {
+									if (!mBackendCacheHandler || !mBackendCacheHandler->hasConceptIndividualAssociation(assocData,conDesIt->getConcept(),conDesIt->isNegated(),calcAlgContext)) {
+										backendSynched = false;
+									}
+								}
+								if (backendSynched) {
+									backendSyncData->setLastSynchedConceptDescriptor(conDesIt);
+								}
+								conDesIt = conDesIt->getNext();
+							}
+							backendSyncData->setLastSynchronizationTestedConceptDescriptor(conDesLinker);
+						} else {
+							backendSynched = false;
+						}
+
+						backendSyncData->setBackendCacheSynchron(backendSynched);
+					} else {
+						backendSynched = false;
+					}
+					return backendSynched;
+				}
+
+
+
 
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::getLocalizedIndividual(cint64 indiID, CCalculationAlgorithmContextBase* calcAlgContext) {
 					return getLocalizedIndividual(getUpToDateIndividual(indiID,calcAlgContext),false,calcAlgContext);
@@ -16345,11 +18783,13 @@ namespace Konclude {
 							localicedIndi->initIndividualProcessNode(indi);
 							indiProcNodeVec->setLocalData(localicedIndi->getIndividualID(),localicedIndi);
 
-							if (calcAlgContext->hasCompletionGraphCachedIndividualNodes()) {
+							if (calcAlgContext->hasCompletionGraphCachedIndividualNodes() && mConfCompletionGraphCaching) {
 								if (localicedIndi->getIndividualID() <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
 									if (indi->getLocalizationTag() <= calcAlgContext->getCompletionGraphCachedLocalizationTag()) {
+										trackIndividualReferredDependence(indi->getIndividualID(),calcAlgContext);
 										localicedIndi->clearProcessingQueued();
 										localicedIndi->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCACHEDCOMPUTEDTYPESADDED);
+										localicedIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
 									}
 								}
 							}
@@ -16782,6 +19222,15 @@ namespace Konclude {
 							processIndi->setIndividualInitializationConcept(conceptDescriptor);
 						}
 					}
+					if (!contained) {
+						if (conceptDescriptor->getConcept()->getOperatorCode() == CCMARKER) {
+							bool nondeterministically = true;
+							if (dependencyTrackPoint && dependencyTrackPoint->getBranchingTag() <= 0) {
+								nondeterministically = false;
+							}
+							calcAlgContext->getProcessingDataBox()->getMarkerIndividualNodeHash(true)->addMarkerIndividualNode(conceptDescriptor->getConcept(),processIndi,nondeterministically);
+						}
+					}
 					if (contained && clashedConceptDescriptor) {
 
 						//mClashedDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext);
@@ -17093,12 +19542,26 @@ namespace Konclude {
 
 				void CCalculationTableauCompletionTaskHandleAlgorithm::addCopiedConceptToProcessingQueue(CConceptProcessDescriptor* copyConProDes, CIndividualProcessNode*& processIndi, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CMemoryAllocationManager* taskMemMan = nullptr;
-					CIndividualProcessNode* locProcessNode = getLocalizedIndividual(processIndi,true,calcAlgContext);
 					taskMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
+
+					if (!processIndi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
+						processIndi = getUpToDateIndividual(processIndi,calcAlgContext);
+						if (!processIndi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
+							STATINC(INDINODELOCALIZEDLOADCOUNT,calcAlgContext);
+							CMemoryAllocationManager* taskMemMan = nullptr;
+							CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+							CIndividualProcessNode* localicedIndi = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,calcAlgContext->getUsedProcessContext());
+							localicedIndi->initIndividualProcessNode(processIndi);
+							indiProcNodeVec->setLocalData(localicedIndi->getIndividualID(),localicedIndi);
+							processIndi = localicedIndi;
+							calcAlgContext->getUsedProcessTagger()->incLocalizationTag();
+						}
+					}
+
 					CConceptProcessDescriptor* conProDes = CObjectAllocator<CConceptProcessDescriptor>::allocateAndConstruct(taskMemMan);
-					CConceptProcessPriority conProPriority = calcAlgContext->getUsedConceptPriorityStrategy()->getPriorityForConcept(copyConProDes->getConceptDescriptor(),locProcessNode);
+					CConceptProcessPriority conProPriority = calcAlgContext->getUsedConceptPriorityStrategy()->getPriorityForConcept(copyConProDes->getConceptDescriptor(),processIndi);
 					conProDes->initCopy(copyConProDes);
-					CConceptProcessingQueue* conceptProcessingQueue = locProcessNode->getConceptProcessingQueue(true);
+					CConceptProcessingQueue* conceptProcessingQueue = processIndi->getConceptProcessingQueue(true);
 					insertConceptProcessDescriptorToProcessingQueue(conProDes,conceptProcessingQueue,processIndi,calcAlgContext);
 				}
 
@@ -17219,9 +19682,29 @@ namespace Konclude {
 					CProcessingDataBox* processingDataBox = calcAlgContext->getProcessingDataBox();
 
 					if (mConfDepthOrientatedProcessing && !individual->isNominalIndividual() && !individual->isExtendedQueueProcessing()) {
+
 						if (!individual->isProcessingQueued()) {
-							CIndividualUnsortedProcessingQueue* depthProcessingQueue = processingDataBox->getIndividualDepthFirstProcessingQueue(true);
-							depthProcessingQueue->insertIndiviudalProcessNode(individual);
+							bool deterministicPreprocessingQueued = false;
+							if (mOptDetExpPreporcessing) {
+								deterministicPreprocessingQueued = true;
+								CConceptProcessingQueue* conProQueue = individual->getConceptProcessingQueue(false);
+								if (!conProQueue) {
+									CConceptProcessPriority conProPri;
+									if (conProQueue->getNextConceptProcessPriority(&conProPri)) {
+										double priority = conProPri.getPriority();
+										if (priority < mDeterministicProcessPriority) {
+											deterministicPreprocessingQueued = false;
+										}
+									}
+								}
+							}
+							if (deterministicPreprocessingQueued) {
+								CIndividualUnsortedProcessingQueue* unPrQueue = processingDataBox->getIndividualDepthFirstDeterministicExpansionProcessingQueue(true);
+								unPrQueue->insertIndiviudalProcessNode(individual);
+							} else {
+								CIndividualUnsortedProcessingQueue* depthProcessingQueue = processingDataBox->getIndividualDepthFirstProcessingQueue(true);
+								depthProcessingQueue->insertIndiviudalProcessNode(individual);
+							}
 							individual->setProcessingQueued(true);
 							individualInserted = true;
 						}
@@ -17323,7 +19806,49 @@ namespace Konclude {
 				}
 
 
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::addIndividualToIncrementalCompatibilityCheckingQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (!individual->isIncrementalCompatibilityCheckingQueued() && individual->isNominalIndividual()) {
+						individual->setIncrementalCompatibilityCheckingQueued(true);
+						CIndividualDepthProcessingQueue* incCompCheckingQueue = calcAlgContext->getProcessingDataBox()->getIncrementalCompatibilityCheckingQueue(true);
+						incCompCheckingQueue->insertProcessIndiviudal(individual);
+						STATINC(INDINODESADDEDPROCESSINGQUEUECOUNT,calcAlgContext);
+						return true;
+					}
+					return false;
+				}
 
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::addIndividualToIncrementalExpansionQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (!individual->isIncrementalExpansionQueued()) {
+						CIndividualNodeIncrementalExpansionData* incExpData = individual->getIncrementalExpansionData(false);
+						if (!incExpData || !incExpData->isIncremetnalExpansionListInitialized()) {
+							individual->setIncrementalExpansionQueued(true);
+							CIndividualDepthProcessingQueue* incExpInitQueue = calcAlgContext->getProcessingDataBox()->getIncrementalExpansionInitializingProcessingQueue(true);
+							incExpInitQueue->insertProcessIndiviudal(individual);
+							STATINC(INDINODESADDEDPROCESSINGQUEUECOUNT,calcAlgContext);
+							return true;
+						} else if (incExpData->requiresFurtherIncrementalExpansion()) {
+							individual->setIncrementalExpansionQueued(true);
+							double nextExpPriority = incExpData->getNextIncrementalExpansionPriority();
+							CIndividualCustomPriorityProcessingQueue* incExpQueue = calcAlgContext->getProcessingDataBox()->getIncrementalExpansionProcessingQueue(true);
+							incExpQueue->insertIndiviudal(nextExpPriority,individual);
+							STATINC(INDINODESADDEDPROCESSINGQUEUECOUNT,calcAlgContext);
+							return true;
+						}
+					}
+					return false;
+				}
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::addIndividualToBackendSynchronisationRetestQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (!individual->isBackendSynchronRetestProcessingQueued()) {
+						individual->setBackendSynchronRetestProcessingQueued(true);
+						CIndividualUnsortedProcessingQueue* backendCacheSyncQueue = calcAlgContext->getProcessingDataBox()->getBackendCacheSynchronizationProcessingQueue(true);
+						backendCacheSyncQueue->insertIndiviudalProcessNode(individual);
+						STATINC(INDINODESADDEDPROCESSINGQUEUECOUNT,calcAlgContext);
+						return true;
+					}
+					return false;
+				}
 
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::addIndividualToBlockingUpdateReviewProcessingQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext) {

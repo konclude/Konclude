@@ -60,8 +60,13 @@
 #include "Reasoner/Query/CQueryInconsitentOntologyError.h"
 #include "Reasoner/Query/CSucceedQueryResult.h"
 #include "Reasoner/Query/CClassSetResult.h"
+#include "Reasoner/Query/CIndividualClassAssertionsResult.h"
+#include "Reasoner/Query/CIndividualSynonymsResult.h"
 
 #include "Reasoner/Kernel/Process/CProcessingStatistics.h"
+
+#include "Config/CConfiguration.h"
+#include "Config/CConfigDataReader.h"
 
 // Other includes
 
@@ -74,6 +79,7 @@ using namespace Konclude::Logger;
 
 namespace Konclude {
 
+	using namespace Config;
 	using namespace Reasoner::Query;
 	using namespace Reasoner::Kernel::Process;
 
@@ -99,7 +105,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						COWLLinkRecordInterpreter(CCommandDelegater *commandDelegater);
+						COWLLinkRecordInterpreter(CCommandDelegater *commandDelegater, CConfiguration* config);
 
 						//! Destructor
 						virtual ~COWLLinkRecordInterpreter();
@@ -156,6 +162,9 @@ namespace Konclude {
 
 						bool mCalculatedWrongResult;
 						bool mRespondQueryStatistics;
+
+						CConfiguration* mConfig;
+						bool mConfExtendedErrorReporting;
 
 					// private methods
 					private:

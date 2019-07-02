@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,13 +29,15 @@
 #include "CPrecomputationTestingItem.h"
 
 // Other includes
-
+#include "Utilities/UtilitiesSettings.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
 
 
 namespace Konclude {
+
+	using namespace Utilities;
 
 	namespace Reasoner {
 
@@ -54,15 +56,19 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CSaturationPrecomputationTestingItem(COntologyPrecomputationItem* preCompItem);
+					CSaturationPrecomputationTestingItem(COntologyPrecomputationItem* preCompItem, CPrecomputationTestingItem::PRECOMPUTATIONTYPE precomputationType, cint64 saturationID = 0);
 
 					virtual PRECOMPUTATIONTYPE getPrecomputationTestingType();
+
+					cint64 getSaturationID();
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					cint64 mSaturationID;
+					PRECOMPUTATIONTYPE mPrecomputationType;
 
 				// private methods
 				private:

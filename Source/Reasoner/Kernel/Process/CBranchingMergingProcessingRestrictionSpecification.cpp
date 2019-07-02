@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -53,6 +53,8 @@ namespace Konclude {
 					mInitMergingNodesClashes = nullptr;
 					mMultipleInitMergingNodesClashes = nullptr;
 
+					mDistinctSetNodeRelocated = false;
+
 					//mList.clear();
 					//mList.append(QString(""));
 					//mList.append(QString(""));
@@ -87,9 +89,11 @@ namespace Konclude {
 						mMergingDependencyNode = prevRest->mMergingDependencyNode;
 						mInitMergingNodesClashes = prevRest->mInitMergingNodesClashes;
 						mMultipleInitMergingNodesClashes = prevRest->mMultipleInitMergingNodesClashes;
+						mDistinctSetNodeRelocated = prevRest->mDistinctSetNodeRelocated;
 
 						//mList = prevRest->mList;
 					} else {
+						mDistinctSetNodeRelocated = false;
 						mDistinctMergedNodesSet = nullptr;
 						mMergingNodesLinker = nullptr;
 						mNominalMergingNodesLinker = nullptr;
@@ -389,6 +393,17 @@ namespace Konclude {
 				CClashedDependencyDescriptor* CBranchingMergingProcessingRestrictionSpecification::getMultipleMergingNodesInitializationClashesDescriptors() {
 					return mMultipleInitMergingNodesClashes;
 				}
+
+
+				bool CBranchingMergingProcessingRestrictionSpecification::isDistinctSetNodeRelocated() {
+					return mDistinctSetNodeRelocated;
+				}
+
+				CBranchingMergingProcessingRestrictionSpecification* CBranchingMergingProcessingRestrictionSpecification::setDistinctSetNodeRelocated(bool distinctSetNodeRelocated) {
+					mDistinctSetNodeRelocated = distinctSetNodeRelocated;
+					return this;
+				}
+
 
 				//bool CBranchingMergingProcessingRestrictionSpecification::addIndividualToContainer(cint64 container, cint64 individual) {
 				//	QString insertString;

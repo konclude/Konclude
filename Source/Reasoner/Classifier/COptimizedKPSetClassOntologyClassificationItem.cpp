@@ -109,7 +109,7 @@ namespace Konclude {
 				item = mConceptSatItemHash.value(satTestConcept);
 				if (!item && create) {
 					item = new COptimizedKPSetClassTestingItem();
-					item->initSatisfiableTestingItem(satTestConcept);
+					item->initSatisfiableTestingItem(satTestConcept,&mConceptRefLinkData);
 					mConceptSatItemHash.insert(satTestConcept,item);
 					mSatTestItemContainer.append(item);
 				}
@@ -165,7 +165,7 @@ namespace Konclude {
 			}
 
 
-			QHash<CConcept*,CConceptReferenceLinking*>* COptimizedKPSetClassOntologyClassificationItem::getConceptReferenceLinkingDataHash() {
+			QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* COptimizedKPSetClassOntologyClassificationItem::getConceptReferenceLinkingDataHash() {
 				return &mConceptRefLinkData;
 			}
 

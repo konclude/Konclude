@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -55,7 +55,7 @@ namespace Konclude {
 			class CPrecomputationTestingStep {
 				// public methods
 				public:
-					enum TESTINGSTEPTYPE { CONSISTENCYPRECOMPUTATIONSTEP, CYCLEPRECOMPUTATIONSTEP, SATURATIONPRECOMPUTATIONSTEP };
+					enum TESTINGSTEPTYPE { CONSISTENCYPRECOMPUTATIONSTEP, CYCLEPRECOMPUTATIONSTEP, SATURATIONPRECOMPUTATIONSTEP, INDIVIDUALPRECOMPUTATIONSTEP };
 
 					//! Constructor
 					CPrecomputationTestingStep(TESTINGSTEPTYPE testingStepType, COntologyProcessingStepData* processingStepData, COntologyPrecomputationItem* precompItem);

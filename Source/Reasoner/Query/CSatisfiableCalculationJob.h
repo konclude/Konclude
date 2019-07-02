@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,10 +32,13 @@
 // Other includes
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
 #include "Reasoner/Kernel/Task/CCalculationStatisticsCollector.h"
-#include "Reasoner/Kernel/Task/CSatisfiableSubsumptionIdentifierAdapter.h"
 #include "Reasoner/Kernel/Task/CTaskPreyingAdapter.h"
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationJobInstantiation.h"
 #include "Reasoner/Kernel/Task/CSatisfiableTaskClassificationMessageAdapter.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskIncrementalConsistencyTestingAdapter.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskIndividualDependenceTrackingAdapter.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -85,15 +88,26 @@ namespace Konclude {
 					CSatisfiableCalculationJob* setSatisfiableTaskPreyingAdapter(CTaskPreyingAdapter* preyingAdapter);
 					CTaskPreyingAdapter* getSatisfiableTaskPreyingAdapter();
 
-					CSatisfiableCalculationJob* setSatisfiableSubsumptionIdentifierAdapter(CSatisfiableSubsumptionIdentifierAdapter* satSubIdObserver);
-					CSatisfiableSubsumptionIdentifierAdapter* getSatisfiableSubsumptionIdentifierAdapter();
-
 					CSatisfiableCalculationJob* setSatisfiableClassificationMessageAdapter(CSatisfiableTaskClassificationMessageAdapter* classMessObserver);
 					CSatisfiableTaskClassificationMessageAdapter* getSatisfiableClassificationMessageAdapter();
 
 					CSatisfiableCalculationJobInstantiation* getConsecutivelyCalculationJobInstantiation();
 					CSatisfiableCalculationJob* setConsecutivelyCalculationJobInstantiation(CSatisfiableCalculationJobInstantiation* jobInstantiation);
 
+
+					CSatisfiableCalculationJob* setSatisfiableTaskIncrementalConsistencyTestingAdapter(CSatisfiableTaskIncrementalConsistencyTestingAdapter* incConsTestAdaptor);
+					CSatisfiableTaskIncrementalConsistencyTestingAdapter* getSatisfiableTaskIncrementalConsistencyTestingAdapter();
+
+
+					CSatisfiableCalculationJob* setRealizationMarkedCandidatesMessageAdapter(CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* realMessObserver);
+					CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* getRealizationMarkedCandidatesMessageAdapter();
+
+					CSatisfiableCalculationJob* setSatisfiableTaskIndividualDependenceTrackingAdapter(CSatisfiableTaskIndividualDependenceTrackingAdapter* indDepTrackAdaptor);
+					CSatisfiableTaskIndividualDependenceTrackingAdapter* getSatisfiableTaskIndividualDependenceTrackingAdapter();
+
+
+					CSatisfiableCalculationJob* setPossibleAssertionCollectionAdapter(CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* possAssCollAdapter);
+					CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* getPossibleAssertionCollectionAdapter();
 
 					cint64 getNextRelativeNodeID(bool moveNext = true);
 
@@ -108,9 +122,12 @@ namespace Konclude {
 					CCalculationConfigurationExtension* mCalculationConfiguration;
 					CCalculationStatisticsCollector* mCalclulationStatisticsCollector;
 					CTaskPreyingAdapter* mPreyingAdapter;
-					CSatisfiableSubsumptionIdentifierAdapter* mSatSubIdAdapter;
 					CSatisfiableCalculationJobInstantiation* mJobInstantiation;
 					CSatisfiableTaskClassificationMessageAdapter* mSatClassMessAdapter;
+					CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* mRealMarkCandMessAdapter;
+					CSatisfiableTaskIncrementalConsistencyTestingAdapter* mSatIncConsTestingAdapter;
+					CSatisfiableTaskIndividualDependenceTrackingAdapter* mSatIndDepTrackAdapter;
+					CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* mPossAssCollAdapter;
 
 				// private methods
 				private:

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -112,6 +112,9 @@ namespace Konclude {
 
 					CBOXHASH<CRole*,CConcept*>* getRoleDomainTriggerConceptHash(bool create = true);
 
+					CBOXHASH<cint64,CConcept*>* getIndividualTriggerConceptHash(bool create = true);
+
+
 					cint64 getTopConceptIndex();
 					cint64 getBottomConceptIndex();
 					cint64 getIndividualTriggerConceptIndex();
@@ -149,6 +152,7 @@ namespace Konclude {
 					CBOXSET<CConcept*>* mEquivConNonCandidateSet;
 
 					CBOXHASH<CRole*,CConcept*>* mRoleDomainTriggerConceptHash;
+					CBOXHASH<cint64,CConcept*>* mIndividualTriggerConceptHash;
 
 					cint64 mTopConceptIndex;
 					cint64 mBottomConceptIndex;

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -108,6 +108,7 @@ namespace Konclude {
 				mCandidateEquivConHash = tBox->getCandidateEquivalentConceptHash(true);
 				mEquivConNonCandidateSet = tBox->getEquivalentConceptNonCandidateSet(true);
 				mRoleDomainTriggerConceptHash = tBox->getRoleDomainTriggerConceptHash(false);
+				mIndividualTriggerConceptHash = tBox->getIndividualTriggerConceptHash(false);
 
 				mBranchTriggVec = mBox->getBranchingTriggerVector();
 				mNomSchemaTemplVec = mBox->getNominalSchemaTemplateVector(false);
@@ -126,6 +127,25 @@ namespace Konclude {
 				mStatGCIPartialAbsorbed = 0;
 				mStatReusedImplications = 0;
 				mStatOptimizedRemovedTriggers = 0;
+
+
+				if (ontology->getIncrementalRevisionData()->isIncrementalOntology()) {
+					if (ontology->getIncrementalRevisionData()->getAxiomChangeData()->hasChangedABoxAxioms()) {
+						CIndividualVector* indiVec = aBox->getIndividualVector(false);
+						if (indiVec && mIndividualTriggerConceptHash) {
+							for (CBOXHASH<cint64,CConcept*>::const_iterator it = mIndividualTriggerConceptHash->constBegin(), itEnd = mIndividualTriggerConceptHash->constEnd(); it != itEnd; ++it) {
+								cint64 indiID = it.key();
+								CConcept* triggerConcept = it.value();
+								CIndividual* locIndi = indiVec->getLocalData(indiID);
+								if (locIndi) {
+									CConceptAssertionLinker* assLinker = CObjectAllocator< CConceptAssertionLinker >::allocateAndConstruct(mMemMan);
+									assLinker->initNegLinker(triggerConcept,false);
+									locIndi->addAssertionConceptLinker(assLinker);
+								}
+							}
+						}
+					}					
+				}
 
 
 				if (mConfAbsorbEqClassDefinitions) {
@@ -357,6 +377,7 @@ namespace Konclude {
 				asorbForallsToRanges(topConcept);
 
 
+				mStatInvRolesGenerated = mRoleInverseRoleCreateHash.count();
 				CConcreteOntologyInverseRoleBuilder::createDelayedInverseRoles(&mRoleInverseRoleCreateHash,mOnto);
 
 
@@ -585,7 +606,7 @@ namespace Konclude {
 						cint64 opCode = concept->getOperatorCode();
 						CConceptOperator* conOperator = concept->getConceptOperator();
 						CSortedNegLinker<CConcept*>* opConLinker = concept->getOperandList();
-						if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AND_AQAND_TYPE) || conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE) || opCode == CCEQ || opCode == CCSUB || opCode == CCAQSOME || opCode == CCSOME) {
+						if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AND_AQAND_TYPE) || conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE) || opCode == CCEQ || !negated && opCode == CCSUB || opCode == CCAQSOME || opCode == CCSOME) {
 							CSortedNegLinker<CConcept*>* opConLinkerIt = opConLinker;
 							while (opConLinkerIt) {
 								CConcept* opConcept = opConLinkerIt->getData();
@@ -2330,6 +2351,11 @@ namespace Konclude {
 						assLinker->initNegLinker(nextLevelTriggerConcept,false);
 						locatedIndividual->addAssertionConceptLinker(assLinker);
 
+						if (!mIndividualTriggerConceptHash) {
+							mIndividualTriggerConceptHash = mTBox->getIndividualTriggerConceptHash(true);
+						}
+						mIndividualTriggerConceptHash->insertMulti(individual->getIndividualID(),nextLevelTriggerConcept);
+
 
 						CConceptTriggerLinker* newTrigger = createTriggerLinker();
 						newTrigger->initConceptTriggerLinker(propagatedTriggerConcept,triggerComplexity);
@@ -2353,6 +2379,12 @@ namespace Konclude {
 						CConceptAssertionLinker* assLinker = CObjectAllocator< CConceptAssertionLinker >::allocateAndConstruct(mMemMan);
 						assLinker->initNegLinker(nominalTriggerConcept,false);
 						locatedIndividual->addAssertionConceptLinker(assLinker);
+
+						if (!mIndividualTriggerConceptHash) {
+							mIndividualTriggerConceptHash = mTBox->getIndividualTriggerConceptHash(true);
+						}
+						mIndividualTriggerConceptHash->insertMulti(individual->getIndividualID(),nominalTriggerConcept);
+
 
 						CConceptTriggerLinker* newTrigger = createTriggerLinker();
 						newTrigger->initConceptTriggerLinker(nominalTriggerConcept,triggerComplexity);
@@ -3312,6 +3344,10 @@ namespace Konclude {
 									}
 								}
 							}
+							if (opCode == CCEQ) {
+								CConceptTriggerLinker* implTriggers = getImplicationTriggeredConceptForTriggers(andTriggers,nullptr);
+								andTriggers = implTriggers;
+							}
 							if (andTriggers) {
 								triggers = andTriggers->append(triggers);
 							}
@@ -3404,6 +3440,10 @@ namespace Konclude {
 						assLinker->initNegLinker(nextLevelTriggerConcept,false);
 						locatedIndividual->addAssertionConceptLinker(assLinker);
 
+						if (!mIndividualTriggerConceptHash) {
+							mIndividualTriggerConceptHash = mTBox->getIndividualTriggerConceptHash(true);
+						}
+						mIndividualTriggerConceptHash->insertMulti(individual->getIndividualID(),nextLevelTriggerConcept);
 
 						CConceptTriggerLinker* newTrigger = createTriggerLinker();
 						newTrigger->initConceptTriggerLinker(propagatedTriggerConcept,triggerComplexity);
@@ -3425,6 +3465,11 @@ namespace Konclude {
 						CConceptAssertionLinker* assLinker = CObjectAllocator< CConceptAssertionLinker >::allocateAndConstruct(mMemMan);
 						assLinker->initNegLinker(nominalTriggerConcept,false);
 						locatedIndividual->addAssertionConceptLinker(assLinker);
+
+						if (!mIndividualTriggerConceptHash) {
+							mIndividualTriggerConceptHash = mTBox->getIndividualTriggerConceptHash(true);
+						}
+						mIndividualTriggerConceptHash->insertMulti(individual->getIndividualID(),nominalTriggerConcept);
 
 						CConceptTriggerLinker* newTrigger = createTriggerLinker();
 						newTrigger->initConceptTriggerLinker(nominalTriggerConcept,triggerComplexity);
@@ -3649,7 +3694,7 @@ namespace Konclude {
 						bool opNegated = opConLinkerIt->isNegated()^negated;
 
 						cint64 opOpCode = opConcept->getOperatorCode();
-						if (!opNegated && opOpCode == CCOR || opNegated && (opOpCode == CCAND || opOpCode == CCEQ)) {
+						if (!opNegated && opOpCode == CCOR || opNegated && (opOpCode == CCAND)) {
 							absorbableDisjuncts |= addAbsorbableDisjunctCandidates(opConcept,opNegated,list);
 						} else {
 							list.append(TConceptNegationPair(opConcept,opNegated));

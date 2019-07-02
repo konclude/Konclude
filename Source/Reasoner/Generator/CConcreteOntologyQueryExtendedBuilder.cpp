@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -192,9 +192,7 @@ namespace Konclude {
 
 				CSatisfiableCalculationJobGenerator* satCalcJobGenerator = new CSatisfiableCalculationJobGenerator(mOntology);
 
-				bool confBuildQueryStats = true;
-
-
+				bool confBuildQueryStats = CConfigDataReader::readConfigBoolean(config,"Konclude.Query.Statistics.CollectStatistics",false);
 
 				foreach (CQueryAreClassesEquivalentExpression *classEqExp, classEqExpList) {
 					QString queryName = classEqExp->getName();
@@ -394,9 +392,9 @@ namespace Konclude {
 							CClassAssertionExpression* classAssAxiom = dynamic_cast<CClassAssertionExpression*>(axiomExpression);
 							if (classAssAxiom) {
 								CIndividual* individual = getIndividualFromBuildExpression(classAssAxiom->getIndividualTermExpression());
-								CConcept* concept = getConceptFromBuildExpression(entAxiExpAss->takeNextConstructedTestClass());
+								CConcept* concept = getConceptFromBuildExpression(classAssAxiom->getClassTermExpression());
 								if (concept && individual) {
-									CSatisfiableCalculationJob* satCalcJob = satCalcJobGenerator->getSatisfiableCalculationJob(concept,concept->hasMappingNegation(),individual);
+									CSatisfiableCalculationJob* satCalcJob = satCalcJobGenerator->getSatisfiableCalculationJob(concept,!concept->hasMappingNegation(),individual);
 									if (confBuildQueryStats) {
 										satCalcJob->setCalclulationStatisticsCollector(queryStats->createCalculationStatisticsCollection());
 									}
@@ -408,8 +406,11 @@ namespace Konclude {
 					}
 					query->setQueryStatistics(queryStats);
 
-					queryList.append(query);
-					LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated AreEntailed-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					if (!query->getJobList().isEmpty()) {
+						queryList.append(query);
+						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated AreEntailed-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					}
+					LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Failed to generate AreEntailed-Query '%1'.").arg(query->getQueryName()),this);
 
 					delete isEntailedExp;
 				}

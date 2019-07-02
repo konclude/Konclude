@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -37,7 +37,7 @@ namespace Konclude {
 				}
 			}
 
-			bool CPrecomputedSaturationSubsumerExtractor::extractSubsumers(CConcept* concept, CConceptSubsumerObserver* subsumerObserver, bool* possibleSubsumerFlag) {
+			bool CPrecomputedSaturationSubsumerExtractor::extractSubsumers(CConcept* concept, CConceptSubsumerObserver* subsumerObserver, bool* possibleSubsumerFlag, CIndividualDependenceTrackingObserver* indDepTrackingObserver, CIndividualDependenceTrackingMarker* indiDepTrackMarker) {
 				if (mSatCalcTask) {
 					CProcessingDataBox* procDataBox = mSatCalcTask->getProcessingDataBox();
 					CConceptProcessData* conProData = (CConceptProcessData*)concept->getConceptData();
@@ -77,6 +77,44 @@ namespace Konclude {
 															}
 														}
 													}
+												}
+											}
+										}
+									}
+									if (indiDepTrackMarker) {
+										CSuccessorConnectedNominalSet* succConnNomSet = indiNode->getSuccessorConnectedNominalSet(false);
+										if (succConnNomSet) {
+											indiDepTrackMarker->setIndividualDependenceTracked();
+										}
+									}
+									if (indDepTrackingObserver) {
+										CSuccessorConnectedNominalSet* succConnNomSet = indiNode->getSuccessorConnectedNominalSet(false);
+										if (succConnNomSet) {
+											CIndividualDependenceTracking* indiDepTracking = indDepTrackingObserver->getExtendingIndividualDependenceTracking();
+											CReferredIndividualTrackingVector* refIndiDepTrackVec = nullptr;
+											if (indiDepTracking) {
+												refIndiDepTrackVec = dynamic_cast<CReferredIndividualTrackingVector*>(indiDepTracking);
+											}
+											if (!refIndiDepTrackVec) {
+												cint64 trackIndiCount = mOntology->getABox()->getIndividualCount();
+												CConsistenceData* consData = mOntology->getConsistence()->getConsistenceModelData();
+												if (consData) {
+													CConsistenceTaskData* consTaskData = dynamic_cast<CConsistenceTaskData*>(consData);
+													if (consTaskData) {
+														CSatisfiableCalculationTask* cachedSatTask = consTaskData->getDeterministicSatisfiableTask();
+														if (cachedSatTask) {
+															trackIndiCount = qMax(trackIndiCount,cachedSatTask->getProcessingDataBox()->getIndividualProcessNodeVector()->getItemCount());
+														}
+													}
+												}
+												refIndiDepTrackVec = new CReferredIndividualTrackingVector();
+												refIndiDepTrackVec->initReferredIndividualTrackingVector(trackIndiCount);
+												refIndiDepTrackVec = dynamic_cast<CReferredIndividualTrackingVector*>(indDepTrackingObserver->installIndividualDependenceTracking(refIndiDepTrackVec));
+											}
+											if (refIndiDepTrackVec) {
+												for (CSuccessorConnectedNominalSet::const_iterator it = succConnNomSet->constBegin(), itEnd = succConnNomSet->constEnd(); it != itEnd; ++it) {
+													cint64 nominalIndiID(*it);
+													refIndiDepTrackVec->setIndividualReferred(nominalIndiID);
 												}
 											}
 										}
@@ -226,7 +264,7 @@ namespace Konclude {
 			}
 
 
-			bool CPrecomputedSaturationSubsumerExtractor::getConceptFlags(CConcept* concept, bool* unsatisfiableFlag, bool* insufficientFlag) {
+			bool CPrecomputedSaturationSubsumerExtractor::getConceptFlags(CConcept* concept, bool* unsatisfiableFlag, bool* insufficientFlag, bool* incompleteProcessedFlag) {
 				if (mSatCalcTask) {
 					CProcessingDataBox* procDataBox = mSatCalcTask->getProcessingDataBox();
 					CConceptProcessData* conProData = (CConceptProcessData*)concept->getConceptData();
@@ -241,12 +279,16 @@ namespace Konclude {
 									while (indiNode->hasSubstituteIndividualNode()) {
 										indiNode = indiNode->getSubstituteIndividualNode();
 									}
+									CIndividualSaturationProcessNodeStatusFlags* baseFlags = baseIndiNode->getIndirectStatusFlags();
 									CIndividualSaturationProcessNodeStatusFlags* flags = indiNode->getIndirectStatusFlags();
-									if (flags->hasClashedFlag() && unsatisfiableFlag) {
+									if ((baseFlags->hasClashedFlag() || flags->hasClashedFlag()) && unsatisfiableFlag) {
 										*unsatisfiableFlag = true;
 									}
-									if (flags->hasInsufficientFlag() && insufficientFlag) {
+									if ((baseFlags->hasInsufficientFlag() || flags->hasInsufficientFlag()) && insufficientFlag) {
 										*insufficientFlag = true;
+									}
+									if ((baseFlags->hasUnprocessedFlag() || flags->hasUnprocessedFlag()) && incompleteProcessedFlag) {
+										*incompleteProcessedFlag = true;
 									}
 									return true;
 								}

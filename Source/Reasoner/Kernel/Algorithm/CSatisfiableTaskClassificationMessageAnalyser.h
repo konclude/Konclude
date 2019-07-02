@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -92,7 +92,7 @@ namespace Konclude {
 						bool readCalculationConfig(CCalculationConfigurationExtension *config);
 						bool analyseSatisfiableTask(CSatisfiableCalculationTask* statCalcTask, CCalculationAlgorithmContext* calcAlgContext);
 
-						CIndividualProcessNode* getCorrectedIndividualID(CIndividualProcessNode* baseIndiNode, CIndividualProcessNodeVector* indiNodeVec);
+						CIndividualProcessNode* getCorrectedIndividualID(CIndividualProcessNode* baseIndiNode, CIndividualProcessNodeVector* indiNodeVec, bool* nondetMergedFlag);
 
 
 						void checkCanHaveClashWithModel(CIndividualProcessNode* indiNode, CConcept* concept, bool negated, bool& clashFoundFlag, bool& unknownFlag, bool& clashFreeFlag, cint64 depth, QSet<CIndividualProcessNode*>* testedIndividualsSet, CIndividualProcessNode* lastNode, CIndividualProcessNodeVector* indiNodeVec);
@@ -197,7 +197,7 @@ namespace Konclude {
 
 						CPROCESSINGHASH< CConcept*,CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* >* mMultiplePossSubsumInitAvoidHash;
 						bool mUseAlwaysConRefLinkDataHash;
-						QHash<CConcept*,CConceptReferenceLinking*>* mConRefLinkDataHash;
+						QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* mConRefLinkDataHash;
 						CTaskMemoryPoolAllocationManager* mTempMemAllocMan;
 						CContextBase* mTmpContext;
 						CSatisfiableCalculationTask* mStatCalcTask;

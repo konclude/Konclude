@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -35,9 +35,25 @@ namespace Konclude {
 
 
 				CSaturationNodeAssociatedExpansionCacheEntry* CSaturationNodeAssociatedExpansionCacheReader::getCacheEntry(CIndividualSaturationProcessNode* saturationNode) {
-					CSaturationNodeAssociatedExpansionCacheEntry* cacheEntry = (CSaturationNodeAssociatedExpansionCacheEntry*)saturationNode->getCacheExpansionData();
+					CSaturationNodeAssociatedExpansionCacheEntry* cacheEntry = nullptr;
+					if (saturationNode) {
+						cacheEntry = (CSaturationNodeAssociatedExpansionCacheEntry*)saturationNode->getCacheExpansionData();
+					}
 					return cacheEntry;
 				}
+
+
+				const CCacheValue CSaturationNodeAssociatedExpansionCacheReader::getCacheValue(CConcept* concept, bool negation) {
+					cint64 conTag = concept->getConceptTag();
+					CCacheValue::CACHEVALUEIDENTIFIER cacheValueIdentifier = CCacheValue::CACHEVALTAGANDCONCEPT;
+					if (negation) {
+						cacheValueIdentifier = CCacheValue::CACHEVALTAGANDNEGATEDCONCEPT;
+					}
+					CCacheValue cacheValue;
+					cacheValue.initCacheValue(conTag,(cint64)concept,cacheValueIdentifier);
+					return cacheValue;
+				}
+
 
 
 			}; // end namespace Cache

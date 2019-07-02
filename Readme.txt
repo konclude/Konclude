@@ -86,7 +86,7 @@ directory. See http://konclude.com/ for detailed usage instructions.
 	Furthermore, all OWL 2 ontologies/axioms used in LoadOntologies/Tell 
 	commands must be in the OWL 2 XML [1] or in the OWL 2 Functional Style [2] 
 	format and Konclude does currently NOT process annotations. The protege 
-	editor [3] can be used to convert OWL 2 ontologies between different 
+	editor [2] can be used to convert OWL 2 ontologies between different 
 	formats.
 	
 
@@ -145,6 +145,10 @@ has to be executed/called.
 
 CHANGELOG
 ===========
+
+Konclude v0.6.1:
+	- Several bug fixes.
+	- Minor performance improvements.
 
 Konclude v0.6.0:
 	- Several fixed bugs and memory leaks.

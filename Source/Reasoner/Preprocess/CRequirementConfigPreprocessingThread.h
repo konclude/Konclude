@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -88,6 +88,9 @@ namespace Konclude {
 					virtual bool finishOntologyPreprocessing(CRequirementConfigPreprocessingItem* totallyPreCompItem);
 					virtual bool preprocessingTested(COntologyPreprocessingItem* ontPreCompItem, CPreprocessingTestingItem* preTestItem, CPreprocessingCalculatedCallbackEvent* pcce);
 
+					CConcreteOntology* searchPreviousConsistentOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem);
+					CConcreteOntology* searchPreviousClassesClassifiedOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem);
+					CConcreteOntology* searchPreviousClassRealizedOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem);
 
 
 					virtual bool createBuild(CRequirementConfigPreprocessingItem* reqConfPreCompItem);

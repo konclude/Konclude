@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -367,6 +367,16 @@ namespace Konclude {
 					return depNode;
 				}
 
+				CROLEASSERTIONDependencyNode* CDependencyFactory::createROLEASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CROLEASSERTIONDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CROLEASSERTIONDependencyNode,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
+						depNode->initROLEASSERTIONDependencyNode(processIndi,prevDepTrackPoint,nominalDepTrackPoint);
+						roleAssDepTrackPoint = depNode->getContinueDependencyTrackPoint();
+					}
+					return depNode;
+				}
+
 				CNEGVALUEDependencyNode* CDependencyFactory::createNEGVALUEDependency(CDependencyTrackPoint*& negValueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
 					CNEGVALUEDependencyNode* depNode = nullptr;
 					if (mConfBuildDependencies) {
@@ -559,6 +569,17 @@ namespace Konclude {
 					if (mConfBuildDependencies) {
 						depNode = CObjectParameterizingAllocator< CDATATYPECONNECTIONDependencyNode,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
 						depNode->initDATATYPECONNECTIONDependencyNode(prevDepTrackPoint);
+					}
+					return depNode;
+				}
+
+
+				CMERGEDIndividualDependencyNode* CDependencyFactory::createMERGEDINDIVIDUALDependency(CDependencyTrackPoint*& mergedIndividualContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* individualPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CMERGEDIndividualDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CMERGEDIndividualDependencyNode,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
+						depNode->initMERGEDIndividualDependencyNode(processIndi,mergePrevDepTrackPoint,individualPrevDepTrackPoint);
+						mergedIndividualContinueDepTrackPoint = depNode->getContinueDependencyTrackPoint();
 					}
 					return depNode;
 				}

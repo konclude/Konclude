@@ -138,9 +138,6 @@ namespace Konclude {
 
 				CConceptDescriptor* CIndividualProcessNodeValueSpaceHandler::addConceptLinker(CIndividualProcessNode* indiProcNode, CConceptDescriptor* appendConceptLinker, CDatatypeValueSpaceConceptTriggerLinker* triggeringConceptLinker, CDependencyTrackPoint* depTrackPoint, CDatatypeDependencyCollection* depCollection, CCalculationAlgorithmContext* calcAlgContext) {
 					CConceptDescriptor* conceptTriggerLinker = appendConceptLinker;
-					if (!depTrackPoint) {
-						bool bug = true;
-					}
 					for (CDatatypeValueSpaceConceptTriggerLinker* triggeringConceptLinkerIt = triggeringConceptLinker; triggeringConceptLinkerIt; triggeringConceptLinkerIt = triggeringConceptLinkerIt->getNext()) {
 						CConcept* triggerConcept = triggeringConceptLinkerIt->getTriggerConcept();
 						if (!hasConceptTriggered(indiProcNode,triggerConcept,calcAlgContext)) {

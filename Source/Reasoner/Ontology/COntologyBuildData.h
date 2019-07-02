@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,7 @@
 #include "CRole.h"
 #include "CIndividual.h"
 #include "COntologyImportData.h"
+#include "COntologyBuildExpressionCounter.h"
 
 
 // Other includes
@@ -180,6 +181,7 @@ namespace Konclude {
 
 					CBUILDHASH<CStringRefStringHasher,COntologyImportData*>* getImportDataHash();
 
+					COntologyBuildExpressionCounter* getBuildExpressionCounter();
 
 
 				// protected methods
@@ -188,6 +190,9 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COntologyContext* mOntoContext;
+
+
+					COntologyBuildExpressionCounter mExpressionCounter;
 
 					// contains also previous ontology data
 					CONTOLOGYAXIOMSET<CAxiomExpression*>* mTellAxiomSet;

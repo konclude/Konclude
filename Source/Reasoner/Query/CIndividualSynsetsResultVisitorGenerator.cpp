@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -33,6 +33,13 @@ namespace Konclude {
 				mAbbreviatedIRIs = abbreviatedIRIs;
 			}
 
+			bool CIndividualSynsetsResultVisitorGenerator::visitRoleInstance(CRoleInstanceItem* item, CRoleRealization* roleRealization) {
+				mTmpIndividualSynsetResult = new CIndividualSynsetResult();
+				roleRealization->visitIndividuals(item,this);
+				mIndividualSynsetsResult->addIndividualSynset(mTmpIndividualSynsetResult);
+				return true;
+			}
+
 
 			bool CIndividualSynsetsResultVisitorGenerator::visitInstance(CConceptInstanceItem* item, CConceptRealization* conRealization) {
 				mTmpIndividualSynsetResult = new CIndividualSynsetResult();
@@ -43,7 +50,7 @@ namespace Konclude {
 
 			bool CIndividualSynsetsResultVisitorGenerator::visitIndividual(CIndividual* individual, CConceptRealization* conRealization) {
 				QString individualString;
-				if (individualString.isEmpty()) {
+				if (mAbbreviatedIRIs) {
 					individualString = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
 				} 
 				if (individualString.isEmpty()) {
@@ -54,6 +61,22 @@ namespace Konclude {
 				}
 				return true;
 			}
+
+
+			bool CIndividualSynsetsResultVisitorGenerator::visitIndividual(CIndividual* individual, CRoleRealization* roleRealization) {
+				QString individualString;
+				if (mAbbreviatedIRIs) {
+					individualString = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
+				} 
+				if (individualString.isEmpty()) {
+					individualString = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
+				}
+				if (!individualString.isEmpty()) {
+					mTmpIndividualSynsetResult->addEquivalentIndividualName(individualString);
+				}
+				return true;
+			}
+
 
 		}; // end namespace Query
 

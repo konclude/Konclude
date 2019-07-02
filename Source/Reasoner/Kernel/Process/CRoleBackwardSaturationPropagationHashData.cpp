@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -35,6 +35,8 @@ namespace Konclude {
 					mReapplyLinker = nullptr;
 					mSelfConnected = false;
 					mRoleALLConceptsProcessingQueued = false;
+					mRolePredecessorMergingProcessingQueued = false;
+					mRolePredecessorMergingQueuingRequired = false;
 				}
 
 
@@ -43,6 +45,8 @@ namespace Konclude {
 					mReapplyLinker = data.mReapplyLinker;
 					mSelfConnected = data.mSelfConnected;
 					mRoleALLConceptsProcessingQueued = false;
+					mRolePredecessorMergingProcessingQueued = false;
+					mRolePredecessorMergingQueuingRequired = false;
 				}
 
 

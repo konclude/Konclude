@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -109,6 +109,8 @@ namespace Konclude {
 				expression = parseGetTypesNode(node);
 			} else  if (nodeString == "GetFlattenedInstances") {
 				expression = parseGetFlattenedInstancesNode(node);
+			} else  if (nodeString == "GetSameIndividuals") {
+				expression = parseGetSameIndividualsNode(node);
 			} else  if (nodeString == "GetInstances") {
 				expression = parseGetInstancesNode(node);
 			} else  if (nodeString == "GetSubClasses") {
@@ -119,6 +121,20 @@ namespace Konclude {
 				expression = parseGetEquivalentClassesNode(node);
 			} else  if (nodeString == "IsEntailed") {
 				expression = parseIsEntailedNode(node);
+			} else  if (nodeString == "GetObjectPropertyTargets") {
+				expression = parseGetObjectPropertyTargetsNode(node);
+			} else  if (nodeString == "GetFlattenedObjectPropertyTargets") {
+				expression = parseGetFlattenedObjectPropertyTargetsNode(node);
+
+			} else  if (nodeString == "GetDeterministicIndividuals") {
+				expression = parseGetDeterministicIndividualsNode(node);
+			} else  if (nodeString == "GetNondeterministicIndividuals") {
+				expression = parseGetNondeterministicIndividualsNode(node);
+			} else  if (nodeString == "GetDeterministicClassAssertions" || nodeString == "GetKnownClassAssertions") {
+				expression = parseGetDeterministicClassAssertionsNode(node);
+			} else  if (nodeString == "GetNondeterministicClassAssertions" || nodeString == "GetPossibleClassAssertions") {
+				expression = parseGetNondeterministicClassAssertionsNode(node);
+
 			} else if (nodeString == "#text") {
 				// ignoring text nodes
 			} else {
@@ -132,17 +148,7 @@ namespace Konclude {
 
 		CQueryIsClassSatisfiableExpression *COWLlinkQueryParser::parseIsClassSatisfiableNode(QDomElement *node) {
 			// parse <IsClassSatisfiable id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
-
+			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression *> builds = parseOntologyChildNodes(node);
 
 			CQueryIsClassSatisfiableExpression *queryExpression = 0;
@@ -154,16 +160,7 @@ namespace Konclude {
 
 		CQueryAreClassesEquivalentExpression *COWLlinkQueryParser::parseAreClassesEquivalentNode(QDomElement *node) {
 			// parse <IsClassSatisfiable id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression *> builds = parseOntologyChildNodes(node);
 			CQueryAreClassesEquivalentExpression *queryExpression = 0;
 			queryExpression = mQueryBuilder->getAreClassesEquivalenceQuery(builds,idName);
@@ -173,16 +170,7 @@ namespace Konclude {
 
 		CQueryIsInstanceOfExpression *COWLlinkQueryParser::parseIsInstanceOfNode(QDomElement *node) {
 			// parse <IsClassSatisfiable id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression *> builds = parseOntologyChildNodes(node);
 			CQueryIsInstanceOfExpression *queryExpression = 0;
 			queryExpression = mQueryBuilder->getIsInstanceOfQuery(builds,idName);
@@ -192,16 +180,7 @@ namespace Konclude {
 
 		CQueryIsClassSubsumedByExpression *COWLlinkQueryParser::parseIsClassSubsumedByNode(QDomElement *node) {
 			// parse <IsClassSatisfiable id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression *> builds = parseOntologyChildNodes(node);
 			CQueryIsClassSubsumedByExpression *queryExpression = 0;
 			queryExpression = mQueryBuilder->getIsClassSubsumedByQuery(builds,idName);
@@ -211,16 +190,7 @@ namespace Konclude {
 
 		CQueryAreClassesDisjointExpression *COWLlinkQueryParser::parseAreClassesDisjointNode(QDomElement *node) {
 			// parse <IsClassSatisfiable id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression *> builds = parseOntologyChildNodes(node);
 			CQueryAreClassesDisjointExpression *queryExpression = 0;
 			queryExpression = mQueryBuilder->getAreClassesDisjointQuery(builds,idName);
@@ -231,16 +201,7 @@ namespace Konclude {
 
 		CQueryGetTypesExpression *COWLlinkQueryParser::parseGetTypesNode(QDomElement *node) {
 			// parse <GetTypes id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
 			if (directString.toUpper() == "TRUE") {
@@ -255,16 +216,7 @@ namespace Konclude {
 
 		CQueryGetFlattenedTypesExpression *COWLlinkQueryParser::parseGetFlattenedTypesNode(QDomElement *node) {
 			// parse <GetFlattenedTypes id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
 			if (directString.toUpper() == "TRUE") {
@@ -280,16 +232,7 @@ namespace Konclude {
 
 		CQueryGetFlattenedInstancesExpression *COWLlinkQueryParser::parseGetFlattenedInstancesNode(QDomElement *node) {
 			// parse <GetFlattenedInstances id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
 			if (directString.toUpper() == "TRUE") {
@@ -301,19 +244,18 @@ namespace Konclude {
 			return queryExpression;
 		}
 
+		CQueryGetSameIndividualsExpression *COWLlinkQueryParser::parseGetSameIndividualsNode(QDomElement *node) {
+			// parse <GetSameIndividuals id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetSameIndividualsExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetSameIndividualsQuery(builds,idName);
+			return queryExpression;
+		}
 
 		CQueryGetInstancesExpression *COWLlinkQueryParser::parseGetInstancesNode(QDomElement *node) {
 			// parse <GetFlattenedInstances id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
 			if (directString.toUpper() == "TRUE") {
@@ -328,16 +270,7 @@ namespace Konclude {
 
 		CQueryGetSubClassesExpression *COWLlinkQueryParser::parseGetSubClassesNode(QDomElement *node) {
 			// parse <GetFlattenedInstances id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
 			if (directString.toUpper() == "TRUE") {
@@ -352,16 +285,7 @@ namespace Konclude {
 
 		CQueryGetSuperClassesExpression *COWLlinkQueryParser::parseGetSuperClassesNode(QDomElement *node) {
 			// parse <GetFlattenedInstances id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
 			if (directString.toUpper() == "TRUE") {
@@ -376,16 +300,7 @@ namespace Konclude {
 
 		CQueryGetEquivalentClassesExpression* COWLlinkQueryParser::parseGetEquivalentClassesNode(QDomElement *node) {
 			// parse <GetFlattenedInstances id="xxxx"/>
-			QString idName = node->attribute("id");
-			if (idName.isEmpty()) {
-				idName = node->attribute("name");
-			}
-			if (idName.isEmpty()) {
-				idName = node->attribute("kb");
-				if (!idName.isEmpty()) {
-					idName = idName + " KB-Query";
-				}
-			}
+			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
 			CQueryGetEquivalentClassesExpression *queryExpression = 0;
 			queryExpression = mQueryBuilder->getGetEquivalentClassesQuery(builds,idName);
@@ -396,6 +311,25 @@ namespace Konclude {
 
 		CQueryIsEntailedExpression* COWLlinkQueryParser::parseIsEntailedNode(QDomElement *node) {
 			// parse <GetFlattenedInstances id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryIsEntailedExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getIsEntailedQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+		CQueryGetObjectPropertyTargetsExpression *COWLlinkQueryParser::parseGetObjectPropertyTargetsNode(QDomElement *node) {
+			// parse <GetObjectPropertyTargets id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetObjectPropertyTargetsExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetObjectPropertyTargetsQuery(builds,idName);
+			return queryExpression;
+		}
+
+		QString COWLlinkQueryParser::getQueryIDNameString(QDomElement* node) {
 			QString idName = node->attribute("id");
 			if (idName.isEmpty()) {
 				idName = node->attribute("name");
@@ -406,9 +340,52 @@ namespace Konclude {
 					idName = idName + " KB-Query";
 				}
 			}
+			return idName;
+		}
+
+		CQueryGetFlattenedObjectPropertyTargetsExpression *COWLlinkQueryParser::parseGetFlattenedObjectPropertyTargetsNode(QDomElement *node) {
+			// parse <GetFlattenedObjectPropertyTargets id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
-			CQueryIsEntailedExpression *queryExpression = 0;
-			queryExpression = mQueryBuilder->getIsEntailedQuery(builds,idName);
+			CQueryGetFlattenedObjectPropertyTargetsExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetFlattenedObjectPropertyTargetsQuery(builds,idName);
+			return queryExpression;
+		}
+
+		CQueryGetDeterministicIndividualsExpression *COWLlinkQueryParser::parseGetDeterministicIndividualsNode(QDomElement *node) {
+			// parse <GetDeterministicIndividuals id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetDeterministicIndividualsExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetDeterministicIndividualsQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+		CQueryGetNondeterministicIndividualsExpression *COWLlinkQueryParser::parseGetNondeterministicIndividualsNode(QDomElement *node) {
+			// parse <GetNondeterministicIndividuals id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetNondeterministicIndividualsExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetNondeterministicIndividualsQuery(builds,idName);
+			return queryExpression;
+		}
+
+		CQueryGetDeterministicClassAssertionsExpression *COWLlinkQueryParser::parseGetDeterministicClassAssertionsNode(QDomElement *node) {
+			// parse <GetDeterministicClassAssertions id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetDeterministicClassAssertionsExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetDeterministicClassAssertionsQuery(builds,idName);
+			return queryExpression;
+		}
+
+		CQueryGetNondeterministicClassAssertionsExpression *COWLlinkQueryParser::parseGetNondeterministicClassAssertionsNode(QDomElement *node) {
+			// parse <GetNondeterministicClassAssertions id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetNondeterministicClassAssertionsExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetNondeterministicClassAssertionsQuery(builds,idName);
 			return queryExpression;
 		}
 

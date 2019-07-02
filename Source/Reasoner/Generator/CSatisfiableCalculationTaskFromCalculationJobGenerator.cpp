@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -39,138 +39,7 @@ namespace Konclude {
 
 
 
-			CSatisfiableCalculationTask* CSatisfiableCalculationTaskFromCalculationJobGenerator::createDefaultSaturationCalculationTask(CConcreteOntology *ontology, CSaturationCalculationJob* saturCalcJob, CCallbackData* additionalCalculatedCallback) {
-				CSatisfiableCalculationTask* satCalcTask = CObjectMemoryPoolAllocator<CSatisfiableCalculationTask>::allocateAndConstructWithMemroyPool(mGenTaskHandleContext->getTaskHandleMemoryAllocationManager());
-				satCalcTask->initSatisfiableCalculationTask(ontology,saturCalcJob->getCalculationConfiguration(),saturCalcJob->getCalclulationStatisticsCollector(),mGenTaskHandleContext);
-				CProcessContext* procContext = satCalcTask->getProcessContext(mGenTaskHandleContext);
 
-				satCalcTask->setSatisfiableSubsumptionIdentifierAdapter(saturCalcJob->getSatisfiableSubsumptionIdentifierAdapter());
-				CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();
-
-				CIndividualProcessNodeVector* indiNodeVec = dataBox->getIndividualProcessNodeVector();
-
-
-				CMemoryAllocationManager* memMan = procContext->getUsedMemoryAllocationManager();
-				cint64 nextIndiID = qMax(ontology->getABox()->getIndividualCount(),indiNodeVec->getItemCount());
-
-
-				CSaturationCalculationConstruct* satCalcConstruct = saturCalcJob->getSatisfiableCalculationConstructs();
-				while (satCalcConstruct) {
-					CConcept* conConcept = satCalcConstruct->getConstructConcept();
-					bool conNegation = satCalcConstruct->getConstructConceptNegation();
-					CIndividual* individual = satCalcConstruct->getIndividual();
-					cint64 individualID = nextIndiID;
-					if (individual) {
-						individualID = individual->getIndividualID();
-					} else {
-						cint64 fixedIndiID = satCalcConstruct->getIndividualID();
-						if (fixedIndiID >= 0) {
-							individualID = fixedIndiID;
-						} else {
-							++nextIndiID;
-						}
-					}
-
-					CIndividualProcessNode* refIndi = indiNodeVec->getData(individualID);
-
-					CIndividualProcessNode* indi = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
-					if (refIndi) {
-						while (refIndi->hasMergedIntoIndividualNodeID()) {
-							cint64 corrIndiID = refIndi->getMergedIntoIndividualNodeID();
-							refIndi = indiNodeVec->getData(corrIndiID);
-							individualID = corrIndiID;
-						}
-						indi->initIndividualProcessNode(refIndi);
-					} else if (individual) {
-						indi->setAssertionConceptLinkerIt(individual->getAssertionConceptLinker());
-						indi->setAssertionRoleLinkerIt(individual->getAssertionRoleLinker());
-					}
-
-					CXSortedNegLinker<CConcept*>* initConLinker = CObjectAllocator< CXSortedNegLinker<CConcept*> >::allocateAndConstruct(memMan);
-					initConLinker->initNegLinker(conConcept,conNegation);
-					CConceptProcessData* conProcData = (CConceptProcessData*)conConcept->getConceptData();
-					CConceptSaturationReferenceLinkingData* conSatRefLinkData = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
-					conSatRefLinkData->getClassifierReferenceLinkingData()->setIndividualProcessNodeForConcept(indi);
-
-					indi->setInitializingConceptLinkerIt(initConLinker);
-					indi->setIndividualID(individualID);
-					if (individual) {
-						indi->setNominalIndividual(individual);
-						indi->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
-					}
-					indiNodeVec->setLocalData(individualID,indi);
-
-					CIndividualProcessNodeLinker* indiProcNodeLinker = CObjectAllocator< CIndividualProcessNodeLinker >::allocateAndConstruct(memMan);
-					indiProcNodeLinker->initProcessNodeLinker(indi,true);
-					indi->setIndividualProcessNodeLinker(indiProcNodeLinker);
-					dataBox->addIndividualProcessNodeLinker(indiProcNodeLinker);
-
-
-					satCalcConstruct = satCalcConstruct->getNextConstruct();
-				}
-
-				if (additionalCalculatedCallback) {
-					satCalcTask->addCallbackLinker(additionalCalculatedCallback);
-				}
-
-				satCalcTask->setCalculationTaskType(CSatisfiableCalculationTask::CALCULATIONTABLEAUDEFAULTSATURATIONTASK);
-
-				return satCalcTask;
-			}
-
-
-
-
-
-			CSatisfiableCalculationTask* CSatisfiableCalculationTaskFromCalculationJobGenerator::createPilingSaturationCalculationTask(CConcreteOntology *ontology, CSaturationCalculationJob* saturCalcJob, CCallbackData* additionalCalculatedCallback) {
-				CSatisfiableCalculationTask* satCalcTask = CObjectMemoryPoolAllocator<CSatisfiableCalculationTask>::allocateAndConstructWithMemroyPool(mGenTaskHandleContext->getTaskHandleMemoryAllocationManager());
-				satCalcTask->initSatisfiableCalculationTask(ontology,saturCalcJob->getCalculationConfiguration(),saturCalcJob->getCalclulationStatisticsCollector(),mGenTaskHandleContext);
-				CProcessContext* procContext = satCalcTask->getProcessContext(mGenTaskHandleContext);
-
-				satCalcTask->setSatisfiableSubsumptionIdentifierAdapter(saturCalcJob->getSatisfiableSubsumptionIdentifierAdapter());
-				CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();
-
-				CIndividualPilingProcessNodeVector* indiNodeVec = dataBox->getIndividualPilingProcessNodeVector();
-
-
-				CMemoryAllocationManager* memMan = procContext->getUsedMemoryAllocationManager();
-				cint64 nextIndiID = qMax(ontology->getABox()->getIndividualCount(),indiNodeVec->getItemCount());
-
-
-				CSaturationCalculationConstruct* satCalcConstruct = saturCalcJob->getSatisfiableCalculationConstructs();
-				while (satCalcConstruct) {
-					CConcept* conConcept = satCalcConstruct->getConstructConcept();
-					bool conNegation = satCalcConstruct->getConstructConceptNegation();
-					cint64 individualID = nextIndiID++;
-
-					CIndividualPilingProcessNode* indi = CObjectParameterizingAllocator< CIndividualPilingProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
-					indi->initIndividualPilingProcessNode(individualID);
-
-					CXSortedNegLinker<CConcept*>* initConLinker = CObjectAllocator< CXSortedNegLinker<CConcept*> >::allocateAndConstruct(memMan);
-					initConLinker->initNegLinker(conConcept,conNegation);
-					CConceptProcessData* conProcData = (CConceptProcessData*)conConcept->getConceptData();
-					CConceptSaturationReferenceLinkingData* conSatRefLinkData = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
-					conSatRefLinkData->getClassifierReferenceLinkingData()->setIndividualProcessNodeForConcept(indi);
-
-					indi->setInitializingConceptLinker(initConLinker);
-					indiNodeVec->setLocalData(individualID,indi);
-
-					CIndividualPilingProcessNodeLinker* indiProcNodeLinker = CObjectAllocator< CIndividualPilingProcessNodeLinker >::allocateAndConstruct(memMan);
-					indiProcNodeLinker->initProcessNodeLinker(indi,true);
-					indi->setIndividualPilingProcessNodeLinker(indiProcNodeLinker);
-					dataBox->addIndividualPilingProcessNodeLinker(indiProcNodeLinker);
-
-					satCalcConstruct = satCalcConstruct->getNextConstruct();
-				}
-
-				if (additionalCalculatedCallback) {
-					satCalcTask->addCallbackLinker(additionalCalculatedCallback);
-				}
-
-				satCalcTask->setCalculationTaskType(CSatisfiableCalculationTask::CALCULATIONTABLEAUPILINGSATURATIONTASK);
-
-				return satCalcTask;
-			}
 
 
 
@@ -199,17 +68,35 @@ namespace Konclude {
 				CIndividualSaturationProcessNodeVector* indiNodeVec = dataBox->getIndividualSaturationProcessNodeVector();
 
 				CMemoryAllocationManager* memMan = procContext->getUsedMemoryAllocationManager();
-				cint64 nextIndiID = qMax(ontology->getABox()->getIndividualCount(),indiNodeVec->getItemCount());
+				cint64 nextIndiID = qMax(ontology->getABox()->getIndividualCount()+1,indiNodeVec->getItemCount());
 
+				bool separateSaturation = approxSaturCalcJob->isSeparateSaturation();
 
 				CApproximatedSaturationCalculationConstructionConstruct* satCalcConsConstruct = approxSaturCalcJob->getSatisfiableCalculationConstructionConstructs();
 				while (satCalcConsConstruct) {
 					CSaturationConceptReferenceLinking* satConRefLink = satCalcConsConstruct->getSaturationConceptReferenceLinking();
-					cint64 individualID = nextIndiID++;
+					CSaturationIndividualReferenceLinking* satIndiRefLink = satCalcConsConstruct->getSaturationIndividualReferenceLinking();
+					CIndividual* nominalIndi = satCalcConsConstruct->getIndividual();
+					cint64 individualID = 0;
+					if (nominalIndi) {
+						individualID = nominalIndi->getIndividualID();
+					} else {
+						individualID = nextIndiID++;
+					}
 
 					CIndividualSaturationProcessNode* indi = CObjectParameterizingAllocator< CIndividualSaturationProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
-					indi->initIndividualSaturationProcessNode(individualID,satConRefLink);
-					satConRefLink->setIndividualProcessNodeForConcept(indi);
+					indi->initIndividualSaturationProcessNode(individualID,satConRefLink,satIndiRefLink);
+					if (nominalIndi) {
+						indi->setNominalIndividual(nominalIndi);
+					}
+					indi->setSeparated(separateSaturation);
+
+					if (satConRefLink) {
+						satConRefLink->setIndividualProcessNodeForConcept(indi);
+					}
+					if (satIndiRefLink) {
+						satIndiRefLink->setIndividualProcessNodeForIndividual(indi);
+					}
 
 					indiNodeVec->setLocalData(individualID,indi);
 
@@ -227,11 +114,22 @@ namespace Konclude {
 				CApproximatedSaturationCalculationProcessingConstruct* satCalcProcConstruct = approxSaturCalcJob->getSatisfiableCalculationProcessingConstructs();
 				while (satCalcProcConstruct) {
 					CSaturationConceptReferenceLinking* satConRefLink = satCalcProcConstruct->getSaturationConceptReferenceLinking();
-					CIndividualSaturationProcessNode* indiNode = (CIndividualSaturationProcessNode*)satConRefLink->getIndividualProcessNodeForConcept();
-					if (!indiNode->isInitialized()) {
-						CIndividualSaturationProcessNodeLinker* indiProcNodeLinker = indiNode->getIndividualSaturationProcessNodeLinker();
-						indiProcNodeLinker->setNegation(true);
-						dataBox->addIndividualSaturationProcessNodeLinker(indiProcNodeLinker);
+					if (satConRefLink) {
+						CIndividualSaturationProcessNode* indiNode = (CIndividualSaturationProcessNode*)satConRefLink->getIndividualProcessNodeForConcept();
+						if (!indiNode->isInitialized()) {
+							CIndividualSaturationProcessNodeLinker* indiProcNodeLinker = indiNode->getIndividualSaturationProcessNodeLinker();
+							indiProcNodeLinker->setNegation(true);
+							dataBox->addIndividualSaturationProcessNodeLinker(indiProcNodeLinker);
+						}
+					}
+					CSaturationIndividualReferenceLinking* satIndiRefLink = satCalcProcConstruct->getSaturationIndividualReferenceLinking();
+					if (satIndiRefLink) {
+						CIndividualSaturationProcessNode* indiNode = (CIndividualSaturationProcessNode*)satIndiRefLink->getIndividualProcessNodeForConcept();
+						if (!indiNode->isInitialized()) {
+							CIndividualSaturationProcessNodeLinker* indiProcNodeLinker = indiNode->getIndividualSaturationProcessNodeLinker();
+							indiProcNodeLinker->setNegation(true);
+							dataBox->addIndividualSaturationProcessNodeLinker(indiProcNodeLinker);
+						}
 					}
 					satCalcProcConstruct = satCalcProcConstruct->getNextConstruct();
 				}
@@ -239,6 +137,8 @@ namespace Konclude {
 				if (additionalCalculatedCallback) {
 					satCalcTask->addCallbackLinker(additionalCalculatedCallback);
 				}
+
+				satCalcTask->setSaturationIndividualsAnalysationObserver(approxSaturCalcJob->getSaturationIndividualsAnalysationObserver());
 
 				satCalcTask->setConsistenceAdapter(approxSaturCalcJob->getSaturationTaskPreyingAdapter());
 
@@ -272,25 +172,13 @@ namespace Konclude {
 						if (consTaskData) {
 							baseTask = consTaskData->getDeterministicSatisfiableTask();
 							lastConDesReapplication = consTaskData->getDeterministicSatisfiableTask() != consTaskData->getCompletionGraphCachedSatisfiableTask();
-							clearIndiProcessingQueue = lastConDesReapplication;
+							clearIndiProcessingQueue = true;
 						}
 					}
 
 					return createSatisfiableCalculationTaskExtension(ontology,calculationJob,baseTask,lastConDesReapplication,clearIndiProcessingQueue,additionalCalculatedCallback);
 				} 
 
-				CSaturationCalculationJob* saturCalcJob = dynamic_cast<CSaturationCalculationJob*>(calculationJob);
-				if (saturCalcJob) {
-					CCalculationConfigurationExtension* calcConfig = saturCalcJob->getCalculationConfiguration();
-					CSatisfiableCalculationTask* satCalcTask = nullptr;
-					if (calcConfig->isSaturationPilingActivated()) {
-						satCalcTask = createPilingSaturationCalculationTask(ontology,saturCalcJob,additionalCalculatedCallback);
-					} else {
-						satCalcTask = createDefaultSaturationCalculationTask(ontology,saturCalcJob,additionalCalculatedCallback);
-					}
-					return satCalcTask;
-
-				}
 
 				CApproximatedSaturationCalculationJob* approxSaturCalcJob = dynamic_cast<CApproximatedSaturationCalculationJob*>(calculationJob);
 				if (approxSaturCalcJob) {
@@ -318,6 +206,8 @@ namespace Konclude {
 
 				if (satCalcJob) {
 
+					cint64 firstPossibleNewIndividualID = ontology->getABox()->getIndividualCount();
+
 					bool requiresTaskCalc = false;
 
 					CIndividualVector* baseIndiVec = nullptr;
@@ -326,6 +216,57 @@ namespace Konclude {
 					}
 
 					CSatisfiableCalculationTask* satCalcTask = CObjectMemoryPoolAllocator<CSatisfiableCalculationTask>::allocateAndConstructWithMemroyPool(mGenTaskHandleContext->getTaskHandleMemoryAllocationManager());
+
+
+
+					bool recreateNodesForIndividuals = false;
+					if (clearIndiProcessingQueue) {
+						bool avoidIndividualReprocessing = satCalcJob->getCalculationConfiguration()->isAvoidRepeatedIndividualProcessingActivated();
+						if (!avoidIndividualReprocessing) {
+							clearIndiProcessingQueue = false;
+
+							if (satCalcJob->getCalculationConfiguration()->isForceNodesRecreationForRepeatedIndividualProcessingActivated()) {
+								baseTask = nullptr;
+
+								if (!recreateNodesForIndividuals) {
+									for (CSatisfiableCalculationConstruct* satCalcConstructIt = satCalcJob->getSatisfiableCalculationConstructs(); satCalcConstructIt && !clearIndiProcessingQueue; satCalcConstructIt = satCalcConstructIt->getNextConstruct()) {
+										CIndividual* individual = satCalcConstructIt->getIndividual();
+										if (individual) {
+											recreateNodesForIndividuals = true;
+										}
+									}
+								}
+
+								if (!recreateNodesForIndividuals) {
+									if (calculationJob->getOntology()->getStructureSummary()->hasNominalOccurrence() || calculationJob->getOntology()->getTBox()->getUniversalConnectionNominalValueConcept()) {
+										recreateNodesForIndividuals = true;
+									}
+								}
+
+							}
+						} else {
+
+							bool confCompletionGraphCaching = satCalcJob->getCalculationConfiguration()->isCompletionGraphCachingActivated();
+							if (!confCompletionGraphCaching) {
+
+								if (clearIndiProcessingQueue) {
+									for (CSatisfiableCalculationConstruct* satCalcConstructIt = satCalcJob->getSatisfiableCalculationConstructs(); satCalcConstructIt && !clearIndiProcessingQueue; satCalcConstructIt = satCalcConstructIt->getNextConstruct()) {
+										CIndividual* individual = satCalcConstructIt->getIndividual();
+										if (individual) {
+											clearIndiProcessingQueue = false;
+										}
+									}
+								}
+
+								if (clearIndiProcessingQueue) {
+									if (calculationJob->getOntology()->getStructureSummary()->hasNominalOccurrence() || calculationJob->getOntology()->getTBox()->getUniversalConnectionNominalValueConcept()) {
+										clearIndiProcessingQueue = false;
+									}
+								}
+							}
+						}
+					}
+
 
 					if (baseTask) {
 						satCalcTask->initUndependedSatisfiableCalculationTask(baseTask,satCalcJob->getCalculationConfiguration(),satCalcJob->getCalclulationStatisticsCollector(),mGenTaskHandleContext);
@@ -339,13 +280,48 @@ namespace Konclude {
 					}
 
 					satCalcTask->setConsistenceAdapter(satCalcJob->getSatisfiableTaskPreyingAdapter());
-					satCalcTask->setSatisfiableSubsumptionIdentifierAdapter(satCalcJob->getSatisfiableSubsumptionIdentifierAdapter());
 					satCalcTask->setClassificationMessageAdapter(satCalcJob->getSatisfiableClassificationMessageAdapter());
+					satCalcTask->setRealizationMarkedCandidatesMessageAdapter(satCalcJob->getRealizationMarkedCandidatesMessageAdapter());
+					satCalcTask->setSatisfiableTaskIncrementalConsistencyTestingAdapter(satCalcJob->getSatisfiableTaskIncrementalConsistencyTestingAdapter());
+					satCalcTask->setSatisfiableTaskIndividualDependenceTrackingAdapter(satCalcJob->getSatisfiableTaskIndividualDependenceTrackingAdapter());
+					satCalcTask->setPossibleAssertionCollectionAdapter(satCalcJob->getPossibleAssertionCollectionAdapter());
 
 
 					CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();
 					dataBox->setConstructedIndividualNode(nullptr);
 					dataBox->setReapplicationLastConceptDesciptorOnLastIndividualNodeRequired(lastConDesReapplication);
+
+					if (satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()) {
+						CConcreteOntology* prevOntology = satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()->getPreviousConsistentOntology();
+
+						CSatisfiableCalculationTask* prevDetConsTask = nullptr;
+						CSatisfiableCalculationTask* prevNondetConsTask = nullptr;
+						CConsistence* prevConsistence = prevOntology->getConsistence();
+						CConsistenceTaskData* prevConsTaskData = nullptr;
+						if (prevConsistence) {
+							CConsistenceData* prevConsData = prevConsistence->getConsistenceModelData();
+							if (prevConsData) {
+								prevConsTaskData = dynamic_cast<CConsistenceTaskData*>(prevConsData);
+							}
+						}
+						if (prevConsTaskData) {
+							prevDetConsTask = prevConsTaskData->getDeterministicSatisfiableTask();
+							prevNondetConsTask = prevConsTaskData->getCompletionGraphCachedSatisfiableTask();
+						}
+						if (prevDetConsTask) {
+							CProcessTagger* prevProcessTagger = prevDetConsTask->getProcessingDataBox()->getProcessContext()->getUsedProcessTagger();
+							CProcessTagger* processTagger = procContext->getUsedProcessTagger();
+							processTagger->initProcessTagger(prevProcessTagger);
+							processTagger->incLocalizationTag();
+						}
+						if (prevNondetConsTask) {
+							firstPossibleNewIndividualID = prevNondetConsTask->getProcessingDataBox()->getNextIndividualNodeID(false);
+						}
+						prevDetConsTask->getProcessingDataBox()->setIncrementalExpansionID(satCalcTask->getSatisfiableTaskIncrementalConsistencyTestingAdapter()->getIncrementalRevisionID());
+					}
+					if (satCalcTask->getSatisfiableTaskIndividualDependenceTrackingAdapter()) {
+						dataBox->setIndividualDependenceTrackingRequired(true);
+					}
 
 					CIndividualProcessNodeVector* indiNodeVec = dataBox->getIndividualProcessNodeVector();
 
@@ -353,13 +329,17 @@ namespace Konclude {
 						dataBox->clearIndividualProcessingQueues();
 					}
 
+
 					CIndividualUnsortedProcessingQueue* indiNodeQueue = dataBox->getIndividualImmediatelyProcessingQueue(true);
 
 					CDependencyTrackPoint* independentBaseDepTrackPoint = dataBox->getBranchingTree(true)->getBaseDependencyNode(true)->getContinueDependencyTrackPoint();
 
 					CMemoryAllocationManager* memMan = procContext->getUsedMemoryAllocationManager();
 
-					cint64 baseIndiID = qMax(ontology->getABox()->getIndividualCount(),indiNodeVec->getItemCount());
+
+					firstPossibleNewIndividualID = qMax(firstPossibleNewIndividualID,indiNodeVec->getItemCount());
+
+					cint64 baseIndiID = firstPossibleNewIndividualID;
 					cint64 constructionIndiCount = 0;
 
 					CSatisfiableCalculationConstruct* satCalcConstruct = satCalcJob->getSatisfiableCalculationConstructs();
@@ -375,6 +355,7 @@ namespace Konclude {
 								individualID = fixedIndiID;
 							}
 						}
+						firstPossibleNewIndividualID = qMax(firstPossibleNewIndividualID,individualID+1);
 
 						CXSortedNegLinker<CConcept*>* satConJobLinker = nullptr;
 						CSatisfiableCalculationConceptConstruct* satConCalcConstuct = dynamic_cast<CSatisfiableCalculationConceptConstruct*>(satCalcConstruct);
@@ -401,8 +382,9 @@ namespace Konclude {
 									localIndi->clearProcessingQueued();
 									localIndi->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCACHEDCOMPUTEDTYPESADDED);
 								} else if (individual) {
-									localIndi->setAssertionConceptLinkerIt(individual->getAssertionConceptLinker());
-									localIndi->setAssertionRoleLinkerIt(individual->getAssertionRoleLinker());
+									localIndi->setAssertionConceptLinker(individual->getAssertionConceptLinker());
+									localIndi->setAssertionRoleLinker(individual->getAssertionRoleLinker());
+									localIndi->setReverseAssertionRoleLinker(individual->getReverseAssertionRoleLinker());
 								}
 
 								localIndi->setIndividualID(individualID);
@@ -414,7 +396,7 @@ namespace Konclude {
 									localIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDBLOCKINGORCACHING);
 								}
 
-								localIndi->setInitializingConceptLinkerIt(nullptr);
+								localIndi->setInitializingConceptLinker(nullptr);
 								indiNodeVec->setLocalData(individualID,localIndi);
 								indiNodeQueue->insertIndiviudalProcessNode(localIndi);
 
@@ -429,7 +411,7 @@ namespace Konclude {
 								initConLinker = tmpConLinker->initNegLinker(satConJobLinker->getData(),satConJobLinker->getNegation(),initConLinker);
 								satConJobLinker = satConJobLinker->getNext();
 							}
-							localIndi->addInitializingConceptLinkerIt(initConLinker);
+							localIndi->addInitializingConceptLinker(initConLinker);
 
 						}
 
@@ -437,6 +419,34 @@ namespace Konclude {
 						satCalcConstruct = satCalcConstruct->getNextConstruct();
 					}
 
+					if (recreateNodesForIndividuals) {
+						CIndividualVector* indiVec = ontology->getABox()->getIndividualVector(false);
+						if (indiVec) {
+							cint64 indiCount = indiVec->getItemCount();
+							for (cint64 i = 0; i < indiCount; ++i) {
+								CIndividual* indi = indiVec->getData(i);
+								if (indi) {
+									CIndividualProcessNode* indiNode = indiNodeVec->getData(i);
+									if (!indiNode) {
+										indiNode = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
+										indiNode->initDependencyTracker(independentBaseDepTrackPoint);
+										indiNode->setAssertionConceptLinker(indi->getAssertionConceptLinker());
+										indiNode->setAssertionRoleLinker(indi->getAssertionRoleLinker());
+										indiNode->setReverseAssertionRoleLinker(indi->getReverseAssertionRoleLinker());
+
+										indiNode->setIndividualID(i);
+										indiNode->setNominalIndividual(indi);
+										indiNode->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
+
+										indiNodeVec->setLocalData(i,indiNode);
+										indiNodeQueue->insertIndiviudalProcessNode(indiNode);
+									}
+								}
+							}
+						}
+					}
+
+					dataBox->setFirstPossibleIndividualNodeID(firstPossibleNewIndividualID);
 					dataBox->setMultipleConstructionIndividualNodes(constructionIndiCount > 1);
 
 					if (additionalCalculatedCallback) {

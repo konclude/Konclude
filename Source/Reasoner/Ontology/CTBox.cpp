@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -38,6 +38,7 @@ namespace Konclude {
 				mCandidateEquivConHash = nullptr;
 				mEquivConNonCandidateSet = nullptr;
 				mRoleDomainTriggerConceptHash = nullptr;
+				mIndividualTriggerConceptHash = nullptr;
 				mUnivConnNomValueCon = nullptr;
 				gciConceptSet = 0;
 				activeConceptSet = 0;
@@ -59,6 +60,7 @@ namespace Konclude {
 				COPADestroyAndRelease(mCandidateEquivConHash,mMemMan);
 				COPADestroyAndRelease(mEquivConNonCandidateSet,mMemMan);
 				COPADestroyAndRelease(mRoleDomainTriggerConceptHash,mMemMan);
+				COPADestroyAndRelease(mIndividualTriggerConceptHash,mMemMan);
 				COPADestroyAndRelease(mDatatypeVector,mMemMan);
 
 			}
@@ -196,6 +198,12 @@ namespace Konclude {
 				return mRoleDomainTriggerConceptHash;
 			}
 
+			CBOXHASH<cint64,CConcept*>* CTBox::getIndividualTriggerConceptHash(bool create) {
+				if (!mIndividualTriggerConceptHash && create) {
+					mIndividualTriggerConceptHash = CObjectParameterizingAllocator< CBOXHASH<cint64,CConcept*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+				}
+				return mIndividualTriggerConceptHash;
+			}
 
 			CTBox* CTBox::setTriggerImplicationHash(CBOXHASH<CConcept*,CConcept*>* takeTriggerImplHash) {
 				COPADestroyAndRelease(mTriggerImpHash,mMemMan);
@@ -282,6 +290,38 @@ namespace Konclude {
 					activeConceptSet->clear();
 				}
 				mUnivConnNomValueCon = tBox->mUnivConnNomValueCon;
+				if (tBox->mIndividualTriggerConceptHash) {
+					if (!mIndividualTriggerConceptHash) {
+						mIndividualTriggerConceptHash = CObjectParameterizingAllocator< CBOXHASH<cint64,CConcept*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+					}
+					mIndividualTriggerConceptHash->init(tBox->mIndividualTriggerConceptHash,mBoxContext);
+				} else if (mIndividualTriggerConceptHash) {
+					mIndividualTriggerConceptHash->clear();
+				}
+				if (tBox->mEquivConCandidateHash) {
+					if (!mEquivConCandidateHash) {
+						mEquivConCandidateHash = CObjectParameterizingAllocator< CBOXHASH<CConcept*,CConcept*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+					}
+					mEquivConCandidateHash->init(tBox->mEquivConCandidateHash,mBoxContext);
+				} else if (mEquivConCandidateHash) {
+					mEquivConCandidateHash->clear();
+				}
+				if (tBox->mCandidateEquivConHash) {
+					if (!mCandidateEquivConHash) {
+						mCandidateEquivConHash = CObjectParameterizingAllocator< CBOXHASH<CConcept*,CConcept*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+					}
+					mCandidateEquivConHash->init(tBox->mCandidateEquivConHash,mBoxContext);
+				} else if (mCandidateEquivConHash) {
+					mCandidateEquivConHash->clear();
+				}
+				if (tBox->mEquivConNonCandidateSet) {
+					if (!mEquivConNonCandidateSet) {
+						mEquivConNonCandidateSet = CObjectParameterizingAllocator< CBOXSET<CConcept*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+					}
+					mEquivConNonCandidateSet->init(tBox->mEquivConNonCandidateSet,mBoxContext);
+				} else if (mEquivConNonCandidateSet) {
+					mEquivConNonCandidateSet->clear();
+				}
 				return this;
 			}
 

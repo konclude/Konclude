@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -26,7 +26,7 @@
 
 // Namespace includes
 #include "RealizerSettings.h"
-#include "COptimizedKPSetConceptInstantiatedItem.h"
+#include "COptimizedKPSetIndividualItem.h"
 
 
 // Other includes
@@ -69,18 +69,18 @@ namespace Konclude {
 					CHierarchyNode* getHierarchyNode();
 					COptimizedKPSetConceptInstancesItem* setHierarchyNode(CHierarchyNode* hierNode);
 
-					QSet<COptimizedKPSetConceptInstantiatedItem*>* getKnownInstancesSet();
-					QSet<COptimizedKPSetConceptInstantiatedItem*>* getPossibleInstancesSet();
+					QSet<COptimizedKPSetIndividualItem*>* getKnownInstancesSet();
+					QSet<COptimizedKPSetIndividualItem*>* getPossibleInstancesSet();
 
 					QList<COptimizedKPSetConceptInstancesItem*>* getParentItemList();
 					QList<COptimizedKPSetConceptInstancesItem*>* getSuccessorItemList();
 
-					bool hasKnownInstance(COptimizedKPSetConceptInstantiatedItem* item);
-					bool hasPossibleInstance(COptimizedKPSetConceptInstantiatedItem* item);
+					bool hasKnownInstance(COptimizedKPSetIndividualItem* item);
+					bool hasPossibleInstance(COptimizedKPSetIndividualItem* item);
 
-					COptimizedKPSetConceptInstancesItem* addKnownInstance(COptimizedKPSetConceptInstantiatedItem* item);
-					COptimizedKPSetConceptInstancesItem* removeKnownInstance(COptimizedKPSetConceptInstantiatedItem* item);
-					COptimizedKPSetConceptInstancesItem* addPossibleInstance(COptimizedKPSetConceptInstantiatedItem* item);
+					COptimizedKPSetConceptInstancesItem* addKnownInstance(COptimizedKPSetIndividualItem* item);
+					COptimizedKPSetConceptInstancesItem* removeKnownInstance(COptimizedKPSetIndividualItem* item);
+					COptimizedKPSetConceptInstancesItem* addPossibleInstance(COptimizedKPSetIndividualItem* item);
 
 					COptimizedKPSetConceptInstancesItem* addParentItem(COptimizedKPSetConceptInstancesItem* item);
 					COptimizedKPSetConceptInstancesItem* addSuccessorItem(COptimizedKPSetConceptInstancesItem* item);
@@ -109,7 +109,7 @@ namespace Konclude {
 					COptimizedKPSetConceptInstancesItem* setSelfSuccessorProcessedFlag(bool selfSuccProcessed);
 
 					bool hasPossibleInstances();
-					COptimizedKPSetConceptInstantiatedItem* takeNextTestingPossibleInstance();
+					COptimizedKPSetIndividualItem* takeNextTestingPossibleInstance();
 
 
 				// protected methods
@@ -118,8 +118,8 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CHierarchyNode* mHierNode;
-					QSet<COptimizedKPSetConceptInstantiatedItem*> mKnownInstancesSet;
-					QSet<COptimizedKPSetConceptInstantiatedItem*> mPossibleInstancesSet;
+					QSet<COptimizedKPSetIndividualItem*> mKnownInstancesSet;
+					QSet<COptimizedKPSetIndividualItem*> mPossibleInstancesSet;
 
 					QList<COptimizedKPSetConceptInstancesItem*> mParentItemList;
 					QList<COptimizedKPSetConceptInstancesItem*> mSuccessorItemList;

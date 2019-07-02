@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,8 @@ namespace Konclude {
 			CRealization::CRealization() {
 				mRealized = false;
 				mConceptRealization = nullptr;
+				mSameRealization = nullptr;
+				mRoleRealization = nullptr;
 			}
 
 			bool CRealization::isRealized() {
@@ -53,6 +55,34 @@ namespace Konclude {
 
 			CRealization* CRealization::setConceptRealization(CConceptRealization* conRealization) {
 				mConceptRealization = conRealization;
+				return this;
+			}
+
+
+
+			CSameRealization* CRealization::getSameRealization() {
+				return mSameRealization;
+			}
+
+			bool CRealization::hasSameRealization() {
+				return mSameRealization != nullptr;
+			}
+
+			CRealization* CRealization::setSameRealization(CSameRealization* sameRealization) {
+				mSameRealization = sameRealization;
+				return this;
+			}
+
+			bool CRealization::hasRoleRealization() {
+				return mRoleRealization != nullptr;
+			}
+
+			CRoleRealization* CRealization::getRoleRealization() {
+				return mRoleRealization;
+			}
+
+			CRealization* CRealization::setRoleRealization(CRoleRealization* roleRealization) {
+				mRoleRealization = roleRealization;
 				return this;
 			}
 

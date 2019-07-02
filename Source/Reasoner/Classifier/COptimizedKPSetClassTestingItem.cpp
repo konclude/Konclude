@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,7 +32,7 @@ namespace Konclude {
 			}
 
 
-			COptimizedKPSetClassTestingItem* COptimizedKPSetClassTestingItem::initSatisfiableTestingItem(CConcept* satTestConcept) {
+			COptimizedKPSetClassTestingItem* COptimizedKPSetClassTestingItem::initSatisfiableTestingItem(CConcept* satTestConcept, QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash) {
 				mConceptSat = satTestConcept;
 				mConSatHierNode = nullptr;
 				mPredCounter = 0;
@@ -51,6 +51,11 @@ namespace Konclude {
 
 				mPossibleSubsumedList = nullptr;
 				mPossibleSubsumedSet = nullptr;
+
+				mFastSatCacheEntry = nullptr;
+				mSuccFastSatTested = false;
+				mIndiDepTracked = false;
+				mConRefLinkDataHash = conRefLinkDataHash;
 				return this;
 			}
 
@@ -188,10 +193,15 @@ namespace Konclude {
 			CConceptSubsumerObserver* COptimizedKPSetClassTestingItem::tellConceptSupsumption(CConcept* subsumedConcept, CConcept* subsumerConcept) {
 				if (subsumerConcept->getOperatorCode() != CCTOP) {
 					CConceptProcessData* conProData = (CConceptProcessData*)subsumerConcept->getConceptData();
-					CConceptSatisfiableReferenceLinkingData* conSatRefLinking = (CConceptSatisfiableReferenceLinkingData*)conProData->getConceptReferenceLinking();
-					if (conSatRefLinking) {
-						COptimizedKPSetClassTestingItem* subsumerClassSaturationItem = (COptimizedKPSetClassTestingItem*)conSatRefLinking->getClassifierReferenceLinkingData();
-						addSubsumingConceptItem(subsumerClassSaturationItem);
+					if (!conProData->isInvalidatedReferenceLinking()) {
+						CConceptSatisfiableReferenceLinkingData* conSatRefLinking = (CConceptSatisfiableReferenceLinkingData*)conProData->getConceptReferenceLinking();
+						if (conSatRefLinking) {
+							COptimizedKPSetClassTestingItem* subsumerClassSaturationItem = (COptimizedKPSetClassTestingItem*)conSatRefLinking->getClassifierReferenceLinkingData();
+							addSubsumingConceptItem(subsumerClassSaturationItem);
+						}
+					} else if (mConRefLinkDataHash) {
+						COptimizedKPSetClassTestingItem* subsumerClasItem = (COptimizedKPSetClassTestingItem*)mConRefLinkDataHash->value(subsumerConcept);
+						addSubsumingConceptItem(subsumerClasItem);
 					}
 				}
 				return this;
@@ -315,6 +325,35 @@ namespace Konclude {
 
 			bool COptimizedKPSetClassTestingItem::hasRemainingPossibleSubsumedItems() {
 				return mPossibleSubsumedList && !mPossibleSubsumedList->isEmpty();
+			}
+
+
+
+			CCacheEntry* COptimizedKPSetClassTestingItem::getFastSatisfiabilityTestedSaturationCacheEntry() {
+				return mFastSatCacheEntry;
+			}
+
+			COptimizedKPSetClassTestingItem* COptimizedKPSetClassTestingItem::setFastSatisfiabilityTestedSaturationCacheEntry(CCacheEntry* cacheEntry) {
+				mFastSatCacheEntry = cacheEntry;
+				return this;
+			}
+
+			bool COptimizedKPSetClassTestingItem::hasSuccessfullyFastSatisfiabilityTested() {
+				return mSuccFastSatTested;
+			}
+
+			COptimizedKPSetClassTestingItem* COptimizedKPSetClassTestingItem::setSuccessfullyFastSatisfiabilityTested(bool successfullyTested) {
+				mSuccFastSatTested = successfullyTested;
+				return this;
+			}
+
+			CIndividualDependenceTrackingMarker* COptimizedKPSetClassTestingItem::setIndividualDependenceTracked() {
+				mIndiDepTracked = true;
+				return this;
+			}
+
+			bool COptimizedKPSetClassTestingItem::hasIndividualDependenceTracked() {
+				return mIndiDepTracked;
 			}
 
 		}; // end namespace Classifier

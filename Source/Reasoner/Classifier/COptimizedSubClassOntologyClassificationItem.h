@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -95,7 +95,7 @@ namespace Konclude {
 					QList<COptimizedSubClassSatisfiableTestingItem*>* getSatisfiableConceptItemList();
 					COptimizedSubClassOntologyClassificationItem* addSatisfiableConceptItem(COptimizedSubClassSatisfiableTestingItem* item);
 
-					QHash<CConcept*,CConceptReferenceLinking*>* getConceptReferenceLinkingDataHash();
+					QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* getConceptReferenceLinkingDataHash();
 
 				// protected methods
 				protected:
@@ -110,7 +110,7 @@ namespace Konclude {
 					QList<COptimizedSubClassSatisfiableTestingItem*> mNextItemList;
 					QSet<COptimizedSubClassSatisfiableTestingItem*> mNextCandItemSet;
 					QSet<COptimizedSubClassSatisfiableTestingItem*> mRemainingCandItemSet;
-					QHash<CConcept*,CConceptReferenceLinking*> mConceptRefLinkData;
+					QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*> mConceptRefLinkData;
 
 					cint64 mRemainingSatTests;
 					cint64 mRunningSatTests;

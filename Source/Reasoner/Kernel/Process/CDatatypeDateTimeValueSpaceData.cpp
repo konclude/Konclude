@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,27 +30,48 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeDateTimeValueSpaceData::CDatatypeDateTimeValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext),mDateTimeValueSpaceMap(processContext) {
-					mValueSpaceMap = &mDateTimeValueSpaceMap;
+				CDatatypeDateTimeValueSpaceData::CDatatypeDateTimeValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext) {
+					mDateTimeValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeDateTimeValueSpaceData* CDatatypeDateTimeValueSpaceData::initDateTimeValueSpaceData(CDatatypeValueSpaceDateTimeType* valueSpaceType) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(nullptr);
-					mDateTimeValueSpaceMap.initDatatypeDateTimeValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mDateTimeValueSpaceMap) {
+						mDateTimeValueSpaceMap->initDatatypeCompareValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeDateTimeValueSpaceData* CDatatypeDateTimeValueSpaceData::copyDateTimeValueSpaceData(CDatatypeDateTimeValueSpaceData* spaceData) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(spaceData);
-					mDateTimeValueSpaceMap.initDatatypeCompareValueSpaceMap(spaceData->getDateTimeValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mDateTimeValueSpaceMap && !mDateTimeValueSpaceMap) {
+						getDateTimeValueSpaceMap(true);
+						mDateTimeValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mDateTimeValueSpaceMap);
+					} else if (mDateTimeValueSpaceMap) {
+						if (spaceData->mDateTimeValueSpaceMap) {
+							mDateTimeValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mDateTimeValueSpaceMap);
+						} else {
+							mDateTimeValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
 
-				CDatatypeDateTimeValueSpaceMap* CDatatypeDateTimeValueSpaceData::getDateTimeValueSpaceMap() {
-					return &mDateTimeValueSpaceMap;
+				CDatatypeDateTimeValueSpaceMap* CDatatypeDateTimeValueSpaceData::getDateTimeValueSpaceMap(bool create) {
+					if (create && !mDateTimeValueSpaceMap) {
+						mDateTimeValueSpaceMap = CObjectParameterizingAllocator< CDatatypeDateTimeValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mDateTimeValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+					}
+					return mDateTimeValueSpaceMap;
+				}
+
+				CDatatypeCompareValueSpaceMap* CDatatypeDateTimeValueSpaceData::createValueSpaceMap() {
+					return getDateTimeValueSpaceMap(true);
 				}
 
 			}; // end namespace Process

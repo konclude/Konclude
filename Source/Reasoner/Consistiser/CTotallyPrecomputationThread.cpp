@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -43,6 +43,11 @@ namespace Konclude {
 						mReuseCompletionGraphCacheWriter = reuseComplGraphCache->createCacheWriter();
 					}
 				}
+				mBackendAssocCache = nullptr;
+				CBackendCache* backendCache = reasonerManager->getBackendAssociationCache();
+				if (backendCache) {
+					mBackendAssocCache = dynamic_cast<CBackendRepresentativeMemoryCache*>(backendCache);
+				}
 			}
 
 
@@ -53,6 +58,43 @@ namespace Konclude {
 			COntologyPrecomputationItem* CTotallyPrecomputationThread::initializeOntologyPrecomputionItem(CConcreteOntology* ontology, CConfigurationBase* config) {
 				CTotallyOntologyPrecomputationItem* item = new CTotallyOntologyPrecomputationItem();
 				item->initTotallyPrecomputationItem(ontology,config);
+
+
+				if (config) {
+					bool configErrorFlag = false;
+					cint64 processorCount = 1;
+					QString processorCountString = CConfigDataReader::readConfigString(config,"Konclude.Calculation.ProcessorCount",QString(),&configErrorFlag);
+					if (!configErrorFlag) {
+						if (processorCountString == "AUTO") {
+							processorCount = CThread::idealThreadCount();
+						} else {
+							qint64 convertedWorkerCount = processorCountString.toInt(&configErrorFlag);
+							if (configErrorFlag) {
+								processorCount = convertedWorkerCount;
+							}
+						}
+					}
+
+					bool mulConfigErrorFlag = false;
+					cint64 multiplicator = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Precomputation.TotalPrecomputor.MultipliedUnitsParallelCalculationCount",1,&mulConfigErrorFlag);
+					mConfMaxTestParallelCount = processorCount*multiplicator;
+					bool maxConfigErrorFlag = false;
+					cint64 maxParallel = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Precomputation.TotalPrecomputor.MaximumParallelCalculationCount",1,&maxConfigErrorFlag);
+					if (!maxConfigErrorFlag) {
+						if (!mulConfigErrorFlag) {
+							mConfMaxTestParallelCount = qMin(mConfMaxTestParallelCount,maxParallel);
+						} else {
+							mConfMaxTestParallelCount = maxParallel;
+						}
+					}
+
+				} else {
+					mConfMaxTestParallelCount = 1;
+				}
+
+				mIndividualSaturationCount = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize",1000);
+				mConfForceFullCompletionGraphConstruction = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Precomputation.ForceFullCompletionGraphConstruction",false);
+
 				return item;
 			}
 
@@ -81,22 +123,36 @@ namespace Konclude {
 
 								if (!totallyPreCompItem->hasConceptSaturationPrecomputationCreated()) {
 									LOG(INFO,getLogDomain(),logTr("Preparing concept saturation."),this);
+
 									CConcreteOntology* ontology = totallyPreCompItem->getOntology();
 									totallyPreCompItem->setSaturationStepRunning(true);
 									createSaturationConstructionJob(totallyPreCompItem);
-									totallyPreCompItem->setConceptSaturationPrecomputationCreated(true);
 									totallyPreCompItem->setSaturationComputationRunning(true);
+									totallyPreCompItem->setConceptSaturationPrecomputationCreated(true);
 
 									addIdentifiedRemainingConsistencyRequiredConcepts(totallyPreCompItem);
-
+									addConsistencyRequiredSaturationIndividuals(totallyPreCompItem);
 								}
 
 
 								if (totallyPreCompItem->hasRemainingConsistencyRequiredSaturationConcepts() && !totallyPreCompItem->isSaturationComputationRunning()) {
-									if (saturateRemainingConsistencyRequiredItems(totallyPreCompItem)) {
+									if (saturateRemainingConsistencyRequiredConcepts(totallyPreCompItem)) {
 										totallyPreCompItem->setSaturationComputationRunning(true);
+										workTestCreated = true;
 									}
 								}
+
+
+								if (totallyPreCompItem->hasRemainingConsistencyRequiredSaturationIndividuals() && (!totallyPreCompItem->isSaturationComputationRunning() || totallyPreCompItem->hasIndividualSaturationRunning())) {
+									if (!isAllAssertionIndividualSaturationSufficient(totallyPreCompItem)) {
+										if (saturateRemainingConsistencyRequiredIndividuals(totallyPreCompItem)) {
+											totallyPreCompItem->incIndividualSaturationRunningCount();
+											totallyPreCompItem->setSaturationComputationRunning(true);
+											workTestCreated = true;
+										}
+									}
+								}
+
 
 
 								if (!totallyPreCompItem->isSaturationComputationRunning()) {
@@ -115,7 +171,11 @@ namespace Konclude {
 								}
 
 								if (totallyPreCompItem->hasConsistenceCheched()) {
+									LOG(INFO,getLogDomain(),logTr("Consistency computation completed."),this);
 									totallyPreCompItem->getConsistencePrecomputationStep()->setStepFinished(true);
+
+									COntologyProcessingStatistics* ontProcStats = totallyPreCompItem->getConsistencePrecomputationStep()->getProcessingStepData()->getProcessingStatistics(true);
+									ontProcStats->setProcessingCountStatisticValue("consistency-checking-time",totallyPreCompItem->getInitializationTime()->elapsed());
 
 									if (totallyPreCompItem->failAfterConsistencyChecking()) {
 										totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
@@ -146,21 +206,69 @@ namespace Konclude {
 
 
 
-					if (!workTestCreated && totallyPreCompItem->isSaturationStepRequired() && totallyPreCompItem->isConsistenceStepFinished()) {
+					if (!workTestCreated && totallyPreCompItem->isIndividualStepRequired() && totallyPreCompItem->isConsistenceStepFinished()) {
+						if (!totallyPreCompItem->isIndividualStepFinished()) {
+							if (totallyPreCompItem->areIndividualStepProcessingRequirementSatisfied()) {
+
+								if (totallyPreCompItem->hasRemainingConsistencyRequiredSaturationIndividuals() && (!totallyPreCompItem->isSaturationComputationRunning() || totallyPreCompItem->hasIndividualSaturationRunning())) {
+									if (saturateRemainingConsistencyRequiredIndividuals(totallyPreCompItem)) {
+										totallyPreCompItem->incIndividualSaturationRunningCount();
+										totallyPreCompItem->setSaturationComputationRunning(true);
+										totallyPreCompItem->setIndividualStepRunning(true);
+										workTestCreated = true;
+									}
+								}
+
+
+								if (!totallyPreCompItem->hasIndividualPrecomputationCreated() && !totallyPreCompItem->isSaturationComputationRunning() && !totallyPreCompItem->hasIndividualSaturationRunning()) {
+									totallyPreCompItem->setIndividualPrecomputationCreated(true);
+									workTestCreated = createIndividualPrecomputationCheck(totallyPreCompItem);
+									totallyPreCompItem->setIndividualStepRunning(true);
+								}
+
+
+								if (totallyPreCompItem->hasIndividualPrecomputationChecked() && !totallyPreCompItem->isIndividualComputationRunning()) {
+									totallyPreCompItem->setIndividualStepRunning(false);
+									totallyPreCompItem->getIndividualPrecomputationStep()->setStepFinished(true);
+									totallyPreCompItem->getIndividualPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL);
+								}
+
+							} else {
+								totallyPreCompItem->setIndividualStepRunning(false);
+								totallyPreCompItem->getIndividualPrecomputationStep()->setStepFinished(true);
+								totallyPreCompItem->getIndividualPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
+							}
+						} else {
+							totallyPreCompItem->getIndividualPrecomputationStep()->submitRequirementsUpdate();
+						}
+					}
+
+
+
+
+
+
+
+
+					if (!workTestCreated && totallyPreCompItem->isSaturationStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->hasIndividualSaturationRunning() && !totallyPreCompItem->isIndividualStepRunning()) {
 						if (!totallyPreCompItem->isSaturationStepFinished()) {
 							if (totallyPreCompItem->areSaturationStepProcessingRequirementSatisfied()) {
+
 
 								if (totallyPreCompItem->hasRemainingRequiredSaturationConcepts() && !totallyPreCompItem->isSaturationComputationRunning()) {
 									if (saturateRemainingRequiredItems(totallyPreCompItem)) {
 										totallyPreCompItem->setSaturationComputationRunning(true);
+										workTestCreated = true;
 									}
 								}
 
 
 								if (totallyPreCompItem->hasConceptSaturationPrecomputationChecked() && !totallyPreCompItem->isSaturationComputationRunning()) {
-									LOG(INFO,getLogDomain(),logTr("Concept saturation finished."),this);
 									totallyPreCompItem->setSaturationStepRunning(false);
-									totallyPreCompItem->getSaturationPrecomputationStep()->setStepFinished(true);
+									if (totallyPreCompItem->requiresAllConceptsSaturation()) {
+										LOG(INFO,getLogDomain(),logTr("Concept saturation finished."),this);
+										totallyPreCompItem->getSaturationPrecomputationStep()->setStepFinished(true);
+									}
 
 									CPrecomputation* precomputation = totallyPreCompItem->getPrecomputation();
 									CSaturationData* saturationData = totallyPreCompItem->getSaturationData();
@@ -295,6 +403,43 @@ namespace Konclude {
 
 
 
+			bool CTotallyPrecomputationThread::isAllAssertionIndividualSaturationSufficient(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
+				if (!totallyPreCompItem->hasAllAssertionIndividualSufficientSaturationChecked()) {
+					CIndividual* allAssertionIndi = totallyPreCompItem->getAllAssertionIndividual();
+					bool saturationSufficient = false;
+
+					if (allAssertionIndi) {
+						CSaturationData* saturationData = totallyPreCompItem->getSaturationData();
+						CSaturationTaskData* satTaskData = (CSaturationTaskData*)saturationData;
+						if (satTaskData) {
+							CSatisfiableCalculationTask* satCalcTask = satTaskData->getSaturationTask();
+							if (satCalcTask) {
+								CProcessingDataBox* procDataBox = satCalcTask->getProcessingDataBox();
+								if (procDataBox) {
+									CIndividualSaturationProcessNodeVector* satIndiNodeVec = procDataBox->getIndividualSaturationProcessNodeVector(false);
+									if (satIndiNodeVec) {
+										CIndividualSaturationProcessNode* allAssertionIndiNode = satIndiNodeVec->getData(allAssertionIndi->getIndividualID());
+										if (allAssertionIndiNode) {
+											CIndividualSaturationProcessNodeStatusFlags* indFlags = allAssertionIndiNode->getIndirectStatusFlags();
+											CIndividualSaturationProcessNodeStatusFlags* dirFlags = allAssertionIndiNode->getDirectStatusFlags();
+											if (!indFlags->hasClashedFlag() && indFlags->hasCompletedFlag() && dirFlags->hasCompletedFlag() && !indFlags->hasInsufficientFlag()) {
+												saturationSufficient = true;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					if (saturationSufficient) {
+						totallyPreCompItem->setAllAssertionIndividualSaturationSufficient(true);
+					}
+					totallyPreCompItem->setAllAssertionIndividualSufficientSaturationChecked(true);
+				}
+				return totallyPreCompItem->isAllAssertionIndividualSaturationSufficient();
+			}
+
+
 			void CTotallyPrecomputationThread::logSaturationInfos(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
 				CConcreteOntology* ontology = totallyPreCompItem->getOntology();
 				CSaturationData* saturationData = totallyPreCompItem->getSaturationData();
@@ -341,6 +486,14 @@ namespace Konclude {
 
 				if (repCycleClassConcept) {
 
+					CSaturationConceptDataItem* conSatItem = totallyPreCompItem->getSaturationConceptDataItem(repCycleClassConcept,false,false);
+					if (conSatItem) {
+						CIndividualSaturationProcessNode* satNode = (CIndividualSaturationProcessNode*)conSatItem->getIndividualProcessNodeForConcept();
+						if (!satNode->getIndirectStatusFlags()->hasInsufficientFlag()) {
+							return false;
+						}
+					}
+
 					if (conceptCycleData->getConceptCount() >= totallyPreCompItem->getMinConceptCycleTestSize()) {
 
 						CConceptCyclePrecomputationTestingItem* conCycPrecTestItem = new CConceptCyclePrecomputationTestingItem(conceptCycleData,totallyPreCompItem);
@@ -359,33 +512,118 @@ namespace Konclude {
 			}
 
 
+
+
+
+
+
+			bool CTotallyPrecomputationThread::createIndividualPrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
+				CConcreteOntology* onto = totallyPreCompItem->getOntology();
+				CSatisfiableCalculationJob* satCalcJob = nullptr;
+
+				if (totallyPreCompItem->hasIndividualsSaturated() && totallyPreCompItem->hasALLIndividualsSaturationOrderd() && totallyPreCompItem->hasInsufficientSaturationIndividuals()) {
+					if (!totallyPreCompItem->hasIndividualPrecomputationChecked()) {
+						QSet<CIndividual*>* procReqIndiSet = totallyPreCompItem->getIncompletelySaturatedIndividuaSet();
+
+						bool allIndiProRequired = false;
+						if (mConfForceFullCompletionGraphConstruction || !totallyPreCompItem->hasIndividualsSaturated()) {
+							allIndiProRequired = true;
+						}
+						if (allIndiProRequired || !procReqIndiSet->isEmpty()) {
+							QList<CIndividual*> indiList;
+							CIndividualVector* indiVec = onto->getABox()->getIndividualVector(false);
+							if (indiVec) {
+								cint64 indiCount = indiVec->getItemCount();
+								for (cint64 idx = 0; idx < indiCount; ++idx) {
+									CIndividual* indi = indiVec->getData(idx);
+									if (indi && allIndiProRequired || procReqIndiSet && procReqIndiSet->contains(indi)) {
+										indiList.append(indi);
+									}
+								}
+							}
+							CSatisfiableCalculationJobGenerator satCalcJobGen(onto);
+							satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(indiList);
+
+							CConsistencePrecomputationTestingItem* consTestItem = new CConsistencePrecomputationTestingItem(totallyPreCompItem,totallyPreCompItem);
+							CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
+							satCalcJob->setCalculationConfiguration(calcConfig);
+							satCalcJob->setSatisfiableTaskPreyingAdapter(consTestItem->getTaskPreyingAdapter());
+
+							processCalculationJob(satCalcJob,totallyPreCompItem,consTestItem);
+							return true;
+						}
+					}
+				} else {
+					totallyPreCompItem->setIndividualPrecomputationChecked(true);
+				}
+				return false;
+			}
+
+
+
+
+
+
+
+
 			
 			bool CTotallyPrecomputationThread::createConsistencePrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
 				CConcreteOntology* onto = totallyPreCompItem->getOntology();
+				CSatisfiableCalculationJob* satCalcJob = nullptr;
 
-				QList<CIndividual*> indiList;
 				CIndividualVector* indiVec = onto->getABox()->getIndividualVector(false);
+				cint64 indiCount = 0;
 				if (indiVec) {
-					cint64 indiCount = indiVec->getItemCount();
-					for (cint64 idx = 0; idx < indiCount; ++idx) {
-						CIndividual* indi = indiVec->getData(idx);
-						if (indi) {
-							indiList.append(indi);
+					indiCount = indiVec->getItemCount();
+				}
+
+				bool consistencyDetected = false;
+				bool detectedConsistency = true;
+				if (!mConfForceFullCompletionGraphConstruction && isAllAssertionIndividualSaturationSufficient(totallyPreCompItem)) {
+					consistencyDetected = true;
+					detectedConsistency = true;
+					LOG(INFO,getLogDomain(),logTr("Trivial consistency detected with merged individual."),getLogObject());
+				} else if (totallyPreCompItem->hasClashedSaturationIndividuals()) {
+					consistencyDetected = true;
+					detectedConsistency = false;
+					LOG(INFO,getLogDomain(),logTr("Trivial inconsistency detected with individual saturation."),getLogObject());
+				} else if (!mConfForceFullCompletionGraphConstruction && totallyPreCompItem->hasIndividualsSaturated() && !totallyPreCompItem->hasInsufficientSaturationIndividuals() && indiCount > 0) {
+					consistencyDetected = true;
+					detectedConsistency = true;
+					LOG(INFO,getLogDomain(),logTr("Trivial consistency detected with individual saturation."),getLogObject());
+				} else {
+					QList<CIndividual*> indiList;
+
+
+					bool allIndiProRequired = false;
+					if (mConfForceFullCompletionGraphConstruction || !totallyPreCompItem->hasIndividualsSaturated()) {
+						allIndiProRequired = true;
+					}
+					QSet<CIndividual*>* procReqIndiSet = procReqIndiSet = totallyPreCompItem->getIncompletelySaturatedIndividuaSet();
+					//QSet<CIndividual*> procReqIndiSet;
+					//mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(&procReqIndiSet);
+
+					if (indiVec) {
+						for (cint64 idx = 0; idx < indiCount; ++idx) {
+							CIndividual* indi = indiVec->getData(idx);
+							//if (indi && allIndiProRequired || procReqIndiSet && procReqIndiSet.contains(indi)) {
+							if (indi && allIndiProRequired || procReqIndiSet && procReqIndiSet->contains(indi)) {
+								indiList.append(indi);
+							}
 						}
 					}
-				}
-				CSatisfiableCalculationJobGenerator satCalcJobGen(onto);
-				CSatisfiableCalculationJob* satCalcJob = nullptr;
-				bool simpleConsistency = false;
-				if (indiList.isEmpty()) {
-					CConcept* topConcept = onto->getTBox()->getTopConcept();
-					if (topConcept->getOperandCount() > 0) {
-						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(topConcept);
+					CSatisfiableCalculationJobGenerator satCalcJobGen(onto);
+					if (indiList.isEmpty()) {
+						CConcept* topConcept = onto->getTBox()->getTopConcept();
+						if (topConcept->getOperandCount() > 0) {
+							satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(topConcept);
+						} else {
+							consistencyDetected = true;
+							detectedConsistency = true;
+						}
 					} else {
-						simpleConsistency = true;
+						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(indiList);
 					}
-				} else {
-					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(indiList);
 				}
 
 
@@ -394,10 +632,16 @@ namespace Konclude {
 					consistence = new CConsistence();
 					onto->setConsistence(consistence);
 				}
+				if (totallyPreCompItem->hasIndividualsSaturated() && totallyPreCompItem->hasALLIndividualsSaturationOrderd()) {
+					consistence->setIndividualsRepresentativelyStored(true);
+					if (totallyPreCompItem->hasInsufficientSaturationIndividuals()) {
+						consistence->setAllIndividualsRepresentativelyStored(true);
+					}
+				}
 				totallyPreCompItem->setConsistence(consistence);
 
-				if (simpleConsistency) {
-					consistence->setOntologyConsistent(simpleConsistency);
+				if (consistencyDetected) {
+					consistence->setOntologyConsistent(detectedConsistency);
 					totallyPreCompItem->setConsistenceCheched(true);
 					return false;
 				} else {
@@ -455,7 +699,6 @@ namespace Konclude {
 					CConcept* concept = conNegSatItem.getConcept();
 					bool negated = conNegSatItem.getNegation();
 					CSaturationConceptDataItem* ontConSatDataItem = conNegSatItem.getSaturationConceptDataItem();
-
 					cint64 nOpCode = concept->getOperatorCode();
 					cint64 opCount = concept->getOperandCount();
 					if (!negated && (nOpCode == CCAND || nOpCode == CCSUB || nOpCode == CCEQ || ((nOpCode == CCOR) && opCount == 1)) || negated && (nOpCode == CCOR || ((nOpCode == CCAND || nOpCode == CCEQ) && opCount == 1))) {
@@ -474,6 +717,9 @@ namespace Konclude {
 									ontConSatDataItem->setMultipleDirectPredecessorsItems(true);
 								}
 							} else if (!opNegation && opConOpCode == CCAND || opNegation && opConOpCode == CCOR) {
+								if (opConcept->getOperandCount() > 1) {
+									ontConSatDataItem->setMultipleDirectPredecessorsItems(true);
+								}
 								if (!processSet.contains(CConceptNegationSaturationItem(opConcept,opNegation,ontConSatDataItem))) {
 									processSet.insert(CConceptNegationSaturationItem(opConcept,opNegation,ontConSatDataItem));
 									processList.append(CConceptNegationSaturationItem(opConcept,opNegation,ontConSatDataItem));
@@ -527,6 +773,9 @@ namespace Konclude {
 											ontConSatDataItem->addExistReferenceConceptItemList(existConceptTestItem);
 											ontConSatDataItem->setMultipleDirectPredecessorsItems(true);
 										} else if (opOpConcept->getOperatorCode() == CCAQAND) {
+											if (opConcept->getOperandCount() > 1) {
+												ontConSatDataItem->setMultipleDirectPredecessorsItems(true);
+											}
 											if (!processSet.contains(CConceptNegationSaturationItem(opOpConcept,false,ontConSatDataItem))) {
 												processSet.insert(CConceptNegationSaturationItem(opOpConcept,false,ontConSatDataItem));
 												processList.append(CConceptNegationSaturationItem(opOpConcept,false,ontConSatDataItem));
@@ -687,12 +936,39 @@ namespace Konclude {
 					}
 				}
 				reqConSatList->clear();
-				if (saturatingConceptCount > 0 || totallyPreCompItem->requiresNominalDelayedConceptsSaturationUpdate()) {
+				if (saturatingConceptCount > 0 || totallyPreCompItem->requiresNominalDelayedConceptsSaturationUpdate() && !totallyPreCompItem->hasNominalDelayedConceptsSaturationUpdated()) {
 					totallyPreCompItem->setNominalDelayedConceptsSaturationUpdateRequired(false);
-					createSaturationProcessingJob(totallyPreCompItem,true);
+					totallyPreCompItem->setNominalDelayedConceptsSaturationUpdated(true);
+					createMarkedConceptSaturationProcessingJob(totallyPreCompItem,true);
 					return true;
 				}
 				return false;
+			}
+
+
+
+			bool CTotallyPrecomputationThread::addConsistencyRequiredSaturationIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
+				CIndividualVector* indiVec = totallyPreCompItem->getOntology()->getABox()->getIndividualVector(false);
+				bool individualsAdded = false;
+				bool saturateConcepts = CConfigDataReader::readConfigBoolean(totallyPreCompItem->getCalculationConfiguration(),"Konclude.Calculation.Optimization.ConceptSaturation",true);
+				bool individualSaturation = CConfigDataReader::readConfigBoolean(totallyPreCompItem->getCalculationConfiguration(),"Konclude.Calculation.Optimization.IndividualSaturation",false);
+				if (saturateConcepts && individualSaturation) {
+					if (indiVec) {
+						QSet<TConceptNegPair> assConNegPairSet;
+						cint64 indiCount = indiVec->getItemCount();
+						for (cint64 indiId = 0; indiId < indiCount; ++indiId) {
+							CIndividual* indi = indiVec->getData(indiId);
+							if (indi) {
+								totallyPreCompItem->addConsistencyRequiredSaturationIndividual(indi);
+								individualsAdded = true; 
+							}
+						}
+					}
+					totallyPreCompItem->setIndividualsSaturated(true);
+				} else {
+					totallyPreCompItem->setIndividualsSaturated(false);
+				}
+				return individualsAdded;
 			}
 
 
@@ -711,6 +987,7 @@ namespace Konclude {
 					CIndividualVector* indiVec = totallyPreCompItem->getOntology()->getABox()->getIndividualVector(false);
 					if (indiVec) {
 						QSet<TConceptNegPair> assConNegPairSet;
+						QSet<CRole*> assRoleSet;
 						cint64 indiCount = indiVec->getItemCount();
 						for (cint64 indiId = 0; indiId < indiCount; ++indiId) {
 							CIndividual* indi = indiVec->getData(indiId);
@@ -718,17 +995,39 @@ namespace Konclude {
 								for (CConceptAssertionLinker* conAssLinkIt = indi->getAssertionConceptLinker(); conAssLinkIt; conAssLinkIt = conAssLinkIt->getNext()) {
 									CConcept* assCon = conAssLinkIt->getData();
 									bool assConNeg = conAssLinkIt->isNegated();
-									if (assCon->getOperatorCode() != CCNOMINAL) {
+									if (assCon->getOperatorCode() == CCNOMINAL) {
+										if (assCon->getNominalIndividual() != indi || assConNeg && assCon->getNominalIndividual() == indi) {
+											assConNegPairSet.insert(TConceptNegPair(assCon,assConNeg));
+										}
+									} else {
 										assConNegPairSet.insert(TConceptNegPair(assCon,assConNeg));
 									}
 								}
+								for (CRoleAssertionLinker* roleAssLinkIt = indi->getAssertionRoleLinker(); roleAssLinkIt; roleAssLinkIt = roleAssLinkIt->getNext()) {
+									CRole* role = roleAssLinkIt->getRole();
+									assRoleSet.insert(role);
+								}
+
 							}
 						}
+						CIndividual* tmpAllAssertionIndi = new CIndividual();
+						tmpAllAssertionIndi->initIndividual(indiVec->getItemCount());
+
 						for (QSet<TConceptNegPair>::const_iterator it = assConNegPairSet.constBegin(), itEnd = assConNegPairSet.constEnd(); it != itEnd; ++it) {
 							constConReqSatAdded = true;
 							TConceptNegPair assConNegPair(*it);
 							totallyPreCompItem->addConsistencyRequiredSaturationConcept(assConNegPair.first,assConNegPair.second);
+							CConceptAssertionLinker* tmpConAssLinker = new CConceptAssertionLinker();
+							tmpConAssLinker->initNegLinker(assConNegPair.first,assConNegPair.second);
+							tmpAllAssertionIndi->addAssertionConceptLinker(tmpConAssLinker);
 						}
+						for (QSet<CRole*>::const_iterator it = assRoleSet.constBegin(), itEnd = assRoleSet.constEnd(); it != itEnd; ++it) {
+							CRole* role(*it);
+							CRoleAssertionLinker* tmpRoleAssLinker = new CRoleAssertionLinker();
+							tmpRoleAssLinker->initRoleAssertionLinker(role,tmpAllAssertionIndi);
+							tmpAllAssertionIndi->addAssertionRoleLinker(tmpRoleAssLinker);
+						}
+						totallyPreCompItem->setAllAssertionIndividual(tmpAllAssertionIndi);
 					}
 				}
 				
@@ -737,7 +1036,7 @@ namespace Konclude {
 
 
 
-			bool CTotallyPrecomputationThread::saturateRemainingConsistencyRequiredItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
+			bool CTotallyPrecomputationThread::saturateRemainingConsistencyRequiredConcepts(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
 				cint64 saturatingConceptCount = 0;
 				QList<TConceptNegPair>* reqConSatList = totallyPreCompItem->getRemainingConsistencyRequiredSaturationConceptList();
 				for (QList<TConceptNegPair>::const_iterator it = reqConSatList->constBegin(), itEnd = reqConSatList->constEnd(); it != itEnd; ++it) {
@@ -748,12 +1047,32 @@ namespace Konclude {
 				}
 				reqConSatList->clear();
 				if (saturatingConceptCount > 0) {
-					createSaturationProcessingJob(totallyPreCompItem,false);
+					createMarkedConceptSaturationProcessingJob(totallyPreCompItem,false);
 					return true;
 				}
 				return false;
 			}
 
+
+
+			bool CTotallyPrecomputationThread::saturateRemainingConsistencyRequiredIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
+				cint64 saturatingIndividualCount = 0;
+				QList<CIndividual*> indiSatList;
+				QList<CIndividual*>* reqIndiSatList = totallyPreCompItem->getRemainingConsistencyRequiredSaturationIndividuals();
+				while (!reqIndiSatList->isEmpty() && saturatingIndividualCount < mIndividualSaturationCount) {
+					CIndividual* individual = reqIndiSatList->takeFirst();
+					indiSatList.append(individual);
+					++saturatingIndividualCount;
+				}
+				if (!totallyPreCompItem->hasRemainingConsistencyRequiredSaturationIndividuals()) {
+					totallyPreCompItem->setALLIndividualsSaturationOrderd(true);
+				}
+				if (saturatingIndividualCount > 0) {
+					createIndividualSaturationProcessingJob(totallyPreCompItem,indiSatList);
+					return true;
+				}
+				return false;
+			}
 
 			cint64 CTotallyPrecomputationThread::markSaturationProcessingItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem, CSaturationConceptDataItem* startMarkingItem, CConcept* startMarkingConcept, bool startMarkingConceptNegation) {
 
@@ -821,11 +1140,21 @@ namespace Konclude {
 								bool opConceptMarked = false;
 								if (nOpCode != CCAQCHOOCE || !opNegation) {
 									CSaturationConceptDataItem* opMarkingItem = totallyPreCompItem->getSaturationConceptDataItem(opConcept,opNegation,false);
-									if (opMarkingItem) {
-										if (!opMarkingItem->isItemProcessingMarked()) {
+									CSaturationConceptDataItem* roleOpMarkingItem = nullptr;
+									if (nextConcept->getRole()) {
+										CRole* role = nextConcept->getRole();
+										roleOpMarkingItem = totallyPreCompItem->getSaturationRoleSuccessorConceptDataItem(role,opConcept,opNegation,false);
+									}
+									if (opMarkingItem || roleOpMarkingItem) {
+										if (opMarkingItem && !opMarkingItem->isItemProcessingMarked()) {
 											++markedConcepts;
 											opMarkingItem->setItemProcessingMarked(true);
 											itemList.append(opMarkingItem);
+										}		
+										if (roleOpMarkingItem && !roleOpMarkingItem->isItemProcessingMarked()) {
+											++markedConcepts;
+											roleOpMarkingItem->setItemProcessingMarked(true);
+											itemList.append(roleOpMarkingItem);
 										}		
 									} else {
 										conNegPairList.append(TConceptNegPair(opConcept,opNegation));
@@ -957,7 +1286,7 @@ namespace Konclude {
 
 
 
-			void CTotallyPrecomputationThread::createSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, bool allowAllSaturation) {
+			void CTotallyPrecomputationThread::createMarkedConceptSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, bool allowAllSaturation) {
 				CApproximatedSaturationCalculationJob* satCalculationJob = nullptr;
 				CConcreteOntology *onto = totallyPreCompItem->getOntology();
 				CApproximatedSaturationCalculationJobGenerator satCalculationJobGenerator(onto);
@@ -982,10 +1311,17 @@ namespace Konclude {
 						saturationConceptCount++;
 					}
 				}
+				if (!totallyPreCompItem->isAllAssertionIndividualSaturated()) {
+					CIndividual* allAssertionIndi = totallyPreCompItem->getAllAssertionIndividual();
+					if (allAssertionIndi) {
+						satCalculationJob = satCalculationJobGenerator.extendApproximatedSaturationCalculationJobProcessing(allAssertionIndi,nullptr,satCalculationJob);
+					}
+					totallyPreCompItem->setAllAssertionIndividualSaturated(true);
+				}
 
-				LOG(INFO,getLogDomain(),logTr("Ordered %1 concepts for saturation for ontology '%2'.").arg(saturationConceptCount).arg(totallyPreCompItem->getOntology()->getTerminologyName()),this);
+				LOG(INFO,getLogDomain(),logTr("Scheduled %1 concepts for saturation for ontology '%2'.").arg(saturationConceptCount).arg(totallyPreCompItem->getOntology()->getTerminologyName()),this);
 
-				CSaturationPrecomputationTestingItem* satTestingItem = new CSaturationPrecomputationTestingItem(totallyPreCompItem);
+				CSaturationPrecomputationTestingItem* satTestingItem = new CSaturationPrecomputationTestingItem(totallyPreCompItem,CPrecomputationTestingItem::CONCEPTSATURATIONPRECOMPUTATIONTYPE);
 				CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
 				satCalculationJob->setCalculationConfiguration(calcConfig);
 				satCalculationJob->setSaturationTaskPreyingAdapter(new CTaskPreyingAdapter((CSaturationObserver*)totallyPreCompItem));
@@ -993,6 +1329,51 @@ namespace Konclude {
 				totallyPreCompItem->setSaturationCalculationJob(satCalculationJob);
 				processCalculationJob(satCalculationJob,totallyPreCompItem,satTestingItem);
 			}
+
+
+
+
+
+
+
+
+			void CTotallyPrecomputationThread::createIndividualSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, const QList<CIndividual*>& individualList) {
+				CApproximatedSaturationCalculationJob* satCalculationJob = nullptr;
+				CConcreteOntology *onto = totallyPreCompItem->getOntology();
+				CApproximatedSaturationCalculationJobGenerator satCalculationJobGenerator(onto);
+				satCalculationJob = satCalculationJobGenerator.getApproximatedSaturationCalculationJob(0,totallyPreCompItem->getSaturationData());
+				satCalculationJob->setSeparateSaturation(true);
+
+				cint64 nextSaturationID = totallyPreCompItem->getNextSaturationID();
+				CSaturationIndividualDataItem* satIndiDataItemLinker = nullptr;
+
+				cint64 saturationIndividualCount = 0;
+				for (QList<CIndividual*>::const_iterator it = individualList.constBegin(), itEnd = individualList.constEnd(); it != itEnd; ++it) {
+					CIndividual* individual = *it;
+					CSaturationIndividualDataItem* satIndiDataItem = totallyPreCompItem->takeFreeSaturationIndividualDataItem();
+					satIndiDataItem->initConceptSaturationTestingItem(individual,nextSaturationID);
+					satIndiDataItemLinker = satIndiDataItem->append(satIndiDataItemLinker);
+					CIndividualProcessData* indiProcessData = (CIndividualProcessData*)individual->getIndividualData();
+					if (indiProcessData) {
+						indiProcessData->setSaturationReferenceLinkingData(satIndiDataItem);
+					}
+					satCalculationJob = satCalculationJobGenerator.extendApproximatedSaturationCalculationJobProcessing(individual,satIndiDataItem,satCalculationJob);
+					++saturationIndividualCount;
+				}
+				totallyPreCompItem->setSaturationIDIndividualDataItems(nextSaturationID,satIndiDataItemLinker);
+
+				LOG(INFO,getLogDomain(),logTr("Scheduled %1 individuals for saturation for ontology '%2'.").arg(saturationIndividualCount).arg(totallyPreCompItem->getOntology()->getTerminologyName()),this);
+
+				CSaturationPrecomputationTestingItem* satTestingItem = new CSaturationPrecomputationTestingItem(totallyPreCompItem,CPrecomputationTestingItem::INDIVIDUALSATURATIONPRECOMPUTATIONTYPE,nextSaturationID);
+				CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
+				satCalculationJob->setCalculationConfiguration(calcConfig);
+				satCalculationJob->setSaturationIndividualsAnalysationObserver(new CSaturationIndividualsAnalysingAdapter((CSaturationIndividualAnalysationObserver*)totallyPreCompItem));
+
+				totallyPreCompItem->setSaturationCalculationJob(satCalculationJob);
+				processCalculationJob(satCalculationJob,totallyPreCompItem,satTestingItem);
+			}
+
+
 
 
 
@@ -1229,7 +1610,7 @@ namespace Konclude {
 
 				LOG(INFO,getLogDomain(),logTr("Preparing saturation of %1 concepts for ontology '%2'.").arg(mSaturationConceptCount).arg(totallyPreCompItem->getOntology()->getTerminologyName()),this);
 
-				CSaturationPrecomputationTestingItem* satTestingItem = new CSaturationPrecomputationTestingItem(totallyPreCompItem);
+				CSaturationPrecomputationTestingItem* satTestingItem = new CSaturationPrecomputationTestingItem(totallyPreCompItem,CPrecomputationTestingItem::CONCEPTSATURATIONPRECOMPUTATIONTYPE);
 				CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
 				satCalculationJob->setCalculationConfiguration(calcConfig);
 				satCalculationJob->setSaturationTaskPreyingAdapter(new CTaskPreyingAdapter((CSaturationObserver*)totallyPreCompItem));
@@ -1275,10 +1656,37 @@ namespace Konclude {
 					}
 
 					return true;
+				} else if (preTestItem->getPrecomputationTestingType() == CPrecomputationTestingItem::INDIVIDUALSATURATIONPRECOMPUTATIONTYPE) {
+					CSaturationPrecomputationTestingItem* satPreTestItem = (CSaturationPrecomputationTestingItem*)preTestItem;
+					cint64 saturationID = satPreTestItem->getSaturationID();
+					totallyPreCompItem->releaseSaturationIDIndividualDataItems(saturationID);
+					totallyPreCompItem->decIndividualSaturationRunningCount();
+					if (!totallyPreCompItem->hasIndividualSaturationRunning()) {
+						totallyPreCompItem->setSaturationComputationRunning(false);
+
+						if (totallyPreCompItem->hasIndividualsSaturated() && totallyPreCompItem->hasALLIndividualsSaturationOrderd()) {
+
+							if (!totallyPreCompItem->hasIndividualsSaturationCacheSynchronisation()) {
+								totallyPreCompItem->setIndividualsSaturationCacheSynchronisation(true);
+								QSet<CIndividual*>* procReqIndiSet = totallyPreCompItem->getIncompletelySaturatedIndividuaSet();
+								mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(procReqIndiSet);
+								LOG(INFO,getLogDomain(),logTr("Individual saturation insufficient for %1 individuals.").arg(procReqIndiSet->size()),getLogObject());
+							}
+
+
+							CConsistence* consistence = totallyPreCompItem->getConsistence();
+							if (consistence) {
+								consistence->setIndividualsRepresentativelyStored(true);
+								if (totallyPreCompItem->hasInsufficientSaturationIndividuals()) {
+									consistence->setAllIndividualsRepresentativelyStored(true);
+								}
+							}
+						}
+					}
+					return true;
 				}
 				return false;
 			}
-
 
 
 
@@ -1288,13 +1696,15 @@ namespace Konclude {
 				CTotallyOntologyPrecomputationItem* totallyPreCompItem = (CTotallyOntologyPrecomputationItem*)ontPreCompItem;
 				if (preTestItem->getPrecomputationTestingType() == CPrecomputationTestingItem::CONSISTENCEPRECOMPUTATIONTYPE) {
 					CConsistencePrecomputationTestingItem* consPreTestItem = (CConsistencePrecomputationTestingItem*)preTestItem;
+					totallyPreCompItem->setIndividualStepRunning(false);
+					totallyPreCompItem->setIndividualPrecomputationChecked(true);
+					totallyPreCompItem->setConsistenceCheched(true);
 
 					if (pcce->hasCalculationError()) {
 						LOG(ERROR,getLogDomain(),logTr("Error in computation, consistence testing for ontology '%1' failed.").arg(ontPreCompItem->getOntology()->getTerminologyName()),getLogObject());
-						totallyPreCompItem->setConsistenceCheched(true);
 						totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
+						totallyPreCompItem->getIndividualPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
 					} else {
-						totallyPreCompItem->setConsistenceCheched(true);
 						CConsistence* consistence = totallyPreCompItem->getConsistence();
 						consistence->setConsistenceModelData(totallyPreCompItem->getConsistenceData());
 						consistence->setOntologyConsistent(pcce->getTestResultSatisfiable());

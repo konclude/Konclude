@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -36,10 +36,14 @@
 
 #include "Reasoner/Kernel/Task/CSaturationTaskData.h"
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationTask.h"
+#include "Reasoner/Kernel/Task/CConsistenceTaskData.h"
 
 #include "Reasoner/Kernel/Process/CIndividualSaturationProcessNode.h"
+#include "Reasoner/Kernel/Process/CReferredIndividualTrackingVector.h"
 
 #include "Reasoner/Consistiser/CSaturationConceptDataItem.h"
+#include "Reasoner/Consistiser/CIndividualDependenceTrackingObserver.h"
+#include "Reasoner/Consistiser/CIndividualDependenceTrackingMarker.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -71,9 +75,9 @@ namespace Konclude {
 					//! Constructor
 					CPrecomputedSaturationSubsumerExtractor(CConcreteOntology* ontology);
 
-					virtual bool extractSubsumers(CConcept* concept, CConceptSubsumerObserver* subsumerObserver, bool* possibleSubsumerFlag = nullptr);
+					virtual bool extractSubsumers(CConcept* concept, CConceptSubsumerObserver* subsumerObserver, bool* possibleSubsumerFlag = nullptr, CIndividualDependenceTrackingObserver* indDepTrackingObserver = nullptr, CIndividualDependenceTrackingMarker* indiDepTrackMarker = nullptr);
 					
-					virtual bool getConceptFlags(CConcept* concept, bool* unsatisfiableFlag, bool* insufficientFlag);
+					virtual bool getConceptFlags(CConcept* concept, bool* unsatisfiableFlag, bool* insufficientFlag, bool* incompleteProcessedFlag);
 
 
 					virtual cint64 getSubsumerCount(CConcept* concept);

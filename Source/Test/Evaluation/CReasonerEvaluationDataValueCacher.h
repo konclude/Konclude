@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -64,6 +64,11 @@ namespace Konclude {
 					CReasonerEvaluationDataValue* getCachedDataValue(const QString& responseName, cint64 extractionType);
 					bool addDataValueToCache(const QString& responseName, cint64 extractionType, CReasonerEvaluationDataValue* dataValue);
 
+
+					CReasonerEvaluationDataValue* getCachedDataValue(const QString& responseName, const QString& extractionTypeName);
+					bool addDataValueToCache(const QString& responseName, const QString& extractionTypeName, CReasonerEvaluationDataValue* dataValue);
+
+
 				// protected methods
 				protected:
 
@@ -73,6 +78,7 @@ namespace Konclude {
 				// private methods
 				private:
 					QHash< QPair<QString,cint64>,CReasonerEvaluationDataValue* > mResponseTypeDataValueHash;
+					QHash< QPair<QString,QString>,CReasonerEvaluationDataValue* > mResponseTypeStringDataValueHash;
 
 				// private variables
 				private:

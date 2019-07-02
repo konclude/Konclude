@@ -166,6 +166,14 @@ namespace Konclude {
 					QSemaphore mBlockingSemaphore;
 					COWLLinkRecordInterpreter* mOWLLinkInterpreter;
 
+					bool mReportParsingTimeForConsistency;
+					bool mReportParsingTimeForClassification;
+					bool mReportParsingTimeForRealisation;
+					bool mReportParsingTimeForSatisfiability;
+
+					bool mReportAllTime;
+
+
 					CConfiguration* mLoaderConfig;
 
 
@@ -184,6 +192,11 @@ namespace Konclude {
 
 					COREConsolePrintLogObserver* mInfoConsoleObserver;
 					COREFilePrintLogObserver* mErrorFileObserver;
+
+
+					CIsConsistentQueryCommand* mConsistencyKBCommand;
+					CIsTriviallyConsistentQueryCommand* mTriviallyConsistencyKBCommand;
+					cint64 mAdditionalCheckingTime;
 
 				// private methods
 				private:

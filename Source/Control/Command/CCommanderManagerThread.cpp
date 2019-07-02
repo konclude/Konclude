@@ -132,10 +132,10 @@ namespace Konclude {
 													CUnspecifiedMessageInformationRecord::makeRecord(QString("Setting configuration for '%1' to value '%2'.").arg(setConfigCommand->getConfigNameString()).arg(setConfigCommand->getConfigValueString()),&commandRecordRouter);
 													configurationProvider->installGlobalConfiguration(config);
 												} else {
-													CUnspecifiedMessageErrorRecord::makeRecord(QString("Value for configurationProvider property '%1' could not read from string.").arg(setConfigCommand->getConfigNameString()),&commandRecordRouter);
+													CUnspecifiedMessageErrorRecord::makeRecord(QString("Value for configuration property '%1' cannot be read from string '%2'.").arg(setConfigCommand->getConfigNameString()).arg(setConfigCommand->getConfigValueString()),&commandRecordRouter);
 												}
 											} else {
-												CUnspecifiedMessageErrorRecord::makeRecord(QString("Value for configurationProvider property '%1' could not read from string.").arg(setConfigCommand->getConfigNameString()),&commandRecordRouter);
+												CUnspecifiedMessageErrorRecord::makeRecord(QString("Value for configuration property '%1' cannot be from string '%2'.").arg(setConfigCommand->getConfigNameString()).arg(setConfigCommand->getConfigValueString()),&commandRecordRouter);
 											}
 										} else {
 											CUnspecifiedMessageErrorRecord::makeRecord(QString("Configuration property '%1' not available.").arg(setConfigCommand->getConfigNameString()),&commandRecordRouter);
@@ -195,12 +195,12 @@ namespace Konclude {
 									CQuery *query = calcQueryCommand->getQuery();
 									if (reasonerManager) {
 										if (query) {
-											CUnspecifiedMessageInformationRecord::makeRecord("Sending Query to Reasoner Manager.",&commandRecordRouter);
+											CUnspecifiedMessageInformationRecord::makeRecord("Sending query to reasoner manager.",&commandRecordRouter);
 											
 											CCommandCalculatedQueryCallbackEvent *calculatedQueryCE = new CCommandCalculatedQueryCallbackEvent(this,calcQueryCommand);
 											reasonerManager->reasoningQuery(query,calculatedQueryCE);
 										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Query couldn't be resolved.",&commandRecordRouter);
+											CUnspecifiedMessageErrorRecord::makeRecord("Query cannot be be resolved.",&commandRecordRouter);
 											CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 											CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 										}
@@ -216,7 +216,7 @@ namespace Konclude {
 
 									CPrepareKnowledgeBaseCommand* prepareKBCommand = (CPrepareKnowledgeBaseCommand*)command;
 									if (reasonerManager) {
-										CUnspecifiedMessageInformationRecord::makeRecord("Preparing Ontology.",&commandRecordRouter);
+										CUnspecifiedMessageInformationRecord::makeRecord("Preparing ontology.",&commandRecordRouter);
 
 										CConcreteOntology* ontology = prepareKBCommand->getOntology();
 										if (ontology) {
@@ -228,7 +228,7 @@ namespace Konclude {
 											CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 										}
 									} else {
-										CUnspecifiedMessageErrorRecord::makeRecord("Missing Reasoner Manager.",&commandRecordRouter);
+										CUnspecifiedMessageErrorRecord::makeRecord("Missing reasoner manager.",&commandRecordRouter);
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 									}
@@ -258,7 +258,7 @@ namespace Konclude {
 						CCalculateQueryCommand *command = dynamic_cast<CCalculateQueryCommand *>(commCalQueryCallbackEv->getCommand());
 						if (command) {							
 							CCommandRecordRouter commandRecordRouter(command,this);
-							CUnspecifiedMessageInformationRecord::makeRecord("Query by Reasoner Manager calculated.",&commandRecordRouter);
+							CUnspecifiedMessageInformationRecord::makeRecord("Query by reasoner manager calculated.",&commandRecordRouter);
 							CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 							CFinishProcessCommandRecord::makeRecord(&commandRecordRouter); 
 						}
@@ -269,7 +269,7 @@ namespace Konclude {
 						CPrepareKnowledgeBaseCommand* command = dynamic_cast<CPrepareKnowledgeBaseCommand*>(ontPreparedCallbackEv->getCommand());
 						if (command) {							
 							CCommandRecordRouter commandRecordRouter(command,this);
-							CUnspecifiedMessageInformationRecord::makeRecord("Ontology for Reasoner Manager prepared.",&commandRecordRouter);
+							CUnspecifiedMessageInformationRecord::makeRecord("Ontology for reasoner manager prepared.",&commandRecordRouter);
 							CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 							CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 						}
@@ -301,21 +301,21 @@ namespace Konclude {
 					config = configurationProvider->createNextGlobalConfiguration();
 
 					if (reasonerManager) {
-						CUnspecifiedMessageErrorRecord::makeRecord("Reasoner Manager already exists.",commandRecordRouter);
+						CUnspecifiedMessageErrorRecord::makeRecord("Reasoner manager already exists.",commandRecordRouter);
 					} else {
 						reasonerManager = initializationFactory->createReasonerManager(configurationProvider);
 						((CReasonerManagerConfigType *)(config->createAndSetConfig("Konclude.Execution.ReasonerManager"))->getConfigType())->setReasonerManager(reasonerManager);
 					}
 
 					if (classificationMan) {
-						CUnspecifiedMessageErrorRecord::makeRecord("Classification Manager already exists.",commandRecordRouter);
+						CUnspecifiedMessageErrorRecord::makeRecord("Classification manager already exists.",commandRecordRouter);
 					} else {
 						classificationMan = initializationFactory->createClassificationManager(configurationProvider);
 						((CClassificationManagerConfigType *)config->createAndSetConfig("Konclude.Execution.ClassificationManager")->getConfigType())->setClassificationManager(classificationMan);
 					}
 
 					if (ontoRevMan) {
-						CUnspecifiedMessageErrorRecord::makeRecord("Ontology Revision Manager already exists.",commandRecordRouter);
+						CUnspecifiedMessageErrorRecord::makeRecord("Ontology revision manager already exists.",commandRecordRouter);
 					} else {
 						ontoRevMan = initializationFactory->createOntologyRevisionManager(configurationProvider);
 						((COntologyRevisionManagerConfigType *)config->createAndSetConfig("Konclude.Execution.OntologyRevisionManager")->getConfigType())->setOntologyRevisionManager(ontoRevMan);

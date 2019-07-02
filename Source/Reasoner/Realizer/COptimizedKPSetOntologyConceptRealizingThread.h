@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,24 +28,35 @@
 #include "RealizerSettings.h"
 #include "CRealizerThread.h"
 #include "CRealizingTestingItem.h"
-#include "CIndividualInstanceTestingItem.h"
+#include "CIndividualConceptInstanceTestingItem.h"
+#include "CIndividualPairRoleInstanceTestingItem.h"
 #include "CIndividualSameTestingItem.h"
 #include "COptimizedKPSetOntologyConceptRealizingItem.h"
-#include "COptimizedKPSetConceptInstantiatedItem.h"
+#include "COptimizedKPSetIndividualItem.h"
 #include "COptimizedKPSetConceptInstancesItem.h"
 #include "COptimizedKPSetConceptInstancesData.h"
+#include "CRealizationMarkerCandidatesMessageData.h"
+#include "CIndividualRoleCandidateTestingItem.h"
+#include "CIndividualsConsistencyTestingItem.h"
 
 // Other includes
 #include "Reasoner/Kernel/Manager/CReasonerManager.h"
 
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
 #include "Reasoner/Kernel/Task/CConsistenceTaskData.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskIndividualDependenceTrackingAdapter.h"
 
 #include "Reasoner/Kernel/Process/CIndividualProcessNode.h"
 #include "Reasoner/Kernel/Process/CIndividualProcessNodeVector.h"
 
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCache.h"
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheReader.h"
+
 #include "Reasoner/Generator/CSatisfiableCalculationJobGenerator.h"
 #include "Reasoner/Generator/CConcreteOntologyUpdateBuilder.h"
+
+#include "Reasoner/Preprocess/CRoleChainAutomataTransformationPreProcess.h"
+#include "Reasoner/Preprocess/CPreProcessContextBase.h"
 
 #include "Utilities/Memory/CTempMemoryPoolContainerAllocationManager.h"
 
@@ -62,7 +73,9 @@ namespace Konclude {
 		using namespace Kernel::Task;
 		using namespace Kernel::Process;
 		using namespace Kernel::Manager;
+		using namespace Kernel::Cache;
 		using namespace Generator;
+		using namespace Preprocess;
 
 		namespace Realizer {
 
@@ -89,9 +102,9 @@ namespace Konclude {
 
 				// protected methods
 				protected:
-					class CKnownPossibleInstancHashingData {
+					class CKnownPossibleInstanceHashingData {
 						public:
-							CKnownPossibleInstancHashingData() {
+							CKnownPossibleInstanceHashingData() {
 								mKnownInstance = false;
 								mDirectInserted = false;
 								mMostSpecialRetest = false;
@@ -105,42 +118,94 @@ namespace Konclude {
 
 
 					virtual COntologyRealizingItem* initializeOntologyRealizingItem(CConcreteOntology* ontology, CConfigurationBase* config);
-					void readCalculationConfig(CConfigurationBase *config);
+					virtual void readCalculationConfig(CConfigurationBase *config);
 
 					virtual bool createNextTest();
 
 					virtual bool finishOntologyRealizing(COptimizedKPSetOntologyConceptRealizingItem* totallyPreCompItem);
 					virtual bool realizingTested(COntologyRealizingItem* ontPreCompItem, CRealizingTestingItem* preTestItem, CRealizingCalculatedCallbackEvent* pcce);
 
-					bool createNextInstantiationTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetConceptInstantiatedItem* instantiatedItem);
-					bool createNextSameIndividualsTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstantiatedItem* instantiatedItem1, COptimizedKPSetConceptInstantiatedItem* instantiatedItem2);
+					bool createNextConceptInstantiationTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetIndividualItem* instantiatedItem);
+					bool createNextRoleInstantiationTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetRoleInstancesItem* instancesItem, COptimizedKPSetIndividualItemPair itemPair);
+					bool createNextSameIndividualsTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetIndividualItem* instantiatedItem1, COptimizedKPSetIndividualItem* instantiatedItem2);
+					bool createIndividualsConsistencyTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
 
-					bool initializeSamePossibleIndividuals(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstantiatedItem* individualItem, const QList<CIndividual*>& possibleSameIndividualList);
+					bool createNextRoleInitializingTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetRoleInstancesItem* instancesItem, COptimizedKPSetIndividualItem* individualItem);
+					bool createNextRoleInitializingTest(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetIndividualItem* individualItem);
+
+					bool initializeSamePossibleIndividuals(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetIndividualItem* individualItem, const QList<CIndividual*>& possibleSameIndividualList);
 
 					bool initializeItems(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
-					bool initializeKPSetsFromCompletionGraph(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+
+					virtual bool initializeKPSetsFromConsistencyData(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+					bool extractKnownPossibleIndividualDataFromConsistencyData(CIndividual* individual, QList<COptimizedKPSetConceptInstancesItem*>* knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>* possibleInstancesList, QList<CIndividual*>* knownSameIndividualList, QList<CIndividual*>* possibleSameIndividualList, CIndividualProcessNodeVector* indiProcVector, const QList<COptimizedKPSetConceptInstancesItem*>& equivClassList, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+
+
 					bool initializeEquivalentClassList(QList<COptimizedKPSetConceptInstancesItem*>* equivClassList, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
 
 					bool initializeKPSetsForIndividual(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, CIndividual* individual, QList<COptimizedKPSetConceptInstancesItem*>& knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>& possibleInstancesList, QList<CIndividual*>& knownSameIndividualList);
 					bool addKPSetDirectSuperInstances(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesHash* knownPossibleInstancesHash, COptimizedKPSetConceptInstancesItem* instanceItem, bool knownInstance);
 
-					CIndividualProcessNode* getMergeCorrectedIndividualProcessNode(CIndividualProcessNode* indiProcNode, CIndividualProcessNodeVector* indiProcVector, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+					CIndividualProcessNode* getMergeCorrectedIndividualProcessNode(CIndividualProcessNode* indiProcNode, CIndividualProcessNodeVector* indiProcVector, bool* nonDeterministicallyMergedFlag, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
 
 
-					COptimizedKPSetOntologyConceptRealizingThread* incTestedPossibleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
-					COptimizedKPSetOntologyConceptRealizingThread* incOpenPossibleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* incTestedPossibleConceptInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* incOpenPossibleConceptInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
 
-					COptimizedKPSetOntologyConceptRealizingThread* decTestedPossibleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
-					COptimizedKPSetOntologyConceptRealizingThread* decOpenPossibleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* decTestedPossibleConceptInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* decOpenPossibleConceptInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
+
+
+
+					COptimizedKPSetOntologyConceptRealizingThread* incTestedPossibleRoleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* incOpenPossibleRoleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
+
+					COptimizedKPSetOntologyConceptRealizingThread* decTestedPossibleRoleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* decOpenPossibleRoleInstancesCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
+
+
+
+
+					COptimizedKPSetOntologyConceptRealizingThread* incTestedPossibleSameIndividualsCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* incOpenPossibleSameIndividualsCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 incCount = 1);
+
+					COptimizedKPSetOntologyConceptRealizingThread* decTestedPossibleSameIndividualsCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingThread* decOpenPossibleSameIndividualsCount(COptimizedKPSetOntologyConceptRealizingItem* item, cint64 decCount = 1);
+
+
+					virtual COptimizedKPSetOntologyConceptRealizingThread* addRealizationStatistics(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, CRealizingTestingStep* ontProcStep);
+					virtual COptimizedKPSetOntologyConceptRealizingThread* addIndividualDependencyTrackingStatistics(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, CRealizingTestingStep* ontProcStep, const QString& realizationTypeString);
+
 
 					COptimizedKPSetOntologyConceptRealizingThread* updateParentItemsSuccessorProcessed(COptimizedKPSetConceptInstancesItem* item);
+					COptimizedKPSetOntologyConceptRealizingThread* updateParentItemsSuccessorProcessed(COptimizedKPSetRoleInstancesItem* item);
 					
 					virtual CRealizationProgress* getRealizationProgress();
 
-					COptimizedKPSetOntologyConceptRealizingThread* updateCalculatedKnownInstance(COptimizedKPSetConceptInstantiatedItem* instantiatedItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
-					COptimizedKPSetOntologyConceptRealizingThread* updateCalculatedNotInstance(COptimizedKPSetConceptInstantiatedItem* instantiatedItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+					COptimizedKPSetOntologyConceptRealizingThread* updateCalculatedKnownConceptInstance(COptimizedKPSetIndividualItem* instantiatedItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+					COptimizedKPSetOntologyConceptRealizingThread* updateCalculatedNonConceptInstance(COptimizedKPSetIndividualItem* instantiatedItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
 
-					COptimizedKPSetOntologyConceptRealizingThread* mergeSameIndividualItems(COptimizedKPSetConceptInstantiatedItem* instantiatedItem1, COptimizedKPSetConceptInstantiatedItem* instantiatedItem2, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+					COptimizedKPSetOntologyConceptRealizingThread* mergeSameIndividualItems(COptimizedKPSetIndividualItem* instantiatedItem1, COptimizedKPSetIndividualItem* instantiatedItem2, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+
+
+					COptimizedKPSetOntologyConceptRealizingThread* createTemporarySameRealizationOntology(COptimizedKPSetOntologyConceptRealizingItem* item);
+
+					COptimizedKPSetOntologyConceptRealizingThread* createTemporaryRoleRealizationOntology(COptimizedKPSetOntologyConceptRealizingItem* item);
+
+
+					CConcept* createTemporaryConcept(COptimizedKPSetOntologyConceptRealizingItem* item, CConcreteOntology* tmpRoleRealOntology);
+					void addTemporaryConceptOperand(CConcept* concept, CConcept* opConcept, bool negated, COptimizedKPSetOntologyConceptRealizingItem* item, CConcreteOntology* tmpRoleRealOntology);
+
+					COptimizedKPSetOntologyConceptRealizingThread* updateCalculatedKnownRoleInstance(COptimizedKPSetIndividualItemPair individualItemPair, COptimizedKPSetRoleInstancesItem* instancesItem, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+					COptimizedKPSetOntologyConceptRealizingThread* updateCalculatedNonRoleInstance(COptimizedKPSetIndividualItemPair individualItemPair, COptimizedKPSetRoleInstancesItem* instancesItem, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem);
+
+					virtual bool processRealizationMessage(COntologyRealizingItem* ontRealItem, CRealizationMessageData* messageData, CMemoryPool* memoryPools);
+					
+					bool addKPSetDirectSuperInstances(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetRoleInstancesItem* roleInstItem, bool inversed, COptimizedKPSetIndividualItem* indiItem1, COptimizedKPSetIndividualItem* indiItem2, bool knownInstance);
+
+
+					CIndividualProcessNode* getCompletionGraphCachedIndividualProcessNode(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, COptimizedKPSetIndividualItem* indiItem, bool* nondeterministicNodeFlag = nullptr);
+
 
 				// protected variables
 				protected:
@@ -149,6 +214,9 @@ namespace Konclude {
 
 					CRealizationProgress mRealProgress;
 					QTime mRealStartTime;
+
+					CBackendRepresentativeMemoryCache* mBackendAssocCache;
+					CBackendRepresentativeMemoryCacheReader* mBackendAssocCacheReader;
 
 				// private methods
 				private:

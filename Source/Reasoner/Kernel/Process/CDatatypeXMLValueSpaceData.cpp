@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,28 +30,50 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeXMLValueSpaceData::CDatatypeXMLValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext),mXMLValueSpaceMap(processContext) {
-					mValueSpaceMap = &mXMLValueSpaceMap;
+				CDatatypeXMLValueSpaceData::CDatatypeXMLValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext) {
+					mXMLValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeXMLValueSpaceData* CDatatypeXMLValueSpaceData::initXMLValueSpaceData(CDatatypeValueSpaceXMLType* valueSpaceType) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(nullptr);
-					mXMLValueSpaceMap.initDatatypeCompareValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mXMLValueSpaceMap) {
+						mXMLValueSpaceMap->initDatatypeCompareValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeXMLValueSpaceData* CDatatypeXMLValueSpaceData::copyXMLValueSpaceData(CDatatypeXMLValueSpaceData* spaceData) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(spaceData);
-					mXMLValueSpaceMap.initDatatypeCompareValueSpaceMap(spaceData->getXMLValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mXMLValueSpaceMap && !mXMLValueSpaceMap) {
+						getXMLValueSpaceMap(true);
+						mXMLValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mXMLValueSpaceMap);
+					} else if (mXMLValueSpaceMap) {
+						if (spaceData->mXMLValueSpaceMap) {
+							mXMLValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mXMLValueSpaceMap);
+						} else {
+							mXMLValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
 
-				CDatatypeXMLValueSpaceMap* CDatatypeXMLValueSpaceData::getXMLValueSpaceMap() {
-					return &mXMLValueSpaceMap;
+				CDatatypeXMLValueSpaceMap* CDatatypeXMLValueSpaceData::getXMLValueSpaceMap(bool create) {
+					if (create && !mXMLValueSpaceMap) {
+						mXMLValueSpaceMap = CObjectParameterizingAllocator< CDatatypeXMLValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mXMLValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+					}
+					return mXMLValueSpaceMap;
 				}
+
+				CDatatypeCompareValueSpaceMap* CDatatypeXMLValueSpaceData::createValueSpaceMap() {
+					return getXMLValueSpaceMap(true);
+				}
+
 
 			}; // end namespace Process
 

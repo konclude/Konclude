@@ -125,7 +125,7 @@ namespace Konclude {
 						COWLlinkQtXMLCommandParser *owllinkCommandParser = new COWLlinkQtXMLCommandParser();
 						owllinkInterpreter = nullptr;
 						if (!resFileString.isEmpty()) {
-							owllinkInterpreter = new COWLLinkRecordInterpreter(preSynchronizer);
+							owllinkInterpreter = new COWLLinkRecordInterpreter(preSynchronizer,loaderConfig);
 							defaultCommandDelegater = owllinkInterpreter;
 						} else {
 							defaultCommandDelegater = preSynchronizer;

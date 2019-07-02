@@ -98,7 +98,7 @@ namespace Konclude {
 					QList<COptimizedKPSetClassTestingItem*>* getSatisfiableConceptItemList();
 					COptimizedKPSetClassOntologyClassificationItem* addSatisfiableConceptItem(COptimizedKPSetClassTestingItem* item);
 
-					QHash<CConcept*,CConceptReferenceLinking*>* getConceptReferenceLinkingDataHash();
+					QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* getConceptReferenceLinkingDataHash();
 
 					bool hasSatisfiableTestingPhaseFinished();
 					bool hasPossibleSubsumptionTestingPhaseFinished();
@@ -167,7 +167,7 @@ namespace Konclude {
 					QList<COptimizedKPSetClassTestingItem*> mNextPossSubsumItemList;
 					QSet<COptimizedKPSetClassTestingItem*> mCurrentPossSubsumItemSet;
 
-					QHash<CConcept*,CConceptReferenceLinking*> mConceptRefLinkData;
+					QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*> mConceptRefLinkData;
 
 					cint64 mRemainingSatTests;
 					cint64 mRunningSatTests;

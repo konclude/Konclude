@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,7 +32,7 @@
 #include "Reasoner/Ontology/COntologyProcessingRequirement.h"
 
 
-#include "Concurrent/Callback/CCallbackRememberLinkedExecuter.h"
+#include "Concurrent/Callback/CCallbackListExecuter.h"
 #include "Concurrent/Callback/CCallbackData.h"
 
 #include "Config/CConfigurationBase.h"
@@ -93,11 +93,11 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					CConcreteOntology* mOntology;
+					CConcreteOntology* mOntology;					
 					CConfigurationBase* mConfig;
 
 					bool mRealizingFinishedFlag;
-					CCallbackRememberLinkedExecuter mCallbackExecuter;
+					CCallbackListExecuter mCallbackExecuter;
 					QSet<CRealizingTestingItem*> mTestItemSet;
 
 				// private methods

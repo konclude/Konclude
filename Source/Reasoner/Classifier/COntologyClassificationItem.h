@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,8 +29,6 @@
 #include "CClassificationWorkItem.h"
 #include "CClassifiedCallbackDataContext.h"
 #include "CClassifierStatistics.h"
-#include "CClassificationCalculationSupport.h"
-#include "CConceptNegationPair.h"
 #include "CPrecomputedSaturationSubsumerExtractor.h"
 
 // Other includes
@@ -42,6 +40,9 @@
 #include "Reasoner/Ontology/COntologyProcessingStep.h"
 #include "Reasoner/Ontology/COntologyProcessingSteps.h"
 #include "Reasoner/Ontology/COntologyProcessingStepData.h"
+#include "Reasoner/Ontology/CConceptNegationPair.h"
+
+#include "Reasoner/Consistiser/CIndividualDependenceTrackingCollector.h"
 
 #include "Reasoner/Taxonomy/CTaxonomy.h"
 
@@ -62,6 +63,7 @@ namespace Konclude {
 		using namespace Ontology;
 		using namespace Taxonomy;
 		using namespace Classification;
+		using namespace Consistiser;
 
 		using namespace Kernel::Task;
 
@@ -76,7 +78,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COntologyClassificationItem {
+			class COntologyClassificationItem : public CClassConceptClassification {
 				// public methods
 				public:
 					//! Constructor
@@ -89,9 +91,6 @@ namespace Konclude {
 
 					CPrecomputedSaturationSubsumerExtractor* getPrecomputedSaturationSubsumerExtractor(bool create = true);
 
-					virtual bool hasNotSatisfiableTestedConcepts();
-					virtual CConcept *takeNextNotSatisfiableTestedConcept();
-					virtual QList<CConcept *> *getNotSatisfiableTestedConceptList();
 
 					virtual CConcreteOntology *getOntology();
 					virtual CTaxonomy *getTaxonomy();
@@ -117,27 +116,7 @@ namespace Konclude {
 					virtual qint64 getCalcedSubsumptionCount();
 
 					virtual CClassifierStatistics *getClassifierStatistics();
-					virtual COntologyClassificationItem *addNotSatisfiableTestedConcept(CConcept *concept);
 
-					virtual QHash<CConcept *,CConcept *> *getDefferedNotSubsumptionRelationHash();
-					virtual QHash<CConcept *,CConcept *> *getDefferedSubsumptionRelationHash();
-					virtual QHash<CConcept *,CConcept *> *getDefferedDisjointRelationHash();
-
-					virtual CClassificationCalculationSupport *getClassificationCalculationSupport();
-					virtual COntologyClassificationItem *setClassificationCalculationSupport(CClassificationCalculationSupport *calculationSupport);
-
-
-					virtual QSet<QPair<CConcept *,CConcept *> > *getPossibleSubclassSubsumptionConceptSet();
-					virtual CTaxonomy *getPossibleSubclassSubsumptionTaxonomy();
-					virtual COntologyClassificationItem *setPossibleSubclassSubsumptionTaxonomy(CTaxonomy *tax);
-					virtual QSet<CConcept *> *getSubclassConceptSet();
-
-					virtual QHash<CConceptNegationPair,QSet<CConceptNegationPair> *> *getConceptPredecessorPossibleOccurSubclassIdentifierSetHash();
-					virtual QSet<QPair<CConcept *,CConceptNegationPair> > *getConceptNecessaryOccurSubclassIdentifiersSet();
-					virtual QHash<CConcept *,CConceptNegationPair> *getConceptNecessaryOccurSubclassIdentifiersHash();
-					virtual QList<QSet<CConceptNegationPair> *> *getConceptPredecessorPossibleOccurSubclassIdentifierSetContainer();
-
-					virtual QHash<QPair<CHierarchyNode *,CHierarchyNode *>,double> *getSubsumptionProbabilisticHash();
 
 					CClassConceptClassification* getClassConceptClassification();
 					CClassificationStatisticsCollectionStrings* getClassificationStatisticsCollectionStrings();
@@ -145,11 +124,6 @@ namespace Konclude {
 					CClassificationCalculationStatisticsCollection* getCalculationStatisticsCollection();
 					COntologyClassificationItem* reuseCalculationStatisticsCollection(CClassificationCalculationStatisticsCollection* statColl);
 
-					bool hasOnlySubClassCompleteDefinitions();
-					COntologyClassificationItem* setOnlySubClassCompleteDefinitions(bool onlyCompleteDefinitions);
-
-					virtual QHash<CConcept*,CConcept*>* getPossibleConceptSubsumptionOccurrenceHash();
-					virtual QSet< QPair<CConcept*,CConcept*> >* getPossibleConceptSubsumptionOccurrenceSet();
 
 					bool isCollectProcessStatisticsActivated();
 
@@ -160,6 +134,12 @@ namespace Konclude {
 					COntologyClassificationItem* setTaxonomyConstructionFailed();
 					bool isTaxonomyConstructionFailed();
 
+					CIndividualDependenceTrackingCollector* getIndividualDependenceTrackingCollector();
+					COntologyClassificationItem* setIndividualDependenceTrackingCollector(CIndividualDependenceTrackingCollector* indiDepTrackColl);
+
+
+					COntologyProcessingStepData* getClassificationProcessingStep();
+					QTime* getInitializationTime();
 
 				// protected methods
 				protected:
@@ -168,13 +148,10 @@ namespace Konclude {
 				protected:
 					CConcreteOntology *onto;
 					CTaxonomy *tax;
-					CClassConceptClassification* mClassConClassification;
 					CClassificationStatisticsCollectionStrings* mClassificationStatCollStrings;
 					QList<CClassificationCalculationStatisticsCollection*> mReuseStatCollList;
 
 					CPrecomputedSaturationSubsumerExtractor* mPrecSatSubsumerExtractor;
-
-					QList<CConcept*> notSatTestedConList;
 
 					QHash<CSatisfiableCalculationJob*, CClassificationWorkItem*> workItemHash;
 
@@ -190,29 +167,6 @@ namespace Konclude {
 					CClassifierStatistics *statistics;
 					CCalculationConfigurationExtension *config;
 
-					QHash<CConcept *,CConcept *> defferedNotSubsumptionHash;
-					QHash<CConcept *,CConcept *> defferedSubsumptionHash;
-					QHash<CConcept *,CConcept *> defferedDisjointHash;
-
-					CClassificationCalculationSupport *classCalcSupport;
-
-
-					QSet<QPair<CConcept *,CConcept *> > possSubclassSubSumConceptSet;
-					CTaxonomy *possSubclassSubSumTaxonomy;
-					QSet<CConcept *> subclassConceptSet;
-
-					QHash<CConcept *,CConceptNegationPair> conceptNecessaryOccurSubclassIdentifiersHash;
-					QSet<QPair<CConcept *,CConceptNegationPair> > conceptNecessaryOccurSubclassIdentifiersSet;
-					QHash<CConceptNegationPair,QSet<CConceptNegationPair> *> possPredIdentifierOccurSetHash;
-					QList<QSet<CConceptNegationPair> *> possPredIdentifierOccurSetContainer;
-
-					QHash<QPair<CHierarchyNode *,CHierarchyNode *>,double> subsumProbabilisticHash;
-
-					bool mOnlySubClassCompleteDefinitions;
-
-					QHash<CConcept*,CConcept*> mPossConSubsumOccurrHash;
-					QSet< QPair<CConcept*,CConcept*> > mPossConSubsumOccurrSet;
-
 					bool mConfCollectProcessStatistics;
 
 					QList<COntologyProcessingRequirement*> mRequirementList;
@@ -220,6 +174,10 @@ namespace Konclude {
 					bool mTaxonomyConstructionFailed;
 					COntologyProcessingStepData* mClassifyProcessingStepData;
 
+
+					CIndividualDependenceTrackingCollector* mIndiDepTrackingCollector;
+
+					QTime mInitTime;
 
 				// private methods
 				private:

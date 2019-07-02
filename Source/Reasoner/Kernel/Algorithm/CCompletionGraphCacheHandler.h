@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -91,6 +91,7 @@ namespace Konclude {
 
 						bool testConceptLabelSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 						bool testDistinctSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
+						bool testMergingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 						bool testBindingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 
 						bool testCriticalConcept(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConceptDescriptor* conDes, bool containedFlag, CCalculationAlgorithmContext* calcAlgContext);
@@ -102,6 +103,7 @@ namespace Konclude {
 					protected:
 						CConcreteOntology* mLastOntology;
 						bool mLastLoadedCachedCompletionGraph;
+						bool mPreviousConsistencyCachedCompletionGraph;
 						CSatisfiableCalculationTask* mCalcTask;
 						CSatisfiableCalculationTask* mDetSatCalcTask;
 						CSatisfiableCalculationTask* mCompGraphCachedCalcTask;
@@ -109,6 +111,8 @@ namespace Konclude {
 						CIndividualProcessNodeVector* mDetSatProcNodeVec;
 						CIndividualProcessNodeVector* mCompGraphCachedProcNodeVec;
 						cint64 mDetLocalizationTag;
+						bool mIncrementalExpansionCaching;
+						cint64 mCurrentIncrementalExpansionID;
 
 					// private methods
 					private:

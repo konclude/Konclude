@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -55,14 +55,16 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CIndividualSynsetsResultVisitorGenerator : public CConceptRealizationInstanceVisitor, public CConceptRealizationIndividualVisitor {
+			class CIndividualSynsetsResultVisitorGenerator : public CConceptRealizationInstanceVisitor, public CConceptRealizationIndividualVisitor, public CRoleRealizationInstanceVisitor, public CRoleRealizationIndividualVisitor {
 				// public methods
 				public:
 					//! Constructor
 					CIndividualSynsetsResultVisitorGenerator(CIndividualSynsetsResult* classSynsetsResult, bool abbreviatedIRIs);
 
 					virtual bool visitInstance(CConceptInstanceItem* item, CConceptRealization* conRealization);
+					virtual bool visitRoleInstance(CRoleInstanceItem* item, CRoleRealization* roleRealization);
 					virtual bool visitIndividual(CIndividual* individual, CConceptRealization* conRealization);
+					virtual bool visitIndividual(CIndividual* individual, CRoleRealization* roleRealization);
 
 				// protected methods
 				protected:

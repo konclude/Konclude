@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -27,10 +27,14 @@
 // Namespace includes
 #include "CCalculationConfigurationExtension.h"
 #include "CCalculationStatisticsCollector.h"
-#include "CSatisfiableSubsumptionIdentifierAdapter.h"
 #include "CTaskPreyingAdapter.h"
 #include "CSatisfiableCalculationJobInstantiation.h"
 #include "CSatisfiableTaskClassificationMessageAdapter.h"
+#include "CSaturationIndividualsAnalysingAdapter.h"
+#include "CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.h"
+#include "CSatisfiableTaskIncrementalConsistencyTestingAdapter.h"
+#include "CSatisfiableTaskIndividualDependenceTrackingAdapter.h"
+#include "CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter.h"
 
 
 // Other includes
@@ -95,12 +99,26 @@ namespace Konclude {
 						CSatisfiableCalculationTask* setConsistenceAdapter(CTaskPreyingAdapter* consistenceAdapter);
 						CTaskPreyingAdapter* getConsistenceAdapter();
 
+						CSatisfiableCalculationTask* setSaturationIndividualsAnalysationObserver(CSaturationIndividualsAnalysingAdapter* indiAnalAdapter);
+						CSaturationIndividualsAnalysingAdapter* getSaturationIndividualsAnalysationObserver();
 
-						CSatisfiableCalculationTask* setSatisfiableSubsumptionIdentifierAdapter(CSatisfiableSubsumptionIdentifierAdapter* satSubIdObserver);
-						CSatisfiableSubsumptionIdentifierAdapter* getSatisfiableSubsumptionIdentifierAdapter();
 
 						CSatisfiableCalculationTask* setClassificationMessageAdapter(CSatisfiableTaskClassificationMessageAdapter* classMessAdapter);
 						CSatisfiableTaskClassificationMessageAdapter* getClassificationMessageAdapter();
+
+						CSatisfiableCalculationTask* setRealizationMarkedCandidatesMessageAdapter(CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* realMessObserver);
+						CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* getRealizationMarkedCandidatesMessageAdapter();
+
+						CSatisfiableCalculationTask* setSatisfiableTaskIncrementalConsistencyTestingAdapter(CSatisfiableTaskIncrementalConsistencyTestingAdapter* incConsTestAdaptor);
+						CSatisfiableTaskIncrementalConsistencyTestingAdapter* getSatisfiableTaskIncrementalConsistencyTestingAdapter();
+
+
+						CSatisfiableCalculationTask* setSatisfiableTaskIndividualDependenceTrackingAdapter(CSatisfiableTaskIndividualDependenceTrackingAdapter* indDepTrackAdaptor);
+						CSatisfiableTaskIndividualDependenceTrackingAdapter* getSatisfiableTaskIndividualDependenceTrackingAdapter();
+
+
+						CSatisfiableCalculationTask* setPossibleAssertionCollectionAdapter(CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* possAssCollAdapter);
+						CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* getPossibleAssertionCollectionAdapter();
 
 
 						bool isCalculationTableauCompletionTask();
@@ -111,9 +129,7 @@ namespace Konclude {
 
 
 						static const cint64 CALCULATIONTABLEAUCOMPLETIONTASK = 0;
-						static const cint64 CALCULATIONTABLEAUDEFAULTSATURATIONTASK = 1;
-						static const cint64 CALCULATIONTABLEAUPILINGSATURATIONTASK = 2;
-						static const cint64 CALCULATIONTABLEAUAPPROXIMATEDSATURATIONTASK = 3;
+						static const cint64 CALCULATIONTABLEAUAPPROXIMATEDSATURATIONTASK = 1;
 
 					// protected methods
 					protected:
@@ -131,8 +147,12 @@ namespace Konclude {
 						CCalculationConfigurationExtension* mCalculationConfig;
 						CCalculationStatisticsCollector* mCalcStatColl;
 						CTaskPreyingAdapter* mConsAdapter;
-						CSatisfiableSubsumptionIdentifierAdapter* mSatSubIdAdapter;
+						CSaturationIndividualsAnalysingAdapter* mIndiAnalAdapter;
 						CSatisfiableTaskClassificationMessageAdapter* mClassMessAdapter;
+						CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* mRealMessAdapter;
+						CSatisfiableTaskIncrementalConsistencyTestingAdapter* mSatIncConsTestingAdapter;
+						CSatisfiableTaskIndividualDependenceTrackingAdapter* mSatIndDepTrackAdapter;
+						CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* mPossAssCollAdapter;
 
 					// private methods
 					private:

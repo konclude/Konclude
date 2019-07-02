@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,6 +32,7 @@
 #include "Reasoner/Ontology/CConceptReferenceLinking.h"
 
 #include "Reasoner/Classifier/CClassificationMessageDataObserver.h"
+#include "Reasoner/Classifier/CClassificationSatisfiableCalculationConceptReferenceLinking.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -61,14 +62,14 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CSatisfiableTaskClassificationMessageAdapter(CConcept* testingConcept = nullptr, CConcreteOntology* testingOntology = nullptr, CClassificationMessageDataObserver* observer = nullptr, QHash<CConcept*,CConceptReferenceLinking*>* conRefLinkDataHash = nullptr, cint64 extractionFlags = 0);
+						CSatisfiableTaskClassificationMessageAdapter(CConcept* testingConcept = nullptr, CConcreteOntology* testingOntology = nullptr, CClassificationMessageDataObserver* observer = nullptr, QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash = nullptr, cint64 extractionFlags = 0);
 
 						CConcept* getTestingConcept();
 						CConcreteOntology* getTestingOntology();
 
 						CClassificationMessageDataObserver* getClassificationMessageDataObserver();
 
-						QHash<CConcept*,CConceptReferenceLinking*>* getConceptReferenceLinkingDataHash();
+						QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* getConceptReferenceLinkingDataHash();
 
 						cint64 getExtractionFlags();
 						CSatisfiableTaskClassificationMessageAdapter* setExtractionFlags(cint64 flags);
@@ -95,7 +96,7 @@ namespace Konclude {
 						CConcreteOntology* mOntology;
 						CClassificationMessageDataObserver* mMessageObserver;
 						cint64 mExtractionFlags;
-						QHash<CConcept*,CConceptReferenceLinking*>* mConRefLinkDataHash;
+						QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* mConRefLinkDataHash;
 
 					// private methods
 					private:

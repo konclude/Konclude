@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,6 +32,7 @@
 
 // Other includes
 #include "Reasoner/Ontology/CConcept.h"
+#include "Reasoner/Ontology/CRole.h"
 
 
 // Logger includes
@@ -68,6 +69,7 @@ namespace Konclude {
 
 						CSaturationIndividualNodeExtensionResolveHashData& getResolvedIndividualNodeExtensionData(CConcept* concept, bool negation);
 						CSaturationIndividualNodeExtensionResolveHashData& getResolvedIndividualNodeExtensionData(CIndividualSaturationProcessNode* indiNode);
+						CSaturationIndividualNodeExtensionResolveHashData& getResolvedIndividualNodeExtensionData(CRole* role);
 
 					// protected methods
 					protected:

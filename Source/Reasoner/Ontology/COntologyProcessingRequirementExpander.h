@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -64,6 +64,7 @@ namespace Konclude {
 
 					COntologyProcessingStepRequirement* getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::PROCESSINGSTEPTYPE processingStep);
 					COntologyProcessingStepRequirement* getRequiredConsistencyOntologyProcessingStepRequirement();
+					COntologyProcessingStepRequirement* getRequiredIndividualPrecomputationOntologyProcessingStepRequirement();
 
 				// protected methods
 				protected:
@@ -74,10 +75,12 @@ namespace Konclude {
 					COntologyProcessingStepRequirement* mBuildOntProStepReq;
 					COntologyProcessingStepRequirement* mPreprocessOntProStepReq;
 					COntologyProcessingStepRequirement* mConsistencyOntProStepReq;
+					COntologyProcessingStepRequirement* mIndividualOntProStepReq;
 					COntologyProcessingStepRequirement* mSaturationOntProStepReq;
 					COntologyProcessingStepRequirement* mPrecomputeOntProStepReq;
 					COntologyProcessingStepRequirement* mClassClassifyOntProStepReq;
 					COntologyProcessingStepRequirement* mConceptRealizeOntProStepReq;
+					COntologyProcessingStepRequirement* mRoleRealizeOntProStepReq;
 					COntologyProcessingStepRequirement* mSameIndividualsRealizeOntProStepReq;
 
 					COntologyProcessingStepRequirement* mRequiredConsistencyOntProStepReq;

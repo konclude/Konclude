@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -79,6 +79,12 @@ namespace Konclude {
 				mPseudoModelPretestSubsumptionCalculationCount = 0;
 				mCreatedCalculationTaskCount = 0;
 				mRecievedCallbackCount = 0;
+
+				mSatNodeExpCacheReader = nullptr;
+				mSatNodeExpCache = dynamic_cast<CSaturationNodeAssociatedExpansionCache*>(reasonerManager->getSaturationAssociationExpansionCache());
+				if (mSatNodeExpCache) {
+					mSatNodeExpCacheReader = mSatNodeExpCache->createCacheReader();
+				}
 			}
 
 
@@ -137,18 +143,25 @@ namespace Konclude {
 
 			}
 
+			COptimizedKPSetClassOntologyClassificationItem* COptimizedKPSetClassSubsumptionClassifierThread::createOntologyClassificationItem(CConcreteOntology *ontology, CConfigurationBase *config) {
+				return new COptimizedKPSetClassOntologyClassificationItem(config,statistics);
+			}
 
 			
 			CSubsumptionClassifierThread *COptimizedKPSetClassSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 
-				COptimizedKPSetClassOntologyClassificationItem *ontClassItem = new COptimizedKPSetClassOntologyClassificationItem(config,statistics);
-				ontClassItem->setClassificationCalculationSupport(classificationSupport);
+				COptimizedKPSetClassOntologyClassificationItem *ontClassItem = createOntologyClassificationItem(ontology,config);
 				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
 				ontItemList.append(ontClassItem);
 				processingOntItemList.append(ontClassItem);
 				ontItemHash.insert(ontology,ontClassItem);
 
 				readCalculationConfig(ontClassItem->getCalculationConfiguration());
+
+				if (CConfigDataReader::readConfigBoolean(ontClassItem->getCalculationConfiguration(),"Konclude.Calculation.Classification.IndividualDependenceTracking",true)) {
+					ontClassItem->setIndividualDependenceTrackingCollector(new CIndividualDependenceTrackingCollector());
+				}
+
 
 				CPartialPruningTaxonomy *parTax = dynamic_cast<CPartialPruningTaxonomy *>(taxonomy);
 				if (parTax) {
@@ -231,8 +244,8 @@ namespace Konclude {
 				}
 
 
-				QHash<CConcept*,CConceptReferenceLinking*>* conRefLinkDataHash = ontClassItem->getConceptReferenceLinkingDataHash();
-				QList<CConcept*> extClassConceptList;
+				QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash = ontClassItem->getConceptReferenceLinkingDataHash();
+				QList<COptimizedKPSetClassTestingItem*> extClassConceptItemList;
 				CPrecomputedSaturationSubsumerExtractor* precSatSubsumerExtractor = ontClassItem->getPrecomputedSaturationSubsumerExtractor(true);
 
 
@@ -248,7 +261,7 @@ namespace Konclude {
 								}
 							}		
 
-							COptimizedKPSetClassTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(concept,true);
+							COptimizedKPSetClassTestingItem* classItem = ontClassItem->getConceptSatisfiableTestItem(concept,true);
 
 							CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
 							CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
@@ -257,28 +270,27 @@ namespace Konclude {
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
 							}
 
-							conRefLinkDataHash->insert(concept,conRefSatLinking);
+							conRefLinkDataHash->insert(concept,classItem);
 
 							if (conRefSatLinking->getClassifierReferenceLinkingData() || invalidatedConRefLinking) {
 								conProcData->setInvalidatedReferenceLinking(true);
 							} else {
-								conRefSatLinking->setClassifierReferenceLinkingData(subsumerItem);
+								conRefSatLinking->setClassifierReferenceLinkingData(classItem);
 							}
-							extClassConceptList.append(concept);
+							extClassConceptItemList.append(classItem);
 						}
 					}
 				}
 
 
 
-				for (QList<CConcept*>::const_iterator it = extClassConceptList.constBegin(), itEnd = extClassConceptList.constEnd(); it != itEnd; ++it) {
-					CConcept* concept(*it);
-					CConceptProcessData* conProcData = (CConceptProcessData*)concept->getConceptData();
-					CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
-					COptimizedKPSetClassTestingItem* classItem = (COptimizedKPSetClassTestingItem*)conRefSatLinking->getClassifierReferenceLinkingData();
+				for (QList<COptimizedKPSetClassTestingItem*>::const_iterator it = extClassConceptItemList.constBegin(), itEnd = extClassConceptItemList.constEnd(); it != itEnd; ++it) {
+					COptimizedKPSetClassTestingItem* classItem = (*it);
+					CConcept* concept = classItem->getTestingConcept();
 
 					bool unsatisfiableFlag = false;
 					bool insufficientFlag = false;
+					bool incompleteProcessedFlag = false;
 
 
 					//QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
@@ -288,42 +300,178 @@ namespace Konclude {
 
 
 
-					if (precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,&insufficientFlag)) {
-						if (!unsatisfiableFlag) {
-							bool possibleSubsumerFlag = false;
-							precSatSubsumerExtractor->extractSubsumers(concept,classItem,&possibleSubsumerFlag);
-							if (equivConNonCandSet && !equivConNonCandSet->isEmpty()) {
-								for (CBOXSET<CConcept*>::const_iterator eqConIt = equivConNonCandSet->constBegin(), eqConItEnd = equivConNonCandSet->constEnd(); !possibleSubsumerFlag && eqConIt != eqConItEnd; ++eqConIt) {
-									CConcept* eqCon = *eqConIt;
-									CConceptProcessData* eqConProcData = (CConceptProcessData*)eqCon->getConceptData();
-									CConceptSaturationReferenceLinkingData* eqConRefSatLinking = (CConceptSaturationReferenceLinkingData*)eqConProcData->getConceptReferenceLinking();
-									COptimizedKPSetClassTestingItem* eqClassItem = (COptimizedKPSetClassTestingItem*)eqConRefSatLinking->getClassifierReferenceLinkingData();
-									if (!classItem->hasSubsumerConceptItem(eqClassItem)) {
-										possibleSubsumerFlag = true;
+					if (!classItem->isSatisfiableTested()) {
+						if (precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,&insufficientFlag,&incompleteProcessedFlag)) {
+							if (!unsatisfiableFlag) {
+								bool possibleSubsumerFlag = false;
+								precSatSubsumerExtractor->extractSubsumers(concept,classItem,&possibleSubsumerFlag,ontClassItem->getIndividualDependenceTrackingCollector(),classItem);
+								if (incompleteProcessedFlag) {
+									QSet<CConcept*> conSubsumSet = getSubsumerSetFromBuildData(concept,ontClassItem);
+									for (QSet<CConcept*>::const_iterator it = conSubsumSet.constBegin(), itEnd = conSubsumSet.constEnd(); it != itEnd; ++it) {
+										CConcept* subsumerConcept = *it;
+										COptimizedKPSetClassTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(subsumerConcept,true);
+										classItem->addSubsumingConceptItem(subsumerItem);
 									}
 								}
-							}
-							cint64 foundSubsumerCount = classItem->getSubsumingConceptItemCount();
-							classItem->setUnprocessedPredecessorItems(foundSubsumerCount);
-							if (!insufficientFlag && !possibleSubsumerFlag) {
-								classItem->setResultSatisfiableDerivated(true);
-								classItem->setPossibleSubsumptionMapInitialized(true);
-							}
-							ontClassItem->incRemainingSatisfiableTestsCount();
-							remainingCandItemSet->insert(classItem);
-							if (foundSubsumerCount <= 0) {
+								if (equivConNonCandSet && !equivConNonCandSet->isEmpty()) {
+									for (CBOXSET<CConcept*>::const_iterator eqConIt = equivConNonCandSet->constBegin(), eqConItEnd = equivConNonCandSet->constEnd(); !possibleSubsumerFlag && eqConIt != eqConItEnd; ++eqConIt) {
+										CConcept* eqCon = *eqConIt;
+										CConceptProcessData* eqConProcData = (CConceptProcessData*)eqCon->getConceptData();
+										CConceptSaturationReferenceLinkingData* eqConRefSatLinking = (CConceptSaturationReferenceLinkingData*)eqConProcData->getConceptReferenceLinking();
+										COptimizedKPSetClassTestingItem* eqClassItem = (COptimizedKPSetClassTestingItem*)eqConRefSatLinking->getClassifierReferenceLinkingData();
+										if (!classItem->hasSubsumerConceptItem(eqClassItem)) {
+											possibleSubsumerFlag = true;
+										}
+									}
+								}
+								cint64 foundSubsumerCount = 0;
+								QList<COptimizedKPSetClassTestingItem*>* subsumerItemList = classItem->getSubsumingConceptItemList();
+								for (QList<COptimizedKPSetClassTestingItem*>::const_iterator subsubItemIt = subsumerItemList->constBegin(), itEnd = subsumerItemList->constEnd(); subsubItemIt != itEnd; ++subsubItemIt) {
+									COptimizedKPSetClassTestingItem* subsumerItem(*subsubItemIt);
+									++foundSubsumerCount;
+									subsumerItem->addSuccessorSatisfiableTestItem(classItem);
+								}
+								classItem->setUnprocessedPredecessorItems(foundSubsumerCount);
+								if (!insufficientFlag && !possibleSubsumerFlag && !incompleteProcessedFlag) {
+									classItem->setResultSatisfiableDerivated(true);
+									classItem->setPossibleSubsumptionMapInitialized(true);
+								}
+								ontClassItem->incRemainingSatisfiableTestsCount();
+								remainingCandItemSet->insert(classItem);
+								if (foundSubsumerCount <= 0) {
+									nextItemList->append(classItem);
+								}
+							} else {
+								ontClassItem->incRemainingSatisfiableTestsCount();
+								classItem->setResultUnsatisfiableDerivated(true);
 								nextItemList->append(classItem);
 							}
 						} else {
+							bool foundSubsumingConcepts = false;
+							QSet<CConcept*> conSubsumSet = getSubsumerSetFromBuildData(concept,ontClassItem);
+							for (QSet<CConcept*>::const_iterator it = conSubsumSet.constBegin(), itEnd = conSubsumSet.constEnd(); it != itEnd; ++it) {
+								CConcept* subsumedConcept = *it;
+								COptimizedKPSetClassTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(subsumedConcept,true);
+								subsumerItem->addSuccessorSatisfiableTestItem(classItem);
+								classItem->incUnprocessedPredecessorItems();
+								foundSubsumingConcepts = true;
+							}
+
 							ontClassItem->incRemainingSatisfiableTestsCount();
-							classItem->setResultUnsatisfiableDerivated(true);
-							nextItemList->append(classItem);
+
+							remainingCandItemSet->insert(classItem);
+							if (!foundSubsumingConcepts) {
+								nextItemList->append(classItem);
+							}
 						}
 					}
 				}
 
 			}
 
+
+
+
+
+			QSet<CConcept*> COptimizedKPSetClassSubsumptionClassifierThread::getSubsumerSetFromBuildData(CConcept* concept, COptimizedKPSetClassOntologyClassificationItem* ontClassItem) {
+				QSet<QPair<CConcept *,bool> > conSet;
+				QList<QPair<CConcept *,bool> > conList;
+				QSet<CConcept*> conSubsumSet;
+				conList.append(QPair<CConcept *,bool>(concept,false));
+				conSet.insert(QPair<CConcept *,bool>(concept,false));
+				while (!conList.isEmpty()) {
+					QPair<CConcept *,bool> conNegPair = conList.takeFirst();
+					CConcept *con = conNegPair.first;
+					bool neg = conNegPair.second;
+					qint64 conOpCode = con->getProcessingOperatorTag();
+					cint64 opCount = con->getOperandCount();
+					cint64 param = con->getParameter();
+					if (conOpCode == CCAND && (!neg || neg && opCount <= 1) || conOpCode == CCOR && (neg || !neg && opCount <= 1)) {
+						CSortedNegLinker<CConcept *> *opConIt = con->getOperandList();
+						while (opConIt) {
+							CConcept *opCon = opConIt->getData();
+							bool opNeg = opConIt->isNegated();
+							QPair<CConcept *,bool> opConNegPair(opCon,neg ^ opNeg);
+							if (opCon->hasClassName()) {
+								if (neg ^ opNeg) {				
+									if (!conSet.contains(opConNegPair)) {
+										conSet.insert(opConNegPair);
+										conList.append(opConNegPair);
+									}
+								} else {
+									conSubsumSet.insert(opCon);
+								}
+							} else {
+								if (!conSet.contains(opConNegPair)) {
+									conSet.insert(opConNegPair);
+									conList.append(opConNegPair);
+								}
+							}
+							opConIt = opConIt->getNext();
+						}
+					} else if (!neg && (conOpCode == CCSOME || conOpCode == CCATLEAST && param >= 1) || neg && (conOpCode == CCALL || conOpCode == CCATMOST && param >= 2)) {
+						CRole* role = con->getRole();
+						CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList();
+						while (superRoleIt) {
+							CRole* superRole = superRoleIt->getData();
+							bool superRoleNeg = superRoleIt->isNegated();
+
+							CSortedNegLinker<CConcept*>* domainConIt = superRole->getDomainRangeConceptList(superRoleNeg);
+							while (domainConIt) {
+								CConcept *domCon = domainConIt->getData();
+								bool opDomNeg = domainConIt->isNegated();
+								QPair<CConcept *,bool> domConNegPair(domCon,neg ^ opDomNeg);
+								if (domCon->hasClassName()) {
+									if (neg ^ opDomNeg) {				
+										if (!conSet.contains(domConNegPair)) {
+											conSet.insert(domConNegPair);
+											conList.append(domConNegPair);
+										}
+									} else {
+										conSubsumSet.insert(domCon);
+									}
+								} else {
+									if (!conSet.contains(domConNegPair)) {
+										conSet.insert(domConNegPair);
+										conList.append(domConNegPair);
+									}
+								}
+
+								domainConIt = domainConIt->getNext();
+							}
+
+							superRoleIt = superRoleIt->getNext();
+						}
+					} else if (!neg && (conOpCode == CCNOMINAL)) {
+						CIndividual* individual = con->getNominalIndividual();
+						CConceptAssertionLinker* assConLinkIt = individual->getAssertionConceptLinker();
+						while (assConLinkIt) {
+							CConcept* assCon = assConLinkIt->getData();
+							bool assConNeg = assConLinkIt->isNegated();
+
+							QPair<CConcept *,bool> assConNegPair(assCon,neg ^ assConNeg);
+							if (assCon->hasClassName()) {
+								if (neg ^ assConNeg) {				
+									if (!conSet.contains(assConNegPair)) {
+										conSet.insert(assConNegPair);
+										conList.append(assConNegPair);
+									}
+								} else {
+									conSubsumSet.insert(assCon);
+								}
+							} else {
+								if (!conSet.contains(assConNegPair)) {
+									conSet.insert(assConNegPair);
+									conList.append(assConNegPair);
+								}
+							}
+
+							assConLinkIt = assConLinkIt->getNext();
+						}
+					}
+				}
+				return conSubsumSet;
+			}
 
 
 
@@ -373,7 +521,7 @@ namespace Konclude {
 				}
 
 
-				QHash<CConcept*,CConceptReferenceLinking*>* conRefLinkDataHash = ontClassItem->getConceptReferenceLinkingDataHash();
+				QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash = ontClassItem->getConceptReferenceLinkingDataHash();
 
 				CBOXSET<CConcept*> *conceptHash = tBox->getActiveClassConceptSet(false);
 				if (conceptHash) {
@@ -385,103 +533,9 @@ namespace Konclude {
 									equivConNonCandSet->insert(concept);
 								}
 							}
-							QSet<QPair<CConcept *,bool> > conSet;
-							QList<QPair<CConcept *,bool> > conList;
-							QSet<CConcept*> conSubsumSet;
-							conList.append(QPair<CConcept *,bool>(concept,false));
-							conSet.insert(QPair<CConcept *,bool>(concept,false));
-							while (!conList.isEmpty()) {
-								QPair<CConcept *,bool> conNegPair = conList.takeFirst();
-								CConcept *con = conNegPair.first;
-								bool neg = conNegPair.second;
-								qint64 conOpCode = con->getProcessingOperatorTag();
-								cint64 opCount = con->getOperandCount();
-								cint64 param = con->getParameter();
-								if (conOpCode == CCAND && (!neg || neg && opCount <= 1) || conOpCode == CCOR && (neg || !neg && opCount <= 1)) {
-									CSortedNegLinker<CConcept *> *opConIt = con->getOperandList();
-									while (opConIt) {
-										CConcept *opCon = opConIt->getData();
-										bool opNeg = opConIt->isNegated();
-										QPair<CConcept *,bool> opConNegPair(opCon,neg ^ opNeg);
-										if (opCon->hasClassName()) {
-											if (neg ^ opNeg) {				
-												if (!conSet.contains(opConNegPair)) {
-													conSet.insert(opConNegPair);
-													conList.append(opConNegPair);
-												}
-											} else {
-												conSubsumSet.insert(opCon);
-											}
-										} else {
-											if (!conSet.contains(opConNegPair)) {
-												conSet.insert(opConNegPair);
-												conList.append(opConNegPair);
-											}
-										}
-										opConIt = opConIt->getNext();
-									}
-								} else if (!neg && (conOpCode == CCSOME || conOpCode == CCATLEAST && param >= 1) || neg && (conOpCode == CCALL || conOpCode == CCATMOST && param >= 2)) {
-									CRole* role = con->getRole();
-									CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList();
-									while (superRoleIt) {
-										CRole* superRole = superRoleIt->getData();
-										bool superRoleNeg = superRoleIt->isNegated();
 
-										CSortedNegLinker<CConcept*>* domainConIt = superRole->getDomainRangeConceptList(superRoleNeg);
-										while (domainConIt) {
-											CConcept *domCon = domainConIt->getData();
-											bool opDomNeg = domainConIt->isNegated();
-											QPair<CConcept *,bool> domConNegPair(domCon,neg ^ opDomNeg);
-											if (domCon->hasClassName()) {
-												if (neg ^ opDomNeg) {				
-													if (!conSet.contains(domConNegPair)) {
-														conSet.insert(domConNegPair);
-														conList.append(domConNegPair);
-													}
-												} else {
-													conSubsumSet.insert(domCon);
-												}
-											} else {
-												if (!conSet.contains(domConNegPair)) {
-													conSet.insert(domConNegPair);
-													conList.append(domConNegPair);
-												}
-											}
 
-											domainConIt = domainConIt->getNext();
-										}
-
-										superRoleIt = superRoleIt->getNext();
-									}
-								} else if (!neg && (conOpCode == CCNOMINAL)) {
-									CIndividual* individual = con->getNominalIndividual();
-									CConceptAssertionLinker* assConLinkIt = individual->getAssertionConceptLinker();
-									while (assConLinkIt) {
-										CConcept* assCon = assConLinkIt->getData();
-										bool assConNeg = assConLinkIt->isNegated();
-
-										QPair<CConcept *,bool> assConNegPair(assCon,neg ^ assConNeg);
-										if (assCon->hasClassName()) {
-											if (neg ^ assConNeg) {				
-												if (!conSet.contains(assConNegPair)) {
-													conSet.insert(assConNegPair);
-													conList.append(assConNegPair);
-												}
-											} else {
-												conSubsumSet.insert(assCon);
-											}
-										} else {
-											if (!conSet.contains(assConNegPair)) {
-												conSet.insert(assConNegPair);
-												conList.append(assConNegPair);
-											}
-										}
-
-										assConLinkIt = assConLinkIt->getNext();
-									}
-								}
-							}
-
+							QSet<CConcept*> conSubsumSet = getSubsumerSetFromBuildData(concept,ontClassItem);
 
 							//QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
 							//if (iriClassNameString == "http://www.owllink.org/testsuite/galen#Haem") {
@@ -498,7 +552,7 @@ namespace Konclude {
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
 							}
 
-							conRefLinkDataHash->insert(concept,conRefSatLinking);
+							conRefLinkDataHash->insert(concept,subsumerItem);
 
 							if (conRefSatLinking->getClassifierReferenceLinkingData() || invalidatedConRefLinking) {
 								conProcData->setInvalidatedReferenceLinking(true);
@@ -725,10 +779,11 @@ namespace Konclude {
 							} else if (!nextCandItemSet->isEmpty()) {
 								COptimizedKPSetClassTestingItem* minItem = nullptr;
 								cint64 minUnpPredCount = 0;
-								for (QSet<COptimizedKPSetClassTestingItem*>::const_iterator it = nextCandItemSet->constBegin(), itEnd = nextCandItemSet->constEnd(); it != itEnd; ++it) {
+								cint64 maxItCount = 100;
+								for (QSet<COptimizedKPSetClassTestingItem*>::const_iterator it = nextCandItemSet->constBegin(), itEnd = nextCandItemSet->constEnd(); it != itEnd && maxItCount > 0; ++it, --maxItCount) {
 									COptimizedKPSetClassTestingItem* item = (*it);
 									cint64 predCount = item->getUnprocessedPredecessorItemCount();
-									if (!minItem || minUnpPredCount < predCount) {
+									if (!minItem || predCount < minUnpPredCount) {
 										minUnpPredCount = predCount;
 										minItem = item;
 									}
@@ -783,7 +838,9 @@ namespace Konclude {
 								COptimizedKPSetClassTestingItem* topItem = optKPSetClassificationItem->getTopConceptSatisfiableTestItem();
 								COptimizedKPSetClassTestingItem* bottomItem = optKPSetClassificationItem->getBottomConceptSatisfiableTestItem();
 
-								topItem->setPropagationConnected(true);
+								if (topItem) {
+									topItem->setPropagationConnected(true);
+								}
 
 								QList<COptimizedKPSetClassTestingItem*> classList(*optKPSetClassificationItem->getSatisfiableConceptItemList());
 								qSort(classList.begin(),classList.end(),itemSortLessSubsumptionsThan);
@@ -1186,7 +1243,7 @@ namespace Konclude {
 				}
 				CPrecomputedSaturationSubsumerExtractor* precSatSubsumerExtractor = optKPSetClassificationItem->getPrecomputedSaturationSubsumerExtractor(false);
 				bool unsatisfiableFlag = false;
-				if (precSatSubsumerExtractor && precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,nullptr) && unsatisfiableFlag) {
+				if (precSatSubsumerExtractor && precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,nullptr,nullptr) && unsatisfiableFlag) {
 					satisfiableFlag = false;
 					nextSatTestItem->setSatisfiableTested(true);
 					nextSatTestItem->setSatisfiableTestedResult(false);
@@ -1211,7 +1268,7 @@ namespace Konclude {
 				workHash->insertMulti(satCalcJob,workItem);
 				workOntItemHash.insert(workItem,optKPSetClassificationItem);
 
-				QHash<CConcept*,CConceptReferenceLinking*>* conRefLinkDataHash = optKPSetClassificationItem->getConceptReferenceLinkingDataHash();
+				QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash = optKPSetClassificationItem->getConceptReferenceLinkingDataHash();
 				cint64 extFlags = CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTALL;
 				// TODO: set extraction flags
 
@@ -1220,6 +1277,9 @@ namespace Konclude {
 
 				optKPSetClassificationItem->incCurrentCalculatingCount();
 				processCalculationJob(satCalcJob,optKPSetClassificationItem,workItem);
+				if (optKPSetClassificationItem->getIndividualDependenceTrackingCollector()) {
+					satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(optKPSetClassificationItem->getIndividualDependenceTrackingCollector(),nextSatTestItem));
+				}
 				++mCreatedCalculationTaskCount;
 				return true;
 			}
@@ -1288,7 +1348,7 @@ namespace Konclude {
 				workHash->insertMulti(satCalcJob,workItem);
 				workOntItemHash.insert(workItem,optKPSetClassificationItem);
 
-				QHash<CConcept*,CConceptReferenceLinking*>* conRefLinkDataHash = optKPSetClassificationItem->getConceptReferenceLinkingDataHash();
+				QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash = optKPSetClassificationItem->getConceptReferenceLinkingDataHash();
 				cint64 extFlags = CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTSUBSUMERSOTHERNODES | 
 						CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTPOSSIBLESUBSUMERSROOTNODE | 
 						CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTPOSSIBLESUBSUMERSOTHERNODES | 
@@ -1296,6 +1356,9 @@ namespace Konclude {
 				// TODO: set extraction flags
 
 				satCalcJob->setSatisfiableClassificationMessageAdapter(new CSatisfiableTaskClassificationMessageAdapter(subsumedConcept,optKPSetClassificationItem->getOntology(),this,conRefLinkDataHash,extFlags));
+				if (optKPSetClassificationItem->getIndividualDependenceTrackingCollector()) {
+					satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(optKPSetClassificationItem->getIndividualDependenceTrackingCollector(),subsumedItem));
+				}
 
 				optKPSetClassificationItem->incCurrentCalculatingCount();
 				processCalculationJob(satCalcJob,optKPSetClassificationItem,workItem);
@@ -1305,6 +1368,70 @@ namespace Konclude {
 			}
 
 
+
+
+			CIndividualSaturationProcessNode* COptimizedKPSetClassSubsumptionClassifierThread::getSaturationIndividualNodeForConcept(CConcept* concept, bool negated) {
+				CIndividualSaturationProcessNode* node = nullptr;
+				CConceptData* conceptData = concept->getConceptData();
+				if (conceptData) {
+					CConceptProcessData* conProcData = (CConceptProcessData*)conceptData;
+					CConceptReferenceLinking* conRefLinking = conProcData->getConceptReferenceLinking();
+					if (conRefLinking) {
+						CConceptSaturationReferenceLinkingData* confSatRefLinkingData = (CConceptSaturationReferenceLinkingData*)conRefLinking;
+						CSaturationConceptReferenceLinking* satCalcRefLinkData = confSatRefLinkingData->getConceptSaturationReferenceLinkingData(negated);
+						if (satCalcRefLinkData) {
+							node = (CIndividualSaturationProcessNode*)satCalcRefLinkData->getIndividualProcessNodeForConcept();
+						}
+					}
+				}
+				return node;
+			}
+
+
+			bool COptimizedKPSetClassSubsumptionClassifierThread::hasCachedSaturationIndividualNodeAssociatedExpansionProplematicConcept(CCacheEntry* cacheEntry, CConcept* testingConcept) {
+				if (!cacheEntry) {
+					return true;
+				}
+				CSaturationNodeAssociatedExpansionCacheEntry* satNodeExpCacheEntry = (CSaturationNodeAssociatedExpansionCacheEntry*)cacheEntry;
+
+				CSaturationNodeAssociatedDeterministicConceptExpansion* detExp = satNodeExpCacheEntry->getDeterministicConceptExpansion();
+				CSaturationNodeAssociatedNondeterministicConceptExpansion* ndetExpLinker = satNodeExpCacheEntry->getNondeterministicConceptExpansionLinker();
+				if (!detExp && !ndetExpLinker) {
+					return true;
+				}
+				CCacheValue cacheValue(mSatNodeExpCacheReader->getCacheValue(testingConcept,true));
+				if (detExp) {
+					CSaturationNodeAssociatedConceptLinker* cacheValueExpLinker = detExp->getConceptExpansionLinker(&cacheValue);
+					if (cacheValueExpLinker) {
+						return true;
+					}
+				}
+				if (ndetExpLinker && (!detExp || detExp->requiresNonDeterministicExpansion())) {
+					bool allNonDetExpansionsProblematic = true;
+					for (CSaturationNodeAssociatedNondeterministicConceptExpansion* ndetExpLinkerIt = ndetExpLinker; allNonDetExpansionsProblematic && ndetExpLinkerIt; ndetExpLinkerIt = ndetExpLinkerIt->getNext()) {
+						CSaturationNodeAssociatedConceptLinker* ndetCacheValueExpLinker = ndetExpLinkerIt->getConceptExpansionLinker(&cacheValue);
+						if (!ndetCacheValueExpLinker) {
+							allNonDetExpansionsProblematic = false;
+						}
+					}
+					if (allNonDetExpansionsProblematic) {
+						return true;
+					}
+				}
+				return false;
+			}
+
+
+			CCacheEntry* COptimizedKPSetClassSubsumptionClassifierThread::getAssociatedSaturationCacheEntry(COptimizedKPSetClassTestingItem* classConItem) {
+				CCacheEntry* cacheEntry = classConItem->getFastSatisfiabilityTestedSaturationCacheEntry();
+				if (!cacheEntry) {
+					CConcept* concept = classConItem->getTestingConcept();
+					CIndividualSaturationProcessNode* satNode = getSaturationIndividualNodeForConcept(concept,false);
+					cacheEntry = mSatNodeExpCacheReader->getCacheEntry(satNode);
+					classConItem->setFastSatisfiabilityTestedSaturationCacheEntry(cacheEntry);
+				}
+				return cacheEntry;
+			}
 
 
 
@@ -1326,55 +1453,64 @@ namespace Konclude {
 							superClassConcept = firstConcept;
 						}
 
-						if (!triggerImpHash->contains(concept) && superClassConcept) {
+						if ((!triggerImpHash || !triggerImpHash->contains(concept)) && superClassConcept) {
 							COptimizedKPSetClassTestingItem* superClassConItem = conceptSatItemHash->value(superClassConcept);
 							if (superClassConItem && superClassConItem->isSatisfiableTested()) {
 								if (!triggerImpHash || !triggerImpHash->contains(superClassConcept)) {
-									QList<COptimizedKPSetClassTestingItem*>* subsumedSubsumingConList = superClassConItem->getSubsumingConceptItemList();
-									for (QList<COptimizedKPSetClassTestingItem*>::const_iterator it = subsumedSubsumingConList->constBegin(), itEnd = subsumedSubsumingConList->constEnd(); it != itEnd; ++it) {
-										COptimizedKPSetClassTestingItem* subsumedItem = (*it);
-										if (nextSatTestItem != subsumedItem && superClassConItem != subsumedItem) {
-											nextSatTestItem->addSubsumingConceptItem(subsumedItem);
-										}
-									}
-									nextSatTestItem->addSubsumingConceptItem(superClassConItem);
-									satFlag = superClassConItem->getSatisfiableTestedResult();
-									testComplete = true;
 
-									if (superClassConItem->isClassPseudoModelInitalized()) {
-										CClassificationClassPseudoModel* superClassPMModel = superClassConItem->getClassPseudoModel();
-										CClassificationClassPseudoModel* classPMModel = nextSatTestItem->getClassPseudoModel();
 
-										CTempMemoryPoolContainerAllocationManager tempMemoryPoolConAllocMan(mContext.getMemoryPoolAllocationManager());
-										CContext* tmpContext = CObjectParameterizingAllocator< CContextBase,CMemoryAllocationManager* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,&tempMemoryPoolConAllocMan);
-										CClassificationClassPseudoModelHash* pmModelHash = CObjectParameterizingAllocator< CClassificationClassPseudoModelHash,CContext* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,tmpContext);
-										pmModelHash->initPseudoModelHash(superClassPMModel->getPseudoModelHash());
-										CClassificationClassPseudoModelData* pmModelData = pmModelHash->getPseudoModelData(0,true);
+									CCacheEntry* superCacheEntry = getAssociatedSaturationCacheEntry(superClassConItem);
+									if (!hasCachedSaturationIndividualNodeAssociatedExpansionProplematicConcept(superCacheEntry,concept)) {
+										nextSatTestItem->setFastSatisfiabilityTestedSaturationCacheEntry(superCacheEntry);
+										nextSatTestItem->setSuccessfullyFastSatisfiabilityTested(true);
 
-										CClassificationClassPseudoModelConceptMap* pmModelConMap = pmModelData->getPseudoModelConceptMap(true);
-										CClassificationClassPseudoModelConceptData& pmModelConData = (*pmModelConMap)[CConceptTagComparer(concept)];
-										pmModelConData.setDeterministic(true);
 
-										optKPSetClassificationItem->addMemoryPools(tempMemoryPoolConAllocMan.takeMemoryPools());
-										classPMModel->setPseudoModelHash(pmModelHash);
-										nextSatTestItem->setClassPseudoModelInitalized(true);
-									}
-
-									if (superClassConItem->isPossibleSubsumptionMapInitialized()) {
-										COptimizedKPSetClassPossibleSubsumptionMap* superPosSubsumMap = superClassConItem->getPossibleSubsumptionMap(false);
-										if (superPosSubsumMap && !nextSatTestItem->isPossibleSubsumptionMapInitialized()) {
-											COptimizedKPSetClassPossibleSubsumptionMap* subPosSubsumMap = nextSatTestItem->getPossibleSubsumptionMap(true);
-											for (COptimizedKPSetClassPossibleSubsumptionMap::const_iterator it = superPosSubsumMap->constBegin(), itEnd = superPosSubsumMap->constEnd(); it != itEnd; ++it) {
-												CConcept* con = it.key().getConcept();
-												COptimizedKPSetClassPossibleSubsumptionData* data = it.value();
-												if (data->isSubsumptionUnknown() && !nextSatTestItem->hasSubsumerConceptItem(data->getClassItem()) && nextSatTestItem != data->getClassItem()) {
-													COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(data->getClassItem());
-													subPosSubsumMap->insert(CConceptTagComparer(con),possSubsumData);
-													incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,subPosSubsumMap);
-												}
+										QList<COptimizedKPSetClassTestingItem*>* subsumedSubsumingConList = superClassConItem->getSubsumingConceptItemList();
+										for (QList<COptimizedKPSetClassTestingItem*>::const_iterator it = subsumedSubsumingConList->constBegin(), itEnd = subsumedSubsumingConList->constEnd(); it != itEnd; ++it) {
+											COptimizedKPSetClassTestingItem* subsumedItem = (*it);
+											if (nextSatTestItem != subsumedItem && superClassConItem != subsumedItem) {
+												nextSatTestItem->addSubsumingConceptItem(subsumedItem);
 											}
 										}
-										nextSatTestItem->setPossibleSubsumptionMapInitialized(true);
+										nextSatTestItem->addSubsumingConceptItem(superClassConItem);
+										satFlag = superClassConItem->getSatisfiableTestedResult();
+										testComplete = true;
+
+										if (superClassConItem->isClassPseudoModelInitalized()) {
+											CClassificationClassPseudoModel* superClassPMModel = superClassConItem->getClassPseudoModel();
+											CClassificationClassPseudoModel* classPMModel = nextSatTestItem->getClassPseudoModel();
+
+											CTempMemoryPoolContainerAllocationManager tempMemoryPoolConAllocMan(mContext.getMemoryPoolAllocationManager());
+											CContext* tmpContext = CObjectParameterizingAllocator< CContextBase,CMemoryAllocationManager* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,&tempMemoryPoolConAllocMan);
+											CClassificationClassPseudoModelHash* pmModelHash = CObjectParameterizingAllocator< CClassificationClassPseudoModelHash,CContext* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,tmpContext);
+											pmModelHash->initPseudoModelHash(superClassPMModel->getPseudoModelHash());
+											CClassificationClassPseudoModelData* pmModelData = pmModelHash->getPseudoModelData(0,true);
+
+											CClassificationClassPseudoModelConceptMap* pmModelConMap = pmModelData->getPseudoModelConceptMap(true);
+											CClassificationClassPseudoModelConceptData& pmModelConData = (*pmModelConMap)[CConceptTagComparer(concept)];
+											pmModelConData.setDeterministic(true);
+
+											optKPSetClassificationItem->addMemoryPools(tempMemoryPoolConAllocMan.takeMemoryPools());
+											classPMModel->setPseudoModelHash(pmModelHash);
+											nextSatTestItem->setClassPseudoModelInitalized(true);
+										}
+
+										if (superClassConItem->isPossibleSubsumptionMapInitialized()) {
+											COptimizedKPSetClassPossibleSubsumptionMap* superPosSubsumMap = superClassConItem->getPossibleSubsumptionMap(false);
+											if (superPosSubsumMap && !nextSatTestItem->isPossibleSubsumptionMapInitialized()) {
+												COptimizedKPSetClassPossibleSubsumptionMap* subPosSubsumMap = nextSatTestItem->getPossibleSubsumptionMap(true);
+												for (COptimizedKPSetClassPossibleSubsumptionMap::const_iterator it = superPosSubsumMap->constBegin(), itEnd = superPosSubsumMap->constEnd(); it != itEnd; ++it) {
+													CConcept* con = it.key().getConcept();
+													COptimizedKPSetClassPossibleSubsumptionData* data = it.value();
+													if (data->isSubsumptionUnknown() && !nextSatTestItem->hasSubsumerConceptItem(data->getClassItem()) && nextSatTestItem != data->getClassItem()) {
+														COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(data->getClassItem());
+														subPosSubsumMap->insert(CConceptTagComparer(con),possSubsumData);
+														incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,subPosSubsumMap);
+													}
+												}
+											}
+											nextSatTestItem->setPossibleSubsumptionMapInitialized(true);
+										}
 									}
 								}
 							}
@@ -1384,39 +1520,46 @@ namespace Konclude {
 					COptimizedKPSetClassTestingItem* topClassConItem = optKPSetClassificationItem->getTopConceptSatisfiableTestItem();
 					if (topClassConItem->isPossibleSubsumptionMapInitialized()) {
 
-						satFlag = true;
-						testComplete = true;
-						CClassificationClassPseudoModel* classPMModel = nextSatTestItem->getClassPseudoModel();
+						CCacheEntry* topCacheEntry = getAssociatedSaturationCacheEntry(topClassConItem);
+						if (!hasCachedSaturationIndividualNodeAssociatedExpansionProplematicConcept(topCacheEntry,concept)) {
 
-						CTempMemoryPoolContainerAllocationManager tempMemoryPoolConAllocMan(mContext.getMemoryPoolAllocationManager());
-						CContext* tmpContext = CObjectParameterizingAllocator< CContextBase,CMemoryAllocationManager* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,&tempMemoryPoolConAllocMan);
-						CClassificationClassPseudoModelHash* pmModelHash = CObjectParameterizingAllocator< CClassificationClassPseudoModelHash,CContext* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,tmpContext);
-						CClassificationClassPseudoModelData* pmModelData = pmModelHash->getPseudoModelData(0,true);
+							nextSatTestItem->setFastSatisfiabilityTestedSaturationCacheEntry(topCacheEntry);
+							nextSatTestItem->setSuccessfullyFastSatisfiabilityTested(true);
 
-						CClassificationClassPseudoModelConceptMap* pmModelConMap = pmModelData->getPseudoModelConceptMap(true);
-						CClassificationClassPseudoModelConceptData& pmModelConData = (*pmModelConMap)[CConceptTagComparer(concept)];
-						pmModelConData.setDeterministic(true);
+							satFlag = true;
+							testComplete = true;
+							CClassificationClassPseudoModel* classPMModel = nextSatTestItem->getClassPseudoModel();
 
-						optKPSetClassificationItem->addMemoryPools(tempMemoryPoolConAllocMan.takeMemoryPools());
-						classPMModel->setPseudoModelHash(pmModelHash);
-						nextSatTestItem->setClassPseudoModelInitalized(true);
+							CTempMemoryPoolContainerAllocationManager tempMemoryPoolConAllocMan(mContext.getMemoryPoolAllocationManager());
+							CContext* tmpContext = CObjectParameterizingAllocator< CContextBase,CMemoryAllocationManager* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,&tempMemoryPoolConAllocMan);
+							CClassificationClassPseudoModelHash* pmModelHash = CObjectParameterizingAllocator< CClassificationClassPseudoModelHash,CContext* >::allocateAndConstructAndParameterize(&tempMemoryPoolConAllocMan,tmpContext);
+							CClassificationClassPseudoModelData* pmModelData = pmModelHash->getPseudoModelData(0,true);
 
-					
-						COptimizedKPSetClassPossibleSubsumptionMap* superPosSubsumMap = topClassConItem->getPossibleSubsumptionMap(false);
-						if (superPosSubsumMap && !nextSatTestItem->isPossibleSubsumptionMapInitialized()) {
-							COptimizedKPSetClassPossibleSubsumptionMap* subPosSubsumMap = nextSatTestItem->getPossibleSubsumptionMap(true);
-							for (COptimizedKPSetClassPossibleSubsumptionMap::const_iterator it = superPosSubsumMap->constBegin(), itEnd = superPosSubsumMap->constEnd(); it != itEnd; ++it) {
-								CConcept* con = it.key().getConcept();
-								COptimizedKPSetClassPossibleSubsumptionData* data = it.value();
-								if (data->isSubsumptionUnknown() && !nextSatTestItem->hasSubsumerConceptItem(data->getClassItem()) && nextSatTestItem != data->getClassItem()) {
-									COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(data->getClassItem());
-									subPosSubsumMap->insert(CConceptTagComparer(con),possSubsumData);
-									incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,subPosSubsumMap);
+							CClassificationClassPseudoModelConceptMap* pmModelConMap = pmModelData->getPseudoModelConceptMap(true);
+							CClassificationClassPseudoModelConceptData& pmModelConData = (*pmModelConMap)[CConceptTagComparer(concept)];
+							pmModelConData.setDeterministic(true);
+
+							optKPSetClassificationItem->addMemoryPools(tempMemoryPoolConAllocMan.takeMemoryPools());
+							classPMModel->setPseudoModelHash(pmModelHash);
+							nextSatTestItem->setClassPseudoModelInitalized(true);
+
+						
+							COptimizedKPSetClassPossibleSubsumptionMap* superPosSubsumMap = topClassConItem->getPossibleSubsumptionMap(false);
+							if (superPosSubsumMap && !nextSatTestItem->isPossibleSubsumptionMapInitialized()) {
+								COptimizedKPSetClassPossibleSubsumptionMap* subPosSubsumMap = nextSatTestItem->getPossibleSubsumptionMap(true);
+								for (COptimizedKPSetClassPossibleSubsumptionMap::const_iterator it = superPosSubsumMap->constBegin(), itEnd = superPosSubsumMap->constEnd(); it != itEnd; ++it) {
+									CConcept* con = it.key().getConcept();
+									COptimizedKPSetClassPossibleSubsumptionData* data = it.value();
+									if (data->isSubsumptionUnknown() && !nextSatTestItem->hasSubsumerConceptItem(data->getClassItem()) && nextSatTestItem != data->getClassItem()) {
+										COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(data->getClassItem());
+										subPosSubsumMap->insert(CConceptTagComparer(con),possSubsumData);
+										incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,subPosSubsumMap);
+									}
 								}
 							}
+							nextSatTestItem->setPossibleSubsumptionMapInitialized(true);
+							OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
 						}
-						nextSatTestItem->setPossibleSubsumptionMapInitialized(true);
-						OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
 					}
 				}
 				if (satFlag && isSatisfiableFlag) {
@@ -1950,9 +2093,10 @@ namespace Konclude {
 
 				//QString iriClassNameString1 = CIRIName::getRecentIRIName(subsumedConcept->getClassNameLinker());
 				//QString iriClassNameString2 = CIRIName::getRecentIRIName(subsumerConcept->getClassNameLinker());
-				//if (iriClassNameString1 == "http://www.bootstrep.eu/ontology/GRO#BindingOfProteinToProteinBindingSiteOfDNA" && iriClassNameString2 == "http://www.bootstrep.eu/ontology/GRO#DNAProteinInteraction" && !isSubsumption) {
+				//if (iriClassNameString1 == "http://purl.org/biotop/biotop.owl#EntireCarbohydrateMonomer" && iriClassNameString2 == "http://purl.org/biotop/biotop.owl#EntireMolecularEntity" && !isSubsumption) {
 				//	bool bug = true;
 				//	calculateSubsumption(optKPSetClassificationItem,subsumedItem,subsumerItem,nullptr);
+				//	return false;
 				//}
 
 				//if (iriClassNameString1 == "http://www.bootstrep.eu/ontology/GRO#BindingOfProteinToProteinBindingSiteOfDNA" && iriClassNameString2 == "http://www.bootstrep.eu/ontology/GRO#DNAProteinInteraction") {
@@ -2506,25 +2650,12 @@ namespace Konclude {
 					CClassification* classification = ontology->getClassification();
 					if (classification) {
 						CClassConceptClassification* classConClassification = ontClassItem->getClassConceptClassification();
-						CClassificationStatisticsCollectionStrings* classifStatCollStrings = ontClassItem->getClassificationStatisticsCollectionStrings();
-						CClassifierStatistics* classifierStats = ontClassItem->getClassifierStatistics();
-						classifStatCollStrings->addProcessingStatistics("class-classification-total-satisfiable-test-count",classifierStats->getTotalSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-tested-count",classifierStats->getTestedSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-pseudo-model-merged-tested-count",classifierStats->getPseudoModelMergedTestedSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-derivate-tested-count",classifierStats->getDerivatedTestedSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-calculated-tested-count",classifierStats->getCalculatedTestedSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-pruned-tested-count",classifierStats->getPrunedTestedSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-told-tested-count",classifierStats->getToldSatisfiableCount()-classifierStats->getCalculatedTestedSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-total-subsumption-test-count",classifierStats->getTotalSatisfiableCount()*(classifierStats->getTotalSatisfiableCount()-1));
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-tested-count",classifierStats->getTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-pseudo-model-merged-tested-count",classifierStats->getPseudoModelMergedTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-subclass-tested-count",classifierStats->getSubclassTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-subclass-identifier-occur-tested-count",classifierStats->getSubclassIdentifierOccurTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-derivate-tested-count",classifierStats->getDerivatedTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-calculated-tested-count",classifierStats->getCalculatedTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-pruned-tested-count",classifierStats->getPrunedTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-told-tested-count",classifierStats->getToldSubsumptionCount()-classifierStats->getCalculatedTestedSubsumptionCount());
+						addClassificationStatistics(ontClassItem,classConClassification);
+						if (ontClassItem->getIndividualDependenceTrackingCollector()) {
+							classConClassification->setDependentIndividualsTracking(ontClassItem->getIndividualDependenceTrackingCollector()->getExtendingIndividualDependenceTracking());
+						}
 						classConClassification->setClassConceptTaxonomy(taxonomy);
+						CClassificationStatisticsCollectionStrings* classifStatCollStrings = ontClassItem->getClassificationStatisticsCollectionStrings();
 						classConClassification->setClassificationStatistics(classifStatCollStrings);
 						classification->setClassConceptClassification(classConClassification);
 					}
@@ -2545,50 +2676,50 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetClassSubsumptionClassifierThread::interceptTestResults(CInterceptOntologyTestResultEvent *interceptResult) {
-				CConcreteOntology *ontology = interceptResult->getOntology();
-				COntologyClassificationItem *ontoClassItem = ontItemHash.value(ontology);
-				CCallbackData *callbackData = interceptResult->getCallbackData();
-				bool tested = false;
-				bool result = false;
-				if (ontoClassItem) {
-					CTaxonomy *taxonomy = ontoClassItem->getTaxonomy();
-					if (interceptResult->isConceptSatisfiableTest()) {
-						CConcept *concept = interceptResult->getSatisfiableTestedConcept();
-						result = taxonomy->isSatisfiable(concept);
-						if (result) {
-							tested = true;
-						} else {
-							result = !taxonomy->isNotSatisfiable(concept);
-							if (!result) {
-								tested = true;
-							} else {
-								result = false;
-							}
-						}
-					} else if (interceptResult->isConceptSubsumptionTest()) {
-						CConcept *subsumerConcept = interceptResult->getSubsumerTestedConcept();
-						CConcept *subsumedConcept = interceptResult->getSubsumedTestedConcept();
-						result = taxonomy->isSubsumption(subsumerConcept,subsumedConcept);
-						if (result) {
-							tested = true;
-						} else {
-							result = !taxonomy->isNotSubsumption(subsumerConcept,subsumedConcept);
-							if (!result) {
-								tested = true;
-							} else {
-								result = false;
-							}
-						}
-					}
+			bool COptimizedKPSetClassSubsumptionClassifierThread::addClassificationStatistics(COntologyClassificationItem *ontClassItem, CClassConceptClassification* classConClassification) {
+				CClassificationStatisticsCollectionStrings* classifStatCollStrings = ontClassItem->getClassificationStatisticsCollectionStrings();
+				CClassifierStatistics* classifierStats = ontClassItem->getClassifierStatistics();
+				classifStatCollStrings->addProcessingStatistics("class-classification-total-satisfiable-test-count",classifierStats->getTotalSatisfiableCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-tested-count",classifierStats->getTestedSatisfiableCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-pseudo-model-merged-tested-count",classifierStats->getPseudoModelMergedTestedSatisfiableCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-derivation-tested-count",classifierStats->getDerivatedTestedSatisfiableCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-calculated-tested-count",classifierStats->getCalculatedTestedSatisfiableCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-pruned-tested-count",classifierStats->getPrunedTestedSatisfiableCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-satisfiable-told-tested-count",classifierStats->getToldSatisfiableCount()-classifierStats->getCalculatedTestedSatisfiableCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-total-subsumption-test-count",classifierStats->getTotalSatisfiableCount()*(classifierStats->getTotalSatisfiableCount()-1));
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-tested-count",classifierStats->getTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-pseudo-model-merged-tested-count",classifierStats->getPseudoModelMergedTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-subclass-tested-count",classifierStats->getSubclassTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-subclass-identifier-occur-tested-count",classifierStats->getSubclassIdentifierOccurTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-derivation-tested-count",classifierStats->getDerivatedTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-calculated-tested-count",classifierStats->getCalculatedTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-pruned-tested-count",classifierStats->getPrunedTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-subsumption-told-tested-count",classifierStats->getToldSubsumptionCount()-classifierStats->getCalculatedTestedSubsumptionCount());
+				classifStatCollStrings->addProcessingStatistics("class-classification-time",ontClassItem->getInitializationTime()->elapsed());
+
+				COntologyProcessingStatistics* ontProcStats = ontClassItem->getClassificationProcessingStep()->getProcessingStatistics(true);
+				ontProcStats->setProcessingCountStatisticValue("class-classification-time",ontClassItem->getInitializationTime()->elapsed());
+
+				COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem = dynamic_cast<COptimizedKPSetClassOntologyClassificationItem*>(ontClassItem);
+				if (optKPSetClassificationItem) {
+					addIndividualDependencyTrackingStatistics(optKPSetClassificationItem);
 				}
-				CInterceptResultCallbackDataContext *interceptContext = new CInterceptResultCallbackDataContext(tested,result);
-				callbackData->setCallbackDataContext(interceptContext);
-				callbackData->doCallback();
 				return true;
 			}
 
 
+
+			COptimizedKPSetClassSubsumptionClassifierThread* COptimizedKPSetClassSubsumptionClassifierThread::addIndividualDependencyTrackingStatistics(COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem, const QString& classificationTypeString) {
+				if (optKPSetClassificationItem->getIndividualDependenceTrackingCollector()) {
+					CClassificationStatisticsCollectionStrings* classifStatCollStrings = optKPSetClassificationItem->getClassificationStatisticsCollectionStrings();
+					CIndividualDependenceTracking* indiDepTack = optKPSetClassificationItem->getIndividualDependenceTrackingCollector()->getExtendingIndividualDependenceTracking();
+					if (indiDepTack) {
+						classifStatCollStrings->addProcessingStatistics(QString("%1-tracked-node-dependency-size").arg(classificationTypeString),indiDepTack->getDependenceSize());
+						classifStatCollStrings->addProcessingStatistics(QString("%1-tracked-node-dependency-count").arg(classificationTypeString),1);
+					}
+				}
+				return this;
+			}
 		}; // end namespace Classifier
 
 	}; // end namespace Reasoner

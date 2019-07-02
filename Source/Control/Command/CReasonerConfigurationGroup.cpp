@@ -121,6 +121,11 @@ namespace Konclude {
 						new CBooleanConfigType(true));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.MaximumRecursiveProcessingConceptCount",
+						"Determines the maximum recursion for the processing of added concepts in completion graphs with tableau expansion rules.",
+						new CIntegerConfigType(300)),
+						new CIntegerConfigType(300));
+
 
 				// Processing configurations
 
@@ -140,6 +145,12 @@ namespace Konclude {
 						"Determines whether the reasoner writes single individual level clashes to unsatisfiable cache.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.UnsatisfiableCacheTestingConceptWriting",
+						"Determines whether the reasoner writes unsatisfiability tested concepts to unsatisfiable cache.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SatisfiableCacheSingleLevelWriting",
 						"Determines whether the reasoner writes single individual level satisfiable to satisfiable cache.",
 						new CBooleanConfigType(true)),
@@ -256,6 +267,22 @@ namespace Konclude {
 						"Determines whether the reasoner can use the generated completion graph in the persistence check to block unnecessary individual node processing.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.DelayedCompletionGraphCachingReactivation",
+						"Determines whether the reactivation of completion graph cached nodes is delayed.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.AvoidRepeatedIndividualProcessing",
+						"Determines whether the reprocessing of nodes for individuals is avoided if nominals do not occur in the ontology and tests do not directly refers to individuals.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.ForceNodesRecreationForRepeatedIndividualProcessing",
+						"Determines whether for the repeated reprocessing of individuals new nodes are created.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.CompletionGraphReuseCachingRetrieval",
 						"Determines whether the reasoner queries the completion graph reuse cache for compatible entries.",
 						new CBooleanConfigType(true)),
@@ -289,6 +316,16 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.IndividualsBackendCacheLoading",
+						"Determines whether the reasoner loads data for individuals from backend cache.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SuccessorConceptSaturationExpansion",
 						"Determines whether the reasoner using saturated concepts for expanding newly created successor nodes.",
 						new CBooleanConfigType(true)),
@@ -309,6 +346,46 @@ namespace Konclude {
 						"Determines whether successors are extended in the saturation with concepts that are propagated into successor directions.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationReferredNodeManyConceptCount",
+						"The number of concepts for which referred nodes are identified to have many concepts.",
+						new CIntegerConfigType(500)),
+						new CIntegerConfigType(500));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationManyConceptReferredNodeCountProcessLimit",
+						"The number of referred nodes with many concept for which saturation is not performed.",
+						new CIntegerConfigType(2)),
+						new CIntegerConfigType(2));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationReferredNodeConceptCountProcessLimit",
+						"The number of concepts of the referred nodes for which saturation is not performed.",
+						new CIntegerConfigType(1500)),
+						new CIntegerConfigType(1500));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationReferredNodeUnprocessedCountProcessLimit",
+						"The number of unprocessed referred nodes for which saturation is not performed.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.SaturationReferredNodeCheckingDepth",
+						"The recursive checking depth for referred nodes for saturation.",
+						new CIntegerConfigType(5)),
+						new CIntegerConfigType(5));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.ForceManyConceptNodeSaturation",
+						"Determines whether saturation is enforced even if there are many concepts.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.NominalSaturationCachingByNodeReactivation",
 						"Determines whether the reasoner using saturated concepts with connections to nominals for caching with reactivation.",
@@ -341,6 +418,53 @@ namespace Konclude {
 						"Determinses whether concepts are saturated for the assisting of the tableau algorithm.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+ 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.IndividualSaturation",
+						"Determines whether individual are saturated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.ComputedTypesCaching",
+						"Determines whether computed types are cached for reusing in other tests.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.ConstructionIndividualNodeMerging",
+						"Determines whether constructed individual nodes are merged into nominal nodes.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.SatisfiableExpander.InitialMemoryLevelForIncreaseRequiredSignatureReferenceCount",
+						"Specifies the initial memory level for which the required signature references for the creation of cache entries is increased.",
+						new CIntegerConfigType(200*1024*1024)),
+						new CIntegerConfigType(200*1024*1024));
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.SatisfiableExpander.NextMemoryLevelIncreaseForIncreaseRequiredSignatureReferenceCount",
+						"Specifies the increase for the next memory level for which the required signature references is increased.",
+						new CIntegerConfigType(100*1024*1024)),
+						new CIntegerConfigType(100*1024*1024));
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.SatisfiableExpander.InitialRequiredSignatureReferenceCount",
+						"Specifies the initial required signature references count.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.SatisfiableExpander.RequiredSignatureReferenceCountIncrease",
+						"Specifies the increase for the required signature references count.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+
+
+
+
+
+
 
 
 
@@ -392,6 +516,10 @@ namespace Konclude {
 						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.ProcessingDataExtender",
 						"Determines whether the ontology is extended with processing data.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.ReverseRoleAssertionGeneration",
+						"Determines whether reverse role assertions are generated.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.OntologyStructureInspection",
@@ -521,6 +649,29 @@ namespace Konclude {
 
 
 
+				// Precomputation configurations
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.MaximumParallelCalculationCount",
+						"Determines the maximum number of calculation jobs that are created at the same time.",
+						new CIntegerConfigType(1)),
+						((CConfigData*)nullptr));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.MultipliedUnitsParallelCalculationCount",
+						"Determines how many calculation jobs are created.",
+						new CIntegerConfigType(2)),
+						new CIntegerConfigType(2));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize",
+						"Determines how many individuals are saturated together.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.ForceFullCompletionGraphConstruction",
+						"Determines whether the construction of a completion graph is enforced for the consistency check.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
 
 				// Classification configurations
 
@@ -540,7 +691,7 @@ namespace Konclude {
 						new CBooleanConfigType(true));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.DerivateSubsumptionRelations",
-						"Determines whether unnecessary calculations for ontology classification are derivated.",
+						"Determines whether unnecessary calculations for ontology classification are derrived.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.PseudoModelSubsumptionMerging",
@@ -642,12 +793,16 @@ namespace Konclude {
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.SaturationSubsumerExtraction",
-						"Determinses whether the subsumption relations are extracted from the saturation.",
+						"Determines whether the subsumption relations are extracted from the saturation.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.IndividualDependenceTracking",
+						"Determines whether dependent individuals are tracked for classification.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 
 
@@ -669,11 +824,42 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.RealizePrecomputation.SameIndividuals",
+						"Determines whether same individuals are precomputed if realization is requested.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.RealizePrecomputation.ConceptInstances",
+						"Determines whether concept instances are precomputed if realization is requested.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.RealizePrecomputation.RoleInstances",
+						"Determines whether role instances are precomputed if realization is requested.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.IndividualDependenceTracking",
+						"Determines whether dependent individuals are tracked for realization.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.PossibleAssertionsCollecting",
+						"Determines whether possible assertions are collected for realization.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.ExtraConsistencyTesting",
+						"Determines whether a separate consistency test is performed for realization.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 
 
@@ -715,6 +901,28 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Ontology.Revision.BasementResolveKBName",
+						"Determines which knowledge bases is used as basement for the creation of new knowledge bases.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Query.Statistics.CollectStatistics",
+						"Determines whether statistics are collected for queries.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Query.Statistics.CollectCalculationStatistics",
+						"Determines whether statistics about calculations are collected.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Query.Statistics.CollectProcessingStepsStatistics",
+						"Determines whether statistics about processing steps are collected.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 
 
@@ -858,6 +1066,12 @@ namespace Konclude {
 						new CStringConfigType("Tests/Generator/Output")),
 						new CStringConfigType("Tests/Generator/Output"));
 
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.FilterDirectory",
+						"Filter directory for converter.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.OntologyStatisticsDirectory",
 						"Output directory for tested evaluation tests.",
 						new CStringConfigType("Evaluation/Infos/Statistics/Ontologies/")),
@@ -890,6 +1104,137 @@ namespace Konclude {
 						"Determines whether type tests are generated.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.GenerateIncrementalAssertionConsistencyTests",
+						"Determines whether incremental assertion consistency tests are generated.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionConsistencyTestsGeneration.AssertionAdditionCount",
+						"Determines the number of assertion that are added for incremental consistency tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionConsistencyTestsGeneration.TestCount",
+						"Determines the number incremental consistency tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionConsistencyTestsGeneration.AssertionRemovalCount",
+						"Determines the number of assertion that are removed for incremental consistency tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionConsistencyTestsGeneration.RatioAdditionRemoval",
+						"Determines whether the incremental changed assertion count for incremental consistency tests is determined by the ontology size ratio.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionConsistencyTestsGeneration.AssertionAdditionRatioDenominator",
+						"Determines the denominator for the assertion ratio that are added for incremental consistency tests.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionConsistencyTestsGeneration.AssertionRemovalRatioDenominator",
+						"Determines the denominator for the assertion ratio  that are removed for incremental consistency tests.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+
+
+
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.GenerateIncrementalAssertionClassificationTests",
+						"Determines whether incremental assertion classification tests are generated.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionClassificationTestsGeneration.AssertionAdditionCount",
+						"Determines the number of assertion that are added for incremental classification tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionClassificationTestsGeneration.TestCount",
+						"Determines the number incremental classification tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionClassificationTestsGeneration.AssertionRemovalCount",
+						"Determines the number of assertion that are removed for incremental classification tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionClassificationTestsGeneration.RatioAdditionRemoval",
+						"Determines whether the incremental changed assertion count for incremental classification tests is determined by the ontology size ratio.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionClassificationTestsGeneration.AssertionAdditionRatioDenominator",
+						"Determines the denominator for the assertion ratio that are added for incremental classification tests.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionClassificationTestsGeneration.AssertionRemovalRatioDenominator",
+						"Determines the denominator for the assertion ratio  that are removed for incremental classification tests.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.GenerateIncrementalAssertionRealizationTests",
+						"Determines whether incremental assertion realization tests are generated.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionRealizationTestsGeneration.AssertionAdditionCount",
+						"Determines the number of assertion that are added for incremental realization tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionRealizationTestsGeneration.TestCount",
+						"Determines the number incremental realization tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionRealizationTestsGeneration.AssertionRemovalCount",
+						"Determines the number of assertion that are removed for incremental realization tests.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionRealizationTestsGeneration.RatioAdditionRemoval",
+						"Determines whether the incremental changed assertion count for incremental realization tests is determined by the ontology size ratio.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionRealizationTestsGeneration.AssertionAdditionRatioDenominator",
+						"Determines the denominator for the assertion ratio that are added for incremental realization tests.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.Generator.IncrementalAssertionRealizationTestsGeneration.AssertionRemovalRatioDenominator",
+						"Determines the denominator for the assertion ratio  that are removed for incremental realization tests.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+
+
+
+
+
 
 
 
@@ -930,6 +1275,10 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing",
+						"Determines whether UTF-8 compatibility is enforced for stream-based XML parsing.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -976,10 +1325,10 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
-				addConfigProperty(new CConfigDescription("Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing",
-						"Determines whether UTF-8 compatibility is enforced for stream-based XML parsing.",
-						new CBooleanConfigType(true)),
-						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.OWLlink.ExtendedErrorReporting",
+						"Determines whether more detailed error messages are reported via OWLlink.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 				
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.AbbreviatedIRIs",
@@ -1273,6 +1622,10 @@ namespace Konclude {
 						new CStringConfigType(""));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.TerminateAssistProgram",
+						"Program/Script/Command Line that is called with the process id to assist termination.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
 
 
 				addConfigProperty(new CConfigDescription("Konclude.CLI.Output.WriteDeclarations",
@@ -1385,6 +1738,32 @@ namespace Konclude {
 						"Determines whether only direct types are written to the output file for realization tasks.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.ReportParsingTimeForConsistency",
+						"Determines whether the parsing time is reported for the consistency checking reasoning task.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.ReportParsingTimeForSatisfiability",
+						"Determines whether the parsing time is reported for the satisfiability checking reasoning task.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.ReportParsingTimeForRealization",
+						"Determines whether the parsing time is reported for the realization reasoning task.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.ORE.ReportParsingTimeForClassification",
+						"Determines whether the parsing time is reported for the classification reasoning task.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
 			}
 
 

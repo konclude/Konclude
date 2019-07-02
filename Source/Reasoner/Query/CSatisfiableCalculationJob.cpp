@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -34,9 +34,12 @@ namespace Konclude {
 				mCalculationConfiguration = nullptr;
 				mCalclulationStatisticsCollector = nullptr;
 				mPreyingAdapter = nullptr;
-				mSatSubIdAdapter = nullptr;
 				mSatClassMessAdapter = nullptr;
 				mJobInstantiation = nullptr;
+				mRealMarkCandMessAdapter = nullptr;
+				mSatIncConsTestingAdapter = nullptr;
+				mSatIndDepTrackAdapter = nullptr;
+				mPossAssCollAdapter = nullptr;
 				mNextRelativeNodeID = 0;
 			}
 
@@ -103,11 +106,6 @@ namespace Konclude {
 				return mPreyingAdapter;
 			}
 
-			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableSubsumptionIdentifierAdapter(CSatisfiableSubsumptionIdentifierAdapter* satSubIdObserver) {
-				mSatSubIdAdapter = satSubIdObserver;
-				return this;
-			}
-
 
 			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableClassificationMessageAdapter(CSatisfiableTaskClassificationMessageAdapter* classMessObserver) {
 				mSatClassMessAdapter = classMessObserver;
@@ -118,10 +116,6 @@ namespace Konclude {
 				return mSatClassMessAdapter;
 			}
 
-
-			CSatisfiableSubsumptionIdentifierAdapter* CSatisfiableCalculationJob::getSatisfiableSubsumptionIdentifierAdapter() {
-				return mSatSubIdAdapter;
-			}
 
 			CSatisfiableCalculationJobInstantiation* CSatisfiableCalculationJob::getConsecutivelyCalculationJobInstantiation() {
 				return mJobInstantiation;
@@ -136,6 +130,44 @@ namespace Konclude {
 			cint64 CSatisfiableCalculationJob::getNextRelativeNodeID(bool moveNext) {
 				return mNextRelativeNodeID;
 			}
+
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setRealizationMarkedCandidatesMessageAdapter(CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* realMessObserver) {
+				mRealMarkCandMessAdapter = realMessObserver;
+				return this;
+			}
+
+			CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* CSatisfiableCalculationJob::getRealizationMarkedCandidatesMessageAdapter() {
+				return mRealMarkCandMessAdapter;
+			}
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableTaskIncrementalConsistencyTestingAdapter(CSatisfiableTaskIncrementalConsistencyTestingAdapter* incConsTestAdaptor) {
+				mSatIncConsTestingAdapter = incConsTestAdaptor;
+				return this;
+			}
+
+			CSatisfiableTaskIncrementalConsistencyTestingAdapter* CSatisfiableCalculationJob::getSatisfiableTaskIncrementalConsistencyTestingAdapter() {
+				return mSatIncConsTestingAdapter;
+			}
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableTaskIndividualDependenceTrackingAdapter(CSatisfiableTaskIndividualDependenceTrackingAdapter* indDepTrackAdaptor) {
+				mSatIndDepTrackAdapter = indDepTrackAdaptor;
+				return this;
+			}
+
+			CSatisfiableTaskIndividualDependenceTrackingAdapter* CSatisfiableCalculationJob::getSatisfiableTaskIndividualDependenceTrackingAdapter() {
+				return mSatIndDepTrackAdapter;
+			}
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setPossibleAssertionCollectionAdapter(CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* possAssCollAdapter) {
+				mPossAssCollAdapter = possAssCollAdapter;
+				return this;
+			}
+
+			CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter* CSatisfiableCalculationJob::getPossibleAssertionCollectionAdapter() {
+				return mPossAssCollAdapter;
+			}
+
 
 
 		}; // end namespace Query

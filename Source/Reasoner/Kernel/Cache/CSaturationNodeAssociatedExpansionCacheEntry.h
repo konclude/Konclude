@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -26,6 +26,7 @@
 
 // Namespace includes
 #include "CacheSettings.h"
+#include "CCacheEntry.h"
 #include "CSaturationNodeAssociatedExpansionCacheContext.h"
 #include "CSaturationNodeAssociatedDeterministicConceptExpansion.h"
 #include "CSaturationNodeAssociatedNondeterministicConceptExpansion.h"
@@ -58,7 +59,7 @@ namespace Konclude {
 				 *		\brief		TODO
 				 *
 				 */
-				class CSaturationNodeAssociatedExpansionCacheEntry : public CIndividualSaturationProcessNodeCacheData {
+				class CSaturationNodeAssociatedExpansionCacheEntry : public CIndividualSaturationProcessNodeCacheData, public CCacheEntry {
 					// public methods
 					public:
 						//! Constructor

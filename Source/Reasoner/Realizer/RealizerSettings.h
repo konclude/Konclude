@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -24,6 +24,7 @@
 // Libraries includes
 #include <QtGlobal>
 #include <QEvent>
+#include <QPair>
 
 // Namespace includes
 
@@ -55,14 +56,18 @@ namespace Konclude {
 			class CRealizingTestingItem;
 			class COntologyRealizingItem;
 			class COptimizedKPSetConceptInstancesItem;
-			class COptimizedKPSetConceptInstantiatedItem;
+			class COptimizedKPSetIndividualItem;
 			class COptimizedKPSetConceptInstancesData;
+			class COptimizedKPSetRoleInstancesData;
+			class COptimizedKPSetRoleInstancesItem;
 
+			typedef QPair<COptimizedKPSetRoleInstancesItem*,bool> TRoleItemInversionPair;
 
 			// Custom Events >= 2000
 			const QEvent::Type EVENTPREALIZEONTOLOGY					= (QEvent::Type)2000;
 			const QEvent::Type EVENTCALLBACKREALIZEDONTOLOGY			= (QEvent::Type)2001;
 			const QEvent::Type EVENTREALIZINGCALCULATEDCALLBACK			= (QEvent::Type)2002;
+			const QEvent::Type EVENTREALIZATIONMESSAGE					= (QEvent::Type)2003;
 
 
 

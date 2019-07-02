@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,27 +30,48 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeIRIValueSpaceData::CDatatypeIRIValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext),mIRIValueSpaceMap(processContext) {
-					mValueSpaceMap = &mIRIValueSpaceMap;
+				CDatatypeIRIValueSpaceData::CDatatypeIRIValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext) {
+					mIRIValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeIRIValueSpaceData* CDatatypeIRIValueSpaceData::initIRIValueSpaceData(CDatatypeValueSpaceIRIType* valueSpaceType) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(nullptr);
-					mIRIValueSpaceMap.initDatatypeCompareValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mIRIValueSpaceMap) {
+						mIRIValueSpaceMap->initDatatypeCompareValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeIRIValueSpaceData* CDatatypeIRIValueSpaceData::copyIRIValueSpaceData(CDatatypeIRIValueSpaceData* spaceData) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(spaceData);
-					mIRIValueSpaceMap.initDatatypeCompareValueSpaceMap(spaceData->getIRIValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mIRIValueSpaceMap && !mIRIValueSpaceMap) {
+						getIRIValueSpaceMap(true);
+						mIRIValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mIRIValueSpaceMap);
+					} else if (mIRIValueSpaceMap) {
+						if (spaceData->mIRIValueSpaceMap) {
+							mIRIValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mIRIValueSpaceMap);
+						} else {
+							mIRIValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
 
-				CDatatypeIRIValueSpaceMap* CDatatypeIRIValueSpaceData::getIRIValueSpaceMap() {
-					return &mIRIValueSpaceMap;
+				CDatatypeIRIValueSpaceMap* CDatatypeIRIValueSpaceData::getIRIValueSpaceMap(bool create) {
+					if (create && !mIRIValueSpaceMap) {
+						mIRIValueSpaceMap = CObjectParameterizingAllocator< CDatatypeIRIValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mIRIValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+					}
+					return mIRIValueSpaceMap;
+				}
+
+				CDatatypeCompareValueSpaceMap* CDatatypeIRIValueSpaceData::createValueSpaceMap() {
+					return getIRIValueSpaceMap(true);
 				}
 
 			}; // end namespace Process

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,12 +31,13 @@
 #include "COntologyRealizingItem.h"
 #include "CRealizingCallbackDataContext.h"
 #include "CRealizingTestingItem.h"
+#include "CRealizationMessageObserver.h"
 
 // Other includes
 #include "Reasoner/Realizer/Events/CCallbackRealizedOntologyEvent.h"
 #include "Reasoner/Realizer/Events/CRealizeOntologyEvent.h"
 #include "Reasoner/Realizer/Events/CRealizingCalculatedCallbackEvent.h"
-
+#include "Reasoner/Realizer/Events/CRealizationMessageEvent.h"
 
 #include "Reasoner/Ontology/CConcept.h"
 #include "Reasoner/Ontology/COntologyProcessingRequirement.h"
@@ -77,7 +78,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CRealizerThread : public CRealizer, public CThread {
+			class CRealizerThread : public CRealizer, public CThread, public CRealizationMessageObserver {
 				// public methods
 				public:
 					//! Constructor
@@ -90,6 +91,7 @@ namespace Konclude {
 					virtual bool realize(CConcreteOntology* ontology, CConfigurationBase* config, const QList<COntologyProcessingRequirement*>& requirementList);
 					virtual bool callbackRealized(CConcreteOntology* ontology, CCallbackData* callback);
 
+					virtual CRealizationMessageObserver* tellRealizationMessage(CConcreteOntology *ontology, CRealizationMessageData* messageData, CMemoryPool* memoryPool);
 
 				// protected methods
 				protected:
@@ -109,6 +111,9 @@ namespace Konclude {
 
 					virtual bool realizingTested(COntologyRealizingItem* ontPreCompItem, CRealizingTestingItem* preTestItem, CRealizingCalculatedCallbackEvent* pcce) = 0;
 
+					virtual bool processRealizationMessage(COntologyRealizingItem* ontRealItem, CRealizationMessageData* messageData, CMemoryPool* memoryPools) = 0;
+
+
 				// protected variables
 				protected:
 					qint64 mConfMaxTestParallelCount;
@@ -123,7 +128,6 @@ namespace Konclude {
 
 					CReasonerManager* mReasoner;
 					CCalculationManager* mCalculationManager;
-
 
 					cint64 mStatCalculatingJobs;
 					CRealizingContext mContext;

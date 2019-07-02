@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -53,6 +53,8 @@ namespace Konclude {
 				mBuildData = CObjectParameterizingAllocator< COntologyBuildData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mConceptCyclesData = CObjectParameterizingAllocator< COntologyCoreConceptCyclesData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mProcessingSteps = CObjectParameterizingAllocator< COntologyProcessingSteps,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
+				mIncRevisionData = CObjectParameterizingAllocator< COntologyIncrementalRevisionData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
+				mIncRevisionData->setBasementOntology(this);
 			}
 
 
@@ -81,6 +83,7 @@ namespace Konclude {
 				mBuildData = CObjectParameterizingAllocator< COntologyBuildData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mConceptCyclesData = CObjectParameterizingAllocator< COntologyCoreConceptCyclesData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mProcessingSteps = CObjectParameterizingAllocator< COntologyProcessingSteps,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
+				mIncRevisionData = CObjectParameterizingAllocator< COntologyIncrementalRevisionData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 
 				if (refOntology) {
 					referenceOntology(refOntology);
@@ -95,6 +98,7 @@ namespace Konclude {
 				COPADestroyAndRelease(mBuildData,CContext::getMemoryAllocationManager(mOntConctext));
 				COPADestroyAndRelease(mConceptCyclesData,CContext::getMemoryAllocationManager(mOntConctext));
 				COPADestroyAndRelease(mProcessingSteps,CContext::getMemoryAllocationManager(mOntConctext));
+				COPADestroyAndRelease(mIncRevisionData,CContext::getMemoryAllocationManager(mOntConctext));
 
 				delete mOntConctext;
 				delete mConsistence;
@@ -114,6 +118,8 @@ namespace Konclude {
 				mStringMapping->referenceStringMapping(ontology->mStringMapping);
 				mBuildData->referenceBuildData(ontology->mBuildData);
 				mStructSumm->referenceStructureSummary(ontology->mStructSumm);
+				mIncRevisionData->referenceIncrementalRevision(ontology->mIncRevisionData);
+				mIncRevisionData->setPreviousOntologyVersion(ontology);
 				return this;
 			}
 
@@ -285,6 +291,16 @@ namespace Konclude {
 
 			CConcreteOntology* CConcreteOntology::setProcessingSteps(COntologyProcessingSteps* stepData) {
 				mProcessingSteps = stepData;
+				return this;
+			}
+
+
+			COntologyIncrementalRevisionData* CConcreteOntology::getIncrementalRevisionData() {
+				return mIncRevisionData;
+			}
+
+			CConcreteOntology* CConcreteOntology::setIncrementalRevisionData(COntologyIncrementalRevisionData* incRevData) {
+				mIncRevisionData = incRevData;
 				return this;
 			}
 

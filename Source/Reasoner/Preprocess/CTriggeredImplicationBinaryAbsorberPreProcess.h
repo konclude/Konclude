@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -295,6 +295,7 @@ namespace Konclude {
 					QHash<TAbsorptionBranchPair,CNominalSchemaAbsorptionBranchLinker*> mAbsorptionBranchPairAbsorptionBranchHash;
 
 					QHash<CRole*,CRole*> mRoleInverseRoleCreateHash;
+					CBOXHASH<cint64,CConcept*>* mIndividualTriggerConceptHash;
 
 
 					cint64 mNextVariableID;

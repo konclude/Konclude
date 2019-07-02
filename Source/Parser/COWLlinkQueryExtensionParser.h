@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,8 +30,6 @@
 
 // Other includes
 #include "Reasoner/Classifier/CClassificationCalculationSupport.h"
-#include "Reasoner/Classifier/CPartialPruningTaxonomy.h"
-#include "Reasoner/Classifier/CTaxonomySatisfiableSubsumptionCalculationSponsor.h"
 
 #include "Reasoner/Ontology/COntology.h"
 #include "Reasoner/Ontology/CConcreteOntology.h"
@@ -71,11 +69,9 @@ namespace Konclude {
 				//! Destructor
 				virtual ~COWLlinkQueryExtensionParser();
 
-				virtual CTaxonomyPremisingQuerySupport *parseTaxonomyQuerySupport(CConcreteOntology *ontology, QDomElement *queryNode);
 
 			// protected methods
 			protected:
-				CClassificationCalculationSupport *parseTaxonomyCalculationSupport(CConcreteOntology *ontology, QDomElement *node);
 
 			// private methods
 			private:

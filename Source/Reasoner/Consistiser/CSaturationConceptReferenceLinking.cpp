@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,6 +29,36 @@ namespace Konclude {
 
 
 			CSaturationConceptReferenceLinking::CSaturationConceptReferenceLinking() {
+				mPotentiallyExistInitConcept = false;
+				mDataRangeConcept = false;
+				mIndiProcessNodeForConcept = nullptr;
+			}
+
+			bool CSaturationConceptReferenceLinking::isPotentiallyExistInitializationConcept() {
+				return mPotentiallyExistInitConcept;
+			}
+
+			CSaturationConceptReferenceLinking* CSaturationConceptReferenceLinking::setPotentiallyExistInitializationConcept(bool initConcept) {
+				mPotentiallyExistInitConcept = initConcept;
+				return this;
+			}
+
+			CSaturationConceptReferenceLinking* CSaturationConceptReferenceLinking::setIndividualProcessNodeForConcept(CProcessReference* indiNode) {
+				mIndiProcessNodeForConcept = indiNode;
+				return this;
+			}
+
+			CProcessReference* CSaturationConceptReferenceLinking::getIndividualProcessNodeForConcept() {
+				return mIndiProcessNodeForConcept;
+			}
+
+			bool CSaturationConceptReferenceLinking::isDataRangeConcept() {
+				return mDataRangeConcept;
+			}
+
+			CSaturationConceptReferenceLinking* CSaturationConceptReferenceLinking::setDataRangeConcept(bool dataRangeConcept) {
+				mDataRangeConcept = dataRangeConcept;
+				return this;
 			}
 
 

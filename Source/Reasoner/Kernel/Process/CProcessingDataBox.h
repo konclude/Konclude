@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,10 +32,6 @@
 #include "CBlockingIndividualNodeCandidateHash.h"
 #include "CNodeSwitchHistory.h"
 #include "CSignatureBlockingReviewSet.h"
-#include "CIndividualPilingProcessNodeLinker.h"
-#include "CIndividualPilingProcessNodeVector.h"
-#include "CIndividualPilingProcessNode.h"
-#include "CConceptPilingProcessLinker.h"
 #include "CIndividualUnsortedProcessingQueue.h"
 #include "CIndividualDepthProcessingQueue.h"
 #include "CReusingReviewData.h"
@@ -58,6 +54,10 @@
 #include "CSaturationNominalDependentNodeHash.h"
 #include "CSaturationInfluencedNominalSet.h"
 #include "CNominalCachingLossReactivationHash.h"
+#include "CMarkerIndividualNodeHash.h"
+#include "CIndividualCustomPriorityProcessingQueue.h"
+#include "CReferredIndividualTrackingVector.h"
+#include "CIndividualSaturationSuccessorLinkDataLinker.h"
 
 // Other includes
 #include "Reasoner/Ontology/CConcreteOntology.h"
@@ -108,6 +108,7 @@ namespace Konclude {
 						CIndividualProcessingQueue* getIndividualProcessingQueue(bool create = true);
 						CProcessingDataBox* clearIndividualProcessingQueue();
 						CIndividualProcessNodeVector* getIndividualProcessNodeVector();
+						CProcessingDataBox* setIndividualProcessNodeVector(CIndividualProcessNodeVector* indiNodeVec);
 
 
 
@@ -118,6 +119,10 @@ namespace Konclude {
 
 						CIndividualUnsortedProcessingQueue* getRoleAssertionProcessingQueue(bool create = true);
 						CProcessingDataBox* clearRoleAssertionProcessingQueue();
+
+						CIndividualUnsortedProcessingQueue* getBackendCacheSynchronizationProcessingQueue(bool create = true);
+						CProcessingDataBox* clearBackendCacheSynchronizationProcessingQueue();
+
 
 						CIndividualUnsortedProcessingQueue* getDelayingNominalProcessingQueue(bool create = true);
 						CProcessingDataBox* clearDelayingNominalProcessingQueue();
@@ -141,6 +146,9 @@ namespace Konclude {
 						CIndividualDepthProcessingQueue* getNominalProcessingQueue(bool create = true);
 						CProcessingDataBox* clearNominalProcessingQueue();
 
+						CIndividualUnsortedProcessingQueue* getIndividualDepthFirstDeterministicExpansionProcessingQueue(bool create = true);
+						CProcessingDataBox* clearIndividualDepthFirstDeterministicExpansionProcessingQueue();
+
 						CIndividualDepthProcessingQueue* getIndividualDepthDeterministicExpansionPreprocessingQueue(bool create = true);
 						CProcessingDataBox* clearIndividualDepthDeterministicExpansionPreprocessingQueue();
 
@@ -158,6 +166,15 @@ namespace Konclude {
 						CIndividualDepthProcessingQueue* getDistinctValueSpaceSatisfiabilityCheckingQueue(bool create = true);
 						CProcessingDataBox* clearDistinctValueSpaceSatisfiabilityCheckingQueue();
 
+						CIndividualDepthProcessingQueue* getIncrementalExpansionInitializingProcessingQueue(bool create = true);
+						CProcessingDataBox* clearIncrementalExpansionInitializingProcessingQueue();
+
+						CIndividualCustomPriorityProcessingQueue* getIncrementalExpansionProcessingQueue(bool create = true);
+						CProcessingDataBox* clearIncrementalExpansionIProcessingQueue();
+
+						CIndividualDepthProcessingQueue* getIncrementalCompatibilityCheckingQueue(bool create = true);
+						CProcessingDataBox* clearIncrementalCompatibilityCheckingQueue();
+
 
 						CConcept* getOntologyTopConcept();
 						CConcept* getOntologyTopDataRangeConcept();
@@ -171,8 +188,10 @@ namespace Konclude {
 						CBlockingIndividualNodeLinkedCandidateHash* getBlockingIndividualNodeLinkedCandidateHash(bool create = true);
 						CSignatureBlockingReviewSet* getSignatureBlockingReviewSet(bool create = true);
 						CProcessingDataBox* clearSignatureBlockingReviewSet();
-						CIndividualReactivationProcessingQueue* getIndividualReactivationProcessingQueue(bool create = true);
-						CProcessingDataBox* clearIndividualReactivationProcessingQueue();
+						CIndividualReactivationProcessingQueue* getEarlyIndividualReactivationProcessingQueue(bool create = true);
+						CProcessingDataBox* clearEarlyIndividualReactivationProcessingQueue();
+						CIndividualReactivationProcessingQueue* getLateIndividualReactivationProcessingQueue(bool create = true);
+						CProcessingDataBox* clearLateIndividualReactivationProcessingQueue();
 
 
 						CReusingReviewData* getReusingReviewData(bool create = true);
@@ -209,6 +228,15 @@ namespace Konclude {
 						CProcessingDataBox* clearBlockedResolveIndividualNodes();
 
 
+
+
+						CXLinker<CIndividualProcessNode*>* getBlockableIndividualNodeUpdatedLinker();
+						CProcessingDataBox* addBlockableIndividualNodeUpdatedLinker(CXLinker<CIndividualProcessNode*>* linker);
+						bool hasBlockableIndividualNodeUpdatedLinker();
+						CProcessingDataBox* clearBlockableIndividualNodeUpdatedLinker();
+
+
+
 						CProcessingDataBox* setMultipleConstructionIndividualNodes(bool multiple);
 						bool hasMultipleConstructionIndividualNodes();
 
@@ -230,22 +258,6 @@ namespace Konclude {
 						CProcessingDataBox* setIndividualProcessNodeLinker(CIndividualProcessNodeLinker* indiProcessNodeLinker);
 						CProcessingDataBox* addIndividualProcessNodeLinker(CIndividualProcessNodeLinker* indiProcessNodeLinker);
 
-						CIndividualPilingProcessNodeVector* getIndividualPilingProcessNodeVector(bool create = true);
-
-						CIndividualPilingProcessNodeLinker* getIndividualPilingProcessNodeLinker();
-						CIndividualPilingProcessNodeLinker* takeIndividualPilingProcessNodeLinker();
-						CProcessingDataBox* setIndividualPilingProcessNodeLinker(CIndividualPilingProcessNodeLinker* indiProcessNodeLinker);
-						CProcessingDataBox* addIndividualPilingProcessNodeLinker(CIndividualPilingProcessNodeLinker* indiProcessNodeLinker);
-
-						CConceptPilingProcessLinker* getRemainingConceptPilingProcessLinker();
-						CConceptPilingProcessLinker* takeRemainingConceptPilingProcessLinker();
-						CProcessingDataBox* setRemainingConceptPilingProcessLinker(CConceptPilingProcessLinker* conPilProcessLinker);
-						CProcessingDataBox* addRemainingConceptPilingProcessLinker(CConceptPilingProcessLinker* conPilProcessLinker);
-
-						CConceptPilingDescriptor* getRemainingConceptPilingDescriptor();
-						CConceptPilingDescriptor* takeRemainingConceptPilingDescriptor();
-						CProcessingDataBox* setRemainingConceptPilingDescriptor(CConceptPilingDescriptor* conPilDes);
-						CProcessingDataBox* addRemainingConceptPilingDescriptor(CConceptPilingDescriptor* conPilDes);
 
 						CIndividualSaturationProcessNodeVector* getIndividualSaturationProcessNodeVector(bool create = true);
 
@@ -260,6 +272,31 @@ namespace Konclude {
 						CIndividualSaturationProcessNodeLinker* takeIndividualDisjunctCommonConceptExtractProcessLinker();
 						CProcessingDataBox* setIndividualDisjunctCommonConceptExtractProcessLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
 						CProcessingDataBox* addIndividualDisjunctCommonConceptExtractProcessLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+
+
+
+
+
+						CIndividualSaturationProcessNodeLinker* getRemainingIndividualSaturationNodeLinker();
+						CIndividualSaturationProcessNodeLinker* takeRemainingIndividualSaturationNodeLinker();
+						CProcessingDataBox* setRemainingIndividualSaturationProcessNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+						CProcessingDataBox* addRemainingIndividualSaturationNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+
+
+
+
+
+						CIndividualSaturationSuccessorLinkDataLinker* getRemainingIndividualSuccessorLinkDataLinker();
+						CIndividualSaturationSuccessorLinkDataLinker* takeRemainingIndividualSuccessorLinkDataLinker();
+						CProcessingDataBox* setRemainingIndividualSuccessorLinkDataLinker(CIndividualSaturationSuccessorLinkDataLinker* succLinkDataLinker);
+						CProcessingDataBox* addRemainingIndividualSuccessorLinkDataLinker(CIndividualSaturationSuccessorLinkDataLinker* succLinkDataLinker);
+
+
+
+
+
+
+
 
 						CConceptSaturationProcessLinker* getRemainingConceptSaturationProcessLinker();
 						CConceptSaturationProcessLinker* takeRemainingConceptSaturationProcessLinker();
@@ -301,6 +338,13 @@ namespace Konclude {
 						CProcessingDataBox* addIndividualSaturationCompletionNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
 
 
+						bool hasIndividualSaturationAnalysationNodeLinker();
+						CIndividualSaturationProcessNodeLinker* getIndividualSaturationAnalysationNodeLinker();
+						CIndividualSaturationProcessNodeLinker* takeIndividualSaturationAnalysationNodeLinker();
+						CProcessingDataBox* setIndividualSaturationAnalysationNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+						CProcessingDataBox* addIndividualSaturationAnalysationNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+
+
 
 
 						bool hasNominalDelayedIndividualSaturationProcessNodeLinker();
@@ -311,6 +355,8 @@ namespace Konclude {
 
 
 
+						CIndividualSaturationProcessNode* getSeparatedSaturationConceptAssertionResolveNode();
+						CProcessingDataBox* setSeparatedSaturationConceptAssertionResolveNode(CIndividualSaturationProcessNode* node);
 
 
 
@@ -333,6 +379,7 @@ namespace Konclude {
 						cint64 getNextSaturationResolvedSuccessorExtensionIndividualNodeID(bool incremetNextID = true);
 
 						cint64 getNextIndividualNodeID(bool incremetNextID = true);
+						CProcessingDataBox* setFirstPossibleIndividualNodeID(cint64 indiID);
 
 						cint64 getNextBindingPropagationID(bool incremetNextID = true);
 
@@ -353,6 +400,37 @@ namespace Konclude {
 
 
 						CNominalCachingLossReactivationHash* getNominalCachingLossReactivationHash(bool createOrForceLocalisation = true);
+
+						CMarkerIndividualNodeHash* getMarkerIndividualNodeHash(bool createOrForceLocalisation = true);
+
+
+						bool isIncrementalExpansionInitialised();
+						CProcessingDataBox* setIncrementalExpansionInitialised(bool initialized);
+
+
+						cint64 getIncrementalExpansionID();
+						CProcessingDataBox* setIncrementalExpansionID(cint64 incExpID);
+
+						cint64 getMaxIncrementalPreviousCompletionGraphNodeID();
+						CProcessingDataBox* setMaxIncrementalPreviousCompletionGraphNodeID(cint64 nodeID);
+
+
+						cint64 getNextIncrementalIndividualExpansionID(bool incrementNextID = true);
+
+						bool isIncrementalExpansionCompatibleMerged();
+						CProcessingDataBox* setIncrementalExpansionCompatibleMerged(bool compatibleMerged);
+
+						bool isIncrementalExpansionCachingMerged();
+						CProcessingDataBox* setIncrementalExpansionCachingMerged(bool cachingMerged);
+
+						cint64 getNextRoleAssertionCreationID(bool incrementNextID = true);
+
+
+						CReferredIndividualTrackingVector* getReferredIndividualTrackingVector();
+						CProcessingDataBox* setReferredIndividualTrackingVector(CReferredIndividualTrackingVector* refIndiTrackVec);
+						bool isIndividualDependenceTrackingRequired();
+						CProcessingDataBox* setIndividualDependenceTrackingRequired(bool indiDepTrackingRequired);
+
 
 					// protected methods
 					protected:
@@ -384,10 +462,17 @@ namespace Konclude {
 						CIndividualUnsortedProcessingQueue* mUseRoleAssertionProcessQueue;
 						CIndividualUnsortedProcessingQueue* mPrevRoleAssertionProcessQueue;
 
+						CIndividualUnsortedProcessingQueue* mBackendSyncRetestProcessQueue;
+						CIndividualUnsortedProcessingQueue* mUseBackendSyncRetestProcessQueue;
+						CIndividualUnsortedProcessingQueue* mPrevBackendSyncRetestProcessQueue;
 
 						CIndividualDepthProcessingQueue* mIndiDepthDetExpPreProcessingQueue;
 						CIndividualDepthProcessingQueue* mUseIndiDepthDetExpPreProcessingQueue;
 						CIndividualDepthProcessingQueue* mPrevIndiDepthDetExpPreProcessingQueue;
+
+						CIndividualUnsortedProcessingQueue* mIndiDepthFirstDetExpPreProcessingQueue;
+						CIndividualUnsortedProcessingQueue* mUseIndiDepthFirstDetExpPreProcessingQueue;
+						CIndividualUnsortedProcessingQueue* mPrevIndiDepthFirstDetExpPreProcessingQueue;
 
 						CIndividualConceptBatchProcessingQueue* mVarBindConceptBatchProcessQueue;
 						CIndividualConceptBatchProcessingQueue* mUseVarBindConceptBatchProcessQueue;
@@ -432,6 +517,24 @@ namespace Konclude {
 						CIndividualDepthProcessingQueue* mPrevDistinctValueSpaceSatisfiabilityCheckingQueue;
 
 
+
+						CIndividualDepthProcessingQueue* mIncrementalExansionInitializingProcessingQueue;
+						CIndividualDepthProcessingQueue* mUseIncrementalExansionInitializingProcessingQueue;
+						CIndividualDepthProcessingQueue* mPrevIncrementalExansionInitializingProcessingQueue;
+
+
+						CIndividualCustomPriorityProcessingQueue* mIncrementalExansionProcessingQueue;
+						CIndividualCustomPriorityProcessingQueue* mUseIncrementalExansionProcessingQueue;
+						CIndividualCustomPriorityProcessingQueue* mPrevIncrementalExansionProcessingQueue;
+
+
+
+						CIndividualDepthProcessingQueue* mIncrementalCompatibilityCheckingQueue;
+						CIndividualDepthProcessingQueue* mUseIncrementalCompatibilityCheckingQueue;
+						CIndividualDepthProcessingQueue* mPrevIncrementalCompatibilityCheckingQueue;
+
+
+
 						CSignatureBlockingCandidateHash* mSignatureBlockingCandidateHash;
 						CSignatureBlockingCandidateHash* mUseSignatureBlockingCandidateHash;
 						CSignatureBlockingCandidateHash* mPrevSignatureBlockingCandidateHash;
@@ -446,9 +549,13 @@ namespace Konclude {
 						CSignatureBlockingCandidateHash* mPrevSignatureNominalDelayingCandidateHash;
 
 
-						CIndividualReactivationProcessingQueue* mIndiReactProQueue;
-						CIndividualReactivationProcessingQueue* mUseIndiReactProQueue;
-						CIndividualReactivationProcessingQueue* mPrevIndiReactProQueue;
+						CIndividualReactivationProcessingQueue* mEarlyIndiReactProQueue;
+						CIndividualReactivationProcessingQueue* mUseEarlyIndiReactProQueue;
+						CIndividualReactivationProcessingQueue* mPrevEarlyIndiReactProQueue;
+
+						CIndividualReactivationProcessingQueue* mLateIndiReactProQueue;
+						CIndividualReactivationProcessingQueue* mUseLateIndiReactProQueue;
+						CIndividualReactivationProcessingQueue* mPrevLateIndiReactProQueue;
 
 						CReusingReviewData* mReusingReviewSet;
 						CReusingReviewData* mUseReusingReviewSet;
@@ -494,16 +601,15 @@ namespace Konclude {
 						CXLinker<CIndividualProcessNode*>* mIndividualNodeCacheTestingLinker;
 
 						CIndividualProcessNodeLinker* mIndiProcessNodeLinker;
-						CIndividualPilingProcessNodeLinker* mIndiPilingProcessNodeLinker;
-						CIndividualPilingProcessNodeVector* mIndiPilingProcessVector;
-						CConceptPilingProcessLinker* mRemConPilProcessLinker;
-						CConceptPilingDescriptor* mRemConPilDes;
 
 						CIndividualSaturationProcessNodeLinker* mDisjunctCommonConceptExtractProcessingLinker;
 						CIndividualSaturationProcessNodeLinker* mIndiSaturationProcessNodeLinker;
 						CIndividualSaturationProcessNodeLinker* mIndiSaturationCompletionNodeLinker;
+						CIndividualSaturationProcessNodeLinker* mIndiSaturationAnalysingNodeLinker;
 						CIndividualSaturationProcessNodeVector* mIndiSaturationProcessVector;
 						CIndividualSaturationProcessNodeStatusUpdateLinker* mRemSatUpdateLinker;
+						CIndividualSaturationProcessNodeLinker* mRemSatIndiNodeLinker;
+						CIndividualSaturationSuccessorLinkDataLinker* mRemSatIndiSuccLinkDataLinker;
 						CConceptSaturationProcessLinker* mRemConSatProcessLinker;
 						CRoleSaturationProcessLinker* mRemRoleSatProcessLinker;
 						CConceptSaturationDescriptor* mRemConSatDes;
@@ -517,7 +623,10 @@ namespace Konclude {
 						CSaturationSuccessorExtensionIndividualNodeProcessingQueue* mSatSuccExtIndNodeProcQueue;
 						CIndividualSaturationProcessNodeLinker* mNominalDelayedIndiSaturationProcessNodeLinker;
 
+						CIndividualSaturationProcessNode* mSeparatedSaturationConAssResolveNode;
+
 						CXLinker<CIndividualProcessNode*>* mIndividualNodeResolveLinker;
+						CXLinker<CIndividualProcessNode*>* mBlockableIndividualNodeUpdatedLinker;
 
 						cint64 mNextSatResSuccExtIndividualNodeID;
 						cint64 mNextIndividualNodeID;
@@ -543,6 +652,25 @@ namespace Konclude {
 
 						CNominalCachingLossReactivationHash* mUseNomCachingLossReactHash;
 						CNominalCachingLossReactivationHash* mLocNomCachingLossReactHash;
+
+
+						CMarkerIndividualNodeHash* mUseMarkerIndiNodeHash;
+						CMarkerIndividualNodeHash* mLocMarkerIndiNodeHash;
+
+
+						bool mIncrementalExpansionInitialized;
+						cint64 mNextIncrementalIndiExpID;
+						cint64 mIncrementalExpID;
+						bool mIncrementalExpansionCompatibleMerged;
+						bool mIncrementalExpansionCachingMerged;
+						cint64 mMaxIncPrevCompGraphNodeID;
+
+
+						cint64 mNextRoleAssertionCreationID;
+
+
+						CReferredIndividualTrackingVector* mReferredIndiTrackVec;
+						bool mIndiDepTrackingRequired;
 
 					// private methods
 					private:

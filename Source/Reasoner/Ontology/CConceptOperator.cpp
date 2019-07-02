@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -153,6 +153,8 @@ namespace Konclude {
 					mTypeFlag = CCF_DATALITERAL;
 				} else if (mOperatorCode == CCDATARESTRICTION) {
 					mTypeFlag = CCF_DATARESTRICTION;
+				} else if (mOperatorCode == CCMARKER) {
+					mTypeFlag = CCF_MARKER;
 				}
 			}
 
@@ -251,6 +253,7 @@ namespace Konclude {
 				mConceptOperatorVector[CCDATATYPE] = new CConceptOperator(CCDATATYPE);
 				mConceptOperatorVector[CCDATALITERAL] = new CConceptOperator(CCDATALITERAL);
 				mConceptOperatorVector[CCDATARESTRICTION] = new CConceptOperator(CCDATARESTRICTION);
+				mConceptOperatorVector[CCMARKER] = new CConceptOperator(CCMARKER);
 			}
 
 

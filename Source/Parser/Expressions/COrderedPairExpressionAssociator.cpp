@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,26 +32,11 @@ namespace Konclude {
 					: CPairExpressionAssociator(expression1,expression2) {
 			}
 
-			COrderedPairExpressionAssociator::~COrderedPairExpressionAssociator() {
-			}
-
 
 			cint64 COrderedPairExpressionAssociator::getStructuralHashValue() {
 				return CExpressionHashMixer::getHashValueMixed(cint64(getFirstExpression()),cint64(getSecondExpression()));
 			}
 
-			bool COrderedPairExpressionAssociator::compareStructuralEquivalence(const CListExpressionAssociator& listExpressionAssociator) {
-				if (listExpressionAssociator.getConstExpressionList()->count() != mExpressionList.count()) {
-					return false;
-				}
-				if (listExpressionAssociator.getConstExpressionList()->first() != mExpressionList.first()) {
-					return false;
-				}
-				if (listExpressionAssociator.getConstExpressionList()->last() != mExpressionList.last()) {
-					return false;
-				}
-				return true;
-			}
 
 			bool COrderedPairExpressionAssociator::compareStructuralEquivalence(const COrderedPairExpressionAssociator& orderedPairExpressionAssociator) {
 				if (orderedPairExpressionAssociator.getFirstExpression() != getFirstExpression()) {

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,11 @@ namespace Konclude {
 			CClassConceptClassification::CClassConceptClassification() {
 				mClassConceptTaxonomy = nullptr;
 				mStatsColl = nullptr;
+				mIndiDepTracking = nullptr;
+				mIndiDepTrackingSet = false;
+			}
+
+			CClassConceptClassification::~CClassConceptClassification() {
 			}
 
 
@@ -61,6 +66,24 @@ namespace Konclude {
 				return this;
 			}
 
+
+			bool CClassConceptClassification::hasDependentIndividualsTracking() {
+				return mIndiDepTracking != nullptr;
+			}
+
+			CIndividualDependenceTracking* CClassConceptClassification::getDependentIndividualsTracking() {
+				return mIndiDepTracking;
+			}
+
+			CClassConceptClassification* CClassConceptClassification::setDependentIndividualsTracking(CIndividualDependenceTracking* indiDepTracking) {
+				mIndiDepTracking = indiDepTracking;
+				mIndiDepTrackingSet = true;
+				return this;
+			}
+
+			bool CClassConceptClassification::isIndividualDependentTrackingSet() {
+				return mIndiDepTrackingSet;
+			}
 
 		}; // end namespace Classification
 

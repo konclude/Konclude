@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -75,6 +75,19 @@ namespace Konclude {
 			QSet<QString> individualNameTestingSet;
 			QSet<QString> individualNameSet = loadIndividualEntities(requestFileName);
 			cint64 maxTestIndividualCount = qMin(testCount,(cint64)individualNameSet.count());
+
+			cint64 slashIndex = qMax(requestFileName.lastIndexOf("/"),requestFileName.lastIndexOf("\\"));
+			QString fileNameString = requestFileName;
+			if (slashIndex >= 0) {
+				fileNameString = requestFileName.mid(slashIndex+1);
+			}
+			uint randInitNumber = 0;
+			for (QString::const_iterator it = requestFileName.constBegin(), itEnd = requestFileName.constEnd(); it != itEnd; ++it) {
+				QChar nameChar(*it);
+				randInitNumber += nameChar.unicode();
+			}
+			qsrand(randInitNumber);
+
 			for (cint64 testNr = 0; testNr < maxTestIndividualCount; ++testNr) {				
 				cint64 nextTextIndividualNr = qrand() % individualNameSet.count();
 				QSet<QString>::iterator individualNameIt = individualNameSet.begin();

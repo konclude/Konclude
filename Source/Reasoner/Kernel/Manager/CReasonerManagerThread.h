@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -42,14 +42,14 @@
 #include "Reasoner/Kernel/Calculation/CConfigDependedCalculationFactory.h"
 
 #include "Reasoner/Kernel/Algorithm/CCalculationTableauCompletionTaskHandleAlgorithm.h"
-#include "Reasoner/Kernel/Algorithm/CCalculationTableauSaturationTaskHandleAlgorithm.h"
-#include "Reasoner/Kernel/Algorithm/CCalculationTableauPilingSaturationTaskHandleAlgorithm.h"
 #include "Reasoner/Kernel/Algorithm/CCalculationTableauApproximationSaturationTaskHandleAlgorithm.h"
 #include "Reasoner/Kernel/Algorithm/CCalculationChooseTaskHandleAlgorithm.h"
 #include "Reasoner/Kernel/Algorithm/CUnsatisfiableCacheHandler.h"
 #include "Reasoner/Kernel/Algorithm/CSatisfiableExpanderCacheHandler.h"
 #include "Reasoner/Kernel/Algorithm/CReuseCompletionGraphCacheHandler.h"
 #include "Reasoner/Kernel/Algorithm/CSaturationNodeExpansionCacheHandler.h"
+#include "Reasoner/Kernel/Algorithm/CSaturationNodeBackendAssociationCacheHandler.h"
+#include "Reasoner/Kernel/Algorithm/CIndividualNodeBackendCacheHandler.h"
 
 #include "Reasoner/Ontology/COntologyProcessingRequirementExpander.h"
 #include "Reasoner/Ontology/COntologyProcessingStepRequirement.h"
@@ -63,6 +63,7 @@
 #include "Reasoner/Query/CConsistencePremisingQuery.h"
 #include "Reasoner/Query/CQueryInconsitentOntologyError.h"
 #include "Reasoner/Query/CQueryUnspecifiedStringError.h"
+#include "Reasoner/Query/CIsTriviallyConsistentQuery.h"
 
 #include "Reasoner/Kernel/Manager/Events/CJobCalculatedSatisfiableCallbackEvent.h"
 #include "Reasoner/Kernel/Manager/Events/CReasoningSatisfiableCalculationJobEvent.h"
@@ -86,6 +87,7 @@
 #include "Reasoner/Kernel/Cache/CReuseCompletionGraphCache.h"
 #include "Reasoner/Kernel/Cache/CSaturationNodeAssociatedExpansionCache.h"
 #include "Reasoner/Kernel/Cache/CComputedConsequencesCache.h"
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCache.h"
 
 #include "Reasoner/Classifier/CClassificationManager.h"
 #include "Reasoner/Classifier/CClassifiedCallbackDataContext.h"
@@ -164,6 +166,8 @@ namespace Konclude {
 						virtual CUnsatisfiableCache *getUnsatisfiableCache();
 
 						virtual CCompletionGraphCache *getCompletionGraphCache();
+						virtual CBackendCache* getBackendAssociationCache();
+						virtual CSaturationCache* getSaturationAssociationExpansionCache();
 
 						virtual CReasonerManager *initializeManager(CConfigurationProvider *configurationProvider);
 
@@ -237,6 +241,7 @@ namespace Konclude {
 						CReuseCompletionGraphCache* mReuseCompGraphCache;
 						CSaturationNodeAssociatedExpansionCache* mSatNodeExpCache;
 						CComputedConsequencesCache* mCompConsCache;
+						CBackendRepresentativeMemoryCache* mBackendAssCache;
 
 
 						static const qint64 PROGRESSQUERYTIMER = 1;
@@ -255,8 +260,8 @@ namespace Konclude {
 
 					// private methods
 					private:
-						bool updateBeginingCalculationStatistics(CReasoningTaskData* reaTaskData);
-						bool updateFinishingCalculationStatistics(CReasoningTaskData* reaTaskData, CQueryStatistics* queryStat);
+						bool updateBeginingCalculationStatistics(CReasoningTaskData* reaTaskData, CConfiguration* config = nullptr);
+						bool updateFinishingCalculationStatistics(CReasoningTaskData* reaTaskData, CQueryStatistics* queryStat, CConfiguration* config = nullptr);
 
 					// private variables
 					private:

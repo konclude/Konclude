@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -36,6 +36,7 @@ namespace Konclude {
 				mConstructConceptNegation = false;
 				mQueueProcessing = false;
 				mSatConRefLinking = nullptr;
+				mSatIndiRefLinking = nullptr;
 			}
 
 			CApproximatedSaturationCalculationConstructionConstruct* CApproximatedSaturationCalculationConstructionConstruct::getNextConstruct() {
@@ -105,6 +106,16 @@ namespace Konclude {
 				mSatConRefLinking = satConRefLinking;
 				return this;
 			}
+
+			CSaturationIndividualReferenceLinking* CApproximatedSaturationCalculationConstructionConstruct::getSaturationIndividualReferenceLinking() {
+				return mSatIndiRefLinking;
+			}
+
+			CApproximatedSaturationCalculationConstructionConstruct* CApproximatedSaturationCalculationConstructionConstruct::setSaturationIndividualReferenceLinking(CSaturationIndividualReferenceLinking* satIndiRefLinking) {
+				mSatIndiRefLinking = satIndiRefLinking;
+				return this;
+			}
+
 
 		}; // end namespace Query
 

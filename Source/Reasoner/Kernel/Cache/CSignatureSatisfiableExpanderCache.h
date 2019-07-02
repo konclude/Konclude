@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -42,6 +42,9 @@
 // Other includes
 #include "Concurrent/CThread.h"
 
+#include "Config/CConfiguration.h"
+#include "Config/CConfigDataReader.h"
+
 #include "Reasoner/Kernel/Cache/Events/CWriteCachedDataEvent.h"
 #include "Reasoner/Kernel/Cache/Events/CWriteExpandCachedEvent.h"
 #include "Reasoner/Kernel/Cache/Events/CWriteSatisfiableBranchCachedEvent.h"
@@ -62,6 +65,7 @@
 
 namespace Konclude {
 
+	using namespace Config;
 	using namespace Concurrent;
 	using namespace Context;
 	using namespace Utilities::Memory;
@@ -86,7 +90,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CSignatureSatisfiableExpanderCache(QString threadIdentifierName = "Satisfiable-Expander-Cache", CWatchDog *watchDogThread = 0);
+						CSignatureSatisfiableExpanderCache(CConfiguration* config, QString threadIdentifierName = "Satisfiable-Expander-Cache", CWatchDog *watchDogThread = 0);
 
 						//! Destructor
 						virtual ~CSignatureSatisfiableExpanderCache();
@@ -117,6 +121,11 @@ namespace Konclude {
 						
 						virtual bool processCustomsEvents(QEvent::Type type, CCustomEvent *event);
 
+
+
+						cint64 getRequiredSignatureReferCountForNextCacheEntryCreation(CSignatureSatisfiableExpanderCacheContext* context);
+						cint64 canCreateCacheEntryForSignature(cint64 singature, CSignatureSatisfiableExpanderCacheContext* context);
+
 					// protected variables
 					protected:
 						CCACHINGHASH<cint64,CSignatureSatisfiableExpanderCacheRedirectionItem*>* mSigItemHash;
@@ -124,6 +133,15 @@ namespace Konclude {
 						CCACHINGSET<cint64>* mAlreadyExpSigSet;
 						// currently not used
 						CCACHINGHASH<CSignatureSatisfiableExpanderCacheHasher,CSignatureSatisfiableExpanderCacheRedirectionItem*>* mHasherItemHash;
+
+
+
+						CCACHINGHASH<cint64,cint64>* mSignatureReferCountSet;
+						cint64 mNextCacheEntryRequiredSignatureRefCount;
+						cint64 mNextMemoryLevelRequiredSignatureRefCount;
+
+						cint64 mNextCacheEntryRequiredSignatureReferenceCountIncrease;
+						cint64 mNextMemoryLevelIncreaseForRequiredSignatureReferenceCount;
 
 
 						cint64 mWriteDataCount;
@@ -142,6 +160,7 @@ namespace Konclude {
 						QMutex mReaderSyncMutex;
 
 						CSignatureSatisfiableExpanderCacheContext mContext;
+						CConfiguration* mConfig;
 
 					// private methods
 					private:

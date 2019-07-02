@@ -53,7 +53,7 @@ namespace Konclude {
 				//CLoadKnowledgeBaseOWLXMLOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLXMLOntologyCommand(testKB,ontoIRIList);
 				//CLoadKnowledgeBaseOWLFunctionalOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLFunctionalOntologyCommand(testKB,ontoIRIList);
 				CLoadKnowledgeBaseOWLAutoOntologyCommand* loadKBCommand = new CLoadKnowledgeBaseOWLAutoOntologyCommand(testKB,ontoIRIList);
-				CKnowledgeBaseClassifyCommand* classifyKBCommand = new CKnowledgeBaseClassifyCommand(testKB);
+				CClassifyQueryCommand* classifyKBCommand = new CClassifyQueryCommand(testKB);
 				addProcessingCommand(createKBCommand);
 				addProcessingCommand(loadKBCommand);
 				addProcessingCommand(classifyKBCommand);

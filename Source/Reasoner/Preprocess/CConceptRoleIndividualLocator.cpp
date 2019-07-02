@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -87,20 +87,22 @@ namespace Konclude {
 				CIndividualVector* indiVector = abox->getIndividualVector();
 				cint64 indiTag = individual->getIndividualID();
 
-				if (!indiVector->hasLocalData(indiTag)) {
+				CIndividual* localIndi = indiVector->getLocalData(indiTag);
+				if (!localIndi) {
 					CMemoryAllocationManager* memMan = abox->getBoxContext()->getMemoryAllocationManager();
 					CBUILDHASH<CIndividual*,CIndividualTermExpression*>* indiIndividualTermHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getIndiIndividulTermMappingHash();
+					CBUILDHASH<CIndividualTermExpression*,CIndividual*>* individualTermIndiHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash();
 
-					CIndividual* prevIndividual = individual;
-					individual = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan)->initIndividualCopy(prevIndividual,memMan);
-					indiVector->setLocalData(indiTag,individual);
+					localIndi = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan)->initIndividualCopy(individual,memMan);
+					indiVector->setLocalData(indiTag,localIndi);
 
-					CIndividualTermExpression* indiTerm = indiIndividualTermHash->value(prevIndividual);
+					CIndividualTermExpression* indiTerm = indiIndividualTermHash->value(individual);
 					if (indiTerm) {
-						indiIndividualTermHash->insert(individual,indiTerm);
+						indiIndividualTermHash->insert(localIndi,indiTerm);
+						individualTermIndiHash->insert(indiTerm,localIndi);
 					}
 				}
-				return individual;
+				return localIndi;
 			}
 
 

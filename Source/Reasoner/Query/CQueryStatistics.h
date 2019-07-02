@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -26,7 +26,7 @@
 #include <QString>
 
 // Namespace includes
-
+#include "Reasoner/Ontology/COntologyProcessingStatistics.h"
 
 // Other includes
 #include "Utilities/UtilitiesSettings.h"
@@ -41,6 +41,8 @@ namespace Konclude {
 	using namespace Utilities;
 
 	namespace Reasoner {
+
+		using namespace Ontology;
 
 		namespace Query {
 
@@ -64,6 +66,8 @@ namespace Konclude {
 					virtual QList<QString> getStatisticsNameStringList() = 0;
 					virtual cint64 getStatisticIntegerValue(const QString& statName) = 0;
 					virtual bool addProcessingStatistics(const QString& statName, cint64 statValue) = 0;
+					virtual bool incProcessingStatistics(const QString& statName, cint64 incStatValue = 1) = 0;
+					virtual bool addProcessingStatistics(COntologyProcessingStatistics* ontProcStats) = 0;
 
 				// protected methods
 				protected:

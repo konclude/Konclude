@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -57,22 +57,9 @@ namespace Konclude {
 					//! Constructor
 					CExtendedConceptReferenceLinkingData();
 
-					bool isPotentiallyExistInitializationConcept();
-					CExtendedConceptReferenceLinkingData* setPotentiallyExistInitializationConcept(bool initConcept);
-
-					bool isDataRangeConcept();
-					CExtendedConceptReferenceLinkingData* setDataRangeConcept(bool dataRangeConcept);
-
-
-					CProcessReference* getIndividualProcessNodeForConcept();
-					CExtendedConceptReferenceLinkingData* setIndividualProcessNodeForConcept(CProcessReference* indiNode);
 
 				// protected methods
 				protected:
-					bool mPotentiallyExistInitConcept;
-					bool mDataRangeConcept;
-					CProcessReference* mIndiProcessNodeForConcept;
-
 				// protected variables
 				protected:
 

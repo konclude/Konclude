@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,9 +32,6 @@ namespace Konclude {
 				statistics = new CClassifierStatistics(nextClassificationStatistics);
 				config = new CCalculationConfigurationExtension(configuration,0);
 
-				classCalcSupport = 0;
-				possSubclassSubSumTaxonomy = 0;
-				mClassConClassification = new CClassConceptClassification();
 				mClassificationStatCollStrings = new CClassificationStatisticsCollectionStrings();
 
 				mConfCollectProcessStatistics = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.CollectProcessStatistics",true);;
@@ -44,6 +41,9 @@ namespace Konclude {
 				mTaxonomyConstructionFailed = false;
 
 				mPrecSatSubsumerExtractor = nullptr;
+				mIndiDepTrackingCollector = nullptr;
+
+				mInitTime.start();
 			}
 
 
@@ -51,10 +51,7 @@ namespace Konclude {
 				delete mPrecSatSubsumerExtractor;
 				delete statistics;
 				delete config;
-				if (possSubclassSubSumTaxonomy) {
-					delete possSubclassSubSumTaxonomy;
-				}
-				qDeleteAll(possPredIdentifierOccurSetContainer);
+				delete mIndiDepTrackingCollector;
 			}
 
 
@@ -79,50 +76,28 @@ namespace Konclude {
 				mTaxonomyConstructionFailed = !mClassifyProcessingStepData->getProcessingStep()->areAllRequirementsSatisfied(ontology);
 
 				remainingTests = true;
-				mOnlySubClassCompleteDefinitions = false;
 
 				CConcept *topConcept = onto->getDataBoxes()->getTopConcept();
 				CConcept *bottomConcept = onto->getDataBoxes()->getBottomConcept();
 
+				cint64 satConCount = 0;
 				CBOXSET<CConcept*> *conceptHash = tBox->getActiveClassConceptSet(false);
 				if (conceptHash) {
 					for (CBOXSET<CConcept*>::const_iterator it = conceptHash->constBegin(), itEnd = conceptHash->constEnd(); it != itEnd; ++it) {
 						CConcept *concept = (*it);
 						if (concept && concept != topConcept && concept != bottomConcept) {
 							// concept which has to be inserted in the taxonomy
-							notSatTestedConList.append(concept);
+							++satConCount;
 						}
 					}
 				}
 
-				statistics->incTotalSatisfiableTestCount(notSatTestedConList.count());
+				statistics->incTotalSatisfiableTestCount(satConCount);
 
 				return this;
 			}
 
 
-			bool COntologyClassificationItem::hasNotSatisfiableTestedConcepts() {
-				return !notSatTestedConList.isEmpty();
-			}
-
-			CConcept *COntologyClassificationItem::takeNextNotSatisfiableTestedConcept() {
-				CConcept *con = 0;
-				if (!notSatTestedConList.isEmpty()) {
-					con = notSatTestedConList.takeFirst();
-				}
-				return con;
-			}
-
-
-			QList<CConcept *> *COntologyClassificationItem::getNotSatisfiableTestedConceptList() {
-				return &notSatTestedConList;
-			}
-
-
-			COntologyClassificationItem *COntologyClassificationItem::addNotSatisfiableTestedConcept(CConcept *concept) {
-				notSatTestedConList.append(concept);
-				return this;
-			}
 
 			CConcreteOntology *COntologyClassificationItem::getOntology() {
 				return onto;
@@ -204,69 +179,9 @@ namespace Konclude {
 				return statistics;
 			}
 
-			QHash<CConcept *,CConcept *> *COntologyClassificationItem::getDefferedNotSubsumptionRelationHash() {
-				return &defferedNotSubsumptionHash;
-			}
-
-			QHash<CConcept *,CConcept *> *COntologyClassificationItem::getDefferedSubsumptionRelationHash() {
-				return &defferedSubsumptionHash;
-			}
-
-			QHash<CConcept *,CConcept *> *COntologyClassificationItem::getDefferedDisjointRelationHash() {
-				return &defferedDisjointHash;
-			}
-
-			CClassificationCalculationSupport *COntologyClassificationItem::getClassificationCalculationSupport() {
-				return classCalcSupport;
-			}
-
-			COntologyClassificationItem *COntologyClassificationItem::setClassificationCalculationSupport(CClassificationCalculationSupport *calculationSupport) {
-				classCalcSupport = calculationSupport;
-				return this;
-			}
-
-			QSet<QPair<CConcept *,CConcept *> > *COntologyClassificationItem::getPossibleSubclassSubsumptionConceptSet() {
-				return &possSubclassSubSumConceptSet;
-			}
-
-
-			QSet<CConcept *> *COntologyClassificationItem::getSubclassConceptSet() {
-				return &subclassConceptSet;
-			}
-
-
-			CTaxonomy *COntologyClassificationItem::getPossibleSubclassSubsumptionTaxonomy() {
-				return possSubclassSubSumTaxonomy;
-			}
-
-			COntologyClassificationItem *COntologyClassificationItem::setPossibleSubclassSubsumptionTaxonomy(CTaxonomy *tax) {
-				possSubclassSubSumTaxonomy = tax;
-				return this;
-			}
-
-			QSet<QPair<CConcept *,CConceptNegationPair> > *COntologyClassificationItem::getConceptNecessaryOccurSubclassIdentifiersSet() {
-				return &conceptNecessaryOccurSubclassIdentifiersSet;
-			}
-
-			QHash<CConcept *,CConceptNegationPair> *COntologyClassificationItem::getConceptNecessaryOccurSubclassIdentifiersHash() {
-				return &conceptNecessaryOccurSubclassIdentifiersHash;
-			}
-
-			QHash<CConceptNegationPair,QSet<CConceptNegationPair> *> *COntologyClassificationItem::getConceptPredecessorPossibleOccurSubclassIdentifierSetHash() {
-				return &possPredIdentifierOccurSetHash;
-			}
-
-			QList<QSet<CConceptNegationPair> *> *COntologyClassificationItem::getConceptPredecessorPossibleOccurSubclassIdentifierSetContainer() {
-				return &possPredIdentifierOccurSetContainer;
-			}
-
-			QHash<QPair<CHierarchyNode *,CHierarchyNode *>,double> *COntologyClassificationItem::getSubsumptionProbabilisticHash() {
-				return &subsumProbabilisticHash;
-			}
-
 
 			CClassConceptClassification* COntologyClassificationItem::getClassConceptClassification() {
-				return mClassConClassification;
+				return this;
 			}
 
 			CClassificationStatisticsCollectionStrings* COntologyClassificationItem::getClassificationStatisticsCollectionStrings() {
@@ -291,22 +206,6 @@ namespace Konclude {
 			}
 
 
-			bool COntologyClassificationItem::hasOnlySubClassCompleteDefinitions() {
-				return mOnlySubClassCompleteDefinitions;
-			}
-
-			COntologyClassificationItem* COntologyClassificationItem::setOnlySubClassCompleteDefinitions(bool onlyCompleteDefinitions) {
-				mOnlySubClassCompleteDefinitions = onlyCompleteDefinitions;
-				return this;
-			}
-
-			QHash<CConcept*,CConcept*>* COntologyClassificationItem::getPossibleConceptSubsumptionOccurrenceHash() {
-				return &mPossConSubsumOccurrHash;
-			}
-
-			QSet< QPair<CConcept*,CConcept*> >* COntologyClassificationItem::getPossibleConceptSubsumptionOccurrenceSet() {
-				return &mPossConSubsumOccurrSet;
-			}
 
 			bool COntologyClassificationItem::isCollectProcessStatisticsActivated() {
 				return mConfCollectProcessStatistics;
@@ -347,6 +246,26 @@ namespace Konclude {
 					ontReq->submitRequirementUpdate(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED,errorFlags);
 				}
 				return this;
+			}
+
+
+			CIndividualDependenceTrackingCollector* COntologyClassificationItem::getIndividualDependenceTrackingCollector() {
+				return mIndiDepTrackingCollector;
+			}
+
+
+			COntologyClassificationItem* COntologyClassificationItem::setIndividualDependenceTrackingCollector(CIndividualDependenceTrackingCollector* indiDepTrackColl) {
+				mIndiDepTrackingCollector = indiDepTrackColl;
+				return this;
+			}
+
+			COntologyProcessingStepData* COntologyClassificationItem::getClassificationProcessingStep() {
+				return mClassifyProcessingStepData;
+			}
+
+
+			QTime* COntologyClassificationItem::getInitializationTime() {
+				return &mInitTime;
 			}
 
 		}; // end namespace Classifier

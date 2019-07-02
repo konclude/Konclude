@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -33,8 +33,6 @@
 #include "COptimizedClassExtractedSaturationOntologyClassificationItem.h"
 
 // Other includes
-#include "Reasoner/Classifier/Events/CSaturationCalculatedCallbackEvent.h"
-
 #include "Reasoner/Revision/COntologyRevision.h"
 
 #include "Reasoner/Ontology/CConceptProcessData.h"
@@ -64,8 +62,6 @@ namespace Konclude {
 
 		namespace Classifier {
 
-			using namespace Events;
-
 
 			/*! 
 			 *
@@ -94,12 +90,7 @@ namespace Konclude {
 
 					virtual void readCalculationConfig(CCalculationConfigurationExtension *config);
 
-					virtual bool interpreteSubsumptionResult(COntologyClassificationItem *ontClassItem, CConcept *subsumerConcept, CConcept *subsumedConcept, bool isSubsumption);
-					virtual bool interpreteSatisfiableResult(COntologyClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis);
-
 					virtual bool interpreteTestResults(CTestCalculatedCallbackEvent *testResult);
-					virtual bool interceptTestResults(CInterceptOntologyTestResultEvent *interceptResult);
-
 
 					virtual bool createNextSubsumtionTest();
 					virtual CTaxonomy *createEmptyTaxonomyForOntology(CConcreteOntology *ontology, CConfigurationBase *config);

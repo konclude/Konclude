@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,28 +30,50 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeBooleanValueSpaceData::CDatatypeBooleanValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext),mBooleanValueSpaceMap(processContext) {
-					mValueSpaceMap = &mBooleanValueSpaceMap;
+				CDatatypeBooleanValueSpaceData::CDatatypeBooleanValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext) {
+					mBooleanValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeBooleanValueSpaceData* CDatatypeBooleanValueSpaceData::initBooleanValueSpaceData(CDatatypeValueSpaceBooleanType* valueSpaceType) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(nullptr);
-					mBooleanValueSpaceMap.initDatatypeCompareValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mBooleanValueSpaceMap) {
+						mBooleanValueSpaceMap->initDatatypeCompareValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeBooleanValueSpaceData* CDatatypeBooleanValueSpaceData::copyBooleanValueSpaceData(CDatatypeBooleanValueSpaceData* spaceData) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(spaceData);
-					mBooleanValueSpaceMap.initDatatypeCompareValueSpaceMap(spaceData->getBooleanValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mBooleanValueSpaceMap && !mBooleanValueSpaceMap) {
+						getBooleanValueSpaceMap(true);
+						mBooleanValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mBooleanValueSpaceMap);
+					} else if (mBooleanValueSpaceMap) {
+						if (spaceData->mBooleanValueSpaceMap) {
+							mBooleanValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mBooleanValueSpaceMap);
+						} else {
+							mBooleanValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
 
-				CDatatypeBooleanValueSpaceMap* CDatatypeBooleanValueSpaceData::getBooleanValueSpaceMap() {
-					return &mBooleanValueSpaceMap;
+				CDatatypeBooleanValueSpaceMap* CDatatypeBooleanValueSpaceData::getBooleanValueSpaceMap(bool create) {
+					if (create && !mBooleanValueSpaceMap) {
+						mBooleanValueSpaceMap = CObjectParameterizingAllocator< CDatatypeBooleanValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mBooleanValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+					}
+					return mBooleanValueSpaceMap;
 				}
+
+				CDatatypeCompareValueSpaceMap* CDatatypeBooleanValueSpaceData::createValueSpaceMap() {
+					return getBooleanValueSpaceMap(true);
+				}
+
 
 			}; // end namespace Process
 

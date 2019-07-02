@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -137,6 +137,10 @@ namespace Konclude {
 						//bool addIndividualToContainer(cint64 container, cint64 individual);
 						//void printIndividualContainer();
 
+
+						bool isDistinctSetNodeRelocated();
+						CBranchingMergingProcessingRestrictionSpecification* setDistinctSetNodeRelocated(bool distinctSetNodeRelocated);
+
 					// protected methods
 					protected:
 						CPROCESSSET<cint64>* createLocalizedDistinctMergedNodeSet();
@@ -164,6 +168,8 @@ namespace Konclude {
 						CProcessContext* mProcessContext;
 						bool mAddedBlockablePredMergingNodeCandidate;
 						CDependencyTrackPoint* mAddedBlockablePredDepTrackPoint;
+
+						bool mDistinctSetNodeRelocated;
 
 
 					// private methods

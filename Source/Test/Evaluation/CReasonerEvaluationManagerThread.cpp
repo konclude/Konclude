@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -366,7 +366,7 @@ namespace Konclude {
 									for (QStringList::const_iterator it1 = mReasonerNameStringList.constBegin(), it2 = mReasonerOutputDirStringList.constBegin(), it1End = mReasonerNameStringList.constEnd(), it2End = mReasonerOutputDirStringList.constEnd(); it1 != it1End && it2 != it2End; ++it1, ++it2) {
 										QString reasonerName(*it1);
 										QString reasonerPath(*it2);
-										LOG(INFO,getLogDomain(),logTr("Extracting accumulated times for '%1' reasoner from accumulated in directory '%2'.").arg(reasonerName).arg(reasonerPath),this);
+										LOG(INFO,getLogDomain(),logTr("Extracting accumulated times for '%1' reasoner from responses in directory '%2'.").arg(reasonerName).arg(reasonerPath),this);
 										responseCollector->collectReasonerEvaluationDataValues(responceReasonerComp,reasonerName,reasonerPath);
 										loadingCollector->collectReasonerEvaluationDataValues(loadingReasonerComp,reasonerName,reasonerPath);
 										classificationCollector->collectReasonerEvaluationDataValues(classificationReasonerComp,reasonerName,reasonerPath);
@@ -422,6 +422,102 @@ namespace Konclude {
 									LOG(WARNING,getLogDomain(),logTr("Accumulated times for '%1' in '%2' already up to date.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory),this);
 								}						
 							}
+
+
+
+
+
+
+
+
+							if (ananysingString == "ReasonerEvaluationStatisticValuesComparer") {
+
+								QString outputDirectory = getAnalyserOutputDirectory(analysingDirectoryString,evaluationProgramName,plattform,"StatisticValuesComparison");
+
+								CReasonerEvaluationAnalyserChecker analysingUpdateChecker;
+								if (analysingUpdateChecker.checkAnalysingUpdateNecessary(mReasonerOutputDirStringList,outputDirectory+"AnalysingUpdateCheckingData.dat",testCountCut)) {
+
+
+
+									LOG(INFO,getLogDomain(),logTr("Collecting statistic names for '%1' to '%2'.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory),this);
+
+
+									QSet<QString> staticticNamesSet;
+									CReasonerEvaluationStatisticsNameCollectingExtractor* statNameCollectingExtractor = new CReasonerEvaluationStatisticsNameCollectingExtractor(&staticticNamesSet,dataValueCacher);
+
+									CReasonerEvaluationAvaragerSummarizer* avarageSummarize = new CReasonerEvaluationAvaragerSummarizer();
+
+									CReasonerEvaluationCollector* statNameCollector = new CReasonerEvaluationCollector(statNameCollectingExtractor,avarageSummarize,mFiltering);
+									CReasonerEvaluationDataValueGroupCollectionReasonerComparison* statNameReasonerComp = new CReasonerEvaluationDataValueGroupCollectionReasonerComparison(mReasonerNameStringList);
+
+
+									for (QStringList::const_iterator it1 = mReasonerNameStringList.constBegin(), it2 = mReasonerOutputDirStringList.constBegin(), it1End = mReasonerNameStringList.constEnd(), it2End = mReasonerOutputDirStringList.constEnd(); it1 != it1End && it2 != it2End; ++it1, ++it2) {
+										QString reasonerName(*it1);
+										QString reasonerPath(*it2);
+										LOG(INFO,getLogDomain(),logTr("Extracting statistic names for '%1' reasoner from responses in directory '%2'.").arg(reasonerName).arg(reasonerPath),this);
+										statNameCollector->collectReasonerEvaluationDataValues(statNameReasonerComp,reasonerName,reasonerPath);
+									}
+
+
+									LOG(INFO,getLogDomain(),logTr("Analysing statistic values for '%1' to '%2'.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory),this);
+
+
+									CReasonerEvaluationGroupRequestReasonerStatisticValueCollectingCSVComparisonAnalyser* analyser4 = new CReasonerEvaluationGroupRequestReasonerStatisticValueCollectingCSVComparisonAnalyser();
+									CReasonerEvaluationGroupRequestSelector* selectors = getSelectors(requestDirectory);
+
+
+									for (QSet<QString>::const_iterator it = staticticNamesSet.constBegin(), itEnd = staticticNamesSet.constEnd(); it != itEnd; ++it) {
+										QString statName(*it);
+
+										analyser4->addNextStatisticName(statName);
+
+										CReasonerEvaluationStatisticsValueExtractor* statValueExtractor = new CReasonerEvaluationStatisticsValueExtractor(statName,&staticticNamesSet,timeoutCut,errorPunishmentTime,dataValueCacher);
+
+										CReasonerEvaluationCollector* statValueCollector = new CReasonerEvaluationCollector(statValueExtractor,avarageSummarize,mFiltering);
+										CReasonerEvaluationDataValueGroupCollectionReasonerComparison* statValueReasonerComp = new CReasonerEvaluationDataValueGroupCollectionReasonerComparison(mReasonerNameStringList);
+
+
+										for (QStringList::const_iterator it1 = mReasonerNameStringList.constBegin(), it2 = mReasonerOutputDirStringList.constBegin(), it1End = mReasonerNameStringList.constEnd(), it2End = mReasonerOutputDirStringList.constEnd(); it1 != it1End && it2 != it2End; ++it1, ++it2) {
+											QString reasonerName(*it1);
+											QString reasonerPath(*it2);
+											LOG(INFO,getLogDomain(),logTr("Extracting statistic values for '%1' reasoner from responses in directory '%2'.").arg(reasonerName).arg(reasonerPath),this);
+											statValueCollector->collectReasonerEvaluationDataValues(statValueReasonerComp,reasonerName,reasonerPath);
+										}
+
+
+
+
+										LOG(INFO,getLogDomain(),logTr("Comparing statistic values for '%1'.").arg(mReasonerNameStringList.join(", ")),this);
+
+
+										CReasonerEvaluationAnalyseContext* reasonerEvaluationContext = new CReasonerEvaluationAnalyseContext(mConfig,QString("%1 Statistics").arg(statName.toUpper()),statName+"-");
+
+
+										CReasonerEvaluationGroupRequestReasonerCSVComparisonAnalyser* analyser1 = new CReasonerEvaluationGroupRequestReasonerCSVComparisonAnalyser();
+										analyser1->analyseEvaluationData(statValueReasonerComp,reasonerEvaluationContext,outputDirectory,selectors);
+
+										CReasonerEvaluationGroupRequestReasonerStatisticValueCSVComparisonAnalyser* analyser2 = new CReasonerEvaluationGroupRequestReasonerStatisticValueCSVComparisonAnalyser();
+										analyser2->analyseEvaluationData(statValueReasonerComp,reasonerEvaluationContext,outputDirectory,selectors);
+
+										CReasonerEvaluationGroupRequestReasonerAccumulatedCountCSVComparisonAnalyser* analyser3 = new CReasonerEvaluationGroupRequestReasonerAccumulatedCountCSVComparisonAnalyser();
+										analyser3->analyseEvaluationData(statValueReasonerComp,reasonerEvaluationContext,outputDirectory,selectors);
+
+										analyser4->analyseEvaluationData(statValueReasonerComp,reasonerEvaluationContext,outputDirectory,selectors);
+
+										LOG(INFO,getLogDomain(),logTr("Statistics values for '%1' compared to '%2'.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory),this);
+										analysingUpdateChecker.saveAnalysingUpdateCheckFile(outputDirectory+"AnalysingUpdateCheckingData.dat");
+
+
+										analysed = true;
+									}
+
+
+
+								} else {
+									LOG(WARNING,getLogDomain(),logTr("Statistic values for '%1' in '%2' already up to date.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory),this);
+								}						
+							}
+
 
 
 

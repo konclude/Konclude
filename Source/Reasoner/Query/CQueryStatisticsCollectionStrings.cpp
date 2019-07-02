@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -55,12 +55,27 @@ namespace Konclude {
 			}
 
 
-			bool CQueryStatisticsCollectionStrings::addProcessingStatistics(const QString& statName, cint64 statValue) {
-				mStatNameStringsValueHash.insert(statName,statValue);
+			bool CQueryStatisticsCollectionStrings::addProcessingStatistics(COntologyProcessingStatistics* ontProcStats) {
+				QHash<QString,cint64>* statsValueHash = ontProcStats->getProcessingCountStatisticsHash();
+				for (QHash<QString,cint64>::const_iterator it = statsValueHash->constBegin(), itEnd = statsValueHash->constEnd(); it != itEnd; ++it) {
+					const QString& statString(it.key());
+					cint64 statValue = it.value();
+					incProcessingStatistics(statString,statValue);
+				}
 				return true;
 			}
 
 
+			bool CQueryStatisticsCollectionStrings::addProcessingStatistics(const QString& statName, cint64 statValue) {
+				mStatNameStringsValueHash[statName] = statValue;
+				return true;
+			}
+
+
+			bool CQueryStatisticsCollectionStrings::incProcessingStatistics(const QString& statName, cint64 incStatValue) {
+				mStatNameStringsValueHash[statName] += incStatValue;
+				return true;
+			}
 
 			QList<QString> CQueryStatisticsCollectionStrings::getStatisticsNameStringList() {
 				if (!mStatStringsCollected) {

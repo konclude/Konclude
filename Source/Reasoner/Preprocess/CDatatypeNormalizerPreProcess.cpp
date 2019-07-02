@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -288,6 +288,7 @@ namespace Konclude {
 					datatype->setValueSpaceType(mValueSpaceTypes->getValueSpaceRealType());
 					datatype->setBasicDatatype(realDatatype);
 					datatype->setBasicDatatypeType(CDatatype::DBT_REAL);
+					datatype->setDatatypeType(CDatatype::DT_INTEGER);
 
 
 				} else if (datatypeIRI == PREFIX_XML_DECIMAL_DATATYPE) {
@@ -302,6 +303,7 @@ namespace Konclude {
 					datatype->setValueSpaceType(mValueSpaceTypes->getValueSpaceRealType());
 					datatype->setBasicDatatype(realDatatype);
 					datatype->setBasicDatatypeType(CDatatype::DBT_REAL);
+					datatype->setDatatypeType(CDatatype::DT_DECIMAL);
 
 
 				} else if (datatypeIRI == PREFIX_OWL_RATIONAL_DATATYPE) {
@@ -317,6 +319,7 @@ namespace Konclude {
 					datatype->setValueSpaceType(mValueSpaceTypes->getValueSpaceRealType());
 					datatype->setBasicDatatype(realDatatype);
 					datatype->setBasicDatatypeType(CDatatype::DBT_REAL);
+					datatype->setDatatypeType(CDatatype::DT_RATIONAL);
 
 
 				} else if (datatypeIRI == PREFIX_OWL_REAL_DATATYPE) {
@@ -324,6 +327,7 @@ namespace Konclude {
 					datatype->setBasicDatatype(true);
 					datatype->setBasicDatatype(datatype);
 					datatype->setBasicDatatypeType(CDatatype::DBT_REAL);
+					datatype->setDatatypeType(CDatatype::DT_REAL);
 
 
 				} else if (datatypeIRI == PREFIX_OWL_TOP_DATATYPE) {
@@ -548,6 +552,7 @@ namespace Konclude {
 					datatype->setBasicDatatype(datatype);
 					datatype->setBasicDatatype(true);
 					datatype->setBasicDatatypeType(CDatatype::DBT_STRING);
+					datatype->setDatatypeType(CDatatype::DT_PLAINLITERAL);
 
 
 				} else if (datatypeIRI == PREFIX_XML_STRING_DATATYPE) {
@@ -562,6 +567,7 @@ namespace Konclude {
 					datatype->setValueSpaceType(mValueSpaceTypes->getValueSpaceStringType());
 					datatype->setBasicDatatype(plainLiteralDatatype);
 					datatype->setBasicDatatypeType(CDatatype::DBT_STRING);
+					datatype->setDatatypeType(CDatatype::DT_STRING);
 
 
 				} else if (datatypeIRI == PREFIX_XML_NORMALIZEDSTRING_DATATYPE) {
@@ -656,6 +662,7 @@ namespace Konclude {
 					datatype->setBasicDatatype(datatype);
 					datatype->setBasicDatatype(true);
 					datatype->setBasicDatatypeType(CDatatype::DBT_BOOLEAN);
+					datatype->setDatatypeType(CDatatype::DT_BOOLEAN);
 
 
 
@@ -668,6 +675,7 @@ namespace Konclude {
 					datatype->setBasicDatatype(datatype);
 					datatype->setBasicDatatype(true);
 					datatype->setBasicDatatypeType(CDatatype::DBT_DOUBLE);
+					datatype->setDatatypeType(CDatatype::DT_DOUBLE);
 
 
 				} else if (datatypeIRI == PREFIX_XML_FLOAT_DATATYPE) {
@@ -675,6 +683,7 @@ namespace Konclude {
 					datatype->setBasicDatatype(datatype);
 					datatype->setBasicDatatype(true);
 					datatype->setBasicDatatypeType(CDatatype::DBT_FLOAT);
+					datatype->setDatatypeType(CDatatype::DT_FLOAT);
 
 
 
@@ -687,6 +696,7 @@ namespace Konclude {
 					datatype->setBasicDatatype(datatype);
 					datatype->setBasicDatatype(true);
 					datatype->setBasicDatatypeType(CDatatype::DBT_IRI);
+					datatype->setDatatypeType(CDatatype::DT_IRI);
 
 
 
@@ -696,6 +706,7 @@ namespace Konclude {
 					datatype->setBasicDatatype(datatype);
 					datatype->setBasicDatatype(true);
 					datatype->setBasicDatatypeType(CDatatype::DBT_XML);
+					datatype->setDatatypeType(CDatatype::DT_XML);
 
 
 

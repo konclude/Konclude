@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,25 +30,43 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeStringValueSpaceData::CDatatypeStringValueSpaceData(CProcessContext* processContext) : CDatatypeValueSpaceData(processContext),mValueSpaceMap(processContext),mProcessContext(processContext) {
+				CDatatypeStringValueSpaceData::CDatatypeStringValueSpaceData(CProcessContext* processContext) : CDatatypeValueSpaceData(processContext),mProcessContext(processContext) {
+					mValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeStringValueSpaceData* CDatatypeStringValueSpaceData::initStringValueSpaceData(CDatatypeValueSpaceStringType* valueSpaceType) {
 					CDatatypeValueSpaceData::initValueSpaceData(nullptr);
-					mValueSpaceMap.initDatatypeStringValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mValueSpaceMap) {
+						mValueSpaceMap->initDatatypeStringValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeStringValueSpaceData* CDatatypeStringValueSpaceData::copyStringValueSpaceData(CDatatypeStringValueSpaceData* spaceData) {
 					CDatatypeValueSpaceData::initValueSpaceData(spaceData);
-					mValueSpaceMap.initDatatypeStringValueSpaceMap(spaceData->getValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mValueSpaceMap && !mValueSpaceMap) {
+						getValueSpaceMap(true);
+						mValueSpaceMap->initDatatypeStringValueSpaceMap(spaceData->mValueSpaceMap);
+					} else if (mValueSpaceMap) {
+						if (spaceData->mValueSpaceMap) {
+							mValueSpaceMap->initDatatypeStringValueSpaceMap(spaceData->mValueSpaceMap);
+						} else {
+							mValueSpaceMap->initDatatypeStringValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
-				CDatatypeStringValueSpaceMap* CDatatypeStringValueSpaceData::getValueSpaceMap() {
-					return &mValueSpaceMap;
+				CDatatypeStringValueSpaceMap* CDatatypeStringValueSpaceData::getValueSpaceMap(bool create) {
+					if (create && !mValueSpaceMap) {
+						mValueSpaceMap = CObjectParameterizingAllocator< CDatatypeStringValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mValueSpaceMap->initDatatypeStringValueSpaceMap(mValueSpaceType);
+					}
+					return mValueSpaceMap;
 				}
 
 

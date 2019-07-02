@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -188,11 +188,15 @@ namespace Konclude {
 							bool nominalStillCached = false;
 							CIndividualProcessNode* indiNode = indiVec->getData(dependentNominalID);
 							if (indiNode) {
-								if (dependentNominalID <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
+								if (dependentNominalID <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID() && indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
 									if (!indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID) && !indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
 										nominalStillCached = true;
 									}
+								} else if (indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND)) {
+									nominalStillCached = true;
 								}
+							} else {
+								nominalStillCached = true;
 							}
 							if (!nominalStillCached) {
 								return false;
@@ -318,13 +322,15 @@ namespace Konclude {
 								bool nominalStillCached = false;
 								CIndividualProcessNode* indiNode = indiVec->getData(nominalNodeID);
 								if (indiNode) {
-									if (nominalNodeID <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
+									if (nominalNodeID <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID() && indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
 										if (!indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID) && !indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
 											nominalStillCached = true;
 											if (indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHEDNODEEXTENDED)) {
 												onlyAllNondeterministic = true;
 											}
 										}
+									} else if (indiNode->hasProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND)) {
+										nominalStillCached = true;
 									}
 								}
 								if (!nominalStillCached) {
@@ -476,13 +482,13 @@ namespace Konclude {
 
 
 								bool wroteCacheData = false;
-								if (detExpWriteData) {
-									wroteCacheData = true;
-									addCacheMessages(detExpWriteData,calcAlgContext);
-								}
 								if (nondetExpWriteData) {
 									wroteCacheData = true;
 									addCacheMessages(nondetExpWriteData,calcAlgContext);
+								}
+								if (detExpWriteData) {
+									wroteCacheData = true;
+									addCacheMessages(detExpWriteData,calcAlgContext);
 								}
 								return wroteCacheData;
 

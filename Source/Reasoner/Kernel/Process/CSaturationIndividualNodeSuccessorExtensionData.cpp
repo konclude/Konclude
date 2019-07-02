@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -39,6 +39,7 @@ namespace Konclude {
 					mIndiProcessNode = indiProcessNode;
 					mALLConceptsExtensionData = nullptr;
 					mFUNCTIONALConceptsExtensionData = nullptr;
+					mAncSuccMergeResolveData = nullptr;
 					mExtensionProcessingQueued = false;
 					return this;
 				}
@@ -62,6 +63,17 @@ namespace Konclude {
 					mExtensionProcessingQueued = queued;
 					return this;
 				}
+
+
+
+				CSaturationIndividualNodeExtensionResolveData* CSaturationIndividualNodeSuccessorExtensionData::getAncestorSuccessorMergeResolveData(bool create) {
+					if (!mAncSuccMergeResolveData && create) {
+						mAncSuccMergeResolveData = CObjectParameterizingAllocator< CSaturationIndividualNodeExtensionResolveData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mAncSuccMergeResolveData->initExtensionResolveData(mIndiProcessNode);
+					}
+					return mAncSuccMergeResolveData;
+				}
+
 
 				CSaturationIndividualNodeExtensionResolveData* CSaturationIndividualNodeSuccessorExtensionData::getBaseExtensionResolveData(bool create) {
 					if (!mExtensionResolveData && create) {

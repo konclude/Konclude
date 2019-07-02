@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -55,7 +55,7 @@ namespace Konclude {
 									CIndividualProcessNodeVector* compGraphCachedProcNodeVec = compGraphCachedCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
 									if (indiProcessNode->getIndividualID() < compGraphCachedProcNodeVec->getItemCount()) {
 										CIndividualProcessNode* compIndiProcNode = compGraphCachedProcNodeVec->getData(indiProcessNode->getIndividualID());
-										if (compIndiProcNode->getReapplyConceptLabelSet(false)->containsConcept(branchedConcept->getData(),branchedConcept->isNegated())) {
+										if (compIndiProcNode && compIndiProcNode->getReapplyConceptLabelSet(false)->containsConcept(branchedConcept->getData(),branchedConcept->isNegated())) {
 											disjunctCached = true;
 										}
 									}

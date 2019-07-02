@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -32,6 +32,7 @@
 #include "CConceptAssertionLinker.h"
 #include "CRoleAssertionLinker.h"
 #include "CIndividualData.h"
+#include "CReverseRoleAssertionLinker.h"
 
 // Other includes
 #include "Utilities/CAllocationObject.h"
@@ -85,6 +86,10 @@ namespace Konclude {
 					CIndividual* addAssertionRoleLinker(CRoleAssertionLinker* assConLinker);
 					CIndividual* setAssertionRoleLinker(CRoleAssertionLinker* assConLinker);
 
+					CReverseRoleAssertionLinker* getReverseAssertionRoleLinker();
+					CIndividual* addReverseAssertionRoleLinker(CReverseRoleAssertionLinker* revAssRoleLinker);
+					CIndividual* setReverseAssertionRoleLinker(CReverseRoleAssertionLinker* revAssRoleLinker);
+
 					CIndividual *initIndividual(qint64 indiID = 0);
 					CIndividual *initIndividualCopy(CIndividual* individual, CMemoryAllocationManager* memMan);
 
@@ -106,6 +111,7 @@ namespace Konclude {
 				protected:
 					CConceptAssertionLinker* mAssertionConceptLinker;
 					CRoleAssertionLinker* mAssertionRoleLinker;
+					CReverseRoleAssertionLinker* mReverseAssertionRoleLinker;
 					CConcept* mNominalConcept;
 					bool mAnonymousIndividual;
 

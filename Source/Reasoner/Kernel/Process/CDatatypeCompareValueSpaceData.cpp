@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -31,6 +31,7 @@ namespace Konclude {
 
 
 				CDatatypeCompareValueSpaceData::CDatatypeCompareValueSpaceData(CProcessContext* processContext) : CDatatypeValueSpaceData(processContext) {
+					mValueSpaceMap = nullptr;
 				}
 
 
@@ -45,7 +46,10 @@ namespace Konclude {
 					return this;
 				}
 
-				CDatatypeCompareValueSpaceMap* CDatatypeCompareValueSpaceData::getValueSpaceMap() {
+				CDatatypeCompareValueSpaceMap* CDatatypeCompareValueSpaceData::getValueSpaceMap(bool create) {
+					if (!mValueSpaceMap && create) {
+						mValueSpaceMap = createValueSpaceMap();
+					}
 					return mValueSpaceMap;
 				}
 

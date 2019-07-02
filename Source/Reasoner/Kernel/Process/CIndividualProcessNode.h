@@ -54,6 +54,7 @@
 #include "CIndividualNodeModelData.h"
 #include "CIndividualNodeBlockData.h"
 #include "CIndividualNodeSatisfiableCacheRetrievalData.h"
+#include "CIndividualNodeBackendCacheSynchronisationData.h"
 #include "CIndividualNodeSatisfiableCacheStoringData.h"
 #include "CIndividualNodeUnsatisfiableCacheRetrievalData.h"
 #include "CIndividualNodeAnalizedConceptExpansionData.h"
@@ -67,13 +68,17 @@
 #include "CConceptPropagationBindingSetHash.h"
 #include "CConceptVariableBindingPathSetHash.h"
 #include "CConceptRepresentativePropagationSetHash.h"
+#include "CIndividualNodeIncrementalExpansionData.h"
 
 #include "CDatatypesValueSpaceData.h"
+#include "CAdditionalProcessRoleAssertionsLinker.h"
+#include "CIndividualMergingHash.h"
 
 // Other includes
 #include "Reasoner/Ontology/CConcept.h"
 #include "Reasoner/Ontology/CRole.h"
 #include "Reasoner/Ontology/CIndividual.h"
+#include "Reasoner/Ontology/CIRIName.h"
 
 
 #include "Utilities/Memory/CObjectParameterizingAllocator.h"
@@ -119,6 +124,7 @@ namespace Konclude {
 						CIndividualProcessNode* initIndividualProcessNodeCopy(CIndividualProcessNode* prevIndividual, bool adobtConceptLabels = true, bool adobtRoleSuccessors = false, bool adobtStatus = false);
 
 						
+						CIndividualProcessNode* setReapplyConceptLabelSet(CReapplyConceptLabelSet* reapplyConSet);
 
 						CReapplyConceptLabelSet* getReapplyConceptLabelSet(bool create = true);
 
@@ -139,6 +145,10 @@ namespace Konclude {
 						bool hasSuccessorIndividualNode(cint64 indiID);
 						bool hasSuccessorIndividualNode(CIndividualProcessNode* indiNode);
 
+
+
+						bool hasDisjointRoleConnections();
+						CIndividualProcessNode* setDisjointRoleConnections(bool disjointRoleConnections);
 
 						CDisjointSuccessorRoleHash* getDisjointSuccessorRoleHash(bool create = true);
 						CDisjointSuccessorRoleIterator getDisjointSuccessorRoleIterator(cint64 succIndiId);
@@ -172,6 +182,8 @@ namespace Konclude {
 						CDistinctHash* getDistinctHash(bool create = true);
 
 
+						CIndividualLinkEdge* getLastAddedRoleLink();
+
 						CIndividualProcessNode* installIndividualLink(CIndividualLinkEdge* link, CReapplyQueueIterator* reapplyQueueIt = nullptr);
 						CIndividualProcessNode* removeIndividualLink(CIndividualLinkEdge* link);
 						CIndividualProcessNode* removeIndividualConnection(CIndividualProcessNode* indi);
@@ -204,6 +216,9 @@ namespace Konclude {
 						CIndividualNodeSatisfiableCacheRetrievalData* getIndividualSatisfiableCacheRetrievalData(bool localCacheData = false);
 						CIndividualProcessNode* setIndividualSatisfiableCacheRetrievalData(CIndividualNodeSatisfiableCacheRetrievalData* satCacheRetrievalData);
 
+						CIndividualNodeBackendCacheSynchronisationData* getIndividualBackendCacheSynchronisationData(bool localCacheData = false);
+						CIndividualProcessNode* setIndividualBackendCacheSynchronisationData(CIndividualNodeBackendCacheSynchronisationData* backendSyncData);
+						
 						CIndividualNodeSatisfiableCacheStoringData* getIndividualSatisfiableCacheStoringData(bool localCacheData = false);
 						CIndividualProcessNode* setIndividualSatisfiableCacheStoringData(CIndividualNodeSatisfiableCacheStoringData* satCacheStoringData);
 
@@ -258,20 +273,52 @@ namespace Konclude {
 
 						bool hasInitializingConcepts();
 						CIndividualProcessNode* clearProcessInitializingConcepts();
-						CXSortedNegLinker<CConcept*>* getInitializingConceptLinkerIt();
-						CXSortedNegLinker<CConcept*>* getProcessInitializingConceptLinkerIt();
-						CIndividualProcessNode* setInitializingConceptLinkerIt(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt);
-						CIndividualProcessNode* addInitializingConceptLinkerIt(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt);
+						CXSortedNegLinker<CConcept*>* getInitializingConceptLinker();
+						CXSortedNegLinker<CConcept*>* getProcessInitializingConceptLinker();
+						CIndividualProcessNode* setInitializingConceptLinker(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt);
+						CIndividualProcessNode* addInitializingConceptLinker(CXSortedNegLinker<CConcept*>* initializingConceptLinkerIt);
 
 						bool hasAssertionConcepts();
 						CIndividualProcessNode* clearAssertionConcepts();
-						CConceptAssertionLinker* getAssertionConceptLinkerIt();
-						CIndividualProcessNode* setAssertionConceptLinkerIt(CConceptAssertionLinker* assertionConceptLinkerIt);
+						CConceptAssertionLinker* getAssertionConceptLinker();
+						CIndividualProcessNode* setAssertionConceptLinker(CConceptAssertionLinker* assertionConceptLinkerIt);
 
 						bool hasAssertionRoles();
 						CIndividualProcessNode* clearAssertionRoles();
-						CRoleAssertionLinker* getAssertionRoleLinkerIt();
-						CIndividualProcessNode* setAssertionRoleLinkerIt(CRoleAssertionLinker* assertionRoleLinkerIt);
+						CRoleAssertionLinker* getAssertionRoleLinker();
+						CIndividualProcessNode* setAssertionRoleLinker(CRoleAssertionLinker* assertionRoleLinkerIt);
+
+
+						cint64 getRoleAssertionCreationID();
+						CIndividualProcessNode* setRoleAssertionCreationID(cint64 creationID);
+
+						bool hasReverseAssertionRoles();
+						CIndividualProcessNode* clearReverseAssertionRoles();
+						CReverseRoleAssertionLinker* getReverseAssertionRoleLinker();
+						CIndividualProcessNode* setReverseAssertionRoleLinker(CReverseRoleAssertionLinker* reverseAssertionRoleLinkerIt);
+
+
+
+
+
+						bool hasAdditionalRoleAssertionsLinker();
+						CIndividualProcessNode* clearAdditionalRoleAssertionsLinker();
+						CAdditionalProcessRoleAssertionsLinker* getAdditionalRoleAssertionsLinker();
+						CIndividualProcessNode* setAdditionalRoleAssertionsLinker(CAdditionalProcessRoleAssertionsLinker* reverseRoleAssertionsLinker);
+						CIndividualProcessNode* addAdditionalRoleAssertionsLinker(CAdditionalProcessRoleAssertionsLinker* reverseRoleAssertionsLinker);
+
+
+
+						bool hasRoleAssertionsInitialized();
+						CIndividualProcessNode* setRoleAssertionsInitialized(bool initialized);
+
+
+						bool hasReverseRoleAssertionsInitialized();
+						CIndividualProcessNode* setReverseRoleAssertionsInitialized(bool initialized);
+
+
+
+
 
 						CIndividualProcessNode* getProcessingBlockTestIndividual();
 						CIndividualProcessNode* clearProcessingBlockTestIndividual();
@@ -365,13 +412,19 @@ namespace Konclude {
 						bool isDeterministicExpandingProcessingQueued();
 						bool isRegularDepthProcessingQueued();
 						bool isBlockedReactivationProcessingQueued();
+						bool isBackendSynchronRetestProcessingQueued();
+						bool isIncrementalCompatibilityCheckingQueued();
+						bool isIncrementalExpansionQueued();
 
 						CIndividualProcessNode* setProcessingQueued(bool processingQueued);
 						CIndividualProcessNode* setExtendedQueueProcessing(bool extendedQueueProcessing);
 						CIndividualProcessNode* setImmediatelyProcessingQueued(bool immProQue);
 						CIndividualProcessNode* setDeterministicExpandingProcessingQueued(bool detExpPro);
 						CIndividualProcessNode* setRegularDepthProcessingQueued(bool depthPro);
-						CIndividualProcessNode* setBlockedReactivationProcessingQueued(bool depthPro);
+						CIndividualProcessNode* setBlockedReactivationProcessingQueued(bool backendSyncRetest);
+						CIndividualProcessNode* setBackendSynchronRetestProcessingQueued(bool backendSyncRetest);
+						CIndividualProcessNode* setIncrementalCompatibilityCheckingQueued(bool incCompChecking);
+						CIndividualProcessNode* setIncrementalExpansionQueued(bool incExpQueued);
 
 						CIndividualProcessNode* clearProcessingQueued();
 
@@ -402,6 +455,11 @@ namespace Konclude {
 
 						CDatatypesValueSpaceData* getDatatypesValueSpaceData(bool create = true);
 
+						CIndividualNodeIncrementalExpansionData* getIncrementalExpansionData(bool create = true);
+
+						CIndividualProcessNode* setIncrementalExpansionID(cint64 incExpID);
+						cint64 getIncrementalExpansionID();
+
 
 						CConceptPropagationBindingSetHash* getConceptPropagationBindingSetHash(bool create = true);
 
@@ -409,6 +467,19 @@ namespace Konclude {
 
 						CConceptRepresentativePropagationSetHash* getConceptRepresentativePropagationSetHash(bool create = true);
 
+
+						CIndividualMergingHash* getIndividualMergingHash(bool create = true);
+						CDependencyTrackPoint* getMergedDependencyTrackPoint();
+						CIndividualProcessNode* setMergedDependencyTrackPoint(CDependencyTrackPoint* depTrackPoint);
+
+						CIndividualProcessNode* getLastMergedIntoIndividualNode();
+						CIndividualProcessNode* setLastMergedIntoIndividualNode(CIndividualProcessNode* indiNode);
+
+						CIndividualProcessNode* setBlockerIndividualNode(CIndividualProcessNode* indiNode);
+						CIndividualProcessNode* getBlockerIndividualNode();
+
+						CIndividualProcessNode* setFollowingIndividualNode(CIndividualProcessNode* indiNode);
+						CIndividualProcessNode* getFollowingIndividualNode();
 
 
 
@@ -469,6 +540,14 @@ namespace Konclude {
 						const static cint64 PRFCACHEDCOMPUTEDTYPESADDED							= Q_UINT64_C(0x1000000000000);
 
 
+						const static cint64 PRFSYNCHRONIZEDBACKEND								= Q_UINT64_C(0x10000000000000);
+						const static cint64 PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED		= Q_UINT64_C(0x20000000000000);
+						const static cint64 PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED		= Q_UINT64_C(0x40000000000000);
+						const static cint64 PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED	= Q_UINT64_C(0x80000000000000);
+
+
+						const static cint64 PRFINCREMENTALEXPANDING								= Q_UINT64_C(0x100000000000000);
+						const static cint64 PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED		= Q_UINT64_C(0x200000000000000);
 
 
 						const static cint64 PRFBLOCKINGRELATEDFLAGCOMPINATION					= PRFDIRECTBLOCKED | PRFINDIRECTBLOCKED | PRFPROCESSINGBLOCKED |
@@ -480,7 +559,6 @@ namespace Konclude {
 																									PRFANCESTORSATISFIABLECACHED | PRFSIGNATUREBLOCKINGCACHED | PRFANCESTORSIGNATUREBLOCKINGCACHED | 
 																									PRFREUSINGINDIVIDUAL | PRFANCESTORREUSINGINDIVIDUALBLOCKED | PRFANCESTORSATURATIONBLOCKINGCACHED | PRFCONCRETEDATAINDINODE;
 
-						CIndividualProcessNode* mDebugBlockerIndi;
 						CConceptDescriptor* mDebugBlockerLastConceptDes;
 
 
@@ -522,6 +600,11 @@ namespace Konclude {
 						CSuccessorRoleHash* mUseSuccRoleHash;
 						CSuccessorRoleHash* mPrevSuccRoleHash;
 
+						CIndividualLinkEdge* mLastAddedLink;
+						CIndividualProcessNode* mBlockerIndiNode;
+						CIndividualProcessNode* mFollowingIndiNode;
+
+
 
 						CConnectionSuccessorSet* mConnSuccSet;
 						CConnectionSuccessorSet* mUseConnSuccSet;
@@ -532,6 +615,7 @@ namespace Konclude {
 						CDistinctHash* mUseDistinctHash;
 						CDistinctHash* mPrevDistinctHash;
 
+						bool mDisjointRoleConnections;
 						CDisjointSuccessorRoleHash* mDisjointSuccRoleHash;
 						CDisjointSuccessorRoleHash* mUseDisjointSuccRoleHash;
 						CDisjointSuccessorRoleHash* mPrevDisjointSuccRoleHash;
@@ -579,6 +663,11 @@ namespace Konclude {
 						CXSortedNegLinker<CConcept*>* mProcessInitializingConceptLinkerIt;
 						CConceptAssertionLinker* mAssertionConceptLinkerIt;
 						CRoleAssertionLinker* mAssertionRoleLinkerIt;
+						CReverseRoleAssertionLinker* mReverseAssertionRoleLinkerIt;
+						CAdditionalProcessRoleAssertionsLinker* mAdditionalRoleAssertionsLinker;
+						bool mRoleAssertionsInitialized;
+						bool mReverseRoleAssertionsInitialized;
+						cint64 mRoleAssertionCreationID;
 
 						cint64 mLastConceptCountCachedBlockerCandidate;
 						cint64 mLastConceptCountSearchBlockerCandidate;
@@ -597,6 +686,9 @@ namespace Konclude {
 						CIndividualNodeSatisfiableCacheRetrievalData* mPrevSatCacheRetData;
 						CIndividualNodeSatisfiableCacheStoringData* mSatCacheStoringData;
 						CIndividualNodeSatisfiableCacheStoringData* mPrevSatCacheStoringData;
+
+						CIndividualNodeBackendCacheSynchronisationData* mBackendSyncData;
+						CIndividualNodeBackendCacheSynchronisationData* mPrevBackendSyncData;
 
 
 						CIndividualProcessNode* mProcessingBlockedIndi;
@@ -618,6 +710,9 @@ namespace Konclude {
 						bool mDetExpProcessingQueued;
 						bool mDepthProcessingQueued;
 						bool mBlockedReactProcessingQueued;
+						bool mBackendSynchronRetestProcessingQueued;
+						bool mIncrementalCompatibilityCheckingQueued;
+						bool mIncrementalExpansionQueued;
 						bool mProcessingQueued;
 						CIndividualProcessNodePriority mLastProcessingPriority;
 
@@ -640,7 +735,17 @@ namespace Konclude {
 						CDatatypesValueSpaceData* mUseDatatypesValueSpaceData;
 						CDatatypesValueSpaceData* mLocDatatypesValueSpaceData;
 
-						
+
+						CIndividualNodeIncrementalExpansionData* mUseIncExpData;
+						CIndividualNodeIncrementalExpansionData* mLocIncExpData;
+						cint64 mIncExpID;
+
+
+						CIndividualMergingHash* mUseIndividualMergingHash;
+						CIndividualMergingHash* mLocIndividualMergingHash;
+						CDependencyTrackPoint* mMergedDepTrackPoint;
+						CIndividualProcessNode* mLastMergedIntoIndividualNode;
+
 					// private methods
 					private:
 

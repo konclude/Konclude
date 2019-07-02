@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -27,6 +27,8 @@
 // Namespace includes
 #include "RealizationSettings.h"
 #include "CConceptRealization.h"
+#include "CRoleRealization.h"
+#include "CSameRealization.h"
 
 // Other includes
 
@@ -59,6 +61,15 @@ namespace Konclude {
 					CConceptRealization* getConceptRealization();
 					CRealization* setConceptRealization(CConceptRealization* conRealization);
 
+
+					bool hasSameRealization();
+					CSameRealization* getSameRealization();
+					CRealization* setSameRealization(CSameRealization* sameRealization);
+
+					bool hasRoleRealization();
+					CRoleRealization* getRoleRealization();
+					CRealization* setRoleRealization(CRoleRealization* roleRealization);
+
 					bool isRealized();
 					CRealization* setRealized(bool realized);
 
@@ -69,6 +80,8 @@ namespace Konclude {
 				protected:
 					bool mRealized;
 					CConceptRealization* mConceptRealization;
+					CRoleRealization* mRoleRealization;
+					CSameRealization* mSameRealization;
 
 				// private methods
 				private:

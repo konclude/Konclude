@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -90,6 +90,13 @@ namespace Konclude {
 				class CComputedConsequencesCacheWriter;
 				class CComputedConsequencesCacheContext;
 
+				class CBackendRepresentativeMemoryCacheWriter;
+				class CBackendRepresentativeMemoryCacheReader;
+				class CBackendRepresentativeMemoryCache;
+				class CBackendRepresentativeMemoryLabelSignatureResolveCacheItem;
+				class CBackendRepresentativeMemoryLabelCacheItem;
+				class CBackendRepresentativeMemoryCacheIndividualAssociationData;
+
 				// events
 
 				const QEvent::Type EVENTWRITEUNSATISFIABLECACHEENTRY				= (QEvent::Type)2000;
@@ -99,6 +106,8 @@ namespace Konclude {
 				const QEvent::Type EVENTWRITECACHEDDATAENTRY						= (QEvent::Type)2004;
 				const QEvent::Type EVENTWRITESATURATIONCACHEDATAENTRY				= (QEvent::Type)2005;
 				const QEvent::Type EVENTWRITECOMPUTEDCONSEQUENCESCACHEDATAENTRY		= (QEvent::Type)2006;
+				const QEvent::Type EVENTWRITEBACKENDASSOCIATIONENTRY				= (QEvent::Type)2007;
+				const QEvent::Type EVENTRETRIEVEINCOMPLETELYASSOCIATIONCACHED		= (QEvent::Type)2008;
 
 
 				// defines

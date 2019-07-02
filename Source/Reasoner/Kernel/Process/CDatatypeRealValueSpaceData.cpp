@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,26 +30,51 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeRealValueSpaceData::CDatatypeRealValueSpaceData(CProcessContext* processContext) : CDatatypeValueSpaceData(processContext),mValueSpaceMap(processContext),mProcessContext(processContext) {
+				CDatatypeRealValueSpaceData::CDatatypeRealValueSpaceData(CProcessContext* processContext) : CDatatypeValueSpaceData(processContext),mProcessContext(processContext) {
+					mValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeRealValueSpaceData* CDatatypeRealValueSpaceData::initRealValueSpaceData(CDatatypeValueSpaceRealType* valueSpaceType) {
 					CDatatypeValueSpaceData::initValueSpaceData(nullptr);
-					mValueSpaceMap.initDatatypeRealValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mValueSpaceMap) {
+						mValueSpaceMap->initDatatypeRealValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeRealValueSpaceData* CDatatypeRealValueSpaceData::copyRealValueSpaceData(CDatatypeRealValueSpaceData* spaceData) {
 					CDatatypeValueSpaceData::initValueSpaceData(spaceData);
-					mValueSpaceMap.initDatatypeRealValueSpaceMap(spaceData->getValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mValueSpaceMap && !mValueSpaceMap) {
+						getValueSpaceMap(true);
+						mValueSpaceMap->initDatatypeRealValueSpaceMap(spaceData->mValueSpaceMap);
+					} else if (mValueSpaceMap) {
+						if (spaceData->mValueSpaceMap) {
+							mValueSpaceMap->initDatatypeRealValueSpaceMap(spaceData->mValueSpaceMap);
+						} else {
+							mValueSpaceMap->initDatatypeRealValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
-				CDatatypeRealValueSpaceMap* CDatatypeRealValueSpaceData::getValueSpaceMap() {
-					return &mValueSpaceMap;
+
+				bool CDatatypeRealValueSpaceData::hasValueSpaceMap() {
+					return mValueSpaceMap;
 				}
+
+				CDatatypeRealValueSpaceMap* CDatatypeRealValueSpaceData::getValueSpaceMap(bool create) {
+					if (create && !mValueSpaceMap) {
+						mValueSpaceMap = CObjectParameterizingAllocator< CDatatypeRealValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mValueSpaceMap->initDatatypeRealValueSpaceMap(mValueSpaceType);
+					}
+					return mValueSpaceMap;
+				}
+
+
 
 
 			}; // end namespace Process

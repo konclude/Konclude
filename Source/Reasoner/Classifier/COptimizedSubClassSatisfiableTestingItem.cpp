@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -43,6 +43,10 @@ namespace Konclude {
 				mSatDerivated = false;
 				mEquiItem = false;
 				mPredOfItem = false;
+
+				mFastSatCacheEntry = nullptr;
+				mSuccFastSatTested = false;
+				mIndiDepTracked = false;
 				return this;
 			}
 
@@ -215,6 +219,32 @@ namespace Konclude {
 			}
 
 
+			CCacheEntry* COptimizedSubClassSatisfiableTestingItem::getFastSatisfiabilityTestedSaturationCacheEntry() {
+				return mFastSatCacheEntry;
+			}
+
+			COptimizedSubClassSatisfiableTestingItem* COptimizedSubClassSatisfiableTestingItem::setFastSatisfiabilityTestedSaturationCacheEntry(CCacheEntry* cacheEntry) {
+				mFastSatCacheEntry = cacheEntry;
+				return this;
+			}
+
+			bool COptimizedSubClassSatisfiableTestingItem::hasSuccessfullyFastSatisfiabilityTested() {
+				return mSuccFastSatTested;
+			}
+
+			COptimizedSubClassSatisfiableTestingItem* COptimizedSubClassSatisfiableTestingItem::setSuccessfullyFastSatisfiabilityTested(bool successfullyTested) {
+				mSuccFastSatTested = successfullyTested;
+				return this;
+			}
+
+			CIndividualDependenceTrackingMarker* COptimizedSubClassSatisfiableTestingItem::setIndividualDependenceTracked() {
+				mIndiDepTracked = true;
+				return this;
+			}
+
+			bool COptimizedSubClassSatisfiableTestingItem::hasIndividualDependenceTracked() {
+				return mIndiDepTracked;
+			}
 		}; // end namespace Classifier
 
 	}; // end namespace Reasoner

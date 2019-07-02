@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -30,28 +30,50 @@ namespace Konclude {
 			namespace Process {
 
 
-				CDatatypeBinaryBase64DataValueSpaceData::CDatatypeBinaryBase64DataValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext),mBinaryBase64DataValueSpaceMap(processContext) {
-					mValueSpaceMap = &mBinaryBase64DataValueSpaceMap;
+				CDatatypeBinaryBase64DataValueSpaceData::CDatatypeBinaryBase64DataValueSpaceData(CProcessContext* processContext) : CDatatypeCompareValueSpaceData(processContext) {
+					mBinaryBase64DataValueSpaceMap = nullptr;
 				}
 
 
 				CDatatypeBinaryBase64DataValueSpaceData* CDatatypeBinaryBase64DataValueSpaceData::initBinaryBase64DataValueSpaceData(CDatatypeValueSpaceBinaryBase64DataType* valueSpaceType) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(nullptr);
-					mBinaryBase64DataValueSpaceMap.initDatatypeCompareValueSpaceMap(valueSpaceType);
+					mValueSpaceType = valueSpaceType;
+					if (mBinaryBase64DataValueSpaceMap) {
+						mBinaryBase64DataValueSpaceMap->initDatatypeCompareValueSpaceMap(valueSpaceType);
+					}
 					return this;
 				}
 
 
 				CDatatypeBinaryBase64DataValueSpaceData* CDatatypeBinaryBase64DataValueSpaceData::copyBinaryBase64DataValueSpaceData(CDatatypeBinaryBase64DataValueSpaceData* spaceData) {
 					CDatatypeCompareValueSpaceData::initValueSpaceData(spaceData);
-					mBinaryBase64DataValueSpaceMap.initDatatypeCompareValueSpaceMap(spaceData->getBinaryBase64DataValueSpaceMap());
+					mValueSpaceType = spaceData->mValueSpaceType;
+					if (spaceData->mBinaryBase64DataValueSpaceMap && !mBinaryBase64DataValueSpaceMap) {
+						getBinaryBase64DataValueSpaceMap(true);
+						mBinaryBase64DataValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mBinaryBase64DataValueSpaceMap);
+					} else if (mBinaryBase64DataValueSpaceMap) {
+						if (spaceData->mBinaryBase64DataValueSpaceMap) {
+							mBinaryBase64DataValueSpaceMap->initDatatypeCompareValueSpaceMap(spaceData->mBinaryBase64DataValueSpaceMap);
+						} else {
+							mBinaryBase64DataValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+						}
+					}
 					return this;
 				}
 
 
-				CDatatypeBinaryDataValueSpaceMap* CDatatypeBinaryBase64DataValueSpaceData::getBinaryBase64DataValueSpaceMap() {
-					return &mBinaryBase64DataValueSpaceMap;
+				CDatatypeBinaryDataValueSpaceMap* CDatatypeBinaryBase64DataValueSpaceData::getBinaryBase64DataValueSpaceMap(bool create) {
+					if (create && !mBinaryBase64DataValueSpaceMap) {
+						mBinaryBase64DataValueSpaceMap = CObjectParameterizingAllocator< CDatatypeBinaryDataValueSpaceMap,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						mBinaryBase64DataValueSpaceMap->initDatatypeCompareValueSpaceMap(mValueSpaceType);
+					}
+					return mBinaryBase64DataValueSpaceMap;
 				}
+
+				CDatatypeCompareValueSpaceMap* CDatatypeBinaryBase64DataValueSpaceData::createValueSpaceMap() {
+					return getBinaryBase64DataValueSpaceMap(true);
+				}
+
 
 			}; // end namespace Process
 

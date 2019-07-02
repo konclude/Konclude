@@ -82,6 +82,9 @@ namespace Konclude {
 
 				// private methods
 				private:
+					CIsConsistentQueryCommand* mConsistencyKBCommand;
+					CIsTriviallyConsistentQueryCommand* mTriviallyConsistencyKBCommand;
+
 
 				// private variables
 				private:

@@ -1556,6 +1556,44 @@ namespace Konclude {
 
 
 
+
+
+									} else if (dynamic_cast<CIsTriviallyConsistentQueryCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CIsTriviallyConsistentQueryCommand* iCQC = (CIsTriviallyConsistentQueryCommand*)command;
+
+										CBuildQueryCommand *buildQC = iCQC->getBuildQueryCommand();
+										if (!buildQC) {
+											buildQC = new CBuildQueryCommand(0,iCQC);
+											iCQC->setBuildQueryCommand(buildQC);
+										}
+
+										CCalculateQueryCommand *calcQC = iCQC->getCalculateQueryCommand();
+										if (!calcQC) {
+											calcQC = new CCalculateQueryCommand(buildQC,iCQC);
+											iCQC->setCalculateQueryCommand(calcQC);
+										}
+
+										CGetCurrentKnowledgeBaseRevisionCommand *getCKBRC = new CGetCurrentKnowledgeBaseRevisionCommand(iCQC->getKnowledgeBaseName());
+										buildQC->makeToSubCommand(getCKBRC);
+
+										CConstructIsTriviallyConsistentQueryCommand *pOWLQC = new CConstructIsTriviallyConsistentQueryCommand(getCKBRC);
+										buildQC->makeToSubCommand(pOWLQC);
+										buildQC->setQueryCommandProvider(pOWLQC);
+
+
+										preSynchronizer->delegateCommand(buildQC);
+										preSynchronizer->delegateCommand(calcQC);
+
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
 									} else if (dynamic_cast<CKnowledgeBaseProcessCommand *>(command)) {
 										CCommandRecordRouter commandRecordRouter(command,this);
 										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1593,9 +1631,10 @@ namespace Konclude {
 										if (ontRev) {
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
 											COWLlinkQueryExtensionParser quExtParser;
-											CTaxonomyPremisingQuerySupport *querySupport = quExtParser.parseTaxonomyQuerySupport(ontRev->getOntology(),cSCHQC->getQueryNode());
-											CSubClassHierarchyQuery *query = new CSubClassHierarchyQuery(ontRev->getOntology(),querySupport,ontConfig);
-											query->setQueryStatistics(new CQueryStatisticsCollectionStrings());
+											CSubClassHierarchyQuery *query = new CSubClassHierarchyQuery(ontRev->getOntology(),nullptr,ontConfig);
+											if (CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Query.Statistics.CollectStatistics",false)) {
+												query->setQueryStatistics(new CQueryStatisticsCollectionStrings());
+											}
 											cSCHQC->setQuery(query);
 										} else {
 											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
@@ -1687,6 +1726,9 @@ namespace Konclude {
 										if (ontRev) {
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
 											CIsConsistentQuery *query = new CIsConsistentQuery(ontRev->getOntology(),ontConfig);
+											if (CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Query.Statistics.CollectStatistics",false)) {
+												query->setQueryStatistics(new CQueryStatisticsCollectionStrings());
+											}
 											cICQC->setQuery(query);
 										} else {
 											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
@@ -1695,6 +1737,28 @@ namespace Konclude {
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
+
+
+
+									} else if (dynamic_cast<CConstructIsTriviallyConsistentQueryCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command,this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+										CConstructIsTriviallyConsistentQueryCommand *cITCQC = (CConstructIsTriviallyConsistentQueryCommand *)command;
+										COntologyRevision *ontRev = cITCQC->getOntologyRevision();
+										if (ontRev) {
+											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
+											CIsTriviallyConsistentQuery *query = new CIsTriviallyConsistentQuery(ontRev->getOntology(),ontConfig);
+											if (CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Query.Statistics.CollectStatistics",false)) {
+												query->setQueryStatistics(new CQueryStatisticsCollectionStrings());
+											}
+											cITCQC->setQuery(query);
+										} else {
+											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 
 									} else if (dynamic_cast<CConstructClassSatisfiableQueryCommand *>(command)) {
@@ -1818,6 +1882,9 @@ namespace Konclude {
 										if (ontRev) {
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
 											CClassifyQuery *query = new CClassifyQuery(ontRev->getOntology(),ontConfig);
+											if (CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Query.Statistics.CollectStatistics",false)) {
+												query->setQueryStatistics(new CQueryStatisticsCollectionStrings());
+											}
 											cCQC->setQuery(query);
 										} else {
 											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
@@ -1835,6 +1902,9 @@ namespace Konclude {
 										if (ontRev) {
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
 											CRealizeQuery *query = new CRealizeQuery(ontRev->getOntology(),ontConfig);
+											if (CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Query.Statistics.CollectStatistics",false)) {
+												query->setQueryStatistics(new CQueryStatisticsCollectionStrings());
+											}
 											cRQC->setQuery(query);
 										} else {
 											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -129,12 +129,13 @@ namespace Konclude {
 				return accepted;
 			}
 
-			QString CReasonerEvaluationHTMLNavigationOverviewSummarizer::createHTMLForDirectory(const QString& directoryString, const QString& relativePathString, const QString& groupFilterString) {
+			QString CReasonerEvaluationHTMLNavigationOverviewSummarizer::createHTMLForDirectory(const QString& directoryString, const QString& relativePathString, const QString& groupFilterString, cint64* addContentCounter) {
 				QString sectionString = mDirLinSecString;
 				QDir directory(directoryString);
 				QStringList subDirStringList = directory.entryList(QDir::Dirs);
 				QStringList fileStringList = directory.entryList(QDir::Files);
 				QString sectionContentsString;
+				cint64 addedContentCount = 0;
 				foreach (const QString& fileString, fileStringList) {
 					if (fileString.endsWith(".html") && isAcceptedByFilters(relativePathString+fileString)) {
 						QString secConString = mDirLinConString;
@@ -143,6 +144,7 @@ namespace Konclude {
 						secConString.replace("$$_CONTENT_LINK_$$",relativePathString+fileString);
 						secConString.replace("$$_CONTENT_TITLE_$$",titleString);
 						sectionContentsString += secConString;
+						++addedContentCount;
 					}
 				}
 				sectionString.replace("$$_SECTION_CONTENT_$$",sectionContentsString);
@@ -160,16 +162,21 @@ namespace Konclude {
 						}
 
 						if (!groupFiltered) {
-							QString subSecString = mDirLinSubString;
-							QString subSecTitleString = subDirString;
-							subSecString.replace("$$_SECTION_TITLE_$$",subSecTitleString);
-
-							QString subSecSectionString = createHTMLForDirectory(directoryString+subDirString+"/",relativePathString+subDirString+"/",groupFilterString);
-
-							subSecString.replace("$$_SECTIONS_$$",subSecSectionString);
-							subsectionsString += subSecString;
+							cint64 recursiveAddedContentCount = 0;
+							QString subSecSectionString = createHTMLForDirectory(directoryString+subDirString+"/",relativePathString+subDirString+"/",groupFilterString,&recursiveAddedContentCount);
+							if (recursiveAddedContentCount > 0) {
+								addedContentCount += recursiveAddedContentCount;
+								QString subSecString = mDirLinSubString;
+								QString subSecTitleString = subDirString;
+								subSecString.replace("$$_SECTION_TITLE_$$",subSecTitleString);
+								subSecString.replace("$$_SECTIONS_$$",subSecSectionString);
+								subsectionsString += subSecString;
+							}
 						}
 					}
+				}
+				if (addContentCounter) {
+					*addContentCounter = addedContentCount;
 				}
 				sectionString.replace("$$_SUBSECTIONS_$$",subsectionsString);
 				return sectionString;

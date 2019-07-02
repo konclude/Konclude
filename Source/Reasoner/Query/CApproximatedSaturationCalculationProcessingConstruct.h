@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,6 +29,7 @@
 
 // Other includes
 #include "Reasoner/Consistiser/CSaturationConceptReferenceLinking.h"
+#include "Reasoner/Consistiser/CSaturationIndividualReferenceLinking.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -64,12 +65,16 @@ namespace Konclude {
 					CSaturationConceptReferenceLinking* getSaturationConceptReferenceLinking();
 					CApproximatedSaturationCalculationProcessingConstruct* setSaturationConceptReferenceLinking(CSaturationConceptReferenceLinking* satConRefLinking);
 
+					CSaturationIndividualReferenceLinking* getSaturationIndividualReferenceLinking();
+					CApproximatedSaturationCalculationProcessingConstruct* setSaturationConceptReferenceLinking(CSaturationIndividualReferenceLinking* satIndiRefLinking);
+
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
 					CSaturationConceptReferenceLinking* mSatConRefLinking;
+					CSaturationIndividualReferenceLinking* mSatIndiRefLinking;
 
 				// private methods
 				private:

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -64,9 +64,10 @@ namespace Konclude {
 
 
 						CReapplyConceptSaturationLabelSet* initReapplyConceptSaturationLabelSet();
-						CReapplyConceptSaturationLabelSet* copyReapplyConceptSaturationLabelSet(CReapplyConceptSaturationLabelSet* copyConceptSaturationLabelSet);
+						CReapplyConceptSaturationLabelSet* copyReapplyConceptSaturationLabelSet(CReapplyConceptSaturationLabelSet* copyConceptSaturationLabelSet, bool tryFlatLabelCopy);
 
 						cint64 getConceptCount();
+						cint64 getTotalCount();
 
 						bool getConceptSaturationDescriptor(cint64 conTag, CConceptSaturationDescriptor*& conSatDes, CImplicationReapplyConceptSaturationDescriptor*& impReapplyConSatDes);
 						bool getConceptSaturationDescriptor(CConcept* concept, CConceptSaturationDescriptor*& conSatDes, CImplicationReapplyConceptSaturationDescriptor*& impReapplyConSatDes);
@@ -108,6 +109,12 @@ namespace Konclude {
 						CReapplyConceptSaturationLabelSetIterator getIterator(bool iterateConSatDes = true, bool iterateReapplies = true);
 
 
+
+						bool areAllConceptsInAdditionalHash();
+
+						CConceptSaturationDescriptor* getLastNominalIndependentConceptSaturationDescriptorLinker();
+						CReapplyConceptSaturationLabelSet* setLastNominalIndependentConceptSaturationDescriptorLinker(CConceptSaturationDescriptor* conSatDes);
+
 					// protected methods
 					protected:
 
@@ -116,6 +123,8 @@ namespace Konclude {
 						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* mConceptDesDepHash;
 						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* mAdditionalConceptDesDepHash;
 						CConceptSaturationDescriptor* mConceptSatDesLinker;
+						CConceptSaturationDescriptor* mLastNominalIndepConSatDes;
+
 						cint64 mConceptCount;
 						cint64 mTotelCount;
 

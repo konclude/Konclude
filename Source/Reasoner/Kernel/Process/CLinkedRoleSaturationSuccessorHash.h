@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -28,6 +28,7 @@
 #include "ProcessSettings.h"
 #include "CProcessContext.h"
 #include "CLinkedRoleSaturationSuccessorData.h"
+#include "CSaturationSuccessorRoleAssertionLinker.h"
 
 
 // Other includes
@@ -72,27 +73,34 @@ namespace Konclude {
 						bool hasLinkedSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole = nullptr, cint64 linkCount = 1);
 
 
-						CLinkedRoleSaturationSuccessorHash* addLinkedSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole, cint64 linkCount = 1);
+						CLinkedRoleSaturationSuccessorHash* addLinkedSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole, cint64 linkCount = 1, bool forceAddLink = false);
 						CLinkedRoleSaturationSuccessorHash* addLinkedVALUESuccessor(CRole* role, cint64 nominalID, CRole* creationRole);
 						CLinkedRoleSaturationSuccessorHash* deactivateLinkedSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole);
 						CLinkedRoleSaturationSuccessorHash* addExtensionSuccessor(CRole* role, CIndividualSaturationProcessNode* linkedIndi, CRole* creationRole, cint64 linkCount = 1);
+						CLinkedRoleSaturationSuccessorHash* setSuccessorMergedCreation(CRole* role, CIndividualSaturationProcessNode* linkedIndi);
 
 						CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>* getLinkedRoleSuccessorHash();
 						
 						CLinkedRoleSaturationSuccessorData*& getLinkedRoleSuccessorData(CRole* role, bool create = true);
+						bool hasLinkedRoleSuccessorData(CRole* role);
 
 						CConceptSaturationDescriptor* getLastExaminedConceptDescriptor();
 						CLinkedRoleSaturationSuccessorHash* setLastExaminedConceptDescriptor(CConceptSaturationDescriptor* conDes);
 
+						CSaturationSuccessorRoleAssertionLinker* getLastExaminedRoleAssertionLinker();
+						CLinkedRoleSaturationSuccessorHash* setLastExaminedRoleAssertionLinker(CSaturationSuccessorRoleAssertionLinker* roleAssLinker);
+
 					// protected methods
 					protected:
 						CSaturationSuccessorData*& getLinkedRoleSuccessorData(CLinkedRoleSaturationSuccessorData*& roleSuccData, cint64 linkedIndiID, bool forceNewCreation = false);
+						bool hasActiveCreationRole(CSaturationSuccessorData* succData, CRole* creationRole);
 
 					// protected variables
 					protected:
 						CProcessContext* mContext;
 						CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*> mRoleSuccDataHash;
 						CConceptSaturationDescriptor* mLastExaminedConDes;
+						CSaturationSuccessorRoleAssertionLinker* mLastExaminedRoleAssLinker;
 
 					// private methods
 					private:

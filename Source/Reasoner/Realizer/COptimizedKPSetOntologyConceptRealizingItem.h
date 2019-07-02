@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -29,13 +29,20 @@
 #include "CRealizingTestingItem.h"
 #include "COntologyRealizingItem.h"
 #include "CRealizingTestingStep.h"
-#include "COptimizedKPSetConceptInstancesItem.h"
-
+#include "COptimizedKPSetRoleInstancesItem.h"
+#include "COptimizedKPSetRoleInstancesRedirectionItem.h"
 
 // Other includes
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
 
 #include "Reasoner/Ontology/COntologyProcessingStepRequirement.h"
+
+#include "Reasoner/Realization/CRoleRealizationInstanceVisitor.h"
+#include "Reasoner/Realization/CRoleRealizationIndividualVisitor.h"
+#include "Reasoner/Realization/CRoleRealization.h"
+#include "Reasoner/Realization/CConceptRealization.h"
+#include "Reasoner/Realization/CSameRealization.h"
+#include "Reasoner/Realization/CPossibleAssertionsCollectionSet.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -47,6 +54,7 @@ namespace Konclude {
 
 		using namespace Kernel::Task;
 		using namespace Ontology;
+		using namespace Realization;
 
 		namespace Realizer {
 
@@ -59,16 +67,20 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedKPSetOntologyConceptRealizingItem : public COntologyRealizingItem, public CConceptRealization {
+			class COptimizedKPSetOntologyConceptRealizingItem : public COntologyRealizingItem, public CRoleRealization, public CConceptRealization, public CSameRealization {
 				// public methods
 				public:
 					//! Constructor
 					COptimizedKPSetOntologyConceptRealizingItem();
 					~COptimizedKPSetOntologyConceptRealizingItem();
 
-					COptimizedKPSetOntologyConceptRealizingItem* initRequirementConfigRealizingItem(CConcreteOntology* ontology, CConfigurationBase* config);
+					virtual COptimizedKPSetOntologyConceptRealizingItem* initRequirementConfigRealizingItem(CConcreteOntology* ontology, CConfigurationBase* config);
 					
-					COptimizedKPSetOntologyConceptRealizingItem* initItemsFromHierarchy();
+					COptimizedKPSetOntologyConceptRealizingItem* initConceptItemsFromHierarchy();
+					COptimizedKPSetOntologyConceptRealizingItem* initRoleItemsFromHierarchy();
+					COptimizedKPSetOntologyConceptRealizingItem* initRoleCandidateInitializingIndividualItems();
+
+					COptimizedKPSetOntologyConceptRealizingItem* initComplexRolesStarterCandidates();
 
 					bool hasItemsInitialized();
 					COptimizedKPSetOntologyConceptRealizingItem* setItemsInitialized(bool initialized);
@@ -79,20 +91,53 @@ namespace Konclude {
 					bool hasRealizationConceptsInitialized();
 					COptimizedKPSetOntologyConceptRealizingItem* setRealizationConceptsInitialized(bool initialized);
 
+					bool hasRealizationRolesInitialized();
+					COptimizedKPSetOntologyConceptRealizingItem* setRealizationRolesInitialized(bool initialized);
+
+					COptimizedKPSetOntologyConceptRealizingItem* setTemporaryRoleRealizationOntology(CConcreteOntology* tmpOntology);
+					CConcreteOntology* getTemporaryRoleRealizationOntology();
+
 					virtual COntologyRealizingItem* addProcessingRequirement(COntologyProcessingRequirement* ontoRequirement);
 
 					CCalculationConfigurationExtension* getCalculationConfiguration();
-					COptimizedKPSetOntologyConceptRealizingItem* markIntanceItemForConceptRealization(CConcept* concept);
-					COptimizedKPSetOntologyConceptRealizingItem* addInstanceItemToProcessingPossibleInstances(COptimizedKPSetConceptInstancesItem* instanceItem);
+
+					COptimizedKPSetOntologyConceptRealizingItem* markIntanceItemForConceptRealization(CConcept* concept, bool subconceptRealizationRequired = true);
+					COptimizedKPSetOntologyConceptRealizingItem* addConceptInstanceItemToProcessPossibleInstances(COptimizedKPSetConceptInstancesItem* instanceItem);
 
 					COptimizedKPSetOntologyConceptRealizingItem* markInstantiatedItemForSameIndividualsRealization();
-					COptimizedKPSetOntologyConceptRealizingItem* addInstantiatedItemToProcessingPossibleSameIndividuals(COptimizedKPSetConceptInstantiatedItem* instantiatedItem);
+					COptimizedKPSetOntologyConceptRealizingItem* addInstantiatedItemToProcessPossibleSameIndividuals(COptimizedKPSetIndividualItem* instantiatedItem);
+
+					COptimizedKPSetOntologyConceptRealizingItem* markIntanceItemForRoleRealization(CRole* role, bool subroleRealizationRequired = true);
+					COptimizedKPSetOntologyConceptRealizingItem* addRoleInstanceItemToProcessPossibleInstances(COptimizedKPSetRoleInstancesItem* instanceItem);
+					COptimizedKPSetOntologyConceptRealizingItem* addRoleInstanceItemToInitializeCandidates(COptimizedKPSetRoleInstancesItem* instanceItem);
+					COptimizedKPSetOntologyConceptRealizingItem* addRoleInstanceIndividualItemToInitializeCandidates(COptimizedKPSetIndividualItem* indiItem);
+
+
+
+					QHash<CConcept*,COptimizedKPSetRoleInstancesItem*>* getMarkerConceptInstancesItemHash();
+
+
+
+					bool isExtraConsistencyTestingStepRequired();
+					COptimizedKPSetOntologyConceptRealizingItem* setExtraConsistencyTestingStepRequired(bool required);
+					bool isExtraConsistencyTesting();
+					COptimizedKPSetOntologyConceptRealizingItem* setExtraConsistencyTesting(bool testing);
+					bool isExtraConsistencyTested();
+					COptimizedKPSetOntologyConceptRealizingItem* setExtraConsistencyTested(bool tested);
+
 
 
 					CRealizingTestingStep* getRealizeConceptProcessingStep();
 					bool isRealizeConceptStepFinished();
 					bool isRealizeConceptStepRequired();
 					bool areRealizeConceptStepProcessingRequirementSatisfied();
+
+
+					CRealizingTestingStep* getRealizeRoleProcessingStep();
+					bool isRealizeRoleStepFinished();
+					bool isRealizeRoleStepRequired();
+					bool areRealizeRoleStepProcessingRequirementSatisfied();
+
 
 					CRealizingTestingStep* getRealizeSameIndividualsProcessingStep();
 					bool isRealizeSameIndividualsStepFinished();
@@ -108,30 +153,56 @@ namespace Konclude {
 					CRealization* getRealization();
 
 
-					bool hasRemainingProcessingInstanceItems();
+					bool hasRemainingInitializingRoleInstanceItems();
+					bool hasRemainingProcessingRoleInstanceItems();
+					bool hasRemainingInitializingRoleInstanceIndividualItems();
+
+					bool hasRemainingProcessingConceptInstanceItems();
 					bool hasRemainingProcessingSameIndividualsItems();
+
+
+					COptimizedKPSetOntologyConceptRealizingItem* addRoleCandidateInitalizingIndividualsItem(COptimizedKPSetIndividualItem* indiItem);
+					QList<COptimizedKPSetIndividualItem*>* getRoleCandidateInitalizingIndividualsItemList();
 
 
 					QHash<CHierarchyNode*,COptimizedKPSetConceptInstancesItem*>* getHierarchyNodeInstancesItemHash();
 					QHash<CConcept*,COptimizedKPSetConceptInstancesItem*>* getConceptInstancesItemHash();
 
-					QHash<CIndividual*,COptimizedKPSetConceptInstantiatedItem*>* getIndividualInstantiatedItemHash();
+					QHash<CRole*,COptimizedKPSetRoleInstancesItem*>* getRoleInstancesItemHash();
+					QList<COptimizedKPSetRoleInstancesItem*>* getRoleInstancesItemList();
+					QList<COptimizedKPSetRoleInstancesItem*>* getComplexRoleInstancesItemList();
 
-					COptimizedKPSetConceptInstantiatedItem* getIndividualInstantiatedItem(CIndividual* individual, bool directCreate = true);
+					QHash<CIndividual*,COptimizedKPSetIndividualItem*>* getIndividualInstantiatedItemHash();
+
+					COptimizedKPSetIndividualItem* getIndividualInstantiatedItem(CIndividual* individual, bool directCreate = true);
 					bool hasIndividualInstantiatedItem(CIndividual* individual);
 
-					QList<COptimizedKPSetConceptInstancesItem*>* getProcessingPossibleInstancesItemList();
-					QList<COptimizedKPSetConceptInstantiatedItem*>* getProcessingPossibleSameIndividualsItemList();
+					QList<COptimizedKPSetConceptInstancesItem*>* getProcessingPossibleConceptInstancesItemList();
+					QList<COptimizedKPSetRoleInstancesItem*>* getProcessingPossibleRoleInstancesItemList();
+					QList<COptimizedKPSetRoleInstancesItem*>* getInitializingRoleInstancesItemList();
+					QList<COptimizedKPSetIndividualItem*>* getProcessingPossibleSameIndividualsItemList();
+
+					QList<COptimizedKPSetIndividualItem*>* getInitializingRoleInstancesIndividualItemList();
 
 
-					cint64 getTestedPossibleInstancesCount();
-					cint64 getOpenPossibleInstancesCount();
+					cint64 getTestedPossibleConceptInstancesCount();
+					cint64 getOpenPossibleConceptInstancesCount();
 
-					COptimizedKPSetOntologyConceptRealizingItem* incTestedPossibleInstancesCount(cint64 incCount = 1);
-					COptimizedKPSetOntologyConceptRealizingItem* incOpenPossibleInstancesCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* incTestedPossibleConceptInstancesCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* incOpenPossibleConceptInstancesCount(cint64 incCount = 1);
 
-					COptimizedKPSetOntologyConceptRealizingItem* decTestedPossibleInstancesCount(cint64 decCount = 1);
-					COptimizedKPSetOntologyConceptRealizingItem* decOpenPossibleInstancesCount(cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decTestedPossibleConceptInstancesCount(cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decOpenPossibleConceptInstancesCount(cint64 decCount = 1);
+
+
+					cint64 getTestedPossibleSameIndividualsCount();
+					cint64 getOpenPossibleSameIndividualsCount();
+
+					COptimizedKPSetOntologyConceptRealizingItem* incTestedPossibleSameIndividualsCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* incOpenPossibleSameIndividualsCount(cint64 incCount = 1);
+
+					COptimizedKPSetOntologyConceptRealizingItem* decTestedPossibleSameIndividualsCount(cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decOpenPossibleSameIndividualsCount(cint64 decCount = 1);
 
 
 					virtual bool visitDirectInstances(CConceptInstantiatedItem* item, CConceptRealizationInstanceVisitor* visitor);
@@ -145,23 +216,116 @@ namespace Konclude {
 					virtual CConceptInstantiatedItem* getInstantiatedItem(CConcept* concept);
 					virtual CConceptInstanceItem* getInstanceItem(CIndividual* individual);
 
+
+					virtual bool visitSameIndividuals(CSameInstanceItem* item, CSameRealizationIndividualVisitor* visitor);
+
+					virtual CSameInstanceItem* getSameInstanceItem(CIndividual* individual);
+
+
+
+					virtual bool visitTargetIndividuals(CRoleInstanceItem* individualItem, CRoleInstantiatedItem* roleItem, CRoleRealizationInstanceVisitor* visitor);
+
+					virtual bool visitIndividuals(CRoleInstanceItem* item, CRoleRealizationIndividualVisitor* visitor);
+
+					virtual CRoleInstantiatedItem* getRoleInstantiatedItem(CRole* role);
+					virtual CRoleInstanceItem* getRoleInstanceItem(CIndividual* individual);
+
+
+
 					COptimizedKPSetConceptInstancesItem* getTopInstancesItem();
 					COptimizedKPSetConceptInstancesItem* getBottomInstancesItem();
 
 					cint64 getTestingPossibleSameIndividualCount();
-					cint64 getTestingPossibleInstanceCount();
+					cint64 getTestingPossibleConceptInstanceCount();
 
 					bool hasTestingPossibleSameIndividual();
-					bool hasTestingPossibleInstances();
+					bool hasTestingPossibleConceptInstances();
 
 					COptimizedKPSetOntologyConceptRealizingItem* setTestingPossibleSameIndividualCount(cint64 testCount);
-					COptimizedKPSetOntologyConceptRealizingItem* setTestingPossibleInstanceCount(cint64 testCount);
+					COptimizedKPSetOntologyConceptRealizingItem* setTestingPossibleConceptInstanceCount(cint64 testCount);
 
 					COptimizedKPSetOntologyConceptRealizingItem* incTestingPossibleSameIndividualCount(cint64 incCount = 1);
 					COptimizedKPSetOntologyConceptRealizingItem* decTestingPossibleSameIndividualCount(cint64 decCount = 1);
 					
-					COptimizedKPSetOntologyConceptRealizingItem* incTestingPossibleInstanceCount(cint64 incCount = 1);
-					COptimizedKPSetOntologyConceptRealizingItem* decTestingPossibleInstanceCount(cint64 decCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* incTestingPossibleConceptInstanceCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decTestingPossibleConceptInstanceCount(cint64 decCount = 1);
+
+
+
+
+
+
+					COptimizedKPSetRoleInstancesItem* getTopRoleInstancesItem();
+					COptimizedKPSetRoleInstancesItem* getBottomRoleInstancesItem();
+
+					bool hasTestingPossibleRoleInstances();
+					cint64 getTestingPossibleRoleInstanceCount();
+					cint64 getTestedPossibleRoleInstancesCount();
+					cint64 getInitializedRoleInstancesCount();
+					cint64 getOpenPossibleRoleInstancesCount();
+					cint64 getRemaningInitalizingRoleInstancesCount();
+
+					COptimizedKPSetOntologyConceptRealizingItem* setTestingPossibleRoleInstanceCount(cint64 testCount);
+					COptimizedKPSetOntologyConceptRealizingItem* incTestingPossibleRoleInstanceCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decTestingPossibleRoleInstanceCount(cint64 decCount = 1);
+
+					COptimizedKPSetOntologyConceptRealizingItem* incTestedPossibleRoleInstancesCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decTestedPossibleRoleInstancesCount(cint64 decCount = 1);
+
+					COptimizedKPSetOntologyConceptRealizingItem* incOpenPossibleRoleInstancesCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decOpenPossibleRoleInstancesCount(cint64 decCount = 1);
+
+					COptimizedKPSetOntologyConceptRealizingItem* incInitializedRoleInstancesCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decInitializedRoleInstancesCount(cint64 decCount = 1);
+
+					COptimizedKPSetOntologyConceptRealizingItem* incRemaningInitalizingInstancesCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decRemaningInitalizingInstancesCount(cint64 decCount = 1);
+
+
+					bool hasTestingRoleInstanceCandidates();
+					cint64 getTestingRoleInstanceCandidatesCount();
+					COptimizedKPSetOntologyConceptRealizingItem* setTestingRoleInstanceCandidatesCount(cint64 testCount);
+					COptimizedKPSetOntologyConceptRealizingItem* incTestingRoleInstanceCandidatesCount(cint64 incCount = 1);
+					COptimizedKPSetOntologyConceptRealizingItem* decTestingRoleInstanceCandidatesCount(cint64 decCount = 1);
+
+
+					bool isConceptRealizationInstalled();
+					COptimizedKPSetOntologyConceptRealizingItem* setConceptRealizationInstalled(bool installed);
+
+					bool isRoleRealizationInstalled();
+					COptimizedKPSetOntologyConceptRealizingItem* setRoleRealizationInstalled(bool installed);
+
+
+					bool isSameRealizationInstalled();
+					COptimizedKPSetOntologyConceptRealizingItem* setSameRealizationInstalled(bool installed);
+
+					bool isCountingPossibleConceptInstancesTesting();
+					bool isCountingPossibleRoleInstancesTesting();
+					bool isCountingPossibleSameInstancesTesting();
+
+					COptimizedKPSetOntologyConceptRealizingItem* setCountingPossibleConceptInstancesTesting(bool counting);
+					COptimizedKPSetOntologyConceptRealizingItem* setCountingPossibleRoleInstancesTesting(bool counting);
+					COptimizedKPSetOntologyConceptRealizingItem* setCountingPossibleSameInstancesTesting(bool counting);
+
+
+
+					COptimizedKPSetOntologyConceptRealizingItem* setTemporarySameRealizationOntology(CConcreteOntology* tmpOntology);
+					CConcreteOntology* getTemporarySameRealizationOntology();
+
+
+					QList<COptimizedKPSetIndividualItem*>* getPossibleSameIndividualsItemList();
+					COptimizedKPSetOntologyConceptRealizingItem* addPossibleSameIndividualsItem(COptimizedKPSetIndividualItem* indiItem);
+
+					virtual CPossibleAssertionsCollectionSet* getPossibleAssertionCollectionSet();
+
+
+
+					bool requiresIndividualDependenceTracking();
+					COptimizedKPSetOntologyConceptRealizingItem* setIndividualDependenceTrackingRequired(bool indiDepTrackingRequired);
+
+					QList<COptimizedKPSetIndividualItem*>* getInstantiatedItemList();
+
+					QTime* getInitializationTime();
 
 				// protected methods
 				protected:
@@ -169,6 +333,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CRealizingTestingStep* mRealizeConceptProcessingStep;
+					CRealizingTestingStep* mRealizeRoleProcessingStep;
 					CRealizingTestingStep* mRealizeSameIndividualsProcessingStep;
 					CRealization* mRealization;
 
@@ -179,26 +344,82 @@ namespace Konclude {
 					bool mItemsInitialized;
 					bool mRealizationSameIndividualsInitialized;
 					bool mRealizationConceptsInitialized;
+					bool mRealizationRolesInitialized;
 
 					QHash<CHierarchyNode*,COptimizedKPSetConceptInstancesItem*> mHierNodeInstancesItemHash;
 					QHash<CConcept*,COptimizedKPSetConceptInstancesItem*> mConceptInstancesItemHash;
-					QList<COptimizedKPSetConceptInstancesItem*> mInstancesItemContainer;
+					QList<COptimizedKPSetConceptInstancesItem*> mConceptInstancesItemContainer;
 
-					QHash<CIndividual*,COptimizedKPSetConceptInstantiatedItem*> mIndividualInstantiatedItemHash;
-					QList<COptimizedKPSetConceptInstantiatedItem*> mInstantiatedItemContainer;
+					QHash<CRole*,COptimizedKPSetRoleInstancesItem*> mRoleInstancesItemHash;
+					QHash<CRole*,COptimizedKPSetRoleInstancesRedirectionItem*> mRedirectedRoleInstancesItemHash;
+					QList<COptimizedKPSetRoleInstancesItem*> mRoleInstancesItemContainer;
+					QList<COptimizedKPSetRoleInstancesItem*> mComplexRoleInstancesItemContainer;
+
+					QHash<CConcept*,COptimizedKPSetRoleInstancesItem*> mMarkerConceptInstancesItemHash;
+
+					QHash<CIndividual*,COptimizedKPSetIndividualItem*> mIndividualInstantiatedItemHash;
+					QList<COptimizedKPSetIndividualItem*> mInstantiatedItemContainer;
 
 
-					QList<COptimizedKPSetConceptInstancesItem*> mProcessingInstancesItemList;
-					QList<COptimizedKPSetConceptInstantiatedItem*> mProcessingSameIndividualsItemList;
+					QList<COptimizedKPSetConceptInstancesItem*> mProcessingConceptInstancesItemList;
+					QList<COptimizedKPSetIndividualItem*> mProcessingSameIndividualsItemList;
 
-					cint64 mTestedPossibleInstancesCount;
-					cint64 mOpenPossibleInstancesCount;
+					cint64 mTestedPossibleConceptInstancesCount;
+					cint64 mOpenPossibleConceptInstancesCount;
 
-					COptimizedKPSetConceptInstancesItem* mTopInstancesItem;
-					COptimizedKPSetConceptInstancesItem* mBottomInstancesItem;
+					COptimizedKPSetConceptInstancesItem* mTopConceptInstancesItem;
+					COptimizedKPSetConceptInstancesItem* mBottomConceptInstancesItem;
 
 					cint64 mTestingPossibleSameIndividualCount;
-					cint64 mTestingPossibleInstanceCount;
+					cint64 mTestingPossibleConceptInstanceCount;
+					cint64 mTestingPossibleRoleInstanceCount;
+					cint64 mTestingRoleInstanceCandidateCount;
+
+
+
+					CConcreteOntology* mTempRoleRealizationOntology;
+					CConcreteOntology* mTempSameRealizationOntology;
+
+
+					QList<COptimizedKPSetIndividualItem*> mRoleCandidateInitalizingIndividualsItemList;
+					QList<COptimizedKPSetRoleInstancesItem*> mInitializingRoleInstancesItemList;
+					QList<COptimizedKPSetRoleInstancesItem*> mProcessingRoleInstancesItemList;
+
+					QList<COptimizedKPSetIndividualItem*> mInitializingRoleInstancesIndividualItemList;
+
+					COptimizedKPSetRoleInstancesItem* mTopRoleInstancesItem;
+					COptimizedKPSetRoleInstancesItem* mBottomRoleInstancesItem;
+
+					cint64 mTestedPossibleRoleInstancesCount;
+					cint64 mInitializedRoleInstancesCount;
+					cint64 mOpenPossibleRoleInstancesCount;
+					cint64 mRemainingInitalizingRoleInstancesCount;
+
+
+					bool mConceptRealizationInstalled;
+					bool mRoleRealizationInstalled;
+					bool mSameRealizationInstalled;
+
+
+					bool mCountingPossibleConceptInstancesTesting;
+					bool mCountingPossibleRoleInstancesTesting;
+					bool mCountingPossibleSameInstancesTesting;
+
+					QList<COptimizedKPSetIndividualItem*> mPossibleSameIndiItemList;
+
+					cint64 mTestedPossibleSameIndividualsCount;
+					cint64 mOpenPossibleSameIndividualsCount;
+
+					CPossibleAssertionsCollectionSet* mPossAssCollSet;
+					bool mIndiDepTrackReq;
+
+
+
+					bool mExtraConsistencyTestingRequired;
+					bool mExtraConsistencyTesting;
+					bool mExtraConsistencyTested;
+
+					QTime mInitTime;
 
 				// private methods
 				private:

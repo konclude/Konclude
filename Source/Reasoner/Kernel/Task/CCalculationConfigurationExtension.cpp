@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -40,6 +40,7 @@ namespace Konclude {
 					mConfMinimizeMergingBranchesChecked = false;
 					mConfSatCacheSingleLevelWritingChecked = false;
 					mConfUnsatCacheSingleLevelWritingChecked = false;
+					mConfUnsatCacheTestedConceptWritingChecked = false;
 					mConfPseudoModelRuleEssentialCheckingChecked = false;
 					mConfClassPseudoModelSubsumptionMergingChecked = false;
 					mConfSpecializedAutomateRuleChecked = false;
@@ -70,6 +71,9 @@ namespace Konclude {
 					mConfSignatureSavingChecked = false;
 					mConfSkipANDConceptsChecked = false;
 					mConfCompletionGraphCachingChecked = false;
+					mConfDelayedCompletionGraphCachingReactivationChecked = false;
+					mConfForceNodesRecreationForRepeatedIndividualProcessingChecked = false;
+					mConfAvoidRepeatedIndividualProcessingChecked = false;
 
 					mConfUnsatCachingUseNodeSignatureSetChecked = false;
 					mConfUnsatCachingUseFullNodeDependencyChecked = false;
@@ -93,7 +97,17 @@ namespace Konclude {
 					mConfSaturationExpansionSatisfiabilityCacheWritingChecked = false;
 					mConfSaturationUnsatisfiabilityCacheWritingChecked = false;
 					mDatatypeReasoningChecked = false;
+					mComputedTypesCachingChecked = false;
+					mConstructionIndividualNodeMergingChecked = false;
+					mConfIndividualsBackendCacheLoadingChecked = false;
 
+					mSaturationReferredNodeManyConceptCountChecked = false;
+					mSaturationManyConceptReferredNodeCountProcessLimitChecked = false;
+					mSaturationReferredNodeConceptCountProcessLimitChecked = false;
+					mSaturationReferredNodeUnprocessedCountProcessLimitChecked = false;
+					mSaturationReferredNodeCheckingDepthChecked = false;
+					mConfForceManyConceptSaturationChecked = false;
+					mMaxRecProConceptCountChecked = false;
 				}
 
 
@@ -165,6 +179,14 @@ namespace Konclude {
 					return mConfUnsatCacheSingleLevelWritingActivated;
 				}
 
+
+				bool CCalculationConfigurationExtension::isTestedConceptUnsatisfiableCacheWritingActivated() {
+					if (!mConfUnsatCacheTestedConceptWritingChecked) {
+						mConfUnsatCacheTestedConceptWritingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.UnsatisfiableCacheTestingConceptWriting",true);
+						mConfUnsatCacheTestedConceptWritingChecked = true;
+					}
+					return mConfUnsatCacheTestedConceptWritingActivated;
+				}
 
 				bool CCalculationConfigurationExtension::isSingleLevelSatisfiableCacheWritingActivated() {
 					if (!mConfSatCacheSingleLevelWritingChecked) {
@@ -412,6 +434,56 @@ namespace Konclude {
 					return mConfCompletionGraphCachingActivated;
 				}
 
+
+
+				bool CCalculationConfigurationExtension::isDelayedCompletionGraphCachingReactivationActivated() {
+					if (!mConfDelayedCompletionGraphCachingReactivationChecked) {
+						mConfDelayedCompletionGraphCachingReactivationActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.DelayedCompletionGraphCachingReactivation",false);
+						mConfDelayedCompletionGraphCachingReactivationChecked = true;
+					}
+					return mConfDelayedCompletionGraphCachingReactivationActivated;
+				}
+
+
+
+				bool CCalculationConfigurationExtension::isForceNodesRecreationForRepeatedIndividualProcessingActivated() {
+					if (!mConfForceNodesRecreationForRepeatedIndividualProcessingChecked) {
+						mConfForceNodesRecreationForRepeatedIndividualProcessingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.ForceNodesRecreationForRepeatedIndividualProcessing",true);
+						mConfForceNodesRecreationForRepeatedIndividualProcessingChecked = true;
+					}
+					return mConfForceNodesRecreationForRepeatedIndividualProcessingActivated;
+				}
+
+
+
+
+
+				bool CCalculationConfigurationExtension::isAvoidRepeatedIndividualProcessingActivated() {
+					if (!mConfAvoidRepeatedIndividualProcessingChecked) {
+						mConfAvoidRepeatedIndividualProcessingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.AvoidRepeatedIndividualProcessing",true);
+						mConfAvoidRepeatedIndividualProcessingChecked = true;
+					}
+					return mConfAvoidRepeatedIndividualProcessingActivated;
+				}
+
+
+
+
+
+
+
+				bool CCalculationConfigurationExtension::isIndividualsBackendCacheLoadingActivated() {
+					if (!mConfIndividualsBackendCacheLoadingChecked) {
+						mConfIndividualsBackendCacheLoadingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.IndividualsBackendCacheLoading",true);
+						mConfIndividualsBackendCacheLoadingChecked = true;
+					}
+					return mConfIndividualsBackendCacheLoadingActivated;
+				}
+
+
+
+
+
 				bool CCalculationConfigurationExtension::isUnsatisfiableCachingFullDependencyActivated() {
 					if (!mConfUnsatCachingUseFullNodeDependencyChecked) {
 						mConfUnsatCachingUseFullNodeDependencyActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.UnsatisfiableCachingFullDependency",false);
@@ -592,11 +664,93 @@ namespace Konclude {
 
 				bool CCalculationConfigurationExtension::isDatatypeReasoningActivated() {
 					if (!mDatatypeReasoningChecked) {
-						mDatatypeReasoningActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.DatatypeReasoning",true);
+						mDatatypeReasoningActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.ComputedTypesCaching",true);
 						mDatatypeReasoningChecked = true;
 					}
 					return mDatatypeReasoningActivated;
 				}
+
+
+				bool CCalculationConfigurationExtension::isComputedTypesCachingActivated() {
+					if (!mComputedTypesCachingChecked) {
+						mComputedTypesCachingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.DatatypeReasoning",true);
+						mComputedTypesCachingChecked = true;
+					}
+					return mComputedTypesCachingActivated;
+				}
+
+
+
+				bool CCalculationConfigurationExtension::isConstructionIndividualNodeMergingActivated() {
+					if (!mConstructionIndividualNodeMergingChecked) {
+						mConstructionIndividualNodeMergingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.ConstructionIndividualNodeMerging",true);
+						mConstructionIndividualNodeMergingChecked = true;
+					}
+					return mConstructionIndividualNodeMergingActivated;
+				}
+
+
+
+
+				cint64 CCalculationConfigurationExtension::getMaximumRecursiveProcessingConceptCount() {
+					if (!mMaxRecProConceptCountChecked) {
+						mMaxRecProConceptCount = CConfigDataReader::readConfigInteger(this,"Konclude.Calculation.MaximumRecursiveProcessingConceptCount",true);
+						mMaxRecProConceptCountChecked = true;
+					}
+					return mMaxRecProConceptCount;
+				}
+
+
+
+				cint64 CCalculationConfigurationExtension::getSaturationReferredNodeManyConceptCount() {
+					if (!mSaturationReferredNodeManyConceptCountChecked) {
+						mSaturationReferredNodeManyConceptCount = CConfigDataReader::readConfigInteger(this,"Konclude.Calculation.Optimization.SaturationReferredNodeManyConceptCount",true);
+						mSaturationReferredNodeManyConceptCountChecked = true;
+					}
+					return mSaturationReferredNodeManyConceptCount;
+				}
+
+				cint64 CCalculationConfigurationExtension::getSaturationManyConceptReferredNodeCountProcessLimit() {
+					if (!mSaturationManyConceptReferredNodeCountProcessLimitChecked) {
+						mSaturationManyConceptReferredNodeCountProcessLimit = CConfigDataReader::readConfigInteger(this,"Konclude.Calculation.Optimization.SaturationManyConceptReferredNodeCountProcessLimit",true);
+						mSaturationManyConceptReferredNodeCountProcessLimitChecked = true;
+					}
+					return mSaturationManyConceptReferredNodeCountProcessLimit;
+				}
+
+				cint64 CCalculationConfigurationExtension::getSaturationReferredNodeConceptCountProcessLimit() {
+					if (!mSaturationReferredNodeConceptCountProcessLimitChecked) {
+						mSaturationReferredNodeConceptCountProcessLimit = CConfigDataReader::readConfigInteger(this,"Konclude.Calculation.Optimization.SaturationReferredNodeConceptCountProcessLimit",true);
+						mSaturationReferredNodeConceptCountProcessLimitChecked = true;
+					}
+					return mSaturationReferredNodeConceptCountProcessLimit;
+				}
+
+				cint64 CCalculationConfigurationExtension::getSaturationReferredNodeUnprocessedCountProcessLimit() {
+					if (!mSaturationReferredNodeUnprocessedCountProcessLimitChecked) {
+						mSaturationReferredNodeUnprocessedCountProcessLimit = CConfigDataReader::readConfigInteger(this,"Konclude.Calculation.Optimization.SaturationReferredNodeUnprocessedCountProcessLimit",true);
+						mSaturationReferredNodeUnprocessedCountProcessLimitChecked = true;
+					}
+					return mSaturationReferredNodeUnprocessedCountProcessLimit;
+				}
+
+				cint64 CCalculationConfigurationExtension::getSaturationReferredNodeCheckingDepth() {
+					if (!mSaturationReferredNodeCheckingDepthChecked) {
+						mSaturationReferredNodeCheckingDepth = CConfigDataReader::readConfigInteger(this,"Konclude.Calculation.Optimization.SaturationReferredNodeCheckingDepth",true);
+						mSaturationReferredNodeCheckingDepthChecked = true;
+					}
+					return mSaturationReferredNodeCheckingDepth;
+				}
+
+
+				bool CCalculationConfigurationExtension::isForceManyConceptSaturationActivated() {
+					if (!mConfForceManyConceptSaturationChecked) {
+						mConfForceManyConceptSaturationActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.ForceManyConceptNodeSaturation",true);
+						mConfForceManyConceptSaturationChecked = true;
+					}
+					return mConfForceManyConceptSaturationActivated;
+				}
+
 
 
 			}; // end namespace Task

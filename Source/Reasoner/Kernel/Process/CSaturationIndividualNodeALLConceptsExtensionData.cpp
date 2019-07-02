@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -94,7 +94,7 @@ namespace Konclude {
 				}
 
 				CSaturationLinkedSuccessorIndividualALLConceptsExtensionData* CSaturationIndividualNodeALLConceptsExtensionData::getALLConceptsExtensionData(CIndividualSaturationProcessNode* indiNode, bool create) {
-					return mLinkedSuccIdnALLConceptExtHash.getALLConceptsExtensionData(indiNode);
+					return mLinkedSuccIdnALLConceptExtHash.getALLConceptsExtensionData(indiNode,create);
 				}
 
 				bool CSaturationIndividualNodeALLConceptsExtensionData::hasExtensionProcessData() {

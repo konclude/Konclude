@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -55,20 +55,20 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CPairExpressionAssociator : public CListExpressionAssociator {
+			class CPairExpressionAssociator {
 				// public methods
 				public:
 					//! Constructor
 					CPairExpressionAssociator(CBuildExpression* expression1, CBuildExpression* expression2);
-
-					//! Destructor
-					virtual ~CPairExpressionAssociator();
 
 					CPairExpressionAssociator* setFirstExpression(CBuildExpression* expression1);
 					CPairExpressionAssociator* setSecondExpression(CBuildExpression* expression2);
 					CBuildExpression* getFirstExpression() const;
 					CBuildExpression* getSecondExpression() const;
 
+					virtual cint64 getStructuralHashValue();
+					virtual bool compareStructuralEquivalence(const CPairExpressionAssociator& pairExpressionAssociator);
+					virtual bool visitSubExpressions(CBuildExpression* expression, CSubExpressionVisitor* subExpressionVisitor);
 
 				// protected methods
 				protected:
@@ -78,6 +78,8 @@ namespace Konclude {
 
 				// protected variables
 				protected:
+					CBuildExpression* mFirstExpression;
+					CBuildExpression* mSecondExpression;
 
 				// private variables
 				private:
