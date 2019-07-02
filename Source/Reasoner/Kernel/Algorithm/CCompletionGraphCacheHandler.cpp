@@ -121,7 +121,7 @@ namespace Konclude {
 								if (mergedIndiID <= detSatIndiCount) {
 									detSatMergedIndiNode = mDetSatProcNodeVec->getData(mergedIndiID);
 								}
-								if (compGraphCachedMergedIndiNode != detSatMergedIndiNode) {
+								if (compGraphCachedMergedIndiNode != detSatMergedIndiNode && detSatMergedIndiNode) {
 									addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatMergedIndiNode,true);
 								}
 							}

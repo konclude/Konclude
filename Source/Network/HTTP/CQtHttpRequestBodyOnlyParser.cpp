@@ -93,6 +93,12 @@ namespace Konclude {
 							if (mHeaderLineReadBuffer[newPos-1] == '\n') {
 								lineCompleted = true;
 							}
+							//if (newPos == 1 && mHeaderLineReadBuffer[newPos-1] == 13) {
+							//	lineCompleted = true;
+							//	if (mExpectedBodyLength == 0) {
+							//		mRequestCompleted = true;
+							//	}
+							//}
 							mHeaderLineReadBufferPosition = newPos;
 							mReadHeaderDataSize += mHeaderLineReadBufferPosition;
 							if (lineCompleted) {

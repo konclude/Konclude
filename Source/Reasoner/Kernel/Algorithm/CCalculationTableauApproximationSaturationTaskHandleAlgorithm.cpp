@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -4175,7 +4175,7 @@ namespace Konclude {
 					updateIndirectAddingIndividualStatusFlags(sourceNode,destinationNode->getIndirectStatusFlags(),mCalcAlgContext);
 
 					CMemoryAllocationManager* taskMemMan = mCalcAlgContext->getUsedProcessTaskMemoryAllocationManager();
-					bool existIndiInitialized = destinationNode->isInitialized();
+					bool existIndiInitialized = destinationNode->isInitialized() || destinationNode == sourceNode;
 					CReapplyConceptSaturationLabelSet* conSet = nullptr;
 					CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList();
 					bool connected = false;
@@ -4556,6 +4556,7 @@ namespace Konclude {
 					} 
 
 					bool tryFlatLabelCopy = false;
+					indiProcSatNode->setRequiredBackwardPropagation(requiredBackProp);
 
 					if (!specialIndiNode) {
 						CIndividual* nominalIndi = indiProcSatNode->getNominalIndividual();
@@ -4694,7 +4695,6 @@ namespace Konclude {
 							}
 						}
 					}
-					indiProcSatNode->setRequiredBackwardPropagation(requiredBackProp);
 					CBackwardSaturationPropagationLink* backSatPropLinkIt = indiProcSatNode->getInitializingBackwardPropagationLinks();
 					if (backSatPropLinkIt) {
 						while (backSatPropLinkIt) {
@@ -6368,7 +6368,6 @@ namespace Konclude {
 					if (!mConfForceAllConceptInsertion) {
 						if (opCode == CCATOM) {
 							++mAddedSUBConcepts;
-							contained = true;
 						} else if (opCode == CCSUB) {
 							++mAddedSUBConcepts;
 						} else if (!conNeg && (opCode == CCALL || opCode == CCIMPLALL)) {
@@ -6425,7 +6424,7 @@ namespace Konclude {
 									updateImplicationReapplyConceptSaturationDescriptor(&tmpNewReapplyImpReapplyConSatDes,rootProcessIndi,labelSet,calcAlgContext);
 								}
 								if (mConfImplicationAddingSkipping) {
-									if (!conNeg && (opCode == CCSUB || opCode == CCIMPLTRIG || opCode == CCBRANCHTRIG)) {
+									if (!conNeg && (opCode == CCATOM || opCode == CCSUB || opCode == CCIMPLTRIG || opCode == CCBRANCHTRIG)) {
 										CSortedNegLinker<CConcept*>* opConceptLinkerIt = concept->getOperandList();
 										while (opConceptLinkerIt) {
 											if (!opConceptLinkerIt->isNegated()) {

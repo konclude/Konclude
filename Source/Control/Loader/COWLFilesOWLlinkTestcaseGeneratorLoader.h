@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -38,6 +38,7 @@
 #include "Test/COWLFileOWLlinkIncrementalAssertionConsistencyRequestGenerator.h"
 #include "Test/COWLFileOWLlinkIncrementalAssertionClassificationRequestGenerator.h"
 #include "Test/COWLFileOWLlinkIncrementalAssertionRealizationRequestGenerator.h"
+#include "Test/COWLFileOWLlinkRealizeRequestGenerator.h"
 
 
 // Logger includes
@@ -96,6 +97,7 @@ namespace Konclude {
 					QString mOutputDirConsistency;
 					QString mOutputDirSatisfiability;
 					QString mOutputDirTypes;
+					QString mOutputDirRealize;
 
 
 					cint64 mSatisfiabilityTestCount;
@@ -137,6 +139,7 @@ namespace Konclude {
 					bool mConfCreateConsistencyTests;
 					bool mConfCreateSatisfiabilityTests;
 					bool mConfCreateTypeTests;
+					bool mConfCreateRealizeTests;
 
 
 
@@ -146,6 +149,7 @@ namespace Konclude {
 					COWLFileOWLlinkConsistencyRequestGenerator* mConsistencyGen;
 					COWLFileOWLlinkSatisfiabilityRequestGenerator* mSatisfiabilityGen;
 					COWLFileOWLlinkTypesRequestGenerator* mTypesGen;
+					COWLFileOWLlinkRealizeRequestGenerator* mRealizeGen;
 					COWLFileOWLlinkIncrementalAssertionConsistencyRequestGenerator* mIncAssConsistencyGen;
 					COWLFileOWLlinkIncrementalAssertionClassificationRequestGenerator* mIncAssClassificationGen;
 					COWLFileOWLlinkIncrementalAssertionRealizationRequestGenerator* mIncAssRealizationGen;

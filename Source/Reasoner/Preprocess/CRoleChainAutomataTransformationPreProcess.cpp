@@ -1128,6 +1128,9 @@ namespace Konclude {
 					for (QHash<CRole*,bool>::const_iterator it = relevantCriticalRoleNegationHash.constBegin(), itEnd = relevantCriticalRoleNegationHash.constEnd(); it != itEnd; ++it) {
 						CRole* role(it.key());
 						bool inversed(it.value());
+						if (recTravSubRoleChainData.mRole->isSymmetric() && recTravSubRoleChainData.mRole->getInverseRole() == recTravSubRoleChainData.mRole) {
+							recTravSubRoleChainData.mRecTraversalSubRoleList.append(TRoleNegationPair(role,!inversed));
+						}
 						recTravSubRoleChainData.mRecTraversalSubRoleList.append(TRoleNegationPair(role,inversed));
 					}
 				}

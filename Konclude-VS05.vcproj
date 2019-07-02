@@ -14707,6 +14707,14 @@
 						>
 					</File>
 					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkRealizeRequestGenerator.cpp"
+						>
+					</File>
+					<File
+						RelativePath=".\Source\Test\COWLFileOWLlinkRealizeRequestGenerator.h"
+						>
+					</File>
+					<File
 						RelativePath=".\Source\Test\COWLFileOWLlinkSatisfiabilityRequestGenerator.cpp"
 						>
 					</File>

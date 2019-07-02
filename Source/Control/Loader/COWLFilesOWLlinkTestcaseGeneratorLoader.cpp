@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -49,6 +49,7 @@ namespace Konclude {
 				mConfCreateConsistencyTests = CConfigDataReader::readConfigBoolean(config,"Konclude.Test.Generator.GenerateConsistencyTests",false);
 				mConfCreateSatisfiabilityTests = CConfigDataReader::readConfigBoolean(config,"Konclude.Test.Generator.GenerateSatisfiabilityTests",false);
 				mConfCreateTypeTests = CConfigDataReader::readConfigBoolean(config,"Konclude.Test.Generator.GenerateTypeTests",false);
+				mConfCreateRealizeTests = CConfigDataReader::readConfigBoolean(config,"Konclude.Test.Generator.GenerateRealizeTests",false);
 
 
 
@@ -58,6 +59,7 @@ namespace Konclude {
 				mOutputDirConsistency = mOutputDir+"Consistency/";
 				mOutputDirSatisfiability = mOutputDir+"Satisfiability/";
 				mOutputDirTypes = mOutputDir+"Types/";
+				mOutputDirRealize = mOutputDir+"Realization/";
 
 
 				mConfCreateIncAssConsistencyTests = CConfigDataReader::readConfigBoolean(config,"Konclude.Test.Generator.GenerateIncrementalAssertionConsistencyTests",false);
@@ -128,6 +130,7 @@ namespace Konclude {
 						QDir consistencyOutputDir(mOutputDirConsistency);
 						QDir satisfiabilityOutputDir(mOutputDirSatisfiability);
 						QDir typeOutputDir(mOutputDirTypes);
+						QDir realizeOutputDir(mOutputDirRealize);
 						QDir consIncAssConsDir(mOutputDirIncAssConsistency);
 						QDir consIncAssClassificationDir(mOutputDirIncAssClassification);
 						QDir consIncAssRealizationDir(mOutputDirIncAssRealization);
@@ -137,12 +140,17 @@ namespace Konclude {
 						QString consistencyOutFileString = outFileString+"-consistency-request.xml";
 						QString satisfiabilityOutFileString = outFileString+"-satisfiability-%1-request.xml";
 						QString typeOutFileString = outFileString+"-type-%1-request.xml";
+						QString realizeOutFileString = outFileString+"-realize-request.xml";
 						QString incAssConsFileString = outFileString+"-inc-ass-consistency-%1-request.xml";
 						QString incAssClassificationFileString = outFileString+"-inc-ass-classification-%1-request.xml";
 						QString incAssRealizationFileString = outFileString+"-inc-ass-realization-%1-request.xml";
 						if (mConfCreateClassifyTests) {
 							classifyOutputDir.mkpath(subDirPathString);
 							mClassifyGen->generateOWLlinkClassifyRequest(dirString+fileString,mOutputDirClassify+subDirPathString+classifyOutFileString);
+						}
+						if (mConfCreateRealizeTests) {
+							realizeOutputDir.mkpath(subDirPathString);
+							mRealizeGen->generateOWLlinkRealizeRequest(dirString+fileString,mOutputDirRealize+subDirPathString+realizeOutFileString);
 						}
 						if (mConfCreateConsistencyTests) {
 							consistencyOutputDir.mkpath(subDirPathString);
@@ -188,6 +196,7 @@ namespace Konclude {
 
 
 			CLoader *COWLFilesOWLlinkTestcaseGeneratorLoader::load() {
+				mRealizeGen = new COWLFileOWLlinkRealizeRequestGenerator(loaderConfig);
 				mClassifyGen = new COWLFileOWLlinkClassifyRequestGenerator(loaderConfig);
 				mConsistencyGen = new COWLFileOWLlinkConsistencyRequestGenerator(loaderConfig);
 				mSatisfiabilityGen = new COWLFileOWLlinkSatisfiabilityRequestGenerator(loaderConfig);
@@ -199,6 +208,7 @@ namespace Konclude {
 				generateTestcasesForDirectory(mInputDir,"");
 
 				delete mClassifyGen;
+				delete mRealizeGen;
 				delete mConsistencyGen;
 				delete mSatisfiabilityGen;
 				delete mTypesGen;

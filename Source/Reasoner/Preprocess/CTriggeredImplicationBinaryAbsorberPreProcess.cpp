@@ -741,7 +741,7 @@ namespace Konclude {
 
 			bool CTriggeredImplicationBinaryAbsorberPreProcess::addRoleRangeConcept(CRole* role, CConcept* addedConcept, bool negated) {
 				CSortedNegLinker<CConcept*>* newBaseOpCon = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
-				newBaseOpCon->init(addedConcept,negated,role->getDomainConceptList());
+				newBaseOpCon->init(addedConcept,negated,role->getRangeConceptList());
 				role->setRangeConceptList(newBaseOpCon);
 				return true;
 			}

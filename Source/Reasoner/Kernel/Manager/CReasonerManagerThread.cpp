@@ -800,7 +800,7 @@ namespace Konclude {
 							}
 							queryStat->addProcessingStatistics("calculation-reasoning-time",reaTaskData->mStartTime.elapsed());
 						}
-						if (CConfigDataReader::readConfigBoolean(config,"Konclude.Query.Statistics.CollectProcessingStepsStatistics",false)) {
+						if (CConfigDataReader::readConfigBoolean(config,"Konclude.Query.Statistics.CollectProcessingStepsStatistics",false) && reaTaskData->mReqPrepData) {
 							QSet<COntologyProcessingStatistics*> addedStatSet;
 							for (QList<COntologyRequirementPair>::const_iterator it = reaTaskData->mReqPrepData->mSatisfiedReqList.constBegin(), itEnd = reaTaskData->mReqPrepData->mSatisfiedReqList.constEnd(); it != itEnd; ++it) {
 								COntologyRequirementPair ontReqPair(*it);

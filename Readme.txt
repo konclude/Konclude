@@ -133,7 +133,7 @@ On Windows-based platforms it is further necessary to install the
 Package [8] for the execution of Konclude.
 
 
-Konclude can be build by running qmake (which is part of the Qt Framework) 
+Konclude can be built by running qmake (which is part of the Qt Framework) 
 on 'Konclude.pro', e.g., 
 	qmake -o Makefile Konclude.pro
 and then by compiling the sources with the generated makefile, i.e.,
@@ -145,6 +145,9 @@ has to be executed/called.
 
 CHANGELOG
 ===========
+
+Konclude v0.6.2:
+	- Several minor bug fixes.
 
 Konclude v0.6.1:
 	- Several bug fixes.

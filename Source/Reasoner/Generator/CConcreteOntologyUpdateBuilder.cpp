@@ -1723,6 +1723,7 @@ namespace Konclude {
 								CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
 								roleLinker->init(invRole,true);
 								role->addInverseRoleLinker(roleLinker);
+								role->setInverseRole(role);
 							}
 							role->setSymmetric(true);
 						} else if (expType == CBuildExpression::BETASYMMETRICPROPERTY) {

@@ -126,8 +126,8 @@ namespace Konclude {
 				bool nonDeterministicMerged = false;
 				while (indiProcNode && indiProcNode->getMergedIntoIndividualNodeID() != indiProcNode->getIndividualID()) {
 					cint64 mergeID = indiProcNode->getMergedIntoIndividualNodeID();
-					indiProcNode = indiProcVector->getData(mergeID);
 					CDependencyTrackPoint* mergedDepTrackPoint = indiProcNode->getMergedDependencyTrackPoint();
+					indiProcNode = indiProcVector->getData(mergeID);
 					if (!mergedDepTrackPoint || mergedDepTrackPoint->getBranchingTag() > 0) {
 						nonDeterministicMerged = true;
 					}
@@ -322,13 +322,20 @@ namespace Konclude {
 									if (!mergedDepTrackPoint || mergedDepTrackPoint->getBranchingTag() > 0) {
 										nondeterministicallyMerged = true;
 									}
-									if (mergedIndi != individual) {
+									if (mergedIndi != individual && !mergedIndi->isAnonymousIndividual()) {
 										if (nondeterministicallyMerged) {
 											possibleSameIndividualList->append(mergedIndi);
 										} else {
 											knownSameIndividualList->append(mergedIndi);
 										}
 									}
+								}
+							}
+							if (indiProcNode != baseIndiProcNode) {
+								if (nondeterministicallyMergedFlag) {
+									possibleSameIndividualList->append(indiProcNode->getNominalIndividual());
+								} else {
+									knownSameIndividualList->append(indiProcNode->getNominalIndividual());
 								}
 							}
 
@@ -358,7 +365,7 @@ namespace Konclude {
 												if (!mergedDepTrackPoint || mergedDepTrackPoint->getBranchingTag() > 0) {
 													nondeterministicallyMerged = true;
 												}
-												if (mergedIndi != individual) {
+												if (mergedIndi != individual && !mergedIndi->isAnonymousIndividual()) {
 													if (!nondeterministicallyMerged) {
 														knownSameIndividualSet.insert(mergedIndi);
 													}

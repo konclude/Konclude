@@ -37,14 +37,14 @@ namespace Konclude {
 
 
 			CIndividualDependenceTracking* CIndividualDependenceTrackingCollector::getExtendingIndividualDependenceTracking() {
-				return mIndiDepTrackingPointer;
+                return mIndiDepTrackingPointer.fetchAndAddRelaxed(0);
 			}
 
 			CIndividualDependenceTracking* CIndividualDependenceTrackingCollector::installIndividualDependenceTracking(CIndividualDependenceTracking* indDepTrack) {
 				if (!mIndiDepTrackingPointer.testAndSetOrdered(nullptr,indDepTrack)) {
 					delete indDepTrack;
 				}
-				return mIndiDepTrackingPointer;
+                return mIndiDepTrackingPointer.fetchAndAddRelaxed(0);
 			}
 
 

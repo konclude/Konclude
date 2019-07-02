@@ -291,7 +291,7 @@ namespace Konclude {
 					mTopObjectRole->addInverseRoleLinker(roleLinker);
 				}
 				cint64 roleCount = mRolesVector->getItemCount();
-				for (cint64 roleIdx = 0; roleIdx < roleCount; ++roleIdx) {
+				for (cint64 roleIdx = 1; roleIdx < roleCount; ++roleIdx) {
 					CRole* role = mRolesVector->getData(roleIdx);
 					if (role && role->isObjectRole() && !role->hasSuperRoleTag(mTopObjectRole->getRoleTag())) {
 						role = getLocalizedRole(role);

@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -48,10 +48,10 @@ namespace Konclude {
 
 	#define KONCLUDE_VERSION_MAJOR				0
 	#define KONCLUDE_VERSION_MINOR				6
-	#define KONCLUDE_VERSION_BUILD				1
-	#define KONCLUDE_VERSION_REVISION			527
+	#define KONCLUDE_VERSION_BUILD				2
+	#define KONCLUDE_VERSION_REVISION			544
 
-	#define KONCLUDE_VERSION_STRING				"0.6.1-527"
+	#define KONCLUDE_VERSION_STRING				"0.6.2-544"
 
 	#define KONCLUDE_NAME						"Konclude"
 	#define KONCLUDE_NAME_EXTENSION				"Uni Ulm Parallel Reasoner"

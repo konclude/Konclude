@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -107,25 +107,43 @@ namespace Konclude {
 								if (mParser->hasHttpRequestParsingCompleted()) {
 									mProcessingRequest = true;
 									mProcessingByteArray = mParser->takeBodyData();
-									LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully parsed, %1 Bytes received.").arg(mProcessingByteArray->count()),this);
+									if (mProcessingByteArray != 0) {
+										LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully parsed, %1 Bytes received.").arg(mProcessingByteArray->count()),this);
 
-									COWLlinkQtXMLCommandParser *owllinkCommandParser = new COWLlinkQtXMLCommandParser();
-									mOwllinkInterpreter = new COWLLinkRecordInterpreter(preSynchronizer,mLoaderConfig);
-									defaultCommandDelegater = mOwllinkInterpreter;
+										COWLlinkQtXMLCommandParser *owllinkCommandParser = new COWLlinkQtXMLCommandParser();
+										mOwllinkInterpreter = new COWLLinkRecordInterpreter(preSynchronizer,mLoaderConfig);
+										defaultCommandDelegater = mOwllinkInterpreter;
 
-									CParseOWLlinkCommandsCommand *parseCommand = new CParseOWLlinkCommandsCommand(mProcessingByteArray,mSocket->peerAddress().toString());
-									parseCommand->setRecorder(mOwllinkInterpreter);
-									parseCommand->setReportErrorFromSubCommands(false);
+										CParseOWLlinkCommandsCommand *parseCommand = new CParseOWLlinkCommandsCommand(mProcessingByteArray,mSocket->peerAddress().toString());
+										parseCommand->setRecorder(mOwllinkInterpreter);
+										parseCommand->setReportErrorFromSubCommands(false);
 
-									CCommandProcessedCallbackEvent *proComm = new CCommandProcessedCallbackEvent(this,parseCommand);
-									parseCommand->addProcessedCallback(proComm);
+										CCommandProcessedCallbackEvent *proComm = new CCommandProcessedCallbackEvent(this,parseCommand);
+										parseCommand->addProcessedCallback(proComm);
 
 
-									owllinkCommandParser->realizeCommand(parseCommand,mOwllinkInterpreter);
-									mProcessingCommand = parseCommand;
+										owllinkCommandParser->realizeCommand(parseCommand,mOwllinkInterpreter);
+										mProcessingCommand = parseCommand;
 
-									delete owllinkCommandParser;
-									delete mProcessingByteArray;
+										delete owllinkCommandParser;
+										delete mProcessingByteArray;
+									} else {
+										// invalid request
+
+										QString koncludeString = QString("%1 %2").arg(CKoncludeInfo::getKoncludeName()).arg(CKoncludeInfo::getKoncludeVersionString());
+										sendData(QString("<h2>%1 OWLlink Sever</h2><p>This response is generated from Konclude's OWLlink server for invalid OWLlink requests. Please make sure that the OWLlink request is appended in OWL 2 XML serialisation as content (with correct Content-Length) of your HTTP request. See <a href=\"http://konclude.com\">konclude.com</a> for help and further information.</p>").arg(koncludeString).toLocal8Bit());
+
+										mProcessingRequest = false;
+										if (mParser->hasRequestedCloseConnection()) {
+											mSocket->disconnectFromHost();
+										} else if (mProcessMoreRead) {
+											mProcessMoreRead = false;
+											connectionRead();
+										}
+
+										mParser->reset();
+
+									}
 
 
 								}
@@ -160,28 +178,32 @@ namespace Konclude {
 					return this;
 				}
 
-				COWLlinkProcessor* COWLlinkHttpConnectionHandlerProcessor::concludeOWLlinkContent() {
-					if (mSocket->state() == QTcpSocket::ConnectedState) {
 
-						QByteArray bodyData = mOwllinkInterpreter->getByteArray();
+
+				COWLlinkProcessor* COWLlinkHttpConnectionHandlerProcessor::sendData(const QByteArray& dataArray) {
+					if (mSocket->state() == QTcpSocket::ConnectedState) {
 
 						QString connectionString = QString("Connection: ");
 						if (mParser->hasRequestedCloseConnection()) {
 							connectionString += QString("close");
 						} else {
-							connectionString += QString("Keep-Alive");
+							connectionString += QString("keep-alive");
 						}
-						QString serverString = QString("%1 %2").arg(CKoncludeInfo::getKoncludeName()).arg(CKoncludeInfo::getKoncludeVersionString());
-						QString responseHeadString = QString("HTTP/1.1 200 OK\r\n%1\r\n%2\r\nContent-Length: %3\r\n\r\n").arg(serverString).arg(connectionString).arg(bodyData.length());
+						QString serverString = QString("Server: %1 %2").arg(CKoncludeInfo::getKoncludeName()).arg(CKoncludeInfo::getKoncludeVersionString());
+						QString responseHeadString = QString("HTTP/1.1 200 OK\r\n%1\r\n%2\r\nContent-Length: %3\r\n\r\n").arg(serverString).arg(connectionString).arg(dataArray.length());
 
-                        mSocket->write(responseHeadString.toLocal8Bit());
-						mSocket->write(bodyData);
+						mSocket->write(responseHeadString.toLocal8Bit());
+						mSocket->write(dataArray);
 
-						LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully processed, %1 Bytes sent.").arg(bodyData.count()),this);
+						LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully processed, %1 Bytes sent.").arg(dataArray.count()),this);
 					} else {
 						LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully processed, but connection already closed."),this);
-
 					}
+					return this;
+				}
+
+				COWLlinkProcessor* COWLlinkHttpConnectionHandlerProcessor::concludeOWLlinkContent() {
+					sendData(mOwllinkInterpreter->getByteArray());
 					delete mOwllinkInterpreter;
 					delete mProcessingCommand;
 					mProcessingCommand = nullptr;
@@ -189,7 +211,7 @@ namespace Konclude {
 					mProcessingRequest = false;
 
 
-					if (true ||mParser->hasRequestedCloseConnection()) {
+					if (mParser->hasRequestedCloseConnection()) {
 						mSocket->disconnectFromHost();
 					} else if (mProcessMoreRead) {
 						mProcessMoreRead = false;

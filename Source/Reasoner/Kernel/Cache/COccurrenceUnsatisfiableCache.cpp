@@ -337,10 +337,10 @@ namespace Konclude {
 									}
 								}
 
-								KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(mCachingString = getCachingConceptsDebugString(*cEL));
-								KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(mCachedStringList.append(mCachingString));
+								//KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(mCachingString = getCachingConceptsDebugString(*cEL));
+								//KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(mCachedStringList.append(mCachingString));
 								//KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(std::cout<<"\nUnsatisfiable cached concepts: "<<mCachingString.toLocal8Bit().data()<<"\n\n");
-								KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(LOG(WARNING,"::Konclude::Reasoner::Cache::OccurenceUnsatisfiableCache",logTr("Unsatisfiable cached concepts: %1").arg(mCachingString),this));
+								//KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(LOG(WARNING,"::Konclude::Reasoner::Cache::OccurenceUnsatisfiableCache",logTr("Unsatisfiable cached concepts: %1").arg(mCachingString),this));
 
 							}
 

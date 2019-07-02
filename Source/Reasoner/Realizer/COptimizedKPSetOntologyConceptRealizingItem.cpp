@@ -196,7 +196,7 @@ namespace Konclude {
 					for (CBOXSET<CRole*>::const_iterator roleIt = activeRoleSet->constBegin(), roleItEnd = activeRoleSet->constEnd(); roleIt != roleItEnd; ++roleIt) {
 						CRole* role(*roleIt);
 						if (!role->isDataRole() && role->isComplexRole()) {
-							for (CXLinker<CRoleChain*>* chainLinkerIt = role->getRoleChainSubSharingLinker(); chainLinkerIt; chainLinkerIt = chainLinkerIt->getNext()) {
+							for (CXLinker<CRoleChain*>* chainLinkerIt = role->getRoleChainSuperSharingLinker(); chainLinkerIt; chainLinkerIt = chainLinkerIt->getNext()) {
 								CRoleChain* roleChain = chainLinkerIt->getData();
 								CRole* firstRole = roleChain->getRoleChainLinker()->getData();
 								CRole* firstInverseRole = nullptr;
@@ -280,6 +280,9 @@ namespace Konclude {
 							}
 						}
 					}
+
+					CRole* topRole = rbox->getTopObjectRole();
+					CRole* bottomRole = rbox->getBottomObjectRole();
 
 					mTopRoleInstancesItem = mRedirectedRoleInstancesItemHash.value(rbox->getTopObjectRole())->getRedirectedItem();
 					mBottomRoleInstancesItem = mRedirectedRoleInstancesItemHash.value(rbox->getBottomObjectRole())->getRedirectedItem();

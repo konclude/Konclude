@@ -1369,6 +1369,9 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Reasoner/Realization/CRoleRealizationIndividualVisitor.h \
     ./Source/Reasoner/Realization/CRoleRealizationInstanceToIndividualVisitor.h \
     ./Source/Reasoner/Realization/CRoleRealizationInstanceVisitor.h \
+    ./Source/Reasoner/Realization/CSameInstanceItem.h \
+    ./Source/Reasoner/Realization/CSameRealization.h \
+    ./Source/Reasoner/Realization/CSameRealizationIndividualVisitor.h \
     ./Source/Reasoner/Realization/RealizationSettings.h \
     ./Source/Reasoner/Consistence/CConsistence.h \
     ./Source/Reasoner/Consistence/CConsistenceData.h \
@@ -1943,9 +1946,7 @@ HEADERS += ./Source/CKoncludeInfo.h \
     ./Source/Renderer/CRenderedQtXMLItemLinker.h \
     ./Source/Renderer/CRenderWriteManager.h \
     ./Source/Renderer/RendererSettings.h \
-    ./Source/Reasoner/Realization/CSameRealization.h \
-    ./Source/Reasoner/Realization/CSameRealizationIndividualVisitor.h \
-    ./Source/Reasoner/Realization/CSameInstanceItem.h
+    ./Source/Test/COWLFileOWLlinkRealizeRequestGenerator.h
 SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/mainLoader.cpp \
     ./Source/Parser/CABoxAxiomBuilder.cpp \
@@ -3268,6 +3269,9 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Reasoner/Realization/CRoleRealizationIndividualVisitor.cpp \
     ./Source/Reasoner/Realization/CRoleRealizationInstanceToIndividualVisitor.cpp \
     ./Source/Reasoner/Realization/CRoleRealizationInstanceVisitor.cpp \
+    ./Source/Reasoner/Realization/CSameInstanceItem.cpp \
+    ./Source/Reasoner/Realization/CSameRealization.cpp \
+    ./Source/Reasoner/Realization/CSameRealizationIndividualVisitor.cpp \
     ./Source/Reasoner/Consistence/CConsistence.cpp \
     ./Source/Reasoner/Consistence/CConsistenceData.cpp \
     ./Source/Reasoner/Consistence/CPrecomputation.cpp \
@@ -3825,6 +3829,4 @@ SOURCES += ./Source/CKoncludeInfo.cpp \
     ./Source/Renderer/CRenderedItemLinker.cpp \
     ./Source/Renderer/CRenderedQtXMLItemLinker.cpp \
     ./Source/Renderer/CRenderWriteManager.cpp \
-    ./Source/Reasoner/Realization/CSameRealization.cpp \
-    ./Source/Reasoner/Realization/CSameInstanceItem.cpp \
-    ./Source/Reasoner/Realization/CSameRealizationIndividualVisitor.cpp
+    ./Source/Test/COWLFileOWLlinkRealizeRequestGenerator.cpp

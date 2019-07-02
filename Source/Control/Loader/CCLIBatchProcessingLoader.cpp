@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -141,11 +141,18 @@ namespace Konclude {
 				LOG(INFO,mLogIdentifier.getLogDomain(),outputString,this);
 			}
 
-			void CCLIBatchProcessingLoader::forcedPathCreated(const QString& filePath) {
+			void CCLIBatchProcessingLoader::forcedPathCreated(const QString& filePath) {				
 				QString path = filePath;
-				path = path.mid(0,path.lastIndexOf("/"));
-				QDir dir;
-				dir.mkpath(path);
+				if (path.contains("/") || path.contains("\\")) {
+					int lastSlash = path.lastIndexOf("/");
+					int lastBackSlash = path.lastIndexOf("\\");
+					int lastSeparator = qMax(lastBackSlash,lastSlash);
+					path = path.mid(0,lastSeparator);
+					if (!path.isEmpty()) {
+						QDir dir;
+						dir.mkpath(path);
+					}
+				}
 			}
 
 			void CCLIBatchProcessingLoader::writeCommandOutput(const QString& outputFileName, CCommand* processedCommand) {

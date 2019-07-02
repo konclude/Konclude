@@ -1,5 +1,5 @@
 /*
- *		Copyright (C) 2013, 2014 by the Konclude Developer Team.
+ *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
@@ -1505,6 +1505,7 @@ namespace Konclude {
 								if (!locSigBlockingData->isIdenticConceptSetRequired()) {
 									locSigBlockingData->setIdenticConceptSetRequired(true);
 									indiProcNode->setLastSearchBlockerCandidateCount(0);
+									detectIndividualNodeSignatureBlockingStatus(indiProcNode,calcAlgContext);
 								}
 							}
 
@@ -4452,7 +4453,7 @@ namespace Konclude {
 						CConceptDescriptor* addingSortedConDes = blockingConSet->getAddingSortedConceptDescriptionLinker();
 						CIndividualNodeAnalizedConceptExpansionData* blockerAnalizedConExpData = blockerIndividualNode->getAnalizedConceptExpansionData(false);
 						if (!blockerAnalizedConExpData->isInvalidBlocker()) {
-							if (addingSortedConDes != lastSubSetTestConDes || blockerAnalizedConExpData->getExpansionConceptCount() != sigBlockingData->getLastUpdatedConceptExpansionCount()) {
+							if (addingSortedConDes != lastSubSetTestConDes || blockerAnalizedConExpData->getExpansionConceptCount() != sigBlockingData->getLastUpdatedConceptExpansionCount() || sigBlockingData->isIdenticConceptSetRequired() && blockingConSet->getConceptCount() != blockerConSet->getConceptCount()) {
 								bool stillSubset = true;
 								CConceptDescriptor* addingSortedConDesIt = addingSortedConDes;
 								while (addingSortedConDesIt != lastSubSetTestConDes && stillSubset) {
@@ -6607,7 +6608,12 @@ namespace Konclude {
 						statusStringList.append("indirect-blocked");
 					}
 					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSIGNATUREBLOCKINGCACHED)) {
-						statusStringList.append("signature-blocking-cached");
+						CSignatureBlockingIndividualNodeConceptExpansionData* locSigBlockingData = indi->getSignatureBlockingIndividualNodeConceptExpansionData(false);
+						cint64 blockerIndiID = -1;
+						if (locSigBlockingData->getBlockerIndividualNode()) {
+							blockerIndiID = locSigBlockingData->getBlockerIndividualNode()->getIndividualID();
+						} 
+						statusStringList.append(QString("signature-blocking-cached by %1").arg(blockerIndiID));
 					}
 					if (indi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSIGNATUREBLOCKINGCACHED)) {
 						statusStringList.append("ancestor-signature-blocking-cached");
@@ -18178,7 +18184,7 @@ namespace Konclude {
 						}
 						roleLinkerIt = roleLinkerIt->getNext();
 					}
-					if (generatedInvLink) {
+					if (generatedInvLink || indiDestination->isNominalIndividual()) {
 						indiSource->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiDestination->getIndividualID());
 					}
 					indiDestination->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiSource->getIndividualID());
@@ -18274,7 +18280,7 @@ namespace Konclude {
 						}
 						roleLinkerIt = roleLinkerIt->getNext();
 					}
-					if (generatedInvLink) {
+					if (generatedInvLink || indiDestination->isNominalIndividual()) {
 						indiSource->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiDestination->getIndividualID());
 					}
 					indiDestination->getConnectionSuccessorSet(true)->insertConnectionSuccessor(indiSource->getIndividualID());

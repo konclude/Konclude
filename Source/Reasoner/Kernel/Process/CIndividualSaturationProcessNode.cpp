@@ -95,6 +95,12 @@ namespace Konclude {
 					}
 
 					mIntegratedNominalIndi = indiNode->mIntegratedNominalIndi;
+					if (indiNode->mNominalIndi) {
+						mIntegratedNominalIndi = indiNode->mNominalIndi;
+					}
+					if (mNominalIndi) {
+						mIntegratedNominalIndi = mNominalIndi;
+					}
 					mDataValueApplied = indiNode->mDataValueApplied;
 
 					if (indiNode->getAppliedDatatypeData(false)) {
@@ -541,6 +547,7 @@ namespace Konclude {
 
 				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setNominalIndividual(CIndividual* nominalIndi) {
 					mNominalIndi = nominalIndi;
+					mIntegratedNominalIndi = mNominalIndi;
 					return this;
 				}
 
