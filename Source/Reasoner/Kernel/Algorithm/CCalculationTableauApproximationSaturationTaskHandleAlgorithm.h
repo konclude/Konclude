@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -31,7 +31,9 @@
 #include "CCalculationErrorProcessingException.h"
 #include "CSatisfiableTaskSaturationPreyingAnalyser.h"
 #include "CSatisfiableTaskSaturationIndividualsAnalyser.h"
+#include "CSatisfiableTaskSaturationOccurrenceStatisticsCollector.h"
 #include "CSaturationNodeBackendAssociationCacheHandler.h"
+#include "CIndexedIndividualAssertionConvertionVisitor.h"
 
 // Other includes
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationTask.h"
@@ -39,6 +41,7 @@
 
 #include "Reasoner/Kernel/Process/CConceptSaturationProcessLinker.h"
 #include "Reasoner/Kernel/Process/CIndividualSaturationProcessNodeStatusUpdateLinker.h"
+#include "Reasoner/Kernel/Process/CLinkedDataValueAssertionSaturationData.h"
 
 #include "Scheduler/CTask.h"
 #include "Scheduler/CTaskHandleAlgorithm.h"
@@ -100,7 +103,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CCalculationTableauApproximationSaturationTaskHandleAlgorithm(CSaturationNodeBackendAssociationCacheHandler* backendAssCaceHandler);
+						CCalculationTableauApproximationSaturationTaskHandleAlgorithm(CSaturationNodeBackendAssociationCacheHandler* backendAssCaceHandler, CSatisfiableTaskSaturationOccurrenceStatisticsCollector* satTaskOccStatCollector);
 
 						//! Destructor
 						virtual ~CCalculationTableauApproximationSaturationTaskHandleAlgorithm();
@@ -125,8 +128,7 @@ namespace Konclude {
 
 						bool hasRemainingProcessingNodes(CProcessingDataBox* processingDataBox, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool hasRemainingExtensionProcessingNodes(CProcessingDataBox* processingDataBox, CCalculationAlgorithmContextBase* calcAlgContext);
-
-
+						bool hasRemainingMergingCriticalExtensionProcessingNodes(CProcessingDataBox* processingDataBox, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool completeSaturatedIndividualNodes(CProcessingDataBox* processingDataBox, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool continueNominalDelayedIndividualNodeProcessing(CProcessingDataBox* processingDataBox, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -150,6 +152,7 @@ namespace Konclude {
 
 						void initializeInitializationConcepts(CIndividualSaturationProcessNode*& indiProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						void initializeRoleAssertions(CIndividualSaturationProcessNode*& indiProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						void initializeDataAssertions(CIndividualSaturationProcessNode*& indiProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						void createRoleAssertionLink(CIndividualSaturationProcessNode*& sourceNode, CIndividualSaturationProcessNode*& destinationNode, CRole* role, bool roleInversed, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						void applyTableauSaturationRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
@@ -171,6 +174,13 @@ namespace Konclude {
 						void applyVALUERule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyNOMINALRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyDATALITERALRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
+
+
+						void createSuccessorForDataLiteral(CIndividualSaturationProcessNode*& processIndi, CRole* role, CDataLiteral* dataLiteral, CCalculationAlgorithmContextBase* calcAlgContext);
+						void associateDataLiteralWithNode(CIndividualSaturationProcessNode*& processIndi, CDataLiteral* dataLiteral, CDatatype* datatype, CCalculationAlgorithmContextBase* calcAlgContext);
+						void handleDatatypeValueSpaceTriggers(CIndividualSaturationProcessNode*& processIndi, CDatatype* datatype, bool &dataValueTriviallySat, bool &dataValueTriviallyUnsat, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool tryHandleDatatypeValueSpaceTriggers(CIndividualSaturationProcessNode*& processIndi, CDatatypeValueSpaceTriggers* datatypeValueSpaceTrigger, CDatatypeValueSpacesTriggers* valueSpaceTriggers, CDatatype* datatype, CCalculationAlgorithmContextBase* calcAlgContext);
+
 
 						void createSuccessorForConcept(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker, cint64 cardinality, CCalculationAlgorithmContextBase* calcAlgContext);
 
@@ -211,7 +221,7 @@ namespace Konclude {
 
 
 
-						void collectLinkedSuccessorNodes(CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						void collectLinkedSuccessorNodes(CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext, CLinkedRoleSaturationSuccessorHash* linkedRoleSuccHash = nullptr);
 						void addLinkedSuccessorNodeForConcept(CConceptSaturationDescriptor* conDes, CLinkedRoleSaturationSuccessorHash* linkedRoleSuccHash, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						void addLinkedSuccessorNodeForRoleAssertion(CIndividualSaturationProcessNode* destNode, CRole* role, bool roleInversion, CLinkedRoleSaturationSuccessorHash* linkedRoleSuccHash, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
@@ -273,9 +283,14 @@ namespace Konclude {
 						bool preprocessResolvedIndividualNode(CIndividualSaturationProcessNode* resolvedIndiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						CIndividualSaturationProcessNode* getResolvedIndividualNodeExtensionSuccessor(CIndividualSaturationProcessNode* indiProcSatNode, CSaturationSuccessorConceptExtensionMap* succConExtMap, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						CSaturationIndividualNodeExtensionResolveData* getResolvedNeighbourIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CIndividualSaturationProcessNode*& copyIndiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+
 						CSaturationIndividualNodeExtensionResolveData* getResolvedIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CConcept* concept, bool negation, CIndividualSaturationProcessNode*& copyIndiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						CSaturationIndividualNodeExtensionResolveData* getResolvedIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CIndividualSaturationProcessNode* extensionNode, CIndividualSaturationProcessNode*& copyIndiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						CSaturationIndividualNodeExtensionResolveData* getResolvedIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CIndividualSaturationProcessNode* extensionNode, CIndividualSaturationProcessNode*& copyIndiProcSatNode, bool* newNodeExpansionCreated, CCalculationAlgorithmContextBase* calcAlgContext);
 						CSaturationIndividualNodeExtensionResolveData* getResolvedIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CPROCESSINGHASH<cint64,CConceptNegationPair>* conExtensionMap, CIndividualSaturationProcessNode*& copyIndiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						CSaturationIndividualNodeExtensionResolveData* getResolvedIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CPROCESSINGHASH<cint64,CConceptNegationPair>* conExtensionMap, CIndividualSaturationProcessNode*& copyIndiProcSatNode, bool* newNodeExpansionCreated, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool collectResolveIndividualExtendableConceptMap(CIndividualSaturationProcessNode* baseIndiNode, CIndividualSaturationProcessNode* extensionIndiNode, CPROCESSINGHASH<cint64,CConceptNegationPair>*& conExtMap, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						void addALLConceptExtensionProcessingRole(CRole* role, CRoleBackwardSaturationPropagationHashData& backPropHashData, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -418,17 +433,31 @@ namespace Konclude {
 						bool isSuccessorCreationRoleMergingSubset(CRole* subCreationRole, CXNegLinker<CRole*>* superCreationRoleLinker, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualNodeLabelMergingSubset(CIndividualSaturationProcessNode* subsetIndiSuccNode, CIndividualSaturationProcessNode* superIndiSuccNode, bool ignoreANDConcepts, CCalculationAlgorithmContextBase* calcAlgContext);
 
-						cint64 getSuccessorLinkSimplyMergeableCardinalityCount(CIndividualSaturationProcessNode*& indiProcSatNode, CSaturationSuccessorData* succLinkData, CIndividualSaturationSuccessorLinkDataLinker* mergingSuccDataLinker, CPROCESSINGHASH<CSaturationSuccessorData*,cint64>* remainMergeableCardHash, CRole* role, cint64 maxRequiredMergingCardinality, CPROCESSINGHASH<CSaturationSuccessorData*,CSaturationSuccessorData*>* mergeDistintHash, CPROCESSINGSET< QPair<CSaturationSuccessorData*,CSaturationSuccessorData*> >* mergeDistintSet, CCalculationAlgorithmContextBase* calcAlgContext);
+						cint64 getSuccessorLinkSimplyMergeableCardinalityCount(CIndividualSaturationProcessNode*& indiProcSatNode, CSaturationSuccessorData* succLinkData, CIndividualSaturationSuccessorLinkDataLinker* mergingSuccDataLinker, CPROCESSHASH<CSaturationSuccessorData*,cint64>* remainMergeableCardHash, CRole* role, cint64 maxRequiredMergingCardinality, CPROCESSHASH<CSaturationSuccessorData*,CSaturationSuccessorData*>* mergeDistintHash, CPROCESSSET< QPair<CSaturationSuccessorData*,CSaturationSuccessorData*> >* mergeDistintSet, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualSuccessorLinkCardinalityMergeable(CSaturationSuccessorData* subsetIndiSuccData, CSaturationSuccessorData* superIndiSuccData, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualSuccessorLinkCardinalityMergeable(CIndividualSaturationProcessNode* subsetIndiSuccNode, CSaturationSuccessorData* subsetIndiSuccData, CIndividualSaturationProcessNode* superIndiSuccNode, CSaturationSuccessorData* superIndiSuccData, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
-						cint64 getSuccessorLinkExtendedMergeableCardinalityCount(CIndividualSaturationProcessNode*& indiProcSatNode, CSaturationSuccessorData* succLinkData, CIndividualSaturationSuccessorLinkDataLinker* mergingSuccDataLinker, CPROCESSINGHASH<CSaturationSuccessorData*,cint64>* remainMergeableCardHash, CRole* role, cint64 maxRequiredMergingCardinality, CPROCESSINGSET< QPair<CSaturationSuccessorData*,CSaturationSuccessorData*> >* mergeDistintSet, CCalculationAlgorithmContextBase* calcAlgContext);
+						cint64 getSuccessorLinkExtendedMergeableCardinalityCount(CIndividualSaturationProcessNode*& indiProcSatNode, CSaturationSuccessorData* succLinkData, CSaturationSuccessorData** mergedSuccLinkData, CIndividualSaturationSuccessorLinkDataLinker* mergingSuccDataLinker, CPROCESSHASH<CSaturationSuccessorData*,cint64>* remainMergeableCardHash, CRole* role, cint64 maxRequiredMergingCardinality, CPROCESSHASH<CSaturationSuccessorData*,CSaturationSuccessorData*>* mergeDistintHash, CPROCESSSET< QPair<CSaturationSuccessorData*,CSaturationSuccessorData*> >* mergeDistintSet, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualSuccessorLinkCardinalityExtendedMergeable(CIndividualSaturationProcessNode*& indiProcSatNode, CSaturationSuccessorData* indiSuccData1, CSaturationSuccessorData* indiSuccData2, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualSuccessorLinkCardinalityExtendedMergeable(CIndividualSaturationProcessNode*& indiProcSatNode, CIndividualSaturationProcessNode* indiSuccNode1, CSaturationSuccessorData* indiSuccData1, CIndividualSaturationProcessNode* indiSuccNode2, CSaturationSuccessorData* indiSuccData2, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool isIndividualNodeLabelMergingProblematic(CIndividualSaturationProcessNode*& indiProcSatNode, CIndividualSaturationProcessNode* mergingSuccNode, CIndividualSaturationProcessNode* probTestingSuccNode, CXNegLinker<CRole*>* creationRoleLinker, CCalculationAlgorithmContextBase* calcAlgContext);
 						cint64 getIndividualNodeQualifiedSuccessorCount(CIndividualSaturationProcessNode*& indiProcSatNode, CRole* role, CSortedNegLinker<CConcept*>* conQualificationLinker, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+
+						cint64 collectATMOSTConceptRelevantSuccessors(CConceptSaturationDescriptor* conDes, CIndividualSaturationProcessNode*& indiProcSatNode, CLinkedRoleSaturationSuccessorData* succData, CIndividualSaturationSuccessorLinkDataLinker*& mergingSuccDataLinker, CIndividualSaturationProcessNode*& lastSuccessorNode, CXNegLinker<CRole*>*& lastSuccessorCreationRoleLinker, cint64& minCardinality, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool tryATMOSTConceptSuccessorMerging(CCalculationAlgorithmContextBase* calcAlgContext);
+						bool tryIndividiualATMOSTConceptSuccessorMerging(CConceptSaturationDescriptor* conDes, CSaturationATMOSTSuccessorMergingHashData* mergingSuccData, bool& nodeInsufficient, bool& ancestorPossiblyCriticalFlag, CIndividualSaturationProcessNode*& functionallyRestrictedSuccessorNode, CXNegLinker<CRole*>*& functionallyRestrictedSuccessorCreationRoleLinker, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						CIndividualSaturationSuccessorLinkDataLinker* reconnectMergedLinkedSuccessors(CSaturationSuccessorData* succLinkData, CSaturationSuccessorData* mergedSuccLinkData, cint64 newSuccCard, cint64 incrSuccCard, CLinkedRoleSaturationSuccessorHash* linkedSuccHash, CLinkedRoleSaturationSuccessorData* succData, CPROCESSHASH<CSaturationSuccessorData*,CSaturationSuccessorData*>* mergeDistintHash, CPROCESSSET< QPair<CSaturationSuccessorData*,CSaturationSuccessorData*> >* mergeDistintSet, CPROCESSHASH<CSaturationSuccessorData*,cint64>* remainMergeableCardHash, CIndividualSaturationProcessNode*& indiProcSatNode, CIndividualSaturationProcessNode* resolvedIndiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool testMergedSuccessorLinkingProblematic(CConceptSaturationDescriptor* conDes, CSaturationSuccessorData* succLinkData, CSaturationSuccessorData* mergedSuccLinkData, CIndividualSaturationProcessNode* resolvedIndiProcSatNode, CLinkedRoleSaturationSuccessorData* succData, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+
+						bool requiresMaxCardinalityCandidatePropagation(CIndividualSaturationProcessNode* indiNode, cint64 atleastCandidate, cint64 atmostCandidate, CCalculationAlgorithmContextBase* calcAlgContext);
+						void updateMaxCardinalityCandidates(CIndividualSaturationProcessNode* indiNode, cint64 atleastCandidate, cint64 atmostCandidate, CCalculationAlgorithmContextBase* calcAlgContext);
+
 
 					// protected variables
 					protected:
@@ -437,6 +466,7 @@ namespace Konclude {
 
 						CSatisfiableTaskSaturationPreyingAnalyser mSatTaskSaturationPreyAnalyser;
 						CSatisfiableTaskSaturationIndividualsAnalyser mSatTaskSaturationIndiAnalyser;
+						CSatisfiableTaskSaturationOccurrenceStatisticsCollector* mSatTaskOccStatCollector;
 
 						CSaturationNodeBackendAssociationCacheHandler* mBackendAssCaceHandler;
 
@@ -457,6 +487,7 @@ namespace Konclude {
 						bool mConfForceAllConceptInsertion;
 						bool mConfForceAllCopyInsteadOfSubstituition;
 						bool mConfDebuggingWriteData;
+						bool mConfDebuggingWriteDataSaturationTasks;
 						bool mWroteFunctionalSuccPredMergingDebugString;
 
 						bool mConfAddCriticalConceptsToQueues;
@@ -474,6 +505,9 @@ namespace Konclude {
 						bool mConfSimpleMergingTestForATMOSTCriticalTesting;
 						bool mConfDetailedMergingTestForATMOSTCriticalTesting;
 
+						bool mConfDelayedMergingCriticalATMOSTConcepts;
+						cint64 mConfDelayedMergingCriticalATMOSTConceptsCardinalitySize;
+
 						cint64 mConfResolveOperandConceptSize;
 
 
@@ -484,6 +518,7 @@ namespace Konclude {
 						cint64 mConfReferredNodeConceptCountProcessLimit;
 						cint64 mConfReferredNodeUnprocessedCountProcessLimit;
 						cint64 mConfReferredNodeCheckingDepth;
+						cint64 mConfOccurrenceStatisticsCollection;
 
 						CCalculationConfigurationExtension *mLastConfig;
 
@@ -524,6 +559,7 @@ namespace Konclude {
 						cint64 mIndirectUpdatedStatusIndiNodeCount;
 
 						cint64 mSuccessorConnectedNominalUpdatedCount;
+						cint64 mMaximumCardinalityCandidatesUpdatedCount;
 
 						cint64 mALLSuccExtInitializedCount;
 

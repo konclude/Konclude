@@ -1,24 +1,25 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
 #include "CConcreteOntology.h"
+#include "CIndividualNameABoxVectorTriplesAccessorResolver.h"
 
 
 namespace Konclude {
@@ -32,6 +33,7 @@ namespace Konclude {
 				mStructSumm = nullptr;
 				mStringMapping = nullptr;
 				mDataBoxes = nullptr;
+				mLoadData = nullptr;
 				mBuildData = nullptr;
 				mTax = nullptr;
 				mConsistence = nullptr;
@@ -42,12 +44,14 @@ namespace Konclude {
 
 				mConfiguration = configuration;
 
+				mOntologyTriplesData = new COntologyTriplesData();
 				mClassification = new CClassification();
 				mPrecomputation = new CPrecomputation();
 				mPreprocessing = new CPreprocessing();
 				mRealization = new CRealization();
 				mOntConctext = new CConcreteOntologyContextBase();
 				mDataBoxes = CObjectParameterizingAllocator< COntologyDataBoxes,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
+				mLoadData = CObjectParameterizingAllocator< COntologyLoadData, CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext), mOntConctext);
 				mStringMapping = CObjectParameterizingAllocator< COntologyStringMapping,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mStructSumm = CObjectParameterizingAllocator< COntologyStructureSummary,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mBuildData = CObjectParameterizingAllocator< COntologyBuildData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
@@ -55,6 +59,9 @@ namespace Konclude {
 				mProcessingSteps = CObjectParameterizingAllocator< COntologyProcessingSteps,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mIncRevisionData = CObjectParameterizingAllocator< COntologyIncrementalRevisionData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mIncRevisionData->setBasementOntology(this);
+
+				mIndividualNameResolver = new CIndividualNameABoxVectorTriplesAccessorResolver(this);
+
 			}
 
 
@@ -62,6 +69,7 @@ namespace Konclude {
 				mStructSumm = nullptr;
 				mStringMapping = nullptr;
 				mDataBoxes = nullptr;
+				mLoadData = nullptr;
 				mBuildData = nullptr;
 				mTax = nullptr;
 				mConsistence = nullptr;
@@ -72,18 +80,22 @@ namespace Konclude {
 
 				mConfiguration = configuration;
 
+				mOntologyTriplesData = new COntologyTriplesData();
 				mClassification = new CClassification();
 				mPrecomputation = new CPrecomputation();
 				mPreprocessing = new CPreprocessing();
 				mRealization = new CRealization();
 				mOntConctext = new CConcreteOntologyContextBase();
 				mDataBoxes = CObjectParameterizingAllocator< COntologyDataBoxes,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
-				mStringMapping = CObjectParameterizingAllocator< COntologyStringMapping,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
+				mLoadData = CObjectParameterizingAllocator< COntologyLoadData, CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext), mOntConctext);
+				mStringMapping = CObjectParameterizingAllocator< COntologyStringMapping, CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext), mOntConctext);
 				mStructSumm = CObjectParameterizingAllocator< COntologyStructureSummary,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mBuildData = CObjectParameterizingAllocator< COntologyBuildData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mConceptCyclesData = CObjectParameterizingAllocator< COntologyCoreConceptCyclesData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mProcessingSteps = CObjectParameterizingAllocator< COntologyProcessingSteps,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
 				mIncRevisionData = CObjectParameterizingAllocator< COntologyIncrementalRevisionData,CBoxContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mOntConctext),mOntConctext);
+
+				mIndividualNameResolver = new CIndividualNameABoxVectorTriplesAccessorResolver(this);
 
 				if (refOntology) {
 					referenceOntology(refOntology);
@@ -92,7 +104,8 @@ namespace Konclude {
 
 
 			CConcreteOntology::~CConcreteOntology() {
-				COPADestroyAndRelease(mDataBoxes,CContext::getMemoryAllocationManager(mOntConctext));
+				COPADestroyAndRelease(mDataBoxes, CContext::getMemoryAllocationManager(mOntConctext));
+				COPADestroyAndRelease(mLoadData, CContext::getMemoryAllocationManager(mOntConctext));
 				COPADestroyAndRelease(mStructSumm,CContext::getMemoryAllocationManager(mOntConctext));
 				COPADestroyAndRelease(mStringMapping,CContext::getMemoryAllocationManager(mOntConctext));
 				COPADestroyAndRelease(mBuildData,CContext::getMemoryAllocationManager(mOntConctext));
@@ -100,12 +113,14 @@ namespace Konclude {
 				COPADestroyAndRelease(mProcessingSteps,CContext::getMemoryAllocationManager(mOntConctext));
 				COPADestroyAndRelease(mIncRevisionData,CContext::getMemoryAllocationManager(mOntConctext));
 
+				delete mIndividualNameResolver;
 				delete mOntConctext;
 				delete mConsistence;
 				delete mClassification;
 				delete mPrecomputation;
 				delete mPreprocessing;
 				delete mRealization;
+				delete mOntologyTriplesData;
 			}
 
 			CConfigurationBase* CConcreteOntology::getConfiguration() {
@@ -114,11 +129,13 @@ namespace Konclude {
 
 
 			CConcreteOntology* CConcreteOntology::referenceOntology(CConcreteOntology* ontology) {
+				mLoadData->referenceLoadData(ontology->mLoadData);
 				mDataBoxes->referenceDataBoxes(ontology->mDataBoxes);
 				mStringMapping->referenceStringMapping(ontology->mStringMapping);
 				mBuildData->referenceBuildData(ontology->mBuildData);
 				mStructSumm->referenceStructureSummary(ontology->mStructSumm);
 				mIncRevisionData->referenceIncrementalRevision(ontology->mIncRevisionData);
+				mOntologyTriplesData->referenceTriplesData(ontology->mOntologyTriplesData);
 				mIncRevisionData->setPreviousOntologyVersion(ontology);
 				return this;
 			}
@@ -146,6 +163,25 @@ namespace Konclude {
 				return concept;
 			}
 
+
+			CRole* CConcreteOntology::getRole(const QString& propertyName) {
+				CRole* role = nullptr;
+				CMAPPINGHASH<CStringRefStringHasher,CRole*>* propertyNameRoleMappingHash = mStringMapping->getPropertyNameRoleMappingHash(false);
+				if (propertyNameRoleMappingHash) {
+					role = propertyNameRoleMappingHash->value(propertyName,nullptr);
+				}
+				return role;
+			}
+
+
+			CIndividual* CConcreteOntology::getIndividual(const QString& indiName) {
+				CIndividual* indi = nullptr;
+				CMAPPINGHASH<CStringRefStringHasher,CIndividual*>* indiNameIndiMappingHash = mStringMapping->getIndividualNameIndividualMappingHash(false);
+				if (indiNameIndiMappingHash) {
+					indi = indiNameIndiMappingHash->value(indiName,nullptr);
+				}
+				return indi;
+			}
 
 
 			CConcreteOntology* CConcreteOntology::setConceptTaxonomy(CTaxonomy *taxonomy) {
@@ -253,6 +289,21 @@ namespace Konclude {
 			}
 
 
+
+
+			COntologyLoadData* CConcreteOntology::getLoadData() {
+				return mLoadData;
+			}
+
+			CConcreteOntology *CConcreteOntology::setLoadData(COntologyLoadData* loadData) {
+				mLoadData = loadData;
+				return this;
+			}
+
+
+
+
+
 			COntologyStringMapping *CConcreteOntology::getStringMapping() {
 				return mStringMapping;
 			}
@@ -294,6 +345,10 @@ namespace Konclude {
 				return this;
 			}
 
+			COntologyTriplesData* CConcreteOntology::getOntologyTriplesData() {
+				return mOntologyTriplesData;
+			}
+
 
 			COntologyIncrementalRevisionData* CConcreteOntology::getIncrementalRevisionData() {
 				return mIncRevisionData;
@@ -303,6 +358,12 @@ namespace Konclude {
 				mIncRevisionData = incRevData;
 				return this;
 			}
+
+
+			CIndividualNameResolver* CConcreteOntology::getIndividualNameResolver() {
+				return mIndividualNameResolver;
+			}
+
 
 		}; // end namespace Ontology
 

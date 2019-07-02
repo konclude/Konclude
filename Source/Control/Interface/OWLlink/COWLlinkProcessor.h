@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -82,7 +82,7 @@
 #include "Control/Command/Instructions/CSaveOWLlinkOWL2XMLSatisfiableTestExtractedKnowledgeBaseCommand.h"
 #include "Control/Command/Instructions/CLoadKnowledgeBaseOWLXMLOntologyCommand.h"
 #include "Control/Command/Instructions/CChooseParseInstallKnowledgeBaseOWLXMLOntologyCommand.h"
-#include "Control/Command/Instructions/CPrepareKnowledgeBaseForQueryCommand.h"
+#include "Control/Command/Instructions/CPreprocessKnowledgeBaseRequirementsForQueryCommand.h"
 #include "Control/Command/Instructions/CGenerateQueryCommand.h"
 #include "Control/Command/Instructions/CPrepareKnowledgeBaseForRevisionCommand.h"
 #include "Control/Command/Instructions/CConstructFlattenedTypesQueryCommand.h"
@@ -119,12 +119,20 @@
 #include "Control/Command/Instructions/CConstructWriteFunctionalIndividualTypesQueryCommand.h"
 #include "Control/Command/Instructions/CIsTriviallyConsistentQueryCommand.h"
 #include "Control/Command/Instructions/CConstructIsTriviallyConsistentQueryCommand.h"
+#include "Control/Command/Instructions/CConstructWriteCustomQueryCommand.h"
+#include "Control/Command/Instructions/CWriteCustomQueryCommand.h"
+#include "Control/Command/Instructions/CPrepareKnowledgeBaseForQueryCommand.h"
+#include "Control/Command/Instructions/CParseProcessSPARQLTextCommand.h"
+#include "Control/Command/Instructions/CParseSPARQLQueryCommand.h"
+#include "Control/Command/Instructions/CCalculateQueriesCommand.h"
+#include "Control/Command/Instructions/CParseProcessSPARQLUpdateTextCommand.h"
+#include "Control/Command/Instructions/CParseProcessSPARQLManageTextCommand.h"
 
 
-#include "Reasoner/Query/CWriteFunctionalIndividualFlattenedTypesQuery.h"
-#include "Reasoner/Query/CWriteFunctionalClassSubsumptionsHierarchyQuery.h"
-#include "Reasoner/Query/CWriteOWLXMLIndividualFlattenedTypesQuery.h"
-#include "Reasoner/Query/CWriteOWLXMLClassSubsumptionsHierarchyQuery.h"
+#include "Reasoner/Query/CWriteOREFunctionalClassSubsumptionsHierarchyQuery.h"
+#include "Reasoner/Query/CWriteSerializerClassSubsumptionsHierarchyQuery.h"
+#include "Reasoner/Query/CWriteSerializerPropertySubsumptionsHierarchyQuery.h"
+#include "Reasoner/Query/CWriteSerializerIndividualFlattenedTypesQuery.h"
 #include "Reasoner/Query/CIsConsistentQuery.h"
 #include "Reasoner/Query/CIsTriviallyConsistentQuery.h"
 #include "Reasoner/Query/CRealizeQuery.h"
@@ -141,6 +149,12 @@
 #include "Parser/COWL2QtXMLOntologySAXParser.h"
 #include "Parser/COWL2QtXMLOntologyStreamParser.h"
 #include "Parser/COWL2QtXMLOntologyStableStreamParser.h"
+#include "Parser/CSPARQLSimpleQueryParser.h"
+#include "Parser/CSPARQLKnowledgeBaseSplittingOperationParser.h"
+#include "Parser/CSPARQLSimpleUpdateParser.h"
+#include "Parser/CSPARQLSimpleManagementParser.h"
+#include "Parser/COWL2RDFTurtleAssertionsSimpleParser.h"
+#include "Parser/CRDFRedlandRaptorParser.h"
 
 #include "Parser/FunctionalJAVACC/COWL2FunctionalJAVACCOntologyStreamParser.h"
 
@@ -155,6 +169,11 @@
 #include "Reasoner/Generator/CConcreteOntologyUpdateCollectorBuilder.h"
 #include "Reasoner/Generator/CConcreteOntologyQueryExtendedBuilder.h"
 #include "Reasoner/Generator/CConcreteOntologyQuerySimpleBuilder.h"
+#include "Reasoner/Generator/CConcreteOntologyUpdateSeparateHashingCollectorBuilder.h"
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+#include "Reasoner/Generator/CConcreteOntologyRedlandTriplesDataExpressionMapper.h"
+#endif // !KONCLUDE_REDLAND_INTEGRATION
 
 #include "Test/CReasonerTestsuiteTester.h"
 
@@ -232,6 +251,13 @@ namespace Konclude {
 						CQtHttpTransactionManager* getNetworkTransactionManager();
 						
 						bool createDownloadParseCommands(const QString& knowledgeBaseNameString, CCommand* parentCommand, CKnowledgeBaseRevisionCommandProvider* kbProviderCommand, const QMap<QString,QString>& ontoIRIMapping, const QStringList& ontoIRIStringList, CCommandRecordRouter& commandRecordRouter);
+
+						bool parseOntology(QIODevice* device, const QString& ontoIRI, const QString& resolvedIRI, CConcreteOntology *ont, COntologyConfigurationExtension *ontConfig, QList<QString>& importOntologiesList, QStringList& parserErrorList, CCommandRecordRouter& commandRecordRouter);
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+						bool parseOntologyWithRaptor(QIODevice* device, CConcreteOntologyUpdateCollectorBuilder *builder, const QString& format, const QString& formatName, const QString& resolvedIRI, QString& parsingTryLogString, QStringList& parserErrorList, CConfiguration* configuration, CCommandRecordRouter& commandRecordRouter);
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+
 
 					// protected variables
 					protected:

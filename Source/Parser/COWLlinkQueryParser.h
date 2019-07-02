@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -86,8 +86,28 @@ namespace Konclude {
 				CQueryGetSuperClassesExpression *parseGetSuperClassesNode(QDomElement *node);
 				CQueryGetEquivalentClassesExpression *parseGetEquivalentClassesNode(QDomElement *node);
 				CQueryIsEntailedExpression* parseIsEntailedNode(QDomElement *node);
-				CQueryGetObjectPropertyTargetsExpression* parseGetObjectPropertyTargetsNode(QDomElement *node);
-				CQueryGetFlattenedObjectPropertyTargetsExpression* parseGetFlattenedObjectPropertyTargetsNode(QDomElement *node);
+				CQueryExpression* parseGetObjectPropertyTargetsNode(QDomElement *node);
+				CQueryExpression* parseGetFlattenedObjectPropertyTargetsNode(QDomElement *node);
+				CQueryExpression* parseGetObjectPropertySourcesNode(QDomElement *node);
+				CQueryExpression* parseGetFlattenedObjectPropertySourcesNode(QDomElement *node);
+
+
+				CQueryGetObjectPropertiesOfSourceExpression* parseGetObjectPropertiesOfSourceNode(QDomElement *node);
+				CQueryGetObjectPropertiesOfTargetExpression* parseGetObjectPropertiesOfTargetNode(QDomElement *node);
+				CQueryGetObjectPropertiesBetweenExpression* parseGetObjectPropertiesOfBetweenNode(QDomElement *node);
+
+
+
+				CQueryGetSubObjectPropertiesExpression *parseGetSubObjectPropertiesNode(QDomElement *node);
+				CQueryGetSuperObjectPropertiesExpression *parseGetSuperObjectPropertiesNode(QDomElement *node);
+				CQueryGetEquivalentObjectPropertiesExpression *parseGetEquivalentObjectPropertiesNode(QDomElement *node);
+				CQueryGetSubObjectPropertyHierarchyExpression *parseGetSubObjectPropertyHierarchyNode(QDomElement *node);
+				CQueryIsObjectPropertySatisfiableExpression *parseIsObjectPropertySatisfiableNode(QDomElement *node);
+				CQueryGetSubDataPropertiesExpression *parseGetSubDataPropertiesNode(QDomElement *node);
+				CQueryGetSuperDataPropertiesExpression *parseGetSuperDataPropertiesNode(QDomElement *node);
+				CQueryGetEquivalentDataPropertiesExpression *parseGetEquivalentDataPropertiesNode(QDomElement *node);
+				CQueryGetSubDataPropertyHierarchyExpression *parseGetSubDataPropertyHierarchyNode(QDomElement *node);
+				CQueryIsDataPropertySatisfiableExpression *parseIsDataPropertySatisfiableNode(QDomElement *node);
 
 
 				CQueryGetDeterministicIndividualsExpression* parseGetDeterministicIndividualsNode(QDomElement *node);
@@ -96,6 +116,9 @@ namespace Konclude {
 				CQueryGetNondeterministicClassAssertionsExpression* parseGetNondeterministicClassAssertionsNode(QDomElement *node);
 
 				virtual QList<CBuildExpression *> parseOntologyChildNodes(QDomElement *node) = 0;
+
+				virtual QList<CBuildExpression*> parseOntologyChildNodesInverseHandling(QDomElement *node, bool& inversed) = 0;
+
 
 			// protected variables
 			protected:

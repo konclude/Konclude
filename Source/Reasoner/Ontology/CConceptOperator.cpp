@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -155,11 +155,26 @@ namespace Konclude {
 					mTypeFlag = CCF_DATARESTRICTION;
 				} else if (mOperatorCode == CCMARKER) {
 					mTypeFlag = CCF_MARKER;
+				//} else if (mOperatorCode == CCNOMINALIMPLI) {
+				//	mTypeFlag = CCF_NOMINALIMPLI;
+				//} else if (mOperatorCode == CCDATATYPEIMPLI) {
+				//	mTypeFlag = CCF_DATATYPEIMPLI;
+				//} else if (mOperatorCode == CCDATALITERALIMPLI) {
+				//	mTypeFlag = CCF_DATALITERALIMPLI;
+				//} else if (mOperatorCode == CCDATARESTRICTIONIMPLI) {
+				//	mTypeFlag = CCF_DATARESTRICTIONIMPLI;
+				} else {
+					mTypeFlag = CCF_SPECIAL;
 				}
 			}
 
 			cint64 CConceptOperator::getOperatorCode() {
 				return mOperatorCode;
+			}
+
+
+			cint64 CConceptOperator::getOperatorFlag() {
+				return mTypeFlag;
 			}
 
 
@@ -254,6 +269,13 @@ namespace Konclude {
 				mConceptOperatorVector[CCDATALITERAL] = new CConceptOperator(CCDATALITERAL);
 				mConceptOperatorVector[CCDATARESTRICTION] = new CConceptOperator(CCDATARESTRICTION);
 				mConceptOperatorVector[CCMARKER] = new CConceptOperator(CCMARKER);
+				mConceptOperatorVector[CCNOMINALIMPLI] = new CConceptOperator(CCNOMINALIMPLI);
+				mConceptOperatorVector[CCDATATYPEIMPLI] = new CConceptOperator(CCDATATYPEIMPLI);
+				mConceptOperatorVector[CCDATALITERALIMPLI] = new CConceptOperator(CCDATALITERALIMPLI);
+				mConceptOperatorVector[CCDATARESTRICTIONIMPLI] = new CConceptOperator(CCDATARESTRICTIONIMPLI);
+				mConceptOperatorVector[CCVARBINDPREPARE] = new CConceptOperator(CCVARBINDPREPARE);
+				mConceptOperatorVector[CCVARBINDFINALZE] = new CConceptOperator(CCVARBINDFINALZE);
+				
 			}
 
 

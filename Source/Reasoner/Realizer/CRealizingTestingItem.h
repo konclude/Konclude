@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -26,6 +26,7 @@
 
 // Namespace includes
 #include "RealizerSettings.h"
+#include "COntologyRealizingDynamicRequirmentProcessingData.h"
 
 // Other includes
 
@@ -53,14 +54,16 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CRealizingTestingItem(COntologyRealizingItem* preproItem);
+					CRealizingTestingItem(COntologyRealizingItem* preproItem, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
 
-					enum REALIZINGTESTINGTYPE { INDIVIDUALCONCEPTINCSTANCETESTINGTYPE, INDIVIDUALPAIRROLEINCSTANCETESTINGTYPE, INDIVIDUALSAMETESTINGTYPE, INDIVIDUALROLECANDIDATETESTINGTYPE, INDIVIDUALSCONSISTENCYTESTINGTYPE };
+					enum REALIZINGTESTINGTYPE { INDIVIDUALCONCEPTINCSTANCETESTINGTYPE, INDIVIDUALPAIRROLEINCSTANCETESTINGTYPE, INDIVIDUALSAMETESTINGTYPE, INDIVIDUALROLECANDIDATEPROPAGATIONTESTINGTYPE, INDIVIDUALROLECANDIDATEPCONFIRMATIONTESTINGTYPE, INDIVIDUALSCONSISTENCYTESTINGTYPE };
 
 					COntologyRealizingItem* getOntologyRealizingItem();
 					CRealizingTestingItem* setOntologyRealizingItem(COntologyRealizingItem* preproItem);
 
 					virtual REALIZINGTESTINGTYPE getRealizingTestingType() = 0;
+
+					COntologyRealizingDynamicRequirmentProcessingData* getProcessingData();
 
 				// protected methods
 				protected:
@@ -68,6 +71,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COntologyRealizingItem* mOntologyPreproItem;
+					COntologyRealizingDynamicRequirmentProcessingData* mProcData;
 
 				// private methods
 				private:

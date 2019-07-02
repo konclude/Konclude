@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,9 +37,9 @@ namespace Konclude {
 				return visitDirectInstances(conceptItem,visitor);
 			}
 
-			bool CConceptRealization::visitInstances(CConcept* concept, CConceptRealizationInstanceVisitor* visitor) {
+			bool CConceptRealization::visitAllInstances(CConcept* concept, CConceptRealizationInstanceVisitor* visitor) {
 				CConceptInstantiatedItem* conceptItem = getInstantiatedItem(concept);
-				return visitInstances(conceptItem,visitor);
+				return visitAllInstances(conceptItem,visitor);
 			}
 
 			bool CConceptRealization::visitInstances(CConcept* concept, bool direct, CConceptRealizationInstanceVisitor* visitor) {
@@ -47,40 +47,78 @@ namespace Konclude {
 				return visitInstances(conceptItem,direct,visitor);
 			}
 
-			bool CConceptRealization::visitDirectTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor) {
-				CConceptInstanceItem* individualItem = getInstanceItem(individual);
-				return visitDirectTypes(individualItem,visitor);
+
+			bool CConceptRealization::visitTypes(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool direct, CConceptRealizationInstantiatedVisitor* visitor) {
+				if (direct) {
+					return visitDirectTypes(indiRealItemRef,visitor);
+				} else {
+					return visitAllTypes(indiRealItemRef,visitor);
+				}
 			}
 
-			bool CConceptRealization::visitTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor) {
-				CConceptInstanceItem* individualItem = getInstanceItem(individual);
-				return visitTypes(individualItem,visitor);
+
+			CRealizationIndividualInstanceItemReference CConceptRealization::getInstanceItemReference(CIndividual* individual) {
+				return getInstanceItemReference(CIndividualReference(individual));
+			}
+
+
+
+			bool CConceptRealization::visitDirectTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor) {
+				return visitDirectTypes(CIndividualReference(individual), visitor);
+			}
+
+			bool CConceptRealization::visitAllTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor) {
+				return visitAllTypes(CIndividualReference(individual), visitor);
 			}
 
 			bool CConceptRealization::visitTypes(CIndividual* individual, bool direct, CConceptRealizationInstantiatedVisitor* visitor) {
-				CConceptInstanceItem* individualItem = getInstanceItem(individual);
-				return visitTypes(individualItem,direct,visitor);;
+				return visitTypes(CIndividualReference(individual), direct, visitor);
 			}
 
-			
+
 			bool CConceptRealization::visitSameIndividuals(CIndividual* individual, CConceptRealizationIndividualVisitor* visitor) {
-				CConceptInstanceItem* individualItem = getInstanceItem(individual);
-				return visitIndividuals(individualItem,visitor);
+				return visitSameIndividuals(CIndividualReference(individual), visitor);
 			}
 
-			bool CConceptRealization::visitTypes(CConceptInstanceItem* item, bool direct, CConceptRealizationInstantiatedVisitor* visitor) {
-				if (direct) {
-					return visitDirectTypes(item,visitor);
-				} else {
-					return visitTypes(item,visitor);
-				}
+
+
+
+			bool CConceptRealization::visitDirectTypes(const CIndividualReference& indiRef, CConceptRealizationInstantiatedVisitor* visitor) {
+				CRealizationIndividualInstanceItemReference indiRealItemRef = getInstanceItemReference(indiRef);
+				return visitDirectTypes(indiRealItemRef, visitor);
 			}
+
+			bool CConceptRealization::visitAllTypes(const CIndividualReference& indiRef, CConceptRealizationInstantiatedVisitor* visitor) {
+				CRealizationIndividualInstanceItemReference indiRealItemRef = getInstanceItemReference(indiRef);
+				return visitAllTypes(indiRealItemRef, visitor);
+			}
+
+			bool CConceptRealization::visitTypes(const CIndividualReference& indiRef, bool direct, CConceptRealizationInstantiatedVisitor* visitor) {
+				CRealizationIndividualInstanceItemReference indiRealItemRef = getInstanceItemReference(indiRef);
+				return visitTypes(indiRealItemRef, direct, visitor);
+			}
+
+
+			bool CConceptRealization::visitSameIndividuals(const CIndividualReference& indiRef, CConceptRealizationIndividualVisitor* visitor) {
+				CRealizationIndividualInstanceItemReference indiRealItemRef = getInstanceItemReference(indiRef);
+				return visitIndividuals(indiRealItemRef, visitor);
+			}
+
+			bool CConceptRealization::isConceptInstance(const CIndividualReference& indiRef, CConcept* concept) {
+				return isConceptInstance(getInstanceItemReference(indiRef), concept);
+			}
+
+			bool CConceptRealization::isConceptInstance(CIndividual* individual, CConcept* concept) {
+				return isConceptInstance(getInstanceItemReference(individual), concept);
+			}
+
+
 
 			bool CConceptRealization::visitInstances(CConceptInstantiatedItem* item, bool direct, CConceptRealizationInstanceVisitor* visitor) {
 				if (direct) {
 					return visitDirectInstances(item,visitor);
 				} else {
-					return visitInstances(item,visitor);
+					return visitAllInstances(item,visitor);
 				}
 			}
 

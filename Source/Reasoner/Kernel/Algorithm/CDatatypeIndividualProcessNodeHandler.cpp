@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -64,6 +64,147 @@ namespace Konclude {
 				}
 
 
+
+
+
+				bool CDatatypeIndividualProcessNodeHandler::triggerDataLiteralConcept(CIndividualProcessNode* indiProcNode, CDataLiteral* dataLiteral, bool negated, CDependencyTrackPoint* depTrackPoint, CConcept* triggerConcept, CConceptDescriptor*& triggeredConcepts, CCalculationAlgorithmContext* calcAlgContext) {
+					bool triggerInstalled = false;
+					bool directlyTriggered = false;
+					CDatatype* datatype = dataLiteral->getDatatype();
+
+					if (datatype) {
+						CDatatypeValueSpaceType* valueSpaceType = datatype->getValueSpaceType();
+						if (valueSpaceType) {
+							CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+							CDatatypeValueSpaceData* valueSpaceData = datatypesSpaceValue->getValueSpace(valueSpaceType, true);
+							if (!valueSpaceData->isValueSpaceClashed()) {
+								CIndividualProcessNodeValueSpaceHandler* valueSpaceHandler = getValueSpaceHandler(valueSpaceType, calcAlgContext);
+								CConceptDescriptor* conceptTriggerLinker = nullptr;
+								CDatatypeDependencyCollection depCollection(calcAlgContext);
+								bool otherValueSpacesClosed = false;
+								if (areOtherValueSpacesClosed(indiProcNode,valueSpaceType,calcAlgContext)) {
+									otherValueSpacesClosed = true;
+								}
+								triggerInstalled |= valueSpaceHandler->triggerDataLiteralConcept(indiProcNode, dataLiteral, negated, depTrackPoint, triggerConcept, otherValueSpacesClosed, &directlyTriggered, &depCollection, calcAlgContext);
+								if (directlyTriggered) {
+									CDependencyTrackPoint* datatypeTriggerDepTrackPoint = nullptr;
+									addClosedValueSpacedDependencies(indiProcNode, &depCollection, calcAlgContext);
+									datatypeTriggerDepTrackPoint = depCollection.getDatatypeTriggerDependencyTrackPoint();
+									CConceptDescriptor* newConceptLinker = CObjectAllocator< CConceptDescriptor >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+									newConceptLinker->initConceptDescriptor(triggerConcept, false, datatypeTriggerDepTrackPoint);
+									triggeredConcepts = newConceptLinker;
+								}
+							}
+						}
+					}
+					if (triggerInstalled) {
+						processValueSpaceModified(indiProcNode, calcAlgContext);
+					}
+					return triggerInstalled;
+				}
+
+
+
+				bool CDatatypeIndividualProcessNodeHandler::triggerDatatypeConcept(CIndividualProcessNode* indiProcNode, CDatatype* datatype, bool negated, CDependencyTrackPoint* depTrackPoint, CConcept* triggerConcept, CConceptDescriptor*& triggeredConcepts, CCalculationAlgorithmContext* calcAlgContext) {
+					bool triggerInstalled = false;
+					bool directlyTriggered = false;
+					CDatatypeValueSpaceType* valueSpaceType = datatype->getValueSpaceType();
+					if (valueSpaceType) {
+						CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+						CDatatypeValueSpaceData* valueSpaceData = datatypesSpaceValue->getValueSpace(valueSpaceType, true);
+						if (!valueSpaceData->isValueSpaceClashed()) {
+							CIndividualProcessNodeValueSpaceHandler* valueSpaceHandler = getValueSpaceHandler(valueSpaceType, calcAlgContext);
+							CConceptDescriptor* conceptTriggerLinker = nullptr;
+							CDatatypeDependencyCollection depCollection(calcAlgContext);
+							bool otherValueSpacesClosed = false;
+							if (areOtherValueSpacesClosed(indiProcNode, valueSpaceType, calcAlgContext)) {
+								otherValueSpacesClosed = true;
+							}
+							triggerInstalled |= valueSpaceHandler->triggerDatatypeConcept(indiProcNode, datatype, negated, depTrackPoint, triggerConcept, otherValueSpacesClosed, &directlyTriggered, &depCollection, calcAlgContext);
+							if (directlyTriggered) {
+								CDependencyTrackPoint* datatypeTriggerDepTrackPoint = nullptr;
+								addClosedValueSpacedDependencies(indiProcNode, &depCollection, calcAlgContext);
+								datatypeTriggerDepTrackPoint = depCollection.getDatatypeTriggerDependencyTrackPoint();
+								CConceptDescriptor* newConceptLinker = CObjectAllocator< CConceptDescriptor >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+								newConceptLinker->initConceptDescriptor(triggerConcept, false, datatypeTriggerDepTrackPoint);
+								triggeredConcepts = newConceptLinker;
+							}
+						}
+					}
+					if (triggerInstalled) {
+						processValueSpaceModified(indiProcNode, calcAlgContext);
+					}
+					return triggerInstalled;
+				}
+
+
+
+
+
+				bool CDatatypeIndividualProcessNodeHandler::triggerDataRestrictionConcept(CIndividualProcessNode* indiProcNode, CConcept* dataRestriction, bool negated, CDependencyTrackPoint* depTrackPoint, CConcept* triggerConcept, CConceptDescriptor*& triggeredConcepts, CCalculationAlgorithmContext* calcAlgContext) {
+					bool triggerInstalled = false;
+					bool directlyTriggered = false;
+					CDatatypeValueSpaceType* valueSpaceType = dataRestriction->getDatatype()->getValueSpaceType();
+					if (valueSpaceType) {
+						CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+						CDatatypeValueSpaceData* valueSpaceData = datatypesSpaceValue->getValueSpace(valueSpaceType, true);
+						if (!valueSpaceData->isValueSpaceClashed()) {
+							CIndividualProcessNodeValueSpaceHandler* valueSpaceHandler = getValueSpaceHandler(valueSpaceType, calcAlgContext);
+							CConceptDescriptor* conceptTriggerLinker = nullptr;
+							CDatatypeDependencyCollection depCollection(calcAlgContext);
+							bool otherValueSpacesClosed = false;
+							if (areOtherValueSpacesClosed(indiProcNode, valueSpaceType, calcAlgContext)) {
+								otherValueSpacesClosed = true;
+							}
+							triggerInstalled |= valueSpaceHandler->triggerDataRestrictionConcept(indiProcNode, dataRestriction, negated, depTrackPoint, triggerConcept, otherValueSpacesClosed, &directlyTriggered, &depCollection, calcAlgContext);
+							if (directlyTriggered) {
+								CDependencyTrackPoint* datatypeTriggerDepTrackPoint = nullptr;
+								addClosedValueSpacedDependencies(indiProcNode, &depCollection, calcAlgContext);
+								datatypeTriggerDepTrackPoint = depCollection.getDatatypeTriggerDependencyTrackPoint();
+								CConceptDescriptor* newConceptLinker = CObjectAllocator< CConceptDescriptor >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+								newConceptLinker->initConceptDescriptor(triggerConcept, false, datatypeTriggerDepTrackPoint);
+								triggeredConcepts = newConceptLinker;
+							}
+						}
+					}
+					if (triggerInstalled) {
+						processValueSpaceModified(indiProcNode, calcAlgContext);
+					}
+					return triggerInstalled;
+				}
+
+
+
+				bool CDatatypeIndividualProcessNodeHandler::areOtherValueSpacesClosed(CIndividualProcessNode* indiProcNode, CDatatypeValueSpaceType* openValueSpaceType, CCalculationAlgorithmContext* calcAlgContext) {
+					bool allOtherClosed = true;
+					CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+					CConcreteOntology* ontology = calcAlgContext->getUsedProcessingDataBox()->getOntology();
+					for (CDatatypeValueSpaceType* valueSpaceTypeIt = ontology->getDataBoxes()->getDatatypeValueSpaceTypes()->getValueSpaceTypeLinker(); valueSpaceTypeIt; valueSpaceTypeIt = valueSpaceTypeIt->getNextValueSpaceType()) {
+						if (valueSpaceTypeIt != openValueSpaceType) {
+							CDatatypeValueSpaceData* valueSpaceData = datatypesSpaceValue->getValueSpace(valueSpaceTypeIt, false);
+							if (!valueSpaceData || !valueSpaceData->isValueSpaceClashed()) {
+								allOtherClosed = false;
+							}
+						}
+					}
+					return allOtherClosed;
+				}
+
+
+
+				CDatatypeDependencyCollection* CDatatypeIndividualProcessNodeHandler::addClosedValueSpacedDependencies(CIndividualProcessNode* indiProcNode, CDatatypeDependencyCollection* depCollection, CCalculationAlgorithmContext* calcAlgContext) {
+					CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+					CConcreteOntology* ontology = calcAlgContext->getUsedProcessingDataBox()->getOntology();
+					for (CDatatypeValueSpaceType* valueSpaceTypeIt = ontology->getDataBoxes()->getDatatypeValueSpaceTypes()->getValueSpaceTypeLinker(); valueSpaceTypeIt; valueSpaceTypeIt = valueSpaceTypeIt->getNextValueSpaceType()) {
+						if (valueSpaceTypeIt) {
+							CDatatypeValueSpaceData* valueSpaceData = datatypesSpaceValue->getValueSpace(valueSpaceTypeIt, false);
+							if (valueSpaceData && valueSpaceData->isValueSpaceClashed()) {
+								addValueSpaceDependencies(indiProcNode, valueSpaceData, valueSpaceTypeIt, depCollection, calcAlgContext);
+							}
+						}
+					}
+					return depCollection;
+				}
 
 
 				bool CDatatypeIndividualProcessNodeHandler::addDatatype(CIndividualProcessNode* indiProcNode, CConcept* datatypeConcept, bool negated, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
@@ -182,6 +323,7 @@ namespace Konclude {
 					}
 					return true;
 				}
+
 
 
 
@@ -316,7 +458,7 @@ namespace Konclude {
 						CPROCESSINGMAP<cint64,CIndividualProcessNode*>* sortedDistinctNodeMap = CObjectParameterizingAllocator< CPROCESSINGMAP<cint64,CIndividualProcessNode*>,CContext* >::allocateAndConstructAndParameterize(taskProcessorContext->getMemoryAllocationManager(),taskProcessorContext);
 						for (CPROCESSINGSET<CIndividualProcessNode*>::const_iterator it = distinctIndividualNodeSet->constBegin(), itEnd = distinctIndividualNodeSet->constEnd(); it != itEnd; ++it) {
 							CIndividualProcessNode* distinctIndiNode(*it);
-							cint64 distinctIndiID = distinctIndiNode->getIndividualID();
+							cint64 distinctIndiID = distinctIndiNode->getIndividualNodeID();
 							sortedDistinctNodeMap->insert(distinctIndiID,distinctIndiNode);
 						}
 
@@ -447,7 +589,7 @@ namespace Konclude {
 				bool CDatatypeIndividualProcessNodeHandler::addDistinctDependencies(CIndividualProcessNode* indiProcNode, CDatatypeValueSpaceDependencyCollector* depCollection, CCalculationAlgorithmContext* calcAlgContext) {
 
 					bool dependenciesAdded = false;
-					cint64 indiNodeID = indiProcNode->getIndividualID();
+					cint64 indiNodeID = indiProcNode->getIndividualNodeID();
 					CDistinctHash* distinctHash = indiProcNode->getDistinctHash(false);
 					if (distinctHash) {
 						CDistinctIterator distinctIterator = distinctHash->getDistinctIterator();

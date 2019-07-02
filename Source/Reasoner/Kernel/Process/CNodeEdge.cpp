@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -64,7 +64,7 @@ namespace Konclude {
 				cint64 CNodeEdge::getSourceIndividualID() {
 					cint64 indiID = 0;
 					if (mSourceIndividual) {
-						indiID = mSourceIndividual->getIndividualID();
+						indiID = mSourceIndividual->getIndividualNodeID();
 					}
 					return indiID;
 				}
@@ -72,7 +72,7 @@ namespace Konclude {
 				cint64 CNodeEdge::getDestinationIndividualID() {
 					cint64 indiID = 0;
 					if (mDestinationIndividual) {
-						indiID = mDestinationIndividual->getIndividualID();
+						indiID = mDestinationIndividual->getIndividualNodeID();
 					}
 					return indiID;
 				}
@@ -90,13 +90,13 @@ namespace Konclude {
 
 				CIndividualProcessNode* CNodeEdge::getOppositeIndividual(CIndividualProcessNode* indi) {
 					if (indi) {
-						return getOppositeIndividual(indi->getIndividualID());
+						return getOppositeIndividual(indi->getIndividualNodeID());
 					}
 					return nullptr;
 				}
 
 				CIndividualProcessNode* CNodeEdge::getOppositeIndividual(cint64 indiID) {
-					if (mSourceIndividual->getIndividualID() == indiID) {
+					if (mSourceIndividual->getIndividualNodeID() == indiID) {
 						return mDestinationIndividual;
 					}
 					return mSourceIndividual;
@@ -104,17 +104,17 @@ namespace Konclude {
 
 				cint64 CNodeEdge::getOppositeIndividualID(CIndividualProcessNode* indi) {
 					if (indi) {
-						return getOppositeIndividualID(indi->getIndividualID());
+						return getOppositeIndividualID(indi->getIndividualNodeID());
 					}
 					return 0;
 				}
 
 
 				cint64 CNodeEdge::getOppositeIndividualID(cint64 indiID) {
-					if (mSourceIndividual->getIndividualID() == indiID) {
-						return mDestinationIndividual->getIndividualID();
+					if (mSourceIndividual->getIndividualNodeID() == indiID) {
+						return mDestinationIndividual->getIndividualNodeID();
 					}
-					return mSourceIndividual->getIndividualID();
+					return mSourceIndividual->getIndividualNodeID();
 				}
 
 
@@ -123,11 +123,11 @@ namespace Konclude {
 				}
 
 				bool CNodeEdge::isDestinationIndividualID(CIndividualProcessNode* indi) {
-					return mDestinationIndividual->getIndividualID() == indi->getIndividualID();
+					return mDestinationIndividual->getIndividualNodeID() == indi->getIndividualNodeID();
 				}
 
 				bool CNodeEdge::isDestinationIndividualID(cint64 indiID) {
-					return mDestinationIndividual->getIndividualID() == indiID;
+					return mDestinationIndividual->getIndividualNodeID() == indiID;
 				}
 
 				bool CNodeEdge::isSourceIndividual(CIndividualProcessNode* indi) {
@@ -135,15 +135,15 @@ namespace Konclude {
 				}
 
 				bool CNodeEdge::isSourceIndividualID(CIndividualProcessNode* indi) {
-					return mSourceIndividual->getIndividualID() == indi->getIndividualID();
+					return mSourceIndividual->getIndividualNodeID() == indi->getIndividualNodeID();
 				}
 
 				bool CNodeEdge::isSourceIndividualID(cint64 indiID) {
-					return mSourceIndividual->getIndividualID() == indiID;
+					return mSourceIndividual->getIndividualNodeID() == indiID;
 				}
 
 				cint64 CNodeEdge::getCoupledIndividualID() {
-					return mSourceIndividual->getIndividualID() + mDestinationIndividual->getIndividualID();
+					return mSourceIndividual->getIndividualNodeID() + mDestinationIndividual->getIndividualNodeID();
 				}
 
 

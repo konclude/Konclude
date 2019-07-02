@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -106,8 +106,9 @@ namespace Konclude {
 
 
 			
-			CSubsumptionClassifierThread *COptimizedSubClassSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
+			CSubsumptionClassifierThread *COptimizedSubClassSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 
+				CTaxonomy *taxonomy = createEmptyTaxonomyForOntology(ontology,config);
 				COptimizedSubClassOntologyClassificationItem *ontClassItem = new COptimizedSubClassOntologyClassificationItem(config,statistics);
 				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
 				ontItemList.append(ontClassItem);
@@ -122,7 +123,7 @@ namespace Konclude {
 
 				CPartialPruningTaxonomy *parTax = dynamic_cast<CPartialPruningTaxonomy *>(taxonomy);
 				if (parTax) {
-					COntologyClassificationItem *ontClassItem = ontItemHash.value(ontology);
+					COntologyClassClassificationItem *ontClassItem = (COntologyClassClassificationItem*)ontItemHash.value(ontology);
 					parTax->createStatistics(ontClassItem->getClassifierStatistics());
 				}
 
@@ -280,7 +281,9 @@ namespace Konclude {
 				QSet<COptimizedSubClassSatisfiableTestingItem*>* nextCandItemSet = ontClassItem->getNextCandidateSatisfiableTestingItemSet();
 				QSet<COptimizedSubClassSatisfiableTestingItem*>* remainingCandItemSet = ontClassItem->getRemainingCandidateSatisfiableTestingItemSet();
 
-				if (topConcept->getOperandList()) {
+				CConcept* univConnNomValueConcept = tBox->getUniversalConnectionNominalValueConcept();
+
+				if (topConcept->getOperandList() || univConnNomValueConcept) {
 					// has not absorbed GCIs
 					nextItemList->append(topItem);
 				}
@@ -500,7 +503,7 @@ namespace Konclude {
 					COptimizedSubClassOntologyClassificationItem *optSubClassItem = (COptimizedSubClassOntologyClassificationItem *)ontClassItem;
 
 
-					while (!workTestCreated && optSubClassItem->hasRemainingSatisfiableTests() && !ontClassItem->isTaxonomyConstructionFailed()) {
+					while (!workTestCreated && optSubClassItem->hasRemainingSatisfiableTests() && !optSubClassItem->isTaxonomyConstructionFailed()) {
 						// get next satisfiable test
 
 						QList<COptimizedSubClassSatisfiableTestingItem*>* nextItemList = optSubClassItem->getNextSatisfiableTestingItemList();
@@ -562,8 +565,8 @@ namespace Konclude {
 
 
 					if (!workTestCreated) {
-						if (optSubClassItem->hasAllSatisfiableTestsCompleted() || ontClassItem->isTaxonomyConstructionFailed()) {
-							finishOntologyClassification(ontClassItem);
+						if (optSubClassItem->hasAllSatisfiableTestsCompleted() || optSubClassItem->isTaxonomyConstructionFailed()) {
+							finishOntologyClassification(optSubClassItem);
 							processingOntItemList.removeFirst();
 						} else {
 							processingOntItemList.removeFirst();
@@ -579,7 +582,7 @@ namespace Konclude {
 
 			bool COptimizedSubClassSubsumptionClassifierThread::calculateSatisfiable(COptimizedSubClassOntologyClassificationItem *optSubClassItem, COptimizedSubClassSatisfiableTestingItem* nextSatTestItem) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
-				CClassificationWorkItem *workItem = 0;
+				CClassClassificationComputationItem *workItem = 0;
 
 				CConcept* concept = nextSatTestItem->getSatisfiableConcept();
 				nextSatTestItem->setSatisfiableTestOrdered(true);
@@ -634,14 +637,14 @@ namespace Konclude {
 
 				CSatisfiableCalculationJobGenerator satCalcJobGen(optSubClassItem->getOntology());
 				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(concept);
-				QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = optSubClassItem->getWorkItemHash();
+				QHash<CSatisfiableCalculationJob *, CClassClassificationComputationItem *> *workHash = optSubClassItem->getWorkItemHash();
 
 				CClassifierStatistics *ontClassStat = optSubClassItem->getClassifierStatistics();
 				if (ontClassStat) {
 					ontClassStat->incCalculatedTestedSatisfiableCount(1);
 				}
 
-				workItem = new CClassificationWorkItem(satCalcJob,concept);
+				workItem = new CClassClassificationComputationItem(satCalcJob,concept);
 				workHash->insertMulti(satCalcJob,workItem);
 				workOntItemHash.insert(workItem,optSubClassItem);
 
@@ -810,7 +813,7 @@ namespace Konclude {
 
 
 
-			CSubsumptionClassifierThread *COptimizedSubClassSubsumptionClassifierThread::processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassificationItem *ontClassItem, CClassificationWorkItem* workItem) {
+			CSubsumptionClassifierThread *COptimizedSubClassSubsumptionClassifierThread::processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassClassificationItem *ontClassItem, CClassClassificationComputationItem* workItem) {
 				CClassificationCalculationStatisticsCollection* statColl =  nullptr;
 				if (ontClassItem->isCollectProcessStatisticsActivated()) {
 					statColl = ontClassItem->getCalculationStatisticsCollection();
@@ -830,7 +833,7 @@ namespace Konclude {
 				while (messageDataLinkerIt) {
 					CClassificationMessageData* messageData = messageDataLinkerIt;
 					if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSSUBSUMPTION) {
-						CClassificationSubsumptionMessageData* subsumMessageData = (CClassificationSubsumptionMessageData*)messageData;
+						CClassificationClassSubsumptionMessageData* subsumMessageData = (CClassificationClassSubsumptionMessageData*)messageData;
 						CConcept* subsumedConcept = subsumMessageData->getSubsumedConcept();
 						CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>* subsumerList = subsumMessageData->getClassSubsumerList();
 
@@ -861,7 +864,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedSubClassSubsumptionClassifierThread::interpreteToldSubsumptionResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubSum) {
+			bool COptimizedSubClassSubsumptionClassifierThread::interpreteToldSubsumptionResult(COntologyClassClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubSum) {
 				CConcept *lastConcept = nullptr;
 				COptimizedSubClassOntologyClassificationItem *optSubClassItem = (COptimizedSubClassOntologyClassificationItem *)ontClassItem;
 				COptimizedSubClassSatisfiableTestingItem* subsumerItem = nullptr;
@@ -882,12 +885,12 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedSubClassSubsumptionClassifierThread::interpreteSubsumptionResult(COntologyClassificationItem *ontClassItem, CConcept *subsumerConcept, CConcept *subsumedConcept, bool isSubsumption) {
+			bool COptimizedSubClassSubsumptionClassifierThread::interpreteSubsumptionResult(COntologyClassClassificationItem *ontClassItem, CConcept *subsumerConcept, CConcept *subsumedConcept, bool isSubsumption) {
 				return false;
 			}
 
 
-			bool COptimizedSubClassSubsumptionClassifierThread::interpreteSatisfiableResult(COntologyClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis) {
+			bool COptimizedSubClassSubsumptionClassifierThread::interpreteSatisfiableResult(COntologyClassClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis) {
 				COptimizedSubClassOntologyClassificationItem *optSubClassItem = (COptimizedSubClassOntologyClassificationItem *)ontClassItem;
 
 				CClassifierStatistics *ontClassStat = optSubClassItem->getClassifierStatistics();
@@ -961,12 +964,12 @@ namespace Konclude {
 			bool COptimizedSubClassSubsumptionClassifierThread::interpreteTestResults(CTestCalculatedCallbackEvent *testResult) {
 				CSatisfiableCalculationJob *satCalcJob = testResult->getSatisfiableCalculationJob();
 				bool testSat = testResult->getTestResultSatisfiable();
-				CClassificationWorkItem *workItem = testResult->getClassificationWorkItem();
+				CClassClassificationComputationItem *workItem = (CClassClassificationComputationItem*)testResult->getClassificationWorkItem();
 
-				COntologyClassificationItem *ontClassItem = workOntItemHash.value(workItem);
+				COntologyClassClassificationItem *ontClassItem = workOntItemHash.value(workItem);
 				if (ontClassItem) {
 
-					QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = ontClassItem->getWorkItemHash();
+					QHash<CSatisfiableCalculationJob *, CClassClassificationComputationItem *> *workHash = ontClassItem->getWorkItemHash();
 
 					CTaxonomy *taxonomy = ontClassItem->getTaxonomy();
 
@@ -983,7 +986,7 @@ namespace Konclude {
 								}
 							}
 						}
-						QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *>::iterator itWorkItem = workHash->find(satCalcJob);
+						QHash<CSatisfiableCalculationJob *, CClassClassificationComputationItem *>::iterator itWorkItem = workHash->find(satCalcJob);
 						while (itWorkItem != workHash->end()) {						
 							if (itWorkItem.value() == workItem) {
 								workHash->erase(itWorkItem);
@@ -1010,7 +1013,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedSubClassSubsumptionClassifierThread::finishOntologyClassification(COntologyClassificationItem *ontClassItem) {
+			bool COptimizedSubClassSubsumptionClassifierThread::finishOntologyClassification(COntologyClassClassificationItem *ontClassItem) {
 
 				if (!ontClassItem->isTaxonomyConstructed() && !ontClassItem->isTaxonomyConstructionFailed()) {
 
@@ -1208,7 +1211,7 @@ namespace Konclude {
 					}
 					ontology->setConceptTaxonomy(taxonomy);
 
-					ontClassItem->setGoneOutRemainingTests(false);
+					ontClassItem->setHasRemainingTests(false);
 
 					taxonomy->setTaxonomyComplete(true);
 					--mClassificationCount;

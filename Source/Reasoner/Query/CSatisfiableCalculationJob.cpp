@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -40,6 +40,12 @@ namespace Konclude {
 				mSatIncConsTestingAdapter = nullptr;
 				mSatIndDepTrackAdapter = nullptr;
 				mPossAssCollAdapter = nullptr;
+				mClassRoleMarkedMessageAdapter = nullptr;
+				mAnswererSubsumptionMessageAdapter = nullptr;
+				mAnswererInstancePropagationMessageAdapter = nullptr;
+				mRepresentativeBackendUpdatingAdapter = nullptr;
+				mAnswererBindingPropagationAdapter = nullptr;
+				mSatisfiablePossibleInstancesMergingAdapter = nullptr;
 				mNextRelativeNodeID = 0;
 			}
 
@@ -168,7 +174,62 @@ namespace Konclude {
 				return mPossAssCollAdapter;
 			}
 
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableClassificationRoleMarkedMessageAdapter(CSatisfiableTaskClassificationRoleMarkedMessageAdapter* classRoleMarkedMessageAdapter) {
+				mClassRoleMarkedMessageAdapter = classRoleMarkedMessageAdapter;
+				return this;
+			}
 
+			CSatisfiableTaskClassificationRoleMarkedMessageAdapter* CSatisfiableCalculationJob::getSatisfiableClassificationRoleMarkedMessageAdapter() {
+				return mClassRoleMarkedMessageAdapter;
+			}
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableAnswererSubsumptionMessageAdapter(CSatisfiableTaskAnswererSubsumptionMessageAdapter* answererMessageAdapter) {
+				mAnswererSubsumptionMessageAdapter = answererMessageAdapter;
+				return this;
+			}
+
+			CSatisfiableTaskAnswererSubsumptionMessageAdapter* CSatisfiableCalculationJob::getSatisfiableAnswererSubsumptionMessageAdapter() {
+				return mAnswererSubsumptionMessageAdapter;
+			}
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableAnswererBindingPropagationAdapter(CSatisfiableTaskAnswererBindingPropagationAdapter* answererMessageAdapter) {
+				mAnswererBindingPropagationAdapter = answererMessageAdapter;
+				return this;
+			}
+
+			CSatisfiableTaskAnswererBindingPropagationAdapter* CSatisfiableCalculationJob::getSatisfiableAnswererBindingPropagationAdapter() {
+				return mAnswererBindingPropagationAdapter;
+			}
+
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiablePossibleInstancesMergingAdapter(CSatisfiableTaskRealizationPossibleInstancesMergingAdapter* possInstMergingAdapter) {
+				mSatisfiablePossibleInstancesMergingAdapter = possInstMergingAdapter;
+				return this;
+			}
+
+			CSatisfiableTaskRealizationPossibleInstancesMergingAdapter* CSatisfiableCalculationJob::getSatisfiablePossibleInstancesMergingAdapter() {
+				return mSatisfiablePossibleInstancesMergingAdapter;
+			}
+
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableAnswererInstancePropagationMessageAdapter(CSatisfiableTaskAnswererInstancePropagationMessageAdapter* answererMessageAdapter) {
+				mAnswererInstancePropagationMessageAdapter = answererMessageAdapter;
+				return this;
+			}
+
+			CSatisfiableTaskAnswererInstancePropagationMessageAdapter* CSatisfiableCalculationJob::getSatisfiableAnswererInstancePropagationMessageAdapter() {
+				return mAnswererInstancePropagationMessageAdapter;
+			}
+
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableRepresentativeBackendCacheUpdatingAdapter(CSatisfiableTaskRepresentativeBackendUpdatingAdapter* representativeBackendUpdatingAdapter) {
+				mRepresentativeBackendUpdatingAdapter = representativeBackendUpdatingAdapter;
+				return this;
+			}
+
+			CSatisfiableTaskRepresentativeBackendUpdatingAdapter* CSatisfiableCalculationJob::getSatisfiableRepresentativeBackendCacheUpdatingAdapter() {
+				return mRepresentativeBackendUpdatingAdapter;
+			}
 
 		}; // end namespace Query
 

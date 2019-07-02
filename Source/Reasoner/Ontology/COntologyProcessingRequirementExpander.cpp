@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -30,33 +30,47 @@ namespace Konclude {
 
 			COntologyProcessingRequirementExpander::COntologyProcessingRequirementExpander() {
 				COntologyProcessingStepVector* ontProStepVec = COntologyProcessingStepVector::getProcessingStepVectorInstance();
+				mTriplesMappingOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSTRIPLESMAPPING), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mActiveCountOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSACTIVECOUNT), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mBuildOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSBUILD), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mPreprocessOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSPREPROCESS), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
+				mTriplesIndexingOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSTRIPLESINDEXING), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mConsistencyOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSCONSISTENCY), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mIndividualOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSPRECOMPUTEINDIVIDUAL), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mSaturationOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSPRECOMPUTESATURATION), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
-				mPrecomputeOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSPRECOMPUTECYCLES), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
+				mPrecomputeCyclesOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSPRECOMPUTECYCLES), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
+				mPrecomputeOccStatsOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSPRECOMPUTEOCCURRENCESTATISTICS), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mClassClassifyOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSCLASSCLASSIFY), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
+				mObjPropClassifyOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
+				mDataPropClassifyOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mRequiredConsistencyOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSCONSISTENCY), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, COntologyProcessingStatus::PSINCONSITENT);
+				mInitRealizeOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSINITREALIZE), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mConceptRealizeOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSCONCEPTREALIZE), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mSameIndividualsRealizeOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 				mRoleRealizeOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSROLEREALIZE), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
+				mComplexQueryAnsweringOntProStepReq = new COntologyProcessingStepRequirement(ontProStepVec->getProcessingStep(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY), COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0);
 			}
 
 			COntologyProcessingRequirementExpander::~COntologyProcessingRequirementExpander() {
+				delete mTriplesIndexingOntProStepReq;
+				delete mTriplesMappingOntProStepReq;
 				delete mActiveCountOntProStepReq;
 				delete mBuildOntProStepReq;
 				delete mPreprocessOntProStepReq;
 				delete mConsistencyOntProStepReq;
 				delete mIndividualOntProStepReq;
 				delete mSaturationOntProStepReq;
-				delete mPrecomputeOntProStepReq;
+				delete mInitRealizeOntProStepReq;
+				delete mPrecomputeCyclesOntProStepReq;
+				delete mPrecomputeOccStatsOntProStepReq;
 				delete mClassClassifyOntProStepReq;
+				delete mObjPropClassifyOntProStepReq;
+				delete mDataPropClassifyOntProStepReq;
 				delete mRequiredConsistencyOntProStepReq;
 				delete mConceptRealizeOntProStepReq;
 				delete mRoleRealizeOntProStepReq;
 				delete mSameIndividualsRealizeOntProStepReq;
+				delete mComplexQueryAnsweringOntProStepReq;
 			}
 
 
@@ -108,12 +122,16 @@ namespace Konclude {
 
 			COntologyProcessingStepRequirement* COntologyProcessingRequirementExpander::getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::PROCESSINGSTEPTYPE processingStep) {
 				COntologyProcessingStepRequirement* ontProStepReq = nullptr;
-				if (processingStep == COntologyProcessingStep::OPSACTIVECOUNT) {
+				if (processingStep == COntologyProcessingStep::OPSTRIPLESMAPPING) {
+					ontProStepReq = mTriplesMappingOntProStepReq;
+				} else if (processingStep == COntologyProcessingStep::OPSACTIVECOUNT) {
 					ontProStepReq = mActiveCountOntProStepReq;
-				} else if (processingStep == COntologyProcessingStep::OPSBUILD) {
+				} else if(processingStep == COntologyProcessingStep::OPSBUILD) {
 					ontProStepReq = mBuildOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSPREPROCESS) {
 					ontProStepReq = mPreprocessOntProStepReq;
+				} else if (processingStep == COntologyProcessingStep::OPSTRIPLESINDEXING) {
+					ontProStepReq = mTriplesIndexingOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSCONSISTENCY) {
 					ontProStepReq = mConsistencyOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSPRECOMPUTEINDIVIDUAL) {
@@ -121,15 +139,25 @@ namespace Konclude {
 				} else if (processingStep == COntologyProcessingStep::OPSPRECOMPUTESATURATION) {
 					ontProStepReq = mSaturationOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSPRECOMPUTECYCLES) {
-					ontProStepReq = mPrecomputeOntProStepReq;
+					ontProStepReq = mPrecomputeCyclesOntProStepReq;
+				} else if (processingStep == COntologyProcessingStep::OPSPRECOMPUTEOCCURRENCESTATISTICS) {
+					ontProStepReq = mPrecomputeOccStatsOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSCLASSCLASSIFY) {
 					ontProStepReq = mClassClassifyOntProStepReq;
+				} else if (processingStep == COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY) {
+					ontProStepReq = mObjPropClassifyOntProStepReq;
+				} else if (processingStep == COntologyProcessingStep::OPSDATAROPERTYCLASSIFY) {
+					ontProStepReq = mDataPropClassifyOntProStepReq;
+				} else if (processingStep == COntologyProcessingStep::OPSINITREALIZE) {
+					ontProStepReq = mInitRealizeOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSCONCEPTREALIZE) {
 					ontProStepReq = mConceptRealizeOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSROLEREALIZE) {
 					ontProStepReq = mRoleRealizeOntProStepReq;
 				} else if (processingStep == COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE) {
 					ontProStepReq = mSameIndividualsRealizeOntProStepReq;
+				} else if (processingStep == COntologyProcessingStep::OPSANSWERCOMPLEXQUERY) {
+					ontProStepReq = mComplexQueryAnsweringOntProStepReq;
 				}
 				return ontProStepReq;
 			}

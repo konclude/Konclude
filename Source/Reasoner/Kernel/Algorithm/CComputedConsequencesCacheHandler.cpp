@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -46,7 +46,7 @@ namespace Konclude {
 					CConcreteOntology* ontology = calcAlgContext->getProcessingDataBox()->getOntology();
 					CConsistence* consistence = ontology->getConsistence();
 					CBOXHASH<CConcept*,CConcept*>* eqConCandHash = ontology->getTBox()->getEquivalentConceptCandidateHash(false);
-					if (consistence) {
+					if (consistence && concept->getTerminology()) {
 						CConsistenceData* consData = consistence->getConsistenceModelData();
 						if (consData) {
 							CConsistenceTaskData* consTaskData = dynamic_cast<CConsistenceTaskData*>(consData);
@@ -54,8 +54,8 @@ namespace Konclude {
 								CSatisfiableCalculationTask* detSatCalcTask = consTaskData->getDeterministicSatisfiableTask();
 								if (detSatCalcTask) {
 									CIndividualProcessNodeVector* detSatProcNodeVec = detSatCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
-									CIndividualProcessNode* detIndiNode = detSatProcNodeVec->getData(individual->getIndividualID());
-									while (detIndiNode->getIndividualID() != detIndiNode->getMergedIntoIndividualNodeID()) {
+									CIndividualProcessNode* detIndiNode = detSatProcNodeVec->getData(-individual->getIndividualID());
+									while (detIndiNode->getIndividualNodeID() != detIndiNode->getMergedIntoIndividualNodeID()) {
 										detIndiNode = detSatProcNodeVec->getData(detIndiNode->getMergedIntoIndividualNodeID());
 									}
 									CReapplyConceptLabelSet* detConSet = detIndiNode->getReapplyConceptLabelSet(false);
@@ -65,9 +65,9 @@ namespace Konclude {
 										//}
 										CSatisfiableCalculationTask* compGraphCachedCalcTask = consTaskData->getCompletionGraphCachedSatisfiableTask();
 										CIndividualProcessNodeVector* compGraphCachedProcNodeVec = compGraphCachedCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
-										CIndividualProcessNode* compGraphCachedIndiNode = compGraphCachedProcNodeVec->getData(individual->getIndividualID());
-										while (compGraphCachedIndiNode->getIndividualID() != compGraphCachedIndiNode->getMergedIntoIndividualNodeID()) {
-											compGraphCachedIndiNode = detSatProcNodeVec->getData(compGraphCachedIndiNode->getIndividualID());
+										CIndividualProcessNode* compGraphCachedIndiNode = compGraphCachedProcNodeVec->getData(-individual->getIndividualID());
+										while (compGraphCachedIndiNode->getIndividualNodeID() != compGraphCachedIndiNode->getMergedIntoIndividualNodeID()) {
+											compGraphCachedIndiNode = detSatProcNodeVec->getData(compGraphCachedIndiNode->getIndividualNodeID());
 										}
 										CReapplyConceptLabelSet* compGraphCachedConSet = compGraphCachedIndiNode->getReapplyConceptLabelSet(false);
 										if (compGraphCachedConSet && compGraphCachedConSet->containsConcept(concept,negation)) {
@@ -75,7 +75,7 @@ namespace Konclude {
 										}
 										if (!negation && eqConCandHash) {
 											CConcept* candidateConcept = eqConCandHash->value(concept);
-											if (compGraphCachedConSet && compGraphCachedConSet->containsConcept(candidateConcept,false)) {
+											if (compGraphCachedConSet && candidateConcept && compGraphCachedConSet->containsConcept(candidateConcept,false)) {
 												return true;
 											}
 
@@ -93,7 +93,7 @@ namespace Konclude {
 				bool CComputedConsequencesCacheHandler::tryCacheTypeConcept(CIndividual* individual, CConcept* concept, bool negation, CCalculationAlgorithmContext* calcAlgContext) {
 					CComputedConsequencesTypesCacheEntry* typeCacheEntry = mSatCacheReader->getTypesCacheEntry(individual);
 
-					if (!typeCacheEntry || !typeCacheEntry->hasConcept(concept,negation) && canCacheTypeConcept(individual,concept,negation,calcAlgContext)) {
+					if ((!typeCacheEntry || !typeCacheEntry->hasConcept(concept,negation)) && canCacheTypeConcept(individual,concept,negation,calcAlgContext)) {
 						// try caching
 						prepareCacheMessages(calcAlgContext);
 						CTaskMemoryPoolAllocationManager* satCacheMemMan = mMemAllocMan;

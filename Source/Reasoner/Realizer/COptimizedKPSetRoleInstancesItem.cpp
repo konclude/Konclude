@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,19 +37,29 @@ namespace Konclude {
 				mTestingPossInstanceCount = 0;
 				mAllSuccProcessedFlag = false;
 				mToProcessFlag = false;
-				mProcessingQueuedFlag = false;
+				mPossibleProcessingQueuedFlag = false;
 				mSelfSuccsCompletedFlag = false;
 				mRequiresCandidateInitializationFlag = true;
 				mUninitializedSuccItemCount = 0;
 				mAllSuccInitializedFlag = false;
 				mInitializingQueuedFlag = false;
 				mInitializationStartedFlag = false;
+				mInitializationCompletedFlag = false;
 				mToInitializeFlag = false;
 				mTmpPropagationConcept = nullptr;
 				mTmpMarkerConcept = nullptr;
 				mTmpInversePropagationConcept = nullptr;
 				mTmpInverseMarkerConcept = nullptr;
 				mInvRole = nullptr;
+				mRoleHierNode = nullptr;
+				mInvRoleHierNode = nullptr;
+				mInvRedirectedItem = nullptr;
+				mComplexIndiCandidateIterator = nullptr;
+				mOnlyTransitiveComplexRoleCandidates = true;
+				mOnlyDeterministicComplexRoleStarterCandidatesUsage = true;
+
+				mPropagationDirectionDetermined = false;
+				mPreferredPropagationDirection = NONE;
 				return this;
 			}
 
@@ -71,6 +81,37 @@ namespace Konclude {
 				mRole = role;
 				return this;
 			}
+
+			CRolePropertiesHierarchyNode* COptimizedKPSetRoleInstancesItem::getRoleHierarchyNode() {
+				return mRoleHierNode;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setRoleHierarchyNode(CRolePropertiesHierarchyNode* roleHierNode) {
+				mRoleHierNode = roleHierNode;
+				return this; 
+			}
+
+
+			CRolePropertiesHierarchyNode* COptimizedKPSetRoleInstancesItem::getInverseRoleHierarchyNode() {
+				return mInvRoleHierNode;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setInverseRoleHierarchyNode(CRolePropertiesHierarchyNode* roleHierNode) {
+				mInvRoleHierNode = roleHierNode;
+				return this; 
+			}
+
+
+			COptimizedKPSetRoleInstancesRedirectionItem* COptimizedKPSetRoleInstancesItem::getInverseRoleRedirectedItem() {
+				return mInvRedirectedItem;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setInverseRoleRedirectedItem(COptimizedKPSetRoleInstancesRedirectionItem* redirectedItem) {
+				mInvRedirectedItem = redirectedItem;
+				return this;
+			}
+
+
 
 			QSet<COptimizedKPSetIndividualItemPair>* COptimizedKPSetRoleInstancesItem::getKnownInstancesSet() {
 				return &mKnownInstancesSet;
@@ -188,13 +229,24 @@ namespace Konclude {
 			}
 
 			bool COptimizedKPSetRoleInstancesItem::hasPossibleInstancesProcessingQueuedFlag() {
-				return mProcessingQueuedFlag;
+				return mPossibleProcessingQueuedFlag;
 			}
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setPossibleInstancesProcessingQueuedFlag(bool processingQueued) {
-				mProcessingQueuedFlag = processingQueued;
+				mPossibleProcessingQueuedFlag = processingQueued;
 				return this;
 			}
+
+
+			bool COptimizedKPSetRoleInstancesItem::hasComplexCandidateInstancesProcessingQueuedFlag() {
+				return mComplexCandidateProcessingQueuedFlag;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setComplexCandidateProcessingQueuedFlag(bool processingQueued) {
+				mComplexCandidateProcessingQueuedFlag = processingQueued;
+				return this;
+			}
+
 
 			bool COptimizedKPSetRoleInstancesItem::hasSelfSuccessorProcessedFlag() {
 				return mSelfSuccsCompletedFlag;
@@ -256,7 +308,7 @@ namespace Konclude {
 			}
 
 			bool COptimizedKPSetRoleInstancesItem::isCandidateSuccessorInitializationCompleted() {
-				return mInitializationStartedFlag && mRemainingCandidateInitializationSuccessorList.isEmpty();
+				return mInitializationStartedFlag && mInitializationCompletedFlag;
 			}
 
 			bool COptimizedKPSetRoleInstancesItem::isCandidateSuccessorInitializationStarted() {
@@ -269,6 +321,10 @@ namespace Konclude {
 			}
 
 
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setCandidateSuccessorInitializationCompleted(bool initCompleted) {
+				mInitializationCompletedFlag = initCompleted;
+				return this;
+			}
 
 			cint64 COptimizedKPSetRoleInstancesItem::getUninitializedSuccessorItemCount() {
 				return mUninitializedSuccItemCount;
@@ -362,31 +418,31 @@ namespace Konclude {
 
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addKnownInverseInstance(const COptimizedKPSetIndividualItemPair& itemPair) {
-				mKnownInverseInstancesSet.insert(itemPair);
+				mKnownInstancesSet.insert(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				return this;
 			}
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::removeKnownInverseInstance(const COptimizedKPSetIndividualItemPair& itemPair) {
-				mKnownInverseInstancesSet.remove(itemPair);
+				mKnownInstancesSet.remove(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				return this;
 			}
 
 			bool COptimizedKPSetRoleInstancesItem::hasKnownInverseInstance(const COptimizedKPSetIndividualItemPair& itemPair) {
-				return mKnownInverseInstancesSet.contains(itemPair);
+				return mKnownInstancesSet.contains(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 			}
 
 
 			bool COptimizedKPSetRoleInstancesItem::hasPossibleInverseInstance(const COptimizedKPSetIndividualItemPair& itemPair) {
-				return mPossibleInverseInstancesSet.contains(itemPair);
+				return mPossibleInstancesSet.contains(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 			}
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addPossibleInverseInstance(const COptimizedKPSetIndividualItemPair& itemPair) {
-				mPossibleInverseInstancesSet.insert(itemPair);
+				mPossibleInstancesSet.insert(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				return this;
 			}
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::removePossibleInverseInstance(const COptimizedKPSetIndividualItemPair& itemPair) {
-				mPossibleInverseInstancesSet.remove(itemPair);
+				mPossibleInstancesSet.remove(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				return this;
 			}
 
@@ -395,7 +451,7 @@ namespace Konclude {
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addKnownInstance(const COptimizedKPSetIndividualItemPair& itemPair, bool inverse) {
 				if (inverse) {
-					addKnownInverseInstance(itemPair);
+					addKnownInstance(COptimizedKPSetIndividualItemPair(itemPair.second,itemPair.first));
 				} else {
 					addKnownInstance(itemPair);
 				}
@@ -404,7 +460,7 @@ namespace Konclude {
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::removeKnownInstance(const COptimizedKPSetIndividualItemPair& itemPair, bool inverse) {
 				if (inverse) {
-					removeKnownInverseInstance(itemPair);
+					removeKnownInstance(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				} else {
 					removeKnownInstance(itemPair);
 				}
@@ -413,7 +469,7 @@ namespace Konclude {
 
 			bool COptimizedKPSetRoleInstancesItem::hasKnownInstance(const COptimizedKPSetIndividualItemPair& itemPair, bool inverse) {
 				if (inverse) {
-					return hasKnownInverseInstance(itemPair);
+					return hasKnownInstance(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				} else {
 					return hasKnownInstance(itemPair);
 				}
@@ -422,7 +478,7 @@ namespace Konclude {
 
 			bool COptimizedKPSetRoleInstancesItem::hasPossibleInstance(const COptimizedKPSetIndividualItemPair& itemPair, bool inverse) {
 				if (inverse) {
-					return hasPossibleInverseInstance(itemPair);
+					return hasPossibleInstance(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				} else {
 					return hasPossibleInstance(itemPair);
 				}
@@ -430,7 +486,7 @@ namespace Konclude {
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addPossibleInstance(const COptimizedKPSetIndividualItemPair& itemPair, bool inverse) {
 				if (inverse) {
-					addPossibleInverseInstance(itemPair);
+					addPossibleInstance(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				} else {
 					addPossibleInstance(itemPair);
 				}
@@ -439,7 +495,7 @@ namespace Konclude {
 
 			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::removePossibleInstance(const COptimizedKPSetIndividualItemPair& itemPair, bool inverse) {
 				if (inverse) {
-					removePossibleInverseInstance(itemPair);
+					removePossibleInstance(COptimizedKPSetIndividualItemPair(itemPair.second, itemPair.first));
 				} else {
 					removePossibleInstance(itemPair);
 				}
@@ -484,6 +540,210 @@ namespace Konclude {
 			bool COptimizedKPSetRoleInstancesItem::hasComplexInverseRoleStarterCandidate(CRole* role) {
 				return mComplexInverseRoleStarterCandidateSet.contains(role);
 			}
+
+
+
+
+			bool COptimizedKPSetRoleInstancesItem::hasOnlyTransitiveComplexRoleCandidates() {
+				return mOnlyTransitiveComplexRoleCandidates;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setOnlyTransitiveComplexRoleCandidates(bool onlyTransitiveCandidates) {
+				mOnlyTransitiveComplexRoleCandidates = onlyTransitiveCandidates;
+				return this;
+			}
+
+
+
+
+			QSet<TRoleItemInversionPair>* COptimizedKPSetRoleInstancesItem::getOnlyTransitiveComplexSubRoleItems() {
+				return &mOnlyTransitiveComplexSubRoleItems;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addOnlyTransitiveComplexSubRoleItem(const TRoleItemInversionPair& item) {
+				mOnlyTransitiveComplexSubRoleItems.insert(item);
+				return this;
+			}
+
+
+
+
+			bool COptimizedKPSetRoleInstancesItem::hasOnlyDeterministicComplexRoleStarterCandidatesUsage() {
+				return mOnlyDeterministicComplexRoleStarterCandidatesUsage;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setOnlyDeterministicComplexRoleStarterCandidatesUsage(bool onlyDeterministicComplexRoleStarterCandidatesUsage) {
+				mOnlyDeterministicComplexRoleStarterCandidatesUsage = onlyDeterministicComplexRoleStarterCandidatesUsage;
+				return this;
+			}
+
+
+
+
+			COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelHash* COptimizedKPSetRoleInstancesItem::getCombinedNeighbourCacheLabelItemDataHash(bool inversed) {
+				if (!inversed) {
+					return &mCombinedNeighbourLabelDataHash;
+				} else {
+					return &mInverseCombinedNeighbourLabelDataHash;
+				}
+			}
+
+
+			bool COptimizedKPSetRoleInstancesItem::hasCombinedNeighbourCacheLabelItemInversed(CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem) {
+				return mInverseCombinedNeighbourLabelDataHash.contains(cacheLabelItem);
+			}
+
+
+			QHash<cint64, COptimizedKPSetIndividualComplexRoleData*>* COptimizedKPSetRoleInstancesItem::getIndividualIdComplexRoleDataHash() {
+				return &mIndividualIdComplexRoleDataHash;
+			}
+
+			bool COptimizedKPSetRoleInstancesItem::hasComplexRoleData() {
+				return mIndividualIdComplexRoleDataHash.size() > 0;
+			}
+
+
+			COptimizedKPSetIndividualComplexRoleData* COptimizedKPSetRoleInstancesItem::getIndividualIdComplexRoleData(cint64 individualId, bool createIfNotExists) {
+				if (createIfNotExists) {
+					COptimizedKPSetIndividualComplexRoleData*& complexRoleData = mIndividualIdComplexRoleDataHash[individualId];
+					if (!complexRoleData) {
+						complexRoleData = new COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData();
+					}
+					return complexRoleData;
+				} else {
+					return mIndividualIdComplexRoleDataHash.value(individualId);
+				}				
+			}
+
+
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addComplexStarterCandidateCombinedNeighbourRoleLabelCacheItem(bool inversed, CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem) {
+				if (!inversed) {
+					mComplexStarterCandidateCombinedNeighbourRoleLabelCacheItemSet.insert(labelCacheItem);
+				} else {
+					mComplexInverseStarterCandidateCombinedNeighbourRoleLabelCacheItemSet.insert(labelCacheItem);
+				}
+				return this;
+			}
+
+
+
+			QSet<CBackendRepresentativeMemoryLabelCacheItem*>* COptimizedKPSetRoleInstancesItem::getComplexStarterCandidateCombinedNeighbourRoleLabelCacheItemSet(bool inversed) {
+				if (inversed) {
+					return &mComplexInverseStarterCandidateCombinedNeighbourRoleLabelCacheItemSet;
+				} else {
+					return &mComplexStarterCandidateCombinedNeighbourRoleLabelCacheItemSet;
+				}
+			}
+
+
+
+
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addComplexStarterCandidateCombinedExistentialRoleLabelCacheItem(bool inversed, CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem) {
+				if (!inversed) {
+					mComplexStarterCandidateCombinedExistentialRoleLabelCacheItemSet.insert(labelCacheItem);
+				} else {
+					mComplexInverseStarterCandidateCombinedExistentialRoleLabelCacheItemSet.insert(labelCacheItem);
+				}
+				return this;
+			}
+
+
+
+			QSet<CBackendRepresentativeMemoryLabelCacheItem*>* COptimizedKPSetRoleInstancesItem::getComplexStarterCandidateCombinedExistentialRoleLabelCacheItemSet(bool inversed) {
+				if (inversed) {
+					return &mComplexInverseStarterCandidateCombinedExistentialRoleLabelCacheItemSet;
+				} else {
+					return &mComplexStarterCandidateCombinedExistentialRoleLabelCacheItemSet;
+				}
+			}
+
+
+
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addExistentialRoleLabelCacheItem(bool inversed, CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem) {
+				if (!inversed) {
+					mExistentialRoleLabelCacheItemSet.insert(labelCacheItem);
+				} else {
+					mExistentialInverseRoleLabelCacheItemSet.insert(labelCacheItem);
+				}
+				return this;
+			}
+
+			QSet<CBackendRepresentativeMemoryLabelCacheItem*>* COptimizedKPSetRoleInstancesItem::getExistentialRoleLabelCacheItemSet(bool inversed) {
+				if (!inversed) {
+					return &mExistentialRoleLabelCacheItemSet;
+				} else {
+					return &mExistentialInverseRoleLabelCacheItemSet;
+				}
+			}			
+
+
+			COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator* COptimizedKPSetRoleInstancesItem::getIndividualComplexCandidateIterator() {
+				return mComplexIndiCandidateIterator;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setIndividualComplexCandidateIterator(COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator* iterator) {
+				mComplexIndiCandidateIterator = iterator;
+				return this;
+			}
+
+
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::addComplexCandidateInstance(const COptimizedKPSetIndividualItemReferencePair& itemRefPair, bool inverse) {
+				COptimizedKPSetIndividualItemReferencePair corrItemRefPair = itemRefPair;
+				if (inverse) {
+					corrItemRefPair = COptimizedKPSetIndividualItemReferencePair(corrItemRefPair.second, corrItemRefPair.first);
+				}
+				mComplexRoleCandidateInstancesSet.insert(corrItemRefPair);
+				return this;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::removeComplexCandidateInstance(const COptimizedKPSetIndividualItemReferencePair& itemRefPair, bool inverse) {
+				COptimizedKPSetIndividualItemReferencePair corrItemRefPair = itemRefPair;
+				if (inverse) {
+					corrItemRefPair = COptimizedKPSetIndividualItemReferencePair(corrItemRefPair.second, corrItemRefPair.first);
+				}
+				mComplexRoleCandidateInstancesSet.remove(corrItemRefPair);
+				return this;
+			}
+
+			bool COptimizedKPSetRoleInstancesItem::hasComplexInstanceCandidates() {
+				return !mComplexRoleCandidateInstancesSet.isEmpty();
+			}
+
+			COptimizedKPSetIndividualItemReferencePair COptimizedKPSetRoleInstancesItem::takeNextTestingComplexInstanceCandidate() {
+				COptimizedKPSetIndividualItemReferencePair nextItem = COptimizedKPSetIndividualItemReferencePair(CRealizationIndividualInstanceItemReference(), CRealizationIndividualInstanceItemReference());
+				if (hasPossibleInstances()) {
+					QSet<COptimizedKPSetIndividualItemReferencePair>::iterator it = mComplexRoleCandidateInstancesSet.begin();
+					nextItem = *it;
+					mComplexRoleCandidateInstancesSet.erase(it);
+				}
+				return nextItem;
+			}
+
+
+			bool COptimizedKPSetRoleInstancesItem::hasPropagationDirectionDetermined() {
+				return mPropagationDirectionDetermined;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setPropagationDirectionDetermined(bool determined) {
+				mPropagationDirectionDetermined = determined;
+				return this;
+			}
+
+			COptimizedKPSetRoleInstancesItem::RolePreferredPropagationDirection COptimizedKPSetRoleInstancesItem::getPreferredPropagationDirection() {
+				return mPreferredPropagationDirection;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setPreferredPropagationDirection(RolePreferredPropagationDirection direction) {
+				mPreferredPropagationDirection = direction;
+				return this;
+			}
+
+
+
 
 		}; // end namespace Realizer
 

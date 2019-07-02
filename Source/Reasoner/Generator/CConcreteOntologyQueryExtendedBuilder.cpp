@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,15 +28,17 @@ namespace Konclude {
 		namespace Generator {
 
 
-			CConcreteOntologyQueryExtendedBuilder::CConcreteOntologyQueryExtendedBuilder(CConcreteOntology* ontology, CConfigurationBase *configuration, COntologyBuilder* ontologyBuilder)
+			CConcreteOntologyQueryExtendedBuilder::CConcreteOntologyQueryExtendedBuilder(CConcreteOntology* baseOntology, CConcreteOntology* ontology, CConfigurationBase *configuration, COntologyBuilder* ontologyBuilder)
 					: CConcreteOntologyQueryBasicBuilder(ontology,configuration) {
 
+				mBaseOntology = baseOntology;
 				mOntologyBuilder = ontologyBuilder;
 			}
 
 
 
 			CConcreteOntologyQueryExtendedBuilder::~CConcreteOntologyQueryExtendedBuilder() {
+				qDeleteAll(mExpContainer);
 			}
 
 
@@ -187,12 +189,257 @@ namespace Konclude {
 
 
 
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, orderingList, filteringList, distinctModifier);
+				mSparqlSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+
+			CQuerySPARQLAskBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, const QString& queryName) {
+				CQuerySPARQLAskBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLAskBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, filteringList);
+				mSparqlAskExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+
+
+			COrderingVariableExpression* CConcreteOntologyQueryExtendedBuilder::getOrderingVariableExpression(CExpressionVariable* variable, bool ascOrdering) {
+				COrderingVariableExpression::ORDERING_TYPE orderType = COrderingVariableExpression::ASC;
+				if (!ascOrdering) {
+					orderType = COrderingVariableExpression::DESC;
+				}
+				COrderingVariableExpression* orderingVarExp = new COrderingVariableExpression(variable, orderType);
+				mExpContainer.append(orderingVarExp);
+				return orderingVarExp;
+			}
+
+			CFilteringComparisonDataLiteralExpression* CConcreteOntologyQueryExtendedBuilder::getFilteringComparisonDataLiteralExpression(CDataLiteralVariableExpression* variable, CDataLiteralExpression* dataLiteralExp, CFilteringComparisonDataLiteralExpression::COMPARING_TYPE comparingType) {
+				CFilteringComparisonDataLiteralExpression* compDataLitExp = new CFilteringComparisonDataLiteralExpression(dataLiteralExp, variable, comparingType);
+				mExpContainer.append(compDataLitExp);
+				return compDataLitExp;
+			}
+
+
+
+
+
+			bool CConcreteOntologyQueryExtendedBuilder::requiresPreprocessedOntology() {
+				if (classEqExpList.isEmpty() && classDisjointExpList.isEmpty() && classSubsumedExpList.isEmpty() && isEntailedExpList.isEmpty()) {
+					return false;
+				}
+				return true;
+			}
+
+
+
+
+			CVariableBindingFiltering* CConcreteOntologyQueryExtendedBuilder::createFilterFromExpression(CFilteringTermExpression* filteringTermExpression) {
+				if (filteringTermExpression->getType() == CBuildExpression::BETFILTERINGCOMPARISONDATALITERAL) {
+					CFilteringComparisonDataLiteralExpression* compDataLitExp = (CFilteringComparisonDataLiteralExpression*)filteringTermExpression;
+					CDataLiteralExpression* dataLiteralExp = compDataLitExp->getComparingDataLiteral();
+					CDataLiteralVariableExpression* variable = compDataLitExp->getComparingDataLiteralVariable();
+					CVariableBindingFilteringLiteralComparison::COMPARING_TYPE type = CVariableBindingFilteringLiteralComparison::EQUAL;
+					if (compDataLitExp->getComparingType() == CFilteringComparisonDataLiteralExpression::LESS_EQUAL) {
+						type = CVariableBindingFilteringLiteralComparison::LESS_EQUAL;
+					} else if (compDataLitExp->getComparingType() == CFilteringComparisonDataLiteralExpression::LESS) {
+						type = CVariableBindingFilteringLiteralComparison::LESS;
+					} else if (compDataLitExp->getComparingType() == CFilteringComparisonDataLiteralExpression::EQUAL) {
+						type = CVariableBindingFilteringLiteralComparison::EQUAL;
+					} else if (compDataLitExp->getComparingType() == CFilteringComparisonDataLiteralExpression::UNEQUAL) {
+						type = CVariableBindingFilteringLiteralComparison::UNEQUAL;
+					} else if (compDataLitExp->getComparingType() == CFilteringComparisonDataLiteralExpression::GREATER) {
+						type = CVariableBindingFilteringLiteralComparison::GREATER;
+					} else if (compDataLitExp->getComparingType() == CFilteringComparisonDataLiteralExpression::GREATER_EQUAL) {
+						type = CVariableBindingFilteringLiteralComparison::GREATER_EQUAL;
+					}
+					CVariableBindingFilteringLiteralComparison* filter = new CVariableBindingFilteringLiteralComparison(type, variable, dataLiteralExp);
+					return filter;
+				}
+				return nullptr;
+			}
+
+
+
+
 			QList<CQuery*> CConcreteOntologyQueryExtendedBuilder::generateQuerys() {
 				QList<CQuery*> queryList;
 
 				CSatisfiableCalculationJobGenerator* satCalcJobGenerator = new CSatisfiableCalculationJobGenerator(mOntology);
 
 				bool confBuildQueryStats = CConfigDataReader::readConfigBoolean(config,"Konclude.Query.Statistics.CollectStatistics",false);
+
+
+
+
+
+
+				foreach(CQueryIsClassSatisfiableExpression *classSatExp, classSatExpList) {
+					QString queryName = classSatExp->getName();
+					CClassTermExpression *satBuildExp = classSatExp->getClassTermExpression();
+
+					CComplexSatisfiabilityAnsweringQuery *query = new CComplexSatisfiabilityAnsweringQuery(mBaseOntology, mOntology, satBuildExp, config, queryName);
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated IsClassSatisfiable-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()), this);
+				}
+
+
+
+
+
+
+
+
+				foreach(CQueryGetSuperClassesExpression* superClassesExp, mSuperClassesExpList) {
+					QString queryName = superClassesExp->getName();
+					CClassTermExpression* classBuildExp = superClassesExp->getClassTermExpression();
+
+					CComplexSuperClassesAnsweringQuery *query = new CComplexSuperClassesAnsweringQuery(mBaseOntology, mOntology, classBuildExp, config, queryName);
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+					query->setDirect(superClassesExp->isDirect());
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-SuperClasses-Query '%1'.").arg(query->getQueryName()), this);
+				}
+
+
+
+
+
+				foreach(CQueryGetSubClassesExpression* subClassesExp, mSubClassesExpList) {
+					QString queryName = subClassesExp->getName();
+					CClassTermExpression* classBuildExp = subClassesExp->getClassTermExpression();
+
+					CComplexSubClassesAnsweringQuery *query = new CComplexSubClassesAnsweringQuery(mBaseOntology, mOntology, classBuildExp, config, queryName);
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+					query->setDirect(subClassesExp->isDirect());
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-SubClasses-Query '%1'.").arg(query->getQueryName()), this);
+				}
+
+
+
+				foreach(CQueryGetEquivalentClassesExpression* eqClassesExp, mEquivClassesExpList) {
+					QString queryName = eqClassesExp->getName();
+					CClassTermExpression* classBuildExp = eqClassesExp->getClassTermExpression();
+
+					CComplexEquivalentClassesAnsweringQuery *query = new CComplexEquivalentClassesAnsweringQuery(mBaseOntology, mOntology, classBuildExp, config, queryName);
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-EquivalentClasses-Query '%1'.").arg(query->getQueryName()), this);
+				}
+
+				foreach(CQueryGetInstancesExpression* instancesExp, instancesExpList) {
+					QString queryName = instancesExp->getName();
+					CClassTermExpression* classBuildExp = instancesExp->getClassTermExpression();
+
+					CComplexIndividualInstancesAnsweringQuery *query = new CComplexIndividualInstancesAnsweringQuery(mBaseOntology, mOntology, classBuildExp, config, queryName);
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+					query->setDirect(instancesExp->isDirect());
+					query->setFlattened(false);
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Instances-Query '%1'.").arg(query->getQueryName()), this);
+				}
+
+				foreach(CQueryGetFlattenedInstancesExpression* instancesExp, flattenedInstancesExpList) {
+					QString queryName = instancesExp->getName();
+					CClassTermExpression* classBuildExp = instancesExp->getClassTermExpression();
+
+					CComplexIndividualInstancesAnsweringQuery *query = new CComplexIndividualInstancesAnsweringQuery(mBaseOntology, mOntology, classBuildExp, config, queryName);
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+					query->setDirect(instancesExp->isDirect());
+					query->setFlattened(true);
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Flattened-Instances-Query '%1'.").arg(query->getQueryName()), this);
+				}
+
+
+
+				foreach(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, mSparqlSelectExpList) {
+					QString queryName = sparqlBgpExp->getName();
+					const QList<CAxiomExpression*>& axiomExps = *sparqlBgpExp->getAxiomExpressionList();
+					const QList<CExpressionVariable*>& disVarExps = *sparqlBgpExp->getOrderedVariableList();
+					const QList<COrderingTermExpression*>& orderingExps = *sparqlBgpExp->getOrderedOrderingTermExpressionList();
+					const QList<CFilteringTermExpression*>& filteringExps = *sparqlBgpExp->getFilteringExpressionList();
+
+					CComplexAssertionsIndividualVariablesAnsweringQuery *query = new CComplexAssertionsIndividualVariablesAnsweringQuery(mBaseOntology, mOntology, axiomExps, disVarExps, config, queryName);
+					for (COrderingTermExpression* orderingExp : orderingExps) {
+						COrderingVariableExpression* orderingVarExp = dynamic_cast<COrderingVariableExpression*>(orderingExp);
+						if (orderingVarExp) {
+							CVariableBindingOrdering::ORDERING_TYPE type = CVariableBindingOrdering::ASC;
+							if (orderingVarExp->getOrderingType() == CVariableBindingOrdering::DESC) {
+								type = CVariableBindingOrdering::DESC;
+							}
+							CVariableBindingOrdering* ordering = new CVariableBindingOrdering(orderingVarExp->getOrderingVariable(), type);
+							query->addResultOrdering(ordering);
+						}
+					}
+					for (CFilteringTermExpression* filteringExp : filteringExps) {
+						CVariableBindingFiltering* filtering = createFilterFromExpression(filteringExp);
+						query->addResultFiltering(filtering);
+					}
+
+					query->setDistinctRequired(sparqlBgpExp->isDistinct());
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Assertions-Individual-Variables-Answering-Query '%1' from SPARQL SELECT query.").arg(query->getQueryName()), this);
+				}
+
+
+
+				foreach(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, mSparqlAskExpList) {
+					QString queryName = sparqlBgpExp->getName();
+					const QList<CAxiomExpression*>& axiomExps = *sparqlBgpExp->getAxiomExpressionList();
+					const QList<CExpressionVariable*> disVarExps;
+					const QList<COrderingTermExpression*> orderingExps;
+					const QList<CFilteringTermExpression*>& filteringExps = *sparqlBgpExp->getFilteringExpressionList();
+
+					CComplexAssertionsIndividualVariablesAnsweringQuery *query = new CComplexAssertionsIndividualVariablesAnsweringQuery(mBaseOntology, mOntology, axiomExps, disVarExps, config, queryName);
+					for (CFilteringTermExpression* filteringExp : filteringExps) {
+						CVariableBindingFiltering* filtering = createFilterFromExpression(filteringExp);
+						query->addResultFiltering(filtering);
+					}
+
+					query->setBooleanEntailmentResultRequired(true);
+					CQueryStatisticsCollectionStrings* queryStats = nullptr;
+					if (confBuildQueryStats) {
+						queryStats = new CQueryStatisticsCollectionStrings();
+					}
+					query->setQueryStatistics(queryStats);
+					queryList.append(query);
+					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Assertions-Individual-Variables-Answering-Query '%1' from SPARQL ASK query.").arg(query->getQueryName()), this);
+				}
+
+
 
 				foreach (CQueryAreClassesEquivalentExpression *classEqExp, classEqExpList) {
 					QString queryName = classEqExp->getName();
@@ -229,7 +476,6 @@ namespace Konclude {
 					queryList.append(query);
 					LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated AreClassesEquivalent-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					
-					delete classEqExp;
 				}
 
 
@@ -267,7 +513,6 @@ namespace Konclude {
 					queryList.append(query);
 					LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated AreClassesDisjoint-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					
-					delete classDisjExp;
 				}
 
 
@@ -305,9 +550,8 @@ namespace Konclude {
 
 
 					queryList.append(query);
-					LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated IsClassSubsemedBy-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated IsClassSubsumedBy-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 
-					delete classSubsumedExp;
 				}
 
 
@@ -412,7 +656,6 @@ namespace Konclude {
 					}
 					LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Failed to generate AreEntailed-Query '%1'.").arg(query->getQueryName()),this);
 
-					delete isEntailedExp;
 				}
 
 
@@ -421,6 +664,7 @@ namespace Konclude {
 
 
 				delete satCalcJobGenerator;
+				qDeleteAll(container);
 
 
 				queryList.append(CConcreteOntologyQueryBasicBuilder::generateQuerys());

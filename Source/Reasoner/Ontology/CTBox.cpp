@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,6 +37,12 @@ namespace Konclude {
 				mEquivConCandidateHash = nullptr;
 				mCandidateEquivConHash = nullptr;
 				mEquivConNonCandidateSet = nullptr;
+				mConceptOfInterestSet = nullptr;
+				mTriggeredConceptOfInterestSet = nullptr;
+				mConceptOfInterestList = nullptr;
+				mConOfIntActivationTriggerHash = nullptr;
+				mCandidateConOfIntHash = nullptr;
+				mTriggerConOfIntHash = nullptr;
 				mRoleDomainTriggerConceptHash = nullptr;
 				mIndividualTriggerConceptHash = nullptr;
 				mUnivConnNomValueCon = nullptr;
@@ -59,9 +65,15 @@ namespace Konclude {
 				COPADestroyAndRelease(mEquivConCandidateHash,mMemMan);
 				COPADestroyAndRelease(mCandidateEquivConHash,mMemMan);
 				COPADestroyAndRelease(mEquivConNonCandidateSet,mMemMan);
+				COPADestroyAndRelease(mConceptOfInterestSet, mMemMan);
+				COPADestroyAndRelease(mTriggeredConceptOfInterestSet, mMemMan);
+				COPADestroyAndRelease(mConceptOfInterestList, mMemMan);
 				COPADestroyAndRelease(mRoleDomainTriggerConceptHash,mMemMan);
 				COPADestroyAndRelease(mIndividualTriggerConceptHash,mMemMan);
 				COPADestroyAndRelease(mDatatypeVector,mMemMan);
+				COPADestroyAndRelease(mConOfIntActivationTriggerHash, mMemMan);
+				COPADestroyAndRelease(mCandidateConOfIntHash, mMemMan);
+				COPADestroyAndRelease(mTriggerConOfIntHash, mMemMan);
 
 			}
 
@@ -205,6 +217,51 @@ namespace Konclude {
 				return mIndividualTriggerConceptHash;
 			}
 
+
+
+			CBOXSET<TConceptNegPair>* CTBox::getConceptOfInterestSet(bool create) {
+				if (!mConceptOfInterestSet && create) {
+					mConceptOfInterestSet = CObjectParameterizingAllocator< CBOXSET<TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+				}
+				return mConceptOfInterestSet;
+			}
+
+
+			CBOXSET<TConceptNegPair>* CTBox::getTriggeredConceptOfInterestSet(bool create) {
+				if (!mTriggeredConceptOfInterestSet && create) {
+					mTriggeredConceptOfInterestSet = CObjectParameterizingAllocator< CBOXSET<TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+				}
+				return mTriggeredConceptOfInterestSet;
+			}
+
+			CBOXLIST<TConceptNegPair>* CTBox::getConceptOfInterestList(bool create) {
+				if (!mConceptOfInterestList && create) {
+					mConceptOfInterestList = CObjectParameterizingAllocator< CBOXLIST<TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+				}
+				return mConceptOfInterestList;
+			}
+
+			CBOXHASH<TConceptNegPair, CConceptOfInterestActivationTriggeringData>* CTBox::getConceptOfInterestActivationTriggerDataHash(bool create) {
+				if (!mConOfIntActivationTriggerHash && create) {
+					mConOfIntActivationTriggerHash = CObjectParameterizingAllocator< CBOXHASH<TConceptNegPair, CConceptOfInterestActivationTriggeringData>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+				}
+				return mConOfIntActivationTriggerHash;
+			}
+
+			CBOXHASH<CConcept*, TConceptNegPair>* CTBox::getCandidateConceptOfInterestHash(bool create) {
+				if (!mCandidateConOfIntHash && create) {
+					mCandidateConOfIntHash = CObjectParameterizingAllocator< CBOXHASH<CConcept*, TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+				}
+				return mCandidateConOfIntHash;
+			}
+
+			CBOXHASH<CConcept*, TConceptNegPair>* CTBox::getTriggerConceptOfInterestHash(bool create) {
+				if (!mTriggerConOfIntHash && create) {
+					mTriggerConOfIntHash = CObjectParameterizingAllocator< CBOXHASH<CConcept*, TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+				}
+				return mTriggerConOfIntHash;
+			}
+
 			CTBox* CTBox::setTriggerImplicationHash(CBOXHASH<CConcept*,CConcept*>* takeTriggerImplHash) {
 				COPADestroyAndRelease(mTriggerImpHash,mMemMan);
 				mTriggerImpHash = takeTriggerImplHash;
@@ -322,6 +379,62 @@ namespace Konclude {
 				} else if (mEquivConNonCandidateSet) {
 					mEquivConNonCandidateSet->clear();
 				}
+				if (tBox->mConceptOfInterestSet) {
+					if (!mConceptOfInterestSet) {
+						mConceptOfInterestSet = CObjectParameterizingAllocator< CBOXSET<TConceptNegPair>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext),mBoxContext);
+					}
+					mConceptOfInterestSet->init(tBox->mConceptOfInterestSet,mBoxContext);
+				} else if (mConceptOfInterestSet) {
+					mConceptOfInterestSet->clear();
+				}	
+				if (tBox->mTriggeredConceptOfInterestSet) {
+					if (!mTriggeredConceptOfInterestSet) {
+						mTriggeredConceptOfInterestSet = CObjectParameterizingAllocator< CBOXSET<TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+					}
+					mTriggeredConceptOfInterestSet->init(tBox->mTriggeredConceptOfInterestSet, mBoxContext);
+				}
+				else if (mTriggeredConceptOfInterestSet) {
+					mTriggeredConceptOfInterestSet->clear();
+				}
+				if (tBox->mConceptOfInterestList) {
+					if (!mConceptOfInterestList) {
+						mConceptOfInterestList = CObjectParameterizingAllocator< CBOXLIST<TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+					}
+					mConceptOfInterestList->init(tBox->mConceptOfInterestList, mBoxContext);
+				}
+				else if (mConceptOfInterestList) {
+					mConceptOfInterestList->clear();
+				}
+
+				if (tBox->mConOfIntActivationTriggerHash) {
+					if (!mConOfIntActivationTriggerHash) {
+						mConOfIntActivationTriggerHash = CObjectParameterizingAllocator< CBOXHASH<TConceptNegPair, CConceptOfInterestActivationTriggeringData>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+					}
+					mConOfIntActivationTriggerHash->init(tBox->mConOfIntActivationTriggerHash, mBoxContext);
+				} else if (mConOfIntActivationTriggerHash) {
+					mConOfIntActivationTriggerHash->clear();
+				}
+				if (tBox->mCandidateConOfIntHash) {
+					if (!mCandidateConOfIntHash) {
+						mCandidateConOfIntHash = CObjectParameterizingAllocator< CBOXHASH<CConcept*, TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+					}
+					mCandidateConOfIntHash->init(tBox->mCandidateConOfIntHash, mBoxContext);
+				} else if (mCandidateConOfIntHash) {
+					mCandidateConOfIntHash->clear();
+				}
+				if (tBox->mTriggerConOfIntHash) {
+					if (!mTriggerConOfIntHash) {
+						mTriggerConOfIntHash = CObjectParameterizingAllocator< CBOXHASH<CConcept*, TConceptNegPair>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mBoxContext), mBoxContext);
+					}
+					mTriggerConOfIntHash->init(tBox->mTriggerConOfIntHash, mBoxContext);
+				}
+				else if (mTriggerConOfIntHash) {
+					mTriggerConOfIntHash->clear();
+				}
+
+
+
+
 				return this;
 			}
 

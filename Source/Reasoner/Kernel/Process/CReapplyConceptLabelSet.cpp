@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -36,6 +36,7 @@ namespace Konclude {
 					mPrevConceptDesLinker = nullptr;
 					mCoreConDesLinker = nullptr;
 					mConceptCount = 0;
+					mAdditionalConceptDesDepMap = nullptr;
 				}
 
 
@@ -43,10 +44,14 @@ namespace Konclude {
 				}
 
 
+				CConceptSetFlags* CReapplyConceptLabelSet::getConceptFlags() {
+					return &mConceptFlags;
+				}
+
+
 				CConceptSetSignature* CReapplyConceptLabelSet::getConceptSignature() {
 					return &mConceptSignature;
 				}
-
 
 				CConceptSetStructure* CReapplyConceptLabelSet::getConceptStructure() {
 					return &mConceptStructure;
@@ -62,16 +67,35 @@ namespace Konclude {
 						mConceptDesLinker = prevConceptLabelSet->mConceptDesLinker;
 						mPrevConceptDesLinker = mConceptDesLinker;
 						mConceptCount = prevConceptLabelSet->mConceptCount;
-						mConceptDesDepMap = prevConceptLabelSet->mConceptDesDepMap;
+						if (!prevConceptLabelSet->mAdditionalConceptDesDepMap && prevConceptLabelSet->mConceptDesDepMap.size() <= 50 || prevConceptLabelSet->mAdditionalConceptDesDepMap && prevConceptLabelSet->mConceptDesDepMap.size()*10 < prevConceptLabelSet->mAdditionalConceptDesDepMap->size()) {
+							mConceptDesDepMap = prevConceptLabelSet->mConceptDesDepMap;
+							mAdditionalConceptDesDepMap = prevConceptLabelSet->mAdditionalConceptDesDepMap;
+						} else {
+							mConceptDesDepMap.clear();
+							if (prevConceptLabelSet->mAdditionalConceptDesDepMap) {
+								mAdditionalConceptDesDepMap = CObjectParameterizingAllocator< CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getMemoryAllocationManager(),mProcessContext);
+								*mAdditionalConceptDesDepMap = *prevConceptLabelSet->mAdditionalConceptDesDepMap;
+								for (CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator it = prevConceptLabelSet->mConceptDesDepMap.constBegin(), itEnd = prevConceptLabelSet->mConceptDesDepMap.constEnd(); it != itEnd; ++it) {
+									cint64 conTag = it.key();
+									const CConceptDescriptorDependencyReapplyData& conData = it.value();
+									(*mAdditionalConceptDesDepMap)[conTag] = conData;
+								}
+							} else {
+								mAdditionalConceptDesDepMap = &prevConceptLabelSet->mConceptDesDepMap;
+							}
+						}
+						mConceptFlags = prevConceptLabelSet->mConceptFlags;
 						mConceptSignature = prevConceptLabelSet->mConceptSignature;
 						mCoreConDesLinker = prevConceptLabelSet->mCoreConDesLinker;
 						mConceptStructure = prevConceptLabelSet->mConceptStructure;
 					} else {
 						mConceptDesDepMap.clear();
+						mAdditionalConceptDesDepMap = nullptr;
 						mConceptDesLinker = nullptr;
 						mPrevConceptDesLinker = nullptr;
 						mCoreConDesLinker = nullptr;
 						mConceptCount = 0;
+						mConceptFlags.reset();
 						mConceptSignature.reset();
 						mConceptStructure.reset();
 					}
@@ -99,16 +123,28 @@ namespace Konclude {
 
 
 				bool CReapplyConceptLabelSet::hasConcept(CConcept* concept, bool negated) {
+					if (!mConceptFlags.containsConceptFlags(concept, negated)) {
+						return false;
+					}
 					cint64 conTag = concept->getConceptTag();
 					CConceptDescriptorDependencyReapplyData* conDesDepData = nullptr;
 					bool isContained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					if (!conDesDepData && mAdditionalConceptDesDepMap) {						
+						isContained = mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,conDesDepData);
+					}
 					return isContained && conDesDepData->mConceptDescriptor && conDesDepData->mConceptDescriptor->isNegated() == negated;
 				}
 
 				bool CReapplyConceptLabelSet::hasConcept(CConcept* concept, bool* containsNegated) {
+					if (!mConceptFlags.containsConceptFlags(concept)) {
+						return false;
+					}
 					cint64 conTag = concept->getConceptTag();
 					CConceptDescriptorDependencyReapplyData* conDesDepData = nullptr;
 					bool isContained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					if (!conDesDepData && mAdditionalConceptDesDepMap) {						
+						isContained = mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (isContained && containsNegated) {
 						*containsNegated = conDesDepData->mConceptDescriptor && conDesDepData->mConceptDescriptor->isNegated();
 					}
@@ -133,6 +169,9 @@ namespace Konclude {
 				bool CReapplyConceptLabelSet::getConceptDescriptor(cint64 conTag, CConceptDescriptor*& conDes, CDependencyTrackPoint*& depTrackPoint) {
 					CConceptDescriptorDependencyReapplyData* conDesDepData = nullptr;
 					bool contained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					if (!conDesDepData && mAdditionalConceptDesDepMap) {						
+						contained = mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (contained)  {
 						conDes = conDesDepData->mConceptDescriptor;
 						if (conDes) {
@@ -149,9 +188,14 @@ namespace Konclude {
 				bool CReapplyConceptLabelSet::insertConceptIgnoreClash(CConceptDescriptor* conceptDescriptor, CDependencyTrackPoint* depTrackPoint, CCondensedReapplyQueueIterator* reapplyQueueIt) {
 					cint64 conTag = conceptDescriptor->getConceptTag();
 					CConceptDescriptorDependencyReapplyData& conDesDepData = mConceptDesDepMap[conTag];
+					if (mAdditionalConceptDesDepMap && !conDesDepData.mConceptDescriptor && conDesDepData.mPosNegReapplyQueue.isEmpty()) {
+						const CConceptDescriptorDependencyReapplyData& addConDesDepData = mAdditionalConceptDesDepMap->value(conTag);
+						conDesDepData = addConDesDepData;
+					}
 					conDesDepData.mConceptDescriptor = conceptDescriptor;
 					++mConceptCount;
 					mConceptSignature.addConceptSignature(conceptDescriptor);
+					mConceptFlags.addConceptFlags(conceptDescriptor);
 					mConceptStructure.addedConcept(conceptDescriptor);
 					mConceptDesLinker = conceptDescriptor->append(mConceptDesLinker);
 					if (reapplyQueueIt) {
@@ -166,8 +210,17 @@ namespace Konclude {
 				bool CReapplyConceptLabelSet::insertConceptGetClash(CConceptDescriptor* conceptDescriptor, CDependencyTrackPoint* depTrackPoint, CCondensedReapplyQueueIterator* reapplyQueueIt, CConceptDescriptor** clashedConDes, CDependencyTrackPoint** clashedDepTrackPoint) {
 					cint64 conTag = conceptDescriptor->getConceptTag();
 					bool containsAlready = false;
+					bool containFromAdditionMap = false;
 					CConceptDescriptorDependencyReapplyData* containedConDesDepData = nullptr;
 					mConceptDesDepMap.tryInsert(conTag,CConceptDescriptorDependencyReapplyData(conceptDescriptor),&containsAlready,&containedConDesDepData);
+					if (!containsAlready && mAdditionalConceptDesDepMap) {
+						const CConceptDescriptorDependencyReapplyData& addConDesDepData = mAdditionalConceptDesDepMap->value(conTag);
+						if (addConDesDepData.mConceptDescriptor || !addConDesDepData.mPosNegReapplyQueue.isEmpty()) {
+							*containedConDesDepData = addConDesDepData;
+							containsAlready = true;
+							containFromAdditionMap = true;
+						}
+					}
 					if (containedConDesDepData->mConceptDescriptor == nullptr) {
 						containedConDesDepData->mConceptDescriptor = conceptDescriptor;
 						containsAlready = false;
@@ -185,6 +238,7 @@ namespace Konclude {
 						return true;
 					} else {
 						++mConceptCount;
+						mConceptFlags.addConceptFlags(conceptDescriptor);
 						mConceptSignature.addConceptSignature(conceptDescriptor);
 						mConceptStructure.addedConcept(conceptDescriptor);
 						mConceptDesLinker = conceptDescriptor->append(mConceptDesLinker);
@@ -206,6 +260,13 @@ namespace Konclude {
 					bool containsAlready = false;
 					CConceptDescriptorDependencyReapplyData* containedConDesDepData = nullptr;
 					mConceptDesDepMap.tryInsert(conTag,CConceptDescriptorDependencyReapplyData(conceptDescriptor),&containsAlready,&containedConDesDepData);
+					if (!containsAlready && mAdditionalConceptDesDepMap) {
+						const CConceptDescriptorDependencyReapplyData& addConDesDepData = mAdditionalConceptDesDepMap->value(conTag);
+						if (addConDesDepData.mConceptDescriptor || !addConDesDepData.mPosNegReapplyQueue.isEmpty()) {
+							*containedConDesDepData = addConDesDepData;
+							containsAlready = true;
+						}
+					}
 					if (containedConDesDepData->mConceptDescriptor == nullptr) {
 						containedConDesDepData->mConceptDescriptor = conceptDescriptor;
 						containsAlready = false;
@@ -230,6 +291,7 @@ namespace Konclude {
 							*hasContained = false;
 						}
 						++mConceptCount;
+						mConceptFlags.addConceptFlags(conceptDescriptor);
 						mConceptSignature.addConceptSignature(conceptDescriptor);
 						mConceptStructure.addedConcept(conceptDescriptor);
 						mConceptDesLinker = conceptDescriptor->append(mConceptDesLinker);
@@ -265,9 +327,13 @@ namespace Konclude {
 
 				CReapplyConceptLabelSetIterator CReapplyConceptLabelSet::getConceptLabelSetIterator(bool getSorted, bool getDependencies, bool getAllStructure) {
 					if (getSorted || getDependencies || getAllStructure) {
-						return CReapplyConceptLabelSetIterator(mConceptCount,nullptr,mConceptDesDepMap.constBegin(),mConceptDesDepMap.constEnd(),!getAllStructure);
+						if (mAdditionalConceptDesDepMap) {
+							return CReapplyConceptLabelSetIterator(mConceptCount,nullptr,mConceptDesDepMap.constBegin(),mConceptDesDepMap.constEnd(),mAdditionalConceptDesDepMap->constBegin(),mAdditionalConceptDesDepMap->constEnd(),!getAllStructure);
+						} else {
+							return CReapplyConceptLabelSetIterator(mConceptCount,nullptr,mConceptDesDepMap.constBegin(),mConceptDesDepMap.constEnd(),CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator(),CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator(),!getAllStructure);
+						}
 					} else {
-						return CReapplyConceptLabelSetIterator(mConceptCount,mConceptDesLinker,CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator(),CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator());
+						return CReapplyConceptLabelSetIterator(mConceptCount,mConceptDesLinker,CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator(),CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator(),CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator(),CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator());
 					}
 				}
 
@@ -280,6 +346,9 @@ namespace Konclude {
 				bool CReapplyConceptLabelSet::getConceptDescriptorAndReapplyQueue(cint64 conTag, CConceptDescriptor*& conDes, CDependencyTrackPoint*& depTrackPoint, CCondensedReapplyQueue*& reapplyQueue) {
 					CConceptDescriptorDependencyReapplyData* conDesDepData = nullptr;
 					bool contained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					if (!conDesDepData && mAdditionalConceptDesDepMap) {						
+						contained = mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (contained)  {
 						conDes = conDesDepData->mConceptDescriptor;
 						reapplyQueue = &conDesDepData->mPosNegReapplyQueue;
@@ -303,6 +372,9 @@ namespace Konclude {
 				bool CReapplyConceptLabelSet::getConceptDescriptorOrReapplyQueue(cint64 conTag, CConceptDescriptor*& conDes, CDependencyTrackPoint*& depTrackPoint, CCondensedReapplyQueue*& reapplyQueue) {
 					CConceptDescriptorDependencyReapplyData* conDesDepData = nullptr;
 					bool contained = mConceptDesDepMap.tryGetValuePointer(conTag,conDesDepData);
+					if (!conDesDepData && mAdditionalConceptDesDepMap) {						
+						contained = mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,conDesDepData);
+					}
 					if (contained)  {
 						conDes = conDesDepData->mConceptDescriptor;
 						reapplyQueue = &conDesDepData->mPosNegReapplyQueue;
@@ -323,11 +395,21 @@ namespace Konclude {
 						bool containsAlready = false;
 						CConceptDescriptorDependencyReapplyData* containedConDesDepData = nullptr;
 						mConceptDesDepMap.tryInsert(conTag,CConceptDescriptorDependencyReapplyData(nullptr),&containsAlready,&containedConDesDepData);
+						if (!containsAlready && mAdditionalConceptDesDepMap) {
+							const CConceptDescriptorDependencyReapplyData& addConDesDepData = mAdditionalConceptDesDepMap->value(conTag);
+							if (addConDesDepData.mConceptDescriptor || !addConDesDepData.mPosNegReapplyQueue.isEmpty()) {
+								*containedConDesDepData = addConDesDepData;
+								containsAlready = true;
+							}
+						}
 						conDes = containedConDesDepData->mConceptDescriptor;
 						return &containedConDesDepData->mPosNegReapplyQueue;
 					} else {
 						CConceptDescriptorDependencyReapplyData* containedConDesDepData = nullptr;
 						if (mConceptDesDepMap.tryGetValuePointer(conTag,containedConDesDepData)) {
+							conDes = containedConDesDepData->mConceptDescriptor;
+							return &containedConDesDepData->mPosNegReapplyQueue;
+						} else if (mAdditionalConceptDesDepMap && mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,containedConDesDepData)) {
 							conDes = containedConDesDepData->mConceptDescriptor;
 							return &containedConDesDepData->mPosNegReapplyQueue;
 						}
@@ -342,6 +424,13 @@ namespace Konclude {
 						bool containsAlready = false;
 						CConceptDescriptorDependencyReapplyData* containedConDesDepData = nullptr;
 						mConceptDesDepMap.tryInsert(conTag,CConceptDescriptorDependencyReapplyData(nullptr),&containsAlready,&containedConDesDepData);
+						if (!containsAlready && mAdditionalConceptDesDepMap) {
+							const CConceptDescriptorDependencyReapplyData& addConDesDepData = mAdditionalConceptDesDepMap->value(conTag);
+							if (addConDesDepData.mConceptDescriptor || !addConDesDepData.mPosNegReapplyQueue.isEmpty()) {
+								*containedConDesDepData = addConDesDepData;
+								containsAlready = true;
+							}
+						}
 						return &containedConDesDepData->mPosNegReapplyQueue;
 						//if (conceptNegation) {
 						//	return &containedConDesDepData->mNegReapplyQueue;
@@ -357,6 +446,8 @@ namespace Konclude {
 							//} else {
 							//	return &containedConDesDepData->mPosReapplyQueue;
 							//}
+						} else if (mAdditionalConceptDesDepMap && mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,containedConDesDepData)) {
+							return &containedConDesDepData->mPosNegReapplyQueue;
 						}
 					}
 					return nullptr;
@@ -380,6 +471,8 @@ namespace Konclude {
 						//} else {
 						//	return !containedConDesDepData->mPosReapplyQueue.isEmpty();
 						//}
+					} else if (mAdditionalConceptDesDepMap && mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,containedConDesDepData)) {
+						return !containedConDesDepData->mPosNegReapplyQueue.isEmpty();
 					}
 					return false;
 				}
@@ -388,12 +481,29 @@ namespace Konclude {
 					cint64 conTag = concept->getConceptTag();
 					CConceptDescriptorDependencyReapplyData* containedConDesDepData = nullptr;
 					if (mConceptDesDepMap.tryGetValuePointer(conTag,containedConDesDepData)) {
-						return containedConDesDepData->mPosNegReapplyQueue.getIterator(conceptNegation,clearDynamicReapplyQueue);
+						if (!clearDynamicReapplyQueue) {
+							return containedConDesDepData->mPosNegReapplyQueue.getIterator(conceptNegation, false);
+						} else {
+							CConceptDescriptorDependencyReapplyData& conDesDepData = mConceptDesDepMap[conTag];
+							return conDesDepData.mPosNegReapplyQueue.getIterator(conceptNegation, true);
+						}
 						//if (conceptNegation) {
 						//	return containedConDesDepData->mNegReapplyQueue.getIterator(clearDynamicReapplyQueue);
 						//} else {
 						//	return containedConDesDepData->mPosReapplyQueue.getIterator(clearDynamicReapplyQueue);
 						//}
+					} else if (mAdditionalConceptDesDepMap && mAdditionalConceptDesDepMap->tryGetValuePointer(conTag,containedConDesDepData)) {
+						if (!clearDynamicReapplyQueue) {
+							return containedConDesDepData->mPosNegReapplyQueue.getIterator(conceptNegation, false);
+						} else {
+							if (!containedConDesDepData->mPosNegReapplyQueue.isEmpty()) {
+								CConceptDescriptorDependencyReapplyData& conDesDepData = mConceptDesDepMap[conTag];
+								conDesDepData = *containedConDesDepData;
+								return conDesDepData.mPosNegReapplyQueue.getIterator(conceptNegation, true);
+							} else {
+								return containedConDesDepData->mPosNegReapplyQueue.getIterator(conceptNegation, false);
+							}
+						}
 					}
 					return CCondensedReapplyQueueIterator(nullptr,conceptNegation);
 				}
@@ -409,7 +519,12 @@ namespace Konclude {
 
 
 				CConceptDescriptorDependencyReapplyData* CReapplyConceptLabelSet::getConceptDescriptorDependencyReapplyData(cint64 dataTag) {
-					return &mConceptDesDepMap[dataTag];
+					CConceptDescriptorDependencyReapplyData& conData = mConceptDesDepMap[dataTag];
+					if (mAdditionalConceptDesDepMap && !conData.mConceptDescriptor && conData.mPosNegReapplyQueue.isEmpty()) {
+						const CConceptDescriptorDependencyReapplyData& addConDesDepData = mAdditionalConceptDesDepMap->value(dataTag);
+						conData = addConDesDepData;
+					}
+					return &conData;
 				}
 
 

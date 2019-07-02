@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -39,10 +39,15 @@ namespace Konclude {
 
 
 			COntologyProcessingStepVector* COntologyProcessingStepVector::initDefaultProcessingSteps() {
+				COntologyProcessingStep* stepTriplesMapping = new COntologyProcessingStep(COntologyProcessingStep::OPSTRIPLESMAPPING, mPrStCount, COntologyProcessingStep::OPPREPROCESSOR);
+				addProcessingSteps(stepTriplesMapping);
+
 				COntologyProcessingStep* activeBuild = new COntologyProcessingStep(COntologyProcessingStep::OPSACTIVECOUNT,mPrStCount,COntologyProcessingStep::OPPREPROCESSOR);
+				activeBuild->addProcessingRequirement(new COntologyProcessingStepRequirement(stepTriplesMapping, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(activeBuild);
 
 				COntologyProcessingStep* stepBuild = new COntologyProcessingStep(COntologyProcessingStep::OPSBUILD,mPrStCount,COntologyProcessingStep::OPPREPROCESSOR);
+				stepBuild->addProcessingRequirement(new COntologyProcessingStepRequirement(stepTriplesMapping, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepBuild);
 
 				COntologyProcessingStep* stepPreprocess = new COntologyProcessingStep(COntologyProcessingStep::OPSPREPROCESS,mPrStCount,COntologyProcessingStep::OPPREPROCESSOR);
@@ -50,9 +55,13 @@ namespace Konclude {
 				stepPreprocess->addProcessingRequirement(new COntologyProcessingStepRequirement(activeBuild, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepPreprocess);
 
+
+				COntologyProcessingStep* stepIndexing = new COntologyProcessingStep(COntologyProcessingStep::OPSTRIPLESINDEXING, mPrStCount, COntologyProcessingStep::OPPREPROCESSOR);
+				stepIndexing->addProcessingRequirement(new COntologyProcessingStepRequirement(stepPreprocess, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				addProcessingSteps(stepIndexing);
+
 				COntologyProcessingStep* stepConsistency = new COntologyProcessingStep(COntologyProcessingStep::OPSCONSISTENCY,mPrStCount,COntologyProcessingStep::OPPRECOMPUTER);
-				stepConsistency->addProcessingRequirement(new COntologyProcessingStepRequirement(stepBuild, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
-				stepConsistency->addProcessingRequirement(new COntologyProcessingStepRequirement(stepPreprocess, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepConsistency->addProcessingRequirement(new COntologyProcessingStepRequirement(stepIndexing, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepConsistency);
 
 
@@ -73,6 +82,14 @@ namespace Konclude {
 				stepCycles->addProcessingRequirement(new COntologyProcessingStepRequirement(stepIndividualComp, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepCycles);
 
+
+				COntologyProcessingStep* stepOccStats = new COntologyProcessingStep(COntologyProcessingStep::OPSPRECOMPUTEOCCURRENCESTATISTICS, mPrStCount, COntologyProcessingStep::OPPRECOMPUTER);
+				stepOccStats->addProcessingRequirement(new COntologyProcessingStepRequirement(stepConsistency, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, COntologyProcessingStatus::PSINCONSITENT));
+				stepOccStats->addProcessingRequirement(new COntologyProcessingStepRequirement(stepIndividualComp, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				addProcessingSteps(stepOccStats);
+
+
+
 				COntologyProcessingStep* stepClassify = new COntologyProcessingStep(COntologyProcessingStep::OPSCLASSCLASSIFY,mPrStCount,COntologyProcessingStep::OPCLASSCLASSIFIER);
 				stepClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepConsistency, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, COntologyProcessingStatus::PSINCONSITENT));
 				stepClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepSaturation, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
@@ -80,17 +97,47 @@ namespace Konclude {
 				stepClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepIndividualComp, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepClassify);
 
+
+
+				COntologyProcessingStep* stepObjPropClassify = new COntologyProcessingStep(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY,mPrStCount,COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER);
+				stepObjPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepConsistency, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, COntologyProcessingStatus::PSINCONSITENT));
+				stepObjPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepSaturation, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepObjPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepCycles, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepObjPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepIndividualComp, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				addProcessingSteps(stepObjPropClassify);
+
+
+
+				COntologyProcessingStep* stepDataPropClassify = new COntologyProcessingStep(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY,mPrStCount,COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER);
+				stepDataPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepConsistency, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, COntologyProcessingStatus::PSINCONSITENT));
+				stepDataPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepSaturation, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepDataPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepCycles, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepDataPropClassify->addProcessingRequirement(new COntologyProcessingStepRequirement(stepIndividualComp, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				addProcessingSteps(stepDataPropClassify);
+
+
+
+				COntologyProcessingStep* initRealize = new COntologyProcessingStep(COntologyProcessingStep::OPSINITREALIZE, mPrStCount, COntologyProcessingStep::OPREALIZER);
+				initRealize->addProcessingRequirement(new COntologyProcessingStepRequirement(stepClassify, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				initRealize->addProcessingRequirement(new COntologyProcessingStepRequirement(stepObjPropClassify, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				addProcessingSteps(initRealize);
+
 				COntologyProcessingStep* stepRealizeConcepts = new COntologyProcessingStep(COntologyProcessingStep::OPSCONCEPTREALIZE,mPrStCount,COntologyProcessingStep::OPREALIZER);
-				stepRealizeConcepts->addProcessingRequirement(new COntologyProcessingStepRequirement(stepClassify, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepRealizeConcepts->addProcessingRequirement(new COntologyProcessingStepRequirement(initRealize, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepRealizeConcepts);
 
 				COntologyProcessingStep* stepRealizeRoles = new COntologyProcessingStep(COntologyProcessingStep::OPSROLEREALIZE,mPrStCount,COntologyProcessingStep::OPREALIZER);
-				stepRealizeRoles->addProcessingRequirement(new COntologyProcessingStepRequirement(stepClassify, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepRealizeRoles->addProcessingRequirement(new COntologyProcessingStepRequirement(initRealize, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepRealizeRoles);
 
 				COntologyProcessingStep* stepRealizeSameIndividuals = new COntologyProcessingStep(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE,mPrStCount,COntologyProcessingStep::OPREALIZER);
-				stepRealizeSameIndividuals->addProcessingRequirement(new COntologyProcessingStepRequirement(stepClassify, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
+				stepRealizeSameIndividuals->addProcessingRequirement(new COntologyProcessingStepRequirement(initRealize, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, 0));
 				addProcessingSteps(stepRealizeSameIndividuals);
+
+				COntologyProcessingStep* stepAnswerComplexQueries = new COntologyProcessingStep(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY, mPrStCount, COntologyProcessingStep::OPANSWERER);
+				stepAnswerComplexQueries->addProcessingRequirement(new COntologyProcessingStepRequirement(stepOccStats, COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, 0, COntologyProcessingStatus::PSSUCESSFULL, COntologyProcessingStatus::PSINCONSITENT));
+				addProcessingSteps(stepAnswerComplexQueries);
+
 				return this;
 			}
 

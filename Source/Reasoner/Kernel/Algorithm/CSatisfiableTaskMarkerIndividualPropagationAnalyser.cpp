@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -56,7 +56,7 @@ namespace Konclude {
 					CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* realMessAdapter = statCalcTask->getRealizationMarkedCandidatesMessageAdapter();
 					if (realMessAdapter) {
 						CRealizationMessageObserver* realMessObserver = realMessAdapter->getRealizationMessageDataObserver();
-						CIndividual* individual = realMessAdapter->getTestingIndividual();
+						CIndividualReference individualReference = realMessAdapter->getTestingIndividualReference();
 						CConcreteOntology* ontology = realMessAdapter->getTestingOntology();
 
 
@@ -75,19 +75,27 @@ namespace Konclude {
 
 
 						CProcessingDataBox* procDataBox = calcAlgContext->getProcessingDataBox();
+						cint64 maxDetBranchTag = procDataBox->getMaximumDeterministicBranchTag();
+						CIndividualVector* indiVec = procDataBox->getOntology()->getABox()->getIndividualVector();
 						CMarkerIndividualNodeHash* markerIndiNodeHash = procDataBox->getMarkerIndividualNodeHash(false);
 						if (markerIndiNodeHash) {
-							for (CPROCESSHASH< CConcept*,CXNegLinker<CIndividualProcessNode*>* >::const_iterator it = markerIndiNodeHash->constBegin(), itEnd = markerIndiNodeHash->constEnd(); it != itEnd; ++it) {
+							for (CPROCESSHASH< CConcept*, CMarkerIndividualNodeData >::const_iterator it = markerIndiNodeHash->constBegin(), itEnd = markerIndiNodeHash->constEnd(); it != itEnd; ++it) {
 								CConcept* markerConcept = it.key();
-								CXLinker<CIndividual*>* detIndiCandLinker = nullptr;
-								CXLinker<CIndividual*>* ndetIndiCandLinker = nullptr;
-								CXNegLinker<CIndividualProcessNode*>* candIndiLinker = it.value();
+								CIndividualRoleCandidateTestingData testingData = realMessAdapter->getIndividualRoleCandidateTestingDataByMarkerConcept(markerConcept);
+								CXLinker<CIndividualReference>* detIndiCandLinker = nullptr;
+								CXLinker<CIndividualReference>* ndetIndiCandLinker = nullptr;
+								CMarkerIndividualNodeData data = it.value();
+								CXNegLinker<CIndividualProcessNode*>* candIndiLinker = data.getMarkerIndividualNodeLinker();
 								for (CXNegLinker<CIndividualProcessNode*>* candIndiLinkerIt = candIndiLinker; candIndiLinkerIt; candIndiLinkerIt = candIndiLinkerIt->getNext()) {
 									CIndividualProcessNode* indiNode = candIndiLinkerIt->getData();
 									CIndividual* candIndividual = indiNode->getNominalIndividual();
 									if (candIndividual) {
-										CXLinker<CIndividual*>* tmpLinker = CObjectAllocator< CXLinker<CIndividual*> >::allocateAndConstruct(tempMemAllocMan);
-										tmpLinker->initLinker(candIndividual);
+										CXLinker<CIndividualReference>* tmpLinker = CObjectAllocator< CXLinker<CIndividualReference> >::allocateAndConstruct(tempMemAllocMan);
+										if (candIndividual->isTemporaryIndividual()) {
+											tmpLinker->initLinker(CIndividualReference(candIndividual->getIndividualID()));
+										} else {
+											tmpLinker->initLinker(candIndividual);
+										}
 										bool nondeterministicallyAdded = candIndiLinkerIt->isNegated();
 										if (nondeterministicallyAdded) {
 											ndetIndiCandLinker = tmpLinker->append(ndetIndiCandLinker);
@@ -95,31 +103,42 @@ namespace Konclude {
 											detIndiCandLinker = tmpLinker->append(detIndiCandLinker);
 										}
 
-										for (CConceptDescriptor* conDesIt = indiNode->getReapplyConceptLabelSet(false)->getAddingSortedConceptDescriptionLinker(); conDesIt; conDesIt = conDesIt->getNext()) {
-											if (!conDesIt->isNegated()) {
-												bool nondeterministicallyMerged = true;
-												CDependencyTrackPoint* depTrackPoint = conDesIt->getDependencyTrackPoint();
-												if (depTrackPoint && depTrackPoint->getBranchingTag() <= 0) {
-													nondeterministicallyMerged = false;
-												}
-												if (nondeterministicallyMerged) {
-													CConcept* concept = conDesIt->getConcept();
-													if (concept->getOperatorCode() == CCNOMINAL) {
-														CIndividual* nomIndividual = concept->getNominalIndividual();
-														if (nomIndividual != candIndividual) {
-															CXLinker<CIndividual*>* nomTmpLinker = CObjectAllocator< CXLinker<CIndividual*> >::allocateAndConstruct(tempMemAllocMan);
-															nomTmpLinker->initLinker(nomIndividual);
+
+										CIndividualMergingHash* indiMergingHash = indiNode->getIndividualMergingHash(false);
+										if (indiMergingHash) {
+
+											for (CIndividualMergingHash::const_iterator indiIt = indiMergingHash->constBegin(), indiItEnd = indiMergingHash->constEnd(); indiIt != indiItEnd; ++indiIt) {
+
+												if (indiIt.value().isMergedWithIndividual()) {
+													cint64 indiIDIt = indiIt.key();
+													CIndividual* mergedIndividual = indiVec->getData(indiIDIt);
+
+													if (mergedIndividual != candIndividual) {
+
+														CDependencyTrackPoint* mergeDepTrackPoint = indiIt.value().getDependencyTrackPoint();
+														bool nonDetMerged = true;
+														if (mergeDepTrackPoint && mergeDepTrackPoint->getBranchingTag() <= maxDetBranchTag) {
+															nonDetMerged = false;
+														}
+														if (nonDetMerged) {
+															CXLinker<CIndividualReference>* nomTmpLinker = CObjectAllocator< CXLinker<CIndividualReference> >::allocateAndConstruct(tempMemAllocMan);
+															if (mergedIndividual->isTemporaryIndividual()) {
+																nomTmpLinker->initLinker(CIndividualReference(mergedIndividual->getIndividualID()));
+															} else {
+																nomTmpLinker->initLinker(mergedIndividual);
+															}
 															ndetIndiCandLinker = nomTmpLinker->append(ndetIndiCandLinker);
 														}
 													}
 												}
 											}
 										}
+
 									}
 								}
 
 								CRealizationMarkerCandidatesMessageData* realMarkCandMessageData = CObjectAllocator<CRealizationMarkerCandidatesMessageData>::allocateAndConstruct(tempMemAllocMan);
-								realMarkCandMessageData->initRealizationMarkerCandidatesMessageData(individual,markerConcept,detIndiCandLinker,ndetIndiCandLinker);
+								realMarkCandMessageData->initRealizationMarkerCandidatesMessageData(individualReference, testingData, markerConcept,detIndiCandLinker,ndetIndiCandLinker);
 								realMessageData = realMarkCandMessageData->append(realMessageData);
 
 							}
@@ -131,7 +150,7 @@ namespace Konclude {
 							taskMemMan->releaseTemporaryMemoryPools(memPoolCon.takeMemoryPools());
 						}
 
-						if (individual) {
+						if (individualReference.isNonEmpty()) {
 							return true;
 						}
 					}

@@ -1,24 +1,25 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
 #include "COntologyIncrementalRevisionData.h"
+#include "CConcreteOntology.h"
 
 
 namespace Konclude {
@@ -38,6 +39,7 @@ namespace Konclude {
 				mPreviousSameIndividualsRealizedOntology = nullptr;
 				mPreviousClassTypesRealizedOntology = nullptr;
 				mPreviousRoleTypesRealizedOntology = nullptr;
+				mPreviousBuiltOntology = nullptr;
 			}
 
 
@@ -55,6 +57,8 @@ namespace Konclude {
 				mPreviousSameIndividualsRealizedOntology = incRevData->mPreviousSameIndividualsRealizedOntology;
 				mPreviousClassTypesRealizedOntology = incRevData->mPreviousClassTypesRealizedOntology;
 				mPreviousRoleTypesRealizedOntology = incRevData->mPreviousRoleTypesRealizedOntology;
+				mPreviousBuiltOntology = incRevData->mPreviousBuiltOntology;
+				mCummulativeAxiomChangeData.addAxiomChangeData(incRevData->getCummulativeAxiomChangeData());
 				return this;
 			}
 
@@ -82,6 +86,10 @@ namespace Konclude {
 				return &mAxiomChangeData;
 			}
 
+			COntologyIncrementalAxiomChangeData* COntologyIncrementalRevisionData::getCummulativeAxiomChangeData() {
+				return &mCummulativeAxiomChangeData;
+			}
+
 			cint64 COntologyIncrementalRevisionData::getLastChangeCountedAxiom() {
 				return mLastChangeCountedAxiom;
 			}
@@ -103,6 +111,41 @@ namespace Konclude {
 			bool COntologyIncrementalRevisionData::isIncrementalOntology() {
 				return !isInitialOntology() && !isBasementOntology();
 			}
+
+
+
+
+			bool COntologyIncrementalRevisionData::isTrivialExpansionToPreviousBuiltOntology() {
+				return isTrivialExpansionToPreviousOntology(getPreviousBuiltOntology());
+			}
+
+
+			bool COntologyIncrementalRevisionData::isTrivialExpansionToPreviousConsistentOntology() {
+				return isTrivialExpansionToPreviousOntology(getPreviousConsistentOntology());
+			}
+
+			bool COntologyIncrementalRevisionData::isTrivialExpansionToPreviousOntology(CConcreteOntology* ontology) {
+				if (!ontology) {
+					return false;
+				}
+				COntologyIncrementalAxiomChangeData* prevCummAxiomChangeData = ontology->getIncrementalRevisionData()->getCummulativeAxiomChangeData();
+				if (mCummulativeAxiomChangeData.hasAxiomChanges(prevCummAxiomChangeData)) {
+					return false;
+				}
+				return true;
+			}
+
+
+
+			COntologyIncrementalRevisionData* COntologyIncrementalRevisionData::setPreviousBuiltOntology(CConcreteOntology* ontology) {
+				mPreviousBuiltOntology = ontology;
+				return this;
+			}
+
+			CConcreteOntology* COntologyIncrementalRevisionData::getPreviousBuiltOntology() {
+				return mPreviousBuiltOntology;
+			}
+
 
 
 			COntologyIncrementalRevisionData* COntologyIncrementalRevisionData::setPreviousConsistentOntology(CConcreteOntology* ontology) {

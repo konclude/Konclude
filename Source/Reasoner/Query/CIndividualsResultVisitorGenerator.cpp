@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,19 +28,14 @@ namespace Konclude {
 		namespace Query {
 
 
-			CIndividualsResultVisitorGenerator::CIndividualsResultVisitorGenerator(CIndividualsResult* individualsResult, bool abbreviatedIRIs) {
+			CIndividualsResultVisitorGenerator::CIndividualsResultVisitorGenerator(CIndividualsResult* individualsResult, bool abbreviatedIRIs, CIndividualNameResolver* indiNameResolver) {
 				mIndividualsResult = individualsResult;
 				mAbbreviatedIRIs = abbreviatedIRIs;
+				mIndiNameResolver = indiNameResolver;
 			}
 
-			bool CIndividualsResultVisitorGenerator::visitIndividual(CIndividual* individual, CConceptRealization* conRealization) {
-				QString individualString;
-				if (mAbbreviatedIRIs) {
-					individualString = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
-				} 
-				if (individualString.isEmpty()) {
-					individualString = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
-				}
+			bool CIndividualsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CConceptRealization* conRealization) {
+				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
 				if (!individualString.isEmpty()) {
 					mIndividualsResult->addIndividual(individualString);
 				}
@@ -48,14 +43,8 @@ namespace Konclude {
 			}
 
 
-			bool CIndividualsResultVisitorGenerator::visitIndividual(CIndividual* individual, CRoleRealization* roleRealization) {
-				QString individualString;
-				if (mAbbreviatedIRIs) {
-					individualString = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
-				} 
-				if (individualString.isEmpty()) {
-					individualString = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
-				}
+			bool CIndividualsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CRoleRealization* roleRealization) {
+				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
 				if (!individualString.isEmpty()) {
 					mIndividualsResult->addIndividual(individualString);
 				}
@@ -63,14 +52,8 @@ namespace Konclude {
 			}
 
 
-			bool CIndividualsResultVisitorGenerator::visitIndividual(CIndividual* individual, CSameRealization* sameRealization) {
-				QString individualString;
-				if (mAbbreviatedIRIs) {
-					individualString = CAbbreviatedIRIName::getRecentAbbreviatedPrefixWithAbbreviatedIRIName(individual->getIndividualNameLinker());
-				} 
-				if (individualString.isEmpty()) {
-					individualString = CIRIName::getRecentIRIName(individual->getIndividualNameLinker());
-				}
+			bool CIndividualsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
+				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
 				if (!individualString.isEmpty()) {
 					mIndividualsResult->addIndividual(individualString);
 				}

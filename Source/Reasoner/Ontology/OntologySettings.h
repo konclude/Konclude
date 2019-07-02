@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -83,6 +83,10 @@ namespace Konclude {
 			class COntologyProcessingStep;
 			class COntologyProcessingRequirement;
 			class COntologyProcessingStatus;
+
+			class COntologyTriplesAssertionsAccessor;
+
+			typedef QPair<CConcept*, bool> TConceptNegPair;
 
 			// Concept Constructor Codes
 			static const qint64 CCNONE = 0;
@@ -170,6 +174,13 @@ namespace Konclude {
 
 			static const qint64 CCMARKER = 54;
 
+			static const qint64 CCNOMINALIMPLI = 55;
+			static const qint64 CCDATATYPEIMPLI = 56;
+			static const qint64 CCDATALITERALIMPLI = 57;
+			static const qint64 CCDATARESTRICTIONIMPLI = 58;
+
+			static const qint64 CCVARBINDPREPARE = 59;
+			static const qint64 CCVARBINDFINALZE = 60;
 
 
 
@@ -292,6 +303,90 @@ namespace Konclude {
 
 
 
+
+			// OWL expressions
+#define PREFIX_OWL_CLASS "http://www.w3.org/2002/07/owl#Class"
+#define PREFIX_OWL_OBJECT_PROPERTY "http://www.w3.org/2002/07/owl#ObjectProperty"
+#define PREFIX_OWL_DATATYPE_PROPERTY "http://www.w3.org/2002/07/owl#DatatypeProperty"
+#define PREFIX_RDFS_DATATYPE "http://www.w3.org/2000/01/rdf-schema#Datatype"
+#define PREFIX_RDF_TYPE "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+#define PREFIX_OWL_RESTRICTION "http://www.w3.org/2002/07/owl#Class"
+#define PREFIX_OWL_NAMED_INDIVIDUAL "http://www.w3.org/2002/07/owl#NamedIndividual"
+
+#define PREFIX_OWL_INTERSECTION_OF "http://www.w3.org/2002/07/owl#intersectionOf"
+#define PREFIX_OWL_UNION_OF "http://www.w3.org/2002/07/owl#unionOf"
+#define PREFIX_OWL_COMPLEMENT_OF "http://www.w3.org/2002/07/owl#complementOf"
+#define PREFIX_OWL_ONE_OF "http://www.w3.org/2002/07/owl#oneOf"
+#define PREFIX_OWL_DATATYPE_COMPLEMENT_OF "http://www.w3.org/2002/07/owl#datatypeComplementOf"
+#define PREFIX_OWL_ON_DATATYPE "http://www.w3.org/2002/07/owl#onDatatype"
+#define PREFIX_OWL_WITH_RESTRICTION "http://www.w3.org/2002/07/owl#Restriction"
+#define PREFIX_OWL_ON_PROPERTY "http://www.w3.org/2002/07/owl#onProperty"
+#define PREFIX_OWL_ON_CLASS "http://www.w3.org/2002/07/owl#onClass"
+
+#define PREFIX_OWL_SOME_VALUES_FROM "http://www.w3.org/2002/07/owl#someValuesFrom"
+#define PREFIX_OWL_ALL_VALUES_FROM "http://www.w3.org/2002/07/owl#allValuesFrom"
+#define PREFIX_OWL_HAS_VALUE "http://www.w3.org/2002/07/owl#hasValue"
+#define PREFIX_OWL_HAS_SELF "http://www.w3.org/2002/07/owl#hasSelf"
+
+#define PREFIX_OWL_MIN_CARDINALITY "http://www.w3.org/2002/07/owl#minCardinality"
+#define PREFIX_OWL_MAX_CARDINALITY "http://www.w3.org/2002/07/owl#maxCardinality"
+#define PREFIX_OWL_CARDINALITY "http://www.w3.org/2002/07/owl#cardinality"
+
+#define PREFIX_OWL_MIN_QUALIFIED_CARDINALITY "http://www.w3.org/2002/07/owl#minQualifiedCardinality"
+#define PREFIX_OWL_MAX_QUALIFIED_CARDINALITY "http://www.w3.org/2002/07/owl#maxQualifiedCardinality"
+#define PREFIX_OWL_QUALIFIED_CARDINALITY "http://www.w3.org/2002/07/owl#qualifiedCardinality"
+#define PREFIX_OWL_ON_DATA_RANGE "http://www.w3.org/2002/07/owl#onDataRange"
+
+
+
+
+#define PREFIX_OWL_ALL_DISJOINT_CLASSES "http://www.w3.org/2002/07/owl#AllDisjointClasses"
+#define PREFIX_OWL_ALL_DISJOINT_PROPERTIES "http://www.w3.org/2002/07/owl#AllDisjointProperties"
+#define PREFIX_OWL_ALL_DIFFERENT "http://www.w3.org/2002/07/owl#AllDifferent"
+#define PREFIX_OWL_ALL_NEGATIVE_PROPERTY_ASSERTION "http://www.w3.org/2002/07/owl#NegativePropertyAssertion"
+
+#define PREFIX_OWL_MEMBERS "http://www.w3.org/2002/07/owl#members"
+#define PREFIX_OWL_DISTINCT_MEMBERS "http://www.w3.org/2002/07/owl#distinctMembers"
+			
+#define PREFIX_OWL_INVERSE_OF "http://www.w3.org/2002/07/owl#inverseOf"
+
+
+#define PREFIX_OWL_SOURCE_INDIVIDUAL "http://www.w3.org/2002/07/owl#sourceIndividual"
+#define PREFIX_OWL_ASSERTION_PROPERTY "http://www.w3.org/2002/07/owl#assertionProperty"
+#define PREFIX_OWL_TARGET_INDIVIDUAL "http://www.w3.org/2002/07/owl#targetIndividual"
+#define PREFIX_OWL_TARGET_VALUE "http://www.w3.org/2002/07/owl#targetValue"
+
+#define PREFIX_OWL_SAME_AS "http://www.w3.org/2002/07/owl#sameAs"
+#define PREFIX_OWL_DIFFERENT_FROM "http://www.w3.org/2002/07/owl#differentFrom"
+
+
+#define PREFIX_RDFS_SUBCLASS_OF "http://www.w3.org/2000/01/rdf-schema#subClassOf"
+#define PREFIX_OWL_EQUIVALENT_CLASS "http://www.w3.org/2002/07/owl#equivalentClass"
+#define PREFIX_OWL_DISJOINT_WITH "http://www.w3.org/2002/07/owl#disjointWith"
+#define PREFIX_OWL_DISJOINT_UNION_OF "http://www.w3.org/2002/07/owl#disjointUnionOf"
+
+#define PREFIX_RDFS_SUBPROPERTY_OF "http://www.w3.org/2000/01/rdf-schema#subPropertyOf"
+#define PREFIX_OWL_PROPERTY_CHAIN_AXIOM "http://www.w3.org/2002/07/owl#propertyChainAxiom"
+#define PREFIX_OWL_EQUIVALENT_PROPERTY "http://www.w3.org/2002/07/owl#equivalentProperty"
+#define PREFIX_OWL_PROPERTY_DISJOINT_WITH "http://www.w3.org/2002/07/owl#propertyDisjointWith"
+#define PREFIX_RDFS_DOMAIN "http://www.w3.org/2000/01/rdf-schema#domain"
+#define PREFIX_RDFS_RANGE "http://www.w3.org/2000/01/rdf-schema#range"
+
+
+
+#define PREFIX_OWL_FUNCTIONAL_PROPERTY "http://www.w3.org/2002/07/owl#FunctionalProperty"
+#define PREFIX_OWL_INVERSE_FUNCTIONAL_PROPERTY "http://www.w3.org/2002/07/owl#InverseFunctionalProperty"
+#define PREFIX_OWL_REFLEXIVE_PROPERTY "http://www.w3.org/2002/07/owl#ReflexiveProperty"
+#define PREFIX_OWL_IRREFLEXIVE_PROPERTY "http://www.w3.org/2002/07/owl#IrreflexiveProperty"
+#define PREFIX_OWL_SYMMETRIC_PROPERTY "http://www.w3.org/2002/07/owl#SymmetricProperty"
+#define PREFIX_OWL_ASYMMETRIC_PROPERTY "http://www.w3.org/2002/07/owl#AsymmetricProperty"
+#define PREFIX_OWL_TRANSITIVE_PROPERTY "http://www.w3.org/2002/07/owl#TransitiveProperty"
+
+
+
+#define PREFIX_RDF_FIRST "http://www.w3.org/1999/02/22-rdf-syntax-ns#first"
+#define PREFIX_RDF_REST "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest"
+#define PREFIX_RDF_NIL "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"
 
 
 #define CMAPPINGHASH CQtHash

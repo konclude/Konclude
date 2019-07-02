@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -30,7 +30,7 @@ namespace Konclude {
 
 
 
-			COptimizedKPSetRoleSubsumptionClassifierThread::COptimizedKPSetRoleSubsumptionClassifierThread(CReasonerManager *reasonerManager) 
+			COptimizedKPSetRoleSubsumptionClassifierThread::COptimizedKPSetRoleSubsumptionClassifierThread(CReasonerManager *reasonerManager, bool dataRoleClassification) 
 					: CSubsumptionClassifierThread(reasonerManager), CLogIdentifier("::Konclude::Reasoner::Kernel::Classifier::OptimizedKPSetRoleSubsumptionClassifierThread",this) {
 				satTestedCount = 0;
 				totalToSatTestClassCount = 0;
@@ -38,7 +38,7 @@ namespace Konclude {
 				subsumTestedCount = 0;
 				totalToSubsumTestCount = 0;
 
-				mConfPossSubsumCalcOrderConceptSorted = true;
+				mConfPossSubsumCalcOrderRoleSorted = true;
 				mConfPossSubsumCalcOrderFewestSubsumptionSorted = false;
 
 				mConfPossSubsumCalcOrderTopDown = true;
@@ -58,6 +58,8 @@ namespace Konclude {
 				mPseudoModelPretestSubsumptionCalculationCount = 0;
 				mCreatedCalculationTaskCount = 0;
 				mRecievedCallbackCount = 0;
+
+				mDataRolesClassification = dataRoleClassification;
 			}
 
 
@@ -65,13 +67,20 @@ namespace Konclude {
 			}
 
 
-			CTaxonomy *COptimizedKPSetRoleSubsumptionClassifierThread::createEmptyTaxonomyForOntology(CConcreteOntology *ontology, CConfigurationBase *config) {
-				CTBox *tBox = ontology->getTBox();
-				CConceptVector *conVec = tBox->getConceptVector();
-				CConcept *topConcept = conVec->getData(1);
-				CConcept *bottomConcept = conVec->getData(0);
-				CPartialPruningTaxonomy *tax = new CPartialPruningTaxonomy(topConcept,bottomConcept);
-				return tax->readConfig(config);
+			CRolePropertiesHierarchy *COptimizedKPSetRoleSubsumptionClassifierThread::createInitialHierarchyForOntology(CConcreteOntology *ontology, CConfigurationBase *config) {
+				CRBox* rBox = ontology->getRBox();
+				CRole* topRole = nullptr;
+				CRole* bottomRole = nullptr;
+				bool classifyDataRoles = mDataRolesClassification;
+				if (classifyDataRoles) {
+					topRole = rBox->getTopDataRole();
+					bottomRole = rBox->getBottomDataRole();
+				} else {
+					topRole = rBox->getTopObjectRole();
+					bottomRole = rBox->getBottomObjectRole();
+				}
+				CRolePropertiesHierarchy *hierarchy = new CRolePropertiesHierarchy(topRole,bottomRole);
+				return hierarchy;
 			}
 
 
@@ -92,10 +101,10 @@ namespace Konclude {
 					}
 
 					bool mulConfigErrorFlag = false;
-					cint64 multiplicator = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Classification.OptimizedKPSetClassSubsumptionClassifier.MultipliedUnitsParallelSatisfiableCalculationCount",1,&mulConfigErrorFlag);
+					cint64 multiplicator = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Classification.OptimizedKPSetRoleSubsumptionClassifier.MultipliedUnitsParallelSatisfiableCalculationCount",1,&mulConfigErrorFlag);
 					confMaxTestParallelCount = processorCount*multiplicator;
 					bool maxConfigErrorFlag = false;
-					cint64 maxParallel = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Classification.OptimizedKPSetClassSubsumptionClassifier.MaximumParallelSatisfiableCalculationCount",1,&maxConfigErrorFlag);
+					cint64 maxParallel = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Classification.OptimizedKPSetRoleSubsumptionClassifier.MaximumParallelSatisfiableCalculationCount",1,&maxConfigErrorFlag);
 					if (!maxConfigErrorFlag) {
 						if (!mulConfigErrorFlag) {
 							confMaxTestParallelCount = qMin(confMaxTestParallelCount,maxParallel);
@@ -103,7 +112,7 @@ namespace Konclude {
 							confMaxTestParallelCount = maxParallel;
 						}
 					}
-					double factor = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Classification.OptimizedKPSetClassSubsumptionClassifier.ParallelSatisfiableCalculationCreationFactor",1000)/1000.;
+					double factor = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Classification.OptimizedKPSetRoleSubsumptionClassifier.ParallelSatisfiableCalculationCreationFactor",1000)/1000.;
 					confMinTestParallelCount = confMaxTestParallelCount*factor;
 
 					mConfWriteDebuggingData = CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false);
@@ -117,37 +126,265 @@ namespace Konclude {
 			}
 
 
+
+
+
+			COptimizedKPSetRoleSubsumptionClassifierThread* COptimizedKPSetRoleSubsumptionClassifierThread::createInitialSubsumptionSatisfiabilityTestingOrderFromBuildData(COptimizedKPSetRoleOntologyClassificationItem* ontPropItem) {
+				CConcreteOntology* ontology = ontPropItem->getOntology();
+				CConcept* topConcept = ontology->getTBox()->getTopConcept();
+
+				CRBox *rBox = ontology->getRBox();
+
+				CRole* topRole = nullptr;
+				CRole* bottomRole = nullptr;
+
+				bool classifyDataRoles = ontPropItem->isDataRolesClassification();
+				if (classifyDataRoles) {
+					topRole = rBox->getTopDataRole();
+					bottomRole = rBox->getBottomDataRole();
+				} else {
+					topRole = rBox->getTopObjectRole();
+					bottomRole = rBox->getBottomObjectRole();
+				}
+
+				cint64 satRoleCount = 1;
+				CBOXSET<CRole*>* activeRoleHash = rBox->getActivePropertyRoleSet(false);
+				if (activeRoleHash) {
+					for (CBOXSET<CRole*>::const_iterator it = activeRoleHash->constBegin(), itEnd = activeRoleHash->constEnd(); it != itEnd; ++it) {
+						CRole *role = (*it);
+						if (role->isDataRole() == classifyDataRoles) {
+							if (role && role != topRole && role != bottomRole) {
+								++satRoleCount;
+								ontPropItem->getRoleSatisfiableTestItem(role,true);
+
+							}
+						}
+					}
+				}
+
+				CClassifierStatistics* statistics = ontPropItem->getClassifierStatistics();
+				statistics->incTotalSatisfiableTestCount(satRoleCount);
+
+
+				COptimizedKPSetRoleTestingItem* topRoleItem = ontPropItem->getRoleSatisfiableTestItem(topRole,true);
+				COptimizedKPSetRoleTestingItem* bottomRoleItem = ontPropItem->getRoleSatisfiableTestItem(bottomRole,true);
+
+				ontPropItem->initTopBottomSatisfiableTestingItems(topRoleItem,bottomRoleItem);
+
+				CConcept* univConnNomValueConcept = ontology->getTBox()->getUniversalConnectionNominalValueConcept();
+
+				QList<COptimizedKPSetRoleTestingItem*>* nextItemList = ontPropItem->getNextSatisfiableTestingItemList();
+				QSet<COptimizedKPSetRoleTestingItem*>* nextCandItemSet = ontPropItem->getNextCandidateSatisfiableTestingItemSet();
+				QSet<COptimizedKPSetRoleTestingItem*>* remainingCandItemSet = ontPropItem->getRemainingCandidateSatisfiableTestingItemSet();
+
+				QList<COptimizedKPSetRoleTestingItem*>* roleItemList = ontPropItem->getRoleSatisfiableTestItemList();
+				for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator it = roleItemList->constBegin(), itEnd = roleItemList->constEnd(); it != itEnd; ++it) {
+					COptimizedKPSetRoleTestingItem* roleItem(*it);
+					if (roleItem != bottomRoleItem) {
+
+						CRole* role = roleItem->getTestingRole();
+						bool complex = false;
+						for (CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
+							CRole* superRole = superRoleIt->getData();
+
+							if (!superRoleIt->isNegated() && superRole != topRole && superRole != role) {
+								COptimizedKPSetRoleTestingItem* superRoleItem = ontPropItem->getRoleSatisfiableTestItem(superRole);
+								if (superRoleItem) {
+									roleItem->addSubsumerRoleItem(superRoleItem);
+								}
+							}
+
+							if (superRole->getDomainConceptList()) {
+								complex = true;
+							}
+							if (superRole->getRangeConceptList()) {
+								complex = true;
+							}
+							if (topConcept->getOperandList() || univConnNomValueConcept) {
+								complex = true;
+							}
+						}
+
+						cint64 foundSubsumerCount = 0;
+						ontPropItem->incRemainingSatisfiableTestsCount();
+						if (!complex) {
+							roleItem->setResultSatisfiableDerivated(true);
+							roleItem->setPossibleSubsumptionMapInitialized(true);
+						} else {
+
+							for (CSortedNegLinker<CRole*>* superRoleIt = role->getSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
+								CRole* superRole = superRoleIt->getData();
+								if (!superRoleIt->isNegated()) {
+									COptimizedKPSetRoleTestingItem* superRoleItem = ontPropItem->getRoleSatisfiableTestItem(superRole);
+									if (superRoleItem) {
+										foundSubsumerCount++;
+										superRoleItem->addSuccessorSatisfiableTestItem(roleItem);
+										roleItem->incUnprocessedPredecessorItems();
+									}
+								}
+							}
+						}
+
+						if (foundSubsumerCount) {
+							nextItemList->append(roleItem);
+						} else {
+							nextCandItemSet->insert(roleItem);
+						}
+					}
+				}			
+				return this;
+			}
+
+
+
+
+
+
+
+			CConcept* COptimizedKPSetRoleSubsumptionClassifierThread::createTemporaryConcept(CConcreteOntology* tmpRoleRealOntology) {
+				CConceptVector* conVec = tmpRoleRealOntology->getTBox()->getConceptVector();
+				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(tmpRoleRealOntology->getOntologyContext()->getMemoryAllocationManager());
+				concept->initConcept();
+
+				cint64 newConTag = conVec->getItemCount();
+				CConsistence* consistence = tmpRoleRealOntology->getConsistence();
+				if (consistence) {
+					CConsistenceData* consData = consistence->getConsistenceModelData();
+					if (consData) {
+						CConsistenceTaskData* consTaskData = dynamic_cast<CConsistenceTaskData*>(consData);
+						CSatisfiableCalculationTask* satConsTask = consTaskData->getCompletionGraphCachedSatisfiableTask();
+						newConTag = qMax(newConTag,satConsTask->getProcessingDataBox()->getExtendedConceptVector()->getItemCount());
+					}
+				}
+
+				concept->setConceptTag(newConTag);
+				conVec->setData(concept->getConceptTag(),concept);
+				return concept;
+			}
+
+			void COptimizedKPSetRoleSubsumptionClassifierThread::addTemporaryConceptOperand(CConcept* concept, CConcept* opConcept, bool negated, CConcreteOntology* tmpRoleRealOntology) {
+				CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(tmpRoleRealOntology->getOntologyContext()->getMemoryAllocationManager());
+				opConLinker->init(opConcept,negated);
+				concept->addOperandLinker(opConLinker);
+				concept->incOperandCount();
+			}
+
+
+
+			COptimizedKPSetRoleSubsumptionClassifierThread* COptimizedKPSetRoleSubsumptionClassifierThread::createTemporaryRoleClassificationOntology(COptimizedKPSetRoleOntologyClassificationItem* item) {
+				CConcreteOntology* ontology = item->getOntology();
+				CConcreteOntology* tmpRoleRealOntology = item->getTemporaryRoleClassificationOntology();
+				if (!tmpRoleRealOntology) {
+					tmpRoleRealOntology = new CConcreteOntology(ontology,ontology->getConfiguration());		
+					tmpRoleRealOntology->setOntologyID(ontology->getOntologyID());
+					tmpRoleRealOntology->setConsistence(ontology->getConsistence());
+
+					QSet<CConcept*> compTransformConceptSet;
+					QHash<CConcept*,COptimizedKPSetRoleTestingItem*>* markerConRolInsItemHash = item->getMarkerConceptInstancesItemHash();
+
+					CABox* abox = item->getOntology()->getABox();
+
+					CABox* tempRoleRealAbox = tmpRoleRealOntology->getABox();
+					CIndividualVector* indiVec = tempRoleRealAbox->getIndividualVector(true);
+
+					CIndividual* tmpIndiProp = new CIndividual();
+					tmpIndiProp->initIndividual(abox->getNextIndividualId(true));
+					indiVec->setData(tmpIndiProp->getIndividualID(),tmpIndiProp);
+					CIndividual* tmpIndiMarker = new CIndividual();
+					tmpIndiMarker->initIndividual(abox->getNextIndividualId(true));
+					indiVec->setData(tmpIndiMarker->getIndividualID(),tmpIndiMarker);
+					tmpIndiProp->setTemporaryIndividual(true);
+					tmpIndiMarker->setTemporaryIndividual(true);
+
+
+					item->setTemporaryMarkerIndividual(tmpIndiMarker);
+					item->setTemporaryPropagationIndividual(tmpIndiProp);
+
+					CConcept* allPropConcept = createTemporaryConcept(tmpRoleRealOntology);
+					allPropConcept->setOperatorCode(CCAND);
+
+
+					COptimizedKPSetRoleTestingItem* topRoleInstItem = item->getTopRoleSatisfiableTestItem();
+					COptimizedKPSetRoleTestingItem* bottomRoleInstItem = item->getBottomRoleSatisfiableTestItem();
+					QList<COptimizedKPSetRoleTestingItem*>* roleItemList = item->getRoleSatisfiableTestItemList();
+					for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator itemIt = roleItemList->constBegin(), itemItEnd = roleItemList->constEnd(); itemIt != itemItEnd; ++itemIt) {
+						COptimizedKPSetRoleTestingItem* roleItem(*itemIt);
+						if (roleItem != bottomRoleInstItem) {
+							CRole* role = roleItem->getTestingRole();
+
+							CConcept* markerConcept = createTemporaryConcept(tmpRoleRealOntology);
+							markerConcept->setOperatorCode(CCMARKER);
+							markerConcept->setRole(role);
+
+							CConcept* existConcept = createTemporaryConcept(tmpRoleRealOntology);
+							existConcept->setOperatorCode(CCVALUE);
+							existConcept->setRole(role);
+							existConcept->setNominalIndividual(tmpIndiMarker);
+							roleItem->setTemporaryExistConcept(existConcept);
+
+							CConcept* propConcept = createTemporaryConcept(tmpRoleRealOntology);
+							propConcept->setOperatorCode(CCALL);
+							propConcept->setRole(role);
+							addTemporaryConceptOperand(propConcept,markerConcept,false,tmpRoleRealOntology);
+
+							addTemporaryConceptOperand(allPropConcept,propConcept,false,tmpRoleRealOntology);
+							roleItem->setTemporaryMarkerConcept(markerConcept);
+							markerConRolInsItemHash->insert(markerConcept,roleItem);
+							roleItem->setTemporaryPropagationConcept(propConcept);
+							if (role->isComplexRole()) {
+								compTransformConceptSet.insert(propConcept);
+							}
+						}
+					}
+
+					if (!compTransformConceptSet.isEmpty()) {
+						CPreProcessContextBase* preprocessContext = new CPreProcessContextBase(tmpRoleRealOntology,ontology->getConfiguration());
+						CRoleChainAutomataTransformationPreProcess* roleChainAutomataTransformPreprocessor = new CRoleChainAutomataTransformationPreProcess();
+						roleChainAutomataTransformPreprocessor->preprocess(tmpRoleRealOntology,&compTransformConceptSet,preprocessContext);
+						delete preprocessContext;
+						delete roleChainAutomataTransformPreprocessor;						
+					}
+
+					item->setTemporaryRoleClassificationOntology(tmpRoleRealOntology);
+					item->setTemporaryAllPropagationConcept(allPropConcept);
+				}
+				return this;
+			}
+
+
+
 			
-			CSubsumptionClassifierThread *COptimizedKPSetRoleSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
+			CSubsumptionClassifierThread *COptimizedKPSetRoleSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 
-				COptimizedKPSetRoleOntologyClassificationItem *ontClassItem = new COptimizedKPSetRoleOntologyClassificationItem(config,statistics);
-				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
-				ontItemList.append(ontClassItem);
-				processingOntItemList.append(ontClassItem);
-				ontItemHash.insert(ontology,ontClassItem);
 
-				readCalculationConfig(ontClassItem->getCalculationConfiguration());
+				CRolePropertiesHierarchy* hierarchy = createInitialHierarchyForOntology(ontology,config);
 
-				if (CConfigDataReader::readConfigBoolean(ontClassItem->getCalculationConfiguration(),"Konclude.Calculation.Classification.IndividualDependenceTracking",true)) {
-					ontClassItem->setIndividualDependenceTrackingCollector(new CIndividualDependenceTrackingCollector());
+				COptimizedKPSetRoleOntologyClassificationItem *ontPropItem = new COptimizedKPSetRoleOntologyClassificationItem(config,statistics);
+				ontPropItem->initClassificationItem(ontology,hierarchy,mDataRolesClassification);
+				ontItemList.append(ontPropItem);
+				processingOntItemList.append(ontPropItem);
+				ontItemHash.insert(ontology,ontPropItem);
+
+				readCalculationConfig(ontPropItem->getCalculationConfiguration());
+
+				if (CConfigDataReader::readConfigBoolean(ontPropItem->getCalculationConfiguration(),"Konclude.Calculation.Classification.IndividualDependenceTracking",true)) {
+					ontPropItem->setIndividualDependenceTrackingCollector(new CIndividualDependenceTrackingCollector());
 				}
 
 
-				CPartialPruningTaxonomy *parTax = dynamic_cast<CPartialPruningTaxonomy *>(taxonomy);
-				if (parTax) {
-					COntologyClassificationItem *ontClassItem = ontItemHash.value(ontology);
-					parTax->createStatistics(ontClassItem->getClassifierStatistics());
-				}
 
+				createInitialSubsumptionSatisfiabilityTestingOrderFromBuildData(ontPropItem);
+				createTemporaryRoleClassificationOntology(ontPropItem);
 
 				if (satTestedCount == totalToSatTestClassCount) {
 					satTestedCount = 0;
-					totalToSatTestClassCount = ontClassItem->getRemainingSatisfiableTestsCount();
+					totalToSatTestClassCount = ontPropItem->getRemainingSatisfiableTestsCount();
 					classStartTime.start();
 				} else {
-					totalToSatTestClassCount += ontClassItem->getRemainingSatisfiableTestsCount();
+					totalToSatTestClassCount += ontPropItem->getRemainingSatisfiableTestsCount();
 				}
 				++mClassificationCount;
+
 				return this;
 			}
 
@@ -203,17 +440,17 @@ namespace Konclude {
 			}
 
 			bool itemSortLessSubsumptionsThan(const COptimizedKPSetRoleTestingItem* item1, const COptimizedKPSetRoleTestingItem* item2) {
-				return item1->getSubsumingConceptItemCount() < item2->getSubsumingConceptItemCount();
+				return item1->getSubsumerRoleItemCount() < item2->getSubsumerRoleItemCount();
 			}
 
 			bool itemSortMoreSubsumptionsThan(const COptimizedKPSetRoleTestingItem* item1, const COptimizedKPSetRoleTestingItem* item2) {
-				return item1->getSubsumingConceptItemCount() > item2->getSubsumingConceptItemCount();
+				return item1->getSubsumerRoleItemCount() > item2->getSubsumerRoleItemCount();
 			}
 
 
 
 			void COptimizedKPSetRoleSubsumptionClassifierThread::testDebugPossibleSubsumerCorrectCounted(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem) {
-				QList<COptimizedKPSetRoleTestingItem*>* classList = optKPSetClassificationItem->getConceptSatisfiableTestItemContainer();
+				QList<COptimizedKPSetRoleTestingItem*>* classList = optKPSetClassificationItem->getRoleSatisfiableTestItemList();
 				cint64 totalCount = 0;
 				foreach (COptimizedKPSetRoleTestingItem* item, *classList) {
 					COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = item->getPossibleSubsumptionMap(false);
@@ -238,7 +475,7 @@ namespace Konclude {
 			}
 
 			void COptimizedKPSetRoleSubsumptionClassifierThread::testDebugPossibleSubsumerCorrectReferenced(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem) {
-				QList<COptimizedKPSetRoleTestingItem*>* classList = optKPSetClassificationItem->getSatisfiableConceptItemList();
+				QList<COptimizedKPSetRoleTestingItem*>* classList = optKPSetClassificationItem->getRoleSatisfiableTestItemList();
 				if (mConfPossSubsumCalcOrderBottomUp) {
 					QSet<COptimizedKPSetRoleTestingItem*>* remItemSet = optKPSetClassificationItem->getRemainingPossibleSubsumptionTestingSet();
 					foreach (COptimizedKPSetRoleTestingItem* item, *classList) {
@@ -248,7 +485,7 @@ namespace Konclude {
 								COptimizedKPSetRolePossibleSubsumptionData* data = it.value();
 								if (data->isSubsumptionUnknown() || data->isUpdateRequired()) {				
 									COptimizedKPSetRoleTestingItem* possSubsumerItem = data->getTestingItem();
-									if (!possSubsumerItem->getPossibleSubsumedSet(false)->contains(item) && !optKPSetClassificationItem->getCurrentPossibleSubsumptionTestingItemSet()->contains(possSubsumerItem)) {
+									if (!possSubsumerItem->getPossibleSubsumerSet(false)->contains(item) && !optKPSetClassificationItem->getCurrentPossibleSubsumptionTestingItemSet()->contains(possSubsumerItem)) {
 										bool bug = true;
 									}
 									if (!remItemSet->contains(possSubsumerItem) && !optKPSetClassificationItem->getCurrentPossibleSubsumptionTestingItemSet()->contains(possSubsumerItem)) {
@@ -264,27 +501,27 @@ namespace Konclude {
 
 			QString COptimizedKPSetRoleSubsumptionClassifierThread::createDebugKPSetString(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, const QString& filename) {
 				QString debugString;
-				QList<COptimizedKPSetRoleTestingItem*>* classList = optKPSetClassificationItem->getSatisfiableConceptItemList();
-				foreach (COptimizedKPSetRoleTestingItem* item, *classList) {
-					QString iriClassNameString = CIRIName::getRecentIRIName(item->getTestingConcept()->getClassNameLinker());
-					QString classDebugString = QString("Class: %1\r\n").arg(iriClassNameString);
+				QList<COptimizedKPSetRoleTestingItem*>* propertyList = optKPSetClassificationItem->getRoleSatisfiableTestItemList();
+				foreach (COptimizedKPSetRoleTestingItem* item, *propertyList) {
+					QString iriPropertyNameString = CIRIName::getRecentIRIName(item->getTestingRole()->getPropertyNameLinker());
+					QString propertyDebugString = QString("Class: %1\r\n").arg(iriPropertyNameString);
 					QString subsumString;
-					foreach (COptimizedKPSetRoleTestingItem* subsumItem, *item->getSubsumingConceptItemList()) {
-						QString subsumIRIClassNameString = CIRIName::getRecentIRIName(subsumItem->getTestingConcept()->getClassNameLinker());
+					foreach (COptimizedKPSetRoleTestingItem* subsumItem, *item->getSubsumerRoleItemList()) {
+						QString subsumIRIPropertyNameString = CIRIName::getRecentIRIName(subsumItem->getTestingRole()->getPropertyNameLinker());
 						if (subsumString.isEmpty()) {
-							subsumString += subsumIRIClassNameString;
+							subsumString += subsumIRIPropertyNameString;
 						} else {
-							subsumString += QString(", %1").arg(subsumIRIClassNameString);
+							subsumString += QString(", %1").arg(subsumIRIPropertyNameString);
 						}
 					}
-					classDebugString += QString("Subsumer Roles: %1\r\n").arg(subsumString);
+					propertyDebugString += QString("Subsumer Roles: %1\r\n").arg(subsumString);
 
 					QString possSubsumString;
 					COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = item->getPossibleSubsumptionMap(false);
 					if (possSubsumMap) {
 						for (COptimizedKPSetRolePossibleSubsumptionMap::const_iterator it = possSubsumMap->constBegin(), itEnd = possSubsumMap->constEnd(); it != itEnd; ++it) {
 							COptimizedKPSetRolePossibleSubsumptionData* data = it.value();
-							QString subsumIRIClassNameString = CIRIName::getRecentIRIName(data->getTestingItem()->getTestingConcept()->getClassNameLinker());
+							QString subsumIRIPropertyNameString = CIRIName::getRecentIRIName(data->getTestingItem()->getTestingRole()->getPropertyNameLinker());
 							QString possString;
 							if (data->isSubsumptionConfirmed()) {
 								possString = "s";
@@ -295,15 +532,15 @@ namespace Konclude {
 							}
 
 							if (possSubsumString.isEmpty()) {
-								possSubsumString += QString("%1(%2)").arg(subsumIRIClassNameString).arg(possString);
+								possSubsumString += QString("%1(%2)").arg(subsumIRIPropertyNameString).arg(possString);
 							} else {
-								possSubsumString += QString(", %1(%2)").arg(subsumIRIClassNameString).arg(possString);
+								possSubsumString += QString(", %1(%2)").arg(subsumIRIPropertyNameString).arg(possString);
 							}
 						}
 					}
-					classDebugString += QString("Possible Subsumer Roles: %1\r\n\r\n\r\n").arg(possSubsumString);
+					propertyDebugString += QString("Possible Subsumer Roles: %1\r\n\r\n\r\n").arg(possSubsumString);
 
-					debugString += classDebugString;
+					debugString += propertyDebugString;
 				}
 
 				QFile file(filename);
@@ -319,19 +556,19 @@ namespace Konclude {
 			bool COptimizedKPSetRoleSubsumptionClassifierThread::createNextSubsumtionTest() {
 
 
-				COntologyClassificationItem *loopOntClassItem = 0;
+				COntologyPropertyRoleClassificationItem *loopontPropItem = 0;
 				bool workTestCreated = false;
 				while (!workTestCreated && !processingOntItemList.isEmpty()) {
-					COntologyClassificationItem *ontClassItem = processingOntItemList.first();
+					COptimizedKPSetRoleOntologyClassificationItem *ontPropItem = (COptimizedKPSetRoleOntologyClassificationItem*)processingOntItemList.first();
 
-					if (ontClassItem == loopOntClassItem) {
+					if (ontPropItem == loopontPropItem) {
 						// don't run into infinite loop without doing something
 						break;
 					}
 
-					COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontClassItem;
+					COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontPropItem;
 
-					if (!optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !ontClassItem->isTaxonomyConstructionFailed()) {
+					if (!optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !ontPropItem->isHierarchyConstructionFailed()) {
 
 						while (!workTestCreated && optKPSetClassificationItem->hasRemainingSatisfiableTests()) {
 							// get next satisfiable test
@@ -376,7 +613,7 @@ namespace Konclude {
 								if (calculateSatisfiable(optKPSetClassificationItem,nextSatTestItem)) {
 									workTestCreated = true;
 								} else {
-									interpreteSatisfiableResult(optKPSetClassificationItem,nextSatTestItem->getTestingConcept(),nextSatTestItem->getSatisfiableTestedResult());
+									interpreteSatisfiableResult(optKPSetClassificationItem,nextSatTestItem->getTestingRole(),nextSatTestItem->getSatisfiableTestedResult());
 								}
 							}
 						}
@@ -394,15 +631,15 @@ namespace Konclude {
 
 								QList<COptimizedKPSetRoleTestingItem*>* nextItemList = optKPSetClassificationItem->getNextPossibleSubsumptionTestingItemList();
 
-								COptimizedKPSetRoleTestingItem* topItem = optKPSetClassificationItem->getTopConceptSatisfiableTestItem();
-								COptimizedKPSetRoleTestingItem* bottomItem = optKPSetClassificationItem->getBottomConceptSatisfiableTestItem();
+								COptimizedKPSetRoleTestingItem* topItem = optKPSetClassificationItem->getTopRoleSatisfiableTestItem();
+								COptimizedKPSetRoleTestingItem* bottomItem = optKPSetClassificationItem->getBottomRoleSatisfiableTestItem();
 
 								topItem->setPropagationConnected(true);
 
-								QList<COptimizedKPSetRoleTestingItem*> classList(*optKPSetClassificationItem->getSatisfiableConceptItemList());
-								qSort(classList.begin(),classList.end(),itemSortLessSubsumptionsThan);
+								QList<COptimizedKPSetRoleTestingItem*> propList(*optKPSetClassificationItem->getRoleSatisfiableTestItemList());
+								qSort(propList.begin(),propList.end(),itemSortLessSubsumptionsThan);
 								QList<COptimizedKPSetRoleTestingItem*> resevePossSubsumClassList;
-								foreach (COptimizedKPSetRoleTestingItem* item, classList) {
+								foreach (COptimizedKPSetRoleTestingItem* item, propList) {
 									COptimizedKPSetRolePossibleSubsumptionMap* possSubSumMap = item->getPossibleSubsumptionMap(false);
 									if (possSubSumMap && possSubSumMap->hasRemainingPossibleSubsumptions()) {	
 										if (mConfPossSubsumCalcOrderTopDown) {
@@ -416,13 +653,13 @@ namespace Konclude {
 										bool bug = true;
 									}
 
-									QList<COptimizedKPSetRoleTestingItem*>* subsumerList = item->getSubsumingConceptItemList();
+									QList<COptimizedKPSetRoleTestingItem*>* subsumerList = item->getSubsumerRoleItemList();
 									COptimizedKPSetRoleTestingItem* maxSubsumerItem = nullptr;
 									cint64 maxSubsumerCount = 0;
 									for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator it = subsumerList->constBegin(), itEnd = subsumerList->constEnd(); it != itEnd; ++it) {
 										COptimizedKPSetRoleTestingItem* subsumerItem = *it;
-										if (!maxSubsumerItem || subsumerItem->getSubsumingConceptItemCount() > maxSubsumerCount) {
-											maxSubsumerCount = subsumerItem->getSubsumingConceptItemCount();
+										if (!maxSubsumerItem || subsumerItem->getSubsumerRoleItemCount() > maxSubsumerCount) {
+											maxSubsumerCount = subsumerItem->getSubsumerRoleItemCount();
 											maxSubsumerItem = subsumerItem;
 										}
 									}
@@ -443,7 +680,7 @@ namespace Konclude {
 										bool alreadySubsumed = false;
 										for (QSet<COptimizedKPSetRoleTestingItem*>::const_iterator itProp = upPropSet->constBegin(), itPropEnd = upPropSet->constEnd(); !alreadySubsumed && itProp != itPropEnd; ++itProp) {
 											COptimizedKPSetRoleTestingItem* propItem = *itProp;
-											if (propItem == subsumerItem || propItem->hasSubsumerConceptItem(subsumerItem)) {
+											if (propItem == subsumerItem || propItem->hasSubsumerRoleItem(subsumerItem)) {
 												alreadySubsumed = true;
 											}
 										}
@@ -473,7 +710,7 @@ namespace Konclude {
 								}
 
 
-								foreach (COptimizedKPSetRoleTestingItem* item, classList) {
+								foreach (COptimizedKPSetRoleTestingItem* item, propList) {
 									COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = item->getPossibleSubsumptionMap(false);
 									QSet<COptimizedKPSetRoleTestingItem*>* upPropSet = item->getUpPropagationItemSet();
 									if (!possSubsumMap && item->isPossibleSubsumptionMapInitialized()) {
@@ -484,7 +721,7 @@ namespace Konclude {
 											if (upPropItemPossSubsumMap) {
 												for (COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itUpPoss = upPropItemPossSubsumMap->constBegin(), itUpPossEnd = upPropItemPossSubsumMap->constEnd(); itUpPoss != itUpPossEnd; ++itUpPoss) {
 													COptimizedKPSetRolePossibleSubsumptionData* upPossData = itUpPoss.value();
-													if (!item->hasSubsumerConceptItem(upPossData->getTestingItem()) && item != upPossData->getTestingItem()) {
+													if (!item->hasSubsumerRoleItem(upPossData->getTestingItem()) && item != upPossData->getTestingItem()) {
 														if (!upPossData->isSubsumptionInvalided()) {
 															upPossData->setSubsumptionInvalid(true);
 															if (upPossData->isUpdateRequired()) {
@@ -505,16 +742,16 @@ namespace Konclude {
 												if (possSubsumMap) {
 													COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd();
 													while (itPoss != itPossEnd && itUpPoss != itUpPossEnd) {
-														CConcept* possCon = itPoss.key().getConcept();
-														CConcept* possUpCon = itUpPoss.key().getConcept();
-														if (possCon->getConceptTag() == possUpCon->getConceptTag()) {
+														CRole* possRole = itPoss.key().getRole();
+														CRole* possUpRole = itUpPoss.key().getRole();
+														if (possRole->getRoleTag() == possUpRole->getRoleTag()) {
 															++itPoss;
 															++itUpPoss;
-														} else if (possCon->getConceptTag() < possUpCon->getConceptTag()) {
+														} else if (possRole->getRoleTag() < possUpRole->getRoleTag()) {
 															++itPoss;
-														} else if (possCon->getConceptTag() > possUpCon->getConceptTag()) {
+														} else if (possRole->getRoleTag() > possUpRole->getRoleTag()) {
 															COptimizedKPSetRolePossibleSubsumptionData* upPossData = itUpPoss.value();
-															if (!item->hasSubsumerConceptItem(upPossData->getTestingItem()) && item != upPossData->getTestingItem()) {
+															if (!item->hasSubsumerRoleItem(upPossData->getTestingItem()) && item != upPossData->getTestingItem()) {
 																if (!upPossData->isSubsumptionInvalided()) {
 																	upPossData->setSubsumptionInvalid(true);
 																	if (upPossData->isUpdateRequired()) {
@@ -528,7 +765,7 @@ namespace Konclude {
 												}
 												while (itUpPoss != itUpPossEnd) {
 													COptimizedKPSetRolePossibleSubsumptionData* upPossData = itUpPoss.value();
-													if (!item->hasSubsumerConceptItem(upPossData->getTestingItem()) && item != upPossData->getTestingItem()) {
+													if (!item->hasSubsumerRoleItem(upPossData->getTestingItem()) && item != upPossData->getTestingItem()) {
 														if (!upPossData->isSubsumptionInvalided()) {
 															upPossData->setSubsumptionInvalid(true);
 															if (upPossData->isUpdateRequired()) {
@@ -553,7 +790,7 @@ namespace Konclude {
 												if (mConfPossSubsumCalcOrderBottomUp) {
 													if (possSubsumData->isSubsumptionUnknown() || possSubsumData->isUpdateRequired()) {
 														COptimizedKPSetRoleTestingItem* possSubsumerItem = possSubsumData->getTestingItem();
-														possSubsumerItem->getPossibleSubsumedSet(true)->insert(item);
+														possSubsumerItem->getPossibleSubsumerSet(true)->insert(item);
 														if (!remTestingSet->contains(possSubsumerItem)) {
 															remTestingSet->insert(possSubsumerItem);
 															nextItemList->append(possSubsumerItem);
@@ -569,21 +806,21 @@ namespace Konclude {
 								if (mConfPossSubsumCalcOrderBottomUp) {
 									for (QSet<COptimizedKPSetRoleTestingItem*>::const_iterator it = remTestingSet->constBegin(), itEnd = remTestingSet->constEnd(); it != itEnd; ++it) {
 										COptimizedKPSetRoleTestingItem* possSubsumerItem = *it;
-										QList<COptimizedKPSetRoleTestingItem*>* subsumersSortedList = new QList<COptimizedKPSetRoleTestingItem*>(possSubsumerItem->getPossibleSubsumedSet(false)->toList());										
+										QList<COptimizedKPSetRoleTestingItem*>* subsumersSortedList = new QList<COptimizedKPSetRoleTestingItem*>(possSubsumerItem->getPossibleSubsumerSet(false)->toList());										
 										qSort(subsumersSortedList->begin(),subsumersSortedList->end(),itemSortMoreSubsumptionsThan);
 										possSubsumerItem->setPossibleSubsumedList(subsumersSortedList);
 									}
 								}
 
 								if (mConfWriteDebuggingData) {
-									createDebugKPSetString(optKPSetClassificationItem,"classkpsets-inital-pruned.txt");
+									createDebugKPSetString(optKPSetClassificationItem,"./Debugging/Classification/classkpsets-inital-pruned.txt");
 								}
 
 							}
 						}
 					}
 
-					if (optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() && !ontClassItem->isTaxonomyConstructionFailed()) {
+					if (optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() && !ontPropItem->isHierarchyConstructionFailed()) {
 
 						QList<COptimizedKPSetRoleTestingItem*>* nextItemList = optKPSetClassificationItem->getNextPossibleSubsumptionTestingItemList();
 						QSet<COptimizedKPSetRoleTestingItem*>* currentItemSet = optKPSetClassificationItem->getCurrentPossibleSubsumptionTestingItemSet();
@@ -615,7 +852,7 @@ namespace Konclude {
 											if (calculateSubsumption(optKPSetClassificationItem,nextPossSubsumTestItem,possSubsumCalcData->getTestingItem(),possSubsumCalcData)) {
 												workTestCreated = true;
 											} else {
-												interpreteSubsumptionResult(optKPSetClassificationItem,nextPossSubsumTestItem->getTestingConcept(),possSubsumCalcData->getTestingItem()->getTestingConcept(),possSubsumCalcData->isSubsumptionConfirmed());
+												interpreteSubsumptionResult(optKPSetClassificationItem,nextPossSubsumTestItem->getTestingRole(),possSubsumCalcData->getTestingItem()->getTestingRole(),possSubsumCalcData->isSubsumptionConfirmed());
 											}
 										}
 									} else {
@@ -628,18 +865,18 @@ namespace Konclude {
 									COptimizedKPSetRoleTestingItem* possSubsumedItem = nullptr;
 
 
-									CConcept* possSubsumerConcept = nextPossSubsumTestItem->getTestingConcept();
-									CConcept* candidateConcept = possSubsumerConcept;
+									CRole* possSubsumerRole = nextPossSubsumTestItem->getTestingRole();
+									CRole* candidateRole = possSubsumerRole;
 
-									QList<COptimizedKPSetRoleTestingItem*>* possSubsumedSortedList = nextPossSubsumTestItem->getPossibleSubsumedList();
+									QList<COptimizedKPSetRoleTestingItem*>* possSubsumedSortedList = nextPossSubsumTestItem->getPossibleSubsumerList();
 									if (possSubsumedSortedList && !possSubsumedSortedList->isEmpty()) {										
 										while (!possSubsumCalcData && !possSubsumedSortedList->isEmpty()) {
 											possSubsumedItem = possSubsumedSortedList->takeFirst();
-											if (nextPossSubsumTestItem->getPossibleSubsumedSet(false)->contains(possSubsumedItem)) {
-												nextPossSubsumTestItem->getPossibleSubsumedSet(false)->remove(possSubsumedItem);
+											if (nextPossSubsumTestItem->getPossibleSubsumerSet(false)->contains(possSubsumedItem)) {
+												nextPossSubsumTestItem->getPossibleSubsumerSet(false)->remove(possSubsumedItem);
 												COptimizedKPSetRolePossibleSubsumptionMap* possSubsumerMap = possSubsumedItem->getPossibleSubsumptionMap(false);
 												if (possSubsumerMap && possSubsumerMap->hasRemainingPossibleSubsumptions()) {
-													possSubsumCalcData = possSubsumerMap->value(CConceptTagComparer(candidateConcept));
+													possSubsumCalcData = possSubsumerMap->value(CRoleTagComparer(candidateRole));
 												}
 											}
 										}
@@ -653,7 +890,7 @@ namespace Konclude {
 											if (calculateSubsumption(optKPSetClassificationItem,possSubsumedItem,nextPossSubsumTestItem,possSubsumCalcData)) {
 												workTestCreated = true;
 											} else {
-												interpreteSubsumptionResult(optKPSetClassificationItem,possSubsumedItem->getTestingConcept(),nextPossSubsumTestItem->getTestingConcept(),possSubsumCalcData->isSubsumptionConfirmed());
+												interpreteSubsumptionResult(optKPSetClassificationItem,possSubsumedItem->getTestingRole(),nextPossSubsumTestItem->getTestingRole(),possSubsumCalcData->isSubsumptionConfirmed());
 											}
 										//}
 									} else {
@@ -672,13 +909,13 @@ namespace Konclude {
 
 
 					if (!workTestCreated) {
-						if (optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() || ontClassItem->isTaxonomyConstructionFailed()) {
-							finishOntologyClassification(ontClassItem);
+						if (optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() || ontPropItem->isHierarchyConstructionFailed()) {
+							finishOntologyClassification(ontPropItem);
 							processingOntItemList.removeFirst();
 						} else {
 							processingOntItemList.removeFirst();
-							processingOntItemList.append(ontClassItem);
-							loopOntClassItem = ontClassItem;
+							processingOntItemList.append(ontPropItem);
+							loopontPropItem = ontPropItem;
 						}
 					}
 				}
@@ -686,19 +923,19 @@ namespace Konclude {
 			}
 
 
-			COptimizedKPSetRolePossibleSubsumptionData* COptimizedKPSetRoleSubsumptionClassifierThread::getNextPossibleSubsumptionCalculation(COptimizedKPSetRoleOntologyClassificationItem *ontClassItem, COptimizedKPSetRoleTestingItem* classItem) {
+			COptimizedKPSetRolePossibleSubsumptionData* COptimizedKPSetRoleSubsumptionClassifierThread::getNextPossibleSubsumptionCalculation(COptimizedKPSetRoleOntologyClassificationItem *ontPropItem, COptimizedKPSetRoleTestingItem* classItem) {
 				COptimizedKPSetRolePossibleSubsumptionData* possSubsumer = nullptr;
 				// I don't know which is the best, simply return the first one
 				// sort by subsumer count?
 				COptimizedKPSetRolePossibleSubsumptionMap* possSubsumerMap = classItem->getPossibleSubsumptionMap(false);
 				if (possSubsumerMap) {
-					if (mConfPossSubsumCalcOrderConceptSorted) {
+					if (mConfPossSubsumCalcOrderRoleSorted) {
 						for (COptimizedKPSetRolePossibleSubsumptionMap::const_iterator it = possSubsumerMap->constBegin(), itEnd = possSubsumerMap->constEnd(); !possSubsumer && it != itEnd; ++it) {
 							COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = it.value();
 							if (possSubsumData->isSubsumptionUnknown()) {
 								possSubsumer = possSubsumData;
 							} else if (possSubsumData->isUpdateRequired()) {
-								prunePossibleSubsumptions(ontClassItem,classItem,possSubsumData);							
+								prunePossibleSubsumptions(ontPropItem,classItem,possSubsumData);							
 							}
 						}
 					}
@@ -709,9 +946,18 @@ namespace Konclude {
 
 			bool COptimizedKPSetRoleSubsumptionClassifierThread::calculateSatisfiable(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* nextSatTestItem) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
-				CClassificationWorkItem *workItem = 0;
+				CPropertyClassificationComputationItem *workItem = 0;
 
-				CConcept* concept = nextSatTestItem->getTestingConcept();
+
+				//if (CIRIName::getRecentIRIName(nextSatTestItem->getTestingRole()->getPropertyNameLinker()) == "http://www.owllink.org/testsuite/particle-D#Neutrino" || CIRIName::getRecentIRIName(nextSatTestItem->getTestingRole()->getPropertyNameLinker()) == "http://www.co-ode.org/roberts/family-tree.owl#isBrotherInLawOf") {
+				//	bool bug = true;
+				//}
+
+
+				CConcept* existConcept = nextSatTestItem->getTemporaryExistConcept();
+				CConcept* allPropConcept = optKPSetClassificationItem->getTemporaryAllPropagationConcept();
+
+
 				nextSatTestItem->setSatisfiableTestOrdered(true);
 
 				bool satisfiableFlag = false;
@@ -728,40 +974,46 @@ namespace Konclude {
 					nextSatTestItem->setSatisfiableTestedResult(false);
 					return false;
 				}
-				CPrecomputedSaturationSubsumerExtractor* precSatSubsumerExtractor = optKPSetClassificationItem->getPrecomputedSaturationSubsumerExtractor(false);
-				bool unsatisfiableFlag = false;
-				if (precSatSubsumerExtractor && precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,nullptr,nullptr) && unsatisfiableFlag) {
-					satisfiableFlag = false;
-					nextSatTestItem->setSatisfiableTested(true);
-					nextSatTestItem->setSatisfiableTestedResult(false);
-					return false;
-				}
+
+
+				CIndividual* tmpIndiPropagation = optKPSetClassificationItem->getTemporaryPropagationIndividual();
+				CIndividual* tmpIndiMarker = optKPSetClassificationItem->getTemporaryMarkerIndividual();
+				CRole* role = nextSatTestItem->getTestingRole();
+
+
 
 				CSatisfiableCalculationJobGenerator satCalcJobGen(optKPSetClassificationItem->getOntology());
-				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(concept);
-				QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = optKPSetClassificationItem->getWorkItemHash();
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(existConcept,false,tmpIndiPropagation,satCalcJob);
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(allPropConcept,false,tmpIndiPropagation,satCalcJob);
+				if (optKPSetClassificationItem->isDataRolesClassification()) {
+					CConcept* topDataConcept = optKPSetClassificationItem->getOntology()->getTBox()->getTopDataRangeConcept();
+					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(topDataConcept,false,tmpIndiMarker,satCalcJob);
+				} else {
+					CConcept* topConcept = optKPSetClassificationItem->getOntology()->getTBox()->getTopConcept();
+					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(topConcept,false,tmpIndiMarker,satCalcJob);
+				}
+
+				QHash<CSatisfiableCalculationJob*,CPropertyClassificationComputationItem*> *workHash = optKPSetClassificationItem->getComputationItemHash();
 
 				CClassifierStatistics *ontClassStat = optKPSetClassificationItem->getClassifierStatistics();
 				if (ontClassStat) {
 					ontClassStat->incCalculatedTestedSatisfiableCount(1);
 				}
 
-				workItem = new CClassificationWorkItem(satCalcJob,concept);
+				workItem = new CPropertyClassificationComputationItem(satCalcJob,role);
 				workHash->insertMulti(satCalcJob,workItem);
 				workOntItemHash.insert(workItem,optKPSetClassificationItem);
 
-				QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash = optKPSetClassificationItem->getConceptReferenceLinkingDataHash();
-				cint64 extFlags = CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTALL;
-				// TODO: set extraction flags
-
-
-				satCalcJob->setSatisfiableClassificationMessageAdapter(new CSatisfiableTaskClassificationMessageAdapter(concept,optKPSetClassificationItem->getOntology(),this,conRefLinkDataHash,extFlags));
+				satCalcJob->setSatisfiableClassificationRoleMarkedMessageAdapter(new CSatisfiableTaskClassificationRoleMarkedMessageAdapter(role,tmpIndiPropagation,tmpIndiMarker,optKPSetClassificationItem->getOntology(),this));
 
 				optKPSetClassificationItem->incCurrentCalculatingCount();
-				processCalculationJob(satCalcJob,optKPSetClassificationItem,workItem);
 				if (optKPSetClassificationItem->getIndividualDependenceTrackingCollector()) {
 					satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(optKPSetClassificationItem->getIndividualDependenceTrackingCollector()));
 				}
+
+				processCalculationJob(satCalcJob,optKPSetClassificationItem,workItem);
+
+
 				++mCreatedCalculationTaskCount;
 				return true;
 			}
@@ -772,11 +1024,11 @@ namespace Konclude {
 
 			bool COptimizedKPSetRoleSubsumptionClassifierThread::calculateSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* subsumedItem, COptimizedKPSetRoleTestingItem* possSubsumerItem, COptimizedKPSetRolePossibleSubsumptionData* possSubsumData) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
-				CClassificationWorkItem *workItem = 0;
+				CPropertyClassificationComputationItem *workItem = 0;
 				++mOrderedSubsumptionCalculationCount;
 
-				CConcept* subsumedConcept = subsumedItem->getTestingConcept();
-				CConcept* subsumerConcept = possSubsumerItem->getTestingConcept();
+				CRole* subsumedRole = subsumedItem->getTestingRole();
+				CRole* subsumerRole = possSubsumerItem->getTestingRole();
 
 				bool isSubsumptionFlag = false;
 				bool precheckedSubsum = false;
@@ -785,32 +1037,41 @@ namespace Konclude {
 				CClassifierStatistics *ontClassStat = optKPSetClassificationItem->getClassifierStatistics();
 				if (possSubsumData && possSubsumData->isSubsumptionKnown()) {
 					return false;
-				} else if (possSubsumData && subsumedItem->hasSubsumerConceptItem(possSubsumerItem)) {					
+				} else if (possSubsumData && subsumedItem->hasSubsumerRoleItem(possSubsumerItem)) {					
 					possSubsumData->setSubsumptionConfirmed(true);
 					return false;
 				}
 
+				CIndividual* tmpIndiPropagation = optKPSetClassificationItem->getTemporaryPropagationIndividual();
+				CIndividual* tmpIndiMarker = optKPSetClassificationItem->getTemporaryMarkerIndividual();
+				CConcept* existConcept = subsumedItem->getTemporaryExistConcept();
+				CConcept* propagationConcept = possSubsumerItem->getTemporaryPropagationConcept();
+
 				CSatisfiableCalculationJobGenerator satCalcJobGen(optKPSetClassificationItem->getOntology());
-				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(subsumedConcept,false,subsumerConcept,true);
-				QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = optKPSetClassificationItem->getWorkItemHash();
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(existConcept,false,tmpIndiPropagation,satCalcJob);
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(propagationConcept,false,tmpIndiPropagation,satCalcJob);
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(possSubsumerItem->getTemporaryMarkerConcept(),true,tmpIndiMarker,satCalcJob);
+				if (optKPSetClassificationItem->isDataRolesClassification()) {
+					CConcept* topDataConcept = optKPSetClassificationItem->getOntology()->getTBox()->getTopDataRangeConcept();
+					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(topDataConcept,false,tmpIndiMarker,satCalcJob);
+				} else {
+					CConcept* topConcept = optKPSetClassificationItem->getOntology()->getTBox()->getTopConcept();
+					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(topConcept,false,tmpIndiMarker,satCalcJob);
+				}
+
+
+				QHash<CSatisfiableCalculationJob *, CPropertyClassificationComputationItem *> *workHash = optKPSetClassificationItem->getComputationItemHash();
 
 				if (ontClassStat) {
 					ontClassStat->incCalculatedTestedSubsumptionCount(1);
 					ontClassStat->incToldSubsumptionCount(1);
 				}
 
-				workItem = new CClassificationWorkItem(satCalcJob,subsumerConcept,subsumedConcept);
+				workItem = new CPropertyClassificationComputationItem(satCalcJob,subsumerRole,subsumedRole);
 				workHash->insertMulti(satCalcJob,workItem);
 				workOntItemHash.insert(workItem,optKPSetClassificationItem);
 
-				QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* conRefLinkDataHash = optKPSetClassificationItem->getConceptReferenceLinkingDataHash();
-				cint64 extFlags = CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTSUBSUMERSOTHERNODES | 
-						CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTPOSSIBLESUBSUMERSROOTNODE | 
-						CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTPOSSIBLESUBSUMERSOTHERNODES | 
-						CSatisfiableTaskClassificationMessageAdapter::EFEXTRACTOTHERNODESMULTIPLEDEPENDENCY;
-				// TODO: set extraction flags
 
-				satCalcJob->setSatisfiableClassificationMessageAdapter(new CSatisfiableTaskClassificationMessageAdapter(subsumedConcept,optKPSetClassificationItem->getOntology(),this,conRefLinkDataHash,extFlags));
 				if (optKPSetClassificationItem->getIndividualDependenceTrackingCollector()) {
 					satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(optKPSetClassificationItem->getIndividualDependenceTrackingCollector()));
 				}
@@ -850,70 +1111,73 @@ namespace Konclude {
 
 
 
-			CSubsumptionClassifierThread *COptimizedKPSetRoleSubsumptionClassifierThread::processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassificationItem *ontClassItem, CClassificationWorkItem* workItem) {
+			CSubsumptionClassifierThread *COptimizedKPSetRoleSubsumptionClassifierThread::processCalculationJob(CSatisfiableCalculationJob* job, COntologyPropertyRoleClassificationItem *ontPropItem, CPropertyClassificationComputationItem* workItem) {
 				CClassificationCalculationStatisticsCollection* statColl =  nullptr;
-				if (ontClassItem->isCollectProcessStatisticsActivated()) {
-					statColl = ontClassItem->getCalculationStatisticsCollection();
+				if (ontPropItem->isCollectProcessStatisticsActivated()) {
+					statColl = ontPropItem->getCalculationStatisticsCollection();
 				}
 				job->setCalclulationStatisticsCollector(statColl);
 				CTestCalculatedCallbackEvent *testResultCallback = new CTestCalculatedCallbackEvent(this,job,workItem,statColl);
-				job->setCalculationConfiguration(ontClassItem->getCalculationConfiguration());
-				CSubsumptionClassifierThread::processCalculationJob(job,ontClassItem,testResultCallback,false);
+				job->setCalculationConfiguration(ontPropItem->getCalculationConfiguration());
+				CSubsumptionClassifierThread::processCalculationJob(job,ontPropItem,testResultCallback,false);
 				return this;
 			}
 
 
 
-			bool COptimizedKPSetRoleSubsumptionClassifierThread::processToldClassificationMessage(COntologyClassificationItem *ontClassItem, CClassificationMessageData* messageDataLinker, CMemoryPool* memoryPools) {
-				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontClassItem;
+			bool COptimizedKPSetRoleSubsumptionClassifierThread::processToldClassificationMessage(COntologyClassificationItem *ontPropItem, CClassificationMessageData* messageDataLinker, CMemoryPool* memoryPools) {
+				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontPropItem;
 				CClassificationMessageData* messageDataLinkerIt = messageDataLinker;
 				while (messageDataLinkerIt) {
 					CClassificationMessageData* messageData = messageDataLinkerIt;
-					if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSSUBSUMPTION) {
+					if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLPROPERTYSUBSUMPTION) {
 						++mStatProcesedSubsumMessCount;
-						CClassificationSubsumptionMessageData* subsumMessageData = (CClassificationSubsumptionMessageData*)messageData;
-						CConcept* subsumedConcept = subsumMessageData->getSubsumedConcept();
-						CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>* subsumerList = subsumMessageData->getClassSubsumerList();
+						CClassificationPropertySubsumptionMessageData* subsumMessageData = (CClassificationPropertySubsumptionMessageData*)messageData;
+						CRole* subsumedRole = subsumMessageData->getSubsumedRole();
+						CPROPERTYSUBSUMPTIONMESSAGELIST<CRole*>* subsumerList = subsumMessageData->getPropertySubsumerList();
 
 						COptimizedKPSetRoleTestingItem* subsumedItem = nullptr;
-						subsumedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumedConcept);
+						subsumedItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumedRole);
+
+						CRole* topRole = optKPSetClassificationItem->getTopRoleSatisfiableTestItem()->getTestingRole();
 
 						COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = subsumedItem->getPossibleSubsumptionMap(false);
 						if (subsumerList) {
-							for (CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>::const_iterator it = subsumerList->constBegin(), itEnd = subsumerList->constEnd(); it != itEnd; ++it) {
-								CConcept* subsumerConcept(*it);
-								COptimizedKPSetRoleTestingItem* subsumerItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumerConcept);
-								if (subsumedItem != subsumerItem) {
-									subsumedItem->addSubsumingConceptItem(subsumerItem);
-									if (possSubsumMap) {
-										COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = possSubsumMap->value(subsumerConcept,nullptr);
-										if (possSubsumData) {
-											if (!possSubsumData->isSubsumptionConfirmed()) {
-												possSubsumData->setSubsumptionConfirmed(true);
+							for (CPROPERTYSUBSUMPTIONMESSAGELIST<CRole*>::const_iterator it = subsumerList->constBegin(), itEnd = subsumerList->constEnd(); it != itEnd; ++it) {
+								CRole* subsumerRole(*it);
+								if (subsumerRole != topRole) {
+									COptimizedKPSetRoleTestingItem* subsumerItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumerRole);
+									if (subsumedItem != subsumerItem) {
+										subsumedItem->addSubsumerRoleItem(subsumerItem);
+										if (possSubsumMap) {
+											COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = possSubsumMap->value(subsumerRole,nullptr);
+											if (possSubsumData) {
+												if (!possSubsumData->isSubsumptionConfirmed()) {
+													possSubsumData->setSubsumptionConfirmed(true);
 
-												if (possSubsumData->isUpdateRequired()) {
-													prunePossibleSubsumptions(optKPSetClassificationItem,subsumedItem,possSubsumData);
+													if (possSubsumData->isUpdateRequired()) {
+														prunePossibleSubsumptions(optKPSetClassificationItem,subsumedItem,possSubsumData);
+													}
 												}
 											}
 										}
+										propagateDownSubsumption(optKPSetClassificationItem,subsumedItem,subsumerItem);
 									}
-									propagateDownSubsumption(optKPSetClassificationItem,subsumedItem,subsumerItem);
 								}
 							}
 						}
-						//if (!possSubsumMap || !possSubsumMap->hasRemainingPossibleSubsumptions()) {
 						subsumedItem->setResultSatisfiableDerivated(true);
-						//}
 
 					} else if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSINITIALIZEPOSSIBLESUBSUM) {
 						++mStatProcesedPossSubsumInitMessCount;
-						CClassificationInitializePossibleSubsumptionMessageData* possSubsumMessageData = (CClassificationInitializePossibleSubsumptionMessageData*)messageData;
-						CConcept* subsumedConcept = possSubsumMessageData->getSubsumedConcept();
-						CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* possSubsumerList = possSubsumMessageData->getClassPossibleSubsumerList();
+						CClassificationInitializePossiblePropertySubsumptionMessageData* possSubsumMessageData = (CClassificationInitializePossiblePropertySubsumptionMessageData*)messageData;
+						CRole* subsumedRole = possSubsumMessageData->getSubsumedRole();
+						CPROPERTYPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossiblePropertySubsumptionData*>* possSubsumerList = possSubsumMessageData->getPropertyPossibleSubsumerList();
 
 
 						COptimizedKPSetRoleTestingItem* subsumedItem = nullptr;
-						subsumedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumedConcept);
+						subsumedItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumedRole);
+						CRole* topRole = optKPSetClassificationItem->getTopRoleSatisfiableTestItem()->getTestingRole();
 
 						COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = subsumedItem->getPossibleSubsumptionMap(false);
 						if (!possSubsumerList || possSubsumerList->empty()) {
@@ -934,14 +1198,14 @@ namespace Konclude {
 								if (possSubsumMap->isEmpty()) {
 									// initialize the possible subsumption map
 									if (possSubsumerList) {
-										for (CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::const_iterator it = possSubsumerList->constBegin(), itEnd = possSubsumerList->constEnd(); it != itEnd; ++it) {
-											CClassificationInitializePossibleSubsumptionData* possSubsumDataIt = *it;
+										for (CPROPERTYPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossiblePropertySubsumptionData*>::const_iterator it = possSubsumerList->constBegin(), itEnd = possSubsumerList->constEnd(); it != itEnd; ++it) {
+											CClassificationInitializePossiblePropertySubsumptionData* possSubsumDataIt = *it;
 											if (possSubsumDataIt->isPossibleSubsumerValid()) {
-												CConcept* possSubsumConcept = possSubsumDataIt->getPossibleSubsumerConcept();
-												COptimizedKPSetRoleTestingItem* possSubsumItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(possSubsumConcept);
-												if (!subsumedItem->hasSubsumerConceptItem(possSubsumItem) && subsumedItem != possSubsumItem) {
+												CRole* possSubsumRole = possSubsumDataIt->getPossibleSubsumerRole();
+												COptimizedKPSetRoleTestingItem* possSubsumItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(possSubsumRole);
+												if (possSubsumRole != topRole && subsumedItem != possSubsumItem && !subsumedItem->hasSubsumerRoleItem(possSubsumItem)) {
 													COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = new COptimizedKPSetRolePossibleSubsumptionData(possSubsumItem);
-													possSubsumMap->insert(CConceptTagComparer(possSubsumConcept),possSubsumData);
+													possSubsumMap->insert(CRoleTagComparer(possSubsumRole),possSubsumData);
 													incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,possSubsumMap);
 												}
 											}
@@ -958,16 +1222,16 @@ namespace Konclude {
 											COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd();
 											COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itUpPoss = upPropItemPossSubsumMap->constBegin(), itUpPossEnd = upPropItemPossSubsumMap->constEnd();
 											while (itPoss != itPossEnd && itUpPoss != itUpPossEnd) {
-												CConcept* possCon = itPoss.key().getConcept();
-												CConcept* possUpCon = itUpPoss.key().getConcept();
-												if (possCon->getConceptTag() == possUpCon->getConceptTag()) {
+												CRole* possRole = itPoss.key().getRole();
+												CRole* possUpRole = itUpPoss.key().getRole();
+												if (possRole->getRoleTag() == possUpRole->getRoleTag()) {
 													++itPoss;
 													++itUpPoss;
-												} else if (possCon->getConceptTag() < possUpCon->getConceptTag()) {
+												} else if (possRole->getRoleTag() < possUpRole->getRoleTag()) {
 													++itPoss;
-												} else if (possCon->getConceptTag() > possUpCon->getConceptTag()) {
+												} else if (possRole->getRoleTag() > possUpRole->getRoleTag()) {
 													COptimizedKPSetRolePossibleSubsumptionData* upPossData = itUpPoss.value();
-													if (!subsumedItem->hasSubsumerConceptItem(upPossData->getTestingItem()) && subsumedItem != upPossData->getTestingItem()) {
+													if (!subsumedItem->hasSubsumerRoleItem(upPossData->getTestingItem()) && subsumedItem != upPossData->getTestingItem()) {
 														if (!upPossData->isSubsumptionInvalided()) {
 															upPossData->setSubsumptionInvalid(true);
 															if (upPossData->isUpdateRequired()) {
@@ -980,7 +1244,7 @@ namespace Konclude {
 											}
 											while (itUpPoss != itUpPossEnd) {
 												COptimizedKPSetRolePossibleSubsumptionData* upPossData = itUpPoss.value();
-												if (!subsumedItem->hasSubsumerConceptItem(upPossData->getTestingItem()) && subsumedItem != upPossData->getTestingItem()) {
+												if (!subsumedItem->hasSubsumerRoleItem(upPossData->getTestingItem()) && subsumedItem != upPossData->getTestingItem()) {
 													if (!upPossData->isSubsumptionInvalided()) {
 														upPossData->setSubsumptionInvalid(true);
 														if (upPossData->isUpdateRequired()) {
@@ -1002,16 +1266,16 @@ namespace Konclude {
 											COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd();
 											COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itDownPoss = downPropItemPossSubsumMap->constBegin(), itDownPossEnd = downPropItemPossSubsumMap->constEnd();
 											while (itPoss != itPossEnd && itDownPoss != itDownPossEnd) {
-												CConcept* possCon = itPoss.key().getConcept();
-												CConcept* possDownCon = itDownPoss.key().getConcept();
-												if (possCon->getConceptTag() == possDownCon->getConceptTag()) {
+												CRole* possRole = itPoss.key().getRole();
+												CRole* possDownRole = itDownPoss.key().getRole();
+												if (possRole->getRoleTag() == possDownRole->getRoleTag()) {
 													++itPoss;
 													++itDownPoss;
-												} else if (possDownCon->getConceptTag() < possCon->getConceptTag()) {
+												} else if (possDownRole->getRoleTag() < possRole->getRoleTag()) {
 													++itDownPoss;
-												} else if (possDownCon->getConceptTag() > possCon->getConceptTag()) {
+												} else if (possDownRole->getRoleTag() > possRole->getRoleTag()) {
 													COptimizedKPSetRolePossibleSubsumptionData* possData = itPoss.value();
-													if (!downPropItem->hasSubsumerConceptItem(possData->getTestingItem()) && downPropItem != possData->getTestingItem()) {
+													if (!downPropItem->hasSubsumerRoleItem(possData->getTestingItem()) && downPropItem != possData->getTestingItem()) {
 														if (!possData->isSubsumptionInvalided()) {
 															possData->setSubsumptionInvalid(true);
 															if (possData->isUpdateRequired()) {
@@ -1024,7 +1288,7 @@ namespace Konclude {
 											}
 											while (itPoss != itPossEnd) {
 												COptimizedKPSetRolePossibleSubsumptionData* possData = itDownPoss.value();
-												if (!downPropItem->hasSubsumerConceptItem(possData->getTestingItem()) && downPropItem != possData->getTestingItem()) {
+												if (!downPropItem->hasSubsumerRoleItem(possData->getTestingItem()) && downPropItem != possData->getTestingItem()) {
 													if (!possData->isSubsumptionInvalided()) {
 														possData->setSubsumptionInvalid(true);
 														if (possData->isUpdateRequired()) {
@@ -1037,7 +1301,7 @@ namespace Konclude {
 										} else if (downPropItem->isPossibleSubsumptionMapInitialized()) {
 											for (COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd(); itPoss != itPossEnd; ++itPoss) {
 												COptimizedKPSetRolePossibleSubsumptionData* possData = itPoss.value();
-												if (!downPropItem->hasSubsumerConceptItem(possData->getTestingItem()) && downPropItem != possData->getTestingItem()) {
+												if (!downPropItem->hasSubsumerRoleItem(possData->getTestingItem()) && downPropItem != possData->getTestingItem()) {
 													if (!possData->isSubsumptionInvalided()) {
 														possData->setSubsumptionInvalid(true);
 														if (possData->isUpdateRequired()) {
@@ -1053,17 +1317,17 @@ namespace Konclude {
 									// prune the possible subsumption map
 									COptimizedKPSetRolePossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd();
 									if (possSubsumerList) {
-										CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::const_iterator itNew = possSubsumerList->constBegin(), itNewEnd = possSubsumerList->constEnd();
+										CPROPERTYPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossiblePropertySubsumptionData*>::const_iterator itNew = possSubsumerList->constBegin(), itNewEnd = possSubsumerList->constEnd();
 										while (itPoss != itPossEnd && itNew != itNewEnd) {
 											COptimizedKPSetRolePossibleSubsumptionData* possData = itPoss.value();
-											CConcept* possCon = itPoss.key().getConcept();
-											CClassificationInitializePossibleSubsumptionData* possNewSubsumDataIt = *itNew;
+											CRole* possRole = itPoss.key().getRole();
+											CClassificationInitializePossiblePropertySubsumptionData* possNewSubsumDataIt = *itNew;
 											if (possNewSubsumDataIt->isPossibleSubsumerValid()) {
-												CConcept* newCon = possNewSubsumDataIt->getPossibleSubsumerConcept();
-												if (possCon->getConceptTag() == newCon->getConceptTag()) {
+												CRole* newRole = possNewSubsumDataIt->getPossibleSubsumerRole();
+												if (possRole->getRoleTag() == newRole->getRoleTag()) {
 													++itPoss;
 													++itNew;
-												} else if (possCon->getConceptTag() < newCon->getConceptTag()) {
+												} else if (possRole->getRoleTag() < newRole->getRoleTag()) {
 													if (!possData->isSubsumptionInvalided()) {
 														possData->setSubsumptionInvalid(true);
 														if (possData->isUpdateRequired()) {
@@ -1071,7 +1335,7 @@ namespace Konclude {
 														}
 													}
 													++itPoss;
-												} else if (possCon->getConceptTag() > newCon->getConceptTag()) {
+												} else if (possRole->getRoleTag() > newRole->getRoleTag()) {
 													++itNew;
 												}
 											} else {
@@ -1081,7 +1345,7 @@ namespace Konclude {
 									}
 									while (itPoss != itPossEnd) {
 										COptimizedKPSetRolePossibleSubsumptionData* possData = itPoss.value();
-										CConcept* possCon = itPoss.key().getConcept();
+										CRole* possRole = itPoss.key().getRole();
 										if (!possData->isSubsumptionInvalided()) {
 											possData->setSubsumptionInvalid(true);
 											if (possData->isUpdateRequired()) {
@@ -1096,13 +1360,13 @@ namespace Konclude {
 						subsumedItem->setPossibleSubsumptionMapInitialized(true);
 
 
-					} else if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSUPDATEPOSSIBLESUBSUM) {
+					} else if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLPROPERTYUPDATEPOSSIBLESUBSUM) {
 						++mStatProcesedPossSubsumUpdateMessCount;
-						CClassificationUpdatePossibleSubsumptionMessageData* possSubsumMessageData = (CClassificationUpdatePossibleSubsumptionMessageData*)messageData;
-						CConcept* subsumedConcept = possSubsumMessageData->getSubsumedConcept();
+						CClassificationUpdatePossiblePropertySubsumptionMessageData* possSubsumMessageData = (CClassificationUpdatePossiblePropertySubsumptionMessageData*)messageData;
+						CRole* subsumedRole = possSubsumMessageData->getSubsumedRole();
 
 						COptimizedKPSetRoleTestingItem* subsumedItem = nullptr;
-						subsumedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumedConcept);
+						subsumedItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumedRole);
 
 						COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = subsumedItem->getPossibleSubsumptionMap(false);
 						if (possSubsumMap && !possSubsumMap->empty()) {
@@ -1121,54 +1385,52 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetRoleSubsumptionClassifierThread::interpreteToldSubsumptionResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubSum) {
-				CConcept *lastConcept = nullptr;
-				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontClassItem;
+			bool COptimizedKPSetRoleSubsumptionClassifierThread::interpreteToldSubsumptionResult(COntologyPropertyRoleClassificationItem *ontPropItem, const QList< QPair<CRole*,CRole*> > &subSumRelList, bool isSubSum) {
+				CRole *lastRole = nullptr;
+				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontPropItem;
 				COptimizedKPSetRoleTestingItem* subsumerItem = nullptr;
 
-				for (QList<QPair<CConcept *,CConcept *> >::const_iterator it = subSumRelList.constBegin(), itEnd = subSumRelList.constEnd(); it != itEnd; ++it) {
-					CConcept *subsumerConcept = it->first;
-					if (lastConcept != subsumerConcept) {
-						lastConcept = subsumerConcept;
-						subsumerItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumerConcept);
+				for (QList< QPair<CRole*,CRole*> >::const_iterator it = subSumRelList.constBegin(), itEnd = subSumRelList.constEnd(); it != itEnd; ++it) {
+					CRole *subsumerRole = it->first;
+					if (lastRole != subsumerRole) {
+						lastRole = subsumerRole;
+						subsumerItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumerRole);
 					}
-					CConcept *subsumedConcept = it->second;
+					CRole *subsumedRole = it->second;
 					if (isSubSum) {
-						COptimizedKPSetRoleTestingItem* subsumedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumedConcept);
-						subsumerItem->addSubsumingConceptItem(subsumedItem);
+						COptimizedKPSetRoleTestingItem* subsumedItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumedRole);
+						subsumerItem->addSubsumerRoleItem(subsumedItem);
 					}
 				}
 				return true;
 			}
 
 
-			bool COptimizedKPSetRoleSubsumptionClassifierThread::interpreteSubsumptionResult(COntologyClassificationItem *ontClassItem, CConcept *subsumedConcept, CConcept *subsumerConcept, bool isSubsumption) {
-				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontClassItem;
+			bool COptimizedKPSetRoleSubsumptionClassifierThread::interpreteSubsumptionResult(COntologyPropertyRoleClassificationItem *ontPropItem, CRole *subsumedRole, CRole *subsumerRole, bool isSubsumption) {
+				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontPropItem;
 
 				++mInterpretedSubsumptionCalculationCount;
-				CConcept* candidateConcept = subsumerConcept;
 
 				optKPSetClassificationItem->decRunningPossibleSubsumptionTestsCount();
 
-				COptimizedKPSetRoleTestingItem* subsumedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumedConcept);
-				COptimizedKPSetRoleTestingItem* subsumerItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(subsumerConcept);
+				COptimizedKPSetRoleTestingItem* subsumedItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumedRole);
+				COptimizedKPSetRoleTestingItem* subsumerItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(subsumerRole);
 
 
-
-				//QString iriClassNameString1 = CIRIName::getRecentIRIName(subsumedConcept->getClassNameLinker());
-				//QString iriClassNameString2 = CIRIName::getRecentIRIName(subsumerConcept->getClassNameLinker());
-				//if (iriClassNameString1 == "http://www.bootstrep.eu/ontology/GRO#BindingOfProteinToProteinBindingSiteOfDNA" && iriClassNameString2 == "http://www.bootstrep.eu/ontology/GRO#DNAProteinInteraction" && !isSubsumption) {
+				//QString iriPropertyNameString1 = CIRIName::getRecentIRIName(subsumedRole->getPropertyNameLinker());
+				//QString iriPropertyNameString2 = CIRIName::getRecentIRIName(subsumerRole->getPropertyNameLinker());
+				//if (iriPropertyNameString1 == "http://www.bootstrep.eu/ontology/GRO#BindingOfProteinToProteinBindingSiteOfDNA" && iriPropertyNameString2 == "http://www.bootstrep.eu/ontology/GRO#DNAProteinInteraction" && !isSubsumption) {
 				//	bool bug = true;
-				//	calculateSubsumption(optKPSetClassificationItem,subsumedItem,subsumerItem,nullptr);
+				//	calculateSubsumption(optKPSetPropertyificationItem,subsumedItem,subsumerItem,nullptr);
 				//}
 
 
-				COptimizedKPSetRoleTestingItem* topItem = optKPSetClassificationItem->getTopConceptSatisfiableTestItem();
+				COptimizedKPSetRoleTestingItem* topItem = optKPSetClassificationItem->getTopRoleSatisfiableTestItem();
 
 				COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = subsumedItem->getPossibleSubsumptionMap(false);
 				COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = nullptr;
 				if (possSubsumMap) {
-					possSubsumData = possSubsumMap->value(candidateConcept);
+					possSubsumData = possSubsumMap->value(subsumerRole);
 				}
 
 				if (isSubsumption) {
@@ -1176,7 +1438,7 @@ namespace Konclude {
 					if (possSubsumData) {
 						possSubsumData->setSubsumptionConfirmed(true);
 					}
-					subsumedItem->addSubsumingConceptItem(subsumerItem);
+					subsumedItem->addSubsumerRoleItem(subsumerItem);
 					subsumedItem->addUpPropagationItem(subsumerItem);
 					subsumerItem->addDownPropagationItem(subsumedItem);
 					propagateDownSubsumption(optKPSetClassificationItem,subsumedItem,subsumerItem);
@@ -1212,8 +1474,8 @@ namespace Konclude {
 					if (currentItemSet->contains(subsumerItem)) {
 						currentItemSet->remove(subsumerItem);
 						if (subsumerItem->hasRemainingPossibleSubsumedItems()) {
-							QSet<COptimizedKPSetRoleTestingItem*>* remPossSubsumedItemSet = subsumerItem->getPossibleSubsumedSet(false);
-							QList<COptimizedKPSetRoleTestingItem*>* remPossSubsumedItemList = subsumerItem->getPossibleSubsumedList();
+							QSet<COptimizedKPSetRoleTestingItem*>* remPossSubsumedItemSet = subsumerItem->getPossibleSubsumerSet(false);
+							QList<COptimizedKPSetRoleTestingItem*>* remPossSubsumedItemList = subsumerItem->getPossibleSubsumerList();
 							nextItemList->prepend(subsumerItem);
 
 							QSet<COptimizedKPSetRoleTestingItem*>* upPropSet = subsumedItem->getUpPropagationItemSet();
@@ -1244,23 +1506,23 @@ namespace Konclude {
 					if (possSubsumData->isSubsumptionConfirmed()) {
 						// is subsuming
 						COptimizedKPSetRoleTestingItem* subsumerItem = possSubsumData->getTestingItem();
-						CConcept* subsumerConcept = subsumerItem->getTestingConcept();
+						CRole* subsumerRole = subsumerItem->getTestingRole();
 						// establish the subsumption for all successor nodes
 						QSet<COptimizedKPSetRoleTestingItem*>* downPropSet = item->getDownPropagationItemSet();
 						for (QSet<COptimizedKPSetRoleTestingItem*>::const_iterator it = downPropSet->constBegin(), itEnd = downPropSet->constEnd(); it != itEnd; ++it) {
 							COptimizedKPSetRoleTestingItem* downPropItem = *it;
-							pruneDownSubsumption(optKPSetClassificationItem,downPropItem,subsumerConcept);
+							pruneDownSubsumption(optKPSetClassificationItem,downPropItem,subsumerRole);
 						}
 						return true;
 					} else {
 						// is not subsuming
 						COptimizedKPSetRoleTestingItem* notSubsumerItem = possSubsumData->getTestingItem();
-						CConcept* notSubsumerConcept = notSubsumerItem->getTestingConcept();
+						CRole* notSubsumerRole = notSubsumerItem->getTestingRole();
 						// establish the subsumption for all successor nodes
 						QSet<COptimizedKPSetRoleTestingItem*>* upPropSet = item->getUpPropagationItemSet();
 						for (QSet<COptimizedKPSetRoleTestingItem*>::const_iterator it = upPropSet->constBegin(), itEnd = upPropSet->constEnd(); it != itEnd; ++it) {
 							COptimizedKPSetRoleTestingItem* upPropItem = *it;
-							pruneUpNotSubsumption(optKPSetClassificationItem,upPropItem,notSubsumerConcept);
+							pruneUpNotSubsumption(optKPSetClassificationItem,upPropItem,notSubsumerRole);
 						}
 
 						return true;
@@ -1276,8 +1538,8 @@ namespace Konclude {
 				QSet<COptimizedKPSetRoleTestingItem*>* downPropSet = item->getDownPropagationItemSet();
 				for (QSet<COptimizedKPSetRoleTestingItem*>::const_iterator it = downPropSet->constBegin(), itEnd = downPropSet->constEnd(); it != itEnd; ++it) {
 					COptimizedKPSetRoleTestingItem* downPropItem = *it;
-					if (!downPropItem->hasSubsumerConceptItem(subsumerItem) && downPropItem != subsumerItem) {
-						downPropItem->addSubsumingConceptItem(subsumerItem);
+					if (!downPropItem->hasSubsumerRoleItem(subsumerItem) && downPropItem != subsumerItem) {
+						downPropItem->addSubsumerRoleItem(subsumerItem);
 						propagateDownSubsumption(optKPSetClassificationItem,downPropItem,subsumerItem);
 						propagated = true;
 					}
@@ -1286,10 +1548,10 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetRoleSubsumptionClassifierThread::pruneDownSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CConcept* subsumerConcept) {		
+			bool COptimizedKPSetRoleSubsumptionClassifierThread::pruneDownSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CRole* subsumerRole) {		
 				COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = item->getPossibleSubsumptionMap(false);
 				if (possSubsumMap) {
-					COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = possSubsumMap->value(subsumerConcept);
+					COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = possSubsumMap->value(subsumerRole);
 					if (possSubsumData && !possSubsumData->isSubsumptionConfirmed()) {
 						possSubsumData->setSubsumptionConfirmed(true);
 						possSubsumData->setSubsumptionUpdated(true);
@@ -1303,7 +1565,7 @@ namespace Konclude {
 						QSet<COptimizedKPSetRoleTestingItem*>* downPropSet = item->getDownPropagationItemSet();
 						for (QSet<COptimizedKPSetRoleTestingItem*>::const_iterator it = downPropSet->constBegin(), itEnd = downPropSet->constEnd(); it != itEnd; ++it) {
 							COptimizedKPSetRoleTestingItem* downPropItem = *it;
-							pruneDownSubsumption(optKPSetClassificationItem,downPropItem,subsumerConcept);
+							pruneDownSubsumption(optKPSetClassificationItem,downPropItem,subsumerRole);
 						}
 						return true;
 					}
@@ -1312,10 +1574,10 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetRoleSubsumptionClassifierThread::pruneUpNotSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CConcept* notSubsumerConcept) {		
+			bool COptimizedKPSetRoleSubsumptionClassifierThread::pruneUpNotSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CRole* notSubsumerRole) {		
 				COptimizedKPSetRolePossibleSubsumptionMap* possSubsumMap = item->getPossibleSubsumptionMap(false);
 				if (possSubsumMap) {
-					COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = possSubsumMap->value(notSubsumerConcept);
+					COptimizedKPSetRolePossibleSubsumptionData* possSubsumData = possSubsumMap->value(notSubsumerRole);
 					if (possSubsumData && !possSubsumData->isSubsumptionInvalided()) {
 						possSubsumData->setSubsumptionInvalid(true);
 						possSubsumData->setSubsumptionUpdated(true);
@@ -1329,7 +1591,7 @@ namespace Konclude {
 						QSet<COptimizedKPSetRoleTestingItem*>* upPropSet = item->getUpPropagationItemSet();
 						for (QSet<COptimizedKPSetRoleTestingItem*>::const_iterator it = upPropSet->constBegin(), itEnd = upPropSet->constEnd(); it != itEnd; ++it) {
 							COptimizedKPSetRoleTestingItem* upPropItem = *it;
-							pruneUpNotSubsumption(optKPSetClassificationItem,upPropItem,notSubsumerConcept);
+							pruneUpNotSubsumption(optKPSetClassificationItem,upPropItem,notSubsumerRole);
 						}
 						return true;
 					}
@@ -1338,8 +1600,8 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetRoleSubsumptionClassifierThread::interpreteSatisfiableResult(COntologyClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis) {
-				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontClassItem;
+			bool COptimizedKPSetRoleSubsumptionClassifierThread::interpreteSatisfiableResult(COntologyPropertyRoleClassificationItem *ontPropItem, CRole *satisfiableRole, bool isSatis) {
+				COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontPropItem;
 
 				CClassifierStatistics *ontClassStat = optKPSetClassificationItem->getClassifierStatistics();
 				if (ontClassStat) {
@@ -1350,8 +1612,8 @@ namespace Konclude {
 
 				optKPSetClassificationItem->decRunningSatisfiableTestsCount();
 
-				COptimizedKPSetRoleTestingItem* satTestedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(satisfiableConcept);
-				//if (CIRIName::getRecentIRIName(satisfiableConcept->getClassNameLinker()) == "http://www.gdst.uqam.ca/Documents/Ontologies/HIT/Equipment_SH_Ontology.owl#Folding_chair" && !isSatis) {
+				COptimizedKPSetRoleTestingItem* satTestedItem = optKPSetClassificationItem->getRoleSatisfiableTestItem(satisfiableRole);
+				//if (CIRIName::getRecentIRIName(satisfiableRole->getPropertyNameLinker()) == "http://www.gdst.uqam.ca/Documents/Ontologies/HIT/Equipment_SH_Ontology.owl#Folding_chair" && !isSatis) {
 				//	bool bug = true;
 				//	calculateSatisfiable(optKPSetClassificationItem,satTestedItem);
 				//	return false;
@@ -1361,19 +1623,14 @@ namespace Konclude {
 				satTestedItem->setSatisfiableTested(true);
 				satTestedItem->setSatisfiableTestedResult(isSatis);
 
-				COptimizedKPSetRoleTestingItem* topItem = optKPSetClassificationItem->getTopConceptSatisfiableTestItem();
 
 				if (isSatis) {
-					optKPSetClassificationItem->addSatisfiableConceptItem(satTestedItem);
+					optKPSetClassificationItem->addSatisfiableRoleItem(satTestedItem);
 
 				} else {
-					CTaxonomy *tax = optKPSetClassificationItem->getTaxonomy();
-					if (topItem) {
-						tax->setConceptSatisfiable(satisfiableConcept,false);
-					} else {
-						tax->getBottomHierarchyNode()->addEquivalentConcept(satisfiableConcept);
-						tax->updateNodeEquivalences(tax->getBottomHierarchyNode());
-					}
+					CRolePropertiesHierarchy* hierarchy = optKPSetClassificationItem->getHierarchy();
+					hierarchy->getBottomHierarchyNode()->addEquivalentElement(satisfiableRole);
+					hierarchy->updateNodeEquivalentElements(hierarchy->getBottomHierarchyNode());
 				}
 
 				QList<COptimizedKPSetRoleTestingItem*>* nextItemList = optKPSetClassificationItem->getNextSatisfiableTestingItemList();
@@ -1381,7 +1638,7 @@ namespace Konclude {
 				QSet<COptimizedKPSetRoleTestingItem*>* remainingCandItemSet = optKPSetClassificationItem->getRemainingCandidateSatisfiableTestingItemSet();
 
 
-				QList<COptimizedKPSetRoleTestingItem*>* subSumItemList = satTestedItem->getSubsumingConceptItemList();
+				QList<COptimizedKPSetRoleTestingItem*>* subSumItemList = satTestedItem->getSubsumerRoleItemList();
 				QList<COptimizedKPSetRoleTestingItem*>* succItemList = satTestedItem->getSuccessorItemList();
 				for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator it = succItemList->constBegin(), itEnd = succItemList->constEnd(); it != itEnd; ++it) {
 					COptimizedKPSetRoleTestingItem* succItem = *it;
@@ -1391,7 +1648,7 @@ namespace Konclude {
 						for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator itSubsum = subSumItemList->constBegin(), itSubsumEnd = subSumItemList->constEnd(); itSubsum != itSubsumEnd; ++itSubsum) {
 							COptimizedKPSetRoleTestingItem* subusmerItem = *itSubsum;
 							if (succItem != subusmerItem) {
-								succItem->addSubsumingConceptItem(subusmerItem);
+								succItem->addSubsumerRoleItem(subusmerItem);
 							}
 						}
 					}
@@ -1410,35 +1667,31 @@ namespace Konclude {
 			bool COptimizedKPSetRoleSubsumptionClassifierThread::interpreteTestResults(CTestCalculatedCallbackEvent *testResult) {
 				CSatisfiableCalculationJob *satCalcJob = testResult->getSatisfiableCalculationJob();
 				bool testSat = testResult->getTestResultSatisfiable();
-				CClassificationWorkItem *workItem = testResult->getClassificationWorkItem();
+				CPropertyClassificationComputationItem *workItem = (CPropertyClassificationComputationItem*)testResult->getClassificationWorkItem();
 				++mRecievedCallbackCount;
 
 
-				COntologyClassificationItem *ontClassItem = workOntItemHash.value(workItem);
-				if (ontClassItem) {
+				COntologyPropertyRoleClassificationItem *ontPropItem = workOntItemHash.value(workItem);
+				if (ontPropItem) {
 
-					QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = ontClassItem->getWorkItemHash();
-
-					CTaxonomy *taxonomy = ontClassItem->getTaxonomy();
+					QHash<CSatisfiableCalculationJob *, CPropertyClassificationComputationItem *> *workHash = ontPropItem->getComputationItemHash();
 
 					if (workItem) {
-						ontClassItem->decCurrentCalculatingCount();
-						if (workItem->isTestValid()) {
+						ontPropItem->decCurrentCalculatingCount();
 
-							if (testResult->hasCalculationError()) {
-								LOG(ERROR,getLogDomain(),logTr("Error in computation, classification for ontology '%1' failed.").arg(ontClassItem->getOntology()->getTerminologyName()),getLogObject());
-								ontClassItem->setTaxonomyConstructionFailed();
+						if (testResult->hasCalculationError()) {
+							LOG(ERROR,getLogDomain(),logTr("Error in computation, role classification for ontology '%1' failed.").arg(ontPropItem->getOntology()->getTerminologyName()),getLogObject());
+							ontPropItem->setHierarchyConstructionFailed();
 
-							} else {
+						} else {
 
-								if (workItem->isConceptSatisfiableTest()) {
-									interpreteSatisfiableResult(ontClassItem,workItem->getSatisfiableTestedConcept(),testSat);
-								} else if (workItem->isConceptSubsumptionTest()) {
-									interpreteSubsumptionResult(ontClassItem,workItem->getSubsumedTestedConcept(),workItem->getSubsumerTestedConcept(),!testSat);
-								}
+							if (workItem->isRoleSatisfiableTest()) {
+								interpreteSatisfiableResult(ontPropItem,workItem->getSatisfiableTestedRole(),testSat);
+							} else if (workItem->isRoleSubsumptionTest()) {
+								interpreteSubsumptionResult(ontPropItem,workItem->getSubsumedTestedRole(),workItem->getSubsumerTestedRole(),!testSat);
 							}
 						}
-						QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *>::iterator itWorkItem = workHash->find(satCalcJob);
+						QHash<CSatisfiableCalculationJob *, CPropertyClassificationComputationItem *>::iterator itWorkItem = workHash->find(satCalcJob);
 						while (itWorkItem != workHash->end()) {						
 							if (itWorkItem.value() == workItem) {
 								workHash->erase(itWorkItem);
@@ -1454,50 +1707,47 @@ namespace Konclude {
 
 					CClassificationCalculationStatisticsCollection* statisticCollection = testResult->getUsedStatisticsCollection();
 					if (statisticCollection) {
-						ontClassItem->reuseCalculationStatisticsCollection(statisticCollection);
+						ontPropItem->reuseCalculationStatisticsCollection(statisticCollection);
 					}
-
-				} 
-
+				}
 
 				return true;
 			}
 
 
-			bool COptimizedKPSetRoleSubsumptionClassifierThread::finishOntologyClassification(COntologyClassificationItem *ontClassItem) {
+			bool COptimizedKPSetRoleSubsumptionClassifierThread::finishOntologyClassification(COntologyPropertyRoleClassificationItem *ontPropItem) {
 
-				if (!ontClassItem->isTaxonomyConstructed() && !ontClassItem->isTaxonomyConstructionFailed()) {
+				if (!ontPropItem->isHierarchyConstructed() && !ontPropItem->isHierarchyConstructionFailed()) {
 
-					CTaxonomy *taxonomy = ontClassItem->getTaxonomy();
-					CConcreteOntology *ontology = ontClassItem->getOntology();
+					CConcreteOntology *ontology = ontPropItem->getOntology();
 					LOG(INFO,getLogDomain(),logTr("Starting Transitive Reduction for Ontology '%1'.").arg(ontology->getTerminologyName()),getLogObject());
 
 					// build taxonomy
 
-					COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontClassItem;
-					QList<COptimizedKPSetRoleTestingItem*>* satItemList = optKPSetClassificationItem->getSatisfiableConceptItemList();
+					COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetRoleOntologyClassificationItem *)ontPropItem;
+					QList<COptimizedKPSetRoleTestingItem*>* satItemList = optKPSetClassificationItem->getSatisfiableRoleItemList();
 
-					CTaxonomy *tax = optKPSetClassificationItem->getTaxonomy();
+					CRolePropertiesHierarchy* hierarchy = optKPSetClassificationItem->getHierarchy();
 
 					QList<COptimizedKPSetRoleTestingItem*> itemList;
 
-					COptimizedKPSetRoleTestingItem* topItem = optKPSetClassificationItem->getTopConceptSatisfiableTestItem();
-					CHierarchyNode* topHierNode = tax->getTopHierarchyNode();
-					CHierarchyNode* bottomHierNode = tax->getBottomHierarchyNode();
+					COptimizedKPSetRoleTestingItem* topItem = optKPSetClassificationItem->getTopRoleSatisfiableTestItem();
+					CRolePropertiesHierarchyNode* topHierNode = hierarchy->getTopHierarchyNode();
+					CRolePropertiesHierarchyNode* bottomHierNode = hierarchy->getBottomHierarchyNode();
 
 
 
-					cint64 topSubsumingItemCount = topItem->getSubsumingConceptItemCount();
-					topItem->setSatisfiableConceptHierarchyNode(topHierNode);
+					cint64 topSubsumingItemCount = topItem->getSubsumerRoleItemCount();
+					topItem->setSatisfiableRoleHierarchyNode(topHierNode);
 					if (topSubsumingItemCount) {
 						QList<COptimizedKPSetRoleTestingItem*>* subsumingConceptItemList = topItem->sortSubsumingConceptItemList();
 						for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator subsumedIt = subsumingConceptItemList->constBegin(), subsumedItEnd = subsumingConceptItemList->constEnd(); subsumedIt != subsumedItEnd; ++subsumedIt) {
 							COptimizedKPSetRoleTestingItem* subsumedConceptItem = *subsumedIt;
 							// mark as equivalent
 							subsumedConceptItem->setEquivalentItem(true);
-							topHierNode->addEquivalentConcept(subsumedConceptItem->getTestingConcept());
-							tax->updateNodeEquivalences(topHierNode);
+							topHierNode->addEquivalentElement(subsumedConceptItem->getTestingRole());
 						}
+						hierarchy->updateNodeEquivalentElements(topHierNode);
 					}
 
 					LOG(INFO,getLogDomain(),logTr("Sorting classes for Ontology '%1'.").arg(ontology->getTerminologyName()),getLogObject());
@@ -1506,25 +1756,25 @@ namespace Konclude {
 						COptimizedKPSetRoleTestingItem* item = *it;
 
 						if (!item->isEquivalentItem() && item != topItem) {
-							CHierarchyNode* itemNode = tax->getHierarchyNode(item->getTestingConcept(),true);
-							item->setSatisfiableConceptHierarchyNode(itemNode);
-							cint64 itemSubsumingCount = item->getSubsumingConceptItemCount();
+							CRolePropertiesHierarchyNode* itemNode = hierarchy->getHierarchyNode(item->getTestingRole(),true);
+							item->setSatisfiableRoleHierarchyNode(itemNode);
+							cint64 itemSubsumingCount = item->getSubsumerRoleItemCount();
 							itemList.append(item);
 							if (itemSubsumingCount > topSubsumingItemCount) {
 								QList<COptimizedKPSetRoleTestingItem*>* subsumingConceptItemList = item->sortSubsumingConceptItemList();
 								for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator subsumedIt = subsumingConceptItemList->constBegin(), subsumedItEnd = subsumingConceptItemList->constEnd(); subsumedIt != subsumedItEnd; ++subsumedIt) {
 									COptimizedKPSetRoleTestingItem* subsumedConceptItem = *subsumedIt;
-									cint64 subsumedItemSubsumingCount = subsumedConceptItem->getSubsumingConceptItemCount();
+									cint64 subsumedItemSubsumingCount = subsumedConceptItem->getSubsumerRoleItemCount();
 									if (subsumedItemSubsumingCount == itemSubsumingCount) {
 										// mark as equivalent
 										subsumedConceptItem->setEquivalentItem(true);
-										itemNode->addEquivalentConcept(subsumedConceptItem->getTestingConcept());
-										tax->updateNodeEquivalences(itemNode);
+										itemNode->addEquivalentElement(subsumedConceptItem->getTestingRole());
 									} else {
 										break;
 									}
 								}
 							}
+							hierarchy->updateNodeEquivalentElements(itemNode);
 						}
 					}
 
@@ -1534,10 +1784,10 @@ namespace Konclude {
 						COptimizedKPSetRoleTestingItem* item = *it;
 
 						if (!item->isEquivalentItem() && item != topItem) {
-							cint64 itemSubsumingCount = item->getSubsumingConceptItemCount();
-							CHierarchyNode* itemHierNode = item->getSatisfiableConceptHierarchyNode();
+							cint64 itemSubsumingCount = item->getSubsumerRoleItemCount();
+							CRolePropertiesHierarchyNode* itemHierNode = item->getSatisfiableRoleHierarchyNode();
 
-							QList<COptimizedKPSetRoleTestingItem*>* subsumingConceptItemList = item->getSubsumingConceptItemList();
+							QList<COptimizedKPSetRoleTestingItem*>* subsumingConceptItemList = item->getSubsumerRoleItemList();
 							QList<COptimizedKPSetRoleTestingItem*>::const_iterator subsumedIt = subsumingConceptItemList->constBegin(), subsumedItEnd = subsumingConceptItemList->constEnd();
 
 							cint64 eqCount = 0;
@@ -1545,7 +1795,7 @@ namespace Konclude {
 							// remove direct equivalences
 							while (subsumedIt != subsumedItEnd) {
 								COptimizedKPSetRoleTestingItem* subsumedConceptItem = *subsumedIt;
-								cint64 subsumedItemSubsumingCount = subsumedConceptItem->getSubsumingConceptItemCount();
+								cint64 subsumedItemSubsumingCount = subsumedConceptItem->getSubsumerRoleItemCount();
 								if (itemSubsumingCount != subsumedItemSubsumingCount) {
 									break;
 								} else {
@@ -1570,10 +1820,10 @@ namespace Konclude {
 									COptimizedKPSetRoleTestingItem* subsumedConceptItem = *subsumedIt;
 									if (!subsumedConceptItem->isEquivalentItem()) {
 										subsumedConceptItem->setPredecessorItem(true);
-										CHierarchyNode* subsumedHierNode = subsumedConceptItem->getSatisfiableConceptHierarchyNode();
+										CRolePropertiesHierarchyNode* subsumedHierNode = subsumedConceptItem->getSatisfiableRoleHierarchyNode();
 										itemHierNode->makeParent(subsumedHierNode);
 										parentItemList.append(subsumedConceptItem);
-										remainingSubsumingCount -= subsumedConceptItem->getSubsumingConceptItemCount()+1;
+										remainingSubsumingCount -= subsumedConceptItem->getSubsumerRoleItemCount()+1;
 										++subsumedIt;
 										break;
 									} else {
@@ -1589,13 +1839,13 @@ namespace Konclude {
 										if (searchForMoreParents) {
 											for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator parentIt = parentItemList.constBegin(), parentItEnd = parentItemList.constEnd(); parentIt != parentItEnd && !predOfOnePrevParent; ++parentIt) {
 												COptimizedKPSetRoleTestingItem* parentItem = *parentIt;
-												if (parentItem->getSubsumingConceptItemSet()->contains(subsumedConceptItem)) {
+												if (parentItem->getSubsumerRoleItemSet()->contains(subsumedConceptItem)) {
 													predOfOnePrevParent = true;
 												}
 											}
 										}
 										subsumedConceptItem->setPredecessorItem(true);
-										CHierarchyNode* subsumedHierNode = subsumedConceptItem->getSatisfiableConceptHierarchyNode();
+										CRolePropertiesHierarchyNode* subsumedHierNode = subsumedConceptItem->getSatisfiableRoleHierarchyNode();
 										if (!predOfOnePrevParent && searchForMoreParents) {
 											itemHierNode->makeParent(subsumedHierNode);
 											parentItemList.append(subsumedConceptItem);
@@ -1612,7 +1862,7 @@ namespace Konclude {
 					for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator it = itemList.constBegin(), itEnd = itemList.constEnd(); it != itEnd; ++it) {
 						COptimizedKPSetRoleTestingItem* item = *it;
 						if (!item->isPredecessorItem() && !item->isEquivalentItem()) {
-							CHierarchyNode* itemHierNode = item->getSatisfiableConceptHierarchyNode();
+							CRolePropertiesHierarchyNode* itemHierNode = item->getSatisfiableRoleHierarchyNode();
 							bottomHierNode->makeParent(itemHierNode);
 						}
 					}
@@ -1622,49 +1872,45 @@ namespace Konclude {
 
 #ifdef OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGSTATUSDESCRIPTION
 					statUpdateMutex.lock();
-					statusString = QString("Finished ontology classification");
+					statusString = QString("Finished ontology role classification");
 					statUpdateMutex.unlock();
 #endif
 
 
 					CClassification* classification = ontology->getClassification();
 					if (classification) {
-						CClassConceptClassification* classConClassification = ontClassItem->getClassConceptClassification();
-						CClassificationStatisticsCollectionStrings* classifStatCollStrings = ontClassItem->getClassificationStatisticsCollectionStrings();
-						CClassifierStatistics* classifierStats = ontClassItem->getClassifierStatistics();
+						CPropertyRoleClassification* propRoleClassification = ontPropItem->getPropertyRoleClassification();
+						CClassificationStatisticsCollectionStrings* classifStatCollStrings = ontPropItem->getClassificationStatisticsCollectionStrings();
+						CClassifierStatistics* classifierStats = ontPropItem->getClassifierStatistics();
 						classifStatCollStrings->addProcessingStatistics("role-classification-total-satisfiable-test-count",classifierStats->getTotalSatisfiableCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-satisfiable-tested-count",classifierStats->getTestedSatisfiableCount());
-						classifStatCollStrings->addProcessingStatistics("role-classification-satisfiable-pseudo-model-merged-tested-count",classifierStats->getPseudoModelMergedTestedSatisfiableCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-satisfiable-derivate-tested-count",classifierStats->getDerivatedTestedSatisfiableCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-satisfiable-calculated-tested-count",classifierStats->getCalculatedTestedSatisfiableCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-satisfiable-pruned-tested-count",classifierStats->getPrunedTestedSatisfiableCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-satisfiable-told-tested-count",classifierStats->getToldSatisfiableCount()-classifierStats->getCalculatedTestedSatisfiableCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-total-subsumption-test-count",classifierStats->getTotalSatisfiableCount()*(classifierStats->getTotalSatisfiableCount()-1));
 						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-tested-count",classifierStats->getTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-pseudo-model-merged-tested-count",classifierStats->getPseudoModelMergedTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-subclass-tested-count",classifierStats->getSubclassTestedSubsumptionCount());
-						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-subclass-identifier-occur-tested-count",classifierStats->getSubclassIdentifierOccurTestedSubsumptionCount());
+						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-subproperty-tested-count",classifierStats->getSubclassTestedSubsumptionCount());
+						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-subproperty-identifier-occur-tested-count",classifierStats->getSubclassIdentifierOccurTestedSubsumptionCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-derivate-tested-count",classifierStats->getDerivatedTestedSubsumptionCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-calculated-tested-count",classifierStats->getCalculatedTestedSubsumptionCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-pruned-tested-count",classifierStats->getPrunedTestedSubsumptionCount());
 						classifStatCollStrings->addProcessingStatistics("role-classification-subsumption-told-tested-count",classifierStats->getToldSubsumptionCount()-classifierStats->getCalculatedTestedSubsumptionCount());
-						classConClassification->setClassConceptTaxonomy(taxonomy);
-						classConClassification->setClassificationStatistics(classifStatCollStrings);
-						classification->setClassConceptClassification(classConClassification);
+						propRoleClassification->setRolePropertiesHierarchy(hierarchy);
+						propRoleClassification->setClassificationStatistics(classifStatCollStrings);
+						classification->setPropertyRoleClassification(propRoleClassification,optKPSetClassificationItem->isDataRolesClassification());
 					}
-					ontology->setConceptTaxonomy(taxonomy);
 
-					ontClassItem->setGoneOutRemainingTests(false);
-					taxonomy->setTaxonomyComplete(true);
+					ontPropItem->setHasRemainingTests(false);
 
 					--mClassificationCount;
-					LOG(INFO,getLogDomain(),logTr("Ontology '%1' classified.").arg(ontology->getTerminologyName()),getLogObject());
-					LOG(INFO,getLogDomain(),logTr("Used %1 satisfiable tests and %3 calculated subsumption tests.").arg(ontClassItem->getCalcedSatisfiableCount()).arg(ontClassItem->getClassifierStatistics()->getCalculatedTestedSubsumptionCount()),getLogObject());
-					LOG(INFO,getLogDomain(),logTr("Confirmed %1 of %2 possible subsumer concepts.").arg(optKPSetClassificationItem->getTruePossibleSubsumerCount()).arg(optKPSetClassificationItem->getPossibleSubsumerCount()),getLogObject());
+					LOG(INFO,getLogDomain(),logTr("Roles of ontology '%1' classified.").arg(ontology->getTerminologyName()),getLogObject());
+					LOG(INFO,getLogDomain(),logTr("Used %1 satisfiable tests and %3 calculated subsumption tests.").arg(ontPropItem->getCalcedSatisfiableCount()).arg(ontPropItem->getClassifierStatistics()->getCalculatedTestedSubsumptionCount()),getLogObject());
+					LOG(INFO,getLogDomain(),logTr("Confirmed %1 of %2 possible subsumer roles.").arg(optKPSetClassificationItem->getTruePossibleSubsumerCount()).arg(optKPSetClassificationItem->getPossibleSubsumerCount()),getLogObject());
 					LOG(INFO,getLogDomain(),logTr("Confirmed %1 and invalidated %2 possible subsumer concepts with calculation.").arg(optKPSetClassificationItem->getCalculatedTruePossibleSubsumerCount()).arg(optKPSetClassificationItem->getFalsePossibleSubsumerCount()),getLogObject());
 				}
-				ontClassItem->submitTaxonomyConstructed();
-				ontClassItem->doClassifiedCallback();
+				ontPropItem->submitHierarchyConstructed();
+				ontPropItem->doClassifiedCallback();
 				return true;
 			}
 

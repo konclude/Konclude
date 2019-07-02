@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -125,6 +125,40 @@ namespace Konclude {
 				expression = parseGetObjectPropertyTargetsNode(node);
 			} else  if (nodeString == "GetFlattenedObjectPropertyTargets") {
 				expression = parseGetFlattenedObjectPropertyTargetsNode(node);
+			} else  if (nodeString == "GetObjectPropertySources") {
+				expression = parseGetObjectPropertySourcesNode(node);
+			} else  if (nodeString == "GetFlattenedObjectPropertySources") {
+				expression = parseGetFlattenedObjectPropertySourcesNode(node);
+
+
+			} else  if (nodeString == "GetSubObjectProperties") {
+				expression = parseGetSubObjectPropertiesNode(node);
+			} else  if (nodeString == "GetSuperObjectProperties") {
+				expression = parseGetSuperObjectPropertiesNode(node);
+			} else  if (nodeString == "GetEquivalentObjectProperties") {
+				expression = parseGetEquivalentObjectPropertiesNode(node);
+			} else  if (nodeString == "GetSubObjectPropertyHierarchy") {
+				expression = parseGetSubObjectPropertyHierarchyNode(node);
+			} else  if (nodeString == "IsObjectPropertySatisfiable") {
+				expression = parseIsObjectPropertySatisfiableNode(node);
+			} else  if (nodeString == "GetSubDataProperties") {
+				expression = parseGetSubDataPropertiesNode(node);
+			} else  if (nodeString == "GetSuperDataProperties") {
+				expression = parseGetSuperDataPropertiesNode(node);
+			} else  if (nodeString == "GetEquivalentDataProperties") {
+				expression = parseGetEquivalentDataPropertiesNode(node);
+			} else  if (nodeString == "GetSubDataPropertyHierarchy") {
+				expression = parseGetSubDataPropertyHierarchyNode(node);
+			} else  if (nodeString == "IsDataPropertySatisfiable") {
+				expression = parseIsDataPropertySatisfiableNode(node);
+
+			} else  if (nodeString == "GetObjectPropertiesOfSource") {
+				expression = parseGetObjectPropertiesOfSourceNode(node);
+			} else  if (nodeString == "GetObjectPropertiesOfTarget") {
+				expression = parseGetObjectPropertiesOfTargetNode(node);
+			} else  if (nodeString == "GetObjectPropertiesBetween") {
+				expression = parseGetObjectPropertiesOfBetweenNode(node);
+
 
 			} else  if (nodeString == "GetDeterministicIndividuals") {
 				expression = parseGetDeterministicIndividualsNode(node);
@@ -269,7 +303,7 @@ namespace Konclude {
 
 
 		CQueryGetSubClassesExpression *COWLlinkQueryParser::parseGetSubClassesNode(QDomElement *node) {
-			// parse <GetFlattenedInstances id="xxxx"/>
+			// parse <GetSubClasses id="xxxx"/>
 			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
@@ -284,7 +318,7 @@ namespace Konclude {
 
 
 		CQueryGetSuperClassesExpression *COWLlinkQueryParser::parseGetSuperClassesNode(QDomElement *node) {
-			// parse <GetFlattenedInstances id="xxxx"/>
+			// parse <GetSuperClasses id="xxxx"/>
 			QString idName = getQueryIDNameString(node);
 			QString directString = node->attribute("direct");
 			bool direct = false;
@@ -299,13 +333,148 @@ namespace Konclude {
 
 
 		CQueryGetEquivalentClassesExpression* COWLlinkQueryParser::parseGetEquivalentClassesNode(QDomElement *node) {
-			// parse <GetFlattenedInstances id="xxxx"/>
+			// parse <GetEquivalentClasses id="xxxx"/>
 			QString idName = getQueryIDNameString(node);
 			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
 			CQueryGetEquivalentClassesExpression *queryExpression = 0;
 			queryExpression = mQueryBuilder->getGetEquivalentClassesQuery(builds,idName);
 			return queryExpression;
 		}
+
+
+
+
+
+
+
+		CQueryGetSubObjectPropertiesExpression *COWLlinkQueryParser::parseGetSubObjectPropertiesNode(QDomElement *node) {
+			// parse <GetSubObjectProperties id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QString directString = node->attribute("direct");
+			bool direct = false;
+			if (directString.toUpper() == "TRUE") {
+				direct = true;
+			}
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetSubObjectPropertiesExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetSubObjectPropertiesQuery(builds,direct,idName);
+			return queryExpression;
+		}
+
+
+		CQueryGetSuperObjectPropertiesExpression *COWLlinkQueryParser::parseGetSuperObjectPropertiesNode(QDomElement *node) {
+			// parse <GetSuperObjectProperties id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QString directString = node->attribute("direct");
+			bool direct = false;
+			if (directString.toUpper() == "TRUE") {
+				direct = true;
+			}
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetSuperObjectPropertiesExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetSuperObjectPropertiesQuery(builds,direct,idName);
+			return queryExpression;
+		}
+
+
+		CQueryGetEquivalentObjectPropertiesExpression* COWLlinkQueryParser::parseGetEquivalentObjectPropertiesNode(QDomElement *node) {
+			// parse <GetEquivalentObjectProperties id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetEquivalentObjectPropertiesExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetEquivalentObjectPropertiesQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+		CQueryGetSubObjectPropertyHierarchyExpression* COWLlinkQueryParser::parseGetSubObjectPropertyHierarchyNode(QDomElement *node) {
+			// parse <GetSubObjectPropertyHierarchy id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetSubObjectPropertyHierarchyExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetSubObjectPropertyHierarchyQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+
+		CQueryIsObjectPropertySatisfiableExpression* COWLlinkQueryParser::parseIsObjectPropertySatisfiableNode(QDomElement *node) {
+			// parse <IsObjectPropertySatisfiable id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryIsObjectPropertySatisfiableExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getIsObjectPropertySatisfiableQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+
+
+		CQueryGetSubDataPropertiesExpression *COWLlinkQueryParser::parseGetSubDataPropertiesNode(QDomElement *node) {
+			// parse <GetSubDataProperties id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QString directString = node->attribute("direct");
+			bool direct = false;
+			if (directString.toUpper() == "TRUE") {
+				direct = true;
+			}
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetSubDataPropertiesExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetSubDataPropertiesQuery(builds,direct,idName);
+			return queryExpression;
+		}
+
+
+		CQueryGetSuperDataPropertiesExpression *COWLlinkQueryParser::parseGetSuperDataPropertiesNode(QDomElement *node) {
+			// parse <GetSuperDataProperties id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QString directString = node->attribute("direct");
+			bool direct = false;
+			if (directString.toUpper() == "TRUE") {
+				direct = true;
+			}
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetSuperDataPropertiesExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetSuperDataPropertiesQuery(builds,direct,idName);
+			return queryExpression;
+		}
+
+
+		CQueryGetEquivalentDataPropertiesExpression* COWLlinkQueryParser::parseGetEquivalentDataPropertiesNode(QDomElement *node) {
+			// parse <GetEquivalentDataProperties id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetEquivalentDataPropertiesExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetEquivalentDataPropertiesQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+		CQueryGetSubDataPropertyHierarchyExpression* COWLlinkQueryParser::parseGetSubDataPropertyHierarchyNode(QDomElement *node) {
+			// parse <GetSubDataPropertyHierarchy id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetSubDataPropertyHierarchyExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetSubDataPropertyHierarchyQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+
+		CQueryIsDataPropertySatisfiableExpression* COWLlinkQueryParser::parseIsDataPropertySatisfiableNode(QDomElement *node) {
+			// parse <IsDataPropertySatisfiable id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryIsDataPropertySatisfiableExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getIsDataPropertySatisfiableQuery(builds,idName);
+			return queryExpression;
+		}
+
 
 
 
@@ -318,16 +487,6 @@ namespace Konclude {
 			return queryExpression;
 		}
 
-
-
-		CQueryGetObjectPropertyTargetsExpression *COWLlinkQueryParser::parseGetObjectPropertyTargetsNode(QDomElement *node) {
-			// parse <GetObjectPropertyTargets id="xxxx"/>
-			QString idName = getQueryIDNameString(node);
-			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
-			CQueryGetObjectPropertyTargetsExpression *queryExpression = 0;
-			queryExpression = mQueryBuilder->getGetObjectPropertyTargetsQuery(builds,idName);
-			return queryExpression;
-		}
 
 		QString COWLlinkQueryParser::getQueryIDNameString(QDomElement* node) {
 			QString idName = node->attribute("id");
@@ -343,14 +502,114 @@ namespace Konclude {
 			return idName;
 		}
 
-		CQueryGetFlattenedObjectPropertyTargetsExpression *COWLlinkQueryParser::parseGetFlattenedObjectPropertyTargetsNode(QDomElement *node) {
-			// parse <GetFlattenedObjectPropertyTargets id="xxxx"/>
+
+
+
+		CQueryExpression *COWLlinkQueryParser::parseGetObjectPropertyTargetsNode(QDomElement *node) {
+			// parse <GetObjectPropertyTargets id="xxxx"/>
 			QString idName = getQueryIDNameString(node);
-			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
-			CQueryGetFlattenedObjectPropertyTargetsExpression *queryExpression = 0;
-			queryExpression = mQueryBuilder->getGetFlattenedObjectPropertyTargetsQuery(builds,idName);
+			bool inversedProperty = false;
+			QList<CBuildExpression*> builds = parseOntologyChildNodesInverseHandling(node,inversedProperty);
+			CQueryExpression *queryExpression = 0;
+			if (!inversedProperty) {
+				queryExpression = mQueryBuilder->getGetObjectPropertyTargetsQuery(builds,idName);
+			} else {
+				queryExpression = mQueryBuilder->getGetObjectPropertySourcesQuery(builds,idName);
+			}
 			return queryExpression;
 		}
+
+		CQueryExpression *COWLlinkQueryParser::parseGetFlattenedObjectPropertyTargetsNode(QDomElement *node) {
+			// parse <GetFlattenedObjectPropertyTargets id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			bool inversedProperty = false;
+			QList<CBuildExpression*> builds = parseOntologyChildNodesInverseHandling(node,inversedProperty);
+			CQueryExpression *queryExpression = 0;
+			if (!inversedProperty) {
+				queryExpression = mQueryBuilder->getGetFlattenedObjectPropertyTargetsQuery(builds,idName);
+			} else {
+				queryExpression = mQueryBuilder->getGetFlattenedObjectPropertySourcesQuery(builds,idName);
+			}
+			return queryExpression;
+		}
+
+
+
+
+		CQueryExpression *COWLlinkQueryParser::parseGetObjectPropertySourcesNode(QDomElement *node) {
+			// parse <GetObjectPropertySources id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			bool inversedProperty = false;
+			QList<CBuildExpression*> builds = parseOntologyChildNodesInverseHandling(node,inversedProperty);
+			CQueryExpression *queryExpression = 0;
+			if (!inversedProperty) {
+				queryExpression = mQueryBuilder->getGetObjectPropertySourcesQuery(builds,idName);
+			} else {
+				queryExpression = mQueryBuilder->getGetObjectPropertyTargetsQuery(builds,idName);
+			}
+			return queryExpression;
+		}
+
+		CQueryExpression *COWLlinkQueryParser::parseGetFlattenedObjectPropertySourcesNode(QDomElement *node) {
+			// parse <GetFlattenedObjectPropertySources id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			bool inversedProperty = false;
+			QList<CBuildExpression*> builds = parseOntologyChildNodesInverseHandling(node,inversedProperty);
+			CQueryExpression *queryExpression = 0;
+			if (!inversedProperty) {
+				queryExpression = mQueryBuilder->getGetFlattenedObjectPropertySourcesQuery(builds,idName);
+			} else {
+				queryExpression = mQueryBuilder->getGetFlattenedObjectPropertyTargetsQuery(builds,idName);
+			}
+			return queryExpression;
+		}
+
+
+
+
+
+
+		CQueryGetObjectPropertiesOfSourceExpression *COWLlinkQueryParser::parseGetObjectPropertiesOfSourceNode(QDomElement *node) {
+			// parse <GetObjectPropertiesOfSource id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetObjectPropertiesOfSourceExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetObjectPropertiesOfSourceQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+		CQueryGetObjectPropertiesOfTargetExpression *COWLlinkQueryParser::parseGetObjectPropertiesOfTargetNode(QDomElement *node) {
+			// parse <GetObjectPropertiesOfTarget id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetObjectPropertiesOfTargetExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetObjectPropertiesOfTargetQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+		CQueryGetObjectPropertiesBetweenExpression *COWLlinkQueryParser::parseGetObjectPropertiesOfBetweenNode(QDomElement *node) {
+			// parse <GetObjectPropertiesBetween id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryGetObjectPropertiesBetweenExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetObjectPropertiesBetweenQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
 
 		CQueryGetDeterministicIndividualsExpression *COWLlinkQueryParser::parseGetDeterministicIndividualsNode(QDomElement *node) {
 			// parse <GetDeterministicIndividuals id="xxxx"/>

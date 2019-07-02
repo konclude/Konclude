@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,11 +28,20 @@
 #include "RealizerSettings.h"
 #include "COptimizedKPSetIndividualItem.h"
 #include "COptimizedKPSetIndividualItemPair.h"
+#include "COptimizedKPSetIndividualItemReferencePair.h"
 #include "COptimizedKPSetRoleInstancesRedirectionItem.h"
+#include "COntologyRealizingDynamicRequirmentProcessingContainer.h"
+#include "COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData.h"
+#include "COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelHash.h"
+#include "COptimizedKPSetIndividualComplexRoleData.h"
+#include "COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator.h"
+#include "COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData.h"
 
 
 // Other includes
 #include "Reasoner/Ontology/CRole.h"
+
+#include "Reasoner/Taxonomy/CRolePropertiesHierarchyNode.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -44,6 +53,7 @@ namespace Konclude {
 
 		using namespace Ontology;
 		using namespace Realization;
+		using namespace Taxonomy;
 
 		namespace Realizer {
 
@@ -56,7 +66,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedKPSetRoleInstancesItem : public COptimizedKPSetRoleInstancesRedirectionItem {
+			class COptimizedKPSetRoleInstancesItem : public COptimizedKPSetRoleInstancesRedirectionItem, public COntologyRealizingDynamicRequirmentProcessingContainer {
 				// public methods
 				public:
 					//! Constructor
@@ -69,6 +79,19 @@ namespace Konclude {
 
 					CRole* getRole();
 					COptimizedKPSetRoleInstancesItem* setRole(CRole* role);
+
+
+					CRolePropertiesHierarchyNode* getRoleHierarchyNode();
+					COptimizedKPSetRoleInstancesItem* setRoleHierarchyNode(CRolePropertiesHierarchyNode* roleHierNode);
+
+
+					CRolePropertiesHierarchyNode* getInverseRoleHierarchyNode();
+					COptimizedKPSetRoleInstancesItem* setInverseRoleHierarchyNode(CRolePropertiesHierarchyNode* roleHierNode);
+
+
+					COptimizedKPSetRoleInstancesRedirectionItem* getInverseRoleRedirectedItem();
+					COptimizedKPSetRoleInstancesItem* setInverseRoleRedirectedItem(COptimizedKPSetRoleInstancesRedirectionItem* redirectedItem);
+
 
 					QSet<COptimizedKPSetIndividualItemPair>* getKnownInstancesSet();
 					QSet<COptimizedKPSetIndividualItemPair>* getPossibleInstancesSet();
@@ -127,6 +150,11 @@ namespace Konclude {
 					bool hasPossibleInstancesProcessingQueuedFlag();
 					COptimizedKPSetRoleInstancesItem* setPossibleInstancesProcessingQueuedFlag(bool processingQueued);
 
+
+					bool hasComplexCandidateInstancesProcessingQueuedFlag();
+					COptimizedKPSetRoleInstancesItem* setComplexCandidateProcessingQueuedFlag(bool processingQueued);
+
+
 					bool hasSelfSuccessorProcessedFlag();
 					COptimizedKPSetRoleInstancesItem* setSelfSuccessorProcessedFlag(bool selfSuccProcessed);
 
@@ -144,6 +172,7 @@ namespace Konclude {
 					bool isCandidateSuccessorInitializationCompleted();
 					bool isCandidateSuccessorInitializationStarted();
 					COptimizedKPSetRoleInstancesItem* setCandidateSuccessorInitializationStarted(bool initStarted);
+					COptimizedKPSetRoleInstancesItem* setCandidateSuccessorInitializationCompleted(bool initCompleted);
 
 
 					cint64 getUninitializedSuccessorItemCount();
@@ -187,6 +216,67 @@ namespace Konclude {
 					bool hasComplexInverseRoleStarterCandidate(CRole* role);
 
 
+					bool hasOnlyTransitiveComplexRoleCandidates();
+					COptimizedKPSetRoleInstancesItem* setOnlyTransitiveComplexRoleCandidates(bool onlyTransitiveCandidates);
+
+					QSet<TRoleItemInversionPair>* getOnlyTransitiveComplexSubRoleItems();
+					COptimizedKPSetRoleInstancesItem* addOnlyTransitiveComplexSubRoleItem(const TRoleItemInversionPair& item);
+
+
+					bool hasOnlyDeterministicComplexRoleStarterCandidatesUsage();
+					COptimizedKPSetRoleInstancesItem* setOnlyDeterministicComplexRoleStarterCandidatesUsage(bool onlyDeterministicComplexRoleStarterCandidatesUsage);
+
+
+
+					COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelHash* getCombinedNeighbourCacheLabelItemDataHash(bool inversed);
+					bool hasCombinedNeighbourCacheLabelItemInversed(CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem);
+
+
+
+					bool hasComplexRoleData();
+					QHash<cint64, COptimizedKPSetIndividualComplexRoleData*>* getIndividualIdComplexRoleDataHash();
+					COptimizedKPSetIndividualComplexRoleData* getIndividualIdComplexRoleData(cint64 individualId, bool createIfNotExists = true);
+
+
+
+					COptimizedKPSetRoleInstancesItem* addComplexStarterCandidateCombinedNeighbourRoleLabelCacheItem(bool inversed, CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem);
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*>* getComplexStarterCandidateCombinedNeighbourRoleLabelCacheItemSet(bool inversed);
+
+
+					COptimizedKPSetRoleInstancesItem* addComplexStarterCandidateCombinedExistentialRoleLabelCacheItem(bool inversed, CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem);
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*>* getComplexStarterCandidateCombinedExistentialRoleLabelCacheItemSet(bool inversed);
+
+
+					COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator* getIndividualComplexCandidateIterator();
+					COptimizedKPSetRoleInstancesItem* setIndividualComplexCandidateIterator(COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator* iterator);
+
+
+
+
+					COptimizedKPSetRoleInstancesItem* addComplexCandidateInstance(const COptimizedKPSetIndividualItemReferencePair& itemRefPair, bool inverse);
+					COptimizedKPSetRoleInstancesItem* removeComplexCandidateInstance(const COptimizedKPSetIndividualItemReferencePair& itemRefPair, bool inverse);
+
+					bool hasComplexInstanceCandidates();
+					COptimizedKPSetIndividualItemReferencePair takeNextTestingComplexInstanceCandidate();
+
+
+
+
+					COptimizedKPSetRoleInstancesItem* addExistentialRoleLabelCacheItem(bool inversed, CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem);
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*>* getExistentialRoleLabelCacheItemSet(bool inversed);
+
+					
+					enum RolePreferredPropagationDirection {
+						STRAIGHT,
+						INVERSE,
+						NONE
+					};
+
+					bool hasPropagationDirectionDetermined();
+					COptimizedKPSetRoleInstancesItem* setPropagationDirectionDetermined(bool determined);
+
+					RolePreferredPropagationDirection getPreferredPropagationDirection();
+					COptimizedKPSetRoleInstancesItem* setPreferredPropagationDirection(RolePreferredPropagationDirection direction);
 
 				// protected methods
 				protected:
@@ -195,6 +285,12 @@ namespace Konclude {
 				protected:
 					CRole* mInvRole;
 
+					CRolePropertiesHierarchyNode* mRoleHierNode;
+					CRolePropertiesHierarchyNode* mInvRoleHierNode;
+
+					COptimizedKPSetRoleInstancesRedirectionItem* mInvRedirectedItem;
+
+
 					CConcept* mTmpPropagationConcept;
 					CConcept* mTmpMarkerConcept;
 
@@ -202,11 +298,11 @@ namespace Konclude {
 					QSet<COptimizedKPSetIndividualItemPair> mPossibleInstancesSet;
 
 
+					QSet<COptimizedKPSetIndividualItemReferencePair> mComplexRoleCandidateInstancesSet;
+
+
 					CConcept* mTmpInversePropagationConcept;
 					CConcept* mTmpInverseMarkerConcept;
-
-					QSet<COptimizedKPSetIndividualItemPair> mKnownInverseInstancesSet;
-					QSet<COptimizedKPSetIndividualItemPair> mPossibleInverseInstancesSet;
 
 					QList<TRoleItemInversionPair> mParentItemList;
 					QList<TRoleItemInversionPair> mSuccessorItemList;
@@ -215,7 +311,8 @@ namespace Konclude {
 					cint64 mTestingPossInstanceCount;
 					bool mAllSuccProcessedFlag;
 					bool mToProcessFlag;
-					bool mProcessingQueuedFlag;
+					bool mPossibleProcessingQueuedFlag;
+					bool mComplexCandidateProcessingQueuedFlag;
 					bool mSelfSuccsCompletedFlag;
 
 
@@ -223,6 +320,7 @@ namespace Konclude {
 
 					QList<COptimizedKPSetIndividualItem*> mRemainingCandidateInitializationSuccessorList;
 					bool mInitializationStartedFlag;
+					bool mInitializationCompletedFlag;
 					cint64 mUninitializedSuccItemCount;
 					bool mAllSuccInitializedFlag;
 					bool mInitializingQueuedFlag;
@@ -232,6 +330,34 @@ namespace Konclude {
 					QSet<CRole*> mComplexRoleStarterCandidateSet;
 					QSet<CRole*> mComplexInverseRoleStarterCandidateSet;
 
+					bool mOnlyTransitiveComplexRoleCandidates;
+					bool mOnlyDeterministicComplexRoleStarterCandidatesUsage;
+					QSet<TRoleItemInversionPair> mOnlyTransitiveComplexSubRoleItems;
+
+
+					COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelHash mCombinedNeighbourLabelDataHash;
+					COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelHash mInverseCombinedNeighbourLabelDataHash;
+
+
+					QHash<cint64, COptimizedKPSetIndividualComplexRoleData*> mIndividualIdComplexRoleDataHash;
+
+
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*> mComplexStarterCandidateCombinedNeighbourRoleLabelCacheItemSet;
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*> mComplexInverseStarterCandidateCombinedNeighbourRoleLabelCacheItemSet;
+
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*> mComplexStarterCandidateCombinedExistentialRoleLabelCacheItemSet;
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*> mComplexInverseStarterCandidateCombinedExistentialRoleLabelCacheItemSet;
+
+
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*> mExistentialRoleLabelCacheItemSet;
+					QSet<CBackendRepresentativeMemoryLabelCacheItem*> mExistentialInverseRoleLabelCacheItemSet;
+
+
+					COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator* mComplexIndiCandidateIterator;
+
+
+					bool mPropagationDirectionDetermined;
+					RolePreferredPropagationDirection mPreferredPropagationDirection;
 
 				// private methods
 				private:

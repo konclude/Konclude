@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -98,7 +98,7 @@ namespace Konclude {
 
 					if (mAbsoluteMinimumExclusionValue) {
 						if (mAbsoluteMinimumExclusionValue->getValue()->isGreaterThan(value)) {
-							return nullptr;
+							return false;
 						}
 					}
 					bool newValuesPotentiallyExcluded = false;
@@ -758,6 +758,16 @@ namespace Konclude {
 
 
 
+				bool CDatatypeStringValueSpaceMap::isRestrictedToWithLanguageTagsValues() {
+					CDatatypeStringValueExclusionType restictionType(CDatatypeStringValueExclusionType::SVET_LANGUAGE_TAGS_COMPLETELY, true);
+					return areAllValuesRestricted(&restictionType);
+				}
+
+				bool CDatatypeStringValueSpaceMap::isRestrictedToWithoutLanguageTagsValues() {
+					CDatatypeStringValueExclusionType restictionType(CDatatypeStringValueExclusionType::SVET_LANGUAGE_TAGS_COMPLETELY, false);
+					return areAllValuesRestricted(&restictionType);
+				}
+
 
 
 
@@ -833,6 +843,45 @@ namespace Konclude {
 				}
 
 
+
+
+				bool CDatatypeStringValueSpaceMap::addValueSpaceDependencies(CDatatypeValueSpaceDependencyCollector* depCollector, CDatatypeStringValueExclusionType* exclusionType) {
+
+					CDatatypeStringValueSpaceMap::const_iterator itBegin = CDatatypeStringValueSpaceMap::constBegin(), itEnd = CDatatypeStringValueSpaceMap::constEnd();
+					CDatatypeStringValueSpaceMap::const_iterator it = itBegin;
+
+					it = itBegin;
+					while (it != itEnd) {
+						const CDatatypeStringValueSpaceMapData& mapData = it.value();
+						CDatatypeStringValueData* itValueData = mapData.mUseValue;
+						if (isDataValueExcluded(itValueData, exclusionType)) {
+							addDataValueExclusionDependencies(itValueData, depCollector);
+						}
+
+						if (it == itBegin) {
+							if (isLeftDataIntervalExcluded(itValueData, exclusionType)) {
+								addLeftIntervalExclusionDependencies(itValueData, depCollector);
+							}
+						}
+
+						++it;
+						if (it == itEnd) {
+							if (isRightDataIntervalExcluded(itValueData, exclusionType)) {
+								addRightIntervalExclusionDependencies(itValueData, depCollector);
+							}
+						} else {
+							const CDatatypeStringValueSpaceMapData& nextMapData = it.value();
+							CDatatypeStringValueData* nextValueData = nextMapData.mUseValue;
+
+							if (isDataIntervalExcluded(itValueData, nextValueData, exclusionType)) {
+								addDataIntervalExclusionDependencies(itValueData, nextValueData, depCollector);
+							}
+
+						}
+					}
+					return true;
+
+				}
 
 
 
@@ -1150,6 +1199,44 @@ namespace Konclude {
 						stringValueData = data.mUseValue;
 					}
 					return stringValueData;
+				}
+
+
+
+
+				bool CDatatypeStringValueSpaceMap::areAllValuesRestricted(CDatatypeStringValueExclusionType* exclusionType) {
+					CDatatypeStringValueSpaceMap::const_iterator itBegin = CDatatypeStringValueSpaceMap::constBegin(), itEnd = CDatatypeStringValueSpaceMap::constEnd();
+					CDatatypeStringValueSpaceMap::const_iterator it = itBegin;
+					if (it == itEnd) {
+						return true;
+					}
+					while (it != itEnd) {
+						const CDatatypeStringValueSpaceMapData& mapData = it.value();
+						CDatatypeStringValueData* stringValueData = mapData.mUseValue;
+						if (!isDataValueExcluded(stringValueData,exclusionType)) {
+							return false;
+						}
+
+						if (it == itBegin) {
+							if (!isLeftDataIntervalExcluded(stringValueData, exclusionType)) {
+								return false;
+							}
+						}
+						++it;
+
+						if (it == itEnd) {
+							if (!isRightDataIntervalExcluded(stringValueData, exclusionType)) {
+								return false;
+							}
+						} else {
+							const CDatatypeStringValueSpaceMapData& nextMapData = it.value();
+							CDatatypeStringValueData* nextStringValueData = nextMapData.mUseValue;
+							if (!isDataIntervalExcluded(stringValueData, nextStringValueData, exclusionType)) {
+								return false;
+							}
+						}
+					}
+					return true;
 				}
 
 

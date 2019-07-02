@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -33,6 +33,7 @@ namespace Konclude {
 			cint64* CDataLiteralNormalizerPreProcess::mBase64StringBinaryDataConvArray = nullptr;
 
 			CDataLiteralNormalizerPreProcess::CDataLiteralNormalizerPreProcess() {
+				mLastConceptId = 0;
 				if (!mConvArraysInitialized) {
 					cint64* tmpHexStringBinaryDataConvArray = new cint64[127];
 					for (cint64 i = 0; i < 127; ++i) {
@@ -78,7 +79,7 @@ namespace Konclude {
 			}
 
 
-			CConcreteOntology *CDataLiteralNormalizerPreProcess::preprocess(CConcreteOntology *ontology, CPreProcessContext* context) {
+			CConcept *CDataLiteralNormalizerPreProcess::preprocessDataConcept(CConcept* dataConcept, CConcreteOntology *ontology, CPreProcessContext* context) {
 				if (ontology) {
 					mTBox = ontology->getDataBoxes()->getTBox();
 					mABox = ontology->getDataBoxes()->getABox();
@@ -96,36 +97,124 @@ namespace Konclude {
 					mBoxContext = mOntology->getDataBoxes()->getBoxContext();
 					mMemMan = mBoxContext->getMemoryAllocationManager();
 
-
-
 					cint64 conceptCount = mConceptVector->getItemCount();
-					for (cint64 i = 0; i < conceptCount; ++i) {
+					if (dataConcept) {
+						CDataLiteral* dataLiteral = dataConcept->getDataLiteral();
+						if (dataLiteral) {
+							CDataLiteralValue* dataLiteralValue = dataLiteral->getDataLiteralValue();
+							if (!dataLiteralValue) {
+								dataLiteralValue = createDataLiteralValue(dataLiteral, context);
+								dataLiteral->setDataLiteralValue(dataLiteralValue);
+							}
+						}
+
+						if (dataConcept->getOperatorCode() == CCDATARESTRICTION) {
+							if (normalizeDatatypeRestriction(dataConcept, context)) {
+								conceptCount = mConceptVector->getItemCount();
+							}
+						}
+						else if (dataConcept->getOperatorCode() == CCDATALITERAL) {
+							normalizeDataLiteral(dataConcept, context);
+						}
+					}
+				}
+				return dataConcept;
+			}
+
+
+			CConcreteOntology *CDataLiteralNormalizerPreProcess::preprocess(CConcreteOntology *ontology, CPreProcessContext* context) {
+				mOntology = ontology;
+				mContext = context;
+				mLastConceptId = 0;
+				if (ontology) {
+					mTBox = ontology->getDataBoxes()->getTBox();
+					mABox = ontology->getDataBoxes()->getABox();
+					mRBox = ontology->getDataBoxes()->getRBox();
+					mMBox = ontology->getDataBoxes()->getMBox();
+
+
+					mRolesVector = mRBox->getRoleVector();
+					mConceptVector = mTBox->getConceptVector();
+					mIndiVec = mABox->getIndividualVector();
+
+
+					mOntology = ontology;
+					mBoxContext = mOntology->getDataBoxes()->getBoxContext();
+					mMemMan = mBoxContext->getMemoryAllocationManager();
+
+
+				}
+
+				return continuePreprocessing();
+			}
+
+
+
+			CConcreteOntology* CDataLiteralNormalizerPreProcess::continuePreprocessing() {
+				if (mOntology) {
+					cint64 conceptCount = mConceptVector->getItemCount();
+					for (cint64 i = mLastConceptId; i < conceptCount; ++i) {
 						CConcept* concept = mConceptVector->getLocalData(i);
 						if (concept) {
 							CDataLiteral* dataLiteral = concept->getDataLiteral();
 							if (dataLiteral) {
 								CDataLiteralValue* dataLiteralValue = dataLiteral->getDataLiteralValue();
 								if (!dataLiteralValue) {
-									dataLiteralValue = createDataLiteralValue(dataLiteral,context);
+									dataLiteralValue = createDataLiteralValue(dataLiteral, mContext);
 									dataLiteral->setDataLiteralValue(dataLiteralValue);
 								}
 							}
 
 							if (concept->getOperatorCode() == CCDATARESTRICTION) {
-								if (normalizeDatatypeRestriction(concept,context)) {
+								if (normalizeDatatypeRestriction(concept, mContext)) {
 									conceptCount = mConceptVector->getItemCount();
 								}
 							} else if (concept->getOperatorCode() == CCDATALITERAL) {
-								normalizeDataLiteral(concept,context);
+								normalizeDataLiteral(concept, mContext);
 							}
 						}
 					}
+					mLastConceptId = conceptCount;
 
+					cint64 indiCount = mIndiVec->getItemCount();
+					for (cint64 i = mLastIndiId; i < indiCount; ++i) {
+						CIndividual* indi = mIndiVec->getLocalData(i);
+						if (indi) {
+							for (CDataAssertionLinker* dataAssLinkerIt = indi->getAssertionDataLinker(); dataAssLinkerIt; dataAssLinkerIt = dataAssLinkerIt->getNext()) {
+								CDataLiteral* dataLiteral = dataAssLinkerIt->getDataLiteral();
+								if (dataLiteral) {
+									CDataLiteralValue* dataLiteralValue = dataLiteral->getDataLiteralValue();
+									if (!dataLiteralValue) {
+										dataLiteralValue = createDataLiteralValue(dataLiteral, mContext);
+										dataLiteral->setDataLiteralValue(dataLiteralValue);
+									}
+								}
 
+							}
+						}
+					}
+					mLastIndiId = indiCount;
 				}
-
-				return ontology;
+				return mOntology;
 			}
+
+
+			CDataLiteralValue* CDataLiteralNormalizerPreProcess::createPreprocessedDataLiteralValue(CDataLiteral* dataLiteral, CPreProcessContext* context, CContext* boxContext) {
+				mOntology = context->getOntology();
+				mMemMan = context->getMemoryAllocationManager();
+				mContext = context;
+				mBoxContext = boxContext;
+
+
+				CDataLiteralValue* dataLiteralValue = dataLiteral->getDataLiteralValue();
+				if (!dataLiteralValue) {
+					dataLiteralValue = createDataLiteralValue(dataLiteral, context);
+					dataLiteral->setDataLiteralValue(dataLiteralValue);
+				}
+				return dataLiteralValue;
+			}
+
+
 
 
 			bool CDataLiteralNormalizerPreProcess::normalizeDataLiteral(CConcept* dataLiteralConcept, CPreProcessContext* context) {
@@ -244,13 +333,13 @@ namespace Konclude {
 					if (lengthParsed) {
 
 						if (datatype->getBasicDatatypeType() == CDatatype::DBT_STRING) {
-							CDataLiteralStringValue* dataLitStringValue = CObjectAllocator<CDataLiteralStringValue>::allocateAndConstruct(mMemMan);
+							CDataLiteralStringValue* dataLitStringValue = CObjectParameterizingAllocator<CDataLiteralStringValue, CContext*>::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 							if (infinite) {
 								dataLitStringValue->initValueFromInfiniteLength();
 							} else {
 								dataLitStringValue->initValueFromLength(length);
 							}
-							CDataLiteral* dataLitString = CObjectAllocator<CDataLiteral>::allocateAndConstruct(mMemMan);
+							CDataLiteral* dataLitString = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 							dataLitString->initDataLiteral("",datatype);
 							dataLitString->setDataLiteralValue(dataLitStringValue);
 							adaptedDataLiteral = dataLitString;
@@ -263,31 +352,31 @@ namespace Konclude {
 							} else {
 								dataLitIRIValue->initValueFromLength(length);
 							}
-							CDataLiteral* dataLitIRI = CObjectAllocator<CDataLiteral>::allocateAndConstruct(mMemMan);
+							CDataLiteral* dataLitIRI = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 							dataLitIRI->initDataLiteral("",datatype);
 							dataLitIRI->setDataLiteralValue(dataLitIRIValue);
 							adaptedDataLiteral = dataLitIRI;
 
 						} else if (datatype->getBasicDatatypeType() == CDatatype::DBT_HEXBINARY) {
-							CDataLiteralBinaryHexDataValue* dataLitHexBinaryValue = CObjectParameterizingAllocator< CDataLiteralBinaryHexDataValue,CContext* >::allocateAndConstructAndParameterize(mMemMan,nullptr);
+							CDataLiteralBinaryHexDataValue* dataLitHexBinaryValue = CObjectParameterizingAllocator< CDataLiteralBinaryHexDataValue,CContext* >::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 							if (infinite) {
 								dataLitHexBinaryValue->initValueFromInfiniteLength();
 							} else {
 								dataLitHexBinaryValue->initValueFromLength(length);
 							}
-							CDataLiteral* dataLitIRI = CObjectAllocator<CDataLiteral>::allocateAndConstruct(mMemMan);
-							dataLitIRI->initDataLiteral("",datatype);
+							CDataLiteral* dataLitIRI = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
+							dataLitIRI->initDataLiteral("", datatype);
 							dataLitIRI->setDataLiteralValue(dataLitHexBinaryValue);
 							adaptedDataLiteral = dataLitIRI;
 
 						} else if (datatype->getBasicDatatypeType() == CDatatype::DBT_BASE64BINARY) {
-							CDataLiteralBinaryBase64DataValue* dataLitBase64BinaryValue = CObjectParameterizingAllocator< CDataLiteralBinaryBase64DataValue,CContext* >::allocateAndConstructAndParameterize(mMemMan,nullptr);
+							CDataLiteralBinaryBase64DataValue* dataLitBase64BinaryValue = CObjectParameterizingAllocator< CDataLiteralBinaryBase64DataValue,CContext* >::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 							if (infinite) {
 								dataLitBase64BinaryValue->initValueFromInfiniteLength();
 							} else {
 								dataLitBase64BinaryValue->initValueFromLength(length);
 							}
-							CDataLiteral* dataLitIRI = CObjectAllocator<CDataLiteral>::allocateAndConstruct(mMemMan);
+							CDataLiteral* dataLitIRI = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 							dataLitIRI->initDataLiteral("",datatype);
 							dataLitIRI->setDataLiteralValue(dataLitBase64BinaryValue);
 							adaptedDataLiteral = dataLitIRI;
@@ -499,7 +588,7 @@ namespace Konclude {
 					}
 
 					languageValueString = languageValueString.toLower();
-					CDataLiteralStringValue* dataLitStringValue = CObjectAllocator<CDataLiteralStringValue>::allocateAndConstruct(mMemMan);
+					CDataLiteralStringValue* dataLitStringValue = CObjectParameterizingAllocator<CDataLiteralStringValue,CContext*>::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 					dataLitStringValue->initValueFromString(stringValueString,languageValueString);
 					dataLiteralValue = dataLitStringValue;
 

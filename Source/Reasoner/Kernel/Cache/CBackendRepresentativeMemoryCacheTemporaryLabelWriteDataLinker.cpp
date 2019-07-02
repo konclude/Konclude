@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -32,13 +32,14 @@ namespace Konclude {
 				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker() {
 				}
 
-				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::initLabelWriteData(cint64 signature) {
+				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::initLabelWriteData(cint64 signature, cint64 labelType) {
+					initCachingStatusFlags();
+					mLabelType = labelType;
 					mDetValueCount = 0;
 					mSignature = signature;
 					mDetValueLinker = nullptr;
-					mCompletelyHandled = false;
-					mCompletelySaturated = false;
 					mTmpData = nullptr;
+					mStatusFlags = 0;
 					return this;
 				}
 
@@ -54,7 +55,7 @@ namespace Konclude {
 				}
 
 
-				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::appendDeterministicCacheValueLinker(CBackendRepresentativeMemoryLabelValueLinker* linker) {
+				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::appendCacheValueLinker(CBackendRepresentativeMemoryLabelValueLinker* linker) {
 					CBackendRepresentativeMemoryLabelValueLinker* linkerIt = linker;
 					while (linkerIt) {
 						++mDetValueCount;
@@ -65,33 +66,13 @@ namespace Konclude {
 				}
 
 
-				CBackendRepresentativeMemoryLabelValueLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::getDeterministicCacheValueLinker() {
+				CBackendRepresentativeMemoryLabelValueLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::getCacheValueLinker() {
 					return mDetValueLinker;
 				}
 
 
-
-				cint64 CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::getDeterministicCacheValueCount() {
+				cint64 CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::getCacheValueCount() {
 					return mDetValueCount;
-				}
-
-				bool CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::isCompletelyHandled() {
-					return mCompletelyHandled;
-				}
-
-				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::setCompletelyHandled(bool completelyHandled) {
-					mCompletelyHandled = completelyHandled;
-					return this;
-				}
-
-
-				bool CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::isCompletelySaturated() {
-					return mCompletelySaturated;
-				}
-
-				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::setCompletelySaturated(bool completelySaturated) {
-					mCompletelySaturated = completelySaturated;
-					return this;
 				}
 
 
@@ -107,6 +88,10 @@ namespace Konclude {
 				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::clearTemporaryData() {
 					mTmpData = nullptr;
 					return this;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker::getLabelType() {
+					return mLabelType;
 				}
 
 

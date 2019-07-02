@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -79,9 +79,9 @@ namespace Konclude {
 								CDataRangeTermExpression* dataRangeExpression = dynamic_cast<CDataRangeTermExpression*>(expression);
 								if (dataRangeExpression) {
 									mDataRangeList.append(dataRangeExpression);
-									CDataLiteralExpression* dataLiteralExpression = dynamic_cast<CDataLiteralExpression*>(expression);
-									if (dataLiteralExpression) {
-										mDataLiteralList.append(dataLiteralExpression);
+									CDataLiteralTermExpression* dataLiteralTermExpression = dynamic_cast<CDataLiteralTermExpression*>(expression);
+									if (dataLiteralTermExpression) {
+										mDataLiteralTermList.append(dataLiteralTermExpression);
 									} else {
 										CDatatypeExpression* datatypeExpression = dynamic_cast<CDatatypeExpression*>(expression);
 										if (datatypeExpression) {
@@ -146,8 +146,8 @@ namespace Konclude {
 				return true;
 			}
 
-			bool CExpressionSplitter::testForDataLiteralExpressions(cint64 literalExpressions) {
-				if (mDataLiteralList.count() < literalExpressions) {
+			bool CExpressionSplitter::testForDataLiteralTermExpressions(cint64 literalExpressions) {
+				if (mDataLiteralTermList.count() < literalExpressions) {
 					return false;
 				}
 				return true;
@@ -188,8 +188,8 @@ namespace Konclude {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ExpressionSplitter",logTr("Couldn't extract minimal required %1 DataProperty-Expressions, extracted DataProperty-Expressions %2.").arg(dataPropertyExpressions).arg(mDataPropertyList.count()),this);
 					return false;
 				}
-				if (mDataLiteralList.count() < dataLiteralExpressions) {
-					LOG(ERROR,"::Konclude::Reasoner::Generator::ExpressionSplitter",logTr("Couldn't extract minimal required %1 DataLiteral-Expressions, extracted DataLiteral-Expressions %2.").arg(dataLiteralExpressions).arg(mDataLiteralList.count()),this);
+				if (mDataLiteralTermList.count() < dataLiteralExpressions) {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ExpressionSplitter",logTr("Couldn't extract minimal required %1 DataLiteral-Expressions, extracted DataLiteral-Expressions %2.").arg(dataLiteralExpressions).arg(mDataLiteralTermList.count()),this);
 					return false;
 				}
 				if (mDatatypeList.count() < datatypeExpressions) {
@@ -225,8 +225,8 @@ namespace Konclude {
 				return &mDataRangeList;
 			}
 
-			CEXPRESSIONLIST<CDataLiteralExpression*>* CExpressionSplitter::getDataLiteralExpressionList() {
-				return &mDataLiteralList;
+			CEXPRESSIONLIST<CDataLiteralTermExpression*>* CExpressionSplitter::getDataLiteralTermExpressionList() {
+				return &mDataLiteralTermList;
 			}
 
 
@@ -305,12 +305,12 @@ namespace Konclude {
 			}
 
 
-			CDataLiteralExpression* CExpressionSplitter::getFirstDataLiteralExpression() {
-				return mDataLiteralList.first();
+			CDataLiteralTermExpression* CExpressionSplitter::getFirstDataLiteralTermExpression() {
+				return mDataLiteralTermList.first();
 			}
 
-			CDataLiteralExpression* CExpressionSplitter::getSecondDataLiteralExpression() {
-				return mDataLiteralList.at(1);
+			CDataLiteralTermExpression* CExpressionSplitter::getSecondDataLiteralTermExpression() {
+				return mDataLiteralTermList.at(1);
 			}
 
 

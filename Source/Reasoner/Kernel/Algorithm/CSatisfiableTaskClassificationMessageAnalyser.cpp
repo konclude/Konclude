@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -63,7 +63,7 @@ namespace Konclude {
 
 
 				CIndividualProcessNode* CSatisfiableTaskClassificationMessageAnalyser::getCorrectedIndividualID(CIndividualProcessNode* baseIndiNode, CIndividualProcessNodeVector* indiNodeVec, bool* nondetMergedFlag) {
-					CIndividualProcessNode* indi = indiNodeVec->getData(baseIndiNode->getIndividualID());
+					CIndividualProcessNode* indi = indiNodeVec->getData(baseIndiNode->getIndividualNodeID());
 					while (indi->hasMergedIntoIndividualNodeID()) {
 						if (nondetMergedFlag && *nondetMergedFlag == false) {
 							if (!indi->getMergedDependencyTrackPoint() || indi->getMergedDependencyTrackPoint()->getBranchingTag() > 0) {
@@ -1145,7 +1145,9 @@ namespace Konclude {
 					CConcept* testingConcept = conDes->getConcept();
 					bool negated = conDes->getNegation();
 
-
+					//if (CIRIName::getRecentIRIName(testingConcept->getClassNameLinker()) == "http://www.owllink.org/testsuite/particle-D#Neutrino") {
+					//	bool bug = true;
+					//}
 					CConceptReferenceLinking* conRefLinking = nullptr;
 					CConceptData* conData = testingConcept->getConceptData();
 					if (conData && !mUseAlwaysConRefLinkDataHash) {
@@ -1166,10 +1168,10 @@ namespace Konclude {
 						if (possSubsumRefLinkData) {
 							if (!possSubsumRefLinkData->isPossibleSubsumptionMapInitialized()) {
 								// initialize possible subsumption list
-								CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* possSubsumerList = nullptr;
+								CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>* possSubsumerList = nullptr;
 
 								if (!mMultiplePossSubsumInitAvoidHash) {
-									mMultiplePossSubsumInitAvoidHash = CObjectParameterizingAllocator< CPROCESSINGHASH< CConcept*,CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* >,CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getTemporaryMemoryAllocationManager(),calcAlgContext->getTaskProcessorContext());
+									mMultiplePossSubsumInitAvoidHash = CObjectParameterizingAllocator< CPROCESSINGHASH< CConcept*,CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>* >,CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getTemporaryMemoryAllocationManager(),calcAlgContext->getTaskProcessorContext());
 								}
 								possSubsumerList = mMultiplePossSubsumInitAvoidHash->value(testingConcept);
 
@@ -1177,13 +1179,13 @@ namespace Konclude {
 								if (possSubsumerList) {
 
 									// prune already initialization list for possible subsumers
-									CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::iterator itPossSubsum = possSubsumerList->begin(), itPossSubsumEnd = possSubsumerList->end();
+									CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>::iterator itPossSubsum = possSubsumerList->begin(), itPossSubsumEnd = possSubsumerList->end();
 									while (conSetIt.hasNext() && itPossSubsum != itPossSubsumEnd) {
 										CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
 										CConcept* concept = conDes->getConcept();
 										bool negated = conDes->getNegation();
 
-										CClassificationInitializePossibleSubsumptionData* possSubsumConData = *itPossSubsum;
+										CClassificationInitializePossibleClassSubsumptionData* possSubsumConData = *itPossSubsum;
 										CConcept* possSubsumConcept = possSubsumConData->getPossibleSubsumerConcept();
 										cint64 conDesTag = conDes->getConceptTag();
 										cint64 possSubsumConTag = possSubsumConcept->getConceptTag();
@@ -1206,7 +1208,7 @@ namespace Konclude {
 										}
 									}
 									while (itPossSubsum != itPossSubsumEnd) {
-										CClassificationInitializePossibleSubsumptionData* subsumData(*itPossSubsum);
+										CClassificationInitializePossibleClassSubsumptionData* subsumData(*itPossSubsum);
 										subsumData->setPossibleSubsumerInvalid();
 										++itPossSubsum;
 									}
@@ -1221,9 +1223,9 @@ namespace Konclude {
 
 										if (!negated && (concept->hasClassName() && concept->getConceptTag() != 1 && concept != testingConcept)) {
 											if (!possSubsumerList) {
-												possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
+												possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
 											}
-											CClassificationInitializePossibleSubsumptionData* possSubsumData = CObjectAllocator< CClassificationInitializePossibleSubsumptionData >::allocateAndConstruct(mTempMemAllocMan);
+											CClassificationInitializePossibleClassSubsumptionData* possSubsumData = CObjectAllocator< CClassificationInitializePossibleClassSubsumptionData >::allocateAndConstruct(mTempMemAllocMan);
 											possSubsumData->initClassificationPossibleSubsumptionData(concept);
 											possSubsumerList->append(possSubsumData);
 										}
@@ -1240,9 +1242,9 @@ namespace Konclude {
 
 											if (testSubsumerCandidatePossibleWithMergedSaturatedModel(indiNode,eqConcept,calcAlgContext)) {
 												if (!possSubsumerList) {
-													possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
+													possSubsumerList = CObjectParameterizingAllocator< CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
 												}
-												CClassificationInitializePossibleSubsumptionData* possSubsumData = CObjectAllocator< CClassificationInitializePossibleSubsumptionData >::allocateAndConstruct(mTempMemAllocMan);
+												CClassificationInitializePossibleClassSubsumptionData* possSubsumData = CObjectAllocator< CClassificationInitializePossibleClassSubsumptionData >::allocateAndConstruct(mTempMemAllocMan);
 												possSubsumData->initClassificationPossibleSubsumptionData(concept);
 												possSubsumerList->append(possSubsumData);
 											}
@@ -1278,7 +1280,7 @@ namespace Konclude {
 										mMultiplePossSubsumInitAvoidHash->insert(testingConcept,possSubsumerList);
 									}
 
-									CClassificationInitializePossibleSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationInitializePossibleSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
+									CClassificationInitializePossibleClassSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationInitializePossibleClassSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
 									possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept,possSubsumerList,eqConceptsNonCandidatePossSubsumers,eqConNonCandPossSubsumerList);
 									messageDataLinker = possSubsumMessageData->append(messageDataLinker);
 								}
@@ -1328,7 +1330,7 @@ namespace Konclude {
 									}
 
 									if (updatedPossSubsumptions) {
-										CClassificationUpdatePossibleSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationUpdatePossibleSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
+										CClassificationUpdatePossibleClassSubsumptionMessageData* possSubsumMessageData = CObjectAllocator<CClassificationUpdatePossibleClassSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
 										possSubsumMessageData->initClassificationPossibleSubsumptionMessageData(testingConcept);
 										messageDataLinker = possSubsumMessageData->append(messageDataLinker);
 									}
@@ -1344,13 +1346,13 @@ namespace Konclude {
 
 				void CSatisfiableTaskClassificationMessageAnalyser::verifySubsumptionPossibleWithModel(CIndividualProcessNode* indiNode, CConcept* testingConcept, CClassificationMessageData* possSubsumMessageData, CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>* subsumerList) {
 					if (possSubsumMessageData) {
-						if (possSubsumMessageData->getClassificationMessageDataType() == CClassificationInitializePossibleSubsumptionMessageData::TELLCLASSINITIALIZEPOSSIBLESUBSUM) {
-							CClassificationInitializePossibleSubsumptionMessageData* initPossSubMessageData = (CClassificationInitializePossibleSubsumptionMessageData*)possSubsumMessageData;
+						if (possSubsumMessageData->getClassificationMessageDataType() == CClassificationInitializePossibleClassSubsumptionMessageData::TELLCLASSINITIALIZEPOSSIBLESUBSUM) {
+							CClassificationInitializePossibleClassSubsumptionMessageData* initPossSubMessageData = (CClassificationInitializePossibleClassSubsumptionMessageData*)possSubsumMessageData;
 							if (initPossSubMessageData) {
-								CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* possSubsumList = initPossSubMessageData->getClassPossibleSubsumerList();
+								CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>* possSubsumList = initPossSubMessageData->getClassPossibleSubsumerList();
 								if (possSubsumList) {
-									for (CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::const_iterator it = possSubsumList->constBegin(), itEnd = possSubsumList->constEnd(); it != itEnd; ++it) {
-										CClassificationInitializePossibleSubsumptionData* possSubsumData = *it;
+									for (CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>::const_iterator it = possSubsumList->constBegin(), itEnd = possSubsumList->constEnd(); it != itEnd; ++it) {
+										CClassificationInitializePossibleClassSubsumptionData* possSubsumData = *it;
 										if (possSubsumData->isPossibleSubsumerValid()) {
 											CConcept* possSubsumerConcept = possSubsumData->getPossibleSubsumerConcept();
 											if (possSubsumerConcept->getOperatorCode() == CCEQCAND) {
@@ -1479,7 +1481,7 @@ namespace Konclude {
 
 										while (!oneClashFoundFlag && linkIt.hasNext()) {
 											CIndividualLinkEdge* link = linkIt.next(true);
-											cint64 succIndiID = link->getOppositeIndividualID(indiNode->getIndividualID());
+											cint64 succIndiID = link->getOppositeIndividualID(indiNode->getIndividualNodeID());
 											CIndividualProcessNode* succIndiNode = indiNodeVec->getData(succIndiID);											
 
 											for (CSortedNegLinker<CConcept*>* operandLinker = concept->getOperandList(); !oneClashFoundFlag && operandLinker; operandLinker = operandLinker->getNext()) {
@@ -1573,10 +1575,10 @@ namespace Konclude {
 						mUseAlwaysConRefLinkDataHash = false;
 
 						if (testOntology && testingConcept && constructedIndiNode) {
-							cint64 constructedID = constructedIndiNode->getIndividualID();
+							cint64 constructedID = constructedIndiNode->getIndividualNodeID();
 							bool nondetMerged = false;
 							CIndividualProcessNode* baseIndi = getCorrectedIndividualID(constructedIndiNode,indiNodeVec,&nondetMerged);
-							cint64 baseIndiID = baseIndi->getIndividualID();
+							cint64 baseIndiID = baseIndi->getIndividualNodeID();
 							if (nondetMerged) {
 								maxDetBranchTag = 0;
 							}
@@ -1633,7 +1635,7 @@ namespace Konclude {
 									}
 								}
 
-								CClassificationSubsumptionMessageData* subsumMessageData = CObjectAllocator<CClassificationSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
+								CClassificationClassSubsumptionMessageData* subsumMessageData = CObjectAllocator<CClassificationClassSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
 								subsumMessageData->initClassificationSubsumptionMessageData(testingConcept,subsumerList);
 								subsumMessageDataLinker = subsumMessageData->append(subsumMessageDataLinker);
 								subsumerList = nullptr;
@@ -1652,7 +1654,7 @@ namespace Konclude {
 									CPROCESSINGLIST<CIndividualAnalyseProcessItem*> succIndiProcList(taskProcessorContext);
 
 									CIndividualAnalyseProcessItem* baseAncItem = CObjectAllocator<CIndividualAnalyseProcessItem>::allocateAndConstruct(taskMemMan);
-									baseAncItem->initIndividualAnalyseProcessItem(baseIndi->getIndividualID(),0,nullptr,nullptr);
+									baseAncItem->initIndividualAnalyseProcessItem(baseIndi->getIndividualNodeID(),0,nullptr,nullptr);
 
 									succIndiProcHash.insert(0,baseAncItem);
 									while (succIt.hasNext()) {
@@ -1673,7 +1675,7 @@ namespace Konclude {
 										CIndividualAnalyseProcessItem* indiAnProcItem = succIndiProcList.takeFirst();
 										cint64 indiID = indiAnProcItem->mIndiID;
 										CIndividualProcessNode* indiNode = indiNodeVec->getData(indiID);
-										if (!indiNode->isNominalIndividual() && !indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION)) {
+										if (!indiNode->isNominalIndividualNode() && !indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION)) {
 											CConceptDescriptor* analyseConDes = nullptr;
 											CConceptDescriptor* conDesSingleDep = nullptr;
 
@@ -1767,7 +1769,7 @@ namespace Konclude {
 															}
 
 															if (!branchingError && subsumerList) {
-																CClassificationSubsumptionMessageData* subsumMessageData = CObjectAllocator<CClassificationSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
+																CClassificationClassSubsumptionMessageData* subsumMessageData = CObjectAllocator<CClassificationClassSubsumptionMessageData>::allocateAndConstruct(mTempMemAllocMan);
 																subsumMessageData->initClassificationSubsumptionMessageData(analyseConcept,subsumerList);
 																subsumMessageDataLinker = subsumMessageData->append(subsumMessageDataLinker);
 																subsumerList = nullptr;
@@ -1894,12 +1896,12 @@ namespace Konclude {
 											for (CXNegLinker<CIndividualProcessNode*>* nodeIt = pmAnalyseProcessItem->mNodeLinker; nodeIt; nodeIt = nodeIt->getNext()) {
 												CIndividualProcessNode* node = nodeIt->getData();
 
-												bool blockedOrCached = node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION | CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED) || node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) && !node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID |CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
+												bool blockedOrCached = node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDATEBLOCKERFLAGSCOMPINATION | CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED) || node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) && !node->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID |CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
 												if (blockedOrCached) {
 													vaidConcepts = false;
 													vaidSuccessors = false;
 												}
-												bool nominalNode = node->isNominalIndividual();
+												bool nominalNode = node->isNominalIndividualNode();
 												if (nominalNode) {
 													vaidSuccessors = false;
 												}

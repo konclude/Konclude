@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -414,6 +414,159 @@ namespace Konclude {
 															domEl = queryResultNode;
 														}
 
+														CClassSynsetsResult* classSynsetsResult = dynamic_cast<CClassSynsetsResult*>(queryResult);
+														if (classSynsetsResult) {
+															queryResultNode = document.createElement("SetOfClassSynsets");
+															QList<CClassSynsetResult*>* classSynsetList = classSynsetsResult->getClassSynsetList();
+															for (QList<CClassSynsetResult*>::const_iterator it = classSynsetList->constBegin(), itEnd = classSynsetList->constEnd(); it != itEnd; ++it) {
+																CClassSynsetResult* classSynset(*it);
+																QDomElement superClassSynsetNode = document.createElement("ClassSynset");
+																foreach (QString className, classSynset->getEquivalentClassNameList()) {
+																	QDomElement classNameNode = document.createElement("owl:Class");
+																	classNameNode.setAttribute("IRI",className);
+																	superClassSynsetNode.appendChild(classNameNode);
+																}
+																queryResultNode.appendChild(superClassSynsetNode);
+															}
+															domEl = queryResultNode;
+														}
+
+
+
+								
+
+
+														CPropertyHierarchyResult *subPropertyHierarchyResult = dynamic_cast<CPropertyHierarchyResult *>(queryResult);
+														if (subPropertyHierarchyResult) {
+
+															bool dataPropertyQuery = subPropertyHierarchyResult->hasDataProperties();
+															QString dataObjectString = QString("Object");
+															if (dataPropertyQuery) {
+																dataObjectString = QString("Data");
+															}
+
+															queryResultNode = document.createElement(QString("%1PropertyHierarchy").arg(dataObjectString));
+															CPropertySynsetResult *bottomPropertySynsetResult = subPropertyHierarchyResult->getBottomPropertySynset();
+															QDomElement propertySynsetNode = document.createElement(QString("%1PropertySynset").arg(dataObjectString));
+															foreach (QString propertyName, bottomPropertySynsetResult->getEquivalentPropertyNameList()) {
+																QDomElement propertyNameNode = document.createElement(QString("owl:%1Property").arg(dataObjectString));
+																propertyNameNode.setAttribute("IRI",propertyName);
+																propertySynsetNode.appendChild(propertyNameNode);
+															}
+															queryResultNode.appendChild(propertySynsetNode);
+															QList<CPropertySynsetResult *> procList;
+															QSet<CPropertySynsetResult *> procSet;
+															CPropertySynsetResult *topPropertySynsetResult = subPropertyHierarchyResult->getTopPropertySynset();
+															procList.append(topPropertySynsetResult);
+															while (!procList.isEmpty()) {
+																CPropertySynsetResult *propertySynsetResult = procList.takeFirst();
+																CPropertySubPropertiesRelationResult *subPropertyRelationResult = subPropertyHierarchyResult->getSubPropertyRelation(propertySynsetResult,false);
+																if (subPropertyRelationResult) {
+																	QDomElement propertySubPropertyPairNode = document.createElement(QString("%1PropertySub%2PropertiesPair").arg(dataObjectString).arg(dataObjectString));
+																	// super property serialization
+																	QDomElement superPropertySynsetNode = document.createElement(QString("%1PropertySynset").arg(dataObjectString));
+																	foreach (QString propertyName, propertySynsetResult->getEquivalentPropertyNameList()) {
+																		QDomElement propertyNameNode = document.createElement(QString("owl:%1Property").arg(dataObjectString));
+																		propertyNameNode.setAttribute("IRI",propertyName);
+																		superPropertySynsetNode.appendChild(propertyNameNode);
+																	}
+																	propertySubPropertyPairNode.appendChild(superPropertySynsetNode);
+																	QDomElement subPropertySynsetsNode = document.createElement(QString("Sub%1PropertySynsets").arg(dataObjectString));
+																	// sub properties serialization
+																	foreach (CPropertySynsetResult *subPropertySynsetResult, subPropertyRelationResult->getSubPropertiesSynsetList()) {
+																		QDomElement subPropertySynsetNode = document.createElement(QString("%1PropertySynset").arg(dataObjectString));
+																		foreach (QString propertyName, subPropertySynsetResult->getEquivalentPropertyNameList()) {
+																			QDomElement propertyNameNode = document.createElement(QString("owl:%1Property").arg(dataObjectString));
+																			propertyNameNode.setAttribute("IRI",propertyName);
+																			subPropertySynsetNode.appendChild(propertyNameNode);
+																		}
+																		subPropertySynsetsNode.appendChild(subPropertySynsetNode);
+																		if (!procSet.contains(subPropertySynsetResult)) {
+																			procSet.insert(subPropertySynsetResult);
+																			procList.append(subPropertySynsetResult);
+																		}
+																	}
+																	propertySubPropertyPairNode.appendChild(subPropertySynsetsNode);
+																	queryResultNode.appendChild(propertySubPropertyPairNode);
+																}
+															}
+															domEl = queryResultNode;
+														}
+
+														//CPropertiesResult* propertiesResult = dynamic_cast<CPropertiesResult*>(queryResult);
+														//if (propertiesResult) {
+														//	queryResultNode = document.createElement("Properties");
+														//	QSet<QString>* propertiesSet = propertiesResult->getPropertiesSet();
+														//	for (QSet<QString>::const_iterator it = propertiesSet->constBegin(), itEnd = propertiesSet->constEnd(); it != itEnd; ++it) {
+														//		const QString& propertyName(*it);
+														//		QDomElement propertyNameNode = document.createElement("owl:Property");
+														//		propertyNameNode.setAttribute("IRI",propertyName);
+														//		queryResultNode.appendChild(propertyNameNode);
+														//	}
+														//	domEl = queryResultNode;
+														//}
+
+
+														
+
+
+
+														CPropertySetResult* propertySetResult = dynamic_cast<CPropertySetResult*>(queryResult);
+														if (propertySetResult) {
+
+															QString dataObjectString = QString("Object");
+															bool dataPropertyResult = propertySetResult->hasDataProperties();
+															if (dataPropertyResult) {
+																dataObjectString = QString("Data");
+															}
+
+															if (dataPropertyResult) {
+																queryResultNode = document.createElement(QString("DataPropertySynonyms"));
+															} else {
+																queryResultNode = document.createElement(QString("SetOfObjectProperties"));
+															}
+															QSet<QString>* propertiesSet = propertySetResult->getPropertiesSet();
+															for (QSet<QString>::const_iterator it = propertiesSet->constBegin(), itEnd = propertiesSet->constEnd(); it != itEnd; ++it) {
+																const QString& propertyName(*it);
+																QDomElement propertyNameNode = document.createElement(QString("owl:%1Property").arg(dataObjectString));
+																propertyNameNode.setAttribute("IRI", propertyName);
+																queryResultNode.appendChild(propertyNameNode);
+															}
+															domEl = queryResultNode;
+														}
+
+														CPropertySynsetsResult* propertySynsetsResult = dynamic_cast<CPropertySynsetsResult*>(queryResult);
+														if (propertySynsetsResult) {
+															QString dataObjectString = QString("Object");
+															bool dataPropertyResult = propertySynsetsResult->hasDataProperties();
+															if (dataPropertyResult) {
+																dataObjectString = QString("Data");
+															}
+
+															queryResultNode = document.createElement(QString("SetOf%1PropertySynsets").arg(dataObjectString));
+															QList<CPropertySynsetResult*>* propertySynsetList = propertySynsetsResult->getPropertySynsetList();
+															for (QList<CPropertySynsetResult*>::const_iterator it = propertySynsetList->constBegin(), itEnd = propertySynsetList->constEnd(); it != itEnd; ++it) {
+																CPropertySynsetResult* propertySynset(*it);
+																QDomElement superPropertySynsetNode = document.createElement(QString("%1PropertySynset").arg(dataObjectString));
+																foreach(QString propertyName, propertySynset->getEquivalentPropertyNameList()) {
+																	QDomElement propertyNameNode = document.createElement(QString("owl:%1Property").arg(dataObjectString));
+																	propertyNameNode.setAttribute("IRI", propertyName);
+																	superPropertySynsetNode.appendChild(propertyNameNode);
+																}
+																queryResultNode.appendChild(superPropertySynsetNode);
+															}
+															domEl = queryResultNode;
+														}
+
+
+
+
+
+
+
+
+
+
 
 														CIndividualSynonymsResult* individualSynonymsResult = dynamic_cast<CIndividualSynonymsResult*>(queryResult);
 														if (individualSynonymsResult) {
@@ -460,22 +613,6 @@ namespace Konclude {
 															domEl = queryResultNode;
 														}
 
-														CClassSynsetsResult* classSynsetsResult = dynamic_cast<CClassSynsetsResult*>(queryResult);
-														if (classSynsetsResult) {
-															queryResultNode = document.createElement("SetOfClassSynsets");
-															QList<CClassSynsetResult*>* classSynsetList = classSynsetsResult->getClassSynsetList();
-															for (QList<CClassSynsetResult*>::const_iterator it = classSynsetList->constBegin(), itEnd = classSynsetList->constEnd(); it != itEnd; ++it) {
-																CClassSynsetResult* classSynset(*it);
-																QDomElement superClassSynsetNode = document.createElement("ClassSynset");
-																foreach (QString className, classSynset->getEquivalentClassNameList()) {
-																	QDomElement classNameNode = document.createElement("owl:Class");
-																	classNameNode.setAttribute("IRI",className);
-																	superClassSynsetNode.appendChild(classNameNode);
-																}
-																queryResultNode.appendChild(superClassSynsetNode);
-															}
-															domEl = queryResultNode;
-														}
 
 														CIndividualSynsetsResult* individualSynsetsResult = dynamic_cast<CIndividualSynsetsResult*>(queryResult);
 														if (individualSynsetsResult) {
@@ -795,7 +932,7 @@ namespace Konclude {
 					QDomElement errorTextNodePa = document.createElement(QString("%1Text").arg(nodeString));
 
 					QDomText errorTextNode = document.createTextNode(errorText);
-					errorNode.setAttribute("error",errorText);
+					errorNode.setAttribute("error",errorText); 
 
 					errorTextNodePa.appendChild(errorTextNode);
 					errorNode.appendChild(errorTextNodePa);

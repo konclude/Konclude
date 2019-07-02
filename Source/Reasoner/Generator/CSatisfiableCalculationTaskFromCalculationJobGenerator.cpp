@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -68,42 +68,64 @@ namespace Konclude {
 				CIndividualSaturationProcessNodeVector* indiNodeVec = dataBox->getIndividualSaturationProcessNodeVector();
 
 				CMemoryAllocationManager* memMan = procContext->getUsedMemoryAllocationManager();
-				cint64 nextIndiID = qMax(ontology->getABox()->getIndividualCount()+1,indiNodeVec->getItemCount());
+				cint64 nextIndiID = qMax((cint64)1,indiNodeVec->getItemCount());
+				nextIndiID = qMax(nextIndiID, dataBox->getOntology()->getABox()->getNextIndividualId(false) + 1);
 
 				bool separateSaturation = approxSaturCalcJob->isSeparateSaturation();
+				CIndividualVector* indiVector = dataBox->getIndividualVector(true);
 
 				CApproximatedSaturationCalculationConstructionConstruct* satCalcConsConstruct = approxSaturCalcJob->getSatisfiableCalculationConstructionConstructs();
 				while (satCalcConsConstruct) {
 					CSaturationConceptReferenceLinking* satConRefLink = satCalcConsConstruct->getSaturationConceptReferenceLinking();
 					CSaturationIndividualReferenceLinking* satIndiRefLink = satCalcConsConstruct->getSaturationIndividualReferenceLinking();
 					CIndividual* nominalIndi = satCalcConsConstruct->getIndividual();
-					cint64 individualID = 0;
-					if (nominalIndi) {
-						individualID = nominalIndi->getIndividualID();
+					cint64 individualID = 1;
+					bool nominalIndiTriplesAssertions = false;
+
+					if (!nominalIndi && satCalcConsConstruct->getIndividualID() >= 0) {
+						individualID = satCalcConsConstruct->getIndividualID();
+						nominalIndi = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan);
+						nominalIndi->initIndividual(individualID);
+						nominalIndi->setTemporaryIndividual(true);
+						indiVector->setLocalData(individualID, nominalIndi);
+
+						if (satIndiRefLink) {
+							CIndividualProcessData* nominalIndiProData = CObjectAllocator<CIndividualProcessData>::allocateAndConstruct(memMan);
+							nominalIndiProData->initIndividualProcessExtensionData();
+							nominalIndiProData->setSaturationReferenceLinkingData(satIndiRefLink);
+							nominalIndi->setIndividualData(nominalIndiProData);
+						}
+
+						nominalIndiTriplesAssertions = true;
+					} else if (nominalIndi) {
+						individualID = (nominalIndi->getIndividualID());
+						nominalIndiTriplesAssertions = nominalIndi->hasIndividualName();
+						nominalIndiTriplesAssertions = true;
 					} else {
 						individualID = nextIndiID++;
 					}
 
-					CIndividualSaturationProcessNode* indi = CObjectParameterizingAllocator< CIndividualSaturationProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
-					indi->initIndividualSaturationProcessNode(individualID,satConRefLink,satIndiRefLink);
+					CIndividualSaturationProcessNode* indiNode = CObjectParameterizingAllocator< CIndividualSaturationProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
+					indiNode->initIndividualSaturationProcessNode(individualID,satConRefLink,satIndiRefLink);
 					if (nominalIndi) {
-						indi->setNominalIndividual(nominalIndi);
+						indiNode->setNominalIndividual(nominalIndi);
 					}
-					indi->setSeparated(separateSaturation);
+					indiNode->setSeparated(separateSaturation);
+					indiNode->setNominalIndividualTriplesAssertions(nominalIndiTriplesAssertions);
 
 					if (satConRefLink) {
-						satConRefLink->setIndividualProcessNodeForConcept(indi);
+						satConRefLink->setIndividualProcessNodeForConcept(indiNode);
 					}
 					if (satIndiRefLink) {
-						satIndiRefLink->setIndividualProcessNodeForIndividual(indi);
+						satIndiRefLink->setIndividualProcessNodeForIndividual(indiNode);
 					}
 
-					indiNodeVec->setLocalData(individualID,indi);
+					indiNodeVec->setLocalData(individualID,indiNode);
 
 					bool processing = satCalcConsConstruct->getQueueProcessing();
 					CIndividualSaturationProcessNodeLinker* indiProcNodeLinker = CObjectAllocator< CIndividualSaturationProcessNodeLinker >::allocateAndConstruct(memMan);
-					indiProcNodeLinker->initProcessNodeLinker(indi,processing);
-					indi->setIndividualSaturationProcessNodeLinker(indiProcNodeLinker);
+					indiProcNodeLinker->initProcessNodeLinker(indiNode,processing);
+					indiNode->setIndividualSaturationProcessNodeLinker(indiProcNodeLinker);
 					if (processing) {
 						dataBox->addIndividualSaturationProcessNodeLinker(indiProcNodeLinker);
 					}
@@ -126,6 +148,7 @@ namespace Konclude {
 					if (satIndiRefLink) {
 						CIndividualSaturationProcessNode* indiNode = (CIndividualSaturationProcessNode*)satIndiRefLink->getIndividualProcessNodeForConcept();
 						if (!indiNode->isInitialized()) {
+
 							CIndividualSaturationProcessNodeLinker* indiProcNodeLinker = indiNode->getIndividualSaturationProcessNodeLinker();
 							indiProcNodeLinker->setNegation(true);
 							dataBox->addIndividualSaturationProcessNodeLinker(indiProcNodeLinker);
@@ -139,6 +162,7 @@ namespace Konclude {
 				}
 
 				satCalcTask->setSaturationIndividualsAnalysationObserver(approxSaturCalcJob->getSaturationIndividualsAnalysationObserver());
+				satCalcTask->setOccurrenceStatisticsCollectingAdapter(approxSaturCalcJob->getOccurrenceStatisticsCollectingAdapter());
 
 				satCalcTask->setConsistenceAdapter(approxSaturCalcJob->getSaturationTaskPreyingAdapter());
 
@@ -206,14 +230,9 @@ namespace Konclude {
 
 				if (satCalcJob) {
 
-					cint64 firstPossibleNewIndividualID = ontology->getABox()->getIndividualCount();
+					cint64 firstPossibleNewIndividualID = 1;
 
 					bool requiresTaskCalc = false;
-
-					CIndividualVector* baseIndiVec = nullptr;
-					if (baseTask) {
-						baseIndiVec = baseTask->getProcessingDataBox()->getOntology()->getABox()->getIndividualVector(false);
-					}
 
 					CSatisfiableCalculationTask* satCalcTask = CObjectMemoryPoolAllocator<CSatisfiableCalculationTask>::allocateAndConstructWithMemroyPool(mGenTaskHandleContext->getTaskHandleMemoryAllocationManager());
 
@@ -285,6 +304,12 @@ namespace Konclude {
 					satCalcTask->setSatisfiableTaskIncrementalConsistencyTestingAdapter(satCalcJob->getSatisfiableTaskIncrementalConsistencyTestingAdapter());
 					satCalcTask->setSatisfiableTaskIndividualDependenceTrackingAdapter(satCalcJob->getSatisfiableTaskIndividualDependenceTrackingAdapter());
 					satCalcTask->setPossibleAssertionCollectionAdapter(satCalcJob->getPossibleAssertionCollectionAdapter());
+					satCalcTask->setSatisfiableClassificationRoleMarkedMessageAdapter(satCalcJob->getSatisfiableClassificationRoleMarkedMessageAdapter());
+					satCalcTask->setSatisfiableAnswererSubsumptionMessageAdapter(satCalcJob->getSatisfiableAnswererSubsumptionMessageAdapter());
+					satCalcTask->setSatisfiableAnswererInstancePropagationMessageAdapter(satCalcJob->getSatisfiableAnswererInstancePropagationMessageAdapter());
+					satCalcTask->setSatisfiableAnswererBindingPropagationAdapter(satCalcJob->getSatisfiableAnswererBindingPropagationAdapter());
+					satCalcTask->setSatisfiablePossibleInstancesMergingAdapter(satCalcJob->getSatisfiablePossibleInstancesMergingAdapter());
+					satCalcTask->setSatisfiableRepresentativeBackendCacheUpdatingAdapter(satCalcJob->getSatisfiableRepresentativeBackendCacheUpdatingAdapter());
 
 
 					CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();
@@ -337,25 +362,41 @@ namespace Konclude {
 					CMemoryAllocationManager* memMan = procContext->getUsedMemoryAllocationManager();
 
 
-					firstPossibleNewIndividualID = qMax(firstPossibleNewIndividualID,indiNodeVec->getItemCount());
+					firstPossibleNewIndividualID = qMax(firstPossibleNewIndividualID,indiNodeVec->getItemMaxIndex() + 1);
 
 					cint64 baseIndiID = firstPossibleNewIndividualID;
 					cint64 constructionIndiCount = 0;
+					CIndividualVector* baseIndiVec = dataBox->getIndividualVector(true);
 
 					CSatisfiableCalculationConstruct* satCalcConstruct = satCalcJob->getSatisfiableCalculationConstructs();
 					while (satCalcConstruct) {
 						++constructionIndiCount;
 						CIndividual* individual = satCalcConstruct->getIndividual();
-						cint64 individualID = baseIndiID+satCalcConstruct->getRelativeNewNodeID();
-						if (individual) {
-							individualID = individual->getIndividualID();
+						cint64 individualNodeID = baseIndiID+satCalcConstruct->getRelativeNewNodeID();
+						bool nominalIndiTriplesAssertions = false;
+
+						if (!individual && satCalcConstruct->getIndividualID() >= 0 && satCalcConstruct->getIndividualID() <= baseIndiVec->getItemMaxIndex()) {
+							individual = baseIndiVec->getData(satCalcConstruct->getIndividualID());
+						}
+
+						if (!individual && satCalcConstruct->getIndividualID() >= 0) {
+							individualNodeID = -satCalcConstruct->getIndividualID();							
+							individual = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan);
+							individual->initIndividual(-individualNodeID);
+							individual->setTemporaryIndividual(true);
+							baseIndiVec->setLocalData(-individualNodeID, individual);
+
+							nominalIndiTriplesAssertions = true;
+						} else if (individual) {
+							individualNodeID = -(individual->getIndividualID());
+							nominalIndiTriplesAssertions = true;
 						} else {
 							cint64 fixedIndiID = satCalcConstruct->getIndividualID();
 							if (fixedIndiID >= 0) {
-								individualID = fixedIndiID;
+								individualNodeID = fixedIndiID;
 							}
 						}
-						firstPossibleNewIndividualID = qMax(firstPossibleNewIndividualID,individualID+1);
+						firstPossibleNewIndividualID = qMax(firstPossibleNewIndividualID,individualNodeID+1);
 
 						CXSortedNegLinker<CConcept*>* satConJobLinker = nullptr;
 						CSatisfiableCalculationConceptConstruct* satConCalcConstuct = dynamic_cast<CSatisfiableCalculationConceptConstruct*>(satCalcConstruct);
@@ -363,31 +404,32 @@ namespace Konclude {
 							satConJobLinker = satConCalcConstuct->getConstructConceptLinker();
 						}
 
-						CIndividualProcessNode* refIndi = indiNodeVec->getData(individualID);
+						CIndividualProcessNode* refIndiNode = indiNodeVec->getData(individualNodeID);
 						// check whether individual is already processed
-						if (satConJobLinker || !refIndi || !baseIndiVec || baseIndiVec->getData(individualID) != individual) {
+						if (satConJobLinker || !refIndiNode || !baseIndiVec || baseIndiVec->getData(-individualNodeID) != individual) {
 							requiresTaskCalc = true;
-							CIndividualProcessNode* indi = indiNodeVec->getLocalData(individualID);
+							CIndividualProcessNode* indi = indiNodeVec->getLocalData(individualNodeID);
 							CIndividualProcessNode* localIndi = indi;
 							if (!localIndi) {
 								localIndi = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
 								localIndi->initDependencyTracker(independentBaseDepTrackPoint);
-								if (refIndi) {
-									while (refIndi->hasMergedIntoIndividualNodeID()) {
-										cint64 corrIndiID = refIndi->getMergedIntoIndividualNodeID();
-										refIndi = indiNodeVec->getData(corrIndiID);
-										individualID = corrIndiID;
+								if (refIndiNode) {
+									while (refIndiNode->hasMergedIntoIndividualNodeID()) {
+										cint64 corrIndiID = refIndiNode->getMergedIntoIndividualNodeID();
+										refIndiNode = indiNodeVec->getData(corrIndiID);
+										individualNodeID = corrIndiID;
 									}
-									localIndi->initIndividualProcessNode(refIndi);
+									localIndi->initIndividualProcessNode(refIndiNode);
 									localIndi->clearProcessingQueued();
 									localIndi->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCACHEDCOMPUTEDTYPESADDED);
 								} else if (individual) {
+									localIndi->setAssertionDataLinker(individual->getAssertionDataLinker());
 									localIndi->setAssertionConceptLinker(individual->getAssertionConceptLinker());
 									localIndi->setAssertionRoleLinker(individual->getAssertionRoleLinker());
 									localIndi->setReverseAssertionRoleLinker(individual->getReverseAssertionRoleLinker());
 								}
 
-								localIndi->setIndividualID(individualID);
+								localIndi->setIndividualNodeID(individualNodeID);
 								if (individual) {
 									localIndi->setNominalIndividual(individual);
 									localIndi->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
@@ -397,12 +439,16 @@ namespace Konclude {
 								}
 
 								localIndi->setInitializingConceptLinker(nullptr);
-								indiNodeVec->setLocalData(individualID,localIndi);
+								indiNodeVec->setLocalData(individualNodeID,localIndi);
 								indiNodeQueue->insertIndiviudalProcessNode(localIndi);
 
 								if (dataBox->getConstructedIndividualNode() == nullptr) {
 									dataBox->setConstructedIndividualNode(localIndi);
 								}					
+							}
+
+							if (nominalIndiTriplesAssertions) {
+								localIndi->setNominalIndividualTriplesAssertions(true);
 							}
 
 							CXSortedNegLinker<CConcept*>* initConLinker = nullptr;
@@ -420,30 +466,31 @@ namespace Konclude {
 					}
 
 					if (recreateNodesForIndividuals) {
+
 						CIndividualVector* indiVec = ontology->getABox()->getIndividualVector(false);
+						QSet<CIndividual*>* activeIndiSet = ontology->getABox()->getActiveIndividualSet(false);
+						cint64 maxTriplesIndexedIndiId = 0;
+						cint64 maxABoxIndiId = 0;
+						COntologyTriplesAssertionsAccessor* triplesAccessor = ontology->getOntologyTriplesData()->getTripleAssertionAccessor();
+						if (triplesAccessor) {
+							maxTriplesIndexedIndiId = ontology->getOntologyTriplesData()->getTripleAssertionAccessor()->getMaxIndexedIndividualId();
+						}
 						if (indiVec) {
 							cint64 indiCount = indiVec->getItemCount();
 							for (cint64 i = 0; i < indiCount; ++i) {
 								CIndividual* indi = indiVec->getData(i);
-								if (indi) {
-									CIndividualProcessNode* indiNode = indiNodeVec->getData(i);
-									if (!indiNode) {
-										indiNode = CObjectParameterizingAllocator< CIndividualProcessNode,CProcessContext* >::allocateAndConstructAndParameterize(memMan,procContext);
-										indiNode->initDependencyTracker(independentBaseDepTrackPoint);
-										indiNode->setAssertionConceptLinker(indi->getAssertionConceptLinker());
-										indiNode->setAssertionRoleLinker(indi->getAssertionRoleLinker());
-										indiNode->setReverseAssertionRoleLinker(indi->getReverseAssertionRoleLinker());
-
-										indiNode->setIndividualID(i);
-										indiNode->setNominalIndividual(indi);
-										indiNode->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
-
-										indiNodeVec->setLocalData(i,indiNode);
-										indiNodeQueue->insertIndiviudalProcessNode(indiNode);
-									}
+								if (indi && activeIndiSet->contains(indi)) {
+									createIndividualNominalNodeForCalculationTask(ontology, indi, i, independentBaseDepTrackPoint, indiNodeQueue, indiNodeVec, procContext, memMan);
+								} else if (i <= maxTriplesIndexedIndiId) {
+									createIndividualNominalNodeForCalculationTask(ontology, indi, i, independentBaseDepTrackPoint, indiNodeQueue, indiNodeVec, procContext, memMan);
 								}
+								maxABoxIndiId = qMax(i, maxABoxIndiId);
 							}
 						}
+						for (cint64 idx = maxABoxIndiId + 1; idx <= maxTriplesIndexedIndiId; ++idx) {
+							createIndividualNominalNodeForCalculationTask(ontology, nullptr, idx, independentBaseDepTrackPoint, indiNodeQueue, indiNodeVec, procContext, memMan);
+						}
+
 					}
 
 					dataBox->setFirstPossibleIndividualNodeID(firstPossibleNewIndividualID);
@@ -458,6 +505,32 @@ namespace Konclude {
 				}
 				return nullptr;
 			}
+
+
+
+			bool CSatisfiableCalculationTaskFromCalculationJobGenerator::createIndividualNominalNodeForCalculationTask(CConcreteOntology *ontology, CIndividual* indi, cint64 i, CDependencyTrackPoint* independentBaseDepTrackPoint, CIndividualUnsortedProcessingQueue* indiNodeQueue, CIndividualProcessNodeVector* indiNodeVec, CProcessContext* procContext, CMemoryAllocationManager* memMan) {
+				CIndividualProcessNode* indiNode = indiNodeVec->getData(-i);
+				if (!indiNode) {
+					indiNode = CObjectParameterizingAllocator< CIndividualProcessNode, CProcessContext* >::allocateAndConstructAndParameterize(memMan, procContext);
+					indiNode->initDependencyTracker(independentBaseDepTrackPoint);
+					if (indi) {
+						indiNode->setAssertionDataLinker(indi->getAssertionDataLinker());
+						indiNode->setAssertionConceptLinker(indi->getAssertionConceptLinker());
+						indiNode->setAssertionRoleLinker(indi->getAssertionRoleLinker());
+						indiNode->setReverseAssertionRoleLinker(indi->getReverseAssertionRoleLinker());
+					}
+					indiNode->setNominalIndividual(indi);
+
+					indiNode->setIndividualNodeID(-i);
+					indiNode->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
+
+					indiNodeVec->setLocalData(i, indiNode);
+					indiNodeQueue->insertIndiviudalProcessNode(indiNode);
+					return true;
+				}
+				return false;
+			}
+
 
 
 		}; // end namespace Generator

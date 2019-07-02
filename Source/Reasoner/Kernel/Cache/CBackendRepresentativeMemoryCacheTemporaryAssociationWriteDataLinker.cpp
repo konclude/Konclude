@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -29,40 +29,55 @@ namespace Konclude {
 
 			namespace Cache {
 
-				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker() {
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker() : CLinkerBase<CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker*, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker>(this) {
 				}
 
-				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::initAccociationWriteData(CIndividual* individual) {
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::initAccociationWriteData(CIndividual* individual, UPDATE_TYPE labelUpdateType, UPDATE_TYPE linksUpdateType) {
+					initAccociationWriteData(individual->getIndividualID(), labelUpdateType, linksUpdateType);
 					mIndividual = individual;
-					mIndividualID = individual->getIndividualID();
-					mReferredLabelData = nullptr;
-					mReferredTmpLabelData = nullptr;
+					return this;
+				}
+
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::initAccociationWriteData(cint64 indiID, UPDATE_TYPE labelUpdateType, UPDATE_TYPE linksUpdateType) {
+					initCachingStatusFlags(CBackendRepresentativeMemoryCachingFlags::FLAG_COMPLETELY_HANDLED | CBackendRepresentativeMemoryCachingFlags::FLAG_COMPLETELY_SATURATED);
+					mLabelUpdateType = labelUpdateType;
+					mLinksUpdateType = linksUpdateType;
+					mIndividual = nullptr;
+					mIndividualID = indiID;
+					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT; ++i) {
+						mReferredLabelData[i] = nullptr;
+						mReferredTmpLabelData[i] = nullptr;
+					}
 					mReferredTmpCardData = nullptr;
 					mReferredCardData = nullptr;
-					mCompletelySaturated = true;
-					mCompletelyHandled = true;
+					mRoleSetNeighbourUpdateDataLinker = nullptr;
+					mAssociationUpdateId = 0;
+					mIntegratedIndirectlyConnectedIndividualsChangeId = 0;
+					mRepresentativeSameIndiId = mIndividualID;
+					mIndirectlyConnectedNominalIndividual = false;
+					mIndirectlyConnectedIndividualIntegration = false;
 					return this;
 				}
 
-				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setReferredTemporaryLabelData(CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* referredTmpLabelData) {
-					if (!referredTmpLabelData->isCompletelyHandled()) {
-						mCompletelyHandled = false;
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setReferredLabel(cint64 labelType, CBackendRepresentativeMemoryCacheTemporaryLabelReference& labelRef) {
+					if (labelRef.getReferredLabelData()) {
+						setReferredLabelData(labelType, labelRef.getReferredLabelData());
+					} else {
+						setReferredTemporaryLabelData(labelType, labelRef.getReferredTemporaryLabelData());
 					}
-					if (!referredTmpLabelData->isCompletelySaturated()) {
-						mCompletelySaturated = false;
-					}
-					mReferredTmpLabelData = referredTmpLabelData;
 					return this;
 				}
 
-				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setReferredLabelData(CBackendRepresentativeMemoryLabelCacheItem* referredLabelData) {
-					if (!referredLabelData->isCompletelyHandled()) {
-						mCompletelyHandled = false;
-					}
-					if (!referredLabelData->isCompletelySaturated()) {
-						mCompletelySaturated = false;
-					}
-					mReferredLabelData = referredLabelData;
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setReferredTemporaryLabelData(cint64 labelType, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* referredTmpLabelData) {
+					mReferredTmpLabelData[labelType] = referredTmpLabelData;
+					return this;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setReferredLabelData(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* referredLabelData) {
+					mReferredLabelData[labelType] = referredLabelData;
 					return this;
 				}
 
@@ -77,6 +92,15 @@ namespace Konclude {
 					return this;
 				}
 
+				CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredTemporaryCardinalityData() {
+					return mReferredTmpCardData;
+				}
+
+
+				CBackendRepresentativeMemoryCardinalityCacheItem* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredCardinalityData() {
+					return mReferredCardData;
+				}
+
 
 
 				CIndividual* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getIndividual() {
@@ -88,40 +112,85 @@ namespace Konclude {
 				}
 
 
-				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredTemporaryLabelData() {
-					return mReferredTmpLabelData;
+				CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredTemporaryLabelData(cint64 labelType) {
+					return mReferredTmpLabelData[labelType];
 				}
 
-				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredLabelData() {
-					return mReferredLabelData;
+				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredLabelData(cint64 labelType) {
+					return mReferredLabelData[labelType];
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::UPDATE_TYPE CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getLabelUpdateType() {
+					return mLabelUpdateType;
 				}
 
 
-				bool CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::isCompletelyHandled() {
-					return mCompletelyHandled;
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::UPDATE_TYPE CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getLinksUpdateType() {
+					return mLinksUpdateType;
 				}
 
-				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setCompletelyHandled(bool completelyHandled) {
-					mCompletelyHandled = completelyHandled;
-					return this;
-				}
-
-				bool CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::isCompletelySaturated() {
-					return mCompletelySaturated;
-				}
-
-				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setCompletelySaturated(bool completelySaturated) {
-					mCompletelySaturated = completelySaturated;
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setLinksUpdateType(UPDATE_TYPE updateType) {
+					mLinksUpdateType = updateType;
 					return this;
 				}
 
 
-				CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredTemporaryCardinalityData() {
-					return mReferredTmpCardData;
+				CBackendRepresentativeMemoryCacheTemporaryIndividualRoleSetNeighbourUpdateDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getRoleSetNeighbourUpdateDataLinker() {
+					return mRoleSetNeighbourUpdateDataLinker;
 				}
 
-				CBackendRepresentativeMemoryCardinalityCacheItem* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getReferredCardinalityData() {
-					return mReferredCardData;
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setRoleSetNeighbourUpdateDataLinker(CBackendRepresentativeMemoryCacheTemporaryIndividualRoleSetNeighbourUpdateDataLinker* roleSetNeighbourUpdateDataLinker) {
+					mRoleSetNeighbourUpdateDataLinker = roleSetNeighbourUpdateDataLinker;
+					return this;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getUsedAssociationUpdateId() {
+					return mAssociationUpdateId;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setUsedAssociationUpdateId(cint64 id) {
+					mAssociationUpdateId = id;
+					return this;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getIntegratedIndirectlyConnectedIndividualsChangeId() {
+					return mIntegratedIndirectlyConnectedIndividualsChangeId;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setIntegratedIndirectlyConnectedIndividualsChangeId(cint64 integratedChangeId) {
+					mIntegratedIndirectlyConnectedIndividualsChangeId = integratedChangeId;
+					return this;
+				}
+
+
+				bool CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::isIndirectlyConnectedNominalIndividual() {
+					return mIndirectlyConnectedNominalIndividual;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setIndirectlyConnectedNominalIndividual(bool indirectlyConnected) {
+					mIndirectlyConnectedNominalIndividual = indirectlyConnected;
+					return this;
+				}
+
+
+				bool CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::hasIndirectlyConnectedIndividualIntegration() {
+					return mIndirectlyConnectedIndividualIntegration;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setIndirectlyConnectedIndividualIntegration(bool indirectlyConnectedIndividualIntegration) {
+					mIndirectlyConnectedIndividualIntegration = indirectlyConnectedIndividualIntegration;
+					return this;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getRepresentativeSameIndividualId() {
+					return mRepresentativeSameIndiId;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setRepresentativeSameIndividualId(cint64 indiId) {
+					mRepresentativeSameIndiId = indiId;
+					return this;
 				}
 
 

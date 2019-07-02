@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,10 +37,7 @@ namespace Konclude {
 				mConfCollectProcessStatistics = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.CollectProcessStatistics",true);;
 				
 				mClassifyProcessingStepData = nullptr;
-				mTaxonomyConstructed = false;
-				mTaxonomyConstructionFailed = false;
 
-				mPrecSatSubsumerExtractor = nullptr;
 				mIndiDepTrackingCollector = nullptr;
 
 				mInitTime.start();
@@ -48,7 +45,6 @@ namespace Konclude {
 
 
 			COntologyClassificationItem::~COntologyClassificationItem() {
-				delete mPrecSatSubsumerExtractor;
 				delete statistics;
 				delete config;
 				delete mIndiDepTrackingCollector;
@@ -56,77 +52,16 @@ namespace Konclude {
 
 
 
-			CPrecomputedSaturationSubsumerExtractor* COntologyClassificationItem::getPrecomputedSaturationSubsumerExtractor(bool create) {
-				if (!mPrecSatSubsumerExtractor && create) {
-					mPrecSatSubsumerExtractor = new CPrecomputedSaturationSubsumerExtractor(onto);
-				}
-				return mPrecSatSubsumerExtractor;
-			}
-
-
-			COntologyClassificationItem *COntologyClassificationItem::initTaxonomyConcepts(CConcreteOntology *ontology, CTaxonomy *taxonomy) {
-				onto = ontology;
-				tax = taxonomy;
-				CABox *aBox = onto->getABox();
-				CTBox *tBox = onto->getTBox();
-
-				currentCalculatingCount = 0;
-
-				mClassifyProcessingStepData = onto->getProcessingSteps()->getOntologyProcessingStepDataVector()->getProcessingStepData(COntologyProcessingStep::OPSCLASSCLASSIFY);
-				mTaxonomyConstructionFailed = !mClassifyProcessingStepData->getProcessingStep()->areAllRequirementsSatisfied(ontology);
-
-				remainingTests = true;
-
-				CConcept *topConcept = onto->getDataBoxes()->getTopConcept();
-				CConcept *bottomConcept = onto->getDataBoxes()->getBottomConcept();
-
-				cint64 satConCount = 0;
-				CBOXSET<CConcept*> *conceptHash = tBox->getActiveClassConceptSet(false);
-				if (conceptHash) {
-					for (CBOXSET<CConcept*>::const_iterator it = conceptHash->constBegin(), itEnd = conceptHash->constEnd(); it != itEnd; ++it) {
-						CConcept *concept = (*it);
-						if (concept && concept != topConcept && concept != bottomConcept) {
-							// concept which has to be inserted in the taxonomy
-							++satConCount;
-						}
-					}
-				}
-
-				statistics->incTotalSatisfiableTestCount(satConCount);
-
-				return this;
-			}
-
-
 
 			CConcreteOntology *COntologyClassificationItem::getOntology() {
 				return onto;
 			}
 
-			CTaxonomy *COntologyClassificationItem::getTaxonomy() {
-				return tax;
-			}
-
-			CTBox *COntologyClassificationItem::getTBox() {
-				return onto->getTBox();
-			}
 			
 			CCalculationConfigurationExtension *COntologyClassificationItem::getCalculationConfiguration() {
 				return config;
 			}
 
-			QList<CHierarchyNode *> *COntologyClassificationItem::getAllNodeList() {
-				return &allNodeList;
-			}
-
-			QList<CHierarchyNode *> *COntologyClassificationItem::getProcessingNodeList() {
-				return &processingNodeList;
-			}
-
-			QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> * COntologyClassificationItem::getWorkItemHash()
-			{
-				return &workItemHash;
-			}
 
 
 			COntologyClassificationItem *COntologyClassificationItem::incCurrentCalculatingCount(qint64 incCount) {
@@ -139,7 +74,7 @@ namespace Konclude {
 				return this;
 			}
 
-			COntologyClassificationItem *COntologyClassificationItem::setGoneOutRemainingTests(bool moreTests) {
+			COntologyClassificationItem *COntologyClassificationItem::setHasRemainingTests(bool moreTests) {
 				remainingTests = moreTests;
 				return this;
 			}
@@ -159,7 +94,7 @@ namespace Konclude {
 			}
 
 			COntologyClassificationItem *COntologyClassificationItem::addClassifiedCallback(CCallbackData *callback) {
-				callback->setCallbackDataContext(new CClassifiedCallbackDataContext(tax,onto));
+				callback->setCallbackDataContext(new CClassifiedCallbackDataContext(onto));
 				classifiedCallbackList.addCallbackData(callback);
 				if (!hasRemainingTests()) {
 					doClassifiedCallback();
@@ -179,10 +114,6 @@ namespace Konclude {
 				return statistics;
 			}
 
-
-			CClassConceptClassification* COntologyClassificationItem::getClassConceptClassification() {
-				return this;
-			}
 
 			CClassificationStatisticsCollectionStrings* COntologyClassificationItem::getClassificationStatisticsCollectionStrings() {
 				return mClassificationStatCollStrings;
@@ -220,33 +151,6 @@ namespace Konclude {
 				return this;
 			}
 
-			bool COntologyClassificationItem::isTaxonomyConstructed() {
-				return mTaxonomyConstructed;
-			}
-
-			COntologyClassificationItem* COntologyClassificationItem::setTaxonomyConstructionFailed() {
-				mTaxonomyConstructionFailed = true;
-				return this;
-			}
-
-			bool COntologyClassificationItem::isTaxonomyConstructionFailed() {
-				return mTaxonomyConstructionFailed;
-			}
-
-			COntologyClassificationItem* COntologyClassificationItem::submitTaxonomyConstructed() {
-				mTaxonomyConstructed = true;
-				mClassifyProcessingStepData->getProcessingStatus()->setProcessingFlags(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED);
-				cint64 errorFlags = COntologyProcessingStatus::PSSUCESSFULL;
-				if (mTaxonomyConstructionFailed) {
-					errorFlags = COntologyProcessingStatus::PSFAILED;
-				}
-				mClassifyProcessingStepData->getProcessingStatus()->setErrorFlags(errorFlags);
-				for (QList<COntologyProcessingRequirement*>::const_iterator it = mRequirementList.constBegin(), itEnd = mRequirementList.constEnd(); it != itEnd; ++it) {
-					COntologyProcessingRequirement* ontReq(*it);
-					ontReq->submitRequirementUpdate(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED,errorFlags);
-				}
-				return this;
-			}
 
 
 			CIndividualDependenceTrackingCollector* COntologyClassificationItem::getIndividualDependenceTrackingCollector() {

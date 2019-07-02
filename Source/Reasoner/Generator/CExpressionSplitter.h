@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,7 +37,7 @@
 #include "Parser/Expressions/CIndividualTermExpression.h"
 #include "Parser/Expressions/CDataPropertyTermExpression.h"
 #include "Parser/Expressions/CDataRangeTermExpression.h"
-#include "Parser/Expressions/CDataLiteralExpression.h"
+#include "Parser/Expressions/CDataLiteralTermExpression.h"
 #include "Parser/Expressions/CDatatypeExpression.h"
 #include "Parser/Expressions/CDataFacetRestrictionExpression.h"
 
@@ -80,7 +80,7 @@ namespace Konclude {
 					bool testForIndividualExpressions(cint64 requiredIndividualExpressions);
 					bool testForDataPropertyExpressions(cint64 dataPropertyExpressions);
 					bool testForDataRangeExpressions(cint64 dataRangeExpressions);
-					bool testForDataLiteralExpressions(cint64 literalExpressions);
+					bool testForDataLiteralTermExpressions(cint64 literalExpressions);
 					bool testForDatatypeExpressions(cint64 datatypeExpressions);
 					bool testForDataFacetRestrictionExpressions(cint64 dataFacetRestrictionExpressions);
 					bool testForDataFacetExpressions(cint64 dataFacetExpressions);
@@ -90,7 +90,7 @@ namespace Konclude {
 					CEXPRESSIONLIST<CDataPropertyTermExpression*>* getDataPropertyTermExpressionList();
 					CEXPRESSIONLIST<CDataRangeTermExpression*>* getDataRangeTermExpressionList();
 					CEXPRESSIONLIST<CIndividualTermExpression*>* getIndividualTermExpressionList();
-					CEXPRESSIONLIST<CDataLiteralExpression*>* getDataLiteralExpressionList();
+					CEXPRESSIONLIST<CDataLiteralTermExpression*>* getDataLiteralTermExpressionList();
 					CEXPRESSIONLIST<CDatatypeExpression*>* getDatatypeExpressionList();
 					CEXPRESSIONLIST<CDataFacetRestrictionExpression*>* getDataFacetRestrictionList();
 					CEXPRESSIONLIST<CDataFacetExpression*>* getDataFacetList();
@@ -111,8 +111,8 @@ namespace Konclude {
 					CDataRangeTermExpression* getSecondDataRangeTermExpression();
 
 
-					CDataLiteralExpression* getFirstDataLiteralExpression();
-					CDataLiteralExpression* getSecondDataLiteralExpression();
+					CDataLiteralTermExpression* getFirstDataLiteralTermExpression();
+					CDataLiteralTermExpression* getSecondDataLiteralTermExpression();
 
 					CDatatypeExpression* getFirstDatatypeExpression();
 					CDatatypeExpression* getSecondDatatypeExpression();
@@ -139,7 +139,7 @@ namespace Konclude {
 					CEXPRESSIONLIST<CIndividualTermExpression*> mIndiList;
 					CEXPRESSIONLIST<CDataPropertyTermExpression*> mDataPropertyList;
 					CEXPRESSIONLIST<CDataRangeTermExpression*> mDataRangeList;
-					CEXPRESSIONLIST<CDataLiteralExpression*> mDataLiteralList;
+					CEXPRESSIONLIST<CDataLiteralTermExpression*> mDataLiteralTermList;
 					CEXPRESSIONLIST<CDatatypeExpression*> mDatatypeList;
 					CEXPRESSIONLIST<CDataFacetRestrictionExpression*> mDataFacetRestrictionList;
 					CEXPRESSIONLIST<CDataFacetExpression*> mDataFacetList;

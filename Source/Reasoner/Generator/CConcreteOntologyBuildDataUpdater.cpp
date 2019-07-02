@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -330,7 +330,10 @@ namespace Konclude {
 				CDataFacetRestrictionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
 				if (expSplitter.testForExpressionComposition(0,0,0,0,0,1,0,0,1)) {
-					expression = getDataFacetRestriction(expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataFacetExpression());
+					CDataLiteralExpression* dataLitExp = dynamic_cast<CDataLiteralExpression*>(expSplitter.getFirstDataLiteralTermExpression());
+					if (dataLitExp) {
+						expression = getDataFacetRestriction(dataLitExp, expSplitter.getFirstDataFacetExpression());
+					}
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FacetRestriction'-Expression."),this);
 				}
@@ -341,7 +344,10 @@ namespace Konclude {
 				CDataFacetRestrictionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2);
 				if (expSplitter.testForExpressionComposition(0,0,0,0,0,1,0,0,1)) {
-					expression = getDataFacetRestriction(expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataFacetExpression());
+					CDataLiteralExpression* dataLitExp = dynamic_cast<CDataLiteralExpression*>(expSplitter.getFirstDataLiteralTermExpression());
+					if (dataLitExp) {
+						expression = getDataFacetRestriction(dataLitExp, expSplitter.getFirstDataFacetExpression());
+					}
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'FacetRestriction'-Expression."),this);
 				}
@@ -369,6 +375,37 @@ namespace Konclude {
 				}
 				return expression;
 			}
+
+
+			CDataLiteralExpression* CConcreteOntologyBuildDataUpdater::getDataLiteral(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
+				CDataLiteralExpression* expression = nullptr;
+				if (expressions.size() >= 2) {
+					expression = getDataLiteral(expressions.first(), expressions.last());
+				} else {
+					LOG(ERROR, "::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder", logTr("Couldn't match parameters for 'DataLiteral'-Expression."), this);
+				}
+				return expression;
+			}
+
+
+			CDataLiteralExpression* CConcreteOntologyBuildDataUpdater::getDataLiteral(CBuildExpression* expression1, CBuildExpression* expression2) {
+				CDataLiteralExpression* expression = nullptr;
+
+				CDataLexicalValueExpression* dataLexicalValue = dynamic_cast<CDataLexicalValueExpression*>(expression1);
+				CDatatypeExpression* datatype = dynamic_cast<CDatatypeExpression*>(expression2);
+				if (!dataLexicalValue) {
+					dataLexicalValue = dynamic_cast<CDataLexicalValueExpression*>(expression2);
+					datatype = dynamic_cast<CDatatypeExpression*>(expression1);
+				}
+
+				if (dataLexicalValue && datatype) {
+					expression = getDataLiteral(dataLexicalValue, datatype);
+				} else {
+					LOG(ERROR, "::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder", logTr("Couldn't match parameters for 'DataLiteral'-Expression."), this);
+				}
+				return expression;
+			}
+
 
 
 
@@ -1288,7 +1325,7 @@ namespace Konclude {
 				CDataPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
 				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
-					expression = getDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+					expression = getDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralTermExpression(),expSplitter.getFirstDataPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyAssertion'-Expression."),this);
 				}
@@ -1299,7 +1336,7 @@ namespace Konclude {
 				CDataPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2,expression3);
 				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
-					expression = getDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+					expression = getDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralTermExpression(),expSplitter.getFirstDataPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'DataPropertyAssertion'-Expression."),this);
 				}
@@ -1310,7 +1347,7 @@ namespace Konclude {
 				CNegativeDataPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expressions);
 				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
-					expression = getNegativeDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+					expression = getNegativeDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralTermExpression(),expSplitter.getFirstDataPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'NegativeDataPropertyAssertion'-Expression."),this);
 				}
@@ -1321,7 +1358,7 @@ namespace Konclude {
 				CNegativeDataPropertyAssertionExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(expression1,expression2,expression3);
 				if (expSplitter.testForExpressionComposition(0,0,1,0,1,1)) {
-					expression = getNegativeDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralExpression(),expSplitter.getFirstDataPropertyTermExpression());
+					expression = getNegativeDataPropertyAssertion(expSplitter.getFirstIndividualTermExpression(),expSplitter.getFirstDataLiteralTermExpression(),expSplitter.getFirstDataPropertyTermExpression());
 				} else {
 					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcretOntologyUpdateBuilder",logTr("Couldn't match parameters for 'NegativeDataPropertyAssertion'-Expression."),this);
 				}
@@ -1358,14 +1395,28 @@ namespace Konclude {
 				return expression;
 			}
 
+
+
+			CConcreteOntologyBuildDataUpdater* CConcreteOntologyBuildDataUpdater::addHashedExpression(CBuildExpression* expression) {
+				mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+				mExpressionBuildContainerList->append(expression);
+				return this;
+			}
+
+
+			CBuildExpression* CConcreteOntologyBuildDataUpdater::getHashedExpression(CBuildExpression* expression) {
+				CBuildExpression* hashExpression = nullptr;
+				hashExpression = mExpressionBuildHash->value(CExpressionHasher(expression),nullptr);
+				return hashExpression;
+			}
+
 			CDeclarationAxiomExpression* CConcreteOntologyBuildDataUpdater::getDeclaration(CExpressionEntity* entity) {
 				CDeclarationAxiomExpression* expression = nullptr;
 				CDeclarationAxiomExpression tmpExpression(entity);
-				expression = (CDeclarationAxiomExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDeclarationAxiomExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDeclarationAxiomExpression(entity);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDECLARATION);
 				}
 				return expression;
@@ -1376,11 +1427,10 @@ namespace Konclude {
 			CEquivalentClassesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentClasses(const CEXPRESSIONLIST<CClassTermExpression*>& expressions) {
 				CEquivalentClassesExpression* expression = nullptr;
 				CEquivalentClassesExpression tmpExpression(expressions);
-				expression = (CEquivalentClassesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CEquivalentClassesExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CEquivalentClassesExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETEQUIVALENTCLASSES);
 				}
 				return expression;
@@ -1389,11 +1439,10 @@ namespace Konclude {
 			CSubClassOfExpression* CConcreteOntologyBuildDataUpdater::getSubClassOf(CClassTermExpression* expression1, CClassTermExpression* expression2) {
 				CSubClassOfExpression* expression = nullptr;
 				CSubClassOfExpression tmpExpression(expression1,expression2);
-				expression = (CSubClassOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CSubClassOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CSubClassOfExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETESUBCLASSOF);
 				}
 				return expression;
@@ -1402,11 +1451,10 @@ namespace Konclude {
 			CDisjointClassesExpression* CConcreteOntologyBuildDataUpdater::getDisjointClasses(const CEXPRESSIONLIST<CClassTermExpression*>& expressions) {
 				CDisjointClassesExpression* expression = nullptr;
 				CDisjointClassesExpression tmpExpression(expressions);
-				expression = (CDisjointClassesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDisjointClassesExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDisjointClassesExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTCLASSES);
 				}
 				return expression;
@@ -1416,11 +1464,10 @@ namespace Konclude {
 			CDisjointUnionExpression* CConcreteOntologyBuildDataUpdater::getDisjointUnion(CClassExpression* classExpression, const CEXPRESSIONLIST<CClassTermExpression*>& expressions) {
 				CDisjointUnionExpression* expression = nullptr;
 				CDisjointUnionExpression tmpExpression(classExpression,expressions);
-				expression = (CDisjointUnionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDisjointUnionExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDisjointUnionExpression(classExpression,expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTUNION);
 				}
 				return expression;
@@ -1430,11 +1477,10 @@ namespace Konclude {
 			CObjectComplementOfExpression* CConcreteOntologyBuildDataUpdater::getObjectComplementOf(CClassTermExpression* compExpression) {
 				CObjectComplementOfExpression* expression = nullptr;
 				CObjectComplementOfExpression tmpExpression(compExpression);
-				expression = (CObjectComplementOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectComplementOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectComplementOfExpression(compExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTCOMPLEMENTOF);
@@ -1444,12 +1490,12 @@ namespace Konclude {
 
 			CObjectIntersectionOfExpression* CConcreteOntologyBuildDataUpdater::getObjectIntersectionOf(const CEXPRESSIONLIST<CClassTermExpression*>& expressions) {
 				CObjectIntersectionOfExpression* expression = nullptr;
+
 				CObjectIntersectionOfExpression tmpExpression(expressions);
-				expression = (CObjectIntersectionOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectIntersectionOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectIntersectionOfExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTINTERSECTION);
@@ -1459,12 +1505,12 @@ namespace Konclude {
 
 			CObjectUnionOfExpression* CConcreteOntologyBuildDataUpdater::getObjectUnionOf(const CEXPRESSIONLIST<CClassTermExpression*>& expressions) {
 				CObjectUnionOfExpression* expression = nullptr;
+
 				CObjectUnionOfExpression tmpExpression(expressions);
-				expression = (CObjectUnionOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectUnionOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectUnionOfExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTUNION);
@@ -1479,11 +1525,10 @@ namespace Konclude {
 					expression2 = mTopClassExpression;
 				}
 				CObjectMaxCardinalityExpression tmpExpression(expression1,expression2,cardinality);
-				expression = (CObjectMaxCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectMaxCardinalityExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectMaxCardinalityExpression(expression1,expression2,cardinality);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTMAXCARDINALITY);
@@ -1498,11 +1543,10 @@ namespace Konclude {
 					expression2 = mTopClassExpression;
 				}
 				CObjectMinCardinalityExpression tmpExpression(expression1,expression2,cardinality);
-				expression = (CObjectMinCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectMinCardinalityExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectMinCardinalityExpression(expression1,expression2,cardinality);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTMINCARDINALITY);
@@ -1517,11 +1561,10 @@ namespace Konclude {
 					expression2 = mTopClassExpression;
 				}
 				CObjectExactlyCardinalityExpression tmpExpression(expression1,expression2,cardinality);
-				expression = (CObjectExactlyCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectExactlyCardinalityExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectExactlyCardinalityExpression(expression1,expression2,cardinality);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTEXACTLYCARDINALITY);
@@ -1534,11 +1577,10 @@ namespace Konclude {
 			CObjectAllValuesFromExpression* CConcreteOntologyBuildDataUpdater::getObjectAllValuesFrom(CObjectPropertyTermExpression* expression1, CClassTermExpression* expression2) {
 				CObjectAllValuesFromExpression* expression = nullptr;
 				CObjectAllValuesFromExpression tmpExpression(expression1,expression2);
-				expression = (CObjectAllValuesFromExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectAllValuesFromExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectAllValuesFromExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTALLVALUEFROM);
@@ -1549,11 +1591,10 @@ namespace Konclude {
 			CObjectOneOfExpression* CConcreteOntologyBuildDataUpdater::getObjectOneOf(const CEXPRESSIONLIST<CIndividualTermExpression*> &expressions) {
 				CObjectOneOfExpression* expression = nullptr;
 				CObjectOneOfExpression tmpExpression(expressions);
-				expression = (CObjectOneOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectOneOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectOneOfExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTONEOF);
@@ -1568,9 +1609,9 @@ namespace Konclude {
 				} else {
 					mTmpObjectOneOfExpression->initObjectOneOfExpression(indiExpression);
 				}
-				CBuildExpression*& expression = (*mExpressionBuildHash)[CExpressionHasher(mTmpObjectOneOfExpression)];
+				CBuildExpression* expression = getHashedExpression(mTmpObjectOneOfExpression);
 				if (!expression) {
-					mExpressionBuildContainerList->append(mTmpObjectOneOfExpression);
+					addHashedExpression(mTmpObjectOneOfExpression);
 					mBuildConceptSet->insert(mTmpObjectOneOfExpression);
 					mBuildConceptList->append(mTmpObjectOneOfExpression);
 					expression = mTmpObjectOneOfExpression;
@@ -1587,11 +1628,10 @@ namespace Konclude {
 			CDataLiteralExpression* CConcreteOntologyBuildDataUpdater::getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype) {
 				CDataLiteralExpression* expression = nullptr;
 				CDataLiteralExpression tmpExpression(dataLexicalValue,datatype);
-				expression = (CDataLiteralExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataLiteralExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataLiteralExpression(dataLexicalValue,datatype);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALITERAL);
@@ -1606,11 +1646,10 @@ namespace Konclude {
 			CDataSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataSomeValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
 				CDataSomeValuesFromExpression* expression = nullptr;
 				CDataSomeValuesFromExpression tmpExpression(expression1,expression2);
-				expression = (CDataSomeValuesFromExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataSomeValuesFromExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataSomeValuesFromExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATASOMEVALUEFROM);
@@ -1623,11 +1662,10 @@ namespace Konclude {
 			CDataHasValueExpression* CConcreteOntologyBuildDataUpdater::getDataHasValue(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
 				CDataHasValueExpression* expression = nullptr;
 				CDataHasValueExpression tmpExpression(expression1,expression2);
-				expression = (CDataHasValueExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataHasValueExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataHasValueExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAHASVALUE);
@@ -1639,11 +1677,10 @@ namespace Konclude {
 			CDataAllValuesFromExpression* CConcreteOntologyBuildDataUpdater::getDataAllValuesFrom(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
 				CDataAllValuesFromExpression* expression = nullptr;
 				CDataAllValuesFromExpression tmpExpression(expression1,expression2);
-				expression = (CDataAllValuesFromExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataAllValuesFromExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataAllValuesFromExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAALLVALUEFROM);
@@ -1659,11 +1696,10 @@ namespace Konclude {
 					expression2 = mTopDataRangeExpression;
 				}
 				CDataMaxCardinalityExpression tmpExpression(expression1,expression2,cardinality);
-				expression = (CDataMaxCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataMaxCardinalityExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataMaxCardinalityExpression(expression1,expression2,cardinality);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAMAXCARDINALITY);
@@ -1679,11 +1715,10 @@ namespace Konclude {
 					expression2 = mTopDataRangeExpression;
 				}
 				CDataMinCardinalityExpression tmpExpression(expression1,expression2,cardinality);
-				expression = (CDataMinCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataMinCardinalityExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataMinCardinalityExpression(expression1,expression2,cardinality);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAMINCARDINALITY);
@@ -1701,11 +1736,10 @@ namespace Konclude {
 					expression2 = mTopDataRangeExpression;
 				}
 				CDataExactCardinalityExpression tmpExpression(expression1,expression2,cardinality);
-				expression = (CDataExactCardinalityExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataExactCardinalityExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataExactCardinalityExpression(expression1,expression2,cardinality);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAEXACTCARDINALITY);
@@ -1720,11 +1754,10 @@ namespace Konclude {
 			CDataFacetRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDataFacetRestriction(CDataLiteralExpression* dataLiteralExpression, CDataFacetExpression* dataFacet) {
 				CDataFacetRestrictionExpression* expression = nullptr;
 				CDataFacetRestrictionExpression tmpExpression(dataLiteralExpression,dataFacet);
-				expression = (CDataFacetRestrictionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataFacetRestrictionExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataFacetRestrictionExpression(dataLiteralExpression,dataFacet);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATATYPERESTRICTION);
 				}
 				return expression;
@@ -1738,11 +1771,10 @@ namespace Konclude {
 			CDataIntersectionOfExpression* CConcreteOntologyBuildDataUpdater::getDataIntersectionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
 				CDataIntersectionOfExpression* expression = nullptr;
 				CDataIntersectionOfExpression tmpExpression(expressions);
-				expression = (CDataIntersectionOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataIntersectionOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataIntersectionOfExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAINTERSECTIONOF);
@@ -1753,11 +1785,10 @@ namespace Konclude {
 			CDataOneOfExpression* CConcreteOntologyBuildDataUpdater::getDataOneOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
 				CDataOneOfExpression* expression = nullptr;
 				CDataOneOfExpression tmpExpression(expressions);
-				expression = (CDataOneOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataOneOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataOneOfExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAONEOF);
@@ -1768,11 +1799,10 @@ namespace Konclude {
 			CDataUnionOfExpression* CConcreteOntologyBuildDataUpdater::getDataUnionOf(const CEXPRESSIONLIST<CDataRangeTermExpression*>& expressions) {
 				CDataUnionOfExpression* expression = nullptr;
 				CDataUnionOfExpression tmpExpression(expressions);
-				expression = (CDataUnionOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataUnionOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataUnionOfExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAUNIONOF);
@@ -1783,11 +1813,10 @@ namespace Konclude {
 			CDataComplementOfExpression* CConcreteOntologyBuildDataUpdater::getDataComplementOf(CDataRangeTermExpression* expression1) {
 				CDataComplementOfExpression* expression = nullptr;
 				CDataComplementOfExpression tmpExpression(expression1);
-				expression = (CDataComplementOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataComplementOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataComplementOfExpression(expression1);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATACOMPLEMENTOF);
@@ -1798,11 +1827,10 @@ namespace Konclude {
 			CDatatypeRestrictionExpression* CConcreteOntologyBuildDataUpdater::getDatatypeRestriction(CDatatypeExpression* datatypeExpression, const CEXPRESSIONLIST<CDataFacetRestrictionExpression*>& expressions) {
 				CDatatypeRestrictionExpression* expression = nullptr;
 				CDatatypeRestrictionExpression tmpExpression(datatypeExpression,expressions);
-				expression = (CDatatypeRestrictionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDatatypeRestrictionExpression*)getHashedExpression(&tmpExpression);;
 				if (!expression) {
 					expression = new CDatatypeRestrictionExpression(datatypeExpression,expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAFACETRESTRICION);
@@ -1831,11 +1859,10 @@ namespace Konclude {
 			CObjectSomeValuesFromExpression* CConcreteOntologyBuildDataUpdater::getObjectSomeValuesFrom(CObjectPropertyTermExpression* expression1, CClassTermExpression* expression2) {
 				CObjectSomeValuesFromExpression* expression = nullptr;
 				CObjectSomeValuesFromExpression tmpExpression(expression1,expression2);
-				expression = (CObjectSomeValuesFromExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectSomeValuesFromExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectSomeValuesFromExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTSOMEVALUEFROM);
@@ -1846,11 +1873,10 @@ namespace Konclude {
 			CObjectHasValueExpression* CConcreteOntologyBuildDataUpdater::getObjectHasValue(CObjectPropertyTermExpression* expression1, CIndividualTermExpression* expression2) {
 				CObjectHasValueExpression* expression = nullptr;
 				CObjectHasValueExpression tmpExpression(expression1,expression2);
-				expression = (CObjectHasValueExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectHasValueExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectHasValueExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTHASVALUE);
@@ -1861,11 +1887,10 @@ namespace Konclude {
 			CObjectHasSelfExpression* CConcreteOntologyBuildDataUpdater::getObjectHasSelf(CObjectPropertyTermExpression* obPrExpression) {
 				CObjectHasSelfExpression* expression = nullptr;
 				CObjectHasSelfExpression tmpExpression(obPrExpression);
-				expression = (CObjectHasSelfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectHasSelfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectHasSelfExpression(obPrExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTHASSELF);
@@ -1877,11 +1902,10 @@ namespace Konclude {
 			CSubObjectPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getSubObjectPropertyOf(const CEXPRESSIONLIST<CObjectPropertyTermExpression*>& subExpressions, CObjectPropertyTermExpression* superExpression) {
 				CSubObjectPropertyOfExpression* expression = nullptr;
 				CSubObjectPropertyOfExpression tmpExpression(subExpressions,superExpression);
-				expression = (CSubObjectPropertyOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CSubObjectPropertyOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CSubObjectPropertyOfExpression(subExpressions,superExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSUBOBJECTPROPERTYOF);
 				}
 				return expression;
@@ -1897,11 +1921,10 @@ namespace Konclude {
 			CObjectPropertyChainExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyChain(const CEXPRESSIONLIST<CObjectPropertyTermExpression*>& expressions) {
 				CObjectPropertyChainExpression* expression = nullptr;
 				CObjectPropertyChainExpression tmpExpression(expressions);
-				expression = (CObjectPropertyChainExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectPropertyChainExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectPropertyChainExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYCHAIN);
 				}
 				return expression;
@@ -1910,11 +1933,10 @@ namespace Konclude {
 			CEquivalentObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentObjectProperties(const CEXPRESSIONLIST<CObjectPropertyTermExpression*>& expressions) {
 				CEquivalentObjectPropertiesExpression* expression = nullptr;
 				CEquivalentObjectPropertiesExpression tmpExpression(expressions);
-				expression = (CEquivalentObjectPropertiesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CEquivalentObjectPropertiesExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CEquivalentObjectPropertiesExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETEQUIVALENTOBJECTPROPERTIES);
 				}
 				return expression;
@@ -1923,11 +1945,10 @@ namespace Konclude {
 			CDisjointObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getDisjointObjectProperties(const CEXPRESSIONLIST<CObjectPropertyTermExpression*>& expressions) {
 				CDisjointObjectPropertiesExpression* expression = nullptr;
 				CDisjointObjectPropertiesExpression tmpExpression(expressions);
-				expression = (CDisjointObjectPropertiesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDisjointObjectPropertiesExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDisjointObjectPropertiesExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTOBJECTPROPERTIES);
 				}
 				return expression;
@@ -1937,11 +1958,10 @@ namespace Konclude {
 			CObjectPropertyDomainExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyDomainExpression(CObjectPropertyTermExpression* expression1, CClassTermExpression* expression2) {
 				CObjectPropertyDomainExpression* expression = nullptr;
 				CObjectPropertyDomainExpression tmpExpression(expression1,expression2);
-				expression = (CObjectPropertyDomainExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectPropertyDomainExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectPropertyDomainExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYDOMAIN);
 				}
 				return expression;
@@ -1950,11 +1970,10 @@ namespace Konclude {
 			CObjectPropertyRangeExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyRangeExpression(CObjectPropertyTermExpression* expression1, CClassTermExpression* expression2) {
 				CObjectPropertyRangeExpression* expression = nullptr;
 				CObjectPropertyRangeExpression tmpExpression(expression1,expression2);
-				expression = (CObjectPropertyRangeExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectPropertyRangeExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectPropertyRangeExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYRANGE);
 				}
 				return expression;
@@ -1970,11 +1989,10 @@ namespace Konclude {
 			CSubDataPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getSubDataPropertyOf(CDataPropertyTermExpression* subExpression, CDataPropertyTermExpression* superExpression) {
 				CSubDataPropertyOfExpression* expression = nullptr;
 				CSubDataPropertyOfExpression tmpExpression(subExpression,superExpression);
-				expression = (CSubDataPropertyOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CSubDataPropertyOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CSubDataPropertyOfExpression(subExpression,superExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSUBDATAPROPERTYOF);
 				}
 				return expression;
@@ -1983,11 +2001,10 @@ namespace Konclude {
 			CEquivalentDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getEquivalentDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions) {
 				CEquivalentDataPropertiesExpression* expression = nullptr;
 				CEquivalentDataPropertiesExpression tmpExpression(expressions);
-				expression = (CEquivalentDataPropertiesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CEquivalentDataPropertiesExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CEquivalentDataPropertiesExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETEQUIVALENTDATAPROPERTIES);
 				}
 				return expression;
@@ -1996,11 +2013,10 @@ namespace Konclude {
 			CDisjointDataPropertiesExpression* CConcreteOntologyBuildDataUpdater::getDisjointDataProperties(const CEXPRESSIONLIST<CDataPropertyTermExpression*>& expressions) {
 				CDisjointDataPropertiesExpression* expression = nullptr;
 				CDisjointDataPropertiesExpression tmpExpression(expressions);
-				expression = (CDisjointDataPropertiesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDisjointDataPropertiesExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDisjointDataPropertiesExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDISJOINTDATAPROPERTIES);
 				}
 				return expression;
@@ -2010,11 +2026,10 @@ namespace Konclude {
 			CDataPropertyDomainExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyDomainExpression(CDataPropertyTermExpression* expression1, CClassTermExpression* expression2) {
 				CDataPropertyDomainExpression* expression = nullptr;
 				CDataPropertyDomainExpression tmpExpression(expression1,expression2);
-				expression = (CDataPropertyDomainExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataPropertyDomainExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataPropertyDomainExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTYDOMAIN);
 				}
 				return expression;
@@ -2023,11 +2038,10 @@ namespace Konclude {
 			CDataPropertyRangeExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyRangeExpression(CDataPropertyTermExpression* expression1, CDataRangeTermExpression* expression2) {
 				CDataPropertyRangeExpression* expression = nullptr;
 				CDataPropertyRangeExpression tmpExpression(expression1,expression2);
-				expression = (CDataPropertyRangeExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataPropertyRangeExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataPropertyRangeExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTYRANGE);
 				}
 				return expression;
@@ -2036,11 +2050,10 @@ namespace Konclude {
 			CFunctionalDataPropertyExpression* CConcreteOntologyBuildDataUpdater::getFunctionalDataProperty(CDataPropertyTermExpression* buildExpression) {
 				CFunctionalDataPropertyExpression* expression = nullptr;
 				CFunctionalDataPropertyExpression tmpExpression(buildExpression);
-				expression = (CFunctionalDataPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CFunctionalDataPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CFunctionalDataPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETFUNCTIONALPROPERTYOF);
 				}
 				return expression;
@@ -2056,11 +2069,10 @@ namespace Konclude {
 			CInverseObjectPropertiesExpression* CConcreteOntologyBuildDataUpdater::getInverseObjectProperties(CObjectPropertyTermExpression* expression1, CObjectPropertyTermExpression* expression2) {
 				CInverseObjectPropertiesExpression* expression = nullptr;
 				CInverseObjectPropertiesExpression tmpExpression(expression1,expression2);
-				expression = (CInverseObjectPropertiesExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CInverseObjectPropertiesExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CInverseObjectPropertiesExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINVERSEOBJECTPROPERTIES);
 				}
 				return expression;
@@ -2069,11 +2081,10 @@ namespace Konclude {
 			CTransetiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getTransetiveObjectProperty(CObjectPropertyTermExpression* buildExpression) {
 				CTransetiveObjectPropertyExpression* expression = nullptr;
 				CTransetiveObjectPropertyExpression tmpExpression(buildExpression);
-				expression = (CTransetiveObjectPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CTransetiveObjectPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CTransetiveObjectPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETTRANSETIVEPROPERTYOF);
 				}
 				return expression;
@@ -2082,11 +2093,10 @@ namespace Konclude {
 			CFunctionalObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getFunctionalObjectProperty(CObjectPropertyTermExpression* buildExpression) {
 				CFunctionalObjectPropertyExpression* expression = nullptr;
 				CFunctionalObjectPropertyExpression tmpExpression(buildExpression);
-				expression = (CFunctionalObjectPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CFunctionalObjectPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CFunctionalObjectPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETFUNCTIONALOBJECTPROPERTY);
 				}
 				return expression;
@@ -2096,11 +2106,10 @@ namespace Konclude {
 			CInverseFunctionalObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getInverseFunctionalObjectProperty(CObjectPropertyTermExpression* buildExpression) {
 				CInverseFunctionalObjectPropertyExpression* expression = nullptr;
 				CInverseFunctionalObjectPropertyExpression tmpExpression(buildExpression);
-				expression = (CInverseFunctionalObjectPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CInverseFunctionalObjectPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CInverseFunctionalObjectPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINVERSEFUNCTIONALPROPERTY);
 				}
 				return expression;
@@ -2109,11 +2118,10 @@ namespace Konclude {
 			CSymmetricObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getSymmetricObjectProperty(CObjectPropertyTermExpression* buildExpression) {
 				CSymmetricObjectPropertyExpression* expression = nullptr;
 				CSymmetricObjectPropertyExpression tmpExpression(buildExpression);
-				expression = (CSymmetricObjectPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CSymmetricObjectPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CSymmetricObjectPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSYMMETRICPROPERTY);
 				}
 				return expression;
@@ -2122,11 +2130,10 @@ namespace Konclude {
 			CAsymmetricObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getAsymmetricObjectProperty(CObjectPropertyTermExpression* buildExpression) {
 				CAsymmetricObjectPropertyExpression* expression = nullptr;
 				CAsymmetricObjectPropertyExpression tmpExpression(buildExpression);
-				expression = (CAsymmetricObjectPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CAsymmetricObjectPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CAsymmetricObjectPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETASYMMETRICPROPERTY);
 				}
 				return expression;
@@ -2135,11 +2142,10 @@ namespace Konclude {
 			CReflexiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getReflexiveObjectProperty(CObjectPropertyTermExpression* buildExpression) {
 				CReflexiveObjectPropertyExpression* expression = nullptr;
 				CReflexiveObjectPropertyExpression tmpExpression(buildExpression);
-				expression = (CReflexiveObjectPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CReflexiveObjectPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CReflexiveObjectPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETREFLEXIVEPROPERTY);
 				}
 				return expression;
@@ -2149,11 +2155,10 @@ namespace Konclude {
 			CIrreflexiveObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getIrreflexiveObjectProperty(CObjectPropertyTermExpression* buildExpression) {
 				CIrreflexiveObjectPropertyExpression* expression = nullptr;
 				CIrreflexiveObjectPropertyExpression tmpExpression(buildExpression);
-				expression = (CIrreflexiveObjectPropertyExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CIrreflexiveObjectPropertyExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CIrreflexiveObjectPropertyExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETIRREFLEXIVEPROPERTY);
 				}
 				return expression;
@@ -2162,16 +2167,15 @@ namespace Konclude {
 			CInverseObjectPropertyOfExpression* CConcreteOntologyBuildDataUpdater::getInverseObjectPropertyOf(CObjectPropertyTermExpression* buildExpression) {
 				CInverseObjectPropertyOfExpression* expression = nullptr;
 				CInverseObjectPropertyOfExpression tmpExpression(buildExpression);
-				expression = (CInverseObjectPropertyOfExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CInverseObjectPropertyOfExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CInverseObjectPropertyOfExpression(buildExpression);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
+					addHashedExpression(expression);
 					mBuildObjectRoleSet->insert(expression);
 					mBuildObjectRoleList->append(expression);
 					mInverseObjectPropertyHash->insert(buildExpression,expression);
 					mInverseObjectPropertyHash->insert(expression,buildExpression);
 					mInverseObjectPropertyList->append( QPair<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>(expression,buildExpression) );
-					mExpressionBuildContainerList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINVERSEOBJECTPROPERTYOF);
 				}
 				return expression;
@@ -2183,6 +2187,10 @@ namespace Konclude {
 				if (invCastExpression) {
 					return invCastExpression->getInverseOfExpression();
 				}
+				CObjectPropertyTermExpression* inverseObjPropTermExp = mInverseObjectPropertyHash->value(invExpression, nullptr);
+				if (inverseObjPropTermExp) {
+					return inverseObjPropTermExp;
+				}
 				CInverseObjectPropertyOfExpression* expression = nullptr;
 				expression = getInverseObjectPropertyOf(invExpression);
 				return expression;
@@ -2193,11 +2201,10 @@ namespace Konclude {
 			CClassAssertionExpression* CConcreteOntologyBuildDataUpdater::getClassAssertion(CIndividualTermExpression* expression1, CClassTermExpression* expression2) {
 				CClassAssertionExpression* expression = nullptr;
 				CClassAssertionExpression tmpExpression(expression1,expression2);
-				expression = (CClassAssertionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CClassAssertionExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CClassAssertionExpression(expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETCLASSASSERTION);
 				}
 				return expression;
@@ -2206,11 +2213,10 @@ namespace Konclude {
 			CObjectPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyAssertion(CIndividualTermExpression* expression1, CIndividualTermExpression* expression2, CObjectPropertyTermExpression* expression3) {
 				CObjectPropertyAssertionExpression* expression = nullptr;
 				CObjectPropertyAssertionExpression tmpExpression(expression3,expression1,expression2);
-				expression = (CObjectPropertyAssertionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CObjectPropertyAssertionExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CObjectPropertyAssertionExpression(expression3,expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYASSERTION);
 				}
 				return expression;
@@ -2219,11 +2225,10 @@ namespace Konclude {
 			CNegativeObjectPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeObjectPropertyAssertion(CIndividualTermExpression* expression1, CIndividualTermExpression* expression2, CObjectPropertyTermExpression* expression3) {
 				CNegativeObjectPropertyAssertionExpression* expression = nullptr;
 				CNegativeObjectPropertyAssertionExpression tmpExpression(expression3,expression1,expression2);
-				expression = (CNegativeObjectPropertyAssertionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CNegativeObjectPropertyAssertionExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CNegativeObjectPropertyAssertionExpression(expression3,expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNEGATIVEOBJECTPROPERTYASSERTION);
 				}
 				return expression;
@@ -2232,11 +2237,10 @@ namespace Konclude {
 			CSameIndividualExpression* CConcreteOntologyBuildDataUpdater::getSameIndividual(const CEXPRESSIONLIST<CIndividualTermExpression*>& expressions) {
 				CSameIndividualExpression* expression = nullptr;
 				CSameIndividualExpression tmpExpression(expressions);
-				expression = (CSameIndividualExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CSameIndividualExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CSameIndividualExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETSAMEINDIVIDUAL);
 				}
 				return expression;
@@ -2245,11 +2249,10 @@ namespace Konclude {
 			CDifferentIndividualsExpression* CConcreteOntologyBuildDataUpdater::getDifferentIndividuals(const CEXPRESSIONLIST<CIndividualTermExpression*>& expressions) {
 				CDifferentIndividualsExpression* expression = nullptr;
 				CDifferentIndividualsExpression tmpExpression(expressions);
-				expression = (CDifferentIndividualsExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDifferentIndividualsExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDifferentIndividualsExpression(expressions);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDIFFERENTINDIVIDUAL);
 				}
 				return expression;
@@ -2257,31 +2260,51 @@ namespace Konclude {
 
 
 
-			CDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+			CDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3) {
 				CDataPropertyAssertionExpression* expression = nullptr;
 				CDataPropertyAssertionExpression tmpExpression(expression3,expression1,expression2);
-				expression = (CDataPropertyAssertionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CDataPropertyAssertionExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CDataPropertyAssertionExpression(expression3,expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAPROPERTYASSERTION);
 				}
 				return expression;
 			}
 
-			CNegativeDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyBuildDataUpdater::getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3) {
 				CNegativeDataPropertyAssertionExpression* expression = nullptr;
 				CNegativeDataPropertyAssertionExpression tmpExpression(expression3,expression1,expression2);
-				expression = (CNegativeDataPropertyAssertionExpression*)mExpressionBuildHash->value(CExpressionHasher(&tmpExpression),nullptr);
+				expression = (CNegativeDataPropertyAssertionExpression*)getHashedExpression(&tmpExpression);
 				if (!expression) {
 					expression = new CNegativeDataPropertyAssertionExpression(expression3,expression1,expression2);
-					mExpressionBuildHash->insert(CExpressionHasher(expression),expression);
-					mExpressionBuildContainerList->append(expression);
+					addHashedExpression(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNEGATIVEDATAPROPERTYASSERTION);
 				}
 				return expression;
 			}
+
+
+
+
+
+			bool CConcreteOntologyBuildDataUpdater::addTriplesData(CTriplesData* tripleData) {
+				mOntologyTriplesData->addTriplesData(tripleData);
+				return true;
+			}
+
+			CTriplesData* CConcreteOntologyBuildDataUpdater::getLatestTriplesData(bool onlyLocal, bool* localFlag) {
+				CTriplesData* tripleData = mOntologyTriplesData->getLatestTriplesData(onlyLocal);
+				if (localFlag && tripleData) {
+					if (mOntologyTriplesData->getLatestTriplesData(true)) {
+						*localFlag = true;
+					} else {
+						*localFlag = false;
+					}
+				}
+				return tripleData;
+			}
+
 
 
 
@@ -2335,7 +2358,14 @@ namespace Konclude {
 				mObjectPropertyBuildHash = mOntoBuild->getObjectPropertyEntityBuildHash();
 				mIndividualBuildHash = mOntoBuild->getIndividualEntityBuildHash();
 				mAnoIndividualBuildHash = mOntoBuild->getAnonymousIndividualBuildHash();
-				mIndividualVariableBuildHash = mOntoBuild->getIndividualVariableBuildHash();
+				mNominalIndividualVariableBuildHash = mOntoBuild->getNominalIndividualVariableBuildHash();
+
+				mAnonymousIndividualVariableBuildHash = mOntoBuild->getAnonymousIndividualVariableBuildHash();
+				mNamedIndividualVariableBuildHash = mOntoBuild->getNamedIndividualVariableBuildHash();
+
+				mDataValueVariableBuildHash = mOntoBuild->getDataValueVariableBuildHash();
+				mDataLiteralVariableBuildHash = mOntoBuild->getDataLiteralVariableBuildHash();
+
 				mDataPropertyBuildHash = mOntoBuild->getDataPropertyEntityBuildHash();
 				mDataLexicalValueBuildHash = mOntoBuild->getDataLexicalValueBuildHash();
 
@@ -2354,6 +2384,8 @@ namespace Konclude {
 				mDataFacetBuildHash = mOntoBuild->getFacetIRIBuildHash();
 
 				mImportDataHash = mOntoBuild->getImportDataHash();
+
+				mOntologyTriplesData = mOnto->getOntologyTriplesData();
 				return true;
 			}
 
@@ -2648,36 +2680,148 @@ namespace Konclude {
 
 
 
-			CObjectIndividualVariableExpression* CConcreteOntologyBuildDataUpdater::getIndividualVariable(const QString &individualVariableName, cint64 axiomNumber) {
+			CObjectIndividualVariableExpression* CConcreteOntologyBuildDataUpdater::getNominalIndividualVariable(const QString &individualVariableName, cint64 axiomNumber) {
 				CObjectIndividualVariableExpression* expression = nullptr;
-				expression = mIndividualVariableBuildHash->value(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber));
+				expression = mNominalIndividualVariableBuildHash->value(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber));
 				if (!expression) {
 					expression = new CObjectIndividualVariableExpression(individualVariableName,axiomNumber);
 					expression->setEntityID(mNextEntityNumber++);
 					mNextMaxAxiomNumberOffset = qMax(axiomNumber,mNextMaxAxiomNumberOffset);
-					mIndividualVariableBuildHash->insert(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber),expression);
+					mNominalIndividualVariableBuildHash->insert(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber),expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
-					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINDIVIDUALVARIABLE);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNOMINALINDIVIDUALVARIABLE);
 				}
 				return expression;
 			}
 
-			CObjectIndividualVariableExpression* CConcreteOntologyBuildDataUpdater::getIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber) {
+			CObjectIndividualVariableExpression* CConcreteOntologyBuildDataUpdater::getNominalIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber) {
 				CObjectIndividualVariableExpression* expression = nullptr;
-				expression = mIndividualVariableBuildHash->value(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber));
+				expression = mNominalIndividualVariableBuildHash->value(QPair<CStringRefStringHasher,cint64>(individualVariableName,axiomNumber));
 				if (!expression) {
 					QString individualVariableNameString(individualVariableName.toString());
 					mNextMaxAxiomNumberOffset = qMax(axiomNumber,mNextMaxAxiomNumberOffset);
 					expression = new CObjectIndividualVariableExpression(individualVariableNameString,axiomNumber);
 					expression->setEntityID(mNextEntityNumber++);
-					mIndividualVariableBuildHash->insert(QPair<CStringRefStringHasher,cint64>(individualVariableNameString,axiomNumber),expression);
+					mNominalIndividualVariableBuildHash->insert(QPair<CStringRefStringHasher,cint64>(individualVariableNameString,axiomNumber),expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
-					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETINDIVIDUALVARIABLE);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNOMINALINDIVIDUALVARIABLE);
 				}
 				return expression;
 			}
+
+
+
+
+
+			CIndividualVariableExpression* CConcreteOntologyBuildDataUpdater::getIndividualVariable(const QStringRef &individualVariableName, bool anonymousVariable) {
+				CIndividualVariableExpression* expression = nullptr;
+				CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* indiVarNameExpHash = mNamedIndividualVariableBuildHash;
+				if (anonymousVariable) {
+					indiVarNameExpHash = mAnonymousIndividualVariableBuildHash;
+				}
+				expression = indiVarNameExpHash->value(individualVariableName);
+				if (!expression) {
+					if (!anonymousVariable) {
+						expression = new CNamedIndividualVariableExpression(individualVariableName.toString());
+					} else {
+						expression = new CAnonymousIndividualVariableExpression(individualVariableName.toString());
+					}
+					expression->setEntityID(mNextEntityNumber++);
+					indiVarNameExpHash->insert(individualVariableName, expression);
+					if (!anonymousVariable) {
+						mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNAMEDINDIVIDUALVARIABLE);
+					} else {
+						mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETANONYMOUSINDIVIDUALVARIABLE);
+					}
+				}
+				return expression;
+			}
+
+
+			CIndividualVariableExpression* CConcreteOntologyBuildDataUpdater::getIndividualVariable(const QString &individualVariableName, bool anonymousVariable) {
+				CIndividualVariableExpression* expression = nullptr;
+				CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* indiVarNameExpHash = mNamedIndividualVariableBuildHash;
+				if (anonymousVariable) {
+					indiVarNameExpHash = mAnonymousIndividualVariableBuildHash;
+				}
+				expression = indiVarNameExpHash->value(individualVariableName);
+				if (!expression) {
+					if (!anonymousVariable) {
+						expression = new CNamedIndividualVariableExpression(individualVariableName);
+					} else {
+						expression = new CAnonymousIndividualVariableExpression(individualVariableName);
+					}
+					expression->setEntityID(mNextEntityNumber++);
+					indiVarNameExpHash->insert(individualVariableName, expression);
+					if (!anonymousVariable) {
+						mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETNAMEDINDIVIDUALVARIABLE);
+					} else {
+						mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETANONYMOUSINDIVIDUALVARIABLE);
+					}
+				}
+				return expression;
+			}
+
+
+
+
+
+			CDataValueVariableExpression* CConcreteOntologyBuildDataUpdater::getDataValueVariable(const QStringRef &dataValueVariableName) {
+				CDataValueVariableExpression* expression = nullptr;
+				expression = mDataValueVariableBuildHash->value(dataValueVariableName);
+				if (!expression) {
+					expression = new CDataValueVariableExpression(dataValueVariableName.toString());
+					expression->setEntityID(mNextEntityNumber++);
+					mDataValueVariableBuildHash->insert(dataValueVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAVALUEVARIABLE);
+				}
+				return expression;
+			}
+
+
+			CDataValueVariableExpression* CConcreteOntologyBuildDataUpdater::getDataValueVariable(const QString &dataValueVariableName) {
+				CDataValueVariableExpression* expression = nullptr;
+				expression = mDataValueVariableBuildHash->value(dataValueVariableName);
+				if (!expression) {
+					expression = new CDataValueVariableExpression(dataValueVariableName);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataValueVariableBuildHash->insert(dataValueVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAVALUEVARIABLE);
+				}
+				return expression;
+			}
+
+
+
+
+			CDataLiteralVariableExpression* CConcreteOntologyBuildDataUpdater::getDataLiteralVariable(const QStringRef &dataLiteralVariableName) {
+				CDataLiteralVariableExpression* expression = nullptr;
+				expression = mDataLiteralVariableBuildHash->value(dataLiteralVariableName);
+				if (!expression) {
+					expression = new CDataLiteralVariableExpression(dataLiteralVariableName.toString());
+					expression->setEntityID(mNextEntityNumber++);
+					mDataLiteralVariableBuildHash->insert(dataLiteralVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALITERALVARIABLE);
+				}
+				return expression;
+			}
+
+
+			CDataLiteralVariableExpression* CConcreteOntologyBuildDataUpdater::getDataLiteralVariable(const QString &dataLiteralVariableName) {
+				CDataLiteralVariableExpression* expression = nullptr;
+				expression = mDataLiteralVariableBuildHash->value(dataLiteralVariableName);
+				if (!expression) {
+					expression = new CDataLiteralVariableExpression(dataLiteralVariableName);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataLiteralVariableBuildHash->insert(dataLiteralVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALITERALVARIABLE);
+				}
+				return expression;
+			}
+
+
 
 			CObjectPropertyExpression* CConcreteOntologyBuildDataUpdater::getObjectProberty(const QString& probertyName) {
 				CObjectPropertyExpression* expression = nullptr;

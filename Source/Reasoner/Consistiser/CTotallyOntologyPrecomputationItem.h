@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -33,6 +33,7 @@
 #include "CSaturationConceptDataItem.h"
 #include "CSaturationIndividualDataItem.h"
 #include "CSaturationIndividualAnalysationObserver.h"
+#include "CIndividualPrecomputationCoordinationHash.h"
 
 
 // Other includes
@@ -40,11 +41,13 @@
 #include "Reasoner/Consistence/CSaturationData.h"
 #include "Reasoner/Consistence/CConsistence.h"
 
+#include "Reasoner/Ontology/OntologySettings.h"
 #include "Reasoner/Ontology/COntologyProcessingStepRequirement.h"
 #include "Reasoner/Ontology/CConceptProcessData.h"
 #include "Reasoner/Ontology/CIndividualProcessData.h"
 #include "Reasoner/Ontology/CConceptSaturationReferenceLinkingData.h"
 #include "Reasoner/Ontology/COntologyProcessingConceptSaturationRequirement.h"
+#include "Reasoner/Ontology/CIndividualReference.h"
 
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
 
@@ -66,7 +69,6 @@ namespace Konclude {
 		namespace Consistiser {
 
 
-			typedef QPair<CConcept*,bool> TConceptNegPair;
 			typedef QPair<CRole*,TConceptNegPair> TRoleConceptNegTriple;
 
 
@@ -131,6 +133,14 @@ namespace Konclude {
 					bool hasClashedSaturationIndividuals();
 					bool hasInsufficientSaturationIndividuals();
 
+
+					bool isFullCompletionGraphConstruction();
+					CTotallyOntologyPrecomputationItem* setFullCompletionGraphConstruction(bool fullCompletionGraphConstruction);
+					bool isFullCompletionGraphConstructed();
+					CTotallyOntologyPrecomputationItem* setFullCompletionGraphConstructed(bool fullCompletionGraphConstructed);
+
+
+
 					bool hasIndividualsSaturated();
 					CTotallyOntologyPrecomputationItem* setIndividualsSaturated(bool saturated);
 
@@ -163,9 +173,16 @@ namespace Konclude {
 					CTotallyOntologyPrecomputationItem* addConsistencyRequiredSaturationConcept(CConcept* concept, bool negation);
 
 
-					bool hasRemainingConsistencyRequiredSaturationIndividuals();
-					QList<CIndividual*>* getRemainingConsistencyRequiredSaturationIndividuals();
-					CTotallyOntologyPrecomputationItem* addConsistencyRequiredSaturationIndividual(CIndividual* individual);
+					bool hasRemainingRequiredSaturationIndividuals();
+					bool hasRemainingRequiredABoxSaturationIndividuals();
+					QList<CIndividual*>* getRemainingRequiredABoxSaturationIndividuals();
+					CTotallyOntologyPrecomputationItem* addRequiredABoxSaturationIndividual(CIndividual* individual);
+					CTotallyOntologyPrecomputationItem* setTripleIndexedIndividualSaturated(bool saturated);
+
+
+					cint64 getHandledTriplesIndividualSaturatedId();
+					CTotallyOntologyPrecomputationItem* setHandledTriplesIndividualSaturatedId(cint64 handledId);
+
 
 
 					cint64 getMinConceptCycleTestSize();
@@ -196,6 +213,15 @@ namespace Konclude {
 					CTotallyOntologyPrecomputationItem* setSaturationComputationRunning(bool satCompRunning);
 
 
+					CTotallyOntologyPrecomputationItem* setSaturationOccurrenceStatisticsCollectingInitialized(bool initialized);
+					bool hasSaturationOccurrenceStatisticsCollectingInitialized();
+					CTotallyOntologyPrecomputationItem* setSaturationOccurrenceStatisticsCollected(bool checked);
+					bool hasSaturationOccurrenceStatisticsCollected();
+
+					CPrecomputationTestingStep* getOccurrenceStatisticsPrecomputationStep();
+					bool isOccurrenceStatisticsStepFinished();
+					bool isOccurrenceStatisticsStepRequired();
+					bool areOccurrenceStatisticsStepProcessingRequirementSatisfied();
 
 
 
@@ -210,13 +236,17 @@ namespace Konclude {
 
 					bool isIndividualComputationRunning();
 					CTotallyOntologyPrecomputationItem* setIndividualComputationRunning(bool indiCompRunning);
+					CTotallyOntologyPrecomputationItem* incIndividualComputationRunningCount(cint64 incCount = 1);
+					CTotallyOntologyPrecomputationItem* decIndividualComputationRunningCount(cint64 decCount = 1);
 
 
-					CTotallyOntologyPrecomputationItem* setIndividualPrecomputationCreated(bool initialized);
-					bool hasIndividualPrecomputationCreated();
+					CTotallyOntologyPrecomputationItem* setAllIndividualPrecomputationCreated(bool initialized);
+					bool hasAllIndividualPrecomputationCreated();
 					CTotallyOntologyPrecomputationItem* setIndividualPrecomputationChecked(bool checked);
 					bool hasIndividualPrecomputationChecked();
 
+					CTotallyOntologyPrecomputationItem* setIndividualPrecomputationClashed(bool checked);
+					bool hasIndividualPrecomputationClashed();
 
 
 
@@ -266,9 +296,31 @@ namespace Konclude {
 					CTotallyOntologyPrecomputationItem* setIndividualsSaturationCacheSynchronisation(bool synchronized);
 
 
-					QSet<CIndividual*>* getIncompletelySaturatedIndividuaSet();
+					CIndividualPrecomputationCoordinationHash* getCurrentIndividualComputationCoordinationHash();
+					CTotallyOntologyPrecomputationItem* setCurrentIndividualComputationCoordinationHash(CIndividualPrecomputationCoordinationHash* coordHash);
+					QSet<CIndividualReference>* getCurrentIndividualComputationSet();
+
+					QSet<CIndividualReference>* getIncompletelyHandledIndividualSet();
+					cint64 getCurrentIncompletelyHandledIndividualRetrievalLimit();
+					CTotallyOntologyPrecomputationItem* setCurrentIncompletelyHandledIndividualRetrievalLimit(cint64 limit);
+					bool hasAllIncompletelyHandledIndividualsRetrieved();
+					CTotallyOntologyPrecomputationItem* setAllIncompletelyHandledIndividualsRetrieved(bool allRetrieved);
+
+
+					cint64 getLastMinimumRetrievedIncompletelyHandledIndividualId();
+					CTotallyOntologyPrecomputationItem* setLastMinimumRetrievedIncompletelyHandledIndividualId(cint64 minId);
+
+
+					cint64 getCurrentIncompletelyHandledIndividualComputationLimit();
+					CTotallyOntologyPrecomputationItem* setCurrentIncompletelyHandledIndividualComputationLimit(cint64 limit);
+
 
 					QTime* getInitializationTime();
+
+
+					cint64 getNextRepresentativeCacheRecomputationId();
+
+
 
 				// protected methods
 				protected:
@@ -299,12 +351,15 @@ namespace Konclude {
 					bool mIndividualTestRunning;
 
 					cint64 mIndividualSaturationRunningCount;
+					cint64 mIndividualComputationRunningCount;
 					bool mIndividualComputationRunning;
 					bool mIndividualPrecomputationCreated;
 					bool mIndividualPrecomputationChecked;
+					bool mIndividualPrecomputationClashed;
 
 					CPrecomputationTestingStep* mConsistencePrecomputationStep;
 					CPrecomputationTestingStep* mCyclePrecomputationStep;
+					CPrecomputationTestingStep* mOccurrenceStatisticsPrecomputationStep;
 					CPrecomputationTestingStep* mSaturationPrecomputationStep;
 					CPrecomputationTestingStep* mIndividualPrecomputationStep;
 					QList<CPrecomputationTestingStep*> mProcessingSteps;
@@ -325,7 +380,9 @@ namespace Konclude {
 					bool mNomDelayedConSatUpRequired;
 					bool mNomDelayedConSatUpdated;
 
-					QList<CIndividual*> mRemainingABoxSatConList;
+					QList<CIndividual*> mRemainingABoxIndiSatList;
+					cint64 mHandledTriplesIndiSaturatedId;
+					bool mTriplesIndexedIndisSaturated;
 
 
 					CApproximatedSaturationCalculationJob* mApproxSatCalcJob;
@@ -347,10 +404,26 @@ namespace Konclude {
 					bool mAllIndividualSaturaturationOrderd;
 
 					bool mIndividualsSaturationCacheSynchronisation;
-					QSet<CIndividual*> mIncompIndiSatSet;
+					QSet<CIndividualReference> mIncompHandledIndiSet;
+					QSet<CIndividualReference> mCurrentIndiComputationSet;
+					CIndividualPrecomputationCoordinationHash* mCurrentIndiCompCoordHash;
+					cint64 mCurrentIncompIndiRetrievalLimit;
+					bool mAllIncompIndiRetrieved;
+					cint64 mLastMinRetrievedIncompIndiId;
+					cint64 mCurrentIncompIndiComputationLimit;
+
+					cint64 mNextRepresentativeCacheRecomputationId = 1;
 
 
 					QTime mInitTime;
+
+
+					bool mSaturationOccurrenceStatisticsCollected;
+					bool mSaturationOccurrenceStatisticsCollectingInitialized;
+
+
+					bool mFullCompletionGraphConstruction;
+					bool mFullCompletionGraphConstructed;
 
 				// private methods
 				private:

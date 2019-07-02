@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -75,7 +75,21 @@ namespace Konclude {
 					QStringList parserList;
 					bool owl2FunctionalParserAdded = false;
 					bool owl2XMLParserAdded = false;
+					bool turtleParserAdded = false;
+					bool owl2RDFXMLParserAdded = false;
 					QString upperFileString = fileName.toUpper();
+					if (!owl2RDFXMLParserAdded && (upperFileString.endsWith(".OWL") || upperFileString.endsWith(".RDF.XML") || upperFileString.endsWith(".OWL.RDF.XML"))) {
+						owl2RDFXMLParserAdded = true;
+						parserList.append(QString("OWLRDFXML"));
+					}
+					if (!turtleParserAdded && (upperFileString.endsWith(".NT"))) {
+						turtleParserAdded = true;
+						parserList.append(QString("RDFNTRIPLES"));
+					}
+					if (!turtleParserAdded && (upperFileString.endsWith(".TURTLE") || upperFileString.endsWith(".TTL") || upperFileString.endsWith(".NT"))) {
+						turtleParserAdded = true;
+						parserList.append(QString("RDFTURTLE"));
+					}
 					if (!owl2XMLParserAdded && (upperFileString.endsWith(".OWL.XML") || upperFileString.endsWith(".XML.OWL"))) {
 						owl2XMLParserAdded = true;
 						parserList.append(QString("OWL2XML"));
@@ -116,6 +130,14 @@ namespace Konclude {
 						owl2XMLParserAdded = true;
 						parserList.append(QString("OWL2XML"));
 					}
+					if (!owl2RDFXMLParserAdded) {
+						owl2RDFXMLParserAdded = true;
+						parserList.append(QString("OWLRDFXML"));
+					}
+					if (!turtleParserAdded) {
+						turtleParserAdded = true;
+						parserList.append(QString("RDFTURTLE"));
+					}
 					return parserList;
 				}
 
@@ -126,6 +148,149 @@ namespace Konclude {
 					}
 					return mNetworkManager;
 				}
+
+
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+
+				bool COWLlinkProcessor::parseOntologyWithRaptor(QIODevice* device, CConcreteOntologyUpdateCollectorBuilder *builder, const QString& format, const QString& formatName, const QString& resolvedIRI, QString& parsingTryLogString, QStringList& parserErrorList, CConfiguration* configuration, CCommandRecordRouter& commandRecordRouter) {
+					bool parsingSucceeded = false;
+					CRDFRedlandRaptorParser *owl2Parser = new CRDFRedlandRaptorParser(builder, CTRIPLES_DATA_UPDATE_TYPE::TRIPLES_DATA_ADDITION, format, configuration);
+					parsingTryLogString = QString("Trying %1 parsing of '%2' with Redland Raptor.").arg(formatName).arg(resolvedIRI);
+					LOG(INFO, getLogDomain(), parsingTryLogString, this);
+					if (device->open(QIODevice::ReadOnly)) {
+						device->reset();
+						if (owl2Parser->parseTriples(device, resolvedIRI)) {
+							parsingSucceeded = true;
+							LOG(INFO, getLogDomain(), logTr("Finished %1 parsing of '%2' with Redland Raptor.").arg(formatName).arg(resolvedIRI), this);
+						} else {
+							parserErrorList.append(QString("Failed %1 parsing of '%2' with Redland Raptor '%3'.").arg(formatName).arg(resolvedIRI));
+						}
+						device->close();
+					} else {
+						CUnspecifiedMessageErrorRecord::makeRecord(QString("Data from '%1' cannot be read.").arg(resolvedIRI), &commandRecordRouter);
+					}
+
+					delete owl2Parser;
+					return parsingSucceeded;
+				}
+
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+
+
+
+				bool COWLlinkProcessor::parseOntology(QIODevice* device, const QString& ontoIRI, const QString& resolvedIRI, CConcreteOntology *ont, COntologyConfigurationExtension *ontConfig, QList<QString>& importOntologiesList, QStringList& parserErrorList, CCommandRecordRouter& commandRecordRouter) {
+
+					QString iriFileString = resolvedIRI;
+					QStringList parserList = getParserOrderFromFileName(iriFileString);
+
+					CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(ont);
+					builder->initializeBuilding();
+
+					bool parsingSucceeded = false;
+					bool triplesParsed = false;
+					for (QStringList::const_iterator parserIt = parserList.constBegin(), parserItEnd = parserList.constEnd(); !parsingSucceeded && parserIt != parserItEnd; ++parserIt) {
+
+						QString parserString(*parserIt);
+						QString parsingTryLogString;
+
+						if (parserString == "OWLRDFXML") {
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+							parsingSucceeded = parseOntologyWithRaptor(device, builder, "rdfxml", "RDF/XML", resolvedIRI, parsingTryLogString, parserErrorList, ontConfig, commandRecordRouter);
+							if (parsingSucceeded) {
+								triplesParsed = true;
+							}
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+
+						} else if (parserString == "OWL2Functional") {
+							COWL2FunctionalJAVACCOntologyStreamParser *owl2Parser = new COWL2FunctionalJAVACCOntologyStreamParser(builder);
+							parsingTryLogString = QString("Trying stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString);
+							LOG(INFO, getLogDomain(), parsingTryLogString, this);
+							if (device->open(QIODevice::ReadOnly)) {
+								device->reset();
+								if (owl2Parser->parseOntology(device)) {
+									parsingSucceeded = true;
+									LOG(INFO, getLogDomain(), logTr("Finished stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString), this);
+								} else {
+									if (owl2Parser->hasError()) {
+										parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing error: %1").arg(owl2Parser->getErrorString()));
+									}
+									parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing for '%1' failed.").arg(iriFileString));
+								}
+								device->close();
+							} else {
+								CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI), &commandRecordRouter);
+							}
+
+							delete owl2Parser;
+
+						} else if (parserString == "OWL2XML") {
+
+							bool enforceUTF8ConvertingParsing = CConfigDataReader::readConfigBoolean(ontConfig, "Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing");
+							COWL2QtXMLOntologyStreamParser *owl2Parser = nullptr;
+							if (enforceUTF8ConvertingParsing) {
+								owl2Parser = new COWL2QtXMLOntologyStableStreamParser(builder);
+							} else {
+								owl2Parser = new COWL2QtXMLOntologyStreamParser(builder);
+							}
+							parsingTryLogString = QString("Trying stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString);
+							LOG(INFO, getLogDomain(), parsingTryLogString, this);
+							if (device->open(QIODevice::ReadOnly)) {
+								device->reset();
+								if (owl2Parser->parseOntology(device)) {
+									parsingSucceeded = true;
+									LOG(INFO, getLogDomain(), logTr("Finished stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString), this);
+								} else {
+									if (owl2Parser->hasError()) {
+										parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing error: %1").arg(owl2Parser->getErrorString()));
+									}
+									parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing for '%1' failed.").arg(iriFileString));
+								}
+								device->close();
+							} else {
+								CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI), &commandRecordRouter);
+							}
+
+							delete owl2Parser;
+
+						} else if (parserString == "RDFTURTLE") {
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+							parsingSucceeded = parseOntologyWithRaptor(device, builder, "turtle", "RDF Turtle", resolvedIRI, parsingTryLogString, parserErrorList, ontConfig, commandRecordRouter);
+							if (parsingSucceeded) {
+								triplesParsed = true;
+							}
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+
+						} else if (parserString == "RDFNTRIPLES") {
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+							parsingSucceeded = parseOntologyWithRaptor(device, builder, "ntriples", "RDF NTriples", resolvedIRI, parsingTryLogString, parserErrorList, ontConfig, commandRecordRouter);
+							if (parsingSucceeded) {
+								triplesParsed = true;
+							}
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+
+						}
+					}
+
+					if (triplesParsed) {
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+						CConcreteOntologyRedlandTriplesDataExpressionMapper* triplesMapper = new CConcreteOntologyRedlandTriplesDataExpressionMapper(builder);
+						triplesMapper->mapTriples(ont, ont->getOntologyTriplesData());
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+					}
+					if (parsingSucceeded) {
+						builder->completeBuilding();
+					}
+
+					importOntologiesList.append(builder->takeAddedImportOntologyList());
+					delete builder;
+
+					return parsingSucceeded;
+				}
+
+
 
 
 
@@ -592,7 +757,7 @@ namespace Konclude {
 											COntologyConfigurationExtension* ontoConfExt = chPaInKBOntComm->getOntologyRevision()->getOntologyConfiguration();
 
 											COntologyConfigurationExtension *ontConfig = ontoRev->getOntologyConfiguration();
-											CConcreteOntology *ont = ontoRev->getOntology();
+											CConcreteOntology* ont = ontoRev->getOntology();
 
 
 											QList<QString> importOntologiesList;
@@ -608,90 +773,26 @@ namespace Konclude {
 												QString ontoIRI = loadData->getOriginalDataName();
 												QString resolvedIRI = loadData->getResolvedDataName();
 
-												QString iriFileString = resolvedIRI;
-
-
-
-												QStringList parserList = getParserOrderFromFileName(iriFileString);
-												QStringList parserErrorList;
-
 
 												QTime parsingTime;
 												if (mConfLogProcessingTimes) {
 													parsingTime.start();
 												}
 
-												CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(ont);
-												builder->initializeBuilding();
+												QStringList parserErrorList;
 
-												bool parsingSucceeded = false;
-												for (QStringList::const_iterator parserIt = parserList.constBegin(), parserItEnd = parserList.constEnd(); !parsingSucceeded && parserIt != parserItEnd; ++parserIt) {
 
-													QString parserString(*parserIt);
-													QString parsingTryLogString;
-
-													if (parserString == "OWL2Functional") {
-														COWL2FunctionalJAVACCOntologyStreamParser *owl2Parser = new COWL2FunctionalJAVACCOntologyStreamParser(builder);
-														parsingTryLogString = QString("Trying stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString);
-														LOG(INFO,getLogDomain(),parsingTryLogString,this);
-														if (device->open(QIODevice::ReadOnly)) {
-															device->reset();
-															if (owl2Parser->parseOntology(device)) {
-																builder->completeBuilding();
-																parsingSucceeded = true;
-																LOG(INFO,getLogDomain(),logTr("Finished stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString),this);
-															} else {
-																if (owl2Parser->hasError()) {
-																	parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing error: %1").arg(owl2Parser->getErrorString()));
-																}
-																parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing for '%1' failed.").arg(iriFileString));
-															}
-															device->close();
-														} else {
-															CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI),&commandRecordRouter);
-														}
-
-														delete owl2Parser;
-													} else if (parserString == "OWL2XML") {
-														bool enforceUTF8ConvertingParsing = CConfigDataReader::readConfigBoolean(ontConfig,"Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing");
-														COWL2QtXMLOntologyStreamParser *owl2Parser = nullptr;
-														if (enforceUTF8ConvertingParsing) {
-															owl2Parser = new COWL2QtXMLOntologyStableStreamParser(builder);
-														} else {
-															owl2Parser = new COWL2QtXMLOntologyStreamParser(builder);
-														}
-														parsingTryLogString = QString("Trying stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString);
-														LOG(INFO,getLogDomain(),parsingTryLogString,this);
-														if (device->open(QIODevice::ReadOnly)) {
-															device->reset();
-															if (owl2Parser->parseOntology(device)) {
-																builder->completeBuilding();
-																parsingSucceeded = true;
-																LOG(INFO,getLogDomain(),logTr("Finished stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString),this);
-															} else {
-																if (owl2Parser->hasError()) {
-																	parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing error: %1").arg(owl2Parser->getErrorString()));
-																}
-																parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing for '%1' failed.").arg(iriFileString));
-															}
-															device->close();
-														} else {
-															CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI),&commandRecordRouter);
-														}
-
-														delete owl2Parser;
-													}
-												}
-												importOntologiesList = builder->takeAddedImportOntologyList();
-												delete builder;
+												bool parsingSucceeded = parseOntology(device, ontoIRI, resolvedIRI, ont, ontConfig, importOntologiesList, parserErrorList, commandRecordRouter);
 
 
 												if (!parsingSucceeded) {
 													allParsingSucceeded = false;
-													parserErrorList.append(QString("All parsers failed for '%1'.").arg(iriFileString));
+													parserErrorList.append(QString("All parsers failed for '%1'.").arg(resolvedIRI));
 													for (QStringList::const_iterator errorIt = parserErrorList.constBegin(), errorItEnd = parserErrorList.constEnd(); errorIt != errorItEnd; ++errorIt) {
 														CUnspecifiedMessageErrorRecord::makeRecord(*errorIt,&commandRecordRouter);
 													}
+												} else {
+													ont->getLoadData()->addLoadedOntologyIRI(ontoIRI, resolvedIRI);
 												}
 
 
@@ -885,6 +986,233 @@ namespace Konclude {
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+
+
+
+									} else if (dynamic_cast<CParseSPARQLQueryCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CParseSPARQLQueryCommand *pSPARQLQueryC = (CParseSPARQLQueryCommand*)command;
+
+
+										COntologyRevision *ontRev = pSPARQLQueryC->getOntologyRevision();
+										if (ontRev) {
+											CConcreteOntology* onto = ontRev->getOntology();
+											CConcreteOntology* baseOnt = ontRev->getPreviousOntologyRevision()->getOntology();
+
+											QTime parsingTime;
+											if (mConfLogProcessingTimes) {
+												parsingTime.start();
+											}
+
+											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
+
+											CConcreteOntologyUpdateSeparateHashingCollectorBuilder *builder = new CConcreteOntologyUpdateSeparateHashingCollectorBuilder(onto);
+											CConcreteOntologyQueryExtendedBuilder* queryBuilderGen = new CConcreteOntologyQueryExtendedBuilder(baseOnt, onto, ontConfig, builder);
+											CSPARQLSimpleQueryParser* sparqlQueryParser = new CSPARQLSimpleQueryParser(queryBuilderGen, builder, onto);
+
+                                            QStringList queryStringList = pSPARQLQueryC->getSPARQLQueryTextList();
+											builder->initializeBuilding();
+											sparqlQueryParser->parseQueryTextList(queryStringList);
+											builder->completeBuilding();
+											QList<CQuery*> queryList = queryBuilderGen->generateQuerys();
+											if (queryList.isEmpty()) {
+												LOG(WARN, getLogDomain(), logTr("No SPARQL query found in request."), this);
+											}
+											pSPARQLQueryC->setQueryList(queryList);
+											delete builder;
+											delete queryBuilderGen;
+											delete sparqlQueryParser;
+
+											if (mConfLogProcessingTimes) {
+												cint64 parsingMilliSeconds = parsingTime.elapsed();
+												LOG(INFO, getLogDomain(), logTr("SPARQL Query parsed in %1 ms.").arg(parsingMilliSeconds), this);
+											}
+										} else {
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base revision not available."), &commandRecordRouter);
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+
+									} else if (dynamic_cast<CParseProcessSPARQLUpdateTextCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CParseProcessSPARQLUpdateTextCommand *pSPARQLUpdateC = (CParseProcessSPARQLUpdateTextCommand*)command;
+
+
+										COntologyRevision *ontRev = pSPARQLUpdateC->getOntologyRevision();
+										if (ontRev) {
+											CConcreteOntology* onto = ontRev->getOntology();
+											CConcreteOntology* baseOnt = ontRev->getPreviousOntologyRevision()->getOntology();
+
+											QTime parsingTime;
+											if (mConfLogProcessingTimes) {
+												parsingTime.start();
+											}
+
+											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
+
+											CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(onto);
+
+											CSPARQLSimpleUpdateParser* sparqlUpdateParser = new CSPARQLSimpleUpdateParser(builder, onto);
+											builder->initializeBuilding();
+											if (pSPARQLUpdateC->isUpdateTextSplitted()) {
+												QStringList updateStringList = pSPARQLUpdateC->getSPARQLUpdateTextList();
+												sparqlUpdateParser->parseUpdateTextList(updateStringList);
+											} else {
+												QString updateString = pSPARQLUpdateC->getSPARQLUpdateText();
+												sparqlUpdateParser->parseUpdateText(updateString);
+											}
+											builder->completeBuilding();
+											delete builder;
+											delete sparqlUpdateParser;
+
+											if (mConfLogProcessingTimes) {
+												cint64 parsingMilliSeconds = parsingTime.elapsed();
+												LOG(INFO, getLogDomain(), logTr("SPARQL Update parsed in %1 ms.").arg(parsingMilliSeconds), this);
+											}
+										} else {
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base revision not available."), &commandRecordRouter);
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+									} else if (dynamic_cast<CParseProcessSPARQLManageTextCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CParseProcessSPARQLManageTextCommand *pSPARQLUpdateC = (CParseProcessSPARQLManageTextCommand*)command;
+
+
+										CSPARQLSimpleManagementParser managementParser(preSynchronizer, pSPARQLUpdateC->getKnowlegeBaseString(), pSPARQLUpdateC);
+										managementParser.parseUpdateTextList(pSPARQLUpdateC->getSPARQLUpdateTextList());
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+									} else if (dynamic_cast<CCalculateQueriesCommand*>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CCalculateQueriesCommand *calcQueriesC = (CCalculateQueriesCommand*)command;
+
+										for (CQuery* query : calcQueriesC->getQueryList()) {
+											if (query) {
+												CCalculateQueryCommand* calcQueryC = new CCalculateQueryCommand(query, calcQueriesC);
+												preSynchronizer->delegateCommand(calcQueryC);
+											}
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+									} else if (dynamic_cast<CParseProcessSPARQLTextCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CParseProcessSPARQLTextCommand *pSPARQLQueryC = (CParseProcessSPARQLTextCommand *)command;
+
+										CConfiguration* configuration = getConfiguration();
+										bool ignoreFromClause = CConfigDataReader::readConfigBoolean(configuration, "Konclude.SPARQL.AlwaysResolveToDefault");
+
+
+										CSPARQLKnowledgeBaseSplittingOperationParser* sparqlSplittingParser = new CSPARQLKnowledgeBaseSplittingOperationParser();
+										const QString& queryString = pSPARQLQueryC->getSPARQLQueryText();
+										sparqlSplittingParser->parseQueryText(queryString);
+										bool foundSparqlOperation = false;
+										for (QString kbString : sparqlSplittingParser->getKnowlegdeBaseList()) {
+											QList<CSPARQLKnowledgeBaseSplittingOperationData*> queryStringList = sparqlSplittingParser->getKnowlegdeBaseSPARQLOperationList(kbString);
+
+											if (ignoreFromClause || kbString.trimmed().isEmpty()) {
+												kbString = CConfigDataReader::readConfigString(configuration, "Konclude.SPARQL.DefaultResolvingOntology");
+											}
+
+											CCreateKnowledgeBaseRevisionUpdateCommand* lastGetCurrKBRevC = nullptr;
+											CParseSPARQLQueryCommand* lastSparqlQC = nullptr;
+
+											CCommand* lastNonQueryC = nullptr;
+
+											QList<CCommand*> commandList;
+
+											while (!queryStringList.isEmpty()) {
+												CSPARQLKnowledgeBaseSplittingOperationData* splitKBOperationData(queryStringList.takeLast());
+												QStringList textList = splitKBOperationData->getOperationPartStringList();
+												CSPARQLKnowledgeBaseSplittingOperationData::SPARQL_COMMAND_TYPE operationType = splitKBOperationData->getOperationType();
+												if (operationType == CSPARQLKnowledgeBaseSplittingOperationData::SPARQL_QUERY) {
+													foundSparqlOperation = true;
+													if (!lastGetCurrKBRevC) {
+														lastGetCurrKBRevC = new CCreateKnowledgeBaseRevisionUpdateCommand(kbString, pSPARQLQueryC);
+														if (lastNonQueryC) {
+															lastGetCurrKBRevC->addCommandPrecondition(new CCommandProcessedPrecondition(lastNonQueryC));
+														}
+														commandList.append(lastGetCurrKBRevC);
+													}
+													if (!lastSparqlQC) {
+														lastSparqlQC = new CParseSPARQLQueryCommand(textList, lastGetCurrKBRevC, pSPARQLQueryC);
+														commandList.append(lastSparqlQC);
+														CCalculateQueriesCommand* calcQueriesC = new CCalculateQueriesCommand(lastSparqlQC, pSPARQLQueryC);
+														commandList.append(calcQueriesC);
+													} else {
+														lastSparqlQC->addQueryText(textList);
+													}
+												} else if (operationType == CSPARQLKnowledgeBaseSplittingOperationData::SPARQL_UPDATE_MANAGE) {
+													foundSparqlOperation = true;
+
+													// some SPARQL update commands may have dependencies to several graphs/knowledge bases, e.g., COPY, i.e., we need a more sophisticated mechanism at some point
+													CParseProcessSPARQLManageTextCommand* ppSPARQLUTC = new CParseProcessSPARQLManageTextCommand(textList, kbString, pSPARQLQueryC);
+													commandList.append(ppSPARQLUTC);
+													if (lastNonQueryC) {
+														ppSPARQLUTC->addCommandPrecondition(new CCommandProcessedPrecondition(lastNonQueryC));
+													}
+
+													lastNonQueryC = ppSPARQLUTC;
+
+												} else if (operationType == CSPARQLKnowledgeBaseSplittingOperationData::SPARQL_UPDATE_MODIFY) {
+													foundSparqlOperation = true;
+													lastGetCurrKBRevC = nullptr;
+													lastSparqlQC = nullptr;
+
+													CCreateKnowledgeBaseRevisionUpdateCommand* getCurrKBRevC = new CCreateKnowledgeBaseRevisionUpdateCommand(kbString, true, pSPARQLQueryC);
+													if (lastNonQueryC) {
+														getCurrKBRevC->addCommandPrecondition(new CCommandProcessedPrecondition(lastNonQueryC));
+													}
+													commandList.append(getCurrKBRevC);
+
+													CParseProcessSPARQLUpdateTextCommand* ppSPARQLUTC = new CParseProcessSPARQLUpdateTextCommand(textList, getCurrKBRevC, pSPARQLQueryC);
+													commandList.append(ppSPARQLUTC);
+
+													CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(kbString, ppSPARQLUTC, pSPARQLQueryC);
+													inKBRevUpC->addCommandPrecondition(new CCommandProcessedPrecondition(ppSPARQLUTC));
+													commandList.append(inKBRevUpC);
+													lastNonQueryC = inKBRevUpC;
+												}
+											}
+
+											for (CCommand* command : commandList) {
+												preSynchronizer->delegateCommand(command);
+											}
+										}
+										delete sparqlSplittingParser;
+
+										if (!foundSparqlOperation) {
+											LOG(WARN, getLogDomain(), logTr("No SPARQL command found in request."), this);
+										}
+
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
 
 
 									} else if (dynamic_cast<CParseOWL2XMLOntologyCommand *>(command)) {
@@ -1127,7 +1455,7 @@ namespace Konclude {
 										pOWLQC->setQueryComplexity(complexQuery);
 
 
-										CPrepareKnowledgeBaseForQueryCommand* prepKBForQueryC = new CPrepareKnowledgeBaseForQueryCommand(cKBRevCP);
+										CPrepareKnowledgeBaseForQueryCommand* prepKBForQueryC = new CPrepareKnowledgeBaseForQueryCommand(cKBRevCP,pOWLQC);
 										buildQC->makeToSubCommand(prepKBForQueryC);
 										prepKBForQueryC->addCommandPrecondition(new CCommandProcessedPrecondition(pOWLQC));
 
@@ -1140,6 +1468,21 @@ namespace Konclude {
 
 										preSynchronizer->delegateCommand(buildQC);
 										preSynchronizer->delegateCommand(calcQC);
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+									} else if (dynamic_cast<CPrepareKnowledgeBaseForQueryCommand*>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CPrepareKnowledgeBaseForQueryCommand *pKBFQC = (CPrepareKnowledgeBaseForQueryCommand *)command;
+
+										CQueryGenerator* queryGenerator = pKBFQC->getQueryGenerator();
+										if (queryGenerator->requiresPreprocessedOntology()) {
+											CPreprocessKnowledgeBaseRequirementsForQueryCommand* prepKBForQueryC = new CPreprocessKnowledgeBaseRequirementsForQueryCommand(pKBFQC->getOntologyRevisionProvider());
+											pKBFQC->makeToSubCommand(prepKBForQueryC);
+											preSynchronizer->delegateCommand(prepKBForQueryC);
+										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1167,7 +1510,7 @@ namespace Konclude {
 										CGetCurrentKnowledgeBaseRevisionCommand *crKBRevGet = new CGetCurrentKnowledgeBaseRevisionCommand(pqOWLC->getKnowledgeBaseName());
 										buildQC->makeToSubCommand(crKBRevGet);
 
-										CPrepareKnowledgeBaseForQueryCommand* prepKBForQueryC = new CPrepareKnowledgeBaseForQueryCommand(crKBRevGet);
+										CPreprocessKnowledgeBaseRequirementsForQueryCommand* prepKBForQueryC = new CPreprocessKnowledgeBaseRequirementsForQueryCommand(crKBRevGet);
 										buildQC->makeToSubCommand(prepKBForQueryC);
 										prepKBForQueryC->addCommandPrecondition(new CCommandProcessedPrecondition(crKBRevGet));
 
@@ -1264,27 +1607,27 @@ namespace Konclude {
 
 
 
-									} else if (dynamic_cast<CWriteXMLSubClassHierarchyQueryCommand *>(command)) {
+									} else if (dynamic_cast<CWriteCustomQueryCommand *>(command)) {
 										CCommandRecordRouter commandRecordRouter(command,this);
 										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
-										CWriteXMLSubClassHierarchyQueryCommand *wFSCHC = (CWriteXMLSubClassHierarchyQueryCommand *)command;
+										CWriteCustomQueryCommand *wCQC = (CWriteCustomQueryCommand *)command;
 
-										CBuildQueryCommand *buildQC = wFSCHC->getBuildQueryCommand();
+										CBuildQueryCommand *buildQC = wCQC->getBuildQueryCommand();
 										if (!buildQC) {
-											buildQC = new CBuildQueryCommand(0,wFSCHC);
-											wFSCHC->setBuildQueryCommand(buildQC);
+											buildQC = new CBuildQueryCommand(0,wCQC);
+											wCQC->setBuildQueryCommand(buildQC);
 										}
 
-										CCalculateQueryCommand *calcQC = wFSCHC->getCalculateQueryCommand();
+										CCalculateQueryCommand *calcQC = wCQC->getCalculateQueryCommand();
 										if (!calcQC) {
-											calcQC = new CCalculateQueryCommand(buildQC,wFSCHC);
-											wFSCHC->setCalculateQueryCommand(calcQC);
+											calcQC = new CCalculateQueryCommand(buildQC,wCQC);
+											wCQC->setCalculateQueryCommand(calcQC);
 										}
 
-										CGetCurrentKnowledgeBaseRevisionCommand *getCKBRC = new CGetCurrentKnowledgeBaseRevisionCommand(wFSCHC->getKnowledgeBaseName());
+										CGetCurrentKnowledgeBaseRevisionCommand *getCKBRC = new CGetCurrentKnowledgeBaseRevisionCommand(wCQC->getKnowledgeBaseName());
 										buildQC->makeToSubCommand(getCKBRC);
 
-										CConstructWriteXMLSubClassHirarchyQueryCommand *pOWLQC = new CConstructWriteXMLSubClassHirarchyQueryCommand(getCKBRC,wFSCHC->getOutputFileString());
+										CConstructWriteCustomQueryCommand *pOWLQC = new CConstructWriteCustomQueryCommand(getCKBRC,wCQC->getWriteQueryType(),wCQC->getWriteQuerySerializer(),wCQC->getEntityRestrictionString());
 										buildQC->makeToSubCommand(pOWLQC);
 										buildQC->setQueryCommandProvider(pOWLQC);
 
@@ -1298,74 +1641,6 @@ namespace Konclude {
 
 
 
-
-									} else if (dynamic_cast<CWriteXMLIndividualTypesQueryCommand *>(command)) {
-										CCommandRecordRouter commandRecordRouter(command,this);
-										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
-										CWriteXMLIndividualTypesQueryCommand *wXITC = (CWriteXMLIndividualTypesQueryCommand *)command;
-
-										CBuildQueryCommand *buildQC = wXITC->getBuildQueryCommand();
-										if (!buildQC) {
-											buildQC = new CBuildQueryCommand(0,wXITC);
-											wXITC->setBuildQueryCommand(buildQC);
-										}
-
-										CCalculateQueryCommand *calcQC = wXITC->getCalculateQueryCommand();
-										if (!calcQC) {
-											calcQC = new CCalculateQueryCommand(buildQC,wXITC);
-											wXITC->setCalculateQueryCommand(calcQC);
-										}
-
-										CGetCurrentKnowledgeBaseRevisionCommand *getCKBRC = new CGetCurrentKnowledgeBaseRevisionCommand(wXITC->getKnowledgeBaseName());
-										buildQC->makeToSubCommand(getCKBRC);
-
-										CConstructWriteXMLIndividualTypesQueryCommand *pOWLQC = new CConstructWriteXMLIndividualTypesQueryCommand(getCKBRC,wXITC->getOutputFileString(),wXITC->getIndividualName());
-										buildQC->makeToSubCommand(pOWLQC);
-										buildQC->setQueryCommandProvider(pOWLQC);
-
-
-										preSynchronizer->delegateCommand(buildQC);
-										preSynchronizer->delegateCommand(calcQC);
-
-
-										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
-										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
-
-
-
-
-
-									} else if (dynamic_cast<CWriteFunctionalIndividualTypesQueryCommand *>(command)) {
-										CCommandRecordRouter commandRecordRouter(command,this);
-										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
-										CWriteFunctionalIndividualTypesQueryCommand *wFITC = (CWriteFunctionalIndividualTypesQueryCommand *)command;
-
-										CBuildQueryCommand *buildQC = wFITC->getBuildQueryCommand();
-										if (!buildQC) {
-											buildQC = new CBuildQueryCommand(0,wFITC);
-											wFITC->setBuildQueryCommand(buildQC);
-										}
-
-										CCalculateQueryCommand *calcQC = wFITC->getCalculateQueryCommand();
-										if (!calcQC) {
-											calcQC = new CCalculateQueryCommand(buildQC,wFITC);
-											wFITC->setCalculateQueryCommand(calcQC);
-										}
-
-										CGetCurrentKnowledgeBaseRevisionCommand *getCKBRC = new CGetCurrentKnowledgeBaseRevisionCommand(wFITC->getKnowledgeBaseName());
-										buildQC->makeToSubCommand(getCKBRC);
-
-										CConstructWriteFunctionalIndividualTypesQueryCommand *pOWLQC = new CConstructWriteFunctionalIndividualTypesQueryCommand(getCKBRC,wFITC->getOutputFileString(),wFITC->getIndividualName());
-										buildQC->makeToSubCommand(pOWLQC);
-										buildQC->setQueryCommandProvider(pOWLQC);
-
-
-										preSynchronizer->delegateCommand(buildQC);
-										preSynchronizer->delegateCommand(calcQC);
-
-
-										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
-										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 
 
@@ -1808,7 +2083,7 @@ namespace Konclude {
 										COntologyRevision *ontRev = cWFSCHQC->getOntologyRevision();
 										if (ontRev) {
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
-											CWriteFunctionalClassSubsumptionsHierarchyQuery *query = new CWriteFunctionalClassSubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,cWFSCHQC->getOutputFileName());
+											CWriteOREFunctionalClassSubsumptionsHierarchyQuery *query = new CWriteOREFunctionalClassSubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,cWFSCHQC->getOutputFileName());
 											cWFSCHQC->setQuery(query);
 										} else {
 											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
@@ -1817,16 +2092,32 @@ namespace Konclude {
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
-									} else if (dynamic_cast<CConstructWriteXMLSubClassHirarchyQueryCommand *>(command)) {
+
+									} else if (dynamic_cast<CConstructWriteCustomQueryCommand *>(command)) {
 										CCommandRecordRouter commandRecordRouter(command,this);
 										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
 
-										CConstructWriteXMLSubClassHirarchyQueryCommand *cWXSCHQC = (CConstructWriteXMLSubClassHirarchyQueryCommand *)command;
-										COntologyRevision *ontRev = cWXSCHQC->getOntologyRevision();
+										CConstructWriteCustomQueryCommand *cWCQC = (CConstructWriteCustomQueryCommand *)command;
+										COntologyRevision *ontRev = cWCQC->getOntologyRevision();
 										if (ontRev) {
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
-											CWriteOWLXMLClassSubsumptionsHierarchyQuery *query = new CWriteOWLXMLClassSubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,cWXSCHQC->getOutputFileName());
-											cWXSCHQC->setQuery(query);
+											CWriteQuery::WRITEQUERYTYPE queryType = cWCQC->getWriteQueryType();
+											CWriteQuerySerializer* serializer = cWCQC->getWriteQuerySerializer();
+											const QString& entityRestrictionString = cWCQC->getEntityRestrictionString();
+											if (queryType == CWriteQuery::WRITESUBCLASSHIERARCHY) {
+												CWriteSerializerClassSubsumptionsHierarchyQuery *query = new CWriteSerializerClassSubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,serializer,entityRestrictionString);
+												cWCQC->setQuery(query);
+											} else if (queryType == CWriteQuery::WRITESUBOBJECTPROPERTYHIERARCHY) {
+												CWriteSerializerPropertySubsumptionsHierarchyQuery *query = new CWriteSerializerPropertySubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,serializer,false,entityRestrictionString);
+												cWCQC->setQuery(query);
+											} else if (queryType == CWriteQuery::WRITESUBDATAPROPERTYHIERARCHY) {
+												CWriteSerializerPropertySubsumptionsHierarchyQuery *query = new CWriteSerializerPropertySubsumptionsHierarchyQuery(ontRev->getOntology(),ontConfig,serializer,true,entityRestrictionString);
+												cWCQC->setQuery(query);
+											} else if (queryType == CWriteQuery::WRITEINDIVIDUALFLATTENEDTYPES) {
+												CWriteSerializerIndividualFlattenedTypesQuery *query = new CWriteSerializerIndividualFlattenedTypesQuery(ontRev->getOntology(),ontConfig,serializer,entityRestrictionString);
+												cWCQC->setQuery(query);
+											}
+
 										} else {
 											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
 										}
@@ -1835,42 +2126,6 @@ namespace Konclude {
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 
-
-									} else if (dynamic_cast<CConstructWriteXMLIndividualTypesQueryCommand *>(command)) {
-										CCommandRecordRouter commandRecordRouter(command,this);
-										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
-
-										CConstructWriteXMLIndividualTypesQueryCommand *cWXITQC = (CConstructWriteXMLIndividualTypesQueryCommand *)command;
-										COntologyRevision *ontRev = cWXITQC->getOntologyRevision();
-										if (ontRev) {
-											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
-											CWriteOWLXMLIndividualFlattenedTypesQuery *query = new CWriteOWLXMLIndividualFlattenedTypesQuery(ontRev->getOntology(),ontConfig,cWXITQC->getOutputFileName(),cWXITQC->getIndividualName());
-											cWXITQC->setQuery(query);
-										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
-										}
-
-										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
-										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
-
-
-
-									} else if (dynamic_cast<CConstructWriteFunctionalIndividualTypesQueryCommand *>(command)) {
-										CCommandRecordRouter commandRecordRouter(command,this);
-										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
-
-										CConstructWriteFunctionalIndividualTypesQueryCommand *cWFITQC = (CConstructWriteFunctionalIndividualTypesQueryCommand *)command;
-										COntologyRevision *ontRev = cWFITQC->getOntologyRevision();
-										if (ontRev) {
-											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
-											CWriteFunctionalIndividualFlattenedTypesQuery *query = new CWriteFunctionalIndividualFlattenedTypesQuery(ontRev->getOntology(),ontConfig,cWFITQC->getOutputFileName(),cWFITQC->getIndividualName());
-											cWFITQC->setQuery(query);
-										} else {
-											CUnspecifiedMessageErrorRecord::makeRecord("Knowledge base revision not available.",&commandRecordRouter);
-										}
-
-										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
-										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 
 									} else if (dynamic_cast<CConstructClassifyQueryCommand *>(command)) {
@@ -1958,10 +2213,11 @@ namespace Konclude {
 
 											QList<CQuery *> queryList;
 											if (complex) {
+												CConcreteOntology* baseOnto = ontRev->getPreviousOntologyRevision()->getOntology();
 
 												COWLlinkQueryParser *queryParser = nullptr;
-												CConcreteOntologyUpdateCollectorBuilder *ontoBuilder = new CConcreteOntologyUpdateCollectorBuilder(onto);
-												queryBuilderGen = new CConcreteOntologyQueryExtendedBuilder(onto,ontConfig,ontoBuilder);
+												CConcreteOntologyUpdateSeparateHashingCollectorBuilder *ontoBuilder = new CConcreteOntologyUpdateSeparateHashingCollectorBuilder(onto);
+												queryBuilderGen = new CConcreteOntologyQueryExtendedBuilder(baseOnto,onto,ontConfig,ontoBuilder);
 												COWL2QtXMLOntologyParser *owl2Parser = new COWL2QtXMLOntologyParser(ontoBuilder,&commandRecordRouter);
 												queryParser = new COWLlinkQtXMLComplexQueryParser(queryBuilderGen,owl2Parser);
 												ontoBuilder->initializeBuilding();

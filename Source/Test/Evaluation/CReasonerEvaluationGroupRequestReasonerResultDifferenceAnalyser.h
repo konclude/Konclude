@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -43,6 +43,7 @@
 #include "Config/CConfiguration.h"
 
 #include "Parser/COWLlinkQtXMLResultParser.h"
+#include "Parser/CSPARQLQtXMLResultParser.h"
 
 
 // Logger includes
@@ -86,16 +87,18 @@ namespace Konclude {
 
 					QString getPrettyTitleFromOutputFile(const QString& outputFile);
 
-					cint64 compareResultsSimilarityWithOtherReasoners(const QString& groupString, const QString& requestString, const QString& reasonerString, CReasonerEvaluationStringListValue* stringListDataValue, const QStringList& reasonerList);
+					cint64 compareResultsSimilarityWithOtherReasoners(const QString& groupString, const QString& requestString, const QString& reasonerString, CReasonerEvaluationStringListValue* stringListDataValue, const QStringList& reasonerList, const QString& detailedReportingOutputDirectory);
 
 					bool isClassHierarchyResultSimilarTo(CClassHierarchyResult* classHierResult, cint64 nodeNumber, const QString& otherResponseFileString);
 					bool isBooleanResultSimilarTo(CBooleanQueryResult* booleanResult, cint64 nodeNumber, const QString& otherResponseFileString);
 					bool isClassesResultSimilarTo(CClassesResult* classesResult, cint64 nodeNumber, const QString& otherResponseFileString);
+					bool isVariableBindingResultSimilarTo(CVariableBindingsAnswersSetResult* varBindingResult, cint64 nodeNumber, const QString& otherResponseFileString, QHash<QString, cint64>* variableNameIndexHash, const QString& reportingFileName);
 
 				// protected variables
 				protected:
 					QString mOutputFileName;
-					COWLlinkQtXMLResultParser mResultParser;
+					COWLlinkQtXMLResultParser mOWLlinkResultParser;
+					CSPARQLQtXMLResultParser mSPARQLResultParser;
 					QHash<cint64, QHash<QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>,cint64>* > mNumberCompareDiffCountHashHash;
 					QHash<QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>,cint64> mReasonerCompareDiffCountHash;
 

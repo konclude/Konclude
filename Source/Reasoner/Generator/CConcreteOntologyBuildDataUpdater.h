@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -112,11 +112,13 @@ namespace Konclude {
 					virtual CClassTermExpression* getTopClass();
 					virtual CClassTermExpression* getBottomClass();
 
-					virtual CObjectIndividualVariableExpression* getIndividualVariable(const QString &individualVariableName, cint64 axiomNumber);
-					virtual CObjectIndividualVariableExpression* getIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber);
+					virtual CObjectIndividualVariableExpression* getNominalIndividualVariable(const QString &individualVariableName, cint64 axiomNumber);
+					virtual CObjectIndividualVariableExpression* getNominalIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber);
 
 
 					virtual CDataLiteralExpression* getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype);
+					virtual CDataLiteralExpression* getDataLiteral(CBuildExpression* expression1, CBuildExpression* expression2);
+					virtual CDataLiteralExpression* getDataLiteral(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
 
 
 					virtual CDatatypeExpression* getDatatype(const QString& datatypeName);
@@ -341,6 +343,16 @@ namespace Konclude {
 					virtual CAnonymousIndividualExpression* getAnonymousIndividual(const QString& ontologyName, const QString& individualName);
 					virtual CAnonymousIndividualExpression* getAnonymousIndividual(const QStringRef& ontologyName, const QStringRef& individualName);
 
+
+					virtual CIndividualVariableExpression* getIndividualVariable(const QStringRef &individualVariableName, bool anonymousVariable);
+					virtual CIndividualVariableExpression* getIndividualVariable(const QString &individualVariableName, bool anonymousVariable);
+
+					virtual CDataValueVariableExpression* getDataValueVariable(const QStringRef &dataValueVariableName);
+					virtual CDataValueVariableExpression* getDataValueVariable(const QString &dataValueVariableName);
+					virtual CDataLiteralVariableExpression* getDataLiteralVariable(const QStringRef &dataLiteralVariableName);
+					virtual CDataLiteralVariableExpression* getDataLiteralVariable(const QString &dataLiteralVariableName);
+
+
 					virtual CClassAssertionExpression* getClassAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
 					virtual CClassAssertionExpression* getClassAssertion(CBuildExpression* expression1, CBuildExpression* expression2);
 					virtual CObjectPropertyAssertionExpression* getObjectPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
@@ -358,11 +370,39 @@ namespace Konclude {
 					virtual CDifferentIndividualsExpression* getDifferentIndividuals(const CEXPRESSIONLIST<CIndividualTermExpression*>& expressions);
 
 
-					virtual CDataPropertyAssertionExpression* getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3);
-					virtual CNegativeDataPropertyAssertionExpression* getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3);
+					virtual CDataPropertyAssertionExpression* getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3);
+					virtual CNegativeDataPropertyAssertionExpression* getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+					// virtual methods from CTriplesDataBuilder
+					virtual bool addTriplesData(CTriplesData* tripleData);
+					virtual CTriplesData* getLatestTriplesData(bool onlyLocal = true, bool* localFlag = nullptr);
+
+
+
+
 
 				// protected functions
 				protected:
+
+
+					virtual CConcreteOntologyBuildDataUpdater* addHashedExpression(CBuildExpression* expression);
+					virtual CBuildExpression* getHashedExpression(CBuildExpression* expression);
+
 
 					// protected variables
 				protected:
@@ -372,6 +412,7 @@ namespace Konclude {
 
 
 					CMemoryAllocationManager* mMemManager;
+					CContext* mBoxContext;
 
 
 					CBUILDSET<CDeclarationAxiomExpression*>* mDeclarationAxiomSet;
@@ -408,8 +449,10 @@ namespace Konclude {
 					CBUILDHASH<CExpressionHasher,CBuildExpression*>* mExpressionBuildHash;
 
 					CBUILDHASH<CStringRefStringHasher,CClassExpression*>* mClassBuildHash;
-					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* mIndividualVariableBuildHash;
-					CBUILDHASH<CStringRefStringHasher,CObjectPropertyExpression*>* mObjectPropertyBuildHash;
+					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* mNominalIndividualVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* mNamedIndividualVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* mAnonymousIndividualVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CObjectPropertyExpression*>* mObjectPropertyBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>* mIndividualBuildHash;
 					CBUILDHASH<QPair<CStringRefStringHasher,CStringRefStringHasher>,CAnonymousIndividualExpression*>* mAnoIndividualBuildHash;
 
@@ -417,6 +460,8 @@ namespace Konclude {
 					CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* mDataLexicalValueBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* mDataPropertyBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>* mDataFacetBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CDataValueVariableExpression*>* mDataValueVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CDataLiteralVariableExpression*>* mDataLiteralVariableBuildHash;
 
 
 
@@ -442,9 +487,9 @@ namespace Konclude {
 
 
 
-
 					CBUILDHASH<CStringRefStringHasher,COntologyImportData*>* mImportDataHash;
 
+					COntologyTriplesData* mOntologyTriplesData;
 
 
 
@@ -452,6 +497,8 @@ namespace Konclude {
 
 
 					CObjectOneOfExpression* mTmpObjectOneOfExpression;
+
+
 
 
 			};

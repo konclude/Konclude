@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -38,7 +38,7 @@ namespace Konclude {
 
 
 
-			cint64 CReasonerEvaluationGroupRequestReasonerResultDifferenceAnalyser::compareResultsSimilarityWithOtherReasoners(const QString& groupString, const QString& requestString, const QString& reasonerString, CReasonerEvaluationStringListValue* stringListDataValue, const QStringList& reasonerList) {
+			cint64 CReasonerEvaluationGroupRequestReasonerResultDifferenceAnalyser::compareResultsSimilarityWithOtherReasoners(const QString& groupString, const QString& requestString, const QString& reasonerString, CReasonerEvaluationStringListValue* stringListDataValue, const QStringList& reasonerList, const QString& detailedReportingOutputDirectory) {
 				cint64 totalDifferentResultCount = 0;
 				const QStringList& responseFileStringList = stringListDataValue->getValue();
 				if (!responseFileStringList.isEmpty()) {
@@ -76,18 +76,18 @@ namespace Konclude {
 											fileOpened = true;
 										}
 										QDomElement rootEl = document.documentElement();
-										QDomElement classResEl = rootEl.firstChildElement();
+										QDomElement resultElement = rootEl.firstChildElement();
 										bool foundResult = false;
 										bool foundError = false;
 										cint64 nodeNumber = 0;
-										if (!classResEl.isNull()) {
-											while (!classResEl.isNull()) {
+										if (!resultElement.isNull()) {
+											while (!resultElement.isNull()) {
 
-												if (classResEl.nodeName() == "Error") {
+												if (resultElement.nodeName() == "Error") {
 													foundError = true;
 													break;
 
-												} else if (classResEl.nodeName() == "ClassHierarchy" || classResEl.nodeName() == "BooleanResponse" || classResEl.nodeName() == "Classes") {
+												} else if (resultElement.nodeName() == "ClassHierarchy" || resultElement.nodeName() == "BooleanResponse" || resultElement.nodeName() == "Classes" || resultElement.nodeName() == "results") {
 													foundResult = true;
 													CClassHierarchyResult* classHierResult = nullptr;
 													if (lastClassHierResult && lastClassHierResultNumber == nodeNumber) {
@@ -95,6 +95,7 @@ namespace Konclude {
 													}
 													CBooleanQueryResult* booleanResult = nullptr;
 													CClassesResult* classesResult = nullptr;
+													CVariableBindingsAnswersSetResult* variableBindingsResult = nullptr;
 
 													cint64 diffCount = 0;
 
@@ -107,9 +108,9 @@ namespace Konclude {
 														diffCount += compareDiffCountHash->value(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal));
 													} else {
 
-														if (classResEl.nodeName() == "ClassHierarchy") {
+														if (resultElement.nodeName() == "ClassHierarchy") {
 															if (!classHierResult) {
-																classHierResult = mResultParser.parseClassHierarchyResult(&classResEl);
+																classHierResult = mOWLlinkResultParser.parseClassHierarchyResult(&resultElement);
 															}
 
 															QString otherResponseFileString = otherResponseFileStringList.first();
@@ -117,9 +118,9 @@ namespace Konclude {
 															if (!isClassHierarchyResultSimilarTo(classHierResult,nodeNumber,otherResponseFileString)) {
 																diffCount = 1;
 															}
-														} else if (classResEl.nodeName() == "BooleanResponse") {
+														} else if (resultElement.nodeName() == "BooleanResponse") {
 															if (!booleanResult) {
-																booleanResult = mResultParser.parseBooleanQueryResult(&classResEl);
+																booleanResult = mOWLlinkResultParser.parseBooleanQueryResult(&resultElement);
 															}
 
 															QString otherResponseFileString = otherResponseFileStringList.first();
@@ -127,14 +128,29 @@ namespace Konclude {
 															if (!isBooleanResultSimilarTo(booleanResult,nodeNumber,otherResponseFileString)) {
 																diffCount = 1;
 															}
-														} else if (classResEl.nodeName() == "Classes") {
+														} else if (resultElement.nodeName() == "Classes") {
 															if (!classesResult) {
-																classesResult = mResultParser.parseClassesResult(&classResEl);
+																classesResult = mOWLlinkResultParser.parseClassesResult(&resultElement);
 															}
 
 															QString otherResponseFileString = otherResponseFileStringList.first();
 															LOG(INFO,"::Konclude::Test::Evaluation::ResultDifferenceAnalyser",logTr("Comparing classes results between '%1' and '%2'.").arg(responseFileString).arg(otherResponseFileString),this);
 															if (!isClassesResultSimilarTo(classesResult,nodeNumber,otherResponseFileString)) {
+																diffCount = 1;
+															}
+														} else if (resultElement.nodeName() == "results") {
+															// handle SPARQL binding results
+															QHash<QString, cint64> variableNameIndexHash;
+															if (!variableBindingsResult) {
+																variableBindingsResult = mSPARQLResultParser.parseVariableBindings(&resultElement, &variableNameIndexHash);
+															}
+
+															QString otherResponseFileString = otherResponseFileStringList.first();
+															QString reportingFileName = responseFileString + "--vs--" + otherResponseFileString + ".txt";
+															reportingFileName = reportingFileName.replace("/", "_").replace(":", "_");
+															reportingFileName = detailedReportingOutputDirectory + reportingFileName;
+															LOG(INFO, "::Konclude::Test::Evaluation::ResultDifferenceAnalyser", logTr("Comparing variable binding results between '%1' and '%2', reporting details to '%3'.").arg(responseFileString).arg(otherResponseFileString).arg(reportingFileName), this);
+															if (!isVariableBindingResultSimilarTo(variableBindingsResult, nodeNumber, otherResponseFileString, &variableNameIndexHash, reportingFileName)) {
 																diffCount = 1;
 															}
 														}
@@ -157,10 +173,15 @@ namespace Konclude {
 													if (classesResult) {
 														delete classesResult;
 													}
+													if (variableBindingsResult) {
+														delete variableBindingsResult;
+													}
 
 												} 
-												++nodeNumber;
-												classResEl = classResEl.nextSiblingElement();
+												if (resultElement.nodeName() != "answering-statistics") {
+													++nodeNumber;
+												}
+												resultElement = resultElement.nextSiblingElement();
 											}
 										}
 
@@ -199,7 +220,7 @@ namespace Konclude {
 								break;
 
 							} else if (currNodeNumber == nodeNumber && classResEl.nodeName() == "ClassHierarchy") {
-								CClassHierarchyResult* otherClassHierResult = mResultParser.parseClassHierarchyResult(&classResEl);
+								CClassHierarchyResult* otherClassHierResult = mOWLlinkResultParser.parseClassHierarchyResult(&classResEl);
 								if (otherClassHierResult) {
 
 									if (!classHierResult->isResultEquivalentTo(otherClassHierResult)) {
@@ -240,7 +261,7 @@ namespace Konclude {
 								break;
 
 							} else if (currNodeNumber == nodeNumber && classResEl.nodeName() == "BooleanResponse") {
-								CBooleanQueryResult* otherBooleanResult = mResultParser.parseBooleanQueryResult(&classResEl);
+								CBooleanQueryResult* otherBooleanResult = mOWLlinkResultParser.parseBooleanQueryResult(&classResEl);
 								if (otherBooleanResult) {
 
 									if (!booleanResult->isResultEquivalentTo(otherBooleanResult)) {
@@ -266,6 +287,77 @@ namespace Konclude {
 
 
 
+			bool CReasonerEvaluationGroupRequestReasonerResultDifferenceAnalyser::isVariableBindingResultSimilarTo(CVariableBindingsAnswersSetResult* varBindingResult, cint64 nodeNumber, const QString& otherResponseFileString, QHash<QString, cint64>* variableNameIndexHash, const QString& reportingFileName) {
+				bool resultSimilar = true;
+				QFile responseFile(otherResponseFileString);
+				if (responseFile.open(QIODevice::ReadOnly)) {
+					QDomDocument document;
+					document.setContent(&responseFile,false);
+					QDomElement rootEl = document.documentElement();
+					QDomElement resultElement = rootEl.firstChildElement();
+					cint64 currNodeNumber = 0;
+					if (!resultElement.isNull()) {
+						while (!resultElement.isNull()) {
+							if (resultElement.nodeName() == "Error") {
+								break;
+
+							} else if (currNodeNumber == nodeNumber && resultElement.nodeName() == "results") {
+								CVariableBindingsAnswersSetResult* otherVarBindingResult = mSPARQLResultParser.parseVariableBindings(&resultElement, variableNameIndexHash, true);
+								if (otherVarBindingResult) {
+
+									if (!varBindingResult || !varBindingResult->isResultEquivalentTo(otherVarBindingResult)) {
+										resultSimilar = false;
+
+										if (varBindingResult && otherVarBindingResult) {
+											CVariableBindingsAnswersResultIterator* it = varBindingResult->getVariableBindingsAnswersIterator();
+											while (it->hasNext()) {
+												CVariableBindingsAnswerResult* answerResult = it->getNext();
+												if (!otherVarBindingResult->hasResultVariableBindings(answerResult)) {
+													QFile reportingFile(reportingFileName);
+													if (reportingFile.open(QFile::Append)) {
+														reportingFile.write(QString("Difference (additional answer) for " + answerResult->getQueryResultString() + "\r\n").toLocal8Bit());
+														reportingFile.close();
+													}
+												}
+											}
+											CVariableBindingsAnswersResultIterator* otherIt = otherVarBindingResult->getVariableBindingsAnswersIterator();
+											while (otherIt->hasNext()) {
+												CVariableBindingsAnswerResult* answerResult = otherIt->getNext();
+												if (!varBindingResult->hasResultVariableBindings(answerResult)) {
+													QFile reportingFile(reportingFileName);
+													if (reportingFile.open(QFile::Append)) {
+														reportingFile.write(QString("Difference (missing answer) for " + answerResult->getQueryResultString() + "\r\n").toLocal8Bit());
+														reportingFile.close();
+													}
+												}
+											}
+										}
+									}
+
+									delete otherVarBindingResult;
+
+								} else if (varBindingResult) {
+									resultSimilar = false;
+								}
+								break;
+
+							} else {
+								if (resultElement.nodeName() != "answering-statistics") {
+									++currNodeNumber;
+								}
+								if (currNodeNumber > nodeNumber) {
+									break;
+								}
+								resultElement = resultElement.nextSiblingElement();
+							}
+						}
+					}
+				}
+				return resultSimilar;
+			}
+
+
+
 			bool CReasonerEvaluationGroupRequestReasonerResultDifferenceAnalyser::isClassesResultSimilarTo(CClassesResult* classesResult, cint64 nodeNumber, const QString& otherResponseFileString) {
 				bool resultSimilar = true;
 				QFile responseFile(otherResponseFileString);
@@ -281,7 +373,7 @@ namespace Konclude {
 								break;
 
 							} else if (currNodeNumber == nodeNumber && classResEl.nodeName() == "Classes") {
-								CClassesResult* otherClassesResult = mResultParser.parseClassesResult(&classResEl);
+								CClassesResult* otherClassesResult = mOWLlinkResultParser.parseClassesResult(&classResEl);
 								if (otherClassesResult) {
 
 									if (!classesResult->isResultEquivalentTo(otherClassesResult)) {
@@ -322,6 +414,9 @@ namespace Konclude {
 				outDir.mkpath(mOutputFileName);
 				QString outputFileString(outputDirectory+mOutputFileName+"result-difference-to-other-reasoners");
 
+				QString detailedOutputReportingDirectory = QString(outputDirectory + mOutputFileName + "/result-differences-reports/");
+				outDir.mkpath(mOutputFileName + "/result-differences-reports");
+
 				CReasonerEvaluationTableMultiFormatOutputWriter<double> tableMultiFormatOutputWriter;
 				tableMultiFormatOutputWriter.addColumnTitles(titleList);
 
@@ -360,7 +455,7 @@ namespace Konclude {
 
 											QStringList responseFiles = stringListDataValue->getValue();
 
-											double diffCount = compareResultsSimilarityWithOtherReasoners(groupString,requestString,reasonerString,stringListDataValue,reasonerList);
+											double diffCount = compareResultsSimilarityWithOtherReasoners(groupString,requestString,reasonerString,stringListDataValue,reasonerList, detailedOutputReportingDirectory);
 
 											tableMultiFormatOutputWriter.addValuesToLastTableRow(QList<double>()<<diffCount);
 

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -37,6 +37,7 @@ namespace Konclude {
 
 
 			CConcreteOntology *CSubroleTransformationPreProcess::preprocess(CConcreteOntology *ontology, CPreProcessContext* context) {
+				mOntology = ontology;
 				if (ontology) {
 					mTBox = ontology->getDataBoxes()->getTBox();
 					mABox = ontology->getDataBoxes()->getABox();
@@ -50,7 +51,6 @@ namespace Konclude {
 					mIndiVec = mABox->getIndividualVector();
 
 					mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
-					mOntology = ontology;
 
 					mTopObjectRole = nullptr;
 					mBottomObjectRole = nullptr;
@@ -66,7 +66,12 @@ namespace Konclude {
 					bool topObjectRuleUsed = construcFlags->isTopObjectRoleUsed();
 					bool bottomObjectRuleUsed = construcFlags->isBottomObjectRoleUsed();
 
-					if (topObjectRuleUsed) {
+
+					bool confForceInverseRoleCreation = CConfigDataReader::readConfigBoolean(context->getConfiguration(),"Konclude.Calculation.Preprocessing.ForceInverseRoleCreation",true);
+					bool confComplexQueryingSupport = CConfigDataReader::readConfigBoolean(context->getConfiguration(),"Konclude.Calculation.Querying.ComplexQueryingSupport",true);
+
+
+					if (topObjectRuleUsed || confComplexQueryingSupport) {
 						mRoleChainVector = mRBox->getRoleChainVector();
 						makeUniversalSuperRole();
 					}
@@ -84,7 +89,75 @@ namespace Konclude {
 						makeBottomDataRoleDomain();
 					}
 
+
+					CBUILDHASH<CRole*, CObjectPropertyTermExpression*>* roleObjPropTermHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
+					CBUILDHASH<CObjectPropertyTermExpression*, CRole*>* objPropTermRoleHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getObjectPropertyTermRoleMappingHash();
+					CBUILDLIST<CBuildExpression*>* expressionBuildContainerList = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getExpressionBuildListContainer();
+					CBUILDHASH<CExpressionHasher, CBuildExpression*>* expressionBuildHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getStructuralExpressionBuildHash();
+
+
 					qint64 itemCounts = mRolesVector->getItemCount();
+					for (qint64 i = 0; i < itemCounts; ++i) {
+						CRole *role = mRolesVector->getLocalData(i);
+						if (role) {
+
+							if (!role->getInverseRole() && !role->isDataRole()) {
+								for (CSortedNegLinker<CRole*>* inverseEquivalentRolesIt = role->getInverseEquivalentRoleList(); inverseEquivalentRolesIt && !role->getInverseRole(); inverseEquivalentRolesIt = inverseEquivalentRolesIt->getNext()) {
+									if (inverseEquivalentRolesIt->isNegated()) {
+										role->setInverseRole(inverseEquivalentRolesIt->getData());
+									}
+								}
+							}
+
+							if ((confForceInverseRoleCreation || confComplexQueryingSupport) && !role->hasInverseRoles()) {
+								CRole* inverseRole = CObjectAllocator< CRole >::allocateAndConstruct(mMemMan);
+
+								inverseRole->initRole();
+								inverseRole->setInverseRole(role);
+								inverseRole->setDataRole(role->isDataRole());
+								cint64 inverseRoleTag = mRolesVector->getItemCount();
+								inverseRole->setRoleTag(inverseRoleTag);
+								inverseRole->setRoleComplexity(role->getRoleComplexity());
+								mRolesVector->setData(inverseRole->getRoleTag(), inverseRole);
+
+
+								CSortedNegLinker<CRole*>* invRoleLinker1 = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
+								invRoleLinker1->init(role, true);
+								inverseRole->addSuperRoleLinker(invRoleLinker1);
+								CSortedNegLinker<CRole*>* invRoleLinker2 = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
+								invRoleLinker2->init(inverseRole, true);
+								role->addSuperRoleLinker(invRoleLinker2);
+								role->setInverseRole(inverseRole);
+
+
+								CSortedNegLinker<CRole*>* invEqRoleLinker1 = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
+								invEqRoleLinker1->init(role, true);
+								inverseRole->addEquivalentRoleLinker(invEqRoleLinker1);
+								CSortedNegLinker<CRole*>* invEqRoleLinker2 = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
+								invEqRoleLinker2->init(inverseRole, true);
+								role->addEquivalentRoleLinker(invEqRoleLinker2);
+
+
+								if (mTopObjectRole && (topObjectRuleUsed || confComplexQueryingSupport) && !role->isDataRole()) {
+									CSortedNegLinker<CRole*>* invUnivRoleSuperLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
+									invUnivRoleSuperLinker->init(mTopObjectRole, true);
+									inverseRole->addSuperRoleLinker(invUnivRoleSuperLinker);
+								}
+
+								if (!role->isDataRole()) {
+									CObjectPropertyTermExpression* buildExpression = roleObjPropTermHash->value(role);
+									CInverseObjectPropertyOfExpression* invRoleExpression = new CInverseObjectPropertyOfExpression(buildExpression);
+									expressionBuildHash->insert(CExpressionHasher(invRoleExpression), invRoleExpression);
+									expressionBuildContainerList->append(invRoleExpression);
+									roleObjPropTermHash->insert(role, invRoleExpression);
+									objPropTermRoleHash->insert(invRoleExpression, role);
+								}
+							}
+						}
+					}
+
+
+					itemCounts = mRolesVector->getItemCount();
 					for (qint64 i = 0; i < itemCounts; ++i) {
 						CRole *role = mRolesVector->getLocalData(i);
 						if (role) {
@@ -106,14 +179,16 @@ namespace Konclude {
 									}
 								}
 							}
+
 						}
 					}
 
+
+
 					QHash<qint64,qint64> roleTagSubRoleTagHash;
 
-
 					for (qint64 i = 0; i < itemCounts; ++i) {
-						CRole *role = mRolesVector->getData(i);
+						CRole *role = mRolesVector->getLocalData(i);
 						if (role) {
 							cint64 roleTag = role->getRoleTag();
 							CSortedNegLinker<CRole*>* superRoleLinkerIt = role->getSuperRoleList();
@@ -127,10 +202,6 @@ namespace Konclude {
 					}
 
 					FOREACHIT (cint64 locRoleTag, locRoleTagSet) {
-						if (!locRoleTagSet.contains(locRoleTag)) {
-							locRoleTagSet.insert(locRoleTag);
-							subRoleUpdateTagList.append(locRoleTag);
-						}
 						FOREACHIT (cint64 subRoleTag, roleTagSubRoleTagHash.values(locRoleTag)) {
 							if (!locRoleTagSet.contains(subRoleTag)) {
 								locRoleTagSet.insert(subRoleTag);
@@ -174,8 +245,10 @@ namespace Konclude {
 								CSortedNegLinker<CRole*>* superRoleLinkerIt = role->getIndirectSuperRoleList();
 								while (superRoleLinkerIt) {
 									CRole* superRole = superRoleLinkerIt->getData();
-									superRole = getLocalizedRole(superRole);
-									superRole->setRoleComplexity(true);
+									if (!superRole->isComplexRole()) {
+										superRole = getLocalizedRole(superRole);
+										superRole->setRoleComplexity(true);
+									}
 									superRoleLinkerIt = superRoleLinkerIt->getNext();
 								}
 							}
@@ -189,6 +262,16 @@ namespace Konclude {
 
 				return ontology;
 			}
+
+
+
+
+			CConcreteOntology* CSubroleTransformationPreProcess::continuePreprocessing() {
+				return mOntology;
+			}
+
+
+
 
 			void CSubroleTransformationPreProcess::makeUniversalConnectionIndividual() {
 				cint64 univConnIndiID = 0;
@@ -261,8 +344,13 @@ namespace Konclude {
 
 			void CSubroleTransformationPreProcess::makeUniversalSuperRole() {
 				mOntology->getDataBoxes()->getExpressionDataBoxMapping()->getBuildConstructFlags()->setComplexRoleUsed();
-				mTopObjectRole = getLocalizedRole(mRolesVector->getData(mRBox->getTopObjectRoleIndex()));
+				bool topRoleLocalized = false;
+				mTopObjectRole = mRolesVector->getData(mRBox->getTopObjectRoleIndex(), &topRoleLocalized);
 				if (!mTopObjectRole->isTransitive()) {
+					if (!topRoleLocalized) {
+						topRoleLocalized = true;
+						mTopObjectRole = getLocalizedRole(mTopObjectRole);
+					}
 					mTopObjectRole->setTransitive(true);
 					cint64 roleChainCount = mRoleChainVector->getItemCount();
 					CRoleChain* roleChain = CObjectAllocator< CRoleChain >::allocateAndConstruct(mMemMan);
@@ -284,6 +372,10 @@ namespace Konclude {
 					mTopObjectRole->addRoleChainSubSharingLinker(subRoleChainLinker);
 				}
 				if (!mTopObjectRole->isSymmetric()) {
+					if (!topRoleLocalized) {
+						topRoleLocalized = true;
+						mTopObjectRole = getLocalizedRole(mRolesVector->getData(mRBox->getTopObjectRoleIndex()));
+					}
 					mTopObjectRole->setSymmetric(true);
 
 					CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
@@ -298,25 +390,31 @@ namespace Konclude {
 
 						CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
 						roleLinker->init(mTopObjectRole,true);
-						mTopObjectRole->addSuperRoleLinker(roleLinker);
+						role->addSuperRoleLinker(roleLinker);
 					}
 				}
 				// make reflexive -> add \exists u.SELF to TOP
 				bool topConLocal = false;
 				CConcept* topConcept = mConceptVector->getData(1,&topConLocal);
-				if (!topConLocal) {
-					topConcept = CConceptRoleIndividualLocator::getLocatedConcept(topConcept,mOntology);
-				}
 				bool hasTopExistsUniversalSelf = false;
+				bool renewTopExistsUniversalSelf = false;
+				CConcept* existsUniversalSelfConcept = nullptr;
 				for (CSortedNegLinker<CConcept*>* opLinker = topConcept->getOperandList(); !hasTopExistsUniversalSelf && opLinker; opLinker = opLinker->getNext()) {
 					if (!opLinker->isNegated()) {
 						CConcept* opConcept = opLinker->getData();
 						if (opConcept->getOperatorCode() == CCSELF && opConcept->getRole()->getRoleTag() == mTopObjectRole->getRoleTag()) {
 							hasTopExistsUniversalSelf = true;
+							existsUniversalSelfConcept = opConcept;
+							if (opConcept->getRole() != mTopObjectRole) {
+								renewTopExistsUniversalSelf = true;
+							}
 						}
 					}
 				}
 				if (!hasTopExistsUniversalSelf) {
+					if (!topConLocal) {
+						topConcept = CConceptRoleIndividualLocator::getLocatedConcept(topConcept, mOntology);
+					}
 					CConcept* univSelfCon = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
 					cint64 conCount = mConceptVector->getItemCount();
 					univSelfCon->initConcept();
@@ -329,6 +427,25 @@ namespace Konclude {
 					topOpLinker->init(univSelfCon,false);
 					topConcept->addOperandLinker(topOpLinker);
 					topConcept->incOperandCount(1);
+				} else if (renewTopExistsUniversalSelf) {
+					if (!topConLocal) {
+						topConcept = CConceptRoleIndividualLocator::getLocatedConcept(topConcept, mOntology);
+					}
+					CConcept* univSelfCon = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
+					cint64 conCount = mConceptVector->getItemCount();
+					univSelfCon->initConcept();
+					univSelfCon->setConceptTag(conCount);
+					univSelfCon->setRole(mTopObjectRole);
+					univSelfCon->setOperatorCode(CCSELF);
+					mConceptVector->setData(conCount, univSelfCon);
+					bool replaced = false;
+
+					for (CSortedNegLinker<CConcept*>* opLinker = topConcept->getOperandList(); !replaced && opLinker; opLinker = opLinker->getNext()) {
+						if (opLinker->getData() == existsUniversalSelfConcept) {
+							opLinker->setData(univSelfCon);
+							replaced = true;
+						}
+					}
 				}
 				
 			}
@@ -347,7 +464,7 @@ namespace Konclude {
 
 						CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemMan);
 						roleLinker->init(mTopDataRole,true);
-						mTopDataRole->addSuperRoleLinker(roleLinker);
+						role->addSuperRoleLinker(roleLinker);
 					}
 				}
 			}

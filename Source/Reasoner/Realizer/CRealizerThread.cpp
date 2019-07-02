@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -132,8 +132,8 @@ namespace Konclude {
 			}
 
 
-			bool CRealizerThread::addOntologyRealizingRequirements(COntologyRealizingItem* item, COntologyProcessingRequirement* requirement) {
-				item->addProcessingRequirement(requirement);
+			bool CRealizerThread::addOntologyRealizingRequirements(COntologyRealizingItem* item, COntologyProcessingRequirement* requirement, COntologyRealizingDynamicRequirmentProcessingData* procData) {
+				item->addProcessingRequirement(requirement, procData);
 				return true;
 			}
 
@@ -186,14 +186,22 @@ namespace Konclude {
 						}
 					}
 
+					COntologyRealizingDynamicRequirmentCallbackData* callbackProcData = new COntologyRealizingDynamicRequirmentCallbackData(callbackData);
+					callbackProcData->incProcessingRequirmentCount(requirementList->count());
 					for (QList<COntologyProcessingRequirement*>::const_iterator it = requirementList->constBegin(), itEnd = requirementList->constEnd(); it != itEnd; ++it) {
 						COntologyProcessingRequirement* requ(*it);
-						addOntologyRealizingRequirements(item,requ);
+						COntologyRealizingDynamicRequirmentProcessingData* procData = new COntologyRealizingDynamicRequirmentProcessingData(requ, callbackProcData);
+						addOntologyRealizingRequirements(item, requ, procData);
 					}
+					item->logRequirementProcessingStartStatistics(callbackProcData->getStatistics());
 
-					if (callbackData) {
-						addOntologyRealizingCallback(item,callbackData);
-					}
+					//for (QList<COntologyProcessingRequirement*>::const_iterator it = requirementList->constBegin(), itEnd = requirementList->constEnd(); it != itEnd; ++it) {
+					//	COntologyProcessingRequirement* requ(*it);
+					//	addOntologyRealizingRequirements(item,requ, procData);
+					//}
+					//if (callbackData) {
+					//	addOntologyRealizingCallback(item, callbackData);
+					//}
 					doNextPendingTests();
 					return true;
 

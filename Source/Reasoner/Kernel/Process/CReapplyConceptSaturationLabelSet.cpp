@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -44,6 +44,7 @@ namespace Konclude {
 					mTotelCount = 0;
 					mModifiedUpdateLinker = nullptr;
 					mLastNominalIndepConSatDes = nullptr;
+					mConceptFlags.reset();
 					return this;
 				}
 
@@ -51,6 +52,7 @@ namespace Konclude {
 					mConceptCount = copyConceptSaturationLabelSet->mConceptCount;
 					mTotelCount = copyConceptSaturationLabelSet->mTotelCount;
 					mConceptDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+					mConceptFlags = copyConceptSaturationLabelSet->mConceptFlags;
 					if (copyConceptSaturationLabelSet->mConceptDesDepHash->count() >= ADDITIONALCOPYSIZE || tryFlatLabelCopy && copyConceptSaturationLabelSet->mConceptDesDepHash->count() > 0) {
 
 						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* tmpAdditionalConDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
@@ -172,6 +174,9 @@ namespace Konclude {
 
 
 				bool CReapplyConceptSaturationLabelSet::hasConcept(CConcept* concept, bool negated) {
+					if (!mConceptFlags.containsConceptFlags(concept, negated)) {
+						return false;
+					}
 					cint64 conTag = concept->getConceptTag();
 					return hasConcept(conTag,negated);
 				}
@@ -188,6 +193,9 @@ namespace Konclude {
 
 
 				bool CReapplyConceptSaturationLabelSet::hasConcept(CConcept* concept, bool* containsNegated) {
+					if (!mConceptFlags.containsConceptFlags(concept)) {
+						return false;
+					}
 					cint64 conTag = concept->getConceptTag();
 					return hasConcept(conTag,containsNegated);
 				}
@@ -259,6 +267,7 @@ namespace Konclude {
 							*newInsertion = true;
 						}
 						mConceptSatDesLinker = conSatDes->append(mConceptSatDesLinker);
+						mConceptFlags.addConceptFlags(conSatDes->getConcept(), conSatDes->getNegation());
 						++mConceptCount;
 						++mTotelCount;
 					} else if (conDesDepData.mConSatDes->isNegated() != conSatDes->isNegated()) {
@@ -318,6 +327,13 @@ namespace Konclude {
 				bool CReapplyConceptSaturationLabelSet::areAllConceptsInAdditionalHash() {
 					return mConceptDesDepHash->isEmpty();
 				}
+
+
+
+				CConceptSetFlags* CReapplyConceptSaturationLabelSet::getConceptFlags() {
+					return &mConceptFlags;
+				}
+
 
 
 

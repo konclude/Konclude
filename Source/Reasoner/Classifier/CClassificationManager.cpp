@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -33,8 +33,8 @@ namespace Konclude {
 
 
 			CClassificationManager::~CClassificationManager() {
-				if (classifierFac) {
-					delete classifierFac;
+				if (mClassifierFac) {
+					delete mClassifierFac;
 				}
 			}
 
@@ -42,7 +42,7 @@ namespace Konclude {
 			cint64 CClassificationManager::getActiveClassifierCount() {
 				readWriteLock.lockForRead();
 				cint64 activeCount = 0;
-				foreach (CSubsumptionClassifier* classifier, ontoClassifierSet) {
+				foreach (CSubsumptionClassifier* classifier, mOntoClassifierSet) {
 					CSubsumptionClassifierThread* threadClassifier = dynamic_cast<CSubsumptionClassifierThread*>(classifier);
 					if (threadClassifier && threadClassifier->isClassifierActive()) {
 						++activeCount;
@@ -54,22 +54,22 @@ namespace Konclude {
 
 
 			CClassificationManager *CClassificationManager::initializeManager(CSubsumptionClassifierFactory *takeClassifierFactory, CConfigurationProvider *configurationProvider) {
-				classifierFac = takeClassifierFactory;
+				mClassifierFac = takeClassifierFactory;
 				return this;
 			}
 
 			
-			CSubsumptionClassifier *CClassificationManager::getClassifier(CConcreteOntology *ontology, CConfigurationBase *config, bool create, bool backgroundClassification) {
+			CSubsumptionClassifier *CClassificationManager::getClassClassifier(CConcreteOntology *ontology, CConfigurationBase *config, bool create, bool backgroundClassification) {
 				readWriteLock.lockForRead();
-				CSubsumptionClassifier *classifier = ontoClassifierHash.value(ontology);
+				CSubsumptionClassifier *classifier = mOntoClassifierHash.value(ontology);
 				readWriteLock.unlock();
 				if (!classifier) {
 					readWriteLock.lockForWrite();
-					classifier = ontoClassifierHash.value(ontology);
+					classifier = mOntoClassifierHash.value(ontology);
 					if (!classifier) {
-						classifier = classifierFac->createClassifier(ontology,config);
-						ontoClassifierSet.insert(classifier);
-						ontoClassifierHash.insert(ontology,classifier);
+						classifier = mClassifierFac->createClassifier(ontology,config);
+						mOntoClassifierSet.insert(classifier);
+						mOntoClassifierHash.insert(ontology,classifier);
 					}
 					readWriteLock.unlock();
 				}
@@ -79,7 +79,7 @@ namespace Konclude {
 			CClassifierStatistics *CClassificationManager::collectClassificationStatistics(CClassifierStatistics *statistics) {
 				statistics->resetValues();
 				readWriteLock.lockForRead();
-				foreach (CSubsumptionClassifier *classifier, ontoClassifierSet) {
+				foreach (CSubsumptionClassifier *classifier, mOntoClassifierSet) {
 					CClassifierStatistics *classifierStatistics = classifier->getClassificationStatistics();
 					statistics->appendStatistics(classifierStatistics);
 				}
@@ -89,7 +89,7 @@ namespace Konclude {
 
 			QList<CSubsumptionClassifier *> CClassificationManager::getClassifierList() {
 				readWriteLock.lockForRead();
-				QList<CSubsumptionClassifier *> list(ontoClassifierSet.values());
+				QList<CSubsumptionClassifier *> list(mOntoClassifierSet.values());
 				readWriteLock.unlock();
 				return list;
 			}
@@ -99,7 +99,7 @@ namespace Konclude {
 				readWriteLock.lockForRead();
 				double percentAvg = 0;
 				cint64 percentCount = 0;
-				foreach (CSubsumptionClassifier *classifier, ontoClassifierSet) {
+				foreach (CSubsumptionClassifier *classifier, mOntoClassifierSet) {
 					CClassificationProgress* classificationProgress = classifier->getClassificationProgress();
 					if (classificationProgress) {
 						newClassProg.setTotalClasses(newClassProg.getTotalClasses()+classificationProgress->getTotalClasses());
@@ -120,6 +120,44 @@ namespace Konclude {
 				mClassificationProgress = newClassProg;
 				return &mClassificationProgress;
 			}
+
+
+
+			CSubsumptionClassifier* CClassificationManager::getDataPropertyClassifier(CConcreteOntology *ontology, CConfigurationBase *config) {
+				readWriteLock.lockForRead();
+				CSubsumptionClassifier *classifier = mOntoDataPropertyClassifierHash.value(ontology);
+				readWriteLock.unlock();
+				if (!classifier) {
+					readWriteLock.lockForWrite();
+					classifier = mOntoDataPropertyClassifierHash.value(ontology);
+					if (!classifier) {
+						classifier = mClassifierFac->getDataPropertyClassifier(ontology,config);
+						mOntoClassifierSet.insert(classifier);
+						mOntoDataPropertyClassifierHash.insert(ontology,classifier);
+					}
+					readWriteLock.unlock();
+				}
+				return classifier;
+			}
+
+			CSubsumptionClassifier* CClassificationManager::getObjectPropertyClassifier(CConcreteOntology *ontology, CConfigurationBase *config) {
+				readWriteLock.lockForRead();
+				CSubsumptionClassifier *classifier = mOntoObjectPropertyClassifierHash.value(ontology);
+				readWriteLock.unlock();
+				if (!classifier) {
+					readWriteLock.lockForWrite();
+					classifier = mOntoObjectPropertyClassifierHash.value(ontology);
+					if (!classifier) {
+						classifier = mClassifierFac->getObjectPropertyClassifier(ontology,config);
+						mOntoClassifierSet.insert(classifier);
+						mOntoObjectPropertyClassifierHash.insert(ontology,classifier);
+					}
+					readWriteLock.unlock();
+				}
+				return classifier;
+			}
+
+
 
 
 		}; // end namespace Classifier

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -96,7 +96,9 @@ namespace Konclude {
 				*mObjectPropertyBuildHash = *baseOntoBuild->getObjectPropertyEntityBuildHash();
 				*mIndividualBuildHash = *baseOntoBuild->getIndividualEntityBuildHash();
 				*mAnoIndividualBuildHash = *baseOntoBuild->getAnonymousIndividualBuildHash();
-				*mIndividualVariableBuildHash = *baseOntoBuild->getIndividualVariableBuildHash();
+				*mNominalIndividualVariableBuildHash = *baseOntoBuild->getNominalIndividualVariableBuildHash();
+				*mNamedIndividualVariableBuildHash = *baseOntoBuild->getNamedIndividualVariableBuildHash();
+				*mAnonymousIndividualVariableBuildHash = *baseOntoBuild->getAnonymousIndividualVariableBuildHash();
 
 				*mAbbreviatedNamePrefixMapHash = *baseOntoStrings->getAbbreviatedNamePrefixHash();
 				*mNamePrefixMapHash = *baseOntoStrings->getNamePrefixHash();
@@ -133,7 +135,7 @@ namespace Konclude {
 
 
 			CBuildExpression* CConcreteOntologyMergingBuilder::handleMergeEpxressionStack(CBuildExpression* expression) {
-				CMergeExpressionStackObject* newMergeExpStackObj = nullptr;
+				CBuildExpression* newMergeExpStackObj = nullptr;
 
 
 				CMergeExpressionStackObject* nextMergeExpStackObj = createMergeExpressionStackObject(expression);
@@ -157,12 +159,12 @@ namespace Konclude {
 							nextMergeExpStackObj = mMergeExpStack.top();
 							nextMergeExpStackObj->addReplacedBuildExpression(replacedExpression);
 						} else {
-							newMergeExpStackObj->mReplaceExpression = replacedExpression;
+							newMergeExpStackObj = replacedExpression;
 						}
 					}
 				}
 
-				return newMergeExpStackObj->mReplaceExpression;
+				return newMergeExpStackObj;
 			}
 
 
@@ -239,7 +241,11 @@ namespace Konclude {
 
 			CConcreteOntologyMergingBuilder* CConcreteOntologyMergingBuilder::initJumpingHash() {
 				mMergeExpFunctionJumpHash.insert((cint64)CClassExpression::BETCLASS,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseClassStart,&CConcreteOntologyMergingBuilder::parseClassEnd));
-				mMergeExpFunctionJumpHash.insert((cint64)CObjectIndividualVariableExpression::BETINDIVIDUALVARIABLE,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseIndividualVariableStart,&CConcreteOntologyMergingBuilder::parseIndividualVariableEnd));
+				mMergeExpFunctionJumpHash.insert((cint64)CObjectIndividualVariableExpression::BETNOMINALINDIVIDUALVARIABLE, CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseNominalIndividualVariableStart, &CConcreteOntologyMergingBuilder::parseNominalIndividualVariableEnd));
+				mMergeExpFunctionJumpHash.insert((cint64)CObjectIndividualVariableExpression::BETNAMEDINDIVIDUALVARIABLE, CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseNamedIndividualVariableStart, &CConcreteOntologyMergingBuilder::parseNamedIndividualVariableEnd));
+				mMergeExpFunctionJumpHash.insert((cint64)CObjectIndividualVariableExpression::BETDATAVALUEVARIABLE, CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseDataValueVariableStart, &CConcreteOntologyMergingBuilder::parseDataValueVariableEnd));
+				mMergeExpFunctionJumpHash.insert((cint64)CObjectIndividualVariableExpression::BETDATALITERALVARIABLE, CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseDataLiteralVariableStart, &CConcreteOntologyMergingBuilder::parseDataLiteralVariableEnd));
+				mMergeExpFunctionJumpHash.insert((cint64)CObjectIndividualVariableExpression::BETANONYMOUSINDIVIDUALVARIABLE, CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseAnonymousIndividualVariableStart, &CConcreteOntologyMergingBuilder::parseAnonymousIndividualVariableEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CEquivalentClassesExpression::BETEQUIVALENTCLASSES,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseEquivalentClassesStart,&CConcreteOntologyMergingBuilder::parseEquivalentClassesEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CSubClassOfExpression::BETESUBCLASSOF,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseSubClassOfStart,&CConcreteOntologyMergingBuilder::parseSubClassOfEnd));
 				mMergeExpFunctionJumpHash.insert((cint64)CDisjointClassesExpression::BETDISJOINTCLASSES,CMergeExpressionFunctionPair(&CConcreteOntologyMergingBuilder::parseDisjointClassesStart,&CConcreteOntologyMergingBuilder::parseDisjointClassesEnd));
@@ -313,7 +319,19 @@ namespace Konclude {
 			void CConcreteOntologyMergingBuilder::parseClassStart(CMergeExpressionStackObject* mergeStackObj) {
 			}
 
-			void CConcreteOntologyMergingBuilder::parseIndividualVariableStart(CMergeExpressionStackObject* mergeStackObj) {
+			void CConcreteOntologyMergingBuilder::parseNominalIndividualVariableStart(CMergeExpressionStackObject* mergeStackObj) {
+			}
+
+			void CConcreteOntologyMergingBuilder::parseNamedIndividualVariableStart(CMergeExpressionStackObject* mergeStackObj) {
+			}
+
+			void CConcreteOntologyMergingBuilder::parseAnonymousIndividualVariableStart(CMergeExpressionStackObject* mergeStackObj) {
+			}
+
+			void CConcreteOntologyMergingBuilder::parseDataValueVariableStart(CMergeExpressionStackObject* mergeStackObj) {
+			}
+
+			void CConcreteOntologyMergingBuilder::parseDataLiteralVariableStart(CMergeExpressionStackObject* mergeStackObj) {
 			}
 
 			void CConcreteOntologyMergingBuilder::parseEquivalentClassesStart(CMergeExpressionStackObject* mergeStackObj) {
@@ -524,9 +542,32 @@ namespace Konclude {
 				mergeStackObj->mReplaceExpression = getClass(expression->getName());
 			}
 
-			void CConcreteOntologyMergingBuilder::parseIndividualVariableEnd(CMergeExpressionStackObject* mergeStackObj) {
+			void CConcreteOntologyMergingBuilder::parseNominalIndividualVariableEnd(CMergeExpressionStackObject* mergeStackObj) {
 				CObjectIndividualVariableExpression* expression = (CObjectIndividualVariableExpression*)mergeStackObj->mExpression;
-				mergeStackObj->mReplaceExpression = getIndividualVariable(expression->getName(),mNextAxiomNumber);
+				mergeStackObj->mReplaceExpression = getNominalIndividualVariable(expression->getName(),mNextAxiomNumber);
+			}
+
+
+			void CConcreteOntologyMergingBuilder::parseNamedIndividualVariableEnd(CMergeExpressionStackObject* mergeStackObj) {
+				CNamedIndividualVariableExpression* expression = (CNamedIndividualVariableExpression*)mergeStackObj->mExpression;
+				mergeStackObj->mReplaceExpression = getIndividualVariable(expression->getName(),false);
+			}
+
+			void CConcreteOntologyMergingBuilder::parseAnonymousIndividualVariableEnd(CMergeExpressionStackObject* mergeStackObj) {
+				CAnonymousIndividualVariableExpression* expression = (CAnonymousIndividualVariableExpression*)mergeStackObj->mExpression;
+				mergeStackObj->mReplaceExpression = getIndividualVariable(expression->getName(), true);
+			}
+
+
+			void CConcreteOntologyMergingBuilder::parseDataValueVariableEnd(CMergeExpressionStackObject* mergeStackObj) {
+				CDataValueVariableExpression* expression = (CDataValueVariableExpression*)mergeStackObj->mExpression;
+				mergeStackObj->mReplaceExpression = getDataValueVariable(expression->getName());
+			}
+
+
+			void CConcreteOntologyMergingBuilder::parseDataLiteralVariableEnd(CMergeExpressionStackObject* mergeStackObj) {
+				CDataLiteralVariableExpression* expression = (CDataLiteralVariableExpression*)mergeStackObj->mExpression;
+				mergeStackObj->mReplaceExpression = getDataLiteralVariable(expression->getName());
 			}
 
 			void CConcreteOntologyMergingBuilder::parseEquivalentClassesEnd(CMergeExpressionStackObject* mergeStackObj) {

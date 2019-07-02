@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -58,6 +58,10 @@
 #include "CIndividualCustomPriorityProcessingQueue.h"
 #include "CReferredIndividualTrackingVector.h"
 #include "CIndividualSaturationSuccessorLinkDataLinker.h"
+#include "CBranchingInstruction.h"
+#include "CIndividualRepresentativeBackendCacheLoadedAssociationHash.h"
+#include "CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash.h"
+#include "CIndividualDelayedBackendInitializationProcessingQueue.h"
 
 // Other includes
 #include "Reasoner/Ontology/CConcreteOntology.h"
@@ -114,14 +118,22 @@ namespace Konclude {
 
 						CProcessingDataBox* clearIndividualProcessingQueues();
 
+						CIndividualVector* getIndividualVector(bool localize = true);
 
 
-
-						CIndividualUnsortedProcessingQueue* getRoleAssertionProcessingQueue(bool create = true);
+						CIndividualUnsortedProcessingQueue* getRoleAssertionExpansionProcessingQueue(bool create = true);
 						CProcessingDataBox* clearRoleAssertionProcessingQueue();
 
 						CIndividualUnsortedProcessingQueue* getBackendCacheSynchronizationProcessingQueue(bool create = true);
 						CProcessingDataBox* clearBackendCacheSynchronizationProcessingQueue();
+
+
+
+						CIndividualUnsortedProcessingQueue* getBackendDirectInfluenceExpansionQueue(bool create = true);
+						CProcessingDataBox* clearBackendDirectInfluenceExpansionQueue();
+
+						CIndividualUnsortedProcessingQueue* getBackendIndirectCompatibilityExpansionQueue(bool create = true);
+						CProcessingDataBox* clearBackendIndirectCompatibilityExpansionQueue();
 
 
 						CIndividualUnsortedProcessingQueue* getDelayingNominalProcessingQueue(bool create = true);
@@ -294,6 +306,10 @@ namespace Konclude {
 
 
 
+						CConceptDescriptor* getRemainingConceptDescriptor();
+						CConceptDescriptor* takeRemainingConceptDescriptor();
+						CProcessingDataBox* setRemainingConceptDescriptor(CConceptDescriptor* conPilDes);
+						CProcessingDataBox* addRemainingConceptDescriptor(CConceptDescriptor* conPilDes);
 
 
 
@@ -338,6 +354,16 @@ namespace Konclude {
 						CProcessingDataBox* addIndividualSaturationCompletionNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
 
 
+
+						bool hasIndividualSaturationCompletedNodeLinker();
+						CIndividualSaturationProcessNodeLinker* getIndividualSaturationCompletedNodeLinker();
+						CIndividualSaturationProcessNodeLinker* takeIndividualSaturationCompletedNodeLinker();
+						CProcessingDataBox* setIndividualSaturationCompletedNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+						CProcessingDataBox* addIndividualSaturationCompletedNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+
+
+
+
 						bool hasIndividualSaturationAnalysationNodeLinker();
 						CIndividualSaturationProcessNodeLinker* getIndividualSaturationAnalysationNodeLinker();
 						CIndividualSaturationProcessNodeLinker* takeIndividualSaturationAnalysationNodeLinker();
@@ -352,6 +378,13 @@ namespace Konclude {
 						CIndividualSaturationProcessNodeLinker* takeNominalDelayedIndividualSaturationProcessNodeLinker();
 						CProcessingDataBox* setNominalDelayedIndividualSaturationProcessNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
 						CProcessingDataBox* addNominalDelayedIndividualSaturationProcessNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+
+
+						bool hasSaturationATMOSTMergingProcessLinker();
+						CIndividualSaturationProcessNodeLinker* getSaturationATMOSTMergingProcessLinker();
+						CIndividualSaturationProcessNodeLinker* takeSaturationATMOSTMergingProcessLinker();
+						CProcessingDataBox* setSaturationATMOSTMergingProcessLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
+						CProcessingDataBox* addSaturationATMOSTMergingProcessLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker);
 
 
 
@@ -431,6 +464,51 @@ namespace Konclude {
 						bool isIndividualDependenceTrackingRequired();
 						CProcessingDataBox* setIndividualDependenceTrackingRequired(bool indiDepTrackingRequired);
 
+						bool hasBranchingInstruction();
+						CBranchingInstruction* getBranchingInstruction();
+						CProcessingDataBox* setBranchingInstruction(CBranchingInstruction* branchingInstruction);
+						CProcessingDataBox* clearBranchingInstruction();
+
+
+						CXLinker<cint64>* getLastMergedPossibleInstanceIndividualLinker();
+						CProcessingDataBox* setLastMergedPossibleInstanceIndividualLinker(CXLinker<cint64>* lastMergedPossibleInstanceLinker);
+
+
+						CXLinker<CXLinker<cint64>*>* getCurrentMergedPossibleInstanceIndividualLinkersLinker();
+						CProcessingDataBox* setCurrentMergedPossibleInstanceIndividualLinkersLinker(CXLinker<CXLinker<cint64>*>* mergedPossibleInstanceLinkerLinker);
+
+
+
+						cint64 getRemainingPossibleInstanceIndividualMergingLimit();
+						CProcessingDataBox* setRemainingPossibleInstanceIndividualMergingLimit(cint64 limit);
+
+						cint64 getPossibleInstanceIndividualMergedCount();
+						CProcessingDataBox* setPossibleInstanceIndividualMergedCount(cint64 count);
+						cint64 getPossibleInstanceIndividualCurrentMergingCount();
+						CProcessingDataBox* setPossibleInstanceIndividualCurrentMergingCount(cint64 count);
+
+						cint64 getPossibleInstanceIndividualMergingSize();
+						CProcessingDataBox* setPossibleInstanceIndividualMergingSize(cint64 size);
+
+						bool isPossibleInstanceIndividualMergingStopped();
+						CProcessingDataBox* setPossibleInstanceIndividualMergingStopped(bool stopped);
+
+
+						CXLinker<CIndividualProcessNode*>* getLastBackendCacheIntegratedIndividualNodeLinker();
+						CProcessingDataBox* setLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker);
+						CProcessingDataBox* addLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker);
+
+
+						CProcessingDataBox* setBackendCacheLoadedAssociationHash(CIndividualRepresentativeBackendCacheLoadedAssociationHash* backendCacheLoadedAssociationHash);
+
+						CIndividualRepresentativeBackendCacheLoadedAssociationHash* getBackendCacheLoadedAssociationHash(bool createOrForceLocalisation = true);
+						CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash* getBackendCacheConceptSetLabelProcessingHash(bool createOrForceLocalisation = true);
+
+
+						CIndividualDelayedBackendInitializationProcessingQueue* getDelayedBackendConceptSetLabelProcessingInitializationQueue(bool create = true);
+						CProcessingDataBox* clearDelayedBackendConceptSetLabelProcessingInitializationQueue();
+
+
 
 					// protected methods
 					protected:
@@ -444,6 +522,9 @@ namespace Konclude {
 						CConcreteOntology* mOntology;
 
 						CClashedDependencyDescriptor* mClashedDescriptorLinker;
+
+						CIndividualVector* mLocalIndiVector;
+						CIndividualVector* mUseIndiVector;
 
 						CIndividualProcessingQueue* mUseIndiProcessQueue;
 						CIndividualProcessingQueue* mLocIndiProcessQueue;
@@ -465,6 +546,22 @@ namespace Konclude {
 						CIndividualUnsortedProcessingQueue* mBackendSyncRetestProcessQueue;
 						CIndividualUnsortedProcessingQueue* mUseBackendSyncRetestProcessQueue;
 						CIndividualUnsortedProcessingQueue* mPrevBackendSyncRetestProcessQueue;
+
+
+
+						CIndividualUnsortedProcessingQueue* mBackendIndirectCompatibilityExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mUseBackendIndirectCompatibilityExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mPrevBackendIndirectCompatibilityExpansionQueue;
+
+
+						CIndividualUnsortedProcessingQueue* mBackendDirectInfluenceExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mUseBackendDirectInfluenceExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mPrevBackendDirectInfluenceExpansionQueue;
+
+
+
+
+
 
 						CIndividualDepthProcessingQueue* mIndiDepthDetExpPreProcessingQueue;
 						CIndividualDepthProcessingQueue* mUseIndiDepthDetExpPreProcessingQueue;
@@ -561,6 +658,8 @@ namespace Konclude {
 						CReusingReviewData* mUseReusingReviewSet;
 						CReusingReviewData* mPrevReusingReviewSet;
 
+						CBranchingInstruction* mBranchingInstruction;
+
 						CBlockingIndividualNodeCandidateHash* mBlockingIndiNodeCandidateHash;
 						CBlockingIndividualNodeCandidateHash* mUseBlockingIndiNodeCandidateHash;
 						CBlockingIndividualNodeCandidateHash* mPrevBlockingIndiNodeCandidateHash;
@@ -605,6 +704,7 @@ namespace Konclude {
 						CIndividualSaturationProcessNodeLinker* mDisjunctCommonConceptExtractProcessingLinker;
 						CIndividualSaturationProcessNodeLinker* mIndiSaturationProcessNodeLinker;
 						CIndividualSaturationProcessNodeLinker* mIndiSaturationCompletionNodeLinker;
+						CIndividualSaturationProcessNodeLinker* mIndiSaturationCompletedNodeLinker;
 						CIndividualSaturationProcessNodeLinker* mIndiSaturationAnalysingNodeLinker;
 						CIndividualSaturationProcessNodeVector* mIndiSaturationProcessVector;
 						CIndividualSaturationProcessNodeStatusUpdateLinker* mRemSatUpdateLinker;
@@ -613,6 +713,7 @@ namespace Konclude {
 						CConceptSaturationProcessLinker* mRemConSatProcessLinker;
 						CRoleSaturationProcessLinker* mRemRoleSatProcessLinker;
 						CConceptSaturationDescriptor* mRemConSatDes;
+						CConceptDescriptor* mRemConDes;
 						CCriticalIndividualNodeProcessingQueue* mSatCriticalIndiNodeProcQueue;
 						CCriticalIndividualNodeConceptTestSet* mSatCriticalIndiNodeConTestSet;
 						CSaturationNominalDependentNodeHash* mSatNominalDependentNodeHash;
@@ -622,6 +723,7 @@ namespace Konclude {
 						bool mProblematicEQCandidateNodeOccured;
 						CSaturationSuccessorExtensionIndividualNodeProcessingQueue* mSatSuccExtIndNodeProcQueue;
 						CIndividualSaturationProcessNodeLinker* mNominalDelayedIndiSaturationProcessNodeLinker;
+						CIndividualSaturationProcessNodeLinker* mSaturationATMOSTMergingProcessLinker;
 
 						CIndividualSaturationProcessNode* mSeparatedSaturationConAssResolveNode;
 
@@ -671,6 +773,29 @@ namespace Konclude {
 
 						CReferredIndividualTrackingVector* mReferredIndiTrackVec;
 						bool mIndiDepTrackingRequired;
+
+						CXLinker<CXLinker<cint64>*>* mCurrentMergedPossibleInstanceIndividualLinkersLinker;
+						CXLinker<cint64>* mLastMergedPossibleInstanceIndividualLinker;
+						cint64 mRemainingPossibleInstanceIndividualMergingLimit;
+						cint64 mPossibleInstanceIndividualCurrentMergingCount;
+						cint64 mPossibleInstanceIndividualMergedCount;
+						cint64 mPossibleInstanceIndividualMergingSize;
+						bool mPossibleInstanceIndividualMergingStopped;
+
+
+						CXLinker<CIndividualProcessNode*>* mLastBackendCacheIntegratedIndiNodeLinker;
+						CIndividualRepresentativeBackendCacheLoadedAssociationHash* mUseBackendLoadedAssociationHash;
+						CIndividualRepresentativeBackendCacheLoadedAssociationHash* mLocBackendLoadedAssociationHash;
+
+						CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash* mUseBackendConceptSetLabelProcessingHash;
+						CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash* mLocBackendConceptSetLabelProcessingHash;
+
+						CIndividualDelayedBackendInitializationProcessingQueue* mDelayedBackendInitProcQueue;
+						CIndividualDelayedBackendInitializationProcessingQueue* mUseDelayedBackendInitProcQueue;
+						CIndividualDelayedBackendInitializationProcessingQueue* mPrevDelayedBackendInitProcQueue;
+
+
+
 
 					// private methods
 					private:

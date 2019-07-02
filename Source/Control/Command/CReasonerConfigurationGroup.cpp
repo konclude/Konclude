@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -123,8 +123,8 @@ namespace Konclude {
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.MaximumRecursiveProcessingConceptCount",
 						"Determines the maximum recursion for the processing of added concepts in completion graphs with tableau expansion rules.",
-						new CIntegerConfigType(300)),
-						new CIntegerConfigType(300));
+						new CIntegerConfigType(200)),
+						new CIntegerConfigType(200));
 
 
 				// Processing configurations
@@ -462,13 +462,37 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.AllowBackendNeighbourExpansionBlocking",
+						"Determines whether the expansion to neighbour nodes/individuals is blocked if the expansion is clear w.r.t. the backend.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.AllowBackendSuccessorExpansionBlocking",
+						"Determines whether the expansion to blockable successor nodes is blocked in completion graphs if the expansion is clear w.r.t. the backend.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
-
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.OccurrenceStatisticsCollecting",
+						"Determines whether the occurrence statistics are collected while building completion/saturation graph for consistency checking.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
 				// Preprocessing configurations
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.IndividualDataConvertion",
+						"Determines whether the triple encoded assertions are converted to individual data.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.ForceInverseRoleCreation",
+						"Determines whether the creation of inverse roles is forced.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing",
 						"Determines whether the ontology is preprocessed. Will disable all preprocessing steps.",
@@ -567,6 +591,24 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.CardinalityQualificationTriggerAbsorption",
+						"Determines whether in the preprocessing phase the qualification concepts of cardinality restrictions are absorbed to candidates.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.CardinalityQualificationTriggerPartialAbsorption",
+						"Determines whether in the preprocessing phase the qualification concepts of cardinality restrictions are partially absorbed to candidates.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.CardinalityQualificationTriggerOnlyPositiveAbsorption",
+						"Determines whether in the preprocessing phase the qualification concepts of cardinality restrictions are only absorbed if they occur positive.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.AssuranceSatisfactionAbsorption",
+						"Determines whether an (additional) assurance-based satisfaction absorption is used for GCIs.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.PartialGCIImplicationAbsorption",
 						"Determines whether in the preprocessing phase GCIs are partially absorbed.",
 						new CBooleanConfigType(true)),
@@ -577,6 +619,10 @@ namespace Konclude {
 						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.DisjunctSorting",
 						"Determines whether the disjuncts in disjunctions are sorted.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.BranchingStatisticsExtender",
+						"Determines whether the concepts are extended by branch statistics.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.NominalSchemaTemplateExtraction",
@@ -645,6 +691,14 @@ namespace Konclude {
 						"Determines whether the extraction of branch triggers is skipped for EL ontologies.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.DisjunctSorting.SkipForELFragment",
+						"Determines whether the sorting of disjunctions is skipped for EL ontologies.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.BranchingStatisticsExtender.SkipForELFragment",
+						"Determines whether the extensions of concepts by branch statistics is skipped for EL ontologies.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -653,12 +707,12 @@ namespace Konclude {
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.MaximumParallelCalculationCount",
 						"Determines the maximum number of calculation jobs that are created at the same time.",
-						new CIntegerConfigType(1)),
+						new CIntegerConfigType(10)),
 						((CConfigData*)nullptr));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.MultipliedUnitsParallelCalculationCount",
 						"Determines how many calculation jobs are created.",
-						new CIntegerConfigType(2)),
-						new CIntegerConfigType(2));
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize",
 						"Determines how many individuals are saturated together.",
@@ -670,6 +724,18 @@ namespace Konclude {
 						"Determines whether the construction of a completion graph is enforced for the consistency check.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.CollectProcessStatistics",
+						"Determines whether calculation statistics for created tasks are collected.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TrivialConsistencyChecking",
+						"Determines whether consistency is pretested by analysing the axioms and expressions in the ontology.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 
 
 
@@ -824,6 +890,39 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceConceptsUpfrontMerging",
+						"Determines whether a merging of possible instances with the to be checked concept should be tried upfront.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMerging",
+						"Determines whether the reasoner should try to merge other possible instances into the checked concept instance.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel",
+						"Determines whether the reasoner should only provide individuals with same representative labels for the afterwards possible instance merging.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.AlternatePossibleConceptInstanceTestingItemsOnCalculations",
+						"Determines whether possible concept instance testing is alternated for the concepts.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingProvidingCount",
+						"Determines how many individuals are provided for merging possible instances after instance checking (negative numbers are interpreted as infinite).",
+						new CIntegerConfigType(-1)),
+						new CIntegerConfigType(-1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount",
+						"Determines how often it can be tried to merge another possible instance individual into the result of the currently checked concept instance.",
+						new CIntegerConfigType(3)),
+						new CIntegerConfigType(3));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.RealizePrecomputation.SameIndividuals",
 						"Determines whether same individuals are precomputed if realization is requested.",
 						new CBooleanConfigType(true)),
@@ -860,6 +959,26 @@ namespace Konclude {
 						"Determines whether a separate consistency test is performed for realization.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+
+
+
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Querying.ComplexQueryingSupport",
+						"Determines whether the ontology is prepared for complex querying.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+
+
+
 
 
 
@@ -908,6 +1027,39 @@ namespace Konclude {
 
 
 
+
+
+
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.OntologyRevisionPersistencer",
+						"Determines the persistencer for ontology revisions.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.DirectoryOWL2XMLFilePersistencer.BaseDirectory",
+						"Determines the directory where the DirectoryOWL2XMLFilePersistencer persists the ontologies.",
+						new CStringConfigType("./Data/Ontologies/Persistence/")),
+						new CStringConfigType("./Data/Ontologies/Persistence/"));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Query.Statistics.CollectStatistics",
 						"Determines whether statistics are collected for queries.",
 						new CBooleanConfigType(false)),
@@ -927,15 +1079,281 @@ namespace Konclude {
 
 
 
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.DefaultComplexConceptAnswerer",
+						"Determines the default answerer for complex concept queries.",
+						new CStringConfigType("Konclude.Answering.OptimizedComplexConceptAnswerer")),
+						new CStringConfigType("Konclude.Answering.OptimizedComplexConceptAnswerer"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.QueryAbsorption.CreateAlwaysBindingConcepts",
+						"Determines whether for each variable of the query a binding concept is created.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.QueryAbsorption.Preabsorption",
+						"Determines whether a query with existential parts is pre-absorbed.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.QueryAbsorption.PreabsorptionCount",
+						"Determines how often a query with existential parts is pre-absorbed.",
+						new CIntegerConfigType(2)),
+						new CIntegerConfigType(2));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.QueryAbsorption.InverseIndividualVariableSinglePathAbsorption",
+						"Determines whether single paths to individual variables are absorbed in inverse direction.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.QueryAbsorption.OccurrenceStatisticsBasedAbsorptionOrder",
+						"Determines whether occurrence statistics are used for selecting the next query term for the absorption.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedundantTermElimination",
+						"Determines whether redundant query terms are eliminated by using class/object property hierarchy and inverses.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedundantlyRestrictedVariablesElimination",
+						"Determines whether redundantly restricted variables are eliminated from the query.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AnonymousToDistinguishedVariableConversion",
+						"Determines whether anonymous variables are converted to distinguished variables if there exist only individual nodes that satisfy the restrictions of the variables.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AllowBindingReduction",
+						"Determines whether bindings for variable mappings are reduced/eliminated if some bindings are not further required.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.BindingReducingForNonDistinctAnswerQueries",
+						"Determines whether bindings for variable mappings can be reduced even for queries with answer variables.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.BindingReductionMappingSize",
+						"Determines at which variable mappings sizes a reduction is allowed.",
+						new CIntegerConfigType(5000)),
+						new CIntegerConfigType(5000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.SamplingBasedJoinMappingSize",
+						"Determines at which variable mappings sizes a sampling based joining is used.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.PropagationJoining",
+						"Determines whether bindings for variable mappings are joined with other mappings while propagating them over roles.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AnonymousToDistinguishedVariableOnlyFullConversion",
+						"Determines whether anonymous variables are converted to distinguished variables only if it is possible for all.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.UnsatisfiableNonInstanceStatisticsChecking",
+						"Determines whether unsatisfiability of a query is pre-tested by checking whether all restrictions principally occur in the model of the ontology.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.FailOnUnknownEntity",
+						"Determines whether an error is reported if an unknown entity is used in the query.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ExtendedLogging",
+					"Determines whether additional logging is output for complex query answering.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Answering.MaximumParallelTestingCalculationCount",
+						"Determines how many calculation jobs are maximally created per answerer at one time.",
+						new CIntegerConfigType(1)),
+						((CConfigData*)nullptr));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Answering.MultipliedUnitsParallelTestingCalculationCount",
+						"Determines how many calculation jobs are created per answerer.",
+						new CIntegerConfigType(8)),
+						new CIntegerConfigType(8));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Answering.CollectProcessStatistics",
+						"Determines whether statistics for answering queries are collected.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+
+
+
+
 				// Testing/Debugging configurations
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingData",
+					"If enabled (true) the reasoner is allowed to write debugging data to files.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataSaturationTasks",
+					"If enabled (true) the reasoner is allowed to write debugging data of saturation testing tasks to files.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasks",
+					"If enabled (true) the reasoner is allowed to write debugging data of completion graph testing tasks to files.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasksOnlyOnSatisfiability",
+					"If enabled (true) the reasoner writes debugging data of completion graph testing tasks only if the tasks are satisfiable.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasksForConsistencyTests",
+					"If enabled (true) the reasoner writes debugging data of completion graph consistency testing tasks.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasksForClassificationTests",
+					"If enabled (true) the reasoner writes debugging data of completion graph consistency testing tasks.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasksForIncrementalExpansionTests",
+					"If enabled (true) the reasoner writes debugging data of completion graph incremental expansion testing tasks.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasksForRepresentativeCacheRecomputationTests",
+					"If enabled (true) the reasoner writes debugging data of completion graph representative cache recomputation testing tasks.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasksForAllTests",
+					"If enabled (true) the reasoner writes debugging data of all completion graph testing tasks.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingDataCompletionTasksForAnsweringPropagationTests",
+					"If enabled (true) the reasoner writes debugging data of completion graph propagation testing tasks for query answering.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteAnsweringVariableCompositionItems",
+					"If enabled (true) the reasoner writes variable composition items to files.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritePreprocessingDebuggingData",
+					"If enabled (true) the reasoner writes preprocessing debugging data to files.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.BaseWritingPath",
+					"Determines the path/directory where debugging files are written.",
+					new CStringConfigType("./Debugging")),
+					new CStringConfigType("./Debugging"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritePreprocessingDebuggingData.BuildedTBox",
+					"If enabled (true) the reasoner writes the corresponding preprocessing debugging data to files.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritingPath.Preprocessing.BuildedTBox",
+					"Determines the path where the corresponding debugging data is written.",
+					new CStringConfigType("Preprocessing/1-BuildedTBox.txt")),
+					new CStringConfigType("Preprocessing/1-BuildedTBox.txt"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritePreprocessingDebuggingData.NormalizedTBox",
+					"If enabled (true) the reasoner writes the corresponding preprocessing debugging data to files.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritingPath.Preprocessing.NormalizedTBox",
+					"Determines the path where the corresponding debugging data is written.",
+					new CStringConfigType("Preprocessing/2-NormalizedTBox.txt")),
+					new CStringConfigType("Preprocessing/2-NormalizedTBox.txt"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritePreprocessingDebuggingData.GroundedTBox",
+					"If enabled (true) the reasoner writes the corresponding preprocessing debugging data to files.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritingPath.Preprocessing.GroundedTBox",
+					"Determines the path where the corresponding debugging data is written.",
+					new CStringConfigType("Preprocessing/3-GroundedTBox.txt")),
+					new CStringConfigType("Preprocessing/3-GroundedTBox.txt"));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritePreprocessingDebuggingData.AbsorbedTBox",
+					"If enabled (true) the reasoner writes the corresponding preprocessing debugging data to files.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritingPath.Preprocessing.AbsorbedTBox",
+					"Determines the path where the corresponding debugging data is written.",
+					new CStringConfigType("Preprocessing/4-AbsorbedTBox.txt")),
+					new CStringConfigType("Preprocessing/4-AbsorbedTBox.txt"));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritePreprocessingDebuggingData.ProcessedTBox",
+					"If enabled (true) the reasoner writes the corresponding preprocessing debugging data to files.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WritingPath.Preprocessing.ProcessedTBox",
+					"Determines the path where the corresponding debugging data is written.",
+					new CStringConfigType("Preprocessing/5-ProcessedTBox.txt")),
+					new CStringConfigType("Preprocessing/5-ProcessedTBox.txt"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.QueryPreprocessingBaseWritingPathExtension",
+					"Determines the relative path/directory to the BaseWritingPath where the query related preprocessing is written.",
+					new CStringConfigType("/Answering")),
+					new CStringConfigType("/Answering"));
+
 
 
 				// Evaluation configurations
 
-				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingData",
-						"If enabled (true) the reasoner writes some debugging data to standard files.",
-						new CBooleanConfigType(false)),
-						new CBooleanConfigType(false));
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Analyse.UpdateInterval",
 						"Update interval for reading analyse data.",
@@ -985,6 +1403,135 @@ namespace Konclude {
 						"Read QueryProgress from Reasoner-Manager for analyse data.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.CompletionGraphRandomWalks",
+						"Determines whether conjunctive queries are generated by random walking over fully expanded and clash-free completion graphs.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.MaximumQueryGenerationCount",
+						"Determines how many conjunctive queries are maximal generated with the current settings.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.MaximumOntologyQueryCount",
+						"Determines how many conjunctive queries are allowed for the given ontology.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.RealCycleQueries",
+						"Determines whether real cycle queries are generated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.TreeFoldedCylceQueries",
+						"Determines whether tree folded cycles queries are generated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.TreeShapedQueries",
+						"Determines whether tree shaped queries are generated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.GenerateConceptTerms",
+						"Determines whether concept terms are generated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.GenerateTreeExtensions",
+						"Determines whether tree extensions that can be rolled-up are generated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.OnlyWalkOverIndividualNodes",
+						"Determines whether only over nodes representing individuals is walked.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.QueryFileBasePath",
+						"Determines the base path for queries.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.OntologyFileBasePath",
+						"Determines the base path of the ontologies.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.LoadFileBasePath",
+						"Determines the base path prefix used for load commands.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.QueryTemplateFile",
+						"Determines the query template file.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.MinimalVariableSelectCount",
+						"Determines the minimum of selected variables.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.MaximumVariableSelectCount",
+						"Determines the maximum of selected variables.",
+						new CIntegerConfigType(4)),
+						new CIntegerConfigType(4));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.IndividualNodeAsExistentialVariableInterpretationRatio",
+						"Determines the percentage with which individual nodes are interpreted as existential variables.",
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.OntologyStatisticsFileBasePath",
+						"Determines the base path prefix for ontology statistics.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.QueryStatisticsFileBasePath",
+						"Determines the base path prefix for the to be generated query statistics.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.MaximumTreeExtensionSize",
+						"Determines the maximum size of tree extensions.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.TreeExtensionCreationRatio",
+						"Determines the ratio of how often are tree extensions created in percent.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.TreeExtensionsOnlyOverIndividualNodes",
+						"Determines whether tree extensions that can be rolled-up are generated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Test.ConjunctiveQueryGeneration.TreeExtensionExistentialVariableConversionRatio",
+						"Determines the percentage with which individual nodes are converted to existential variables.",
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1284,6 +1831,10 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Parser.RedlandRaptor.LoadTriplesIntoStore",
+						"Determines whether triples are loaded into the redland triple store such that the non-trivial OWL 2 axiom can be retrieved.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -1313,7 +1864,7 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.BlockUntilProcessedRequest",
-						"Blocks afterwards processing until request has finished.",
+						"Blocks processing until request has finished.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.LoggingExtendedProcessingTimes",
@@ -1334,6 +1885,13 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
+
+				addConfigProperty(new CConfigDescription("Konclude.OWLlink.Server.ForceDisconnectAfterProcessing",
+						"Determines whether the OWLlink server forces a disconnect after a request is processed.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
 				
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.AbbreviatedIRIs",
 						"Using abbreviated IRIs.",
@@ -1352,6 +1910,17 @@ namespace Konclude {
 						"IRI name for OWLlink.",
 						new CStringConfigType("")),
 						new CStringConfigType(""));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.OWLlink.TargetsSourcesQueriesInverseCorrection",
+						"Inverse property correction for targets and sources query.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.OWLlink.DirectInversePropertiesQuerySupport",
+						"Inverse property correction for targets and sources query.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -1397,8 +1966,69 @@ namespace Konclude {
 
 
 
+				// SPARQL configurations
 
 
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.RequestFile",
+					"Filepath for SPARQL request file loader.",
+					new CStringConfigType("")),
+					new CStringConfigType(""));
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.ResponseFile",
+					"Filepath for writing SPARQL response file.",
+					new CStringConfigType("")),
+					new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.WriteResponseToStandardOutput",
+					"Write SPARQL response direct to program standard output channel.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.WriteResponseToStandardError",
+					"Write SPARQL response direct to program standard error output channel.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.CloseAfterProcessedRequest",
+					"Close program after the SPARQL response has processed.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.BlockUntilProcessedRequest",
+					"Blocks processing until request has finished.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.LoggingExtendedProcessingTimes",
+					"Extended processing time logging.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.DefaultResolvingOntology",
+					"Name of the ontology that is used for processing the SPARQL query if no ontology name is specified, i.e., if there is no 'FROM' clause.",
+					new CStringConfigType("http://Konclude.com/Ontologies/$LastCreatedKnowledgeBaseIfAvailableAndCreateNewAnonymousKnowledgeBaseOtherwise")),
+					new CStringConfigType("http://Konclude.com/Ontologies/$LastCreatedKnowledgeBaseIfAvailableAndCreateNewAnonymousKnowledgeBaseOtherwise"));
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.AlwaysResolveToDefault",
+					"Ignores FROM clauses by always resolving the SPARQL query with the default ontology specified by 'Konclude.SPARQL.DefaultResolvingOntology'.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Server.Port",
+					"Port of the SPARQL server.",
+					new CIntegerConfigType(8080)),
+					new CIntegerConfigType(8080));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Server.ForceDisconnectAfterProcessing",
+					"Determines whether the SPARQL server forces a disconnect after a request is processed.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Server.ChunkEncodingSize",
+					"Determines whether at which size (in bytes) the results are chunked.",
+					new CIntegerConfigType(524288000)),
+					new CIntegerConfigType(524288000));
+
+
+
+
+				// CLI configurations
 
 
 				addConfigProperty(new CConfigDescription("Konclude.CLI.RequestFile",
@@ -1414,7 +2044,14 @@ namespace Konclude {
 						new CStringConfigType("")),
 						new CStringConfigType(""));
 
-
+				addConfigProperty(new CConfigDescription("Konclude.CLI.CloseAfterProcessedRequest",
+						"Close program after the CLI command has processed.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.CLI.BlockUntilProcessedRequest",
+						"Blocks processing until request has finished.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -1550,6 +2187,13 @@ namespace Konclude {
 						new CIntegerConfigType(2*1000*60)),
 						new CIntegerConfigType(2*1000*60));
 
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ResponseDownloadSizeLimit",
+						"The time limit for the response in bytes. If the limit is reached, the request is aborted and the reasoner execution is stopped. -1 stands for no limit.",
+						new CIntegerConfigType(-1)),
+						new CIntegerConfigType(-1));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.RequestTimeout",
 						"The time limit for the reasoner to complete a single request.",
 						new CIntegerConfigType(1000*60)),
@@ -1593,10 +2237,27 @@ namespace Konclude {
 						new CIntegerConfigType(2)),
 						new CIntegerConfigType(2));
 
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ReasonerTestErrorMaximalRetryCount",
+						"How many retries are done for each test.",
+						new CIntegerConfigType(-1)),
+						new CIntegerConfigType(-1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ReasonerTestErrorMaximalRetryWriting",
+						"Determines whether the last response is written if the maximal number of retries for a test is reached.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.WaitingTimeBetweenTests",
 						"Waiting time between tests in milliseconds.",
 						new CIntegerConfigType(0)),
 						new CIntegerConfigType(0));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.TestcaseEvaluationExceptionLimit",
+						"Limit of testcases that are evaluated until an exception is thrown.",
+						new CIntegerConfigType(-1)),
+						new CIntegerConfigType(-1));
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.FirstTestsWarmingUp",
 						"Determines whether the first test case in the evaluation is additionally executed at first without measurement.",
@@ -1612,6 +2273,22 @@ namespace Konclude {
 						"Waiting time after reasoner has created in milliseconds.",
 						new CIntegerConfigType(false)),
 						new CIntegerConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SPARQLSendPrepareBeforeQuerying",
+						"Sending a SPARQL PREPARE command before starting querying.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SPARQLSupportsPrepareOperation",
+						"Whether the SPARQL PREPARE command is supported.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SPARQLResponseSizeLimit",
+						"The limit for SPARQL responses in bytes. If the response exceeds the size limit, then it is not stored and not further analyzed. -1 is interpreted as no limit.",
+						new CIntegerConfigType(-1)),
+						new CIntegerConfigType(-1));
+
 
 
 

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -25,14 +25,12 @@
 #include <QHash>
 
 // Namespace includes
-#include "CClassSubClassesRelationResult.h"
 #include "CQueryResult.h"
+#include "CStringHierarchyResult.h"
+#include "CClassSubClassesRelationResult.h"
 #include "CClassSynsetResult.h"
 
 // Other includes
-#include "Reasoner/Taxonomy/CTaxonomy.h"
-
-#include "Reasoner/Ontology/CConcreteOntology.h"
 
 
 // Logger includes
@@ -44,9 +42,6 @@ namespace Konclude {
 
 	namespace Reasoner {
 
-		using namespace Taxonomy;
-		using namespace Ontology;
-
 		namespace Query {
 
 			/*! 
@@ -57,7 +52,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CClassHierarchyResult : public CQueryResult {
+			class CClassHierarchyResult : public CStringHierarchyResult<CClassHierarchyResult,CClassSubClassesRelationResult,CClassSynsetResult> {
 				// public methods
 				public:
 					//! Constructor
@@ -67,42 +62,27 @@ namespace Konclude {
 					CClassHierarchyResult(CClassSynsetResult *takeBottomClassSynset, CClassSynsetResult *takeTopClassSynset);
 					CClassHierarchyResult(CClassSynsetResult *takeBottomClassSynset);
 
-					//! Destructor
-					virtual ~CClassHierarchyResult();
-
-					virtual QString getQueryResultString();
-					virtual bool isResultEquivalentTo(CQueryResult *otherQueryResult);
-
-					CClassSynsetResult *getClassSynset(const QString &className, bool create = true);
-					CClassSynsetResult *getClassSynset(const QStringList &classNames, bool create = true);
-					CClassSynsetResult *addClassSynset(CClassSynsetResult *takeClassSynset);
-
-					CClassSynsetResult *setTopClassSynset(CClassSynsetResult *classSynset);
 
 
-					CClassSynsetResult *getBottomClassSynset();
-					CClassSynsetResult *getTopClassSynset();
+					CClassSynsetResult* getClassSynset(const QString &className, bool create = true);
+					CClassSynsetResult* getClassSynset(const QStringList &classNames, bool create = true);
+					CClassSynsetResult* addClassSynset(CClassSynsetResult *takeClassSynset);
+									   
+					CClassSynsetResult* setTopClassSynset(CClassSynsetResult *classSynset);
+									   
+									   
+					CClassSynsetResult* getBottomClassSynset();
+					CClassSynsetResult* getTopClassSynset();
 
-					CClassSubClassesRelationResult *addSubClassRelation(CClassSynsetResult *superClassSynset, CClassSynsetResult *anySubClassSynset);
-					CClassSubClassesRelationResult *getSubClassRelation(CClassSynsetResult *superClassSynset, bool create = true);
+					CClassSubClassesRelationResult* addSubClassRelation(CClassSynsetResult *superClassSynset, CClassSynsetResult *anySubClassSynset);
+					CClassSubClassesRelationResult* getSubClassRelation(CClassSynsetResult *superClassSynset, bool create = true);
 
-					virtual CTaxonomy *fillTaxonomy(CConcreteOntology *ontology, Reasoner::Taxonomy::CTaxonomy *taxonomy);
 
 				// protected methods
 				protected:
-					void collectSubsumerClassSynsets(CClassHierarchyResult *otherClassHierarchy, QHash<QString,QString>* subsumHash, QSet< QPair<QString,QString> >* subsumSet = nullptr);
-					void compareSubsumersCount(QHash<QString,QString>* subsumHash1, QHash<QString,QString>* subsumHash2);
 
 				// protected variables
 				protected:
-					CClassSynsetResult *bottomClass;
-					CClassSynsetResult *topClass;
-
-					QList<CClassSubClassesRelationResult *> subClassRelationContainer;
-					QList<CClassSynsetResult *> classSynsetContainer;
-
-					QHash<QString,CClassSynsetResult *> classClassSynsetHash;
-					QHash<CClassSynsetResult *,CClassSubClassesRelationResult *> classSynsetSubClassHash;
 
 				// private methods
 				private:

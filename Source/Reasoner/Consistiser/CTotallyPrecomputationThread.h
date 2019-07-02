@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -35,6 +35,7 @@
 #include "CSaturationPrecomputationTestingItem.h"
 #include "CTotallyOntologyPrecomputationItem.h"
 #include "CSaturationCommonDisjunctConceptsExtractor.h"
+#include "CIndividualPrecomputationTestingItem.h"
 
 // Other includes
 #include "Reasoner/Kernel/Manager/CReasonerManager.h"
@@ -44,6 +45,7 @@
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCache.h"
 
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
+#include "Reasoner/Kernel/Task/CSaturationOccurrenceStatisticsCollectingAdapter.h"
 
 #include "Reasoner/Generator/CSatisfiableCalculationJobGenerator.h"
 #include "Reasoner/Generator/CApproximatedSaturationCalculationJobGenerator.h"
@@ -105,6 +107,57 @@ namespace Konclude {
 
 
 
+			class CTriplesAssertedConceptsExtendingSetVisitor : public COntologyTriplesAssertedTypesVisitor {
+			public:
+				CTriplesAssertedConceptsExtendingSetVisitor(QSet<TConceptNegPair>* extendingTypeSet) {
+					mExtendingTypeSet = extendingTypeSet;
+				}
+
+				bool visitAssertedConcept(CConcept* concept, COntologyTriplesAssertionsAccessor* accessor) {
+					mExtendingTypeSet->insert(TConceptNegPair(concept, false));
+					return true;
+				}
+
+				bool visitAssertedObjectRole(CRole* role, COntologyTriplesAssertionsAccessor* accessor) {
+					return false;
+				}
+
+				bool visitAssertedDataRole(CRole* role, COntologyTriplesAssertionsAccessor* accessor) {
+					return false;
+				}
+
+
+				QSet<TConceptNegPair>* mExtendingTypeSet;
+			};
+
+
+			class CTriplesAssertedRolesExtendingSetVisitor : public COntologyTriplesAssertedTypesVisitor {
+			public:
+				CTriplesAssertedRolesExtendingSetVisitor(QSet<CRole*>* extendingTypeSet) {
+					mExtendingTypeSet = extendingTypeSet;
+				}
+
+				bool visitAssertedConcept(CConcept* concept, COntologyTriplesAssertionsAccessor* accessor) {
+					return false;
+				}
+
+				bool visitAssertedObjectRole(CRole* role, COntologyTriplesAssertionsAccessor* accessor) {
+					mExtendingTypeSet->insert(role);
+					return true;
+				}
+
+				bool visitAssertedDataRole(CRole* role, COntologyTriplesAssertionsAccessor* accessor) {
+					mExtendingTypeSet->insert(role);
+					return true;
+				}
+
+
+				QSet<CRole*>* mExtendingTypeSet;
+			};
+
+
+
+
 			/*! 
 			 *
 			 *		\class		CTotallyPrecomputationThread
@@ -151,21 +204,29 @@ namespace Konclude {
 					bool isAllAssertionIndividualSaturationSufficient(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
 
+					void createOccurrenceStatisticsCollectingSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
 					void createMarkedConceptSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, bool allowAllSaturation);
 					void createIndividualSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, const QList<CIndividual*>& individualList);
+					void createTripleIndexedIndividualsSaturationProcessingJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem, cint64 startIndiId, cint64 endIndiId);
 
 					bool saturateRemainingRequiredItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					cint64 markSaturationProcessingItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem, CSaturationConceptDataItem* startMarkingItem, CConcept* startMarkingConcept, bool startMarkingConceptNegation);
 					bool saturateRemainingConsistencyRequiredConcepts(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
-					bool saturateRemainingConsistencyRequiredIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+					bool saturateRemainingRequiredSaturationIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					bool addIdentifiedRemainingConsistencyRequiredConcepts(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
-					bool addConsistencyRequiredSaturationIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+					bool addRequiredSaturationIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
 
 					void extractCommonDisjunctConceptsFromPrecomputedSaturation(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					void logSaturationInfos(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+
+
+					QList<CIndividualReference> getIndividualComputationList(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+					QList<CIndividualReference> getNextIndividualComputationPartList(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+
+					bool decrementUsageFromIndividualPrecomputationCoordinationHash(CIndividualPrecomputationCoordinationHash* indiPrecompCoordHash, CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
 
 				// protected variables

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,7 +28,8 @@ namespace Konclude {
 		namespace Ontology {
 
 
-			CDataLiteralStringValue::CDataLiteralStringValue() {
+			CDataLiteralStringValue::CDataLiteralStringValue(CContext* context) {
+				mContext = context;
 				clearValue();
 			}
 
@@ -44,11 +45,45 @@ namespace Konclude {
 				if (stringValue) {
 					mInfiniteLength = stringValue->mInfiniteLength;
 					mLength = stringValue->mLength;
-					mString = stringValue->mString;
-					mLanguage = stringValue->mLanguage;
+
+					mStringByteDataArraySize = stringValue->mStringByteDataArraySize;
+					mStringByteDataArray = createStringByteDataArrayCopy(stringValue->mStringByteDataArray, mStringByteDataArraySize);
+
+					mLanguageByteDataArraySize = stringValue->mLanguageByteDataArraySize;
+					mLanguageByteDataArray = createStringByteDataArrayCopy(stringValue->mLanguageByteDataArray, mLanguageByteDataArraySize);
 				}
 				return this;
 			}
+
+
+			QChar* CDataLiteralStringValue::createStringByteDataArrayCopy(QChar* stringByteDataArray, cint64 arrayLength) {
+				QChar* stringByteDataArrayCopy = CObjectAllocator<QChar>::allocateArray(CContext::getMemoryAllocationManager(mContext), arrayLength);
+				for (cint64 i = 0; i < arrayLength; ++i) {
+					stringByteDataArrayCopy[i] = stringByteDataArray[i];
+				}
+				return stringByteDataArrayCopy;
+			}
+
+
+			QChar* CDataLiteralStringValue::createStringByteDataArray(const QString& string) {
+				QChar* stringByteDataArrayCopy = CObjectAllocator<QChar>::allocateArray(CContext::getMemoryAllocationManager(mContext), string.length());
+				const QChar* stringData = string.constData();
+				for (cint64 i = 0; i < string.length(); ++i) {
+					stringByteDataArrayCopy[i] = stringData[i];
+				}
+				return stringByteDataArrayCopy;
+			}
+
+
+
+			QString CDataLiteralStringValue::getValueString() {
+				if (mLanguageByteDataArraySize <= 0) {
+					return QString(mStringByteDataArray, mStringByteDataArraySize);
+				} else {
+					return QString("%1@%2").arg(QString::fromRawData(mStringByteDataArray, mStringByteDataArraySize)).arg(QString::fromRawData(mLanguageByteDataArray, mLanguageByteDataArraySize));
+				}
+			}
+
 
 
 			CDataLiteralStringValue* CDataLiteralStringValue::initValueFromInfiniteLength() {
@@ -66,8 +101,11 @@ namespace Konclude {
 
 			CDataLiteralStringValue* CDataLiteralStringValue::initValueFromString(const QString& string, const QString& langString) {
 				clearValue();
-				mString = string;
-				mLanguage = langString;
+				mStringByteDataArray = createStringByteDataArray(string);
+				mStringByteDataArraySize = string.length();
+				mLanguageByteDataArray = createStringByteDataArray(langString);
+				mLanguageByteDataArraySize = langString.length();
+
 				return this;
 			}
 
@@ -76,8 +114,13 @@ namespace Konclude {
 				if (value) {
 					mInfiniteLength = value->mInfiniteLength;
 					mLength = value->mLength;
-					mString = value->mString;
-					mLanguage = value->mLanguage;
+
+					mStringByteDataArraySize = value->mStringByteDataArraySize;
+					mStringByteDataArray = createStringByteDataArrayCopy(value->mStringByteDataArray, mStringByteDataArraySize);
+
+					mLanguageByteDataArraySize = value->mLanguageByteDataArraySize;
+					mLanguageByteDataArray = createStringByteDataArrayCopy(value->mLanguageByteDataArray, mLanguageByteDataArraySize);
+
 				}
 				return this;
 			}
@@ -86,18 +129,22 @@ namespace Konclude {
 			CDataLiteralStringValue* CDataLiteralStringValue::clearValue() {
 				mInfiniteLength = false;
 				mLength = 0;
-				mString.clear();
-				mLanguage.clear();
+
+				mStringByteDataArray = nullptr;
+				mStringByteDataArraySize = 0;
+
+				mLanguageByteDataArray = nullptr;
+				mLanguageByteDataArraySize = 0;
+
 				return this;
 			}
-
 
 			bool CDataLiteralStringValue::isInfiniteLength() {
 				return mInfiniteLength;
 			}
 
 			bool CDataLiteralStringValue::hasLanguageTag() {
-				return !mLanguage.isEmpty();
+				return mLanguageByteDataArraySize > 0;
 			}
 
 
@@ -105,12 +152,12 @@ namespace Konclude {
 				if (mLength > 0) {
 					return mLength;
 				} else {
-					return mString.length();
+					return mStringByteDataArraySize;
 				}
 			}
 
 			QString CDataLiteralStringValue::getStringValue() {
-				return mString;
+				return QString(mStringByteDataArray, mStringByteDataArraySize);
 			}
 
 
@@ -155,10 +202,13 @@ namespace Konclude {
 				if (mLength > 0 && mLength == stringValue->mLength) {
 					return true;
 				}
-				if (mLanguage == stringValue->mLanguage && mString == stringValue->mString) {
-					return true;
+				if (QString::fromRawData(mLanguageByteDataArray, mLanguageByteDataArraySize) != QString::fromRawData(stringValue->mLanguageByteDataArray, stringValue->mLanguageByteDataArraySize)) {
+					return false;
 				}
-				return false;
+				if (QString::fromRawData(mStringByteDataArray, mStringByteDataArraySize) != QString::fromRawData(stringValue->mStringByteDataArray, stringValue->mStringByteDataArraySize)) {
+					return false;
+				}
+				return true;
 			}
 
 			bool CDataLiteralStringValue::isGreaterEqualThan(CDataLiteralStringValue* stringValue) {
@@ -206,13 +256,13 @@ namespace Konclude {
 				} else if (getLength() > stringValue->getLength()) {
 					return false;
 				} else {
-					int stringComp = mString.compare(stringValue->mString);
+					int stringComp = QString::fromRawData(mStringByteDataArray, mStringByteDataArraySize).compare(QString::fromRawData(stringValue->mStringByteDataArray, stringValue->mStringByteDataArraySize));
 					if (stringComp < 0) {
 						return true;
 					} else if (stringComp > 0) {
 						return false;
 					}
-					int lanComp = mLanguage.compare(stringValue->mLanguage);
+					int lanComp = QString::fromRawData(mLanguageByteDataArray, mLanguageByteDataArraySize).compare(QString::fromRawData(stringValue->mLanguageByteDataArray, stringValue->mLanguageByteDataArraySize));
 					return lanComp < 0;
 				}
 				return false;

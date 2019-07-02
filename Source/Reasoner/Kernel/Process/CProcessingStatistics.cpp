@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -142,6 +142,11 @@ namespace Konclude {
 				const CProcessingStatisticDescription CProcessingStatistics::statVALUERULEAPPLICATIONCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"rule-VALUE-application-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statIMPLICATIONRULEAPPLICATIONCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"rule-IMPLICATION-application-count");
 
+
+				const CProcessingStatisticDescription CProcessingStatistics::statROLEASSERTIONCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "role-assertion-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statREVERSEROLEASSERTIONCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "reverse-role-assertion-count");
+
+
 				const CProcessingStatisticDescription CProcessingStatistics::statINDINODEMERGEINITCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-nodes-merging-initialization-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statINDINODEQUALIFYCHOOCECOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-nodes-choose-qualify-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statINDINODEMERGECOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-nodes-merging-count");
@@ -159,8 +164,10 @@ namespace Konclude {
 				const CProcessingStatisticDescription CProcessingStatistics::statIMPLICATIONEXECUTINGCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"implication-executing-count");
 
 				const CProcessingStatisticDescription CProcessingStatistics::statINDINODENOMINALMERGECOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-nodes-nominal-merge-count");
-				const CProcessingStatisticDescription CProcessingStatistics::statINDINODENOMINALDISTINCTCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-nodes-nominal-distinct-count");
-				const CProcessingStatisticDescription CProcessingStatistics::statINDINODENOMINALCORRECTIDCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-nodes-nominal-correct-ID-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statINDIBLOCKABLENODENOMINALMERGINGCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "individual-blockable-nodes-nominal-merging-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statINDIBLOCKABLENODEVALUECONNECTIONCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "individual-blockable-nodes-value-connection-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statINDINODENOMINALDISTINCTCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "individual-nodes-nominal-distinct-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statINDINODENOMINALCORRECTIDCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "individual-nodes-nominal-correct-ID-count");
 
 				const CProcessingStatisticDescription CProcessingStatistics::statALLROLERESTRICTIONCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"executed-all-role-restriction-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statAUTOMATETRANSACTIONCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"executed-automate-transaction-count");
@@ -214,6 +221,25 @@ namespace Konclude {
 				const CProcessingStatisticDescription CProcessingStatistics::statANYWHEREBLOCKINGCANDIDATEHASHUDATEADDCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"anywhere-blocking-candidate-hash-update-individual-node-add-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statANYWHEREBLOCKINGCANDIDATEHASHUDATEREMOVECOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"anywhere-blocking-candidate-hash-update-individual-node-remove-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statANYWHERECORECONCEPTBLOCKINGCANDIDATEHASHSEARCHINDINODECOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"anywhere-core-concept-blocking-search-individual-node-test-count");
+
+
+
+
+				const CProcessingStatisticDescription CProcessingStatistics::statSIMPLEANALOGOUSPROPAGATIONBLOCKINGCONCEPTSETSBUILDINGCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "simple-analogous-propagation-blocking-concept-set-building-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statSIMPLEANALOGOUSPROPAGATIONBLOCKINGCONCEPTSETSCACHEREUSECOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "simple-analogous-propagation-blocking-concept-set-cached-reuse-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statSIMPLEANALOGOUSPROPAGATIONBLOCKINGCONCEPTSETHASHVALUEDIFFERENCECOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "simple-analogous-propagation-blocking-concept-set-hash-value-difference-count");
+
+
+
+				const CProcessingStatisticDescription CProcessingStatistics::statSIMPLEANALOGOUSPROPAGATIONBLOCKINGTESTCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "simple-analogous-propagation-blocking-test-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statSIMPLEANALOGOUSPROPAGATIONBLOCKINGSUCCESSCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "simple-analogous-propagation-blocking-success-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statSIMPLEANALOGOUSPROPAGATIONBLOCKINGFAILCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "simple-analogous-propagation-blocking-fail-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statFULLANALOGOUSPROPAGATIONBLOCKINGTESTCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "full-analogous-propagation-blocking-test-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statFULLANALOGOUSPROPAGATIONBLOCKINGSUCCESSCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "full-analogous-propagation-blocking-success-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statFULLANALOGOUSPROPAGATIONBLOCKINGFAILCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "full-analogous-propagation-blocking-fail-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statFULLANALOGOUSPROPAGATIONBLOCKINGNOMINALSINVOLVEDCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "full-analogous-propagation-blocking-nominals-involved-count");
+
+
 
 				const CProcessingStatisticDescription CProcessingStatistics::statINDINODEEXPANSIONBLOCKINGTESTCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-node-expansion-blocking-test-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statINDINODEPROCESSINGBLOCKINGTESTCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"individual-node-processing-blocking-test-count");

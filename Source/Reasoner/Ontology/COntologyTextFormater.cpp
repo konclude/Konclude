@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -48,7 +48,11 @@ namespace Konclude {
 					if (!operandListString.isEmpty()) {
 						operandListString += QString(" | ");
 					}
-					operandListString += QString("%1%2").arg((opLinkerIt->isNegated())?"-":"+").arg(opLinkerIt->getData()->getConceptTag());
+					if (opLinkerIt->getData()) {
+						operandListString += QString("%1%2").arg((opLinkerIt->isNegated()) ? "-" : "+").arg(opLinkerIt->getData()->getConceptTag());
+					} else {
+						operandListString += QString("missing operand");
+					}
 					opLinkerIt = opLinkerIt->getNext();
 				}
 
@@ -143,6 +147,20 @@ namespace Konclude {
 					}
 
 				}
+				if (concept->getVariable()) {
+					addReplacementString += QString("Referenced Variable: %1\r\n").arg(concept->getVariable()->getPathVariableID());
+				}
+				if (concept->getVariableLinker()) {
+					QString variables;
+					for (CSortedLinker<CVariable*>* varLinkIt = concept->getVariableLinker(); varLinkIt; varLinkIt = varLinkIt->getNext()) {
+						if (!variables.isEmpty()) {
+							variables.append(", ");
+						}
+						variables.append(QString::number(varLinkIt->getData()->getPathVariableID()));
+					}
+					addReplacementString += QString("Referenced Variables: %1\r\n").arg(variables);
+				}
+
 
 				cint64 opCode = concept->getOperatorCode();
 				QString opCodeString("CCNONE");
@@ -202,6 +220,8 @@ namespace Konclude {
 					opCodeString = QString("CCEQCAND");
 				} else if (opCode == CCBRANCHTRIG) {
 					opCodeString = QString("CCBRANCHTRIG");
+				} else if (opCode == CCBRANCHIMPL) {
+					opCodeString = QString("CCBRANCHIMPL");
 				} else if (opCode == CCPBINDTRIG) {
 					opCodeString = QString("CCPBINDTRIG");
 				} else if (opCode == CCPBINDIMPL) {
@@ -457,6 +477,12 @@ namespace Konclude {
 
 			bool COntologyTextFormater::writeOntologyToFile(CConcreteOntology* ontology, const QString& filename) {
 				QFile file(filename);
+				if (filename.contains('/') || filename.contains('\\')) {
+					int sepPos = qMax(filename.lastIndexOf('/'), filename.lastIndexOf('\\'));
+					QString dirString = filename.mid(0, sepPos);
+					QDir path;
+					path.mkpath(dirString);
+				}
 				if (file.open(QIODevice::WriteOnly)) {
 					QString ontoString = getOntologyString(ontology);
 					file.write(ontoString.toLocal8Bit());

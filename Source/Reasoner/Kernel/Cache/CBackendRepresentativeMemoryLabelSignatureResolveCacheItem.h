@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,7 +28,6 @@
 #include "CacheSettings.h"
 #include "CCacheValue.h"
 #include "CBackendRepresentativeMemoryLabelCacheItem.h"
-#include "CBackendRepresentativeMemoryCacheContext.h"
 
 
 // Other includes
@@ -58,25 +57,21 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CBackendRepresentativeMemoryLabelSignatureResolveCacheItem(CBackendRepresentativeMemoryCacheContext* context);
+						CBackendRepresentativeMemoryLabelSignatureResolveCacheItem();
 
 						CBackendRepresentativeMemoryLabelSignatureResolveCacheItem* appendLabelItem(CBackendRepresentativeMemoryLabelCacheItem* linker);
 						CBackendRepresentativeMemoryLabelCacheItem* getLabelItems();
 
 						cint64 getLabelItemCount();
 
-						cint64 getSignature();
-						CBackendRepresentativeMemoryLabelSignatureResolveCacheItem* setSignature(cint64 signature);
 
 					// protected methods
 					protected:
 
 					// protected variables
 					protected:
-						CBackendRepresentativeMemoryCacheContext* mContext;
 						CBackendRepresentativeMemoryLabelCacheItem* mLabelItemLinker;
 						cint64 mLabelItemCount;
-						cint64 mSignature;
 
 					// private methods
 					private:

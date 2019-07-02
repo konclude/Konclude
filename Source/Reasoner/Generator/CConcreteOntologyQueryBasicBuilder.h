@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -49,6 +49,17 @@
 #include "Reasoner/Query/CObjectPropertyTargetsQuery.h"
 #include "Reasoner/Query/CFlattenedObjectPropertyTargetsQuery.h"
 #include "Reasoner/Query/CSameIndividualsQuery.h"
+#include "Reasoner/Query/CEquivalentPropertiesQuery.h"
+#include "Reasoner/Query/CSuperPropertiesQuery.h"
+#include "Reasoner/Query/CSubPropertiesQuery.h"
+#include "Reasoner/Query/CSubPropertyHierarchyQuery.h"
+#include "Reasoner/Query/CIsPropertySatisfiableQuery.h"
+
+#include "Reasoner/Query/CTargetPropertiesQuery.h"
+#include "Reasoner/Query/CSourcePropertiesQuery.h"
+#include "Reasoner/Query/CBetweenPropertiesQuery.h"
+#include "Reasoner/Query/CFlattenedObjectPropertySourcesQuery.h"
+#include "Reasoner/Query/CObjectPropertySourcesQuery.h"
 
 #include "Reasoner/Query/CNondeterministicIndividualsQuery.h"
 #include "Reasoner/Query/CDeterministicIndividualsQuery.h"
@@ -101,6 +112,12 @@ namespace Konclude {
 					virtual QList<CQuery*> generateQuerys();
 
 
+					virtual CQueryingTemporaryNamedIndividualExpression* getQueryingTemporaryNamedIndividual(const QString& indiName);
+					virtual CQueryingTemporaryInverseObjectPropertyOfExpression* getQueryingTemporaryInverseObjectProperty(CObjectPropertyTermExpression* expression);
+
+
+
+
 					virtual CQueryIsClassSatisfiableExpression* getIsClassSatisfiableQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName);
 					virtual CQueryAreClassesEquivalentExpression* getAreClassesEquivalenceQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName);
 					virtual CQueryAreClassesDisjointExpression* getAreClassesDisjointQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName);
@@ -117,6 +134,27 @@ namespace Konclude {
 					virtual CQueryIsEntailedExpression* getIsEntailedQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName);
 					virtual CQueryGetObjectPropertyTargetsExpression* getGetObjectPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
 					virtual CQueryGetFlattenedObjectPropertyTargetsExpression* getGetFlattenedObjectPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetObjectPropertySourcesExpression* getGetObjectPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetFlattenedObjectPropertySourcesExpression* getGetFlattenedObjectPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+
+
+					virtual CQueryGetObjectPropertiesOfSourceExpression* getGetObjectPropertiesOfSourceQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetObjectPropertiesOfTargetExpression* getGetObjectPropertiesOfTargetQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetObjectPropertiesBetweenExpression* getGetObjectPropertiesBetweenQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+
+
+
+					virtual CQueryGetSubObjectPropertiesExpression* getGetSubObjectPropertiesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testObjectPropertiesExpressions, bool direct, const QString& queryName);
+					virtual CQueryGetSuperObjectPropertiesExpression* getGetSuperObjectPropertiesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testObjectPropertiesExpressions, bool direct, const QString& queryName);
+					virtual CQueryGetEquivalentObjectPropertiesExpression* getGetEquivalentObjectPropertiesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testObjectPropertiesExpressions, const QString& queryName);
+					virtual CQueryGetSubObjectPropertyHierarchyExpression* getGetSubObjectPropertyHierarchyQuery(const CEXPRESSIONLIST<CBuildExpression*>& testObjectPropertiesExpressions, const QString& queryName);
+					virtual CQueryIsObjectPropertySatisfiableExpression* getIsObjectPropertySatisfiableQuery(const CEXPRESSIONLIST<CBuildExpression*>& testObjectPropertyExpressions, const QString& queryName);
+
+					virtual CQueryGetSubDataPropertiesExpression* getGetSubDataPropertiesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testDataPropertiesExpressions, bool direct, const QString& queryName);
+					virtual CQueryGetSuperDataPropertiesExpression* getGetSuperDataPropertiesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testDataPropertiesExpressions, bool direct, const QString& queryName);
+					virtual CQueryGetEquivalentDataPropertiesExpression* getGetEquivalentDataPropertiesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testDataPropertiesExpressions, const QString& queryName);
+					virtual CQueryGetSubDataPropertyHierarchyExpression* getGetSubDataPropertyHierarchyQuery(const CEXPRESSIONLIST<CBuildExpression*>& testDataPropertiesExpressions, const QString& queryName);
+					virtual CQueryIsDataPropertySatisfiableExpression* getIsDataPropertySatisfiableQuery(const CEXPRESSIONLIST<CBuildExpression*>& testDataPropertiesExpressions, const QString& queryName);
 
 
 					virtual CQueryGetDeterministicIndividualsExpression* getGetDeterministicIndividualsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
@@ -136,8 +174,30 @@ namespace Konclude {
 					virtual CQueryGetSuperClassesExpression* getGetSuperClassesQuery(CClassTermExpression* classTermExpression, bool direct, const QString& queryName);
 					virtual CQueryGetEquivalentClassesExpression* getGetEquivalentClassesQuery(CClassTermExpression* classTermExpression, const QString& queryName);
 
+					virtual CQueryGetSubObjectPropertiesExpression* getGetSubObjectPropertiesQuery(CObjectPropertyTermExpression* objectPropertyTermExpression, bool direct, const QString& queryName);
+					virtual CQueryGetSuperObjectPropertiesExpression* getGetSuperObjectPropertiesQuery(CObjectPropertyTermExpression* objectPropertyTermExpression, bool direct, const QString& queryName);
+					virtual CQueryGetEquivalentObjectPropertiesExpression* getGetEquivalentObjectPropertiesQuery(CObjectPropertyTermExpression* objectPropertyTermExpression, const QString& queryName);
+					virtual CQueryGetSubObjectPropertyHierarchyExpression* getGetSubObjectPropertyHierarchyQuery(CObjectPropertyTermExpression* objectPropertyTermExpression, const QString& queryName);
+					virtual CQueryIsObjectPropertySatisfiableExpression* getIsObjectPropertySatisfiableQuery(CObjectPropertyTermExpression* objectPropertyTermExpression, const QString& queryName);
+
+					virtual CQueryGetSubDataPropertiesExpression* getGetSubDataPropertiesQuery(CDataPropertyTermExpression* dataPropertyTermExpression, bool direct, const QString& queryName);
+					virtual CQueryGetSuperDataPropertiesExpression* getGetSuperDataPropertiesQuery(CDataPropertyTermExpression* dataPropertyTermExpression, bool direct, const QString& queryName);
+					virtual CQueryGetEquivalentDataPropertiesExpression* getGetEquivalentDataPropertiesQuery(CDataPropertyTermExpression* dataPropertyTermExpression, const QString& queryName);
+					virtual CQueryGetSubDataPropertyHierarchyExpression* getGetSubDataPropertyHierarchyQuery(CDataPropertyTermExpression* dataPropertyTermExpression, const QString& queryName);
+					virtual CQueryIsDataPropertySatisfiableExpression* getIsDataPropertySatisfiableQuery(CDataPropertyTermExpression* dataPropertyTermExpression, const QString& queryName);
+
+
 					virtual CQueryGetObjectPropertyTargetsExpression* getGetObjectPropertyTargetsQuery(CObjectPropertyTermExpression* objectPropertyExpression, CIndividualTermExpression* individualExpression, const QString& queryName);
 					virtual CQueryGetFlattenedObjectPropertyTargetsExpression* getGetFlattenedObjectPropertyTargetsQuery(CObjectPropertyTermExpression* objectPropertyExpression, CIndividualTermExpression* individualExpression, const QString& queryName);
+					virtual CQueryGetObjectPropertySourcesExpression* getGetObjectPropertySourcesQuery(CObjectPropertyTermExpression* objectPropertyExpression, CIndividualTermExpression* individualExpression, const QString& queryName);
+					virtual CQueryGetFlattenedObjectPropertySourcesExpression* getGetFlattenedObjectPropertySourcesQuery(CObjectPropertyTermExpression* objectPropertyExpression, CIndividualTermExpression* individualExpression, const QString& queryName);
+
+
+					virtual CQueryGetObjectPropertiesOfSourceExpression* getGetObjectPropertiesOfSourceQuery(CIndividualTermExpression* individualExpression, const QString& queryName);
+					virtual CQueryGetObjectPropertiesOfTargetExpression* getGetObjectPropertiesOfTargetQuery(CIndividualTermExpression* individualExpression, const QString& queryName);
+					virtual CQueryGetObjectPropertiesBetweenExpression* getGetObjectPropertiesBetweenQuery(CIndividualTermExpression* sourceIndividualExpression, CIndividualTermExpression* targetIndividualExpression, const QString& queryName);
+
+
 
 
 					virtual CQueryGetDeterministicIndividualsExpression* getGetDeterministicIndividualsQuery(const CEXPRESSIONLIST<CIndividualTermExpression*>& indiExpressions, const QString& queryName);
@@ -159,7 +219,10 @@ namespace Konclude {
 					virtual QString getStringFromConcept(CConcept *concept);
 					virtual CConcept *getConceptFromBuildExpression(CClassTermExpression *buildExp);
 					virtual CRole *getRoleFromBuildExpression(CObjectPropertyTermExpression *buildExp);
+					virtual CRole *getRoleFromBuildExpression(CDataPropertyTermExpression *buildExp);
 					virtual CIndividual *getIndividualFromBuildExpression(CIndividualTermExpression *buildExp);
+					virtual CIndividualReference getIndividualReferenceFromBuildExpression(CIndividualTermExpression *buildExp);
+					virtual QString getIndividualNameFromBuildExpression(CIndividualTermExpression *buildExp);
 
 				// protected variables
 				protected:		
@@ -185,6 +248,27 @@ namespace Konclude {
 					CEXPRESSIONLIST<CQueryGetEquivalentClassesExpression*> mEquivClassesExpList;
 					CEXPRESSIONLIST<CQueryGetObjectPropertyTargetsExpression*> mObjectPropTargetsExpList;
 					CEXPRESSIONLIST<CQueryGetFlattenedObjectPropertyTargetsExpression*> mObjectFlattenedPropTargetsExpList;
+					CEXPRESSIONLIST<CQueryGetObjectPropertySourcesExpression*> mObjectPropSourcesExpList;
+					CEXPRESSIONLIST<CQueryGetFlattenedObjectPropertySourcesExpression*> mObjectFlattenedPropSourcesExpList;
+
+
+					CEXPRESSIONLIST<CQueryGetObjectPropertiesOfSourceExpression*> mObjectPropsOfSourceExpList;
+					CEXPRESSIONLIST<CQueryGetObjectPropertiesOfTargetExpression*> mObjectPropsOfTargetExpList;
+					CEXPRESSIONLIST<CQueryGetObjectPropertiesBetweenExpression*> mObjectPropsBetweenExpList;
+
+
+
+					CEXPRESSIONLIST<CQueryGetSubObjectPropertiesExpression*> mSubObjectPropertiesExpList;
+					CEXPRESSIONLIST<CQueryGetSuperObjectPropertiesExpression*> mSuperObjectPropertiesExpList;
+					CEXPRESSIONLIST<CQueryGetEquivalentObjectPropertiesExpression*> mEquivObjectPropertiesExpList;
+					CEXPRESSIONLIST<CQueryGetSubObjectPropertyHierarchyExpression*> mSubObjectPropertyHierarchyExpList;
+					CEXPRESSIONLIST<CQueryIsObjectPropertySatisfiableExpression*> mObjectPropertySatExpList;
+
+					CEXPRESSIONLIST<CQueryGetSubDataPropertiesExpression*> mSubDataPropertiesExpList;
+					CEXPRESSIONLIST<CQueryGetSuperDataPropertiesExpression*> mSuperDataPropertiesExpList;
+					CEXPRESSIONLIST<CQueryGetEquivalentDataPropertiesExpression*> mEquivDataPropertiesExpList;
+					CEXPRESSIONLIST<CQueryGetSubDataPropertyHierarchyExpression*> mSubDataPropertyHierarchyExpList;
+					CEXPRESSIONLIST<CQueryIsDataPropertySatisfiableExpression*> mDataPropertySatExpList;
 
 
 					CEXPRESSIONLIST<CQueryGetDeterministicIndividualsExpression*> mDetIndisExpList;

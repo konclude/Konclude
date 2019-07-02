@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -54,8 +54,13 @@ namespace Konclude {
 				// public methods
 				public:
 
-					enum PROCESSINGSTEPTYPE { OPSACTIVECOUNT = 0, OPSBUILD = 1, OPSPREPROCESS = 2, OPSCONSISTENCY = 3, OPSPRECOMPUTEINDIVIDUAL = 4, OPSPRECOMPUTESATURATION = 5, OPSPRECOMPUTECYCLES = 6, OPSCLASSCLASSIFY = 7, OPSCONCEPTREALIZE = 8, OPSROLEREALIZE = 9, OPSSAMEINDIVIDUALSREALIZE = 10 };
-					enum PROCESSORTYPE { OPPREPROCESSOR, OPPRECOMPUTER, OPCLASSCLASSIFIER, OPREALIZER };
+					enum PROCESSINGSTEPTYPE {
+						OPSTRIPLESMAPPING = 0, OPSACTIVECOUNT = 1, OPSBUILD = 2, OPSPREPROCESS = 3, OPSTRIPLESINDEXING = 4, OPSCONSISTENCY = 5, OPSPRECOMPUTEINDIVIDUAL = 6, OPSPRECOMPUTESATURATION = 7, OPSPRECOMPUTECYCLES = 8, OPSPRECOMPUTEOCCURRENCESTATISTICS = 9,
+						OPSCLASSCLASSIFY = 10, OPSOBJECTROPERTYCLASSIFY = 11, OPSDATAROPERTYCLASSIFY = 12, OPSINITREALIZE = 13, OPSCONCEPTREALIZE = 14, OPSROLEREALIZE = 15, OPSSAMEINDIVIDUALSREALIZE = 16, OPSANSWERCOMPLEXQUERY = 17
+					};
+					enum PROCESSORTYPE {
+						OPPREPROCESSOR, OPPRECOMPUTER, OPCLASSCLASSIFIER, OPOBJECTPROPERTYCLASSIFIER, OPDATAPROPERTYCLASSIFIER, OPREALIZER, OPANSWERER
+					};
 
 					//! Constructor
 					COntologyProcessingStep(PROCESSINGSTEPTYPE processingType, cint64 id, PROCESSORTYPE processorType);

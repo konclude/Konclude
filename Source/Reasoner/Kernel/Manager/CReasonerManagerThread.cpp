@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -36,6 +36,7 @@ namespace Konclude {
 					mPrecomputationManager = 0;
 					mPreprocessingManager = 0;
 					mRealizationManager = 0;
+					mAnswererManager = 0;
 				}
 
 
@@ -164,6 +165,11 @@ namespace Konclude {
 				}
 
 
+				COccurrenceStatisticsCache* CReasonerManagerThread::getOccurrenceStatisticsCache() {
+					return mOccStatsCache;
+				}
+
+
 				CCalculationManager *CReasonerManagerThread::getCalculationManager() {
 					return mCalculationManager;
 				}
@@ -194,6 +200,8 @@ namespace Konclude {
 					CComputedConsequencesCacheHandler* compConsCachHandler = nullptr;
 					CSaturationNodeBackendAssociationCacheHandler* backendAssCacheHandler = nullptr;
 					CIndividualNodeBackendCacheHandler* backendCacheHandler = nullptr;
+					COccurrenceStatisticsCacheHandler* occStatsCacheHandler = nullptr;
+					CSatisfiableTaskSaturationOccurrenceStatisticsCollector* satTaskOccStatCollector = nullptr;
 					if (unsatCache) {
 						unsatCacheHandler = new CUnsatisfiableCacheHandler(unsatCache->getCacheReader(),unsatCache->getCacheWriter());
 					}
@@ -209,12 +217,18 @@ namespace Konclude {
 					if (mCompConsCache) {
 						compConsCachHandler = new CComputedConsequencesCacheHandler(mCompConsCache->createCacheReader(),mCompConsCache->createCacheWriter());
 					}
+					COccurrenceStatisticsCacheWriter* occStatsCacheWriter = nullptr;
+					if (mOccStatsCache) {
+						occStatsCacheWriter = mOccStatsCache->createCacheWriter();
+						satTaskOccStatCollector = new CSatisfiableTaskSaturationOccurrenceStatisticsCollector(occStatsCacheWriter);
+						occStatsCacheHandler = new COccurrenceStatisticsCacheHandler(occStatsCacheWriter);
+					}
 					if (mBackendAssCache) {
-						backendAssCacheHandler = new CSaturationNodeBackendAssociationCacheHandler(mBackendAssCache->createCacheReader(),mBackendAssCache->createCacheWriter());
+						backendAssCacheHandler = new CSaturationNodeBackendAssociationCacheHandler(mBackendAssCache->createCacheReader(),mBackendAssCache->createCacheWriter(), occStatsCacheWriter);
 						backendCacheHandler = new CIndividualNodeBackendCacheHandler(mBackendAssCache->createCacheReader(),mBackendAssCache->createCacheWriter());
 					}
-					CCalculationTableauApproximationSaturationTaskHandleAlgorithm* approxSatHandleAlg = new CCalculationTableauApproximationSaturationTaskHandleAlgorithm(backendAssCacheHandler);
-					CCalculationTableauCompletionTaskHandleAlgorithm* compTaskHandleAlg = new CCalculationTableauCompletionTaskHandleAlgorithm(unsatCacheHandler,satExpCacheHandler,reuseCompGraphCacheHandler,satNodeCacheHandler,compConsCachHandler,backendCacheHandler);
+					CCalculationTableauApproximationSaturationTaskHandleAlgorithm* approxSatHandleAlg = new CCalculationTableauApproximationSaturationTaskHandleAlgorithm(backendAssCacheHandler, satTaskOccStatCollector);
+					CCalculationTableauCompletionTaskHandleAlgorithm* compTaskHandleAlg = new CCalculationTableauCompletionTaskHandleAlgorithm(unsatCacheHandler,satExpCacheHandler,reuseCompGraphCacheHandler,satNodeCacheHandler,compConsCachHandler,backendCacheHandler, occStatsCacheHandler);
 					return new CCalculationChooseTaskHandleAlgorithm(compTaskHandleAlg,approxSatHandleAlg);
 				}
 
@@ -231,6 +245,7 @@ namespace Konclude {
 					mSatNodeExpCache = new CSaturationNodeAssociatedExpansionCache(configProvider->getCurrentConfiguration());
 					mCompConsCache = new CComputedConsequencesCache(configProvider->getCurrentConfiguration());
 					mBackendAssCache = new CBackendRepresentativeMemoryCache(configProvider->getCurrentConfiguration());
+					mOccStatsCache = new COccurrenceStatisticsCache(configProvider->getCurrentConfiguration());
 
 					CConfigDependedCalculationFactory* calcFactory = new CConfigDependedCalculationFactory(this);
 					CCalculationManager* calculationManager = calcFactory->createCalculationManager(configProvider);
@@ -343,22 +358,73 @@ namespace Konclude {
 							ontReqList.append(COntologyRequirementPair(ontology,ontReq));
 						}
 					}
-					CRealizationPremisingQuery* realQuery = dynamic_cast<CRealizationPremisingQuery*>(query);
-					if (realQuery) {
-						CConcreteOntology* ontology = realQuery->getOntology();
+					CClassificationPremisingQuery* classQuery = dynamic_cast<CClassificationPremisingQuery*>(query);
+					if (classQuery) {
+						CConcreteOntology* ontology = classQuery->getOntology();
 						QList<COntologyProcessingRequirement*> reqList;
-						if (realQuery->isSameIndividualRealisationRequired()) {
-							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+						if (classQuery->isConceptClassificationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
 						}
-						if (realQuery->isConceptRealisationRequired()) {
-							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCONCEPTREALIZE));
+						if (classQuery->isObjectRoleClassificationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
 						}
-						if (realQuery->isRoleRealisationRequired()) {
-							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSROLEREALIZE));
+						if (classQuery->isDataRoleClassificationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY));
 						}
 						reqList = mRequirementExpander->getUnsatisfiedRequirementsExpanded(reqList,ontology);
 						foreach (COntologyProcessingRequirement* ontReq, reqList) {
 							ontReqList.append(COntologyRequirementPair(ontology,ontReq));
+						}
+					}
+					CRealizationPremisingQuery* realQuery = dynamic_cast<CRealizationPremisingQuery*>(query);
+					if (realQuery) {
+						CConcreteOntology* ontology = realQuery->getOntology();
+						QList<COntologyProcessingRequirement*> reqList;
+						if (realQuery->isDynamicRealisationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
+							reqList.append(realQuery->getDynamicRealizationRequirement());
+						} else {
+							if (realQuery->isSameIndividualRealisationRequired()) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+							}
+							if (realQuery->isConceptRealisationRequired()) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCONCEPTREALIZE));
+							}
+							if (realQuery->isRoleRealisationRequired()) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSROLEREALIZE));
+							}
+						}
+						reqList = mRequirementExpander->getUnsatisfiedRequirementsExpanded(reqList,ontology);
+						foreach (COntologyProcessingRequirement* ontReq, reqList) {
+							ontReqList.append(COntologyRequirementPair(ontology,ontReq));
+						}
+					}
+					CComplexAnsweringQuery* complexAnsweringQuery = dynamic_cast<CComplexAnsweringQuery*>(query);
+					if (complexAnsweringQuery) {
+						CConcreteOntology* ontology = complexAnsweringQuery->getBaseOntology();
+						QList<COntologyProcessingRequirement*> reqList;
+						reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY));
+
+						CComplexConceptAnsweringQuery* complexConceptAnsweringQuery = dynamic_cast<CComplexConceptAnsweringQuery*>(complexAnsweringQuery);
+						if (complexConceptAnsweringQuery) {
+							if (complexConceptAnsweringQuery->isSuperClassNodesComputationRequired() || complexConceptAnsweringQuery->isSubClassNodesComputationRequired() || complexConceptAnsweringQuery->isEquivalentClassNodesComputationRequired() || complexConceptAnsweringQuery->isInstancesComputationRequired()) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
+							}
+							if (complexConceptAnsweringQuery->isInstancesComputationRequired()) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
+								//reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+							}
+						}
+						CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarAnsweringQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(complexAnsweringQuery);
+						if (compAssIndVarAnsweringQuery) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
+						}
+
+						reqList = mRequirementExpander->getUnsatisfiedRequirementsExpanded(reqList, ontology);
+						foreach(COntologyProcessingRequirement* ontReq, reqList) {
+							ontReqList.append(COntologyRequirementPair(ontology, ontReq));
 						}
 					}
 					return ontReqList;
@@ -384,12 +450,22 @@ namespace Konclude {
 						} else if (ontReqPrepData->mCheckingProcessorType == COntologyProcessingStep::OPCLASSCLASSIFIER) {
 							if (!mProcessingEndMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCLASSCLASSIFIER))) {
 								mProcessingEndMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCLASSCLASSIFIER));
-								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished classification in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
+								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished class classification in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
+							}
+						} else if (ontReqPrepData->mCheckingProcessorType == COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER) {
+							if (!mProcessingEndMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER))) {
+								mProcessingEndMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER));
+								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished object property classification in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
+							}
+						} else if (ontReqPrepData->mCheckingProcessorType == COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER) {
+							if (!mProcessingEndMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER))) {
+								mProcessingEndMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER));
+								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished data property classification in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
 							}
 						} else if (ontReqPrepData->mCheckingProcessorType == COntologyProcessingStep::OPREALIZER) {
 							if (!mProcessingEndMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPREALIZER))) {
 								mProcessingEndMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPREALIZER));
-								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished realization in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
+								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Finished (lazy) realization in %2 ms for ontology '%1'.").arg(ontology->getOntologyName()).arg(checkingTime),this);
 							}
 						}
 
@@ -448,20 +524,48 @@ namespace Konclude {
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPPRECOMPUTER;
 							ontReqPrepData->mCheckingTimer.start();
 							ontReqPrepData->mPrecomputorReqList.clear();
-						} else if (!ontReqPrepData->mClassifierReqList.isEmpty()) {
+						} else if (!ontReqPrepData->mClassClassifierReqList.isEmpty()) {
 							QString exprString = QString(", expressiveness '%2'").arg(ontology->getStructureSummary()->getExpressivenessString());
 							if (!mProcessingStartMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCLASSCLASSIFIER))) {
 								mProcessingStartMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPCLASSCLASSIFIER));
 								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Classifying ontology '%1'%2.").arg(ontology->getOntologyName()).arg(exprString),this);
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
-							CSubsumptionClassifier* classClassifier = classificationMan->getClassifier(ontology,config);
+							CSubsumptionClassifier* classClassifier = classificationMan->getClassClassifier(ontology,config);
 							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
-							classClassifier->classify(ontology,config,ontReqPrepData->mClassifierReqList,reqProcCallbackEvent);
-							ontReqPrepData->mCheckingReqList = ontReqPrepData->mClassifierReqList;
+							classClassifier->classify(ontology,config,ontReqPrepData->mClassClassifierReqList,reqProcCallbackEvent);
+							ontReqPrepData->mCheckingReqList = ontReqPrepData->mClassClassifierReqList;
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPCLASSCLASSIFIER;
 							ontReqPrepData->mCheckingTimer.start();
-							ontReqPrepData->mClassifierReqList.clear();
+							ontReqPrepData->mClassClassifierReqList.clear();
+						} else if (!ontReqPrepData->mObjectPropertyClassifierReqList.isEmpty()) {
+							QString exprString = QString(", expressiveness '%2'").arg(ontology->getStructureSummary()->getExpressivenessString());
+							if (!mProcessingStartMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER))) {
+								mProcessingStartMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER));
+								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Classifying object properties for ontology '%1'%2.").arg(ontology->getOntologyName()).arg(exprString),this);
+							}
+							CConfigurationBase* config = ontology->getConfiguration();
+							CSubsumptionClassifier* objectPropertyClassifier = classificationMan->getObjectPropertyClassifier(ontology,config);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							objectPropertyClassifier->classify(ontology,config,ontReqPrepData->mObjectPropertyClassifierReqList,reqProcCallbackEvent);
+							ontReqPrepData->mCheckingReqList = ontReqPrepData->mObjectPropertyClassifierReqList;
+							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER;
+							ontReqPrepData->mCheckingTimer.start();
+							ontReqPrepData->mObjectPropertyClassifierReqList.clear();
+						} else if (!ontReqPrepData->mDataPropertyClassifierReqList.isEmpty()) {
+							QString exprString = QString(", expressiveness '%2'").arg(ontology->getStructureSummary()->getExpressivenessString());
+							if (!mProcessingStartMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER))) {
+								mProcessingStartMessageSet.insert(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER));
+								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Classifying data properties for ontology '%1'%2.").arg(ontology->getOntologyName()).arg(exprString),this);
+							}
+							CConfigurationBase* config = ontology->getConfiguration();
+							CSubsumptionClassifier* dataPropertyClassifier = classificationMan->getDataPropertyClassifier(ontology,config);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							dataPropertyClassifier->classify(ontology,config,ontReqPrepData->mDataPropertyClassifierReqList,reqProcCallbackEvent);
+							ontReqPrepData->mCheckingReqList = ontReqPrepData->mDataPropertyClassifierReqList;
+							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER;
+							ontReqPrepData->mCheckingTimer.start();
+							ontReqPrepData->mDataPropertyClassifierReqList.clear();
 						} else if (!ontReqPrepData->mRealizerReqList.isEmpty()) {
 							QString exprString = QString(", expressiveness '%2'").arg(ontology->getStructureSummary()->getExpressivenessString());
 							if (!mProcessingStartMessageSet.contains(QPair<CConcreteOntology*,COntologyProcessingStep::PROCESSORTYPE>(ontology,COntologyProcessingStep::OPREALIZER))) {
@@ -476,6 +580,30 @@ namespace Konclude {
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPREALIZER;
 							ontReqPrepData->mCheckingTimer.start();
 							ontReqPrepData->mRealizerReqList.clear();
+						} else if (!ontReqPrepData->mAnswererReqList.isEmpty()) {
+							QString exprString = QString(", expressiveness '%2'").arg(ontology->getStructureSummary()->getExpressivenessString());
+							if (!mProcessingStartMessageSet.contains(QPair<CConcreteOntology*, COntologyProcessingStep::PROCESSORTYPE>(ontology, COntologyProcessingStep::OPANSWERER))) {
+								mProcessingStartMessageSet.insert(QPair<CConcreteOntology*, COntologyProcessingStep::PROCESSORTYPE>(ontology, COntologyProcessingStep::OPANSWERER));
+								LOG(INFO, "::Konclude::Reasoner::Kernel::ReasonerManager", logTr("Initializing complex query answering for ontology '%1'%2.").arg(ontology->getOntologyName()).arg(exprString), this);
+							}
+							CConfigurationBase* config = ontology->getConfiguration();
+							bool created = false;
+							if (!mAnswererManager) {
+								mAnswererManager = new CAnsweringManagerThread(this, config);
+								created = true;
+							}
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this, ontology, reqData);
+							ontology->getProcessingSteps()->getOntologyProcessingStepDataVector()->getProcessingStepData(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY)->getProcessingStatus()->setProcessingFlags(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED);
+							ontology->getProcessingSteps()->getOntologyProcessingStepDataVector()->getProcessingStepData(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY)->getProcessingStatus()->setErrorFlags(COntologyProcessingStatus::PSSUCESSFULL);
+							ontReqPrepData->mCheckingReqList = ontReqPrepData->mAnswererReqList;
+							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPANSWERER;
+							ontReqPrepData->mCheckingTimer.start();
+							ontReqPrepData->mAnswererReqList.clear();
+							if (created) {
+								mAnswererManager->prepareAnswering(ontology, reqProcCallbackEvent);
+							} else {
+								reqProcCallbackEvent->doCallback();
+							}
 						} else {
 							reqData->mDepCount--;
 						}
@@ -660,14 +788,11 @@ namespace Konclude {
 							CQueryStatistics* queryStats = consQuery->getQueryStatistics();
 							CConcreteOntology* ontology = consQuery->getOntology();
 							if (queryStats) {
-								CClassConceptClassification* classConClassif = ontology->getClassification()->getClassConceptClassification();
-								if (classConClassif) {
-									CClassificationStatistics* classifStats = classConClassif->getClassificationStatistics();
-									if (classifStats) {
-										foreach (QString statName, classifStats->getStatisticsNameStringList()) {
-											cint64 statValue = classifStats->getStatisticIntegerValue(statName);
-											queryStats->addProcessingStatistics(statName,statValue);
-										}
+								CConsistenceStatistics* consStats = ontology->getConsistence()->getConsistenceStatistics();
+								if (consStats) {
+									foreach(QString statName, consStats->getStatisticsNameStringList()) {
+										cint64 statValue = consStats->getStatisticIntegerValue(statName);
+										queryStats->addProcessingStatistics(statName, statValue);
 									}
 								}
 							}
@@ -697,9 +822,9 @@ namespace Konclude {
 								if (classConClassif) {
 									CClassificationStatistics* classifStats = classConClassif->getClassificationStatistics();
 									if (classifStats) {
-										foreach (QString statName, classifStats->getStatisticsNameStringList()) {
+										foreach(QString statName, classifStats->getStatisticsNameStringList()) {
 											cint64 statValue = classifStats->getStatisticIntegerValue(statName);
-											queryStats->addProcessingStatistics(statName,statValue);
+											queryStats->addProcessingStatistics(statName, statValue);
 										}
 									}
 								}
@@ -718,6 +843,29 @@ namespace Konclude {
 							}
 							delete reasoningData;
 						}
+
+
+						CClassificationPremisingQuery* classQuery = dynamic_cast<CClassificationPremisingQuery*>(query);
+						if (classQuery) {
+							reasoningData->mCallback = callbackData;
+
+							CQueryStatistics* queryStats = classQuery->getQueryStatistics();
+							CConcreteOntology* ontology = classQuery->getOntology();
+
+							updateFinishingCalculationStatistics(reasoningData,queryStats,ontology->getConfiguration());
+
+							classQuery->constructResult(ontology->getClassification());
+
+							qint64 mSecs = reasoningData->mStartTime.elapsed();
+							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' ms.").arg(classQuery->getQueryName()).arg(mSecs),this);
+
+							CCallbackData* callback = reasoningData->mCallback;
+							if (callback) {
+								callback->doCallback();
+							}
+							delete reasoningData;
+						}
+
 
 						CRealizationPremisingQuery* realQuery = dynamic_cast<CRealizationPremisingQuery *>(query);
 						if (realQuery) {
@@ -739,6 +887,28 @@ namespace Konclude {
 								callback->doCallback();
 							}
 							delete reasoningData;
+						}
+
+
+						CComplexAnsweringQuery* compAnsQuery = dynamic_cast<CComplexAnsweringQuery *>(query);
+						if (compAnsQuery) {
+							reasoningData->mCallback = callbackData;
+
+							CConcreteOntology* ontology = compAnsQuery->getBaseOntology();							
+
+							CCallbackData* callback = reasoningData->mCallback;
+
+							bool confCollectProcessStatistics = CConfigDataReader::readConfigBoolean(ontology->getConfiguration(), "Konclude.Calculation.Answering.CollectProcessStatistics", false);
+							if (confCollectProcessStatistics) {
+								reasoningData->mFinQueryCallback = new CCalcedQueryEvent(this, compAnsQuery);
+								mReasoningTaskDataHash.insert((cint64)query, reasoningData);
+								callback = reasoningData->mFinQueryCallback;
+							}
+
+							mAnswererManager->answerComplexQuery(compAnsQuery, callback);
+							if (!confCollectProcessStatistics) {
+								delete reasoningData;
+							}
 						}
 					}
 				}
@@ -952,11 +1122,26 @@ namespace Konclude {
 					CQuery *query = cqe->getQuery();
 					CReasoningTaskData* reasoningData = mReasoningTaskDataHash.value((cint64)query,nullptr);
 
+					CComplexAnsweringQuery* compAnsQuery = dynamic_cast<CComplexAnsweringQuery *>(query);
+					if (compAnsQuery) {
+						CQueryStatistics* queryStats = query->getQueryStatistics();
+						if (queryStats) {
+							CAnsweringStatistics* stats = mAnswererManager->getAnsweringStatistics(compAnsQuery->getBaseOntology());
+							if (stats) {
+								for (const QString& statName : stats->getStatisticsNameStringList()) {
+									cint64 statValue = stats->getStatisticIntegerValue(statName);
+									queryStats->addProcessingStatistics(statName, statValue);
+								}
+								delete stats;
+							}
+							updateFinishingCalculationStatistics(reasoningData, queryStats, compAnsQuery->getBaseOntology()->getConfiguration());
+						}
+					} else {
+						LOG(INFO, "::Konclude::Reasoner::Kernel::ReasonerManager", logTr("Query '%1' processed. Question '%2' answered with '%3'.\r\n").arg(cqe->getQueryName()).arg(cqe->getQueryString()).arg(cqe->getAnswerString()), this);
 
-					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed. Question '%2' answered with '%3'.\r\n").arg(cqe->getQueryName()).arg(cqe->getQueryString()).arg(cqe->getAnswerString()),this);
-
-					qint64 mSecs = reasoningData->mStartTime.elapsed();
-					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Query '%1' processed in '%2' ms.").arg(cqe->getQueryName()).arg(mSecs),this);
+						qint64 mSecs = reasoningData->mStartTime.elapsed();
+						LOG(INFO, "::Konclude::Reasoner::Kernel::ReasonerManager", logTr("Query '%1' processed in '%2' ms.").arg(cqe->getQueryName()).arg(mSecs), this);
+					}
 					
 					// print calculation statistics
 					loggingCalculationStatistics();

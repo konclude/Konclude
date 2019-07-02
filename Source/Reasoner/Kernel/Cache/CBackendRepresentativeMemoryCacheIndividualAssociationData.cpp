@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -36,31 +36,60 @@ namespace Konclude {
 
 
 				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::initAssociationData(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData) {
-					mIndividual = assData->mIndividual;
-					mCompletelyHandled = assData->mCompletelyHandled;
-					mCompletelySaturated = assData->mCompletelySaturated;
+					initCachingStatusFlags(assData->getStatusFlags());
+					mIndiID = assData->mIndiID;
+					mRepresentativeSameIndiId = assData->mRepresentativeSameIndiId;
 					mIncompletelyMarked = assData->mIncompletelyMarked;
+					mIndirectlyConnectedNominalIndividual = assData->mIndirectlyConnectedNominalIndividual;
+					mIndirectlyConnectedIndividualIntegration = assData->mIndirectlyConnectedIndividualIntegration;
 					mCardinalityCacheEntry = assData->mCardinalityCacheEntry;
-					mLabelCacheEntry = assData->mLabelCacheEntry;
+					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT; ++i) {
+						mLabelCacheEntries[i] = assData->mLabelCacheEntries[i];
+					}
+					mNeighbourRoleSetHash = nullptr;
+					mRoleSetNeighbourArray = nullptr;
+					mAssociationDataUpdateId = assData->mAssociationDataUpdateId + 1;
+					mCacheUpdateId = 0;
+					mLastIntegratedIndirectlyConnectedIndividualsChangeId = assData->mLastIntegratedIndirectlyConnectedIndividualsChangeId;
+					prevData = assData;
 					return this;
 				}
 
-				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::initAssociationData(CIndividual* individual) {
-					mIndividual = individual;
-					mCompletelyHandled = false;
-					mCompletelySaturated = false;
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::initAssociationData(cint64 indiId) {
+					initCachingStatusFlags();
+					mAssociationDataUpdateId = 1;
+					mIndiID = indiId;
+					mRepresentativeSameIndiId = indiId;
 					mIncompletelyMarked = false;
+					mIndirectlyConnectedNominalIndividual = false;
+					mIndirectlyConnectedIndividualIntegration = false;
 					mCardinalityCacheEntry = nullptr;
-					mLabelCacheEntry = nullptr;
+					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT; ++i) {
+						mLabelCacheEntries[i] = nullptr;
+					}
+					mNeighbourRoleSetHash = nullptr;
+					mRoleSetNeighbourArray = nullptr;
+					mCacheUpdateId = 0;
+					mLastIntegratedIndirectlyConnectedIndividualsChangeId = 0;
 					return this;
 				}
 
-				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheIndividualAssociationData::getBackendLabelCacheEntry() {
-					return mLabelCacheEntry;
+				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheIndividualAssociationData::getDeterministicConceptSetLabelCacheEntry() {
+					return getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL);
 				}
 
-				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setBackendLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem* cacheEntry) {
-					mLabelCacheEntry = cacheEntry;
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setDeterministicConceptSetLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem* cacheEntry) {
+					setLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL, cacheEntry);
+					return this;
+				}
+
+
+				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheIndividualAssociationData::getLabelCacheEntry(cint64 labelType) {
+					return mLabelCacheEntries[labelType];
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setLabelCacheEntry(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* cacheEntry) {
+					mLabelCacheEntries[labelType] = cacheEntry;
 					return this;
 				}
 
@@ -75,32 +104,97 @@ namespace Konclude {
 				}
 
 
-				bool CBackendRepresentativeMemoryCacheIndividualAssociationData::isCompletelyHandled() {
-					return mCompletelyHandled;
-				}
-
-				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setCompletelyHandled(bool completelyHandled) {
-					mCompletelyHandled = completelyHandled;
-					return this;
-				}
-
-
-				bool CBackendRepresentativeMemoryCacheIndividualAssociationData::isCompletelySaturated() {
-					return mCompletelySaturated;
-				}
-
-				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setCompletelySaturated(bool completelySaturated) {
-					mCompletelySaturated = completelySaturated;
-					return this;
-				}
-
 				bool CBackendRepresentativeMemoryCacheIndividualAssociationData::isIncompletelyMarked() {
 					return mIncompletelyMarked;
 				}
 
 				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setIncompletelyMarked(bool marked) {
-					mIncompletelyMarked;
+					mIncompletelyMarked = marked;
 					return this;
+				}
+
+
+				CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* CBackendRepresentativeMemoryCacheIndividualAssociationData::getNeighbourRoleSetHash() {
+					return mNeighbourRoleSetHash;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setNeighbourRoleSetHash(CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash) {
+					mNeighbourRoleSetHash = neighbourRoleSetHash;
+					return this;
+				}
+
+
+				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* CBackendRepresentativeMemoryCacheIndividualAssociationData::getRoleSetNeighbourArray() {
+					return mRoleSetNeighbourArray;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setRoleSetNeighbourArray(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray) {
+					mRoleSetNeighbourArray = roleSetNeighbourArray;
+					return this;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getAssociationDataUpdateId() {
+					return mAssociationDataUpdateId;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getCacheUpdateId() {
+					return mCacheUpdateId;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setCacheUpdateId(cint64 updateId) {
+					mCacheUpdateId = updateId;
+					return this;
+				}
+
+
+
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getLastIntegratedIndirectlyConnectedIndividualsChangeId() {
+					return mLastIntegratedIndirectlyConnectedIndividualsChangeId;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setLastIntegratedIndirectlyConnectedIndividualsChangeId(cint64 lastIntegratedChangeId) {
+					mLastIntegratedIndirectlyConnectedIndividualsChangeId = lastIntegratedChangeId;
+					return this;
+				}
+
+
+				bool CBackendRepresentativeMemoryCacheIndividualAssociationData::isIndirectlyConnectedNominalIndividual() {
+					return mIndirectlyConnectedNominalIndividual;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setIndirectlyConnectedNominalIndividual(bool indirectlyConnected) {
+					mIndirectlyConnectedNominalIndividual = indirectlyConnected;
+					return this;
+				}
+
+
+				bool CBackendRepresentativeMemoryCacheIndividualAssociationData::hasIndirectlyConnectedIndividualIntegration() {
+					return mIndirectlyConnectedIndividualIntegration;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setIndirectlyConnectedIndividualIntegration(bool indirectlyConnectedIndividualIntegration) {
+					mIndirectlyConnectedIndividualIntegration = indirectlyConnectedIndividualIntegration;
+					return this;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getRepresentativeSameIndividualId() {
+					return mRepresentativeSameIndiId;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setRepresentativeSameIndividualId(cint64 indiId) {
+					mRepresentativeSameIndiId = indiId;
+					return this;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getAssociatedIndividualId() {
+					return mIndiID;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::hasRepresentativeSameIndividualMerging() {
+					return mIndiID != mRepresentativeSameIndiId;
 				}
 
 

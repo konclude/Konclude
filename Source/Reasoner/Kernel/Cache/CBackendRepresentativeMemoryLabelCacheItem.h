@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -29,6 +29,8 @@
 #include "CCacheValue.h"
 #include "CBackendRepresentativeMemoryCacheContext.h"
 #include "CBackendRepresentativeMemoryLabelValueLinker.h"
+#include "CBackendRepresentativeMemoryCachingFlags.h"
+#include "CBackendRepresentativeMemoryLabelCacheItemExtensionData.h"
 
 
 // Other includes
@@ -56,14 +58,51 @@ namespace Konclude {
 				 *		\brief		TODO
 				 *
 				 */
-				class CBackendRepresentativeMemoryLabelCacheItem : public CLinkerBase<cint64,CBackendRepresentativeMemoryLabelCacheItem> {
+				class CBackendRepresentativeMemoryLabelCacheItem : public CLinkerBase<cint64,CBackendRepresentativeMemoryLabelCacheItem>, public CBackendRepresentativeMemoryCachingFlags {
 					// public methods
 					public:
+
+						enum LABEL_CACHE_ITEM_TYPE {
+							DETERMINISTIC_CONCEPT_SET_LABEL = 0,
+							NONDETERMINISTIC_CONCEPT_SET_LABEL = 1,
+
+							FULL_CONCEPT_SET_LABEL = 2,
+
+							DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL = 3,
+							NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL = 4,
+							DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL = 5,
+							NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL = 6,
+
+
+							DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL = 7,
+							NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL = 8,
+
+
+							DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL = 9,
+							NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL = 10,
+
+							DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL = 11,
+							NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL = 12,
+
+
+							INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL = 13,
+
+
+							NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL = 14,
+							NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL = 15,
+
+						};
+
+						static const cint64 LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT = 15;
+						static const cint64 LABEL_CACHE_ITEM_TYPE_COUNT = 16;
+
+
 						//! Constructor
 						CBackendRepresentativeMemoryLabelCacheItem(CBackendRepresentativeMemoryCacheContext* context);
 
 
-						CBackendRepresentativeMemoryLabelCacheItem* initCacheEntry(cint64 signature, cint64 entryID);
+						CBackendRepresentativeMemoryLabelCacheItem* initCacheEntry(cint64 signature, cint64 entryID, LABEL_CACHE_ITEM_TYPE type);
+						LABEL_CACHE_ITEM_TYPE getLabelType();
 
 						cint64 getCacheEntryID();
 						CBackendRepresentativeMemoryLabelCacheItem* setCacheEntryID(cint64 entryID);
@@ -72,19 +111,25 @@ namespace Konclude {
 						CBackendRepresentativeMemoryLabelCacheItem* setSignature(cint64 signature);
 
 
-						CBackendRepresentativeMemoryLabelCacheItem* addDeterministicCacheValueLinker(CBackendRepresentativeMemoryLabelValueLinker* linker);
-						CBackendRepresentativeMemoryLabelValueLinker* getDeterministicCacheValueLinker();
+						CBackendRepresentativeMemoryLabelCacheItem* addCacheValueLinker(CBackendRepresentativeMemoryLabelValueLinker* linker);
+						CBackendRepresentativeMemoryLabelValueLinker* getCacheValueLinker();
 
 
-						CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelValueLinker*>* getDeterministicTagCacheValueHash(bool create = false);
-						CBackendRepresentativeMemoryLabelCacheItem* setDeterministicTagCacheValueHash(CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelValueLinker*>* hash);
-						cint64 getDeterministicCacheValueCount();
+						CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelValueLinker*>* getTagCacheValueHash(bool create = false);
+						CBackendRepresentativeMemoryLabelCacheItem* setTagCacheValueHash(CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelValueLinker*>* hash);
+						cint64 getCacheValueCount();
 
-						bool isCompletelyHandled();
-						CBackendRepresentativeMemoryLabelCacheItem* setCompletelyHandled(bool completelyHandled);
 
-						bool isCompletelySaturated();
-						CBackendRepresentativeMemoryLabelCacheItem* setCompletelySaturated(bool completelySaturated);
+						bool hasCachedTagValue(cint64 tag);
+
+
+						CBackendRepresentativeMemoryLabelCacheItemExtensionData* getExtensionData(cint64 extensionType);
+						CBackendRepresentativeMemoryLabelCacheItem* setExtensionData(cint64 extensionType, CBackendRepresentativeMemoryLabelCacheItemExtensionData* extensionData);
+
+						CBackendRepresentativeMemoryLabelCacheItem* incIndividualAssociationCount(cint64 count = 1);
+						CBackendRepresentativeMemoryLabelCacheItem* decIndividualAssociationCount(cint64 count = 1);
+						cint64 getIndividualAssociationCount();
+
 
 
 					// protected methods
@@ -93,13 +138,17 @@ namespace Konclude {
 					// protected variables
 					protected:
 						CBackendRepresentativeMemoryCacheContext* mContext;
-						cint64 mSignature;
-						CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelValueLinker*>* mDetTagValueHash;
-						CBackendRepresentativeMemoryLabelValueLinker* mDetValueLinker;
-						cint64 mDetValueCount;
 
-						bool mCompletelyHandled;
-						bool mCompletelySaturated;
+						LABEL_CACHE_ITEM_TYPE mCacheItemType;
+
+						cint64 mSignature;
+						CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelValueLinker*>* mTagValueHash;
+						CBackendRepresentativeMemoryLabelValueLinker* mValueLinker;
+						cint64 mValueCount;
+
+						cint64 mIndiAssociationCount;
+
+						CBackendRepresentativeMemoryLabelCacheItemExtensionData* mExtensionData[CBackendRepresentativeMemoryLabelCacheItemExtensionData::LABEL_CACHE_ITEM_EXTENSION_TYPE_COUNT];
 
 
 

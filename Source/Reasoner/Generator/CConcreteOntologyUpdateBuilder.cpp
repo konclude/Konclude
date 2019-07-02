@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -60,6 +60,26 @@ namespace Konclude {
 				tBox = mOntoData->getTBox();
 				rBox = mOntoData->getRBox();
 				aBox = mOntoData->getABox();
+				mBoxContext = mOntoData->getBoxContext();
+
+				mIndividualNameIndividualMapHash = nullptr;
+				mIndexedTriplesAssertionAccessor = mOnto->getOntologyTriplesData()->getTripleAssertionAccessor();
+				if (!mIndexedTriplesAssertionAccessor) {
+					CConcreteOntology* prevOntology = mOnto;
+					while (prevOntology && !mIndexedTriplesAssertionAccessor) {
+						prevOntology = prevOntology->getIncrementalRevisionData()->getPreviousOntologyVersion();
+						if (prevOntology) {
+							mIndexedTriplesAssertionAccessor = prevOntology->getOntologyTriplesData()->getTripleAssertionAccessor();
+						}
+					}
+				}
+				if (!mIndexedTriplesAssertionAccessor) {
+					mIndividualNameIndividualMapHash = mOnto->getStringMapping()->getIndividualNameIndividualMappingHash(false);
+					if (!mIndividualNameIndividualMapHash || mIndividualNameIndividualMapHash->isEmpty()) {
+						mIndividualNameIndividualMapHash = nullptr;
+					}
+				}
+
 
 				mInitialBuild = mOntoData->isInitialBuild();
 
@@ -258,7 +278,7 @@ namespace Konclude {
 						mLocExpressionBuildHash->insert(CExpressionHasher(buildExp),buildExp);
 					}
 				}
-				mLocExpressionBuildHash = mExpressionBuildHash;
+				mExpressionBuildHash = mLocExpressionBuildHash;
 				mExpressionBuildContainerList = mLocExpressionBuildContainerList;
 
 				if (mLastProcessedBuildIndividual <= 0) {
@@ -1231,7 +1251,7 @@ namespace Konclude {
 									CObjectPropertyTermExpression* opObjPropExp = objExp->getObjectPropertyTermExpression();
 									setConceptRoleFromObjectPropertyTerm(concept,opObjPropExp);
 									concept->setOperatorCode(CCSELF);
-								} else if (expType == CBuildExpression::BETINDIVIDUALVARIABLE) {
+								} else if (expType == CBuildExpression::BETNOMINALINDIVIDUALVARIABLE) {
 									mConstructFlags->setNonELConstructUsed();
 									mConstructFlags->setNominalSchemaUsed();
 									mNominalConceptCreationRequired = true;
@@ -1415,16 +1435,17 @@ namespace Konclude {
 							} else if (expType == CBuildExpression::BETDATAPROPERTYASSERTION) {	
 								CDataPropertyAssertionExpression* dataAssExp = (CDataPropertyAssertionExpression*)assAxiom;
 								CDataPropertyTermExpression* dataPropTermExp = dataAssExp->getDataPropertyTermExpression();
-								CDataLiteralExpression* dataLiteralExp = dataAssExp->getDataLiteralExpression();
-								CClassTermExpression* classTermExp = getDataHasValue(dataPropTermExp,dataLiteralExp);
-								setIndividualAssertionConceptFromClassTerm(individual,classTermExp,false);
+								CDataLiteralExpression* dataLiteralExp = dynamic_cast<CDataLiteralExpression*>(dataAssExp->getDataLiteralTermExpression());
+								setIndividualAssertionDataFromDataLiteralTerm(individual, dataPropTermExp, dataLiteralExp);
 
 							} else if (expType == CBuildExpression::BETNEGATIVEDATAPROPERTYASSERTION) {	
 								CNegativeDataPropertyAssertionExpression* dataAssExp = (CNegativeDataPropertyAssertionExpression*)assAxiom;
 								CDataPropertyTermExpression* dataPropTermExp = dataAssExp->getDataPropertyTermExpression();
-								CDataLiteralExpression* dataLiteralExp = dataAssExp->getDataLiteralExpression();
+								CDataLiteralExpression* dataLiteralExp = dynamic_cast<CDataLiteralExpression*>(dataAssExp->getDataLiteralTermExpression());
 								CClassTermExpression* classTermExp = getDataHasValue(dataPropTermExp,dataLiteralExp);
-								setIndividualAssertionConceptFromClassTerm(individual,classTermExp,true);
+								if (dataLiteralExp) {
+									setIndividualAssertionConceptFromClassTerm(individual, classTermExp, true);
+								}
 
 							} else if (expType == CBuildExpression::BETNEGATIVEOBJECTPROPERTYASSERTION) {	
 								CNegativeObjectPropertyAssertionExpression* propAssExp = (CNegativeObjectPropertyAssertionExpression*)assAxiom;
@@ -1538,21 +1559,21 @@ namespace Konclude {
 							CClassTermExpression* domainExp = dataPropAxiomExp->getClassTermExpression();
 							CConcept* domainCon = getConceptForClassTerm(domainExp);
 							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-							conceptLinker->init(domainCon,false);
+							conceptLinker->init(domainCon, domainCon->hasMappingNegation());
 							role->addDomainConceptLinker(conceptLinker);
 						} else if (expType == CBuildExpression::BETDATAPROPERTYRANGE) {
 							CDataPropertyRangeExpression* dataPropAxiomExp = (CDataPropertyRangeExpression*)dataPropAxiom;
 							CDataRangeTermExpression* rangeExp = dataPropAxiomExp->getDataRangeTermExpression();
 							CConcept* rangeCon = getConceptForDataRangeTerm(rangeExp);
 							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-							conceptLinker->init(rangeCon,false);
+							conceptLinker->init(rangeCon, rangeCon->hasMappingNegation());
 							role->addRangeConceptLinker(conceptLinker);
 						} else if (expType == CBuildExpression::BETFUNCTIONALDATAPROPERTY) {
 							CFunctionalDataPropertyExpression* dataPropAxiomExp = (CFunctionalDataPropertyExpression*)dataPropAxiom;
 							CDataMaxCardinalityExpression* funcCardExp = getDataMaxCardinality(dataPropTermExp,mTopDataPropExpression,1);
 							CConcept* domainCon = getConceptForClassTerm(funcCardExp);
 							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-							conceptLinker->init(domainCon,false);
+							conceptLinker->init(domainCon, domainCon->hasMappingNegation());
 							role->addDomainConceptLinker(conceptLinker);
 							role->setFunctional(true);
 						}
@@ -1578,8 +1599,21 @@ namespace Konclude {
 
 				CObjectPropertyTermExpression* inverseObjPropTermExp = mInverseObjectPropertyHash->value(objPropTermExp,nullptr);
 
+				CRole* role = nullptr;
+				if (objPropAccAxiomList.isEmpty() && inverseObjPropTermExp) {
+					role = mObjPropTermRoleHash->value(objPropTermExp);
+					CRole* invRole = mObjPropTermRoleHash->value(inverseObjPropTermExp);
+					if (!role && invRole) {
+						role = invRole->getInverseRole();
+						if (role) {
+							mObjPropTermRoleHash->insert(objPropTermExp, role);
+						}
+					}
+				}
 
-				CRole* role = getRoleForObjectPropertyTerm(objPropTermExp,true);
+				if (!role) {
+					role = getRoleForObjectPropertyTerm(objPropTermExp, true);
+				}
 
 				if (inverseObjPropTermExp) {
 					CRole* invRole = getRoleForObjectPropertyTerm(inverseObjPropTermExp);
@@ -1601,9 +1635,32 @@ namespace Konclude {
 					}
 				}
 
+				FOREACHIT(CObjectPropertyAxiomExpression* objPropAxiom, objPropAccAxiomList) {
+					if (!mRetractUpdatedAxiomSet->contains(objPropAxiom)) {
+						mObjPropTermObjPropAxiomHash->insertMulti(objPropTermExp, objPropAxiom);
+						CBuildExpression::ExpressionType expType = objPropAxiom->getType();
+						if (expType == CBuildExpression::BETINVERSEOBJECTPROPERTIES) {
+							CInverseObjectPropertiesExpression* objPropAxiomExp = (CInverseObjectPropertiesExpression*)objPropAxiom;
+							CObjectPropertyTermExpression* invObjPropTermExp = nullptr;
+							if (objPropTermExp == objPropAxiomExp->getFirstObjectPropertyTermExpression()) {
+								invObjPropTermExp = objPropAxiomExp->getSecondObjectPropertyTermExpression();
+							} else {
+								invObjPropTermExp = objPropAxiomExp->getFirstObjectPropertyTermExpression();
+							}
+							mInverseObjectPropertyHash->insert(objPropTermExp, invObjPropTermExp);
+							mInverseObjectPropertyHash->insert(invObjPropTermExp, objPropTermExp);
+							CRole* invRole = getRoleForObjectPropertyTerm(invObjPropTermExp);
+							if (!role->hasInverseRole(invRole)) {
+								CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
+								roleLinker->init(invRole, true);
+								role->addInverseRoleLinker(roleLinker);
+							}
+						}
+					}
+				}
+
 				FOREACHIT (CObjectPropertyAxiomExpression* objPropAxiom, objPropAccAxiomList) {
 					if (!mRetractUpdatedAxiomSet->contains(objPropAxiom)) {
-						mObjPropTermObjPropAxiomHash->insertMulti(objPropTermExp,objPropAxiom);
 						CBuildExpression::ExpressionType expType = objPropAxiom->getType();
 						if (expType == CBuildExpression::BETSUBOBJECTPROPERTYOF) {
 							if (objPropTermExp != mBottomObjPropExpression) {
@@ -1660,40 +1717,26 @@ namespace Konclude {
 									}
 								}
 							}
-						} else if (expType == CBuildExpression::BETINVERSEOBJECTPROPERTIES) {
-							CInverseObjectPropertiesExpression* objPropAxiomExp = (CInverseObjectPropertiesExpression*)objPropAxiom;
-							CObjectPropertyTermExpression* invObjPropTermExp = nullptr;
-							if (objPropTermExp == objPropAxiomExp->getFirstObjectPropertyTermExpression()) {
-								invObjPropTermExp = objPropAxiomExp->getSecondObjectPropertyTermExpression();
-							} else {
-								invObjPropTermExp = objPropAxiomExp->getFirstObjectPropertyTermExpression();
-							}
-							CRole* invRole = getRoleForObjectPropertyTerm(invObjPropTermExp);
-							if (!role->hasInverseRole(invRole)) {
-								CSortedNegLinker<CRole*>* roleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(mMemManager);
-								roleLinker->init(invRole,true);
-								role->addInverseRoleLinker(roleLinker);
-							}
 						} else if (expType == CBuildExpression::BETOBJECTPROPERTYDOMAIN) {
 							CObjectPropertyDomainExpression* objPropAxiomExp = (CObjectPropertyDomainExpression*)objPropAxiom;
 							CClassTermExpression* domainExp = objPropAxiomExp->getClassTermExpression();
 							CConcept* domainCon = getConceptForClassTerm(domainExp);
 							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-							conceptLinker->init(domainCon,false);
+							conceptLinker->init(domainCon,domainCon->hasMappingNegation());
 							role->addDomainConceptLinker(conceptLinker);
 						} else if (expType == CBuildExpression::BETOBJECTPROPERTYRANGE) {
 							CObjectPropertyRangeExpression* objPropAxiomExp = (CObjectPropertyRangeExpression*)objPropAxiom;
 							CClassTermExpression* rangeExp = objPropAxiomExp->getClassTermExpression();
 							CConcept* rangeCon = getConceptForClassTerm(rangeExp);
 							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-							conceptLinker->init(rangeCon,false);
+							conceptLinker->init(rangeCon, rangeCon->hasMappingNegation());
 							role->addRangeConceptLinker(conceptLinker);
 						} else if (expType == CBuildExpression::BETFUNCTIONALOBJECTPROPERTY) {
 							CFunctionalObjectPropertyExpression* objPropAxiomExp = (CFunctionalObjectPropertyExpression*)objPropAxiom;
 							CObjectMaxCardinalityExpression* funcCardExp = getObjectMaxCardinality(objPropTermExp,mTopClassExpression,1);
 							CConcept* domainCon = getConceptForClassTerm(funcCardExp);
 							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-							conceptLinker->init(domainCon,false);
+							conceptLinker->init(domainCon, domainCon->hasMappingNegation());
 							role->addDomainConceptLinker(conceptLinker);
 							role->setFunctional(true);
 						} else if (expType == CBuildExpression::BETINVERSEFUNCTIONALPROPERTY) {
@@ -1701,7 +1744,7 @@ namespace Konclude {
 							CObjectMaxCardinalityExpression* funcCardExp = getObjectMaxCardinality(getCorrectedInverseObjectPropertyOf(objPropTermExp),mTopClassExpression,1);
 							CConcept* rangeCon = getConceptForClassTerm(funcCardExp);
 							CSortedNegLinker<CConcept*>* conceptLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-							conceptLinker->init(rangeCon,false);
+							conceptLinker->init(rangeCon, rangeCon->hasMappingNegation());
 							role->addRangeConceptLinker(conceptLinker);
 							role->setInverseFunctional(true);
 						} else if (expType == CBuildExpression::BETREFLEXIVEPROPERTY) {
@@ -1841,9 +1884,12 @@ namespace Konclude {
 
 
 			bool CConcreteOntologyUpdateBuilder::buildPermutableConceptDisjointClass(CClassTermExpression* disCallClassExp, const CEXPRESSIONLIST<CClassTermExpression*>& disClassExpList) {
+				bool sameDisCallClassOcc = false;
 				FOREACHIT (CClassTermExpression* disClassExp2, disClassExpList) {
-					if (disCallClassExp != disClassExp2) {
+					if (disCallClassExp != disClassExp2 || sameDisCallClassOcc) {
 						buildConceptSubClassInclusion(disCallClassExp,disClassExp2,true);
+					} else {
+						sameDisCallClassOcc = true;
 					}
 				}
 				return true;
@@ -1981,6 +2027,7 @@ namespace Konclude {
 							newNameLinker->init(newName);
 							item->addNameLinker(newNameLinker);
 							nameAdded = true;
+							break;
 						}
 					}
 					if (!nameAdded) {
@@ -2048,7 +2095,7 @@ namespace Konclude {
 				CDatatypeExpression* datatypeExp = dataLiteralExp->getDatatypeExpression();
 				CDataLexicalValueExpression* lexDatValueExp = dataLiteralExp->getDataLexicalValueExpression();
 				CDatatype* datatype = getDatatypeForDatatypeExpression(datatypeExp);
-				CDataLiteral* dataLiteral = CObjectAllocator<CDataLiteral>::allocateAndConstruct(mMemManager);
+				CDataLiteral* dataLiteral = CObjectParameterizingAllocator<CDataLiteral,CContext*>::allocateAndConstructAndParameterize(mMemManager, mBoxContext);
 				dataLiteral->initDataLiteral(lexDatValueExp->getName(),datatype);
 				return dataLiteral;
 			}
@@ -2123,6 +2170,10 @@ namespace Konclude {
 			CIndividual* CConcreteOntologyUpdateBuilder::getIndividualForIndividualTerm(CIndividualTermExpression* indiTermExp, bool forceLocalisation) {
 				CIndividual* indi = nullptr;
 				indi = mIndividulTermIndiHash->value(indiTermExp);
+				if (!indi && mIndividualNameIndividualMapHash) {
+					CNamedIndividualExpression* namedIndiExp = (CNamedIndividualExpression*)indiTermExp;
+					indi = mIndividualNameIndividualMapHash->value(namedIndiExp->getName());
+				}
 				bool forceCreation = false;
 				if (indi && indi->getTag() == -1) {
 					forceLocalisation = false;
@@ -2139,8 +2190,25 @@ namespace Konclude {
 					}
 					indi = CObjectAllocator<CIndividual>::allocateAndConstruct(mMemManager);
 					indi->initIndividual();
+
+					QString indiName;
+					if (indiTermExp->getType() == CBuildExpression::BETNAMEDINDIVIDUAL) {
+						CNamedIndividualExpression* namedIndiExp = (CNamedIndividualExpression*)indiTermExp;
+						indiName = namedIndiExp->getName();
+					} else if (indiTermExp->getType() == CBuildExpression::BETANONYMOUSINDIVIDUAL) {
+						CAnonymousIndividualExpression* anonymousIndiExp = (CAnonymousIndividualExpression*)indiTermExp;
+						indiName = anonymousIndiExp->getName();
+					}
+
+					cint64 useIndiTag = -1;
 					if (prevIndi) {
-						indi->initTag(prevIndi->getIndividualID());
+						useIndiTag = prevIndi->getIndividualID();
+					} else if (mIndexedTriplesAssertionAccessor) {
+						useIndiTag = mIndexedTriplesAssertionAccessor->getIndividualId(indiName);
+					} 
+
+					if (useIndiTag >= 0) {
+						indi->initTag(useIndiTag);
 						mInstallIndividualList.append(indi);
 					} else {
 						mTaggingIndividualSet.append(indi);
@@ -2149,15 +2217,8 @@ namespace Konclude {
 					mIndividulTermIndiHash->insert(indiTermExp,indi);
 					mIndiIndividulTermHash->insert(indi,indiTermExp);
 
-					if (indiTermExp->getType() == CBuildExpression::BETNAMEDINDIVIDUAL) {
-						// update name
-						CNamedIndividualExpression* namedIndiExp = (CNamedIndividualExpression*)indiTermExp;
-						QString indiName = namedIndiExp->getName();
-						updateName(indi,indiName);
-					} else if (indiTermExp->getType() == CBuildExpression::BETANONYMOUSINDIVIDUAL) {
-						CAnonymousIndividualExpression* anonymousIndiExp = (CAnonymousIndividualExpression*)indiTermExp;
-						QString indiName = anonymousIndiExp->getName();
-						updateName(indi,indiName);
+					updateName(indi, indiName);
+					if (indiTermExp->getType() == CBuildExpression::BETANONYMOUSINDIVIDUAL) {
 						indi->setAnonymousIndividual(true);
 					}
 
@@ -2312,8 +2373,12 @@ namespace Konclude {
 				FOREACHIT (CClassTermExpression* classTermExp, *classTermList) {
 					CConcept* opConcept = getConceptForClassTerm(classTermExp);
 					//if (!concept->hasOperandConcept(opConcept,negate)) {
+						bool opConNegation = negate;
 						CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
-						opConLinker->init(opConcept,negate);
+						if (opConcept->hasMappingNegation()) {
+							opConNegation = !opConNegation;
+						}
+						opConLinker->init(opConcept, opConNegation);
 						concept->addOperandLinker(opConLinker);
 						concept->incOperandCount();
 					//}
@@ -2338,6 +2403,15 @@ namespace Konclude {
 				return true;
 			}
 
+			bool CConcreteOntologyUpdateBuilder::setIndividualAssertionDataFromDataLiteralTerm(CIndividual* individual, CDataPropertyTermExpression* dataPropTermExp, CDataLiteralExpression* dataLitExp) {
+				CRole* role = getRoleForDataPropertyTerm(dataPropTermExp);
+				CDataLiteral* dataLiteral = getDataLiteralForLiteralExpression(dataLitExp);
+				CDataAssertionLinker* dataAssLinker = CObjectAllocator< CDataAssertionLinker >::allocateAndConstruct(mMemManager);
+				dataAssLinker->initDataAssertionLinker(role, dataLiteral);
+				individual->addAssertionDataLinker(dataAssLinker);
+				return true;
+			}
+
 			bool CConcreteOntologyUpdateBuilder::setIndividualAssertionNominalFromClassTerm(CIndividual* individual, CClassTermExpression* classTermExp, bool negate) {
 				CConcept* opConcept = getConceptForClassTerm((CClassTermExpression*)classTermExp);
 				individual->setIndividualNominalConcept(opConcept);
@@ -2353,6 +2427,9 @@ namespace Konclude {
 					CConcept* opConcept = getConceptForClassTerm((CClassTermExpression*)classTermExp);
 					//if (!concept->hasOperandConcept(opConcept,negate)) {
 						CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+						if (opConcept->hasMappingNegation()) {
+							negate = !negate;
+						}
 						opConLinker->init(opConcept,negate);
 						concept->addOperandLinker(opConLinker);
 						concept->incOperandCount();
@@ -2368,6 +2445,9 @@ namespace Konclude {
 					CConcept* opConcept = getConceptForDataRangeTerm(dataRangeTermExp);
 					//if (!concept->hasOperandConcept(opConcept,negate)) {
 					CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+					if (opConcept->hasMappingNegation()) {
+						negate = !negate;
+					}
 					opConLinker->init(opConcept,negate);
 					concept->addOperandLinker(opConLinker);
 					concept->incOperandCount();
@@ -2382,6 +2462,9 @@ namespace Konclude {
 					CConcept* opConcept = getConceptForDataRangeTerm(dataRangeTermExp);
 					//if (!concept->hasOperandConcept(opConcept,negate)) {
 					CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+					if (opConcept->hasMappingNegation()) {
+						negate = !negate;
+					}
 					opConLinker->init(opConcept,negate);
 					concept->addOperandLinker(opConLinker);
 					concept->incOperandCount();
@@ -2393,6 +2476,9 @@ namespace Konclude {
 			bool CConcreteOntologyUpdateBuilder::setConceptOperands(CConcept* concept, CConcept* operandConcept, bool negate) {
 				//if (!concept->hasOperandConcept(operandConcept,negate)) {
 					CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemManager);
+					if (operandConcept->hasMappingNegation()) {
+						negate = !negate;
+					}
 					opConLinker->init(operandConcept,negate);
 					concept->addOperandLinker(opConLinker);
 					concept->incOperandCount();
@@ -2601,7 +2687,7 @@ namespace Konclude {
 					CSortedNegLinker<CConcept*>* opConLinker = concept->getOperandList();
 					while (opConLinker) {
 						CConcept* opConcept = opConLinker->getData();
-						if (opConcept) {
+						if (opConcept && opConcept->getConceptTag() == -1) {
 							CConceptTaggingDependingItem* taggingItem = (CConceptTaggingDependingItem*)opConcept->getConceptData();
 							if (taggingItem && !taggingItem->mDependent) {
 								taggingItem->mDependent = true;
@@ -2641,7 +2727,7 @@ namespace Konclude {
 						CSortedNegLinker<CConcept*>* opConLinker = concept->getOperandList();
 						while (opConLinker) {
 							CConcept* opConcept = opConLinker->getData();
-							if (opConcept) {
+							if (opConcept && opConcept->getConceptTag() == -1) {
 								CConceptTaggingDependingItem* taggingItem = (CConceptTaggingDependingItem*)opConcept->getConceptData();
 								if (taggingItem && taggingItem->mDependent) {
 									taggingItem->mDependent = false;

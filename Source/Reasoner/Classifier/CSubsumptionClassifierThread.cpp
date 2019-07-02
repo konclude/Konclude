@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -105,9 +105,8 @@ namespace Konclude {
 				return this;
 			}
 
-			CSubsumptionClassifierThread *CSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
+			CSubsumptionClassifierThread *CSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 				COntologyClassificationItem *ontClassItem = new COntologyClassificationItem(config,statistics);
-				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
 				ontItemList.append(ontClassItem);
 				processingOntItemList.append(ontClassItem);
 				ontItemHash.insert(ontology,ontClassItem);
@@ -151,8 +150,8 @@ namespace Konclude {
 							nextTestCreated = false;
 						}
 					}
-					submitCalculationJobs();
 				}
+				submitCalculationJobs();
 				return createdNewTests;
 			}
 
@@ -198,8 +197,7 @@ namespace Konclude {
 					CConfigurationBase* config = coe->getConfiguration();
 					QList<COntologyProcessingRequirement*>* reqList = coe->getClassificationRequirementList();
 					if (!isOntologyClassificationScheduled(onto)) {
-						CTaxonomy* taxonomy = createEmptyTaxonomyForOntology(onto,config);
-						scheduleOntologyClassification(onto,taxonomy,nullptr,config);
+						scheduleOntologyClassification(onto,nullptr,config);
 						addOntologyClassifyRequirements(onto,*reqList);
 					} else {
 						rescheduleOntologyClassification(onto);
@@ -236,11 +234,7 @@ namespace Konclude {
 					CCallbackData *possCallback = ccoe->getCallbackPossibleCallbackData();
 					COntologyClassificationItem *ontClassItem = ontItemHash.value(ccoe->getOntology(),0);
 					if (possCallback) {
-						CTaxonomy *taxonomy = 0;
-						if (ontClassItem) {
-							taxonomy = ontClassItem->getTaxonomy();
-						}
-						CClassifyingCallbackDataContext *possCallbackContext = new CClassifyingCallbackDataContext(ontClassItem,taxonomy,ccoe->getOntology());
+						CClassifyingCallbackDataContext *possCallbackContext = new CClassifyingCallbackDataContext(ontClassItem,ccoe->getOntology());
 						possCallback->setCallbackDataContext(possCallbackContext);
 						possCallback->doCallback();
 					}

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -36,15 +36,17 @@ namespace Konclude {
 
 				CReferredIndividualTrackingVector::CReferredIndividualTrackingVector() {
 					mIndiTrackCount = 0;
+					mIndiTrackOffset = 0;
 					mIndiTrackVector = nullptr;
 				}
 				CReferredIndividualTrackingVector::~CReferredIndividualTrackingVector() {
 					delete [] mIndiTrackVector;
 				}
 
-				CReferredIndividualTrackingVector* CReferredIndividualTrackingVector::initReferredIndividualTrackingVector(cint64 indiCount) {
+				CReferredIndividualTrackingVector* CReferredIndividualTrackingVector::initReferredIndividualTrackingVector(cint64 indiCount, cint64 indiOffset) {
 					mIndiTrackVector = new CReferredIndividualTrackingData[indiCount];
 					mIndiTrackCount = indiCount;
+					mIndiTrackOffset = indiOffset;
 					return this;
 				}
 
@@ -61,14 +63,15 @@ namespace Konclude {
 
 
 				CReferredIndividualTrackingData* CReferredIndividualTrackingVector::getReferredIndividualTrackingData(cint64 indiID) {
-					if (indiID >= 0 && indiID < mIndiTrackCount) {
-						return &mIndiTrackVector[indiID];
+					cint64 correctedIndiID = indiID+mIndiTrackOffset;
+					if (correctedIndiID >= 0 && correctedIndiID < mIndiTrackCount) {
+						return &mIndiTrackVector[correctedIndiID];
 					}
 					return nullptr;
 				}
 
 				CReferredIndividualTrackingVector* CReferredIndividualTrackingVector::setIndividualReferred(cint64 indiID) {
-					CReferredIndividualTrackingData* indTrackData = getReferredIndividualTrackingData(indiID);
+					CReferredIndividualTrackingData* indTrackData = getReferredIndividualTrackingData(indiID+mIndiTrackOffset);
 					if (indTrackData && !indTrackData->isReferred()) {
 						indTrackData->setReferred();
 					}
@@ -76,7 +79,7 @@ namespace Konclude {
 				}
 
 				CReferredIndividualTrackingVector* CReferredIndividualTrackingVector::setIndividualReferredAndExtended(cint64 indiID) {
-					CReferredIndividualTrackingData* indTrackData = getReferredIndividualTrackingData(indiID);
+					CReferredIndividualTrackingData* indTrackData = getReferredIndividualTrackingData(indiID+mIndiTrackOffset);
 					if (indTrackData && (!indTrackData->isExtended() || !indTrackData->isReferred())) {
 						indTrackData->setReferred();
 						indTrackData->setExtended();
@@ -108,13 +111,13 @@ namespace Konclude {
 				bool CReferredIndividualTrackingVector::areIndividualsAffected(QSet<cint64>* indirectlyChangedIndividualSet, QSet<cint64>* changedCompatibleSet) {
 					for (QSet<cint64>::const_iterator it = indirectlyChangedIndividualSet->constBegin(), itEnd = indirectlyChangedIndividualSet->constEnd(); it != itEnd; ++it) {
 						cint64 indiID(*it);
-						if (indiID < mIndiTrackCount) {
-							CReferredIndividualTrackingData* indiTrackData = &mIndiTrackVector[indiID];
+						if (indiID+mIndiTrackOffset < mIndiTrackCount) {
+							CReferredIndividualTrackingData* indiTrackData = &mIndiTrackVector[indiID+mIndiTrackOffset];
 							if (indiTrackData) {
 								if (indiTrackData->isExtended()) {
 									return true;
 								}
-								if (indiTrackData->isReferred() && !changedCompatibleSet->contains(indiID)) {
+								if (indiTrackData->isReferred() && !changedCompatibleSet->contains(indiID+mIndiTrackOffset)) {
 									return true;
 								}
 							}
@@ -132,15 +135,15 @@ namespace Konclude {
 						//QSet<cint64>* changedCompatibleSet = incConsTaskData->getChangedCompatibleNodeSet();
 						//for (QSet<cint64>::const_iterator it = indirectlyChangedIndividualSet->constBegin(), itEnd = indirectlyChangedIndividualSet->constEnd(); it != itEnd; ++it) {
 						//	cint64 indiID(*it);
-						//	if (indiID < mIndiTrackCount) {
-						//		CReferredIndividualTrackingData* indiTrackData = &mIndiTrackVector[indiID];
+						//	if (indiID+mIndiTrackOffset < mIndiTrackCount) {
+						//		CReferredIndividualTrackingData* indiTrackData = &mIndiTrackVector[indiID+mIndiTrackOffset];
 						//		if (indiTrackData) {
 						//			if (indiTrackData->isExtended()) {
-						//				CIndividualProcessNode* indiNode = incConsTaskData->getCompletionGraphCachedSatisfiableTask()->getProcessingDataBox()->getIndividualProcessNodeVector()->getData(indiID);
+						//				CIndividualProcessNode* indiNode = incConsTaskData->getCompletionGraphCachedSatisfiableTask()->getProcessingDataBox()->getIndividualProcessNodeVector()->getData(indiID+mIndiTrackOffset);
 						//				return true;
 						//			}
-						//			if (indiTrackData->isReferred() && !changedCompatibleSet->contains(indiID)) {
-						//				CIndividualProcessNode* indiNode = incConsTaskData->getCompletionGraphCachedSatisfiableTask()->getProcessingDataBox()->getIndividualProcessNodeVector()->getData(indiID);
+						//			if (indiTrackData->isReferred() && !changedCompatibleSet->contains(indiID+mIndiTrackOffset)) {
+						//				CIndividualProcessNode* indiNode = incConsTaskData->getCompletionGraphCachedSatisfiableTask()->getProcessingDataBox()->getIndividualProcessNodeVector()->getData(indiID+mIndiTrackOffset);
 						//				return true;
 						//			}
 						//		}

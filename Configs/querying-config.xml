@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xml:base="http://www.owllink.org/testsuite/1a#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+	
+	<!--Configurations for the Konclude reasoner.-->	
+	
+	<Set key='Konclude.Calculation.Precomputation.ForceFullCompletionGraphConstruction'>
+		<Literal>true</Literal>
+	</Set>	
+		
+	<Set key='Konclude.Calculation.Querying.ComplexQueryingSupport'>
+		<Literal>true</Literal>
+	</Set>	
+	
+	<Set key='Konclude.Calculation.Optimization.RepresentativePropagation'>
+		<Literal>false</Literal>
+	</Set>
+	
+	<Set key='Konclude.Calculation.Optimization.SignatureMirroringBlocking'>
+		<Literal>false</Literal>
+	</Set>		
+	
+	
+	
+	
+	<Set key='Konclude.Debugging.WriteDebuggingData'>
+		<Literal>false</Literal>
+	</Set>	
+	
+		
+
+	<Set key='Konclude.Debugging.WriteDebuggingDataSaturationTasks'>
+		<Literal>false</Literal>
+	</Set>	
+	
+
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksForAnsweringPropagationTests'>
+		<Literal>true</Literal>
+	</Set>			
+		
+
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasks'>
+		<Literal>true</Literal>
+	</Set>			
+
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksForConsistencyTests'>
+		<Literal>true</Literal>
+	</Set>	
+		
+
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksOnlyOnSatisfiability'>
+		<Literal>true</Literal>
+	</Set>		
+	
+		
+	<Set key='Konclude.Calculation.Answering.MultipliedUnitsParallelTestingCalculationCount'>
+		<Literal>1</Literal>
+	</Set>	
+
+	<Set key='Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount'>
+		<Literal>10</Literal>
+	</Set>				
+	
+	
+</RequestMessage>

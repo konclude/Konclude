@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -36,6 +36,7 @@ namespace Konclude {
 					reasonerCommander = CConfigManagerReader::readCommanderManagerConfig(mLoaderConfig);
 					mSocket = nullptr;
 					mQueued = false;
+					mForceDisconnect = CConfigDataReader::readConfigBoolean(mLoaderConfig,"Konclude.OWLlink.Server.ForceDisconnectAfterProcessing",false);
 					mProcessingCommand = nullptr;
 					startThread();
 					mThreadStartedSemaphore.acquire(1);
@@ -110,7 +111,15 @@ namespace Konclude {
 									if (mProcessingByteArray != 0) {
 										LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully parsed, %1 Bytes received.").arg(mProcessingByteArray->count()),this);
 
-										COWLlinkQtXMLCommandParser *owllinkCommandParser = new COWLlinkQtXMLCommandParser();
+
+										//QFile commFile("Debugging/Communication/http-owllink-requests.txt");
+										//if (commFile.open(QIODevice::Append)) {
+										//	commFile.write(*mProcessingByteArray);
+										//	commFile.close();
+										//}
+
+
+										COWLlinkQtXMLCommandParser *owllinkCommandParser = new COWLlinkQtXMLCommandParser(mLoaderConfig);
 										mOwllinkInterpreter = new COWLLinkRecordInterpreter(preSynchronizer,mLoaderConfig);
 										defaultCommandDelegater = mOwllinkInterpreter;
 
@@ -134,7 +143,7 @@ namespace Konclude {
 										sendData(QString("<h2>%1 OWLlink Sever</h2><p>This response is generated from Konclude's OWLlink server for invalid OWLlink requests. Please make sure that the OWLlink request is appended in OWL 2 XML serialisation as content (with correct Content-Length) of your HTTP request. See <a href=\"http://konclude.com\">konclude.com</a> for help and further information.</p>").arg(koncludeString).toLocal8Bit());
 
 										mProcessingRequest = false;
-										if (mParser->hasRequestedCloseConnection()) {
+										if (mForceDisconnect || mParser->hasRequestedCloseConnection()) {
 											mSocket->disconnectFromHost();
 										} else if (mProcessMoreRead) {
 											mProcessMoreRead = false;
@@ -193,7 +202,15 @@ namespace Konclude {
 						QString responseHeadString = QString("HTTP/1.1 200 OK\r\n%1\r\n%2\r\nContent-Length: %3\r\n\r\n").arg(serverString).arg(connectionString).arg(dataArray.length());
 
 						mSocket->write(responseHeadString.toLocal8Bit());
+
+						//QFile commFile("Debugging/Communication/http-owllink-responses.txt");
+						//if (commFile.open(QIODevice::Append)) {
+						//	commFile.write(dataArray);
+						//	commFile.close();
+						//}
+
 						mSocket->write(dataArray);
+
 
 						LOG(INFO,"::Konclude::Control::Interface::OWLlink::OWLlinkHTTPConnectionProcessor",logTr("HTTP request successfully processed, %1 Bytes sent.").arg(dataArray.count()),this);
 					} else {
@@ -211,7 +228,7 @@ namespace Konclude {
 					mProcessingRequest = false;
 
 
-					if (mParser->hasRequestedCloseConnection()) {
+					if (mForceDisconnect || mParser->hasRequestedCloseConnection()) {
 						mSocket->disconnectFromHost();
 					} else if (mProcessMoreRead) {
 						mProcessMoreRead = false;

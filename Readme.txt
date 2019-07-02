@@ -13,7 +13,7 @@ LICENSING
 ===========
 
 Konclude is released as free software, i.e., you can redistribute it and/or modify
-it under the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1) as
+it under the terms of version 3 of the GNU Lesser General Public License (LGPLv3) as
 published by the Free Software Foundation.
 
 You should have received a copy of the GNU Lesser General Public License
@@ -25,12 +25,19 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
 details see GNU Lesser General Public License.
 
 Konclude uses the following libraries:
-- Qt 4.8.* or above, released unter LGPL 2.1 (http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html).
-  Note, Konclude uses slightly modified versions of Qt containers (QMap, QHash, QList) for an
-  integrated memory management.
-	  
-	 
-	  
+- Qt 5.11 or above (https://www.qt.io/download), released under LGPLv3 
+  (https://www.gnu.org/licenses/lgpl-3.0.en.html). Note, Konclude uses slightly 
+  modified versions of Qt containers (QMap, QHash, QList, see 
+  Source/Utilities/Container/CQtManagedRestrictedModification* files) for an 
+  integrated memory management, which were released under LGPLv2 and, hence, are 
+  available under the GPLv3 in oder to ensure compatiblity with LGPLv3 (cf. 
+  https://www.gnu.org/licenses/gpl-faq.html#AllCompatibility).	  
+- Redland RDF Libraries (http://librdf.org/), released under the LGPL 2.1, GPL 2, 
+  and Apache 2 licenses. Note that the Redland RDF Libraries are optional and 
+  only required if RDF triples have to be parsed and mapped to OWL objects.
+
+
+
 USAGE
 =======
 
@@ -51,9 +58,11 @@ directory. See http://konclude.com/ for detailed usage instructions.
 	The	class satisfiability checking additionally requires the IRI of the class that has to 
 	be tested, which has to be specified with '-x IRI'.
 	
-	Please note that Konclude currently only supports ontologies in the OWL 2 XML [1] or in the 
-	OWL 2 Functional Style format [2]. For ontologies in other syntaxes, you may use the protege 
-	editor [3] for converting ontologies into a supported format.
+	Please note that Konclude natively only supports ontologies in the OWL 2 XML [1] or in the 
+	OWL 2 Functional Style format [2]. The optional integration of the Redland RDF Libraries 
+	allow for parsing RDF serialization formats, but the mapping to OWL constructs can be 
+	considered as experimental.	Hence, you may use the protege editor [3] to convert
+	ontologies in other syntaxes into a fully supported format.
 
 	Examples (on Windows you have to omit ./):
 		./Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
@@ -84,7 +93,7 @@ directory. See http://konclude.com/ for detailed usage instructions.
 	  GetFlattenedInstances (only for atomic concepts)
 
 	Furthermore, all OWL 2 ontologies/axioms used in LoadOntologies/Tell 
-	commands must be in the OWL 2 XML [1] or in the OWL 2 Functional Style [2] 
+	commands should be in the OWL 2 XML [1] or in the OWL 2 Functional Style [2] 
 	format and Konclude does currently NOT process annotations. The protege 
 	editor [2] can be used to convert OWL 2 ontologies between different 
 	formats.
@@ -103,6 +112,26 @@ directory. See http://konclude.com/ for detailed usage instructions.
 	OWLlink command, because the request files are completely loaded 
 	into the main memory of the system. In contrast, the files referenced by
 	the LoadOntologies commands are parsed in a stream-based manner.
+
+
+- SPARQL:
+
+	A trivial SPARQL HTTP server is integrated that supports processing
+	of some basic SPARQL Update commands and answering of some ABox related
+	queries (only simple BGP, where variables are used for individuals). Note
+	that the SPARQL request/queries must be sent as HTTP POST requests.
+
+	Examples (on Windows you have to omit ./):
+		./Konclude sparqlserver -p 8080 -c Configs/querying-config.xml
+		./Konclude spraqlfile -i Tests/sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+
+	Currently, the following SPARQL commands/queries are (partially) supported:
+	- LOAD, SELECT, ASK
+
+	Note that the querying-config must be used for supporting complex queries 
+	in order to ensure that Konclude preprocesses the ontology appropriately.
+
+
 
 - CONFIGURATION:
 
@@ -123,28 +152,50 @@ directory. See http://konclude.com/ for detailed usage instructions.
 REQUIREMENTS, INSTALLATION, BUILD
 ===================================
 
-Konclude requires Qt 4.8 libraries or above [6]. If they are not included 
+Konclude requires Qt 5.11 libraries or above [6]. If they are not included 
 in the release (or integrated in the binary), then you should install 
 them manually on your system. 
 
 
-On Windows-based platforms it is further necessary to install the 
-.Net Framework 4.0 [7] and the Microsoft Visual C++ 2005 Redistributable 
-Package [8] for the execution of Konclude.
+On Windows-based platforms it may further be necessary to install the 
+.Net Framework [7] and the Microsoft Visual C++ Redistributable 
+Package [8] for executing Konclude.
 
 
 Konclude can be built by running qmake (which is part of the Qt Framework) 
-on 'Konclude.pro', e.g., 
+for 'Konclude.pro' or 'KoncludeWithoutRedland.pro', e.g., 
 	qmake -o Makefile Konclude.pro
-and then by compiling the sources with the generated makefile, i.e.,
+and then by compiling the sources with the generated makefile, i.e., the command
 	make
-has to be executed/called.
-	
+has to be executed/called. Note that you may have to adapt the paths to the 
+Redland libraries in the 'Konclude.pro' file. If you have docker installed,
+then you may simply use the provided docker images for building Konclude
+(which download/install all dependent libraries, compile Konclude and create
+a statically linked binary). For this, go into the 'KoncludeDocker' directory
+and run the following command:
+	./deploy/snap.sh
+For more details for building with docker, see also 'KoncludeDocker/README.md'.
 
+
+Setting up Konclude for building/compiling with Visual Studio 2015/2017:
+	- Make sure that Qt is installed and the environment variable QTDIR is set to the QT directory
+	- Install the QT VS Tools/Package extension for Visual Studio (enables more comfortable debugging)
+	- Copy the QT DLLs (Qt5Networkd.dll, Qt5Network.dll, Qt5Xmld.dll, Qt5Xml.dll, Qt5Cored.dll, Qt5Core.dll) into the root directory of Konclude
+	
 		
 
 CHANGELOG
 ===========
+
+Konclude v0.6.2-842 (no official release, not production ready):
+	- Experimental conjunctive query answering engine based on absorption.
+	- Simple SPARQL HTTP server.
+	- Experimental support of RDF serializations of ontologies via the Redland RDF libraries.
+	- Representative completion graph caching for efficient indexing, parallel consistency checking, and improved handling of larger ontologies.
+	- Docker images for building and running Konclude.
+	- Very basic and experimental JNI bridge.
+	- Role classification and realization.
+	- Several bug fixes.
 
 Konclude v0.6.2:
 	- Several minor bug fixes.
@@ -176,4 +227,4 @@ REFERENCES
 [5] http://www.w3.org/Submission/2010/SUBM-owllink-httpxml-binding-20100701/ 	
 [6] http://qt-project.org/downloads
 [7] http://www.microsoft.com/en-us/download/details.aspx?id=17718 
-[7] http://www.microsoft.com/en-us/download/details.aspx?id=21254 
+[8] https://www.microsoft.com/en-us/download/details.aspx?id=48145

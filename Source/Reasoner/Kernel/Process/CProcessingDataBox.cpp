@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -78,14 +78,17 @@ namespace Konclude {
 					mIndiProcessNodeLinker = nullptr;
 					mIndiSaturationProcessNodeLinker = nullptr;
 					mIndiSaturationCompletionNodeLinker = nullptr;
+					mIndiSaturationCompletedNodeLinker = nullptr;
 					mIndiSaturationAnalysingNodeLinker = nullptr;
 					mNominalDelayedIndiSaturationProcessNodeLinker = nullptr;
+					mSaturationATMOSTMergingProcessLinker = nullptr;
 					mDisjunctCommonConceptExtractProcessingLinker = nullptr;
 					mRemConSatProcessLinker = nullptr;
 					mRemSatUpdateLinker = nullptr;
 					mRemSatIndiNodeLinker = nullptr;
 					mRemSatIndiSuccLinkDataLinker = nullptr;
 					mRemConSatDes = nullptr;
+					mRemConDes = nullptr;
 					mRemRoleSatProcessLinker = nullptr;
 					mIndiSaturationProcessVector = nullptr;
 					mSatCriticalIndiNodeProcQueue = nullptr;
@@ -111,6 +114,12 @@ namespace Konclude {
 					mBackendSyncRetestProcessQueue = nullptr;
 					mUseBackendSyncRetestProcessQueue = nullptr;
 					mPrevBackendSyncRetestProcessQueue = nullptr;
+					mBackendIndirectCompatibilityExpansionQueue = nullptr;
+					mUseBackendIndirectCompatibilityExpansionQueue = nullptr;
+					mPrevBackendIndirectCompatibilityExpansionQueue = nullptr;
+					mBackendDirectInfluenceExpansionQueue = nullptr;
+					mUseBackendDirectInfluenceExpansionQueue = nullptr;
+					mPrevBackendDirectInfluenceExpansionQueue = nullptr;
 					mConstructedIndiNodeInitialized = false;
 					mMultipleConstructionIndiNodes = false;
 					mMaximumDeterministicBranchTag = 0;
@@ -139,6 +148,14 @@ namespace Konclude {
 					mLocNomCachingLossReactHash = nullptr;
 					mUseMarkerIndiNodeHash = nullptr;
 					mLocMarkerIndiNodeHash = nullptr;
+					mUseBackendLoadedAssociationHash = nullptr;
+					mLocBackendLoadedAssociationHash = nullptr;
+					mUseBackendConceptSetLabelProcessingHash = nullptr;
+					mLocBackendConceptSetLabelProcessingHash = nullptr;
+
+					mDelayedBackendInitProcQueue = nullptr;
+					mUseDelayedBackendInitProcQueue = nullptr;
+					mPrevDelayedBackendInitProcQueue = nullptr;
 
 					mIndiDepthProcessingQueue = nullptr;
 					mUseIndiDepthProcessingQueue = nullptr;
@@ -194,6 +211,9 @@ namespace Konclude {
 					mUseDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
 					mPrevDistinctValueSpaceSatisfiabilityCheckingQueue = nullptr;
 
+					mLocalIndiVector = nullptr;
+					mUseIndiVector = nullptr;
+
 					mSeparatedSaturationConAssResolveNode = nullptr;
 					mIncrementalExpID = 0;
 					mMaxIncPrevCompGraphNodeID = 0;
@@ -202,6 +222,17 @@ namespace Konclude {
 
 					mReferredIndiTrackVec = nullptr;
 					mIndiDepTrackingRequired = false;
+
+					mBranchingInstruction = nullptr;
+					mRemainingPossibleInstanceIndividualMergingLimit = -1;
+					mPossibleInstanceIndividualMergingSize = 1;
+					mPossibleInstanceIndividualMergedCount = 0;
+					mPossibleInstanceIndividualCurrentMergingCount = 0;
+					mPossibleInstanceIndividualMergingStopped = false;
+
+					mCurrentMergedPossibleInstanceIndividualLinkersLinker = nullptr;
+					mLastMergedPossibleInstanceIndividualLinker = nullptr;
+					mLastBackendCacheIntegratedIndiNodeLinker = nullptr;
 				}
 
 
@@ -210,6 +241,7 @@ namespace Konclude {
 					mOntologyTopConcept = mOntology->getTBox()->getTopConcept();
 					mOntologyTopDataRangeConcept = mOntology->getTBox()->getTopDataRangeConcept();
 					mUseExtendedConceptVector = mOntology->getTBox()->getConceptVector(false);
+					mUseIndiVector = mOntology->getABox()->getIndividualVector(false);
 					return this;
 				}
 
@@ -231,11 +263,14 @@ namespace Konclude {
 					mRemSatIndiNodeLinker = nullptr;
 					mRemSatIndiSuccLinkDataLinker = nullptr;
 					mRemConSatDes = nullptr;
+					mRemConDes = nullptr;
 					mRemRoleSatProcessLinker = nullptr;
 
 					mIndiSaturationProcessNodeLinker = nullptr;
 					mIndiSaturationCompletionNodeLinker = nullptr;
+					mIndiSaturationCompletedNodeLinker = nullptr;
 					mIndiSaturationAnalysingNodeLinker = nullptr;
+					mSaturationATMOSTMergingProcessLinker = nullptr;
 					mNominalDelayedIndiSaturationProcessNodeLinker = nullptr;
 					mDisjunctCommonConceptExtractProcessingLinker = nullptr;
 					mRemConSatProcessLinker = nullptr;
@@ -265,6 +300,10 @@ namespace Konclude {
 					mUseNomCachingLossReactHash = nullptr;
 					mUseMarkerIndiNodeHash = nullptr;
 					mLocMarkerIndiNodeHash = nullptr;
+					mUseBackendLoadedAssociationHash = nullptr;
+					mLocBackendLoadedAssociationHash = nullptr;
+					mUseBackendConceptSetLabelProcessingHash = nullptr;
+					mLocBackendConceptSetLabelProcessingHash = nullptr;
 					mNextIndividualNodeID = 0;
 					mNextSatResSuccExtIndividualNodeID = -1;
 					mNextPropagationID = 1;
@@ -277,7 +316,26 @@ namespace Konclude {
 					mIncrementalExpansionCompatibleMerged = false;
 					mIncrementalExpansionCachingMerged = false;
 					mSeparatedSaturationConAssResolveNode = nullptr;
+					mBranchingInstruction = nullptr;
+					mRemainingPossibleInstanceIndividualMergingLimit = -1;
+					mPossibleInstanceIndividualMergingStopped = false;
+					mPossibleInstanceIndividualMergingSize = 1;
+					mPossibleInstanceIndividualMergedCount = 0;
+					mPossibleInstanceIndividualCurrentMergingCount = 0;
+					mLastMergedPossibleInstanceIndividualLinker = nullptr;
+					mCurrentMergedPossibleInstanceIndividualLinkersLinker = nullptr;
+					mLastBackendCacheIntegratedIndiNodeLinker = nullptr;
+					mLocalIndiVector = nullptr;
 					if (processingDataBox) {
+						mPossibleInstanceIndividualMergingStopped = processingDataBox->mPossibleInstanceIndividualMergingStopped;
+						mPossibleInstanceIndividualMergingSize = processingDataBox->mPossibleInstanceIndividualMergingSize;
+						mPossibleInstanceIndividualMergedCount = processingDataBox->mPossibleInstanceIndividualMergedCount;
+						mPossibleInstanceIndividualCurrentMergingCount = processingDataBox->mPossibleInstanceIndividualCurrentMergingCount;
+						mRemainingPossibleInstanceIndividualMergingLimit = processingDataBox->mRemainingPossibleInstanceIndividualMergingLimit;
+						mLastMergedPossibleInstanceIndividualLinker = processingDataBox->mLastMergedPossibleInstanceIndividualLinker;
+						mCurrentMergedPossibleInstanceIndividualLinkersLinker = processingDataBox->mCurrentMergedPossibleInstanceIndividualLinkersLinker;
+						mLastBackendCacheIntegratedIndiNodeLinker = processingDataBox->mLastBackendCacheIntegratedIndiNodeLinker;
+						mBranchingInstruction = processingDataBox->mBranchingInstruction;
 						mUseIndiProcessQueue = processingDataBox->mUseIndiProcessQueue;
 						prevIndiProcVec = processingDataBox->mIndiProcessVector;
 						mOntology = processingDataBox->mOntology;
@@ -293,12 +351,12 @@ namespace Konclude {
 						mUseIndiDepthDetExpPreProcessingQueue = mPrevIndiDepthDetExpPreProcessingQueue;
 						mPrevIndiDepthFirstDetExpPreProcessingQueue = processingDataBox->mUseIndiDepthFirstDetExpPreProcessingQueue;
 						mUseIndiDepthFirstDetExpPreProcessingQueue = mPrevIndiDepthFirstDetExpPreProcessingQueue;
-						mPrevIndiSignatureBlockingUpdateProcessingQueue = processingDataBox->mUseIndiBlockedReactivationProcessingQueue;
-						mUseIndiBlockedReactivationProcessingQueue = mPrevIndiSignatureBlockingUpdateProcessingQueue;
+						mPrevIndiBlockedReactivationProcessingQueue = processingDataBox->mUseIndiBlockedReactivationProcessingQueue;
+						mUseIndiBlockedReactivationProcessingQueue = mPrevIndiBlockedReactivationProcessingQueue;
 						mPrevVarBindConceptBatchProcessQueue = processingDataBox->mUseVarBindConceptBatchProcessQueue;
 						mUseVarBindConceptBatchProcessQueue = mPrevVarBindConceptBatchProcessQueue;
-						mPrevIndiBlockedReactivationProcessingQueue = processingDataBox->mUseIndiSignatureBlockingUpdateProcessingQueue;
-						mUseIndiSignatureBlockingUpdateProcessingQueue = mPrevIndiBlockedReactivationProcessingQueue;
+						mPrevIndiSignatureBlockingUpdateProcessingQueue = processingDataBox->mUseIndiSignatureBlockingUpdateProcessingQueue;
+						mUseIndiSignatureBlockingUpdateProcessingQueue = mPrevIndiSignatureBlockingUpdateProcessingQueue;
 						mPrevValueSpaceTriggeringProcessingQueue = processingDataBox->mUseValueSpaceTriggeringProcessingQueue;
 						mUseValueSpaceTriggeringProcessingQueue = mPrevValueSpaceTriggeringProcessingQueue;
 						mPrevDistinctValueSpaceSatisfiabilityCheckingQueue = processingDataBox->mUseDistinctValueSpaceSatisfiabilityCheckingQueue;
@@ -331,10 +389,19 @@ namespace Konclude {
 						mUseDelayNomProcessQueue = mPrevDelayNomProcessQueue;
 						mPrevCachingLossReactivationProcessQueue = processingDataBox->mUseCachingLossReactivationProcessQueue;
 						mUseCachingLossReactivationProcessQueue = mPrevCachingLossReactivationProcessQueue;
+
+						mPrevDelayedBackendInitProcQueue = processingDataBox->mUseDelayedBackendInitProcQueue;
+						mUseDelayedBackendInitProcQueue = mPrevDelayedBackendInitProcQueue;
+
+
 						mPrevRoleAssertionProcessQueue = processingDataBox->mUseRoleAssertionProcessQueue;
 						mUseRoleAssertionProcessQueue = mPrevRoleAssertionProcessQueue;
 						mPrevBackendSyncRetestProcessQueue = processingDataBox->mUseBackendSyncRetestProcessQueue;
 						mUseBackendSyncRetestProcessQueue = mPrevBackendSyncRetestProcessQueue;
+						mPrevBackendIndirectCompatibilityExpansionQueue = processingDataBox->mUseBackendIndirectCompatibilityExpansionQueue;
+						mUseBackendIndirectCompatibilityExpansionQueue = mPrevBackendIndirectCompatibilityExpansionQueue;
+						mPrevBackendDirectInfluenceExpansionQueue = processingDataBox->mUseBackendDirectInfluenceExpansionQueue;
+						mUseBackendDirectInfluenceExpansionQueue = mPrevBackendDirectInfluenceExpansionQueue;
 						mPrevBranchingTree = processingDataBox->mUseBranchingTree;
 						mUseBranchingTree = mPrevBranchingTree;
 						mOntologyTopConcept = processingDataBox->mOntologyTopConcept;
@@ -369,6 +436,8 @@ namespace Konclude {
 						mProblematicEQCandidateNodeOccured = processingDataBox->mProblematicEQCandidateNodeOccured;
 						mUseNomCachingLossReactHash = processingDataBox->mUseNomCachingLossReactHash;
 						mUseMarkerIndiNodeHash = processingDataBox->mUseMarkerIndiNodeHash;
+						mUseBackendConceptSetLabelProcessingHash = processingDataBox->mUseBackendConceptSetLabelProcessingHash;
+						mUseBackendLoadedAssociationHash = processingDataBox->mUseBackendLoadedAssociationHash;
 						mIncrementalExpansionInitialized = processingDataBox->mIncrementalExpansionInitialized;
 						mNextIncrementalIndiExpID = processingDataBox->mNextIncrementalIndiExpID;
 						mNextRoleAssertionCreationID = processingDataBox->mNextRoleAssertionCreationID;
@@ -382,9 +451,13 @@ namespace Konclude {
 
 						mIndiSaturationProcessNodeLinker = processingDataBox->mIndiSaturationProcessNodeLinker;
 						mIndiSaturationCompletionNodeLinker = processingDataBox->mIndiSaturationCompletionNodeLinker;
+						mIndiSaturationCompletedNodeLinker = processingDataBox->mIndiSaturationCompletedNodeLinker;
 						mIndiSaturationAnalysingNodeLinker = processingDataBox->mIndiSaturationAnalysingNodeLinker;
 						mDisjunctCommonConceptExtractProcessingLinker = processingDataBox->mDisjunctCommonConceptExtractProcessingLinker;
 						mNominalDelayedIndiSaturationProcessNodeLinker = processingDataBox->mNominalDelayedIndiSaturationProcessNodeLinker;
+						mSaturationATMOSTMergingProcessLinker = processingDataBox->mSaturationATMOSTMergingProcessLinker;
+						mUseIndiVector = processingDataBox->mUseIndiVector;
+
 
 						if (processingDataBox->mIndiSaturationProcessVector) {
 							getIndividualSaturationProcessNodeVector(true)->referenceVector(processingDataBox->mIndiSaturationProcessVector);
@@ -441,12 +514,24 @@ namespace Konclude {
 					clearSortedNominalNonDeterministicProcessingNodeLinker();
 					clearValueSpaceTriggeringProcessingQueue();
 					clearDistinctValueSpaceSatisfiabilityCheckingQueue();
-					clearRoleAssertionProcessingQueue();
 					clearIncrementalExpansionInitializingProcessingQueue();
 					clearIncrementalCompatibilityCheckingQueue();
 					clearIncrementalExpansionIProcessingQueue();
 					clearBackendCacheSynchronizationProcessingQueue();
+					clearBackendDirectInfluenceExpansionQueue();
+					clearBackendIndirectCompatibilityExpansionQueue();
+					clearDelayedBackendConceptSetLabelProcessingInitializationQueue();
 					return this;
+				}
+
+
+				CIndividualVector* CProcessingDataBox::getIndividualVector(bool localize) {
+					if (!mLocalIndiVector && localize) {
+						mLocalIndiVector = CObjectParameterizingAllocator<CIndividualVector, CContext*>::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mProcessContext), mProcessContext);
+						mLocalIndiVector->referenceVector(mUseIndiVector);
+						mUseIndiVector = mLocalIndiVector;
+					}
+					return mUseIndiVector;
 				}
 
 
@@ -540,9 +625,14 @@ namespace Konclude {
 				}
 
 
-				cint64 CProcessingDataBox::getNextSaturationResolvedSuccessorExtensionIndividualNodeID(bool incremetNextID) {
+				cint64 CProcessingDataBox::getNextSaturationResolvedSuccessorExtensionIndividualNodeID(bool incremetNextID) {					
 					if (mNextSatResSuccExtIndividualNodeID == -1) {
 						mNextSatResSuccExtIndividualNodeID = mIndiSaturationProcessVector->getItemCount();
+						mNextSatResSuccExtIndividualNodeID = qMax(mNextSatResSuccExtIndividualNodeID, mOntology->getABox()->getIndividualCount());
+						COntologyTriplesAssertionsAccessor* triplesAccessor = mOntology->getOntologyTriplesData()->getTripleAssertionAccessor();
+						if (triplesAccessor) {
+							mNextSatResSuccExtIndividualNodeID = qMax(mNextSatResSuccExtIndividualNodeID, mOntology->getOntologyTriplesData()->getTripleAssertionAccessor()->getMaxIndexedIndividualId());
+						}
 					}
 					cint64 nextPropID = mNextSatResSuccExtIndividualNodeID;
 					if (incremetNextID) {
@@ -667,7 +757,7 @@ namespace Konclude {
 
 
 
-				CIndividualUnsortedProcessingQueue* CProcessingDataBox::getRoleAssertionProcessingQueue(bool create) {
+				CIndividualUnsortedProcessingQueue* CProcessingDataBox::getRoleAssertionExpansionProcessingQueue(bool create) {
 					if (!mRoleAssertionProcessQueue && create) {
 						mRoleAssertionProcessQueue = CObjectParameterizingAllocator< CIndividualUnsortedProcessingQueue,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 						mRoleAssertionProcessQueue->initProcessingQueue(mPrevRoleAssertionProcessQueue);
@@ -704,6 +794,44 @@ namespace Konclude {
 					return this;
 				}
 
+
+
+
+				CIndividualUnsortedProcessingQueue* CProcessingDataBox::getBackendDirectInfluenceExpansionQueue(bool create) {
+					if (!mBackendDirectInfluenceExpansionQueue && create) {
+						mBackendDirectInfluenceExpansionQueue = CObjectParameterizingAllocator< CIndividualUnsortedProcessingQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mBackendDirectInfluenceExpansionQueue->initProcessingQueue(mPrevBackendDirectInfluenceExpansionQueue);
+						mUseBackendDirectInfluenceExpansionQueue = mBackendDirectInfluenceExpansionQueue;
+					}
+					return mUseBackendDirectInfluenceExpansionQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearBackendDirectInfluenceExpansionQueue() {
+					mBackendDirectInfluenceExpansionQueue = nullptr;
+					mUseBackendDirectInfluenceExpansionQueue = nullptr;
+					mPrevBackendDirectInfluenceExpansionQueue = nullptr;
+					return this;
+				}
+
+
+
+				CIndividualUnsortedProcessingQueue* CProcessingDataBox::getBackendIndirectCompatibilityExpansionQueue(bool create) {
+					if (!mBackendIndirectCompatibilityExpansionQueue && create) {
+						mBackendIndirectCompatibilityExpansionQueue = CObjectParameterizingAllocator< CIndividualUnsortedProcessingQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mBackendIndirectCompatibilityExpansionQueue->initProcessingQueue(mPrevBackendIndirectCompatibilityExpansionQueue);
+						mUseBackendIndirectCompatibilityExpansionQueue = mBackendIndirectCompatibilityExpansionQueue;
+					}
+					return mUseBackendIndirectCompatibilityExpansionQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearBackendIndirectCompatibilityExpansionQueue() {
+					mBackendIndirectCompatibilityExpansionQueue = nullptr;
+					mUseBackendIndirectCompatibilityExpansionQueue = nullptr;
+					mPrevBackendIndirectCompatibilityExpansionQueue = nullptr;
+					return this;
+				}
 
 
 
@@ -1493,6 +1621,34 @@ namespace Konclude {
 					return this;
 				}
 
+				CConceptDescriptor* CProcessingDataBox::getRemainingConceptDescriptor() {
+					return mRemConDes;
+				}
+
+				CConceptDescriptor* CProcessingDataBox::takeRemainingConceptDescriptor() {
+					CConceptDescriptor* conDes = mRemConDes;
+					if (mRemConDes) {
+						mRemConDes = mRemConDes->getNext();
+						conDes->clearNext();
+					}
+					return conDes;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setRemainingConceptDescriptor(CConceptDescriptor* conDes) {
+					mRemConDes = conDes;
+					return this;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::addRemainingConceptDescriptor(CConceptDescriptor* conDes) {
+					mRemConDes = conDes->append(mRemConDes);
+					return this;
+				}
+
+
+
+
+
+
 				CConceptSaturationDescriptor* CProcessingDataBox::getRemainingConceptSaturationDescriptor() {
 					return mRemConSatDes;
 				}
@@ -1515,8 +1671,6 @@ namespace Konclude {
 					mRemConSatDes = conSatDes->append(mRemConSatDes);
 					return this;
 				}
-
-
 
 
 
@@ -1662,6 +1816,41 @@ namespace Konclude {
 
 
 
+
+				bool CProcessingDataBox::hasIndividualSaturationCompletedNodeLinker() {
+					return mIndiSaturationCompletedNodeLinker != nullptr;
+				}
+
+				CIndividualSaturationProcessNodeLinker* CProcessingDataBox::getIndividualSaturationCompletedNodeLinker() {
+					return mIndiSaturationCompletedNodeLinker;
+				}
+
+				CIndividualSaturationProcessNodeLinker* CProcessingDataBox::takeIndividualSaturationCompletedNodeLinker() {
+					CIndividualSaturationProcessNodeLinker* indiProcNodeLinker = mIndiSaturationCompletedNodeLinker;
+					if (mIndiSaturationCompletedNodeLinker) {
+						mIndiSaturationCompletedNodeLinker = mIndiSaturationCompletedNodeLinker->getNext();
+						indiProcNodeLinker->clearNext();
+					}
+					return indiProcNodeLinker;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setIndividualSaturationCompletedNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker) {
+					mIndiSaturationCompletedNodeLinker = indiProcessNodeLinker;
+					return this;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::addIndividualSaturationCompletedNodeLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker) {
+					mIndiSaturationCompletedNodeLinker = indiProcessNodeLinker->append(mIndiSaturationCompletedNodeLinker);
+					return this;
+				}
+
+
+
+
+
+
+
 				bool CProcessingDataBox::hasIndividualSaturationAnalysationNodeLinker() {
 					return mIndiSaturationAnalysingNodeLinker != nullptr;
 				}
@@ -1724,6 +1913,52 @@ namespace Konclude {
 					mNominalDelayedIndiSaturationProcessNodeLinker = indiProcessNodeLinker->append(mNominalDelayedIndiSaturationProcessNodeLinker);
 					return this;
 				}
+
+
+
+
+
+
+
+
+
+				bool CProcessingDataBox::hasSaturationATMOSTMergingProcessLinker() {
+					return mSaturationATMOSTMergingProcessLinker != nullptr;
+				}
+
+				CIndividualSaturationProcessNodeLinker* CProcessingDataBox::getSaturationATMOSTMergingProcessLinker() {
+					return mSaturationATMOSTMergingProcessLinker;
+				}
+
+				CIndividualSaturationProcessNodeLinker* CProcessingDataBox::takeSaturationATMOSTMergingProcessLinker() {
+					CIndividualSaturationProcessNodeLinker* indiProcNodeLinker = mSaturationATMOSTMergingProcessLinker;
+					if (mSaturationATMOSTMergingProcessLinker) {
+						mSaturationATMOSTMergingProcessLinker = mSaturationATMOSTMergingProcessLinker->getNext();
+						indiProcNodeLinker->clearNext();
+					}
+					return indiProcNodeLinker;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setSaturationATMOSTMergingProcessLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker) {
+					mSaturationATMOSTMergingProcessLinker = indiProcessNodeLinker;
+					return this;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::addSaturationATMOSTMergingProcessLinker(CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker) {
+					mSaturationATMOSTMergingProcessLinker = indiProcessNodeLinker->append(mSaturationATMOSTMergingProcessLinker);
+					return this;
+				}
+
+
+
+
+
+
+
+
+
+
 
 
 				CIndividualSaturationProcessNode* CProcessingDataBox::getSeparatedSaturationConceptAssertionResolveNode() {
@@ -1879,7 +2114,165 @@ namespace Konclude {
 				}
 
 
+				bool CProcessingDataBox::hasBranchingInstruction() {
+					return mBranchingInstruction != nullptr;
+				}
 
+				CBranchingInstruction* CProcessingDataBox::getBranchingInstruction() {
+					return mBranchingInstruction;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setBranchingInstruction(CBranchingInstruction* branchingInstruction) {
+					mBranchingInstruction = branchingInstruction;
+					return this;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::clearBranchingInstruction() {
+					mBranchingInstruction = nullptr;
+					return this;
+				}
+
+				CXLinker<cint64>* CProcessingDataBox::getLastMergedPossibleInstanceIndividualLinker() {
+					return mLastMergedPossibleInstanceIndividualLinker;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setLastMergedPossibleInstanceIndividualLinker(CXLinker<cint64>* lastMergedPossibleInstanceLinker) {
+					mLastMergedPossibleInstanceIndividualLinker = lastMergedPossibleInstanceLinker;
+					return this;
+				}
+
+
+
+				CXLinker<CXLinker<cint64>*>* CProcessingDataBox::getCurrentMergedPossibleInstanceIndividualLinkersLinker() {
+					return mCurrentMergedPossibleInstanceIndividualLinkersLinker;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setCurrentMergedPossibleInstanceIndividualLinkersLinker(CXLinker<CXLinker<cint64>*>* mergedPossibleInstanceLinker) {
+					mCurrentMergedPossibleInstanceIndividualLinkersLinker = mergedPossibleInstanceLinker;
+					return this;
+				}
+
+
+				cint64 CProcessingDataBox::getRemainingPossibleInstanceIndividualMergingLimit() {
+					return mRemainingPossibleInstanceIndividualMergingLimit;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setRemainingPossibleInstanceIndividualMergingLimit(cint64 limit) {
+					mRemainingPossibleInstanceIndividualMergingLimit = limit;
+					return this;
+				}
+
+
+
+
+
+				cint64 CProcessingDataBox::getPossibleInstanceIndividualMergedCount() {
+					return mPossibleInstanceIndividualMergedCount;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setPossibleInstanceIndividualMergedCount(cint64 count) {
+					mPossibleInstanceIndividualMergedCount = count;
+					return this;
+				}
+
+
+
+				cint64 CProcessingDataBox::getPossibleInstanceIndividualCurrentMergingCount() {
+					return mPossibleInstanceIndividualCurrentMergingCount;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setPossibleInstanceIndividualCurrentMergingCount(cint64 count) {
+					mPossibleInstanceIndividualCurrentMergingCount = count;
+					return this;
+				}
+
+
+
+
+				cint64 CProcessingDataBox::getPossibleInstanceIndividualMergingSize() {
+					return mPossibleInstanceIndividualMergingSize;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setPossibleInstanceIndividualMergingSize(cint64 limit) {
+					mPossibleInstanceIndividualMergingSize = limit;
+					return this;
+				}
+
+
+
+
+				bool CProcessingDataBox::isPossibleInstanceIndividualMergingStopped() {
+					return mPossibleInstanceIndividualMergingStopped;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setPossibleInstanceIndividualMergingStopped(bool stopped) {
+					mPossibleInstanceIndividualMergingStopped = stopped;
+					return this;
+				}
+
+
+
+
+				CXLinker<CIndividualProcessNode*>* CProcessingDataBox::getLastBackendCacheIntegratedIndividualNodeLinker() {
+					return mLastBackendCacheIntegratedIndiNodeLinker;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker) {
+					mLastBackendCacheIntegratedIndiNodeLinker = indiLinker;
+					return this;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::addLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker) {
+					mLastBackendCacheIntegratedIndiNodeLinker = indiLinker->append(mLastBackendCacheIntegratedIndiNodeLinker);
+					return this;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::setBackendCacheLoadedAssociationHash(CIndividualRepresentativeBackendCacheLoadedAssociationHash* backendCacheLoadedAssociationHash) {
+					mUseBackendLoadedAssociationHash = backendCacheLoadedAssociationHash;
+					mLocBackendLoadedAssociationHash = backendCacheLoadedAssociationHash;
+					return this;
+				}
+
+
+				CIndividualRepresentativeBackendCacheLoadedAssociationHash* CProcessingDataBox::getBackendCacheLoadedAssociationHash(bool createOrForceLocalisation) {
+					if (createOrForceLocalisation && !mLocBackendLoadedAssociationHash) {
+						mLocBackendLoadedAssociationHash = CObjectParameterizingAllocator<CIndividualRepresentativeBackendCacheLoadedAssociationHash, CProcessContext*>::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mProcessContext), mProcessContext);
+						mLocBackendLoadedAssociationHash->initIndividualRepresentativeBackendCacheLoadedAssociationHash(mUseBackendLoadedAssociationHash);
+						mUseBackendLoadedAssociationHash = mLocBackendLoadedAssociationHash;
+					}
+					return mUseBackendLoadedAssociationHash;
+				}
+
+
+				CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash* CProcessingDataBox::getBackendCacheConceptSetLabelProcessingHash(bool createOrForceLocalisation) {
+					if (createOrForceLocalisation && !mLocBackendConceptSetLabelProcessingHash) {
+						mLocBackendConceptSetLabelProcessingHash = CObjectParameterizingAllocator<CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash, CProcessContext*>::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mProcessContext), mProcessContext);
+						mLocBackendConceptSetLabelProcessingHash->initIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash(mUseBackendConceptSetLabelProcessingHash);
+						mUseBackendConceptSetLabelProcessingHash = mLocBackendConceptSetLabelProcessingHash;
+					}
+					return mUseBackendConceptSetLabelProcessingHash;
+				}
+
+
+
+
+				CIndividualDelayedBackendInitializationProcessingQueue* CProcessingDataBox::getDelayedBackendConceptSetLabelProcessingInitializationQueue(bool create) {
+					if (!mDelayedBackendInitProcQueue && create) {
+						mDelayedBackendInitProcQueue = CObjectParameterizingAllocator< CIndividualDelayedBackendInitializationProcessingQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mDelayedBackendInitProcQueue->initProcessingQueue(mPrevDelayedBackendInitProcQueue);
+						mUseDelayedBackendInitProcQueue = mDelayedBackendInitProcQueue;
+					}
+					return mUseDelayedBackendInitProcQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearDelayedBackendConceptSetLabelProcessingInitializationQueue() {
+					mDelayedBackendInitProcQueue = nullptr;
+					mUseDelayedBackendInitProcQueue = nullptr;
+					mPrevDelayedBackendInitProcQueue = nullptr;
+					return this;
+				}
 
 			}; // end namespace Process
 

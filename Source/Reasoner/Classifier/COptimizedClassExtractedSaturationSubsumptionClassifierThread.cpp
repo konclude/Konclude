@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -56,8 +56,9 @@ namespace Konclude {
 
 
 			
-			CSubsumptionClassifierThread *COptimizedClassExtractedSaturationSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
+			CSubsumptionClassifierThread *COptimizedClassExtractedSaturationSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 
+				CTaxonomy *taxonomy = createEmptyTaxonomyForOntology(ontology,config);
 				COptimizedClassExtractedSaturationOntologyClassificationItem *ontClassItem = new COptimizedClassExtractedSaturationOntologyClassificationItem(config,statistics);
 				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
 				ontItemList.append(ontClassItem);
@@ -74,7 +75,7 @@ namespace Konclude {
 
 				CPartialPruningTaxonomy *parTax = dynamic_cast<CPartialPruningTaxonomy *>(taxonomy);
 				if (parTax) {
-					COntologyClassificationItem *ontClassItem = ontItemHash.value(ontology);
+					COntologyClassClassificationItem *ontClassItem = (COntologyClassClassificationItem*)ontItemHash.value(ontology);
 					parTax->createStatistics(ontClassItem->getClassifierStatistics());
 				}
 
@@ -254,8 +255,8 @@ namespace Konclude {
 
 
 					if (!workTestCreated) {
-						if (optSubClassItem || ontClassItem->isTaxonomyConstructionFailed()) {
-							finishOntologyClassification(ontClassItem);
+						if (optSubClassItem || optSubClassItem->isTaxonomyConstructionFailed()) {
+							finishOntologyClassification(optSubClassItem);
 							processingOntItemList.removeFirst();
 						} else {
 							processingOntItemList.removeFirst();
@@ -282,7 +283,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedClassExtractedSaturationSubsumptionClassifierThread::finishOntologyClassification(COntologyClassificationItem *ontClassItem) {
+			bool COptimizedClassExtractedSaturationSubsumptionClassifierThread::finishOntologyClassification(COntologyClassClassificationItem *ontClassItem) {
 
 				if (!ontClassItem->isTaxonomyConstructed() && !ontClassItem->isTaxonomyConstructionFailed()) {
 					CTaxonomy *taxonomy = ontClassItem->getTaxonomy();
@@ -506,7 +507,7 @@ namespace Konclude {
 					}
 					ontology->setConceptTaxonomy(taxonomy);
 
-					ontClassItem->setGoneOutRemainingTests(false);
+					ontClassItem->setHasRemainingTests(false);
 
 					taxonomy->setTaxonomyComplete(true);
 					--mClassificationCount;

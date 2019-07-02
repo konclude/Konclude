@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -59,8 +59,10 @@ namespace Konclude {
 
 				CPreProcessContextBase preprocessingContext(ontology,config);
 
-				if (CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false)) {
-					COntologyTextFormater::writeOntologyToFile(ontology,"buildedTBox.txt");
+				bool writeDebugginData = CConfigDebugDataReader::readConfigDebugWritingPreprocessingEnabled(config);
+
+				if (writeDebugginData && CConfigDebugDataReader::readConfigDebugWritingPreprocessingEnabled(config,"Konclude.Debugging.WritePreprocessingDebuggingData.BuildedTBox",false)) {
+					COntologyTextFormater::writeOntologyToFile(ontology, CConfigDebugDataReader::readConfigDebuggingWritingFileString(config, "Konclude.Debugging.WritingPath.Preprocessing.BuildedTBox"));
 				}
 
 
@@ -94,8 +96,9 @@ namespace Konclude {
 						reportLog("Stopped data literal values normalization preprocessing.");
 						delete dataLitNorm;
 					}
-					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false)) {
-						COntologyTextFormater::writeOntologyToFile(ontology,"unprocessedTBox.txt");
+
+					if (writeDebugginData && CConfigDebugDataReader::readConfigDebugWritingPreprocessingEnabled(config, "Konclude.Debugging.WritePreprocessingDebuggingData.NormalizedTBox", false)) {
+						COntologyTextFormater::writeOntologyToFile(ontology, CConfigDebugDataReader::readConfigDebuggingWritingFileString(config, "Konclude.Debugging.WritingPath.Preprocessing.NormalizedTBox"));
 					}
 
 
@@ -114,10 +117,10 @@ namespace Konclude {
 						delete onPreProc;
 					} 
 
-					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false)) {
-						COntologyTextFormater::writeOntologyToFile(ontology,"groundedTBox.txt");
+					if (writeDebugginData && CConfigDebugDataReader::readConfigDebugWritingPreprocessingEnabled(config, "Konclude.Debugging.WritePreprocessingDebuggingData.GroundedTBox", false)) {
+						COntologyTextFormater::writeOntologyToFile(ontology, CConfigDebugDataReader::readConfigDebuggingWritingFileString(config, "Konclude.Debugging.WritingPath.Preprocessing.GroundedTBox"));
 					}
-					
+
 					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.GCIAbsorption.TriggeredImplicationBinaryGCIAbsorption",true)) {
 						COntologyPreProcess *triggImplNorm = new CTriggeredImplicationBinaryAbsorberPreProcess();
 						reportLog("Starting triggered implication binary GCI absorption preprocessing.");
@@ -126,8 +129,8 @@ namespace Konclude {
 						delete triggImplNorm;
 					}
 
-					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false)) {
-						COntologyTextFormater::writeOntologyToFile(ontology,"partialProcessedTBox.txt");
+					if (writeDebugginData && CConfigDebugDataReader::readConfigDebugWritingPreprocessingEnabled(config, "Konclude.Debugging.WritePreprocessingDebuggingData.AbsorbedTBox", false)) {
+						COntologyTextFormater::writeOntologyToFile(ontology, CConfigDebugDataReader::readConfigDebuggingWritingFileString(config, "Konclude.Debugging.WritingPath.Preprocessing.AbsorbedTBox"));
 					}
 
 					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.RoleChainAutomataTransformation",true)) {
@@ -191,6 +194,13 @@ namespace Konclude {
 						reportLog("Stopped processing data extender preprocessing.");
 						delete onPreProc;
 					}
+					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.BranchingStatisticsExtender",true)) {
+						COntologyPreProcess *onPreProc = new CBranchStatisticsExtenderPreProcess();
+						reportLog("Starting processing branching statistics extender preprocessing.");
+						onPreProc->preprocess(ontology,&preprocessingContext);
+						reportLog("Stopped processing branching statistics extender preprocessing.");
+						delete onPreProc;
+					}
 
 					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.ReverseRoleAssertionGeneration",true)) {
 						COntologyPreProcess *onPreProc = new CReverseRoleAssertionGeneratorPreProcess();
@@ -236,27 +246,12 @@ namespace Konclude {
 						delete onPreProc;
 					}
 
-					//if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.CheckingOntologyConsistency",true)) {
-					//	COntologyPreProcess *onPreProc = new CConsistenceCheckerPreProcess(config);
-					//	reportLog("Starting checking ontology consistency preprocessing.");
-					//	onPreProc->preprocess(ontology,&preprocessingContext);
-					//	reportLog("Stopped checking ontology consistency preprocessing.");
-					//	delete onPreProc;
-					//}
-					//} 
 
 
-					if (CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false)) {
-						COntologyTextFormater::writeOntologyToFile(ontology,"preprocessedTBox.txt");
+					if (writeDebugginData && CConfigDebugDataReader::readConfigDebugWritingPreprocessingEnabled(config, "Konclude.Debugging.WritePreprocessingDebuggingData.ProcessedTBox", false)) {
+						COntologyTextFormater::writeOntologyToFile(ontology, CConfigDebugDataReader::readConfigDebuggingWritingFileString(config, "Konclude.Debugging.WritingPath.Preprocessing.ProcessedTBox"));
 					}
 
-					//if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.OntologyPrecomputation",true)) {
-					//	COntologyPreProcess *onPreProc = new CPrecomputationPreProcess();
-					//	reportLog("Starting ontology preprocessing precomputation.");
-					//	onPreProc->preprocess(ontology,&preprocessingContext);
-					//	reportLog("Stopped ontology preprocessing precomputation.");
-					//	delete onPreProc;
-					//}
 
 
 				}

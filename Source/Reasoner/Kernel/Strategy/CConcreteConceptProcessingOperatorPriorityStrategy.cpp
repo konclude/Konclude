@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -57,35 +57,38 @@ namespace Konclude {
 					cint64 nextPriority = 14;
 
 
-					symAccessPri[CCTOP]				= nextPriority;
-					symAccessPri[-CCBOTTOM]			= nextPriority;
-					symAccessPri[CCATOM]			= nextPriority;
-					symAccessPri[-CCATOM]			= nextPriority;
+					symAccessPri[CCTOP]					= nextPriority;
+					symAccessPri[-CCBOTTOM]				= nextPriority;
+					symAccessPri[CCATOM]				= nextPriority;
+					symAccessPri[-CCATOM]				= nextPriority;
 
 					nextPriority = 13;
 
-					symAccessPri[CCAND]				= nextPriority;
-					symAccessPri[-CCOR]				= nextPriority;
-					symAccessPri[CCSUB]				= nextPriority;
-					symAccessPri[CCEQ]				= nextPriority;
-					symAccessPri[CCIMPLTRIG]		= nextPriority;
-					symAccessPri[CCBRANCHTRIG]		= nextPriority;
-					symAccessPri[CCPBINDTRIG]		= nextPriority;
-					symAccessPri[CCPBINDAND]		= nextPriority;
-					symAccessPri[CCVARBINDTRIG]		= nextPriority;
-					symAccessPri[CCVARBINDAND]		= nextPriority;
-					symAccessPri[CCVARPBACKTRIG]	= nextPriority;
-					symAccessPri[CCBACKACTIVTRIG]	= nextPriority;
+					symAccessPri[CCAND]					= nextPriority;
+					symAccessPri[-CCOR]					= nextPriority;
+					symAccessPri[CCSUB]					= nextPriority;
+					symAccessPri[CCEQ]					= nextPriority;
+					symAccessPri[CCIMPLTRIG]			= nextPriority;
+					symAccessPri[CCBRANCHTRIG]			= nextPriority;
+					symAccessPri[CCPBINDTRIG]			= nextPriority;
+					symAccessPri[CCPBINDAND]			= nextPriority;
+					symAccessPri[CCVARBINDTRIG]			= nextPriority;
+					symAccessPri[CCVARBINDAND]			= nextPriority;
+					symAccessPri[CCVARPBACKTRIG]		= nextPriority;
+					symAccessPri[CCBACKACTIVTRIG]		= nextPriority;
 
-					symAccessPri[CCOR]				= nextPriority;
-					symAccessPri[-CCAND]			= nextPriority;
-					symAccessPri[-CCEQ]				= nextPriority;
-					symAccessPri[CCDATATYPE]		= nextPriority;
-					symAccessPri[-CCDATATYPE]		= nextPriority;
-					symAccessPri[CCDATALITERAL]		= nextPriority;
-					symAccessPri[-CCDATALITERAL]	= nextPriority;
-					symAccessPri[CCDATARESTRICTION] = nextPriority;
-					symAccessPri[-CCDATARESTRICTION]= nextPriority;
+					symAccessPri[CCVARBINDPREPARE]		= nextPriority;
+					symAccessPri[CCVARBINDFINALZE]		= nextPriority;
+
+					symAccessPri[CCOR]					= nextPriority;
+					symAccessPri[-CCAND]				= nextPriority;
+					symAccessPri[-CCEQ]					= nextPriority;
+					symAccessPri[CCDATATYPE]			= nextPriority;
+					symAccessPri[-CCDATATYPE]			= nextPriority;
+					symAccessPri[CCDATALITERAL]			= nextPriority;
+					symAccessPri[-CCDATALITERAL]		= nextPriority;
+					symAccessPri[CCDATARESTRICTION]		= nextPriority;
+					symAccessPri[-CCDATARESTRICTION]	= nextPriority;
 
 					mDisjDelConsidPriOffset = -11.0;
 					mDisjDelProcessPriOffset = -11.5;
@@ -93,83 +96,87 @@ namespace Konclude {
 
 					nextPriority = 12;
 
-					symAccessPri[CCALL]				= nextPriority;
-					symAccessPri[-CCSOME]			= nextPriority;
-					symAccessPri[CCAQALL]			= nextPriority;
-					symAccessPri[CCIMPLALL]			= nextPriority;
-					symAccessPri[CCBRANCHALL]		= nextPriority;
-					symAccessPri[CCIMPLAQALL]		= nextPriority;
-					symAccessPri[CCBRANCHAQALL]		= nextPriority;
-					symAccessPri[CCPBINDALL]		= nextPriority;
-					symAccessPri[CCVARBINDALL]		= nextPriority;
-					symAccessPri[CCVARBINDAQALL]	= nextPriority;
-					symAccessPri[CCVARPBACKAQALL]	= nextPriority;
-					symAccessPri[CCVARPBACKALL]		= nextPriority;
+					symAccessPri[CCALL]					= nextPriority;
+					symAccessPri[-CCSOME]				= nextPriority;
+					symAccessPri[CCAQALL]				= nextPriority;
+					symAccessPri[CCIMPLALL]				= nextPriority;
+					symAccessPri[CCBRANCHALL]			= nextPriority;
+					symAccessPri[CCIMPLAQALL]			= nextPriority;
+					symAccessPri[CCBRANCHAQALL]			= nextPriority;
+					symAccessPri[CCPBINDALL]			= nextPriority;
+					symAccessPri[CCVARBINDALL]			= nextPriority;
+					symAccessPri[CCVARBINDAQALL]		= nextPriority;
+					symAccessPri[CCVARPBACKAQALL]		= nextPriority;
+					symAccessPri[CCVARPBACKALL]			= nextPriority;
 
 					nextPriority = 11;
 
-					symAccessPri[CCAQAND]			= nextPriority;
-					symAccessPri[CCIMPLAQAND]		= nextPriority;
-					symAccessPri[CCBRANCHAQAND]		= nextPriority;
-					symAccessPri[CCPBINDAQAND]		= nextPriority;
-					symAccessPri[CCVARBINDAQAND]	= nextPriority;
-					symAccessPri[CCVARPBACKAQAND]	= nextPriority;
+					symAccessPri[CCAQAND]				= nextPriority;
+					symAccessPri[CCIMPLAQAND]			= nextPriority;
+					symAccessPri[CCBRANCHAQAND]			= nextPriority;
+					symAccessPri[CCPBINDAQAND]			= nextPriority;
+					symAccessPri[CCVARBINDAQAND]		= nextPriority;
+					symAccessPri[CCVARPBACKAQAND]		= nextPriority;
 
 					nextPriority = 10;
 
-					symAccessPri[CCAQCHOOCE]		= nextPriority;
-					symAccessPri[-CCAQCHOOCE]		= nextPriority;
+					symAccessPri[CCAQCHOOCE]			= nextPriority;
+					symAccessPri[-CCAQCHOOCE]			= nextPriority;
 
 					nextPriority = 9;
 
-					symAccessPri[CCIMPL]			= nextPriority;
-					symAccessPri[CCBRANCHIMPL]		= nextPriority;
-					symAccessPri[CCPBINDIMPL]		= nextPriority;
-					symAccessPri[CCPBINDVARIABLE]	= nextPriority;
-					symAccessPri[CCPBINDCYCLE]		= nextPriority;
-					symAccessPri[CCVARBINDJOIN]		= nextPriority;
-					symAccessPri[CCVARBINDVARIABLE]	= nextPriority;
-					symAccessPri[CCBACKACTIVIMPL]	= nextPriority;
-					symAccessPri[CCVARBINDIMPL]		= nextPriority;
+					symAccessPri[CCIMPL]				= nextPriority;
+					symAccessPri[CCNOMINALIMPLI]		= nextPriority;
+					symAccessPri[CCDATATYPEIMPLI]		= nextPriority;
+					symAccessPri[CCDATALITERALIMPLI]	= nextPriority;
+					symAccessPri[CCDATARESTRICTIONIMPLI]= nextPriority;
+					symAccessPri[CCBRANCHIMPL]			= nextPriority;
+					symAccessPri[CCPBINDIMPL]			= nextPriority;
+					symAccessPri[CCPBINDVARIABLE]		= nextPriority;
+					symAccessPri[CCPBINDCYCLE]			= nextPriority;
+					symAccessPri[CCVARBINDJOIN]			= nextPriority;
+					symAccessPri[CCVARBINDVARIABLE]		= nextPriority;
+					symAccessPri[CCBACKACTIVIMPL]		= nextPriority;
+					symAccessPri[CCVARBINDIMPL]			= nextPriority;
 
 					nextPriority = 8;
-					symAccessPri[CCSELF]			= nextPriority;
-					symAccessPri[-CCSELF]			= nextPriority;
-					symAccessPri[CCVALUE]			= nextPriority;
-					symAccessPri[-CCVALUE]			= nextPriority;
+					symAccessPri[CCSELF]				= nextPriority;
+					symAccessPri[-CCSELF]				= nextPriority;
+					symAccessPri[CCVALUE]				= nextPriority;
+					symAccessPri[-CCVALUE]				= nextPriority;
 
 					// intermediately processing limit
 
 					nextPriority = 7;
 
-					symAccessPri[CCNOMINAL]			= nextPriority;
-					symAccessPri[-CCNOMINAL]		= nextPriority;
+					symAccessPri[CCNOMINAL]				= nextPriority;
+					symAccessPri[-CCNOMINAL]			= nextPriority;
 
 
 					nextPriority = 6;
 
-					symAccessPri[CCPBINDGROUND]		= nextPriority;
-					symAccessPri[CCVARBINDGROUND]	= nextPriority;
-					symAccessPri[-CCPBINDGROUND]	= nextPriority;
-					symAccessPri[-CCVARBINDGROUND]	= nextPriority;
+					symAccessPri[CCPBINDGROUND]			= nextPriority;
+					symAccessPri[CCVARBINDGROUND]		= nextPriority;
+					symAccessPri[-CCPBINDGROUND]		= nextPriority;
+					symAccessPri[-CCVARBINDGROUND]		= nextPriority;
 
 					nextPriority = 5;
 
-					symAccessPri[CCATLEAST]			= nextPriority;
-					symAccessPri[-CCATMOST]			= nextPriority;
+					symAccessPri[CCATLEAST]				= nextPriority;
+					symAccessPri[-CCATMOST]				= nextPriority;
 
 					nextPriority = 4;
 
-					symAccessPri[CCSOME]			= nextPriority;
-					symAccessPri[-CCALL]			= nextPriority;
-					symAccessPri[CCAQSOME]			= nextPriority;
+					symAccessPri[CCSOME]				= nextPriority;
+					symAccessPri[-CCALL]				= nextPriority;
+					symAccessPri[CCAQSOME]				= nextPriority;
 
 					// deterministic processing limit
 
 					nextPriority = 3;
 
-					symAccessPri[CCATMOST]			= nextPriority;
-					symAccessPri[-CCATLEAST]		= nextPriority;
+					symAccessPri[CCATMOST]				= nextPriority;
+					symAccessPri[-CCATLEAST]			= nextPriority;
 
 					nextPriority = 2;
 
@@ -177,7 +184,7 @@ namespace Konclude {
 
 
 
-
+					mVariableBindingsPreparationDelaying = false;
 
 
 				}
@@ -186,6 +193,22 @@ namespace Konclude {
 				CConcreteConceptProcessingOperatorPriorityStrategy::~CConcreteConceptProcessingOperatorPriorityStrategy() {
 					delete [] priorities;
 				}
+
+				void CConcreteConceptProcessingOperatorPriorityStrategy::readCalculationConfig(CSatisfiableCalculationTask* satCalcTask) {
+					mVariableBindingsPreparationDelaying = false;
+					CCalculationConfigurationExtension *config = satCalcTask->getCalculationConfiguration();
+
+					CSatisfiableTaskAnswererBindingPropagationAdapter* answererMessageAdapter = satCalcTask->getSatisfiableAnswererBindingPropagationAdapter();
+					if (answererMessageAdapter) {
+						CAnsweringPropagationSteeringController* propagationSteeringController = answererMessageAdapter->getAnswererPropagationSteeringController();
+						if (propagationSteeringController) {
+							if (propagationSteeringController->finalizeWithClashing()) {
+								mVariableBindingsPreparationDelaying = true;
+							}
+						}
+					}
+				}
+
 
 				double CConcreteConceptProcessingOperatorPriorityStrategy::getPriorityOffsetForDisjunctionDelayedConsidering(CConceptDescriptor *conceptDescriptor, CIndividualProcessNode *individual) {
 					return mDisjDelConsidPriOffset;
@@ -205,6 +228,16 @@ namespace Konclude {
 					}
 					double priority = 0;
 					priority = symAccessPri[cCode];
+
+					if (cCode == CCVARBINDPREPARE) {
+						if (!conceptDescriptor->getData()->getVariable()) {
+							if (mVariableBindingsPreparationDelaying) {
+								priority = 3.5;
+							} else if (!individual->isNominalIndividualNode()) {
+								priority = 3.5;
+							}
+						}
+					}
 
 					CSortedNegLinker<CConcept *> *opConLinkerIt = conceptDescriptor->getData()->getOperandList();
 					if (cCode == CCATMOST) {

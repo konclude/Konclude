@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -367,11 +367,21 @@ namespace Konclude {
 					return depNode;
 				}
 
-				CROLEASSERTIONDependencyNode* CDependencyFactory::createROLEASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+				CROLEASSERTIONDependencyNode* CDependencyFactory::createROLEASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CRole* baseAssertionRole, CIndividual* baseAssertionIndi, CCalculationAlgorithmContext* calcAlgContext) {
 					CROLEASSERTIONDependencyNode* depNode = nullptr;
 					if (mConfBuildDependencies) {
 						depNode = CObjectParameterizingAllocator< CROLEASSERTIONDependencyNode,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
-						depNode->initROLEASSERTIONDependencyNode(processIndi,prevDepTrackPoint,nominalDepTrackPoint);
+						depNode->initROLEASSERTIONDependencyNode(processIndi,prevDepTrackPoint,nominalDepTrackPoint, baseAssertionRole, baseAssertionIndi);
+						roleAssDepTrackPoint = depNode->getContinueDependencyTrackPoint();
+					}
+					return depNode;
+				}
+
+				CDATAASSERTIONDependencyNode* CDependencyFactory::createDATAASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CDATAASSERTIONDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CDATAASSERTIONDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initDATAASSERTIONDependencyNode(processIndi, prevDepTrackPoint);
 						roleAssDepTrackPoint = depNode->getContinueDependencyTrackPoint();
 					}
 					return depNode;
@@ -502,6 +512,15 @@ namespace Konclude {
 					return depNode;
 				}
 
+				CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode* CDependencyFactory::createMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CIndividualProcessNode* mergingIndi, CCalculationAlgorithmContext* calcAlgContext) {
+					CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode(calcAlgContext->getUsedBranchTreeNode(), processIndi, mergingIndi, prevDepTrackPoint);
+					}
+					return depNode;
+				}
+
 				CREUSECONCEPTSDependencyNode* CDependencyFactory::createREUSECONCEPTSDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
 					CREUSECONCEPTSDependencyNode* depNode = nullptr;
 					if (mConfBuildDependencies) {
@@ -580,6 +599,19 @@ namespace Konclude {
 						depNode = CObjectParameterizingAllocator< CMERGEDIndividualDependencyNode,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
 						depNode->initMERGEDIndividualDependencyNode(processIndi,mergePrevDepTrackPoint,individualPrevDepTrackPoint);
 						mergedIndividualContinueDepTrackPoint = depNode->getContinueDependencyTrackPoint();
+					}
+					return depNode;
+				}
+
+
+
+
+				CSAMEINDIVIDUALSMERGEDependencyNode* CDependencyFactory::createSAMEINDIVIDUALMERGEDependency(CDependencyTrackPoint*& expContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* prevOtherDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CSAMEINDIVIDUALSMERGEDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CSAMEINDIVIDUALSMERGEDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initSAMEINDIVIDUALSMERGEDependencyNode(processIndi, prevDepTrackPoint, prevOtherDepTrackPoint);
+						expContinueDepTrackPoint = depNode->getContinueDependencyTrackPoint();
 					}
 					return depNode;
 				}

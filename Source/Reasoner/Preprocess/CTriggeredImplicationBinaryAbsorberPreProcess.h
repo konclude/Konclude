@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -25,7 +25,7 @@
 #include <QSet>
 
 // Namespace includes
-#include "CConcreteOntologyPreProcess.h"
+#include "CConcreteOntologyContinuablePreProcess.h"
 #include "CConceptRoleIndividualLocator.h"
 #include "CConceptTriggerLinker.h"
 #include "CConceptRoleIndividualLocator.h"
@@ -70,7 +70,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CTriggeredImplicationBinaryAbsorberPreProcess : public CConcreteOntologyPreProcess {
+			class CTriggeredImplicationBinaryAbsorberPreProcess : public CConcreteOntologyContinuablePreProcess {
 				// public methods
 				public:
 					//! Constructor
@@ -79,7 +79,8 @@ namespace Konclude {
 					//! Destructor
 					virtual ~CTriggeredImplicationBinaryAbsorberPreProcess();
 
-					virtual CConcreteOntology *preprocess(CConcreteOntology *ontology, CPreProcessContext* context);
+					virtual CConcreteOntology* preprocess(CConcreteOntology *ontology, CPreProcessContext* context);
+					virtual CConcreteOntology* continuePreprocessing();
 
 
 				// protected methods
@@ -90,12 +91,14 @@ namespace Konclude {
 					typedef QPair<CNominalSchemaAbsorptionBranchLinker*,CNominalSchemaAbsorptionBranchLinker*> TAbsorptionBranchPair;
 
 
+					void createDisjunctionAbsorptions(bool continuationExtension = false);
+					void createConceptOfInterestAbsorptions(bool continuationExtension = false);
 
 					void asorbForallsToRanges(CConcept* topConcept);
 
 					bool collectConjunctions(CConcept* concept, bool negated, QList< TConceptNegationPair >& conjList);
 
-					void collectPositiveConcepts(CConcept* concept, bool negated, QSet<TConceptNegationPair>* positiveConceptSet);
+					void collectPositiveConcepts(CConcept* concept, bool negated, QSet<TConceptNegationPair>* positiveConceptSet, bool recursiveDefinition = false);
 
 					CConcept* getRoleDomainTriggerConcept(CRole* role);
 
@@ -108,7 +111,11 @@ namespace Konclude {
 					CConcept* createImplicationConcept(CConcept* impliedConcept, bool negated);
 					CConcept* createImplicationTriggerConcept(CConcept* impConcept, bool negated);
 					bool addImplicationTrigger(CConcept* implConcept, CConcept* triggerConcept, bool negated);
-					CConcept* createTriggerPropagationConcept(CConcept* destConcept, CRole* backwardPropRole);
+					CConcept* createTriggerPropagationConcept(CConcept* destConcept, CRole* backwardPropRole, bool branchTiggerCreation, bool invsereRolePropagation = true);
+					CConcept* createNominalImplication(CConcept* destConcept, CIndividual* nominalIndi);
+					CConcept* createDatatypeImplication(CConcept* destConcept, CDatatype* datatype);
+					CConcept* createDataLiteralImplication(CConcept* destConcept, CDataLiteral* dataLiteral);
+					CConcept* createDataRestrictionImplication(CConcept* destConcept, CDatatype* datatype, CDataLiteral* dataliteral, cint64 restrictionCode);
 
 					bool isEquivalenceConceptTriggeredImplicationAbsorbable(CConcept* orConcept, bool negated, cint64* notAbsorbableOperandsCount = nullptr);
 					bool isEquivalenceConceptCandidateExtractable(CConcept* orConcept, bool negated);
@@ -126,7 +133,7 @@ namespace Konclude {
 
 
 
-					CConceptTriggerLinker* getTriggersForConcept(CConcept* concept, bool negated);
+					CConceptTriggerLinker* getTriggersForConcept(CConcept* concept, bool negated, CConcept* backPropConcept = nullptr);
 					CConceptTriggerLinker* createTriggerLinker();
 					CConceptTriggerLinker* copyTriggerLinkers(CConceptTriggerLinker* triggers);
 					void releaseTriggerLinkers(CConceptTriggerLinker* triggers);
@@ -143,10 +150,11 @@ namespace Konclude {
 
 
 					CConcept* createTriggerConcept(bool branchTrigger = false);
+					CConcept* createMarkerConcept();
 					void addUnfoldingConceptForConcept(CConcept* concept, CConcept* addingUnfoldingConcept, bool addingNegation);
 					void addUnfoldingConceptForImplicationConcept(CConcept* implicationConcept, CConcept* addingUnfoldingConcept, bool addingNegation);
 
-					CConceptTriggerLinker* getPartialTriggersForConcept(CConcept* concept, bool negated);
+					CConceptTriggerLinker* getPartialTriggersForConcept(CConcept* concept, bool negated, CConcept* backPropConcept = nullptr);
 					CConceptRoleBranchingTrigger* getSimpleBranchTriggersForConcept(CConcept* concept, bool negated);
 
 					CConceptRoleBranchingTrigger* getBranchTiggers(CConceptTriggerLinker* triggers);
@@ -162,6 +170,14 @@ namespace Konclude {
 					
 
 					
+
+					bool isCardinalityConceptQualificationTriggerAbsorbable(CConcept* cardConcept, bool negated);
+					bool isCardinalityConceptPartialQualificationTriggerAbsorbable(CConcept* cardConcept, bool negated);
+
+
+					CConceptRoleBranchingTrigger* createCardinalityQualificationPartialAbsorbedTriggers(CConcept* cardConcept, bool negated);
+
+
 					bool absorbGCIConceptsToTriggeredImplications(CConcept* orConcept, bool negated);
 
 					void createGCIAbsorbedTriggeredImplication(CConcept* orConcept, bool negated, QList<TConceptNegationPair>& absorbList, QList<TConceptNegationPair>& candList);
@@ -172,6 +188,19 @@ namespace Konclude {
 
 					CConceptRoleBranchingTrigger* createDisjunctionPartialAbsorbedBranchTriggers(CConcept* orConcept, bool negated);
 					CConceptRoleBranchingTrigger* createDisjunctionPartialAbsorbedBranchTriggers(CConcept* orConcept, bool negated, const QList<TConceptNegationPair>& absorbList);
+
+
+					bool createConceptOfInterestAbsorption(CConcept* intConcept, bool negated, bool continuationExtension = false);
+					bool createDirectConceptOfInterestAbsorption(CConcept* intConcept, bool negated, bool continuationExtension = false);
+					bool createPropagationConceptOfInterestAbsorption(CConcept* intConcept, bool negated, bool continuationExtension = false);
+					CConcept* getConceptOfInterestTrigger(CConcept* intConcept, bool negated, CConcept* backPropTriggerCon);
+					CConcept* getConceptOfInterestCandidate(CConcept* intConcept, bool negated, CConcept* backPropTriggerCon);
+					CConceptTriggerLinker* createBackpropPartialExtendedAbsorbedImpliedTrigger(const QList<TConceptNegationPair>& absorbList, CConcept* backPropTriggerCon);
+					CConceptTriggerLinker* createBackpropExtendedAbsorbedImpliedTrigger(const QList<TConceptNegationPair>& absorbList, CConcept* backPropTriggerCon);
+					CConcept* createDisjunctionAbsorbedBackpropagationTriggeredImplication(CConcept* orConcept, bool negated, CConcept* backPropTriggerCon);
+					CConcept* createDisjunctionAbsorbedBackpropagationTriggeredImplication(CConcept* orConcept, bool negated, QList<TConceptNegationPair>& absorbList, QList<TConceptNegationPair>& partialAbsorbList, QList<TConceptNegationPair>& candList, CConcept* backPropTriggerCon);
+					CConcept* createPartialBackpropagationExtendedAbsorbedImpliedTriggerCocnept(const QList<TConceptNegationPair>& absorbList, CConcept* backPropTriggerCon);
+					CConceptTriggerLinker* createPartialBackpropagationExtendedAbsorbedImpliedTrigger(const QList<TConceptNegationPair>& absorbList, CConcept* backPropTriggerCon);
 
 
 					CConcept* createPartialExtendedAbsorbedTriggeredImplication(CConcept* impliedConcept, bool impliedNegation, const QList<TConceptNegationPair>& absorbList);
@@ -194,6 +223,7 @@ namespace Konclude {
 
 
 
+					bool absorbNominalConceptsToAssertions(CConcept* concept, bool negated);
 					bool absorbNominalSchemaGCIConceptsToTriggeredImplications(CConcept* concept, bool negated);
 
 					void createGCINominalSchemaAbsorbedTriggeredImplication(CConcept* orConcept, bool negated, QList<TConceptNegationPair>& absorbList, QList<TConceptNegationPair>& partialAbsorbList, QList<TConceptNegationPair>& candList, CNominalSchemaTemplate* nsTemplate);
@@ -243,6 +273,13 @@ namespace Konclude {
 					bool hasNominalSchemaConceptFillHash(CConcept* concept, CBOXHASH<CConcept*,CConcept*>* conceptNominalSchemaConceptHash, CConcept* nominalSchemaConcept, QSet<CConcept*>* testedConceptSet);
 					void collectNominalSchemaConcepts(CConcept* concept, CBOXSET<CConcept*>* nominalSchemaConceptSet);
 
+
+
+					bool isConceptPropagationTriggerable(CConcept* concept, bool negated);
+					CConceptTriggerLinker* getPropagationTriggersForConcept(CConcept* concept, bool negated, TConceptNegPair& intConceptNegationPair, bool completelyAbsorbable);
+					CConceptTriggerLinker* getPropagationTriggersForConceptOperandList(CSortedNegLinker<CConcept*>* opConLinker, bool operandsNegation, bool chooseInsteadOfNegation, CConcept* concept, bool negated, TConceptNegPair& intConceptNegationPair, bool completelyAbsorbable);
+
+
 				// protected variables
 				protected:
 					class CAbsorpEquivalentClassItem {
@@ -264,6 +301,11 @@ namespace Konclude {
 					QHash<TConceptNegationPair,CConceptTriggerLinker*> mConceptTriggerLinkerHash;
 					CConceptTriggerLinker* mTmpTriggerLinker;
 
+					QHash<TConceptNegationPair, CConcept*> mBackPropActivationConHash;
+
+					QSet<CConcept*> mCreatedImpliedDisjunctions;
+
+
 					QList<CConceptTriggerLinker*> mTriggerContainer;
 					QList<CSortedNegLinker<CConcept*>*> mLaterTopConceptTriggerAddList;
 
@@ -282,6 +324,7 @@ namespace Konclude {
 					QHash<TConceptNegationPair,bool> mConceptTotalAbsorbableHash;
 					QHash<TConceptNegationPair,bool> mConceptPartialAbsorbableHash;
 					QSet<CConcept*> mEQNotConceptPartialAbsorbableSet;
+					QHash<TConceptNegationPair, bool> mConceptPropagationAbsorbableHash;
 
 
 					CBOXHASH<CConcept*,CConcept*>* mEquivConCandidateHash;
@@ -297,6 +340,8 @@ namespace Konclude {
 					QHash<CRole*,CRole*> mRoleInverseRoleCreateHash;
 					CBOXHASH<cint64,CConcept*>* mIndividualTriggerConceptHash;
 
+					QSet<TConceptNegationPair> mPositiveConceptReferencedSet;
+					CImplicationReplacementVector* mImpRepVec = nullptr;
 
 					cint64 mNextVariableID;
 
@@ -308,6 +353,12 @@ namespace Konclude {
 					bool mConfAbsorbSimpleDisjunctions;
 					bool mConfPartialDisjunctionsAbsorption;
 					bool mConfOnlyPositiveDisjunctionsAbsorption;
+
+
+					bool mConfCardinalityQualificationTriggerAbsorption;
+					bool mConfPartialCardinalityQualificationTriggerAbsorption;
+					bool mConfOnlyPositiveCardinalityQualificationTriggerAbsorption;
+
 
 					bool mConfNominalSchemaPathPreabsorption;
 
@@ -362,6 +413,7 @@ namespace Konclude {
 					cint64 mStatReusedImplications;
 					cint64 mStatOptimizedRemovedTriggers;
 					cint64 mStatGCINormalSchemaAbsorbed;
+					cint64 mStatGCIAssertionAbsorbed;
 
 					QString mDebugGCIString;
 					QString mDebugAbsorbedString;
@@ -373,6 +425,8 @@ namespace Konclude {
 					QString mDebugTotalAbsorbedGCIString;
 					cint64 mLastNewConceptTag;
 					cint64 mFirstNewConceptTag;
+
+					cint64 mLastDisjunctId;
 
 				// private methods
 				private:

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -34,6 +34,7 @@
 #include "Reasoner/Kernel/Process/Dependency/CSOMEDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CVALUEDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CROLEASSERTIONDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CDATAASSERTIONDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CNEGVALUEDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CALLDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CATLEASTDependencyNode.h"
@@ -55,6 +56,7 @@
 #include "Reasoner/Kernel/Process/Dependency/CCONNECTIONDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CREUSEINDIVIDUALDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CREUSECOMPLETIONGRAPHDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CREUSECONCEPTSDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CBINDVARIABLEDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CPROPAGATEBINDINGDependencyNode.h"
@@ -66,6 +68,7 @@
 #include "Reasoner/Kernel/Process/Dependency/CPROPAGATECONNECTIONDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CPROPAGATECONNECTIONAWAYDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CBINDPROPAGATEGROUNDINGDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CSAMEINDIVIDUALSMERGEDependencyNode.h"
 
 #include "Reasoner/Kernel/Process/Dependency/CVARBINDPROPAGATEANDDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CVARBINDPROPAGATEALLDependencyNode.h"
@@ -155,7 +158,8 @@ namespace Konclude {
 						CSOMEDependencyNode* createSOMEDependency(CDependencyTrackPoint*& someContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CSELFDependencyNode* createSELFDependency(CDependencyTrackPoint*& selfContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CVALUEDependencyNode* createVALUEDependency(CDependencyTrackPoint*& valueContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
-						CROLEASSERTIONDependencyNode* createROLEASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+						CROLEASSERTIONDependencyNode* createROLEASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CRole* baseAssertionRole, CIndividual* baseAssertionIndi, CCalculationAlgorithmContext* calcAlgContext);
+						CDATAASSERTIONDependencyNode* createDATAASSERTIONDependency(CDependencyTrackPoint*& roleAssDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CALLDependencyNode* createALLDependency(CDependencyTrackPoint*& allContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* linkDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CATLEASTDependencyNode* createATLEASTDependency(CDependencyTrackPoint*& atleastContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CAUTOMATTRANSACTIONDependencyNode* createAUTOMATTRANSACTIONDependency(CDependencyTrackPoint*& allContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* linkDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
@@ -169,6 +173,7 @@ namespace Konclude {
 						CMERGEDependencyNode* createMERGEDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CREUSEINDIVIDUALDependencyNode* createREUSEINDIVIDUALDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CREUSECOMPLETIONGRAPHDependencyNode* createREUSECOMPLETIONGRAPHDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+						CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode* createMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CIndividualProcessNode* mergingIndi, CCalculationAlgorithmContext* calcAlgContext);
 						CREUSECONCEPTSDependencyNode* createREUSECONCEPTSDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CQUALIFYDependencyNode* createQUALIFYDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CMERGEDCONCEPTDependencyNode* createMERGEDCONCEPTDependency(CDependencyTrackPoint*& mergedConceptContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* conceptPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
@@ -179,6 +184,7 @@ namespace Konclude {
 						CDATATYPETRIGGERDependencyNode* createDATATYPETRIGGERDependency(CDependencyTrackPoint*& triggerContinueDepTrackPoint, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext);
 						CDATATYPECONNECTIONDependencyNode* createDATATYPECONNECTIONDependency(CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CMERGEDIndividualDependencyNode* createMERGEDINDIVIDUALDependency(CDependencyTrackPoint*& mergedIndividualContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* individualPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+						CSAMEINDIVIDUALSMERGEDependencyNode* createSAMEINDIVIDUALMERGEDependency(CDependencyTrackPoint*& expContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* prevOtherDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 
 					// protected methods
 					protected:

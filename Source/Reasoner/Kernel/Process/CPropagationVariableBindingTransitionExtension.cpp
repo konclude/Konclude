@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -85,7 +85,11 @@ namespace Konclude {
 				CVariableBindingTriggerHash* CPropagationVariableBindingTransitionExtension::getVariableBindingTriggerHash(bool localize) {
 					if (localize && !mLocVarBindTriggerHash) {
 						CMemoryAllocationManager* taskMemMan = mProcessContext->getUsedMemoryAllocationManager();
-						mUseVarBindTriggerHash = mLocVarBindTriggerHash = CObjectParameterizingAllocator< CVariableBindingTriggerHash,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,mProcessContext);
+						mLocVarBindTriggerHash = CObjectParameterizingAllocator< CVariableBindingTriggerHash,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,mProcessContext);
+						if (mUseVarBindTriggerHash) {
+							mLocVarBindTriggerHash->initVariableBindingTriggerHash(mUseVarBindTriggerHash);
+						}
+						mUseVarBindTriggerHash = mLocVarBindTriggerHash;
 					}
 					return mUseVarBindTriggerHash;
 				}
@@ -95,7 +99,11 @@ namespace Konclude {
 				CVariableBindingPathJoiningHash* CPropagationVariableBindingTransitionExtension::getVariableBindingPathJoiningHash(bool localize) {
 					if (localize && !mLocVarBindPathJoiningHash) {
 						CMemoryAllocationManager* taskMemMan = mProcessContext->getUsedMemoryAllocationManager();
-						mUseVarBindPathJoiningHash = mLocVarBindPathJoiningHash = CObjectParameterizingAllocator< CVariableBindingPathJoiningHash,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,mProcessContext);
+						mLocVarBindPathJoiningHash = CObjectParameterizingAllocator< CVariableBindingPathJoiningHash,CProcessContext* >::allocateAndConstructAndParameterize(taskMemMan,mProcessContext);
+						if (mUseVarBindPathJoiningHash) {
+							*mLocVarBindPathJoiningHash = *mUseVarBindPathJoiningHash;
+						}
+						mUseVarBindPathJoiningHash = mLocVarBindPathJoiningHash;
 					}
 					return mUseVarBindPathJoiningHash;
 				}
@@ -113,7 +121,7 @@ namespace Konclude {
 				bool CPropagationVariableBindingTransitionExtension::addAnalysedPropagationBindingDescriptorReturnMatched(CPropagationBindingDescriptor* propBindDes, CVariableBindingTriggerLinker** reapplyTriggerLinker) {
 					CVariable* variable = propBindDes->getPropagationBinding()->getBindedVariable();
 					CIndividualProcessNode* indiNode = propBindDes->getPropagationBinding()->getBindedIndividual();
-					TVariableIndividualPair varIndiPair(variable,indiNode->getIndividualID());
+					TVariableIndividualPair varIndiPair(variable,indiNode->getIndividualNodeID());
 
 					if (mTriggeredVarIndPair == varIndiPair) {
 						return true;
@@ -148,7 +156,7 @@ namespace Konclude {
 
 
 				CPropagationVariableBindingTransitionExtension* CPropagationVariableBindingTransitionExtension::setTriggeredVariableIndividualPair(CVariable* variable, CIndividualProcessNode* indiNode) {
-					mTriggeredVarIndPair = TVariableIndividualPair(variable,indiNode->getIndividualID());
+					mTriggeredVarIndPair = TVariableIndividualPair(variable,indiNode->getIndividualNodeID());
 					return this;
 				}
 

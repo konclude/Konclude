@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,11 +28,12 @@
 // Namespace includes
 #include "OntologySettings.h"
 #include "CNamedItem.h"
-#include "CTagItem.h"
+#include "CIndividualIdentifier.h"
 #include "CConceptAssertionLinker.h"
 #include "CRoleAssertionLinker.h"
 #include "CIndividualData.h"
 #include "CReverseRoleAssertionLinker.h"
+#include "CDataAssertionLinker.h"
 
 // Other includes
 #include "Utilities/CAllocationObject.h"
@@ -63,7 +64,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CIndividual :  public CTagItem, public CNamedItem, public CAllocationObject {
+			class CIndividual :  public CIndividualIdentifier, public CNamedItem, public CAllocationObject {
 				// public methods
 				public:
 					//! Constructor
@@ -83,8 +84,13 @@ namespace Konclude {
 					CIndividual* setAssertionConceptLinker(CConceptAssertionLinker* assConLinker);
 
 					CRoleAssertionLinker* getAssertionRoleLinker();
-					CIndividual* addAssertionRoleLinker(CRoleAssertionLinker* assConLinker);
-					CIndividual* setAssertionRoleLinker(CRoleAssertionLinker* assConLinker);
+					CIndividual* addAssertionRoleLinker(CRoleAssertionLinker* assRoleLinker);
+					CIndividual* setAssertionRoleLinker(CRoleAssertionLinker* assRoleLinker);
+
+					CDataAssertionLinker* getAssertionDataLinker();
+					CIndividual* addAssertionDataLinker(CDataAssertionLinker* assDataLinker);
+					CIndividual* setAssertionDataLinker(CDataAssertionLinker* assDataLinker);
+
 
 					CReverseRoleAssertionLinker* getReverseAssertionRoleLinker();
 					CIndividual* addReverseAssertionRoleLinker(CReverseRoleAssertionLinker* revAssRoleLinker);
@@ -93,12 +99,13 @@ namespace Konclude {
 					CIndividual *initIndividual(qint64 indiID = 0);
 					CIndividual *initIndividualCopy(CIndividual* individual, CMemoryAllocationManager* memMan);
 
-					CIndividual *setIndividualID(qint64 id);
-					qint64 getIndividualID();
 					bool hasAssertedConcept(CConcept* concept);
 
 					CIndividual* setAnonymousIndividual(bool anonymous);
 					bool isAnonymousIndividual();
+
+					CIndividual* setTemporaryIndividual(bool temporary);
+					bool isTemporaryIndividual();
 
 					bool hasIndividualData();
 					CIndividualData* getIndividualData();
@@ -111,9 +118,11 @@ namespace Konclude {
 				protected:
 					CConceptAssertionLinker* mAssertionConceptLinker;
 					CRoleAssertionLinker* mAssertionRoleLinker;
+					CDataAssertionLinker* mAssertionDataLinker;
 					CReverseRoleAssertionLinker* mReverseAssertionRoleLinker;
 					CConcept* mNominalConcept;
 					bool mAnonymousIndividual;
+					bool mTemporaryIndividual;
 
 					CIndividualData* mIndividualData;
 

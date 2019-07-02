@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -30,6 +30,9 @@ namespace Konclude {
 
 			CRoleChainAutomataTransformationPreProcess::CRoleChainAutomataTransformationPreProcess() {
 				mConfSaveTransitiveTransitions = true;
+				mOntology = nullptr;
+				mLastConceptForallId = 0;
+				mLastConceptValueId = 0;
 			}
 
 
@@ -38,6 +41,9 @@ namespace Konclude {
 
 
 			CConcreteOntology *CRoleChainAutomataTransformationPreProcess::preprocess(CConcreteOntology *ontology, CPreProcessContext* context) {
+				mOntology = nullptr;
+				mLastConceptForallId = 0;
+				mLastConceptValueId = 0;
 				bool complexRoleConstructsUsed = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getBuildConstructFlags()->isComplexRoleUsed();
 				if (complexRoleConstructsUsed) {
 					mOntology = ontology;
@@ -83,24 +89,8 @@ namespace Konclude {
 
 					createRecursiveTraversalData();
 
+					transformFORALLPropagations();
 
-					cint64 conCount = mConVec->getItemCount();
-					for (qint64 i = 0; i < conCount; ++i) {
-						CConcept *concept = mConVec->getData(i);
-						if (concept) {
-							cint64 opCode = concept->getOperatorCode();
-							if (opCode == CCALL || opCode == CCSOME || opCode == CCIMPLALL || opCode == CCBRANCHALL || opCode == CCVARBINDALL || opCode == CCPBINDALL || opCode == CCVARPBACKALL) {
-								CRole* role = concept->getRole();
-								role = mRoleVec->getData(role->getRoleTag());
-								if (role->isComplexRole()) {
-									concept = CConceptRoleIndividualLocator::getLocatedConcept(concept,ontology);
-									// translate into concept role automate
-									++mStatAutomateTransformedConceptCount;
-									convertAutomatConcept(concept);
-								}
-							}
-						}
-					}
 
 					if (mStatAutomateTransformedConceptCount > 0) {
 						LOG(INFO,"::Konclude::Reasoner::Preprocess::RoleChainAutomataTransformation",logTr("Transformed %1 concepts to automate.").arg(mStatAutomateTransformedConceptCount),this);
@@ -112,6 +102,39 @@ namespace Konclude {
 				return ontology;
 			}
 
+
+
+			CConcreteOntology* CRoleChainAutomataTransformationPreProcess::continuePreprocessing() {
+				if (mOntology) {
+					mNextConceptTag = mConVec->getItemCount();
+					transformVALUERestrictions();
+					transformFORALLPropagations();
+				}
+				return mOntology;
+			}
+
+
+			CRoleChainAutomataTransformationPreProcess* CRoleChainAutomataTransformationPreProcess::transformFORALLPropagations() {
+				cint64 conCount = mConVec->getItemCount();
+				for (qint64 i = mLastConceptForallId; i < conCount; ++i) {
+					CConcept *concept = mConVec->getLocalData(i);
+					if (concept) {
+						cint64 opCode = concept->getOperatorCode();
+						if (opCode == CCALL || opCode == CCSOME || opCode == CCIMPLALL || opCode == CCBRANCHALL || opCode == CCVARBINDALL || opCode == CCPBINDALL || opCode == CCVARPBACKALL) {
+							CRole* role = concept->getRole();
+							role = mRoleVec->getData(role->getRoleTag());
+							if (role->isComplexRole()) {
+								concept = CConceptRoleIndividualLocator::getLocatedConcept(concept, mOntology);
+								// translate into concept role automate
+								++mStatAutomateTransformedConceptCount;
+								convertAutomatConcept(concept);
+							}
+						}
+					}
+				}
+				mLastConceptForallId = conCount;
+				return this;
+			}
 
 
 			CConcreteOntology* CRoleChainAutomataTransformationPreProcess::preprocess(CConcreteOntology *ontology, QSet<CConcept*>* transformConceptSet, CPreProcessContext* context) {
@@ -174,9 +197,10 @@ namespace Konclude {
 
 			CRoleChainAutomataTransformationPreProcess* CRoleChainAutomataTransformationPreProcess::transformVALUERestrictions() {
 				cint64 conCount = mConVec->getItemCount();
-				for (qint64 i = 0; i < conCount; ++i) {
+				for (qint64 i = mLastConceptValueId; i < conCount; ++i) {
 					bool localFlag = false;
-					CConcept *concept = mConVec->getData(i,&localFlag);
+					//CConcept *concept = mConVec->getData(i, &localFlag);
+					CConcept *concept = mConVec->getLocalData(i);
 					if (concept) {
 						bool transformToExistentialNominal = false;
 						cint64 opCode = concept->getOperatorCode();
@@ -189,9 +213,9 @@ namespace Konclude {
 						}
 
 						if (transformToExistentialNominal) {
-							if (!localFlag) {
-								concept = CConceptRoleIndividualLocator::getLocatedConcept(concept,mOntology);
-							}
+							//if (!localFlag) {
+							//	concept = CConceptRoleIndividualLocator::getLocatedConcept(concept,mOntology);
+							//}
 							CIndividual* nomIndividual = concept->getNominalIndividual();
 							concept->setOperatorCode(CCSOME);
 							concept->setNominalIndividual(nullptr);
@@ -205,6 +229,7 @@ namespace Konclude {
 						}
 					}
 				}
+				mLastConceptValueId = conCount;
 				return this;
 			}
 
@@ -217,7 +242,7 @@ namespace Konclude {
 				QSet<CConcept*> domRangePropCocneptSet;
 				qint64 itemCounts = mRoleVec->getItemCount();
 				for (qint64 i = 0; i < itemCounts; ++i) {
-					CRole *role = mRoleVec->getData(i);
+					CRole *role = mRoleVec->getLocalData(i);
 					if (role && role->isComplexRole()) {
 
 						CRole* inverseRole = nullptr;
@@ -474,9 +499,6 @@ namespace Konclude {
 				appendTransitionOperandConceptLinker(propCon,createTransitionOperandConceptLinker(endState,false));
 
 
-				//if (CIRIName::getRecentIRIName(role->getPropertyNameLinker()) == "#isInLawOf") {
-				//	bool bug = true;
-				//}
 
 
 				//const QList<CRoleSubRoleChainData> subRoleChainDataList(mRoleSubRoleChainDataHash.values(role));

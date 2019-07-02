@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -23,11 +23,14 @@
 
 // Libraries includes
 #include <QString>
+#include <QHash>
 
 // Namespace includes
 #include "COntologyRevisionManager.h"
 
 // Other includes
+#include "Reasoner/Revision/Persistence/COntologyRevisionPersistencer.h"
+
 #include "Reasoner/Classifier/CClassificationManager.h"
 
 #include "Reasoner/Ontology/CConcreteOntology.h"
@@ -56,6 +59,7 @@
 
 #include "Reasoner/Generator/CConcreteOntologyBasementBuilder.h"
 #include "Reasoner/Generator/CConcreteOntologyMergingBuilder.h"
+#include "Reasoner/Generator/CConcreteOntologyMergingRebuildingBuilder.h"
 
 #include "Reasoner/Preprocess/COntologyConfigDependedPreProcesser.h"
 
@@ -82,6 +86,8 @@ namespace Konclude {
 
 		namespace Revision {
 
+			using namespace Persistence;
+
 			/*! 
 			 *
 			 *		\class		CSPOntologyRevisionManager
@@ -94,7 +100,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CSPOntologyRevisionManager();
+					CSPOntologyRevisionManager(COntologyRevisionPersistencer* persistencer = nullptr);
 
 					//! Destructor
 					virtual ~CSPOntologyRevisionManager();
@@ -109,6 +115,12 @@ namespace Konclude {
 				// protected methods
 				protected:
 					CConcreteOntology* getBasementOntology(CCommandRecordRouter& commandRecordRouter);
+
+					COntologyRevision* createNewOntologyRevisionFromBasementOntology(const QString& ontologyName, CCommandRecordRouter& commandRecordRouter);
+
+					COntologyRevision* createNewOntologyRevision(const QString& ontologyName, bool forceCreation, CCommandRecordRouter& commandRecordRouter);
+					QString createNewOntology(const QString& ontologyName, QList<CNamePrefix*>* prefixList, CCommandRecordRouter& commandRecordRouter);
+
 
 				// protected variables
 				protected:
@@ -128,6 +140,17 @@ namespace Konclude {
 					CClassificationManager *classificationMan;
 
 					CConcreteOntology* mBaseOnto;
+
+					QString mLastOntologyRevisionUpdateKBNameOrNewAnonymous;
+					QString mLastOntologyRevisionUpdateKBName;
+					QString mLastOntologyCreatedKBName;
+					QString mFirstOntologyRevisionUpdateKBName;
+					QString mFirstOntologyCreatedKBName;
+					bool mHasFirstCreatedOntology;
+					bool mHasFirstOntologyRevisionUpdate;
+
+
+					COntologyRevisionPersistencer* mOntoRevPersistencer;
 
 				// private methods
 				private:

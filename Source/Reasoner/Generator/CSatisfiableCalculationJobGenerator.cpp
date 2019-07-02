@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -39,9 +39,13 @@ namespace Konclude {
 
 
 			CSatisfiableCalculationJob* CSatisfiableCalculationJobGenerator::getSatisfiableCalculationJob(CConcept* concept, bool negation, CIndividual* individual, CSatisfiableCalculationJob* satCalcJob) {
-				return getSatisfiableCalculationJob(QList< QPair<CConcept*,bool> >()<<QPair<CConcept*,bool>(concept,negation),individual,satCalcJob);
+				return getSatisfiableCalculationJob(concept, negation,CIndividualReference(individual),satCalcJob);
 			}
 
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJobGenerator::getSatisfiableCalculationJob(CConcept* concept, bool negation, const CIndividualReference& indiRef, CSatisfiableCalculationJob* satCalcJob) {
+				return getSatisfiableCalculationJob(QList< QPair<CConcept*, bool> >() << QPair<CConcept*, bool>(concept, negation), indiRef, satCalcJob);
+			}
 
 			CSatisfiableCalculationJob* CSatisfiableCalculationJobGenerator::getSatisfiableCalculationJob(CConcept* concept1, bool negation1, CConcept* concept2, bool negation2, CIndividual* individual, CSatisfiableCalculationJob* satCalcJob) {
 				return getSatisfiableCalculationJob(QList< QPair<CConcept*,bool> >()<<QPair<CConcept*,bool>(concept1,negation1)<<QPair<CConcept*,bool>(concept2,negation2),individual,satCalcJob);
@@ -55,7 +59,11 @@ namespace Konclude {
 				return getSatisfiableCalculationJob(conNegList,individual,satCalcJob);
 			}
 
-			CSatisfiableCalculationJob* CSatisfiableCalculationJobGenerator::getSatisfiableCalculationJob(const QList< QPair<CConcept*,bool> >& conceptNegationList, CIndividual* individual, CSatisfiableCalculationJob* satCalcJob) {
+			CSatisfiableCalculationJob* CSatisfiableCalculationJobGenerator::getSatisfiableCalculationJob(const QList< QPair<CConcept*, bool> >& conceptNegationList, CIndividual* individual, CSatisfiableCalculationJob* satCalcJob) {
+				return getSatisfiableCalculationJob(conceptNegationList, CIndividualReference(individual), satCalcJob);
+			}
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJobGenerator::getSatisfiableCalculationJob(const QList< QPair<CConcept*,bool> >& conceptNegationList, const CIndividualReference& indiRef, CSatisfiableCalculationJob* satCalcJob) {
 				if (!satCalcJob) {
 					satCalcJob = new CSatisfiableCalculationJob();
 				}
@@ -70,8 +78,12 @@ namespace Konclude {
 					satCalcConstruct->addConstructConceptLinker(conNegLinker);
 				}
 
-				if (individual) {
-					satCalcConstruct->setIndividual(individual);
+				if (indiRef.isNonEmpty()) {
+					if (indiRef.getIndividual()) {
+						satCalcConstruct->setIndividual(indiRef.getIndividual());
+					} else {
+						satCalcConstruct->setIndividualID(indiRef.getIndividualID());
+					}
 				} else {
 					satCalcConstruct->setRelativeNewNodeID(satCalcJob->getNextRelativeNodeID());
 				}
@@ -99,6 +111,26 @@ namespace Konclude {
 				return satCalcJob;
 			}
 
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJobGenerator::getSatisfiableCalculationJob(const QList<CIndividualReference>& indiList, CSatisfiableCalculationJob* satCalcJob) {
+				if (!satCalcJob) {
+					satCalcJob = new CSatisfiableCalculationJob();
+				}
+				satCalcJob->setOntology(mOntology);
+				for (QList<CIndividualReference>::const_iterator it = indiList.constBegin(), itEnd = indiList.constEnd(); it != itEnd; ++it) {
+					CIndividualReference individualReference = (*it);
+					CSatisfiableCalculationConceptConstruct* satCalcConstruct = new CSatisfiableCalculationConceptConstruct();
+					if (individualReference.isNonEmpty()) {
+						if (individualReference.getIndividual()) {
+							satCalcConstruct->setIndividual(individualReference.getIndividual());
+						} else {
+							satCalcConstruct->setIndividualID(individualReference.getIndividualID());
+						}
+					}
+					satCalcJob->addSatisfiableCalculationConstruct(satCalcConstruct);
+				}
+				return satCalcJob;
+			}
 
 		}; // end namespace Generator
 

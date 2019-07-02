@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -148,8 +148,10 @@ namespace Konclude {
 			}
 
 			
-			CSubsumptionClassifierThread *COptimizedKPSetClassSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
+			CSubsumptionClassifierThread *COptimizedKPSetClassSubsumptionClassifierThread::scheduleOntologyClassification(CConcreteOntology *ontology, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config) {
 
+
+				CTaxonomy *taxonomy = createEmptyTaxonomyForOntology(ontology,config);
 				COptimizedKPSetClassOntologyClassificationItem *ontClassItem = createOntologyClassificationItem(ontology,config);
 				ontClassItem->initTaxonomyConcepts(ontology,taxonomy);
 				ontItemList.append(ontClassItem);
@@ -165,7 +167,7 @@ namespace Konclude {
 
 				CPartialPruningTaxonomy *parTax = dynamic_cast<CPartialPruningTaxonomy *>(taxonomy);
 				if (parTax) {
-					COntologyClassificationItem *ontClassItem = ontItemHash.value(ontology);
+					COntologyClassClassificationItem *ontClassItem = (COntologyClassClassificationItem*)ontItemHash.value(ontology);
 					parTax->createStatistics(ontClassItem->getClassifierStatistics());
 				}
 
@@ -222,8 +224,11 @@ namespace Konclude {
 				QSet<COptimizedKPSetClassTestingItem*>* nextCandItemSet = ontClassItem->getNextCandidateSatisfiableTestingItemSet();
 				QSet<COptimizedKPSetClassTestingItem*>* remainingCandItemSet = ontClassItem->getRemainingCandidateSatisfiableTestingItemSet();
 
+
+				CConcept* univConnNomValueConcept = tBox->getUniversalConnectionNominalValueConcept();
+
 				bool testTopConcept = false;
-				if (topConcept->getOperandList() || eqConNonCandidateSet && !eqConNonCandidateSet->isEmpty()) {
+				if (topConcept->getOperandList() || eqConNonCandidateSet && !eqConNonCandidateSet->isEmpty() || univConnNomValueConcept) {
 					// has not absorbed GCIs
 					nextItemList->append(topItem);
 					testTopConcept = true;
@@ -498,9 +503,11 @@ namespace Konclude {
 				QList<COptimizedKPSetClassTestingItem*>* nextItemList = ontClassItem->getNextSatisfiableTestingItemList();
 				QSet<COptimizedKPSetClassTestingItem*>* nextCandItemSet = ontClassItem->getNextCandidateSatisfiableTestingItemSet();
 				QSet<COptimizedKPSetClassTestingItem*>* remainingCandItemSet = ontClassItem->getRemainingCandidateSatisfiableTestingItemSet();
+				
+				CConcept* univConnNomValueConcept = tBox->getUniversalConnectionNominalValueConcept();
 
 				bool testTopConcept = true;
-				if (topConcept->getOperandList() || eqConNonCandidateSet && !eqConNonCandidateSet->isEmpty()) {
+				if (topConcept->getOperandList() || eqConNonCandidateSet && !eqConNonCandidateSet->isEmpty() || univConnNomValueConcept) {
 					// has not absorbed GCIs
 					nextItemList->append(topItem);
 					testTopConcept = true;
@@ -760,7 +767,7 @@ namespace Konclude {
 
 					COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetClassOntologyClassificationItem *)ontClassItem;
 
-					if (!optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !ontClassItem->isTaxonomyConstructionFailed()) {
+					if (!optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !optKPSetClassificationItem->isTaxonomyConstructionFailed()) {
 
 						while (!workTestCreated && optKPSetClassificationItem->hasRemainingSatisfiableTests()) {
 							// get next satisfiable test
@@ -917,7 +924,7 @@ namespace Konclude {
 
 								}
 								OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
-								OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(createDebugKPSetString(optKPSetClassificationItem,"classkpsets-inital.txt"));
+								OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(createDebugKPSetString(optKPSetClassificationItem,"./Debugging/Classification/classkpsets-inital.txt"));
 
 
 								foreach (COptimizedKPSetClassTestingItem* item, classList) {
@@ -1044,16 +1051,16 @@ namespace Konclude {
 								}
 
 								if (mConfWriteDebuggingData) {
-									createDebugKPSetString(optKPSetClassificationItem,"classkpsets-inital-pruned.txt");
+									createDebugKPSetString(optKPSetClassificationItem,"./Debugging/Classification/classkpsets-inital-pruned.txt");
 								}
-								OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(createDebugKPSetString(optKPSetClassificationItem,"classkpsets-inital-pruned.txt"));
+								OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(createDebugKPSetString(optKPSetClassificationItem,"./Debugging/Classification/classkpsets-inital-pruned.txt"));
 								OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(testDebugPossibleSubsumerCorrectCounted(optKPSetClassificationItem));
 
 							}
 						}
 					}
 
-					if (optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() && !ontClassItem->isTaxonomyConstructionFailed()) {
+					if (optKPSetClassificationItem->hasSatisfiableTestingPhaseFinished() && !optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() && !optKPSetClassificationItem->isTaxonomyConstructionFailed()) {
 
 						QList<COptimizedKPSetClassTestingItem*>* nextItemList = optKPSetClassificationItem->getNextPossibleSubsumptionTestingItemList();
 						QSet<COptimizedKPSetClassTestingItem*>* currentItemSet = optKPSetClassificationItem->getCurrentPossibleSubsumptionTestingItemSet();
@@ -1164,8 +1171,8 @@ namespace Konclude {
 
 
 					if (!workTestCreated) {
-						if (optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() || ontClassItem->isTaxonomyConstructionFailed()) {
-							finishOntologyClassification(ontClassItem);
+						if (optKPSetClassificationItem->hasPossibleSubsumptionTestingPhaseFinished() || optKPSetClassificationItem->isTaxonomyConstructionFailed()) {
+							finishOntologyClassification(optKPSetClassificationItem);
 							processingOntItemList.removeFirst();
 						} else {
 							processingOntItemList.removeFirst();
@@ -1202,7 +1209,7 @@ namespace Konclude {
 
 			bool COptimizedKPSetClassSubsumptionClassifierThread::calculateSatisfiable(COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetClassTestingItem* nextSatTestItem) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
-				CClassificationWorkItem *workItem = 0;
+				CClassClassificationComputationItem *workItem = 0;
 
 				CConcept* concept = nextSatTestItem->getTestingConcept();
 				nextSatTestItem->setSatisfiableTestOrdered(true);
@@ -1224,7 +1231,7 @@ namespace Konclude {
 				cout<<QString("Calculating whether '%1' is satisfiable").arg(iriClassNameString).toLocal8Bit().data()<<endl<<endl;
 #endif
 
-				//if (iriClassNameString == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students") {
+				//if (iriClassNameString == "http://www.owllink.org/testsuite/particle-D#Neutrino") {
 				//	bool bug = true;
 				//}
 
@@ -1257,14 +1264,14 @@ namespace Konclude {
 
 				CSatisfiableCalculationJobGenerator satCalcJobGen(optKPSetClassificationItem->getOntology());
 				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(concept);
-				QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = optKPSetClassificationItem->getWorkItemHash();
+				QHash<CSatisfiableCalculationJob *, CClassClassificationComputationItem *> *workHash = optKPSetClassificationItem->getWorkItemHash();
 
 				CClassifierStatistics *ontClassStat = optKPSetClassificationItem->getClassifierStatistics();
 				if (ontClassStat) {
 					ontClassStat->incCalculatedTestedSatisfiableCount(1);
 				}
 
-				workItem = new CClassificationWorkItem(satCalcJob,concept);
+				workItem = new CClassClassificationComputationItem(satCalcJob,concept);
 				workHash->insertMulti(satCalcJob,workItem);
 				workOntItemHash.insert(workItem,optKPSetClassificationItem);
 
@@ -1276,10 +1283,10 @@ namespace Konclude {
 				satCalcJob->setSatisfiableClassificationMessageAdapter(new CSatisfiableTaskClassificationMessageAdapter(concept,optKPSetClassificationItem->getOntology(),this,conRefLinkDataHash,extFlags));
 
 				optKPSetClassificationItem->incCurrentCalculatingCount();
-				processCalculationJob(satCalcJob,optKPSetClassificationItem,workItem);
 				if (optKPSetClassificationItem->getIndividualDependenceTrackingCollector()) {
 					satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(optKPSetClassificationItem->getIndividualDependenceTrackingCollector(),nextSatTestItem));
 				}
+				processCalculationJob(satCalcJob,optKPSetClassificationItem,workItem);
 				++mCreatedCalculationTaskCount;
 				return true;
 			}
@@ -1290,7 +1297,7 @@ namespace Konclude {
 
 			bool COptimizedKPSetClassSubsumptionClassifierThread::calculateSubsumption(COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetClassTestingItem* subsumedItem, COptimizedKPSetClassTestingItem* possSubsumerItem, COptimizedKPSetClassPossibleSubsumptionData* possSubsumData) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
-				CClassificationWorkItem *workItem = 0;
+				CClassClassificationComputationItem *workItem = 0;
 				++mOrderedSubsumptionCalculationCount;
 
 				CConcept* subsumedConcept = subsumedItem->getTestingConcept();
@@ -1337,14 +1344,14 @@ namespace Konclude {
 
 				CSatisfiableCalculationJobGenerator satCalcJobGen(optKPSetClassificationItem->getOntology());
 				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(subsumedConcept,false,subsumerConcept,true);
-				QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = optKPSetClassificationItem->getWorkItemHash();
+				QHash<CSatisfiableCalculationJob *, CClassClassificationComputationItem *> *workHash = optKPSetClassificationItem->getWorkItemHash();
 
 				if (ontClassStat) {
 					ontClassStat->incCalculatedTestedSubsumptionCount(1);
 					ontClassStat->incToldSubsumptionCount(1);
 				}
 
-				workItem = new CClassificationWorkItem(satCalcJob,subsumerConcept,subsumedConcept);
+				workItem = new CClassClassificationComputationItem(satCalcJob,subsumerConcept,subsumedConcept);
 				workHash->insertMulti(satCalcJob,workItem);
 				workOntItemHash.insert(workItem,optKPSetClassificationItem);
 
@@ -1701,7 +1708,7 @@ namespace Konclude {
 			}
 
 
-			CSubsumptionClassifierThread *COptimizedKPSetClassSubsumptionClassifierThread::processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassificationItem *ontClassItem, CClassificationWorkItem* workItem) {
+			CSubsumptionClassifierThread *COptimizedKPSetClassSubsumptionClassifierThread::processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassClassificationItem *ontClassItem, CClassClassificationComputationItem* workItem) {
 				CClassificationCalculationStatisticsCollection* statColl =  nullptr;
 				if (ontClassItem->isCollectProcessStatisticsActivated()) {
 					statColl = ontClassItem->getCalculationStatisticsCollection();
@@ -1711,7 +1718,7 @@ namespace Konclude {
 				job->setCalculationConfiguration(ontClassItem->getCalculationConfiguration());
 				CSubsumptionClassifierThread::processCalculationJob(job,ontClassItem,testResultCallback,false);
 				return this;
-			}
+			} 
 
 
 
@@ -1723,7 +1730,7 @@ namespace Konclude {
 					CClassificationMessageData* messageData = messageDataLinkerIt;
 					if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSSUBSUMPTION) {
 						++mStatProcesedSubsumMessCount;
-						CClassificationSubsumptionMessageData* subsumMessageData = (CClassificationSubsumptionMessageData*)messageData;
+						CClassificationClassSubsumptionMessageData* subsumMessageData = (CClassificationClassSubsumptionMessageData*)messageData;
 						CConcept* subsumedConcept = subsumMessageData->getSubsumedConcept();
 						CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>* subsumerList = subsumMessageData->getClassSubsumerList();
 
@@ -1768,9 +1775,9 @@ namespace Konclude {
 
 					} else if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSINITIALIZEPOSSIBLESUBSUM) {
 						++mStatProcesedPossSubsumInitMessCount;
-						CClassificationInitializePossibleSubsumptionMessageData* possSubsumMessageData = (CClassificationInitializePossibleSubsumptionMessageData*)messageData;
+						CClassificationInitializePossibleClassSubsumptionMessageData* possSubsumMessageData = (CClassificationInitializePossibleClassSubsumptionMessageData*)messageData;
 						CConcept* subsumedConcept = possSubsumMessageData->getSubsumedConcept();
-						CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>* possSubsumerList = possSubsumMessageData->getClassPossibleSubsumerList();
+						CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>* possSubsumerList = possSubsumMessageData->getClassPossibleSubsumerList();
 						bool eqConceptsNonCandidatePossSubsumers = possSubsumMessageData->hasEqConceptsNonCandidatePossSubsumers();
 						CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CConcept*>* eqConNonCandPossSubsumerList = possSubsumMessageData->getClassEqConceptNonCandidatePossibleSubsumerList();
 
@@ -1805,8 +1812,8 @@ namespace Konclude {
 								if (possSubsumMap->isEmpty()) {
 									// initialize the possible subsumption map
 									if (possSubsumerList) {
-										for (CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::const_iterator it = possSubsumerList->constBegin(), itEnd = possSubsumerList->constEnd(); it != itEnd; ++it) {
-											CClassificationInitializePossibleSubsumptionData* possSubsumDataIt = *it;
+										for (CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>::const_iterator it = possSubsumerList->constBegin(), itEnd = possSubsumerList->constEnd(); it != itEnd; ++it) {
+											CClassificationInitializePossibleClassSubsumptionData* possSubsumDataIt = *it;
 											if (possSubsumDataIt->isPossibleSubsumerValid()) {
 												CConcept* possSubsumConcept = possSubsumDataIt->getPossibleSubsumerConcept();
 												if (possSubsumConcept->getOperatorCode() != CCEQ || !equivConCandidateHash->contains(possSubsumConcept)) {
@@ -1960,11 +1967,11 @@ namespace Konclude {
 									// prune the possible subsumption map
 									COptimizedKPSetClassPossibleSubsumptionMap::const_iterator itPoss = possSubsumMap->constBegin(), itPossEnd = possSubsumMap->constEnd();
 									if (possSubsumerList) {
-										CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleSubsumptionData*>::const_iterator itNew = possSubsumerList->constBegin(), itNewEnd = possSubsumerList->constEnd();
+										CCLASSPOSSIBLESUBSUMPTIONMESSAGELIST<CClassificationInitializePossibleClassSubsumptionData*>::const_iterator itNew = possSubsumerList->constBegin(), itNewEnd = possSubsumerList->constEnd();
 										while (itPoss != itPossEnd && itNew != itNewEnd) {
 											COptimizedKPSetClassPossibleSubsumptionData* possData = itPoss.value();
 											CConcept* possCon = itPoss.key().getConcept();
-											CClassificationInitializePossibleSubsumptionData* possNewSubsumDataIt = *itNew;
+											CClassificationInitializePossibleClassSubsumptionData* possNewSubsumDataIt = *itNew;
 											if (possNewSubsumDataIt->isPossibleSubsumerValid()) {
 												CConcept* newCon = possNewSubsumDataIt->getPossibleSubsumerConcept();
 												if (possCon->getConceptTag() == newCon->getConceptTag()) {
@@ -2011,7 +2018,7 @@ namespace Konclude {
 
 					} else if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSUPDATEPOSSIBLESUBSUM) {
 						++mStatProcesedPossSubsumUpdateMessCount;
-						CClassificationUpdatePossibleSubsumptionMessageData* possSubsumMessageData = (CClassificationUpdatePossibleSubsumptionMessageData*)messageData;
+						CClassificationUpdatePossibleClassSubsumptionMessageData* possSubsumMessageData = (CClassificationUpdatePossibleClassSubsumptionMessageData*)messageData;
 						CConcept* subsumedConcept = possSubsumMessageData->getSubsumedConcept();
 
 						COptimizedKPSetClassTestingItem* subsumedItem = nullptr;
@@ -2050,7 +2057,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetClassSubsumptionClassifierThread::interpreteToldSubsumptionResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubSum) {
+			bool COptimizedKPSetClassSubsumptionClassifierThread::interpreteToldSubsumptionResult(COntologyClassClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubSum) {
 				CConcept *lastConcept = nullptr;
 				COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetClassOntologyClassificationItem *)ontClassItem;
 				COptimizedKPSetClassTestingItem* subsumerItem = nullptr;
@@ -2071,7 +2078,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetClassSubsumptionClassifierThread::interpreteSubsumptionResult(COntologyClassificationItem *ontClassItem, CConcept *subsumedConcept, CConcept *subsumerConcept, bool isSubsumption) {
+			bool COptimizedKPSetClassSubsumptionClassifierThread::interpreteSubsumptionResult(COntologyClassClassificationItem *ontClassItem, CConcept *subsumedConcept, CConcept *subsumerConcept, bool isSubsumption) {
 				COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetClassOntologyClassificationItem *)ontClassItem;
 
 				++mInterpretedSubsumptionCalculationCount;
@@ -2093,7 +2100,7 @@ namespace Konclude {
 
 				//QString iriClassNameString1 = CIRIName::getRecentIRIName(subsumedConcept->getClassNameLinker());
 				//QString iriClassNameString2 = CIRIName::getRecentIRIName(subsumerConcept->getClassNameLinker());
-				//if (iriClassNameString1 == "http://purl.org/biotop/biotop.owl#EntireCarbohydrateMonomer" && iriClassNameString2 == "http://purl.org/biotop/biotop.owl#EntireMolecularEntity" && !isSubsumption) {
+				//if (iriClassNameString1.endsWith("Wine") && iriClassNameString2.endsWith("Wine") && isSubsumption) {
 				//	bool bug = true;
 				//	calculateSubsumption(optKPSetClassificationItem,subsumedItem,subsumerItem,nullptr);
 				//	return false;
@@ -2323,7 +2330,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetClassSubsumptionClassifierThread::interpreteSatisfiableResult(COntologyClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis) {
+			bool COptimizedKPSetClassSubsumptionClassifierThread::interpreteSatisfiableResult(COntologyClassClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis) {
 				COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetClassOntologyClassificationItem *)ontClassItem;
 
 				CClassifierStatistics *ontClassStat = optKPSetClassificationItem->getClassifierStatistics();
@@ -2336,7 +2343,7 @@ namespace Konclude {
 				optKPSetClassificationItem->decRunningSatisfiableTestsCount();
 
 				COptimizedKPSetClassTestingItem* satTestedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(satisfiableConcept);
-				//if (CIRIName::getRecentIRIName(satisfiableConcept->getClassNameLinker()) == "http://www.gdst.uqam.ca/Documents/Ontologies/HIT/Equipment_SH_Ontology.owl#Folding_chair" && !isSatis) {
+				//if (CIRIName::getRecentIRIName(satisfiableConcept->getClassNameLinker()) == "http://www.w3.org/TR/2003/CR-owl-guide-20030818/wine#WineFlavor" && !isSatis) {
 				//	bool bug = true;
 				//	calculateSatisfiable(optKPSetClassificationItem,satTestedItem);
 				//	return false;
@@ -2412,14 +2419,14 @@ namespace Konclude {
 			bool COptimizedKPSetClassSubsumptionClassifierThread::interpreteTestResults(CTestCalculatedCallbackEvent *testResult) {
 				CSatisfiableCalculationJob *satCalcJob = testResult->getSatisfiableCalculationJob();
 				bool testSat = testResult->getTestResultSatisfiable();
-				CClassificationWorkItem *workItem = testResult->getClassificationWorkItem();
+				CClassClassificationComputationItem *workItem = (CClassClassificationComputationItem*)testResult->getClassificationWorkItem();
 				++mRecievedCallbackCount;
 
 
-				COntologyClassificationItem *ontClassItem = workOntItemHash.value(workItem);
+				COntologyClassClassificationItem *ontClassItem = workOntItemHash.value(workItem);
 				if (ontClassItem) {
 
-					QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *> *workHash = ontClassItem->getWorkItemHash();
+					QHash<CSatisfiableCalculationJob *, CClassClassificationComputationItem *> *workHash = ontClassItem->getWorkItemHash();
 
 					CTaxonomy *taxonomy = ontClassItem->getTaxonomy();
 
@@ -2440,7 +2447,7 @@ namespace Konclude {
 								}
 							}
 						}
-						QHash<CSatisfiableCalculationJob *, CClassificationWorkItem *>::iterator itWorkItem = workHash->find(satCalcJob);
+						QHash<CSatisfiableCalculationJob *, CClassClassificationComputationItem *>::iterator itWorkItem = workHash->find(satCalcJob);
 						while (itWorkItem != workHash->end()) {						
 							if (itWorkItem.value() == workItem) {
 								workHash->erase(itWorkItem);
@@ -2470,7 +2477,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetClassSubsumptionClassifierThread::finishOntologyClassification(COntologyClassificationItem *ontClassItem) {
+			bool COptimizedKPSetClassSubsumptionClassifierThread::finishOntologyClassification(COntologyClassClassificationItem *ontClassItem) {
 
 				if (!ontClassItem->isTaxonomyConstructed() && !ontClassItem->isTaxonomyConstructionFailed()) {
 
@@ -2485,7 +2492,10 @@ namespace Konclude {
 
 					COptimizedKPSetClassOntologyClassificationItem *optKPSetClassificationItem = (COptimizedKPSetClassOntologyClassificationItem *)ontClassItem;
 					QList<COptimizedKPSetClassTestingItem*>* satItemList = optKPSetClassificationItem->getSatisfiableConceptItemList();
-					OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(createDebugKPSetString(optKPSetClassificationItem,"classkpsets-final.txt"));
+					if (mConfWriteDebuggingData) {
+						createDebugKPSetString(optKPSetClassificationItem, "./Debugging/Classification/classkpsets-final.txt");
+					}
+					OPTIMIZEDKPSETCLASSCLASSIFIERDEBUGCONSISTENCYTEST(createDebugKPSetString(optKPSetClassificationItem,"./Debugging/Classification/classkpsets-final.txt"));
 
 					CTaxonomy *tax = optKPSetClassificationItem->getTaxonomy();
 
@@ -2661,7 +2671,7 @@ namespace Konclude {
 					}
 					ontology->setConceptTaxonomy(taxonomy);
 
-					ontClassItem->setGoneOutRemainingTests(false);
+					ontClassItem->setHasRemainingTests(false);
 					taxonomy->setTaxonomyComplete(true);
 
 					--mClassificationCount;
@@ -2676,7 +2686,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedKPSetClassSubsumptionClassifierThread::addClassificationStatistics(COntologyClassificationItem *ontClassItem, CClassConceptClassification* classConClassification) {
+			bool COptimizedKPSetClassSubsumptionClassifierThread::addClassificationStatistics(COntologyClassClassificationItem *ontClassItem, CClassConceptClassification* classConClassification) {
 				CClassificationStatisticsCollectionStrings* classifStatCollStrings = ontClassItem->getClassificationStatisticsCollectionStrings();
 				CClassifierStatistics* classifierStats = ontClassItem->getClassifierStatistics();
 				classifStatCollStrings->addProcessingStatistics("class-classification-total-satisfiable-test-count",classifierStats->getTotalSatisfiableCount());

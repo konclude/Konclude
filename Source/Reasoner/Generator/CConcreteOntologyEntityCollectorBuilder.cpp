@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -50,12 +50,24 @@ namespace Konclude {
 				return &mIndividualNameSet;
 			}
 
-			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getVariableNameSet() {
-				return &mVariableNameSet;
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getNominalVariableNameSet() {
+				return &mNominalVariableNameSet;
 			}
 
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getNamedIndividualVariableNameSet() {
+				return &mNamedIndividualVariableNameSet;
+			}
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getAnonymousIndividualVariableNameSet() {
+				return &mAnonymousIndividualVariableNameSet;
+			}
 
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getDataValueVariableNameSet() {
+				return &mDataValueVariableNameSet;
+			}
 
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getDataLiteralVariableNameSet() {
+				return &mDataLiteralVariableNameSet;
+			}
 
 
 
@@ -140,16 +152,49 @@ namespace Konclude {
 			}
 
 
-			CObjectIndividualVariableExpression* CConcreteOntologyEntityCollectorBuilder::getIndividualVariable(const QString &individualVariableName, cint64 axiomNumber) {
-				mVariableNameSet.insert(individualVariableName);
+			CObjectIndividualVariableExpression* CConcreteOntologyEntityCollectorBuilder::getNominalIndividualVariable(const QString &individualVariableName, cint64 axiomNumber) {
+				mNominalVariableNameSet.insert(individualVariableName);
 				return nullptr;
 			}
 
-			CObjectIndividualVariableExpression* CConcreteOntologyEntityCollectorBuilder::getIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber) {
-				return getIndividualVariable(individualVariableName.toString(),axiomNumber);
+			CObjectIndividualVariableExpression* CConcreteOntologyEntityCollectorBuilder::getNominalIndividualVariable(const QStringRef &individualVariableName, cint64 axiomNumber) {
+				return getNominalIndividualVariable(individualVariableName.toString(),axiomNumber);
+			}
+
+			CIndividualVariableExpression* CConcreteOntologyEntityCollectorBuilder::getIndividualVariable(const QStringRef &individualVariableName, bool anonymousVariable) {
+				return getIndividualVariable(individualVariableName.toString(), anonymousVariable);
+			}
+
+			CIndividualVariableExpression* CConcreteOntologyEntityCollectorBuilder::getIndividualVariable(const QString &individualVariableName, bool anonymousVariable) {
+				if (anonymousVariable) {
+					mAnonymousIndividualVariableNameSet.insert(individualVariableName);
+				} else {
+					mNamedIndividualVariableNameSet.insert(individualVariableName);
+				}
+				return nullptr;
 			}
 
 
+
+			CDataValueVariableExpression* CConcreteOntologyEntityCollectorBuilder::getDataValueVariable(const QStringRef &dataValueVariableName) {
+				return getDataValueVariable(dataValueVariableName.toString());
+			}
+
+			CDataValueVariableExpression* CConcreteOntologyEntityCollectorBuilder::getDataValueVariable(const QString &dataValueVariableName) {
+				mDataValueVariableNameSet.insert(dataValueVariableName);
+				return nullptr;
+			}
+
+
+
+			CDataLiteralVariableExpression* CConcreteOntologyEntityCollectorBuilder::getDataLiteralVariable(const QStringRef &dataLiteralVariableName) {
+				return getDataLiteralVariable(dataLiteralVariableName.toString());
+			}
+
+			CDataLiteralVariableExpression* CConcreteOntologyEntityCollectorBuilder::getDataLiteralVariable(const QString &dataLiteralVariableName) {
+				mDataLiteralVariableNameSet.insert(dataLiteralVariableName);
+				return nullptr;
+			}
 
 
 			CDataLiteralExpression* CConcreteOntologyEntityCollectorBuilder::getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype) {
@@ -361,11 +406,11 @@ namespace Konclude {
 
 
 
-			CDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+			CDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3) {
 				return nullptr;
 			}
 
-			CNegativeDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralExpression* expression2, CDataPropertyTermExpression* expression3) {
+			CNegativeDataPropertyAssertionExpression* CConcreteOntologyEntityCollectorBuilder::getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3) {
 				return nullptr;
 			}
 
@@ -937,6 +982,33 @@ namespace Konclude {
 			bool CConcreteOntologyEntityCollectorBuilder::retractOntologyAxiom(CAxiomExpression* axiom) {
 				return false;
 			}
+
+
+			bool CConcreteOntologyEntityCollectorBuilder::tellOntologyAxiom(CBuildExpression* axiom) {
+				CAxiomExpression* axiomExp = dynamic_cast<CAxiomExpression*>(axiom);
+				if (axiomExp) {
+					return tellOntologyAxiom(axiomExp);
+				}
+				return false;
+			}
+
+			bool CConcreteOntologyEntityCollectorBuilder::retractOntologyAxiom(CBuildExpression* axiom) {
+				CAxiomExpression* axiomExp = dynamic_cast<CAxiomExpression*>(axiom);
+				if (axiomExp) {
+					return retractOntologyAxiom(axiomExp);
+				}
+				return false;
+			}
+
+
+			bool CConcreteOntologyEntityCollectorBuilder::addTriplesData(CTriplesData* tripleData) {
+				return false;
+			}
+
+			CTriplesData* CConcreteOntologyEntityCollectorBuilder::getLatestTriplesData(bool onlyLocal, bool* localFlag) {
+				return nullptr;
+			}
+
 
 
 

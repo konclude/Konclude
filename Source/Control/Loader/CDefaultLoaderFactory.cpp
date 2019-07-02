@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -93,8 +93,12 @@ namespace Konclude {
 					loader = new CReasonerEvaluationTestcaseStatisticCollectionGeneratorLoader();
 				} else if (loaderName == "ReasonerEvaluationOntologyExtractionLoader") {
 					loader = new CReasonerEvaluationOntologyExtractionLoader();
-				} else if (loaderName == "CLIClassificationBatchProcessingLoader") {
-					loader = new CCLIClassificationBatchProcessingLoader();
+				} else if (loaderName == "CLIClassClassificationBatchProcessingLoader") {
+					loader = new CCLIClassClassificationBatchProcessingLoader();
+				} else if (loaderName == "CLIObjectPropertyClassificationBatchProcessingLoader") {
+					loader = new CCLIObjectPropertyClassificationBatchProcessingLoader();
+				} else if (loaderName == "CLIDataPropertyClassificationBatchProcessingLoader") {
+					loader = new CCLIDataPropertyClassificationBatchProcessingLoader();
 				} else if (loaderName == "CLIConsistencyBatchProcessingLoader") {
 					loader = new CCLIConsistencyBatchProcessingLoader();
 				} else if (loaderName == "CLISatisfiabilityBatchProcessingLoader") {
@@ -103,6 +107,14 @@ namespace Konclude {
 					loader = new CCLIRealizationBatchProcessingLoader();
 				} else if (loaderName == "LoggerConfigurationLoader") {
 					loader = new CLoggerConfigurationLoader();
+				} else if (loaderName == "JNICommandProcessorLoader") {
+					loader = new CJNICommandProcessorLoader();
+				} else if (loaderName == "SPARQLBatchFileLoader") {
+					loader = new CSPARQLBatchFileLoader();
+				} else if (loaderName == "CLILoadingBatchProcessingLoader") {
+					loader = new CCLILoadingBatchProcessingLoader();
+				} else if (loaderName == "SPARQLHttpServerLoader") {
+					loader = new CSPARQLHttpServerLoader();
 				}
 				return loader;
 			}
@@ -165,7 +177,11 @@ namespace Konclude {
 					canLoad = true;
 				} else if (loaderName == "ReasonerEvaluationOntologyExtractionLoader") {
 					canLoad = true;
-				} else if (loaderName == "CLIClassificationBatchProcessingLoader") {
+				} else if (loaderName == "CLIClassClassificationBatchProcessingLoader") {
+					canLoad = true;
+				} else if (loaderName == "CLIObjectPropertyClassificationBatchProcessingLoader") {
+					canLoad = true;
+				} else if (loaderName == "CLIDataPropertyClassificationBatchProcessingLoader") {
 					canLoad = true;
 				} else if (loaderName == "CLIConsistencyBatchProcessingLoader") {
 					canLoad = true;
@@ -174,6 +190,14 @@ namespace Konclude {
 				} else if (loaderName == "CLIRealizationBatchProcessingLoader") {
 					canLoad = true;
 				} else if (loaderName == "LoggerConfigurationLoader") {
+					canLoad = true;
+				} else if (loaderName == "JNICommandProcessorLoader") {
+					canLoad = true;
+				} else if (loaderName == "SPARQLBatchFileLoader") {
+					canLoad = true;
+				} else if (loaderName == "CLILoadingBatchProcessingLoader") {
+					canLoad = true;
+				} else if (loaderName == "SPARQLHttpServerLoader") {
 					canLoad = true;
 				}
 				return canLoad;

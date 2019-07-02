@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -56,7 +56,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CReapplyConceptLabelSetIterator(cint64 conceptCount, CConceptDescriptor* conceptDesLinker, const CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator& beginIt, const CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator& endIt, bool skipEmptyConceptDescriptors = true);
+						CReapplyConceptLabelSetIterator(cint64 conceptCount, CConceptDescriptor* conceptDesLinker, const CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator& beginIt, const CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator& endIt, const CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator& addBeginIt, const CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator& addEndIt, bool skipEmptyConceptDescriptors = true);
 
 						cint64 getRemainingConceptCount();
 
@@ -84,6 +84,8 @@ namespace Konclude {
 					protected:
 						CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator mConDesDepBeginIt;
 						CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator mConDesDepEndIt;
+						CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator mAdditionalConDesDepBeginIt;
+						CPROCESSMAP<cint64,CConceptDescriptorDependencyReapplyData>::const_iterator mAdditionalConDesDepEndIt;
 						CConceptDescriptor* mConceptDesLinkerIt;
 						cint64 mConceptCount;
 						bool mSkipEmptyConceptDescriptors;

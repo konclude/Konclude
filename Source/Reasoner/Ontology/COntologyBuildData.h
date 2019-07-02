@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -54,6 +54,10 @@
 #include "Parser/Expressions/CDataLexicalValueExpression.h"
 #include "Parser/Expressions/CDataPropertyExpression.h"
 #include "Parser/Expressions/CDataFacetExpression.h"
+#include "Parser/Expressions/CNamedIndividualVariableExpression.h"
+#include "Parser/Expressions/CAnonymousIndividualVariableExpression.h"
+#include "Parser/Expressions/CDataValueVariableExpression.h"
+#include "Parser/Expressions/CDataLiteralVariableExpression.h"
 
 #include "Reasoner/Generator/CExpressionHasher.h"
 
@@ -141,12 +145,20 @@ namespace Konclude {
 					CBUILDHASH<CStringRefStringHasher,CObjectPropertyExpression*>* getObjectPropertyEntityBuildHash();
 					CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>* getIndividualEntityBuildHash();
 					CBUILDHASH<QPair<CStringRefStringHasher,CStringRefStringHasher>,CAnonymousIndividualExpression*>* getAnonymousIndividualBuildHash();
-					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* getIndividualVariableBuildHash();
+					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* getNominalIndividualVariableBuildHash();
+
+
+					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* getNamedIndividualVariableBuildHash();
+					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* getAnonymousIndividualVariableBuildHash();
+
+
 					CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>* getDatatypeIRIBuildHash();
 					CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>* getFacetIRIBuildHash();
 					CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* getDataPropertyEntityBuildHash();
 					CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* getDataLexicalValueBuildHash();
 
+					CBUILDHASH<CStringRefStringHasher, CDataValueVariableExpression*>* getDataValueVariableBuildHash();
+					CBUILDHASH<CStringRefStringHasher, CDataLiteralVariableExpression*>* getDataLiteralVariableBuildHash();
 
 
 					CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>* getInverseObjectPropertyHash();
@@ -237,11 +249,15 @@ namespace Konclude {
 					CBUILDHASH<CStringRefStringHasher,CObjectPropertyExpression*>* mObjectPropertyBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CNamedIndividualExpression*>* mIndividualBuildHash;
 					CBUILDHASH<QPair<CStringRefStringHasher,CStringRefStringHasher>,CAnonymousIndividualExpression*>* mAnoIndividualBuildHash;
-					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* mIndividualVariableBuildHash;
-					CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>* mDatatypeIRIDatatypeBuildHash;
+					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* mNominalIndividualVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* mNamedIndividualVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* mAnonymousIndividualVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CDatatypeExpression*>* mDatatypeIRIDatatypeBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* mDataPropertyBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* mDataLexicalValueBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>* mFacetIRIFacetBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CDataValueVariableExpression*>* mDataValueVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CDataLiteralVariableExpression*>* mDataLiteralVariableBuildHash;
 
 					
 					

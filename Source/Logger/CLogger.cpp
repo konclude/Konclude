@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 #include "CLogger.h"
@@ -116,7 +116,7 @@ namespace Konclude {
 			observerSyncMutex.lock();
 			CLogObserverData *obsData = new CLogObserverData(observer,level,domains);
 			addObserverToDomains(obsData,domains);
-			observerHash.insertMulti((qint64)observer,obsData);
+			observerHash.insertMulti(observer,obsData);
 			observerSyncMutex.unlock();
 			CThread::waitSynchronization();
 		}
@@ -124,18 +124,18 @@ namespace Konclude {
 
 		void CLogger::removeObserverFromAllDomains(CAbstractLogObserver *observer) {
 			observerSyncMutex.lock();
-			if (observerHash.contains((qint64)observer)) {
-				QList<CLogObserverData *> obsDataList(observerHash.values((qint64)observer));
+			if (observerHash.contains(observer)) {
+				QList<CLogObserverData *> obsDataList(observerHash.values(observer));
 				foreach (CLogObserverData *obsData, obsDataList) {
-					if (observerDomainHash.contains((qint64)obsData)) {
-						QList<CLogDomain *> domainList(observerDomainHash.values((qint64)obsData));
+					if (observerDomainHash.contains(obsData)) {
+						QList<CLogDomain *> domainList(observerDomainHash.values(obsData));
 						foreach (CLogDomain *domain, domainList) {
 							domain->removeLogObserver(obsData);
 						}
 					}
 					delete obsData;
 				}
-				observerHash.remove((qint64)observer);
+				observerHash.remove(observer);
 			}
 			observerSyncMutex.unlock();
 		}
@@ -144,8 +144,8 @@ namespace Konclude {
 			observerSyncMutex.lock();
 			QSet<QString> removeDomainsSet;
 
-			if (observerHash.contains((qint64)observer)) {
-				QList<CLogObserverData *> obsDataList(observerHash.values((qint64)observer));
+			if (observerHash.contains(observer)) {
+				QList<CLogObserverData *> obsDataList(observerHash.values(observer));
 				foreach (QString domain,remDomains) {
 					removeDomainsSet.insert(domain);
 				}
@@ -179,7 +179,7 @@ namespace Konclude {
 				if (domain) {
 					obsData->addLogDomain(domainString);
 					domain->addLogObserver(obsData);
-					observerDomainHash.insert((qint64)obsData,domain);
+					observerDomainHash.insert(obsData,domain);
 				}
 			}
 		}

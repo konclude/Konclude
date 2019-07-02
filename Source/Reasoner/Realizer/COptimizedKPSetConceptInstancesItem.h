@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -27,12 +27,16 @@
 // Namespace includes
 #include "RealizerSettings.h"
 #include "COptimizedKPSetIndividualItem.h"
+#include "COntologyRealizingDynamicRequirmentProcessingContainer.h"
+#include "CPossibleInstancesIndividualsMergingData.h"
 
 
 // Other includes
 #include "Reasoner/Taxonomy/CHierarchyNode.h"
 
 #include "Reasoner/Realization/CConceptInstantiatedItem.h"
+
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryLabelCacheItem.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -44,6 +48,7 @@ namespace Konclude {
 
 		using namespace Taxonomy;
 		using namespace Realization;
+		using namespace Kernel::Cache;
 
 		namespace Realizer {
 
@@ -56,7 +61,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedKPSetConceptInstancesItem : public CConceptInstantiatedItem {
+			class COptimizedKPSetConceptInstancesItem : public CConceptInstantiatedItem, public COntologyRealizingDynamicRequirmentProcessingContainer {
 				// public methods
 				public:
 					//! Constructor
@@ -69,8 +74,8 @@ namespace Konclude {
 					CHierarchyNode* getHierarchyNode();
 					COptimizedKPSetConceptInstancesItem* setHierarchyNode(CHierarchyNode* hierNode);
 
-					QSet<COptimizedKPSetIndividualItem*>* getKnownInstancesSet();
-					QSet<COptimizedKPSetIndividualItem*>* getPossibleInstancesSet();
+					QMap<cint64, COptimizedKPSetIndividualItem*>* getKnownInstancesMap();
+					QMap<cint64, COptimizedKPSetIndividualItem*>* getPossibleInstancesMap();
 
 					QList<COptimizedKPSetConceptInstancesItem*>* getParentItemList();
 					QList<COptimizedKPSetConceptInstancesItem*>* getSuccessorItemList();
@@ -110,6 +115,30 @@ namespace Konclude {
 
 					bool hasPossibleInstances();
 					COptimizedKPSetIndividualItem* takeNextTestingPossibleInstance();
+					COptimizedKPSetConceptInstancesItem* removeTestingPossibleInstance(COptimizedKPSetIndividualItem* possInstance);
+					QMap<cint64, COptimizedKPSetIndividualItem*>* getPrefferedPossibleInstanceTestingSet();
+
+
+					COptimizedKPSetConceptInstancesItem* setConceptInstancesTestingFinished(bool finished);
+					bool isConceptInstancesTestingFinished();
+
+					QHash<COptimizedKPSetIndividualItem*, CPossibleInstancesIndividualsMergingLinker*>* getIndividualItemPossibleInstanceMergingLinkerHash(bool create = false);
+					QList<CPossibleInstancesIndividualsMergingData*>* getPossibleInstanceMergingDataContainer(bool create = false);
+					COptimizedKPSetConceptInstancesItem* clearPossibleInstanceMergingData();
+
+					QMap<cint64, COptimizedKPSetIndividualItem*>* getModelMergingCheckedSet(bool create = false);
+
+
+					COptimizedKPSetConceptInstancesItem* addKnownInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item);
+					COptimizedKPSetConceptInstancesItem* addKnownMostSpecificInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item);
+					COptimizedKPSetConceptInstancesItem* addPossibleInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item);
+					COptimizedKPSetConceptInstancesItem* addPossibleMostSpecificInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item);
+
+
+					QList<CBackendRepresentativeMemoryLabelCacheItem*>* getKnownInstancesLabelCacheItemList();
+					QList<CBackendRepresentativeMemoryLabelCacheItem*>* getKnownMostSpecificInstancesLabelCacheItemList();
+					QList<CBackendRepresentativeMemoryLabelCacheItem*>* getPossibleInstancesLabelCacheItemList();
+					QList<CBackendRepresentativeMemoryLabelCacheItem*>* getPossibleMostSpecificInstancesLabelCacheItemList();
 
 
 				// protected methods
@@ -118,8 +147,8 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CHierarchyNode* mHierNode;
-					QSet<COptimizedKPSetIndividualItem*> mKnownInstancesSet;
-					QSet<COptimizedKPSetIndividualItem*> mPossibleInstancesSet;
+					QMap<cint64, COptimizedKPSetIndividualItem*> mKnownInstancesMap;
+					QMap<cint64, COptimizedKPSetIndividualItem*> mPossibleInstancesMap;
 
 					QList<COptimizedKPSetConceptInstancesItem*> mParentItemList;
 					QList<COptimizedKPSetConceptInstancesItem*> mSuccessorItemList;
@@ -130,6 +159,25 @@ namespace Konclude {
 					bool mToProcessFlag;
 					bool mProcessingQueuedFlag;
 					bool mSelfSuccsCompletedFlag;
+
+					bool mConceptInstancesTestingFinished;
+
+
+
+					QHash<COptimizedKPSetIndividualItem*, CPossibleInstancesIndividualsMergingLinker*>* mIndividualItemPossibleInstanceMergingLinkerHash;
+					QList<CPossibleInstancesIndividualsMergingData*>* mPossibleInstanceMergingDataContainer;
+					QMap<cint64, COptimizedKPSetIndividualItem*>* mPrefferedPossibleInstancesSet;
+
+					QMap<cint64, COptimizedKPSetIndividualItem*>* mModelMergingCheckedSet;
+
+
+
+
+					QList<CBackendRepresentativeMemoryLabelCacheItem*> mKnownInstancesLabelCacheItemList;
+					QList<CBackendRepresentativeMemoryLabelCacheItem*> mKnownMostSpecificInstancesLabelCacheItemList;
+					QList<CBackendRepresentativeMemoryLabelCacheItem*> mPossibleInstancesLabelCacheItemList;
+					QList<CBackendRepresentativeMemoryLabelCacheItem*> mPossibleMostSpecificInstancesLabelCacheItemList;
+
 
 				// private methods
 				private:

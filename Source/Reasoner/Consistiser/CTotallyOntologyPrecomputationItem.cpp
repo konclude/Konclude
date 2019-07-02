@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -46,14 +46,18 @@ namespace Konclude {
 				mSaturationTestRunning = false;
 				mIndividualPrecomputationCreated = false;
 				mIndividualPrecomputationChecked = false;
+				mIndividualPrecomputationClashed = false;
 
 				COntologyProcessingStepDataVector* ontProStepDataVec = mOntology->getProcessingSteps()->getOntologyProcessingStepDataVector();
 
 				mConsistencePrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::CONSISTENCYPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSCONSISTENCY),this);
 				mCyclePrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::CYCLEPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSPRECOMPUTECYCLES),this);
+				mOccurrenceStatisticsPrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::OCCURRENCESTATISTICSPRECOMPUTATIONSTEP, ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSPRECOMPUTEOCCURRENCESTATISTICS), this);
+
 				mSaturationPrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::SATURATIONPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSPRECOMPUTESATURATION),this);
 				mIndividualPrecomputationStep = new CPrecomputationTestingStep(CPrecomputationTestingStep::INDIVIDUALPRECOMPUTATIONSTEP,ontProStepDataVec->getProcessingStepData(COntologyProcessingStep::OPSPRECOMPUTEINDIVIDUAL),this);
 				mProcessingSteps.append(mCyclePrecomputationStep);
+				mProcessingSteps.append(mOccurrenceStatisticsPrecomputationStep);
 				mProcessingSteps.append(mConsistencePrecomputationStep);
 				mProcessingSteps.append(mSaturationPrecomputationStep);
 				mProcessingSteps.append(mIndividualPrecomputationStep);
@@ -83,20 +87,41 @@ namespace Konclude {
 				mNextSaturationID = 1;
 				mIndividualTestRunning = false;
 				mIndividualsSaturationCacheSynchronisation = false;
+				mTriplesIndexedIndisSaturated = false;
+
+				mHandledTriplesIndiSaturatedId = -1;
+
+				mAllIncompIndiRetrieved = false;
+				mCurrentIncompIndiRetrievalLimit = 100000;
+				mCurrentIncompIndiComputationLimit = 1000;
+				mLastMinRetrievedIncompIndiId = -1;
+
+				mIndividualComputationRunningCount = 0;
+
+				mCurrentIndiCompCoordHash = nullptr;
+
+				mFullCompletionGraphConstruction = false;
+				mFullCompletionGraphConstructed = false;
+
+				mSaturationOccurrenceStatisticsCollectingInitialized = false;
+				mSaturationOccurrenceStatisticsCollected = false;
 
 				mFailAfterConsistencyConceptSaturation = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConsistencyConceptSaturation",false);
 				mFailAfterConsistencyChecking = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConsistencyCheck",false);
 				mFailAfterConceptSaturation = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConceptSaturation",false);
-
+				
 				mInitTime.start();
 				return this;
 			}
+
+
 
 
 			CTotallyOntologyPrecomputationItem::~CTotallyOntologyPrecomputationItem() {
 				delete mCalculationConfig;
 				delete mConsistencePrecomputationStep;
 				delete mCyclePrecomputationStep;
+				delete mOccurrenceStatisticsPrecomputationStep;
 				delete mSaturationPrecomputationStep;
 				delete mIndividualPrecomputationStep;
 
@@ -151,6 +176,10 @@ namespace Konclude {
 					}
 					if (stepProcRequirement->getRequiredProcessingStep()->getOntologyProcessingType() == COntologyProcessingStep::OPSPRECOMPUTECYCLES) {
 						mCyclePrecomputationStep->addProcessingRequirement(stepProcRequirement);
+						supportRequirement = true;
+					}
+					if (stepProcRequirement->getRequiredProcessingStep()->getOntologyProcessingType() == COntologyProcessingStep::OPSPRECOMPUTEOCCURRENCESTATISTICS) {
+						mOccurrenceStatisticsPrecomputationStep->addProcessingRequirement(stepProcRequirement);
 						supportRequirement = true;
 					}
 					if (stepProcRequirement->getRequiredProcessingStep()->getOntologyProcessingType() == COntologyProcessingStep::OPSPRECOMPUTEINDIVIDUAL) {
@@ -355,22 +384,42 @@ namespace Konclude {
 
 
 
-
-
-
-			bool CTotallyOntologyPrecomputationItem::hasRemainingConsistencyRequiredSaturationIndividuals() {
-				return !mRemainingABoxSatConList.isEmpty();
-			}
-
-			QList<CIndividual*>* CTotallyOntologyPrecomputationItem::getRemainingConsistencyRequiredSaturationIndividuals() {
-				return &mRemainingABoxSatConList;
-			}
-
-			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::addConsistencyRequiredSaturationIndividual(CIndividual* individual) {
-				mRemainingABoxSatConList.append(individual);
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setTripleIndexedIndividualSaturated(bool saturated) {
+				mTriplesIndexedIndisSaturated = saturated;
 				return this;
 			}
 
+
+
+			bool CTotallyOntologyPrecomputationItem::hasRemainingRequiredSaturationIndividuals() {
+				return !mRemainingABoxIndiSatList.isEmpty() || !mTriplesIndexedIndisSaturated;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasRemainingRequiredABoxSaturationIndividuals() {
+				return !mRemainingABoxIndiSatList.isEmpty();
+			}
+
+			QList<CIndividual*>* CTotallyOntologyPrecomputationItem::getRemainingRequiredABoxSaturationIndividuals() {
+				return &mRemainingABoxIndiSatList;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::addRequiredABoxSaturationIndividual(CIndividual* individual) {
+				mRemainingABoxIndiSatList.append(individual);
+				return this;
+			}
+
+
+
+			cint64 CTotallyOntologyPrecomputationItem::getHandledTriplesIndividualSaturatedId() {
+				return mHandledTriplesIndiSaturatedId;
+			}
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setHandledTriplesIndividualSaturatedId(cint64 handledId) {
+				mHandledTriplesIndiSaturatedId = handledId;
+				return this;
+			}
 
 
 
@@ -429,6 +478,45 @@ namespace Konclude {
 			bool CTotallyOntologyPrecomputationItem::isCycleStepRequired() {
 				return mCyclePrecomputationStep->hasRequirements();
 			}
+
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setSaturationOccurrenceStatisticsCollectingInitialized(bool initialized) {
+				mSaturationOccurrenceStatisticsCollectingInitialized = initialized;
+				return this;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasSaturationOccurrenceStatisticsCollectingInitialized() {
+				return mSaturationOccurrenceStatisticsCollectingInitialized;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setSaturationOccurrenceStatisticsCollected(bool checked) {
+				mSaturationOccurrenceStatisticsCollected = checked;
+				return this;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasSaturationOccurrenceStatisticsCollected() {
+				return mSaturationOccurrenceStatisticsCollected;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::areOccurrenceStatisticsStepProcessingRequirementSatisfied() {
+				return mOccurrenceStatisticsPrecomputationStep->areStepProcessingRequirementSatisfied();
+			}
+
+			CPrecomputationTestingStep* CTotallyOntologyPrecomputationItem::getOccurrenceStatisticsPrecomputationStep() {
+				return mOccurrenceStatisticsPrecomputationStep;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::isOccurrenceStatisticsStepFinished() {
+				return mOccurrenceStatisticsPrecomputationStep->isStepFinished();
+			}
+
+			bool CTotallyOntologyPrecomputationItem::isOccurrenceStatisticsStepRequired() {
+				return mOccurrenceStatisticsPrecomputationStep->hasRequirements();
+			}
+
+
 
 			bool CTotallyOntologyPrecomputationItem::areSaturationStepProcessingRequirementSatisfied() {
 				return mSaturationPrecomputationStep->areStepProcessingRequirementSatisfied();
@@ -658,6 +746,28 @@ namespace Konclude {
 				return mIndividualSaturationInsufficient;
 			}
 
+
+			bool CTotallyOntologyPrecomputationItem::isFullCompletionGraphConstruction() {
+				return mFullCompletionGraphConstruction;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setFullCompletionGraphConstruction(bool fullCompletionGraphConstruction) {
+				mFullCompletionGraphConstruction = fullCompletionGraphConstruction;
+				return this;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::isFullCompletionGraphConstructed() {
+				return mFullCompletionGraphConstructed;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setFullCompletionGraphConstructed(bool fullCompletionGraphConstructed) {
+				mFullCompletionGraphConstructed = fullCompletionGraphConstructed;
+				return this;
+			}
+
+
+
+
 			bool CTotallyOntologyPrecomputationItem::hasIndividualsSaturated() {
 				return mIndividualSaturated;
 			}
@@ -697,11 +807,51 @@ namespace Konclude {
 				return this;
 			}
 
-			QSet<CIndividual*>* CTotallyOntologyPrecomputationItem::getIncompletelySaturatedIndividuaSet() {
-				return &mIncompIndiSatSet;
+			QSet<CIndividualReference>* CTotallyOntologyPrecomputationItem::getIncompletelyHandledIndividualSet() {
+				return &mIncompHandledIndiSet;
 			}
 
 
+			CIndividualPrecomputationCoordinationHash* CTotallyOntologyPrecomputationItem::getCurrentIndividualComputationCoordinationHash() {
+				return mCurrentIndiCompCoordHash;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setCurrentIndividualComputationCoordinationHash(CIndividualPrecomputationCoordinationHash* coordHash) {
+				mCurrentIndiCompCoordHash = coordHash;
+				return this;
+			}
+
+
+			QSet<CIndividualReference>* CTotallyOntologyPrecomputationItem::getCurrentIndividualComputationSet() {
+				return &mCurrentIndiComputationSet;
+			}
+
+			cint64 CTotallyOntologyPrecomputationItem::getCurrentIncompletelyHandledIndividualRetrievalLimit() {
+				return mCurrentIncompIndiRetrievalLimit;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setCurrentIncompletelyHandledIndividualRetrievalLimit(cint64 limit) {
+				mCurrentIncompIndiRetrievalLimit = limit;
+				return this;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasAllIncompletelyHandledIndividualsRetrieved() {
+				return mAllIncompIndiRetrieved;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setAllIncompletelyHandledIndividualsRetrieved(bool allRetrieved) {
+				mAllIncompIndiRetrieved = allRetrieved;
+				return this;
+			}
+
+			cint64 CTotallyOntologyPrecomputationItem::getLastMinimumRetrievedIncompletelyHandledIndividualId() {
+				return mLastMinRetrievedIncompIndiId;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setLastMinimumRetrievedIncompletelyHandledIndividualId(cint64 minId) {
+				mLastMinRetrievedIncompIndiId = minId;
+				return this;
+			}
 
 			bool CTotallyOntologyPrecomputationItem::areIndividualStepProcessingRequirementSatisfied() {
 				return mIndividualPrecomputationStep->areStepProcessingRequirementSatisfied();
@@ -723,7 +873,7 @@ namespace Konclude {
 
 
 			bool CTotallyOntologyPrecomputationItem::isIndividualComputationRunning() {
-				return mIndividualComputationRunning;
+				return mIndividualComputationRunningCount > 0;
 			}
 
 			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualComputationRunning(bool indiCompRunning) {
@@ -732,15 +882,24 @@ namespace Konclude {
 			}
 
 
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::incIndividualComputationRunningCount(cint64 incCount) {
+				mIndividualComputationRunningCount += incCount;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::decIndividualComputationRunningCount(cint64 decCount) {
+				mIndividualComputationRunningCount -= decCount;
+				return this;
+			}
 
 
 
-			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualPrecomputationCreated(bool initialized) {
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setAllIndividualPrecomputationCreated(bool initialized) {
 				mIndividualPrecomputationCreated = initialized;
 				return this;
 			}
 
-			bool CTotallyOntologyPrecomputationItem::hasIndividualPrecomputationCreated() {
+			bool CTotallyOntologyPrecomputationItem::hasAllIndividualPrecomputationCreated() {
 				return mIndividualPrecomputationCreated;
 			}
 
@@ -753,6 +912,17 @@ namespace Konclude {
 
 			bool CTotallyOntologyPrecomputationItem::hasIndividualPrecomputationChecked() {
 				return mIndividualPrecomputationChecked;
+			}
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualPrecomputationClashed(bool checked) {
+				mIndividualPrecomputationClashed = checked;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::hasIndividualPrecomputationClashed() {
+				return mIndividualPrecomputationClashed;
 			}
 
 
@@ -769,6 +939,24 @@ namespace Konclude {
 			QTime* CTotallyOntologyPrecomputationItem::getInitializationTime() {
 				return &mInitTime;
 			}
+
+
+
+			cint64 CTotallyOntologyPrecomputationItem::getCurrentIncompletelyHandledIndividualComputationLimit() {
+				return mCurrentIncompIndiComputationLimit;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setCurrentIncompletelyHandledIndividualComputationLimit(cint64 limit) {
+				mCurrentIncompIndiComputationLimit = limit;
+				return this;
+			}
+
+
+			cint64 CTotallyOntologyPrecomputationItem::getNextRepresentativeCacheRecomputationId() {
+				return mNextRepresentativeCacheRecomputationId++;
+			}
+
+
 
 		}; // end namespace Consistiser
 

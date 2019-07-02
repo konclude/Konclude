@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -98,7 +98,7 @@ namespace Konclude {
 
 					if (mAbsoluteMinimumExclusionValue) {
 						if (mAbsoluteMinimumExclusionValue->getValue()->isGreaterThan(value)) {
-							return nullptr;
+							return false;
 						}
 					}
 					bool newValuesPotentiallyExcluded = false;
@@ -788,6 +788,7 @@ namespace Konclude {
 
 
 
+
 				bool CDatatypeRealValueSpaceMap::restrictToIntegerValues(CDependencyTrackPoint* depTrackPoint) {
 					CDatatypeRealValueExclusionType exclusionType(CDatatypeRealValueExclusionType::RVET_INTEGER,true);
 					return excludeAll(depTrackPoint,&exclusionType);
@@ -824,6 +825,40 @@ namespace Konclude {
 				}
 
 
+
+				bool CDatatypeRealValueSpaceMap::isRestrictedToIntegerValues() {
+					CDatatypeRealValueExclusionType restictionType(CDatatypeRealValueExclusionType::RVET_INTEGER, true);
+					return areAllValuesRestricted(&restictionType);
+				}
+
+				bool CDatatypeRealValueSpaceMap::isRestrictedToNonIntegerValues() {
+					CDatatypeRealValueExclusionType restictionType(CDatatypeRealValueExclusionType::RVET_INTEGER, false);
+					return areAllValuesRestricted(&restictionType);
+				}
+
+
+				bool CDatatypeRealValueSpaceMap::isRestrictedToDecimalValues() {
+					CDatatypeRealValueExclusionType restictionType(CDatatypeRealValueExclusionType::RVET_DECIMAL, true);
+					return areAllValuesRestricted(&restictionType);
+				}
+
+				bool CDatatypeRealValueSpaceMap::isRestrictedToNonDecimalValues() {
+					CDatatypeRealValueExclusionType restictionType(CDatatypeRealValueExclusionType::RVET_DECIMAL, false);
+					return areAllValuesRestricted(&restictionType);
+				}
+
+
+
+				bool CDatatypeRealValueSpaceMap::isRestrictedToRationalValues() {
+					CDatatypeRealValueExclusionType restictionType(CDatatypeRealValueExclusionType::RVET_RATIONAL, true);
+					return areAllValuesRestricted(&restictionType);
+				}
+
+
+				bool CDatatypeRealValueSpaceMap::isRestrictedToNonRationalValues() {
+					CDatatypeRealValueExclusionType restictionType(CDatatypeRealValueExclusionType::RVET_RATIONAL, false);
+					return areAllValuesRestricted(&restictionType);
+				}
 
 
 				bool CDatatypeRealValueSpaceMap::testValueSpaceReturnClashed() {
@@ -899,6 +934,45 @@ namespace Konclude {
 
 
 
+
+				bool CDatatypeRealValueSpaceMap::addValueSpaceDependencies(CDatatypeValueSpaceDependencyCollector* depCollector, CDatatypeRealValueExclusionType* exclusionType) {
+
+					CDatatypeRealValueSpaceMap::const_iterator itBegin = CDatatypeRealValueSpaceMap::constBegin(), itEnd = CDatatypeRealValueSpaceMap::constEnd();
+					CDatatypeRealValueSpaceMap::const_iterator it = itBegin;
+
+					it = itBegin;
+					while (it != itEnd) {
+						const CDatatypeRealValueSpaceMapData& mapData = it.value();
+						CDatatypeRealValueData* itValueData = mapData.mUseValue;
+						if (isDataValueExcluded(itValueData, exclusionType)) {
+							addDataValueExclusionDependencies(itValueData, depCollector);
+						}
+
+						if (it == itBegin) {
+							if (isLeftDataIntervalExcluded(itValueData, exclusionType)) {
+								addLeftIntervalExclusionDependencies(itValueData, depCollector);
+							}
+						}
+
+						++it;
+						if (it == itEnd) {
+							if (isRightDataIntervalExcluded(itValueData, exclusionType)) {
+								addRightIntervalExclusionDependencies(itValueData, depCollector);
+							}
+						}
+						else {
+							const CDatatypeRealValueSpaceMapData& nextMapData = it.value();
+							CDatatypeRealValueData* nextValueData = nextMapData.mUseValue;
+
+							if (isDataIntervalExcluded(itValueData, nextValueData, exclusionType)) {
+								addDataIntervalExclusionDependencies(itValueData, nextValueData, depCollector);
+							}
+
+						}
+					}
+					return true;
+
+				}
 
 
 
@@ -1243,6 +1317,48 @@ namespace Konclude {
 					}
 					return realValueData;
 				}
+
+
+
+	
+
+				bool CDatatypeRealValueSpaceMap::areAllValuesRestricted(CDatatypeRealValueExclusionType* exclusionType) {
+					CDatatypeRealValueSpaceMap::const_iterator itBegin = CDatatypeRealValueSpaceMap::constBegin(), itEnd = CDatatypeRealValueSpaceMap::constEnd();
+					CDatatypeRealValueSpaceMap::const_iterator it = itBegin;
+					if (it == itEnd) {
+						return true;
+					}
+					while (it != itEnd) {
+						const CDatatypeRealValueSpaceMapData& mapData = it.value();
+						CDatatypeRealValueData* realValueData = mapData.mUseValue;
+						if (!isDataValueExcluded(realValueData, exclusionType)) {
+							return false;
+						}
+
+						if (it == itBegin) {
+							if (!isLeftDataIntervalExcluded(realValueData, exclusionType)) {
+								return false;
+							}
+						}
+						++it;
+
+						if (it == itEnd) {
+							if (!isRightDataIntervalExcluded(realValueData, exclusionType)) {
+								return false;
+							}
+						}
+						else {
+							const CDatatypeRealValueSpaceMapData& nextMapData = it.value();
+							CDatatypeRealValueData* nextRealValueData = nextMapData.mUseValue;
+							if (!isDataIntervalExcluded(realValueData, nextRealValueData, exclusionType)) {
+								return false;
+							}
+						}
+					}
+					return true;
+				}
+
+
 
 
 				bool CDatatypeRealValueSpaceMap::hasExcludedMinimum(CDataLiteralRealValue* value, bool valueInclusively, CDatatypeRealValueExclusionType* exclusionType) {

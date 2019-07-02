@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,17 +28,19 @@ namespace Konclude {
 		namespace Ontology {
 
 
-			CIndividual::CIndividual(qint64 id) : CTagItem(id) {
+			CIndividual::CIndividual(qint64 id) : CIndividualIdentifier(id) {
 				mAssertionConceptLinker = nullptr;
 				mAssertionRoleLinker = nullptr;
+				mAssertionDataLinker = nullptr;
 				mReverseAssertionRoleLinker = nullptr;
 				mNominalConcept = nullptr;
 				mAnonymousIndividual = false;
+				mTemporaryIndividual = false;
 				mIndividualData = nullptr;
 			}
 
 
-
+			
 			bool CIndividual::hasIndividualName() {
 				return hasName();
 			}
@@ -99,6 +101,21 @@ namespace Konclude {
 
 
 
+			CDataAssertionLinker* CIndividual::getAssertionDataLinker() {
+				return mAssertionDataLinker;
+			}
+
+			CIndividual* CIndividual::addAssertionDataLinker(CDataAssertionLinker* assDataLinker) {
+				mAssertionDataLinker = assDataLinker->append(mAssertionDataLinker);
+				return this;
+			}
+
+			CIndividual* CIndividual::setAssertionDataLinker(CDataAssertionLinker* assDataLinker) {
+				mAssertionDataLinker = assDataLinker;
+				return this;
+			}
+
+
 
 			CReverseRoleAssertionLinker* CIndividual::getReverseAssertionRoleLinker() {
 				return mReverseAssertionRoleLinker;
@@ -120,6 +137,7 @@ namespace Konclude {
 				mAssertionConceptLinker = nullptr;
 				mNominalConcept = nullptr;
 				mAnonymousIndividual = false;
+				mTemporaryIndividual = false;
 				return this;
 			}
 
@@ -140,21 +158,9 @@ namespace Konclude {
 
 				mNominalConcept = individual->mNominalConcept;
 				mAnonymousIndividual = individual->mAnonymousIndividual;
+				mTemporaryIndividual = individual->mTemporaryIndividual;
 				return this;
 			}
-
-
-
-
-			CIndividual *CIndividual::setIndividualID(qint64 id) {
-				mTag = id;
-				return this;
-			}
-
-			qint64 CIndividual::getIndividualID() {
-				return mTag;
-			}
-
 
 
 			bool CIndividual::hasAssertedConcept(CConcept* concept) {
@@ -177,6 +183,16 @@ namespace Konclude {
 			bool CIndividual::isAnonymousIndividual() {
 				return mAnonymousIndividual;
 			}
+
+			CIndividual* CIndividual::setTemporaryIndividual(bool temporary) {
+				mTemporaryIndividual = temporary;
+				return this;
+			}
+
+			bool CIndividual::isTemporaryIndividual() {
+				return mTemporaryIndividual;
+			}
+
 
 			bool CIndividual::hasIndividualData() {
 				return mIndividualData != nullptr;

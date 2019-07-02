@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -29,10 +29,13 @@ namespace Konclude {
 
 
 			CCommonDisjunctConceptExtractionPreProcess::CCommonDisjunctConceptExtractionPreProcess() {
+				mOntology = nullptr;
+				mLastConceptId = 0;
 			}
 
 
 			CCommonDisjunctConceptExtractionPreProcess::~CCommonDisjunctConceptExtractionPreProcess() {
+				cDeleteAll(mSetContainer);
 			}
 
 
@@ -40,7 +43,12 @@ namespace Konclude {
 				bool skipForELOntologies = CConfigDataReader::readConfigBoolean(context->getConfiguration(),"Konclude.Calculation.Preprocessing.CommonDisjunctConceptExtraction.SkipForELFragment",true);
 				bool nonELConstructsUsed = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getBuildConstructFlags()->isNonELConstructUsed();
 
+				mOntology = nullptr;
+				mLastConceptId = 0;
+
 				if (nonELConstructsUsed || !skipForELOntologies) {
+
+					mOntology = ontology;
 
 					CMBox *mBox = ontology->getDataBoxes()->getMBox();
 					CTBox *tBox = ontology->getDataBoxes()->getTBox();
@@ -53,7 +61,6 @@ namespace Konclude {
 
 					mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
 
-					CImplicationReplacementVector* repVector = mBox->getImplicationReplacementVector(true);
 
 					mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
 
@@ -62,51 +69,64 @@ namespace Konclude {
 					mStatExtractedCommDisCon = 0;
 					mStatExtractedConceptForDisjunctionCount = 0;
 
-					cint64 conCount = mConceptVector->getItemCount();
-					for (cint64 conIdx = 0; conIdx < conCount; ++conIdx) {
-						CConcept* concept = mConceptVector->getData(conIdx);
-						if (concept) {
-							cint64 conOpCode = concept->getOperatorCode();
-							cint64 opCount = concept->getOperandCount();
-							if (concept->getOperandCount() >= 1 && (conOpCode == CCAND || conOpCode == CCEQ || conOpCode == CCOR)) {
-								bool negateConcept = conOpCode == CCAND || conOpCode == CCEQ;
-								QSet<TConNegPair> consideredDisConConceptSet;
-								QSet<TConNegPair> disConConceptSet;
-								getDisjunctConcepts(concept,negateConcept,&disConConceptSet,&consideredDisConConceptSet);
-								disConConceptSet.remove(TConNegPair(concept,negateConcept));
-								bool localRepData = false;
-								CReplacementData* prevReplData = repVector->getData(conIdx,&localRepData);
-								if (!disConConceptSet.isEmpty() || prevReplData) {
-									CReplacementData* replData = prevReplData;
-									if (!localRepData) {
-										replData = CObjectAllocator<CReplacementData>::allocateAndConstruct(mMemMan);
-										repVector->setData(conIdx,replData);
-										replData->initReplacementData(prevReplData);
-									}
-									++mStatExtractedConceptForDisjunctionCount;
-									replData->clearCommonDisjunctConceptLinker();
-									for (QSet<TConNegPair>::const_iterator it = disConConceptSet.constBegin(), itEnd = disConConceptSet.constEnd(); it != itEnd; ++it) {
-										TConNegPair conNegPair(*it);
-										CConcept* commCon = conNegPair.first;
-										bool commNeg = conNegPair.second;
-										if (commCon != concept || negateConcept != commNeg) {
-											CXNegLinker<CConcept*>* commNegConLinker = CObjectAllocator< CXNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
-											commNegConLinker->initNegLinker(commCon,commNeg);
-											replData->addCommonDisjunctConceptLinker(commNegConLinker);
-											++mStatExtractedCommDisCon;
-										}
-									}
-								}
-								
-							}
-						}
-					}
-
-					cDeleteAll(mSetContainer);
+					extractCommonDisjuncts();
 
 					LOG(INFO,"::Konclude::Reasoner::Preprocess::CommonDisjunctConceptExtractor",logTr("Extracted %1 concepts for %2 disjunctions.").arg(mStatExtractedCommDisCon).arg(mStatExtractedConceptForDisjunctionCount),this);
 				}
 				return ontology;
+			}
+
+
+			CCommonDisjunctConceptExtractionPreProcess* CCommonDisjunctConceptExtractionPreProcess::extractCommonDisjuncts() {
+				CMBox *mBox = mOntology->getDataBoxes()->getMBox();
+				CImplicationReplacementVector* repVector = mBox->getImplicationReplacementVector(true);
+				cint64 conCount = mConceptVector->getItemCount();
+				for (cint64 conIdx = mLastConceptId; conIdx < conCount; ++conIdx) {
+					CConcept* concept = mConceptVector->getData(conIdx);
+					if (concept) {
+						cint64 conOpCode = concept->getOperatorCode();
+						cint64 opCount = concept->getOperandCount();
+						if (concept->getOperandCount() >= 1 && (conOpCode == CCAND || conOpCode == CCEQ || conOpCode == CCOR)) {
+							bool negateConcept = conOpCode == CCAND || conOpCode == CCEQ;
+							QSet<TConNegPair> consideredDisConConceptSet;
+							QSet<TConNegPair> disConConceptSet;
+							getDisjunctConcepts(concept, negateConcept, &disConConceptSet, &consideredDisConConceptSet);
+							disConConceptSet.remove(TConNegPair(concept, negateConcept));
+							bool localRepData = false;
+							CReplacementData* prevReplData = repVector->getData(conIdx, &localRepData);
+							if (!disConConceptSet.isEmpty() || prevReplData) {
+								CReplacementData* replData = prevReplData;
+								if (!localRepData) {
+									replData = CObjectAllocator<CReplacementData>::allocateAndConstruct(mMemMan);
+									repVector->setData(conIdx, replData);
+									replData->initReplacementData(prevReplData);
+								}
+								++mStatExtractedConceptForDisjunctionCount;
+								replData->clearCommonDisjunctConceptLinker();
+								for (QSet<TConNegPair>::const_iterator it = disConConceptSet.constBegin(), itEnd = disConConceptSet.constEnd(); it != itEnd; ++it) {
+									TConNegPair conNegPair(*it);
+									CConcept* commCon = conNegPair.first;
+									bool commNeg = conNegPair.second;
+									if (commCon != concept || negateConcept != commNeg) {
+										CXNegLinker<CConcept*>* commNegConLinker = CObjectAllocator< CXNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
+										commNegConLinker->initNegLinker(commCon, commNeg);
+										replData->addCommonDisjunctConceptLinker(commNegConLinker);
+										++mStatExtractedCommDisCon;
+									}
+								}
+							}
+						}
+					}
+				}
+				mLastConceptId = conCount;
+				return this;
+			}
+
+			CConcreteOntology* CCommonDisjunctConceptExtractionPreProcess::continuePreprocessing() {
+				if (mOntology) {
+					extractCommonDisjuncts();
+				}
+				return mOntology;
 			}
 
 

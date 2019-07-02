@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Realizer {
 
 
-			CIncrementalKPSetOntologyConceptRealizingThread::CIncrementalKPSetOntologyConceptRealizingThread(CReasonerManager *reasonerManager) : COptimizedKPSetOntologyConceptRealizingThread(reasonerManager) {
+			CIncrementalKPSetOntologyConceptRealizingThread::CIncrementalKPSetOntologyConceptRealizingThread(CReasonerManager *reasonerManager) : COptimizedRepresentativeKPSetOntologyRealizingThread(reasonerManager) {
 			}
 
 			CIncrementalKPSetOntologyConceptRealizingThread::~CIncrementalKPSetOntologyConceptRealizingThread() {
@@ -36,18 +36,18 @@ namespace Konclude {
 
 
 			COntologyRealizingItem* CIncrementalKPSetOntologyConceptRealizingThread::initializeOntologyRealizingItem(CConcreteOntology* ontology, CConfigurationBase* config) {
-				return COptimizedKPSetOntologyConceptRealizingThread::initializeOntologyRealizingItem(ontology,config);
+				return COptimizedRepresentativeKPSetOntologyRealizingThread::initializeOntologyRealizingItem(ontology,config);
 			}
 
 			void CIncrementalKPSetOntologyConceptRealizingThread::readCalculationConfig(CConfigurationBase *config) {
-				COptimizedKPSetOntologyConceptRealizingThread::readCalculationConfig(config);
+				COptimizedRepresentativeKPSetOntologyRealizingThread::readCalculationConfig(config);
 			}
 
 
 
 
 
-			bool CIncrementalKPSetOntologyConceptRealizingThread::isIndividualAffectedByIncrementalChanges(CIndividual* individual, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem) {
+			bool CIncrementalKPSetOntologyConceptRealizingThread::isIndividualAffectedByIncrementalChanges(CIndividual* individual, COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem) {
 				CConcreteOntology* ontology = reqConfPreCompItem->getOntology();
 
 				cint64 indiID = individual->getIndividualID();
@@ -75,7 +75,7 @@ namespace Konclude {
 
 
 
-			bool CIncrementalKPSetOntologyConceptRealizingThread::isIndividualItemAffectedByIncrementalChanges(COptimizedKPSetIndividualItem* indiItem, COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem) {
+			bool CIncrementalKPSetOntologyConceptRealizingThread::isIndividualItemAffectedByIncrementalChanges(COptimizedKPSetIndividualItem* indiItem, COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem) {
 				CIndividualDependenceTrackingCollector* indDepTrackingCollector = indiItem->getIndividualDependenceTrackingCollector();
 				if (indDepTrackingCollector) {
 					CIndividualDependenceTracking* indiDepTracking = indDepTrackingCollector->getExtendingIndividualDependenceTracking();
@@ -105,14 +105,14 @@ namespace Konclude {
 
 
 
-			bool CIncrementalKPSetOntologyConceptRealizingThread::initializeKPSetsFromConsistencyData(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem) {
+			bool CIncrementalKPSetOntologyConceptRealizingThread::initializeIndividualProcessingKPSetsFromConsistencyData(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem) {
 
 
-				CConcreteOntology* ontology = reqConfPreCompItem->getOntology();
+				/*CConcreteOntology* ontology = reqConfPreCompItem->getOntology();
 				CConcreteOntology* prevRealizedOntology = ontology->getIncrementalRevisionData()->getPreviousClassTypesRealizedOntology();
 				CRealization* prevRealization = prevRealizedOntology->getRealization();
 
-				COptimizedKPSetOntologyConceptRealizingItem* prevConRealItem = (COptimizedKPSetOntologyConceptRealizingItem*)prevRealization->getConceptRealization();
+				COptimizedRepresentativeKPSetOntologyRealizingItem* prevConRealItem = (COptimizedRepresentativeKPSetOntologyRealizingItem*)prevRealization->getConceptRealization();
 				
 
 
@@ -234,14 +234,14 @@ namespace Konclude {
 				COntologyProcessingStatistics* ontProcStats = reqConfPreCompItem->getRealizeSameIndividualsProcessingStep()->getProcessingStepData()->getProcessingStatistics(true);
 				ontProcStats->setProcessingCountStatisticValue("incremental-realization-previously-reused-individual-calculations-count",previousReusedIndiCalculationsCount);
 				ontProcStats->setProcessingCountStatisticValue("incremental-realization-newly-initialized-individual-calculations-count",newInitializedIndiCalculationsCount);
-
+*/
 
 				return true;
 			}
 
 
 
-			COptimizedKPSetOntologyConceptRealizingThread* CIncrementalKPSetOntologyConceptRealizingThread::addRealizationStatistics(COptimizedKPSetOntologyConceptRealizingItem* reqConfPreCompItem, CRealizingTestingStep* ontProcStep) {
+			COptimizedRepresentativeKPSetOntologyRealizingThread* CIncrementalKPSetOntologyConceptRealizingThread::addRealizationStatistics(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, CRealizingTestingStep* ontProcStep) {
 				COntologyProcessingStatistics* ontProcStats = ontProcStep->getProcessingStepData()->getProcessingStatistics(true);
 				ontProcStats->setProcessingCountStatisticValue("incremental-realization-time",reqConfPreCompItem->getInitializationTime()->elapsed());
 				if (reqConfPreCompItem->getRealizeConceptProcessingStep() == ontProcStep) {

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -82,6 +82,9 @@
 
 #include "Logger/CLogIdentifier.h"
 
+#include "Config/CConfiguration.h"
+#include "Config/CConfigDataReader.h"
+
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -97,6 +100,7 @@ namespace Konclude {
 	using namespace Control::Command;
 	using namespace Instructions;
 	using namespace Records;
+	using namespace Config;
 
 	namespace Parser {
 
@@ -115,7 +119,7 @@ namespace Konclude {
 			// public methods
 			public:
 				//! Constructor
-				COWLlinkQtXMLCommandParser();
+				COWLlinkQtXMLCommandParser(CConfiguration* config = nullptr);
 
 				//! Destructor
 				virtual ~COWLlinkQtXMLCommandParser();
@@ -164,7 +168,7 @@ namespace Konclude {
 
 				CGetSettingsCommand *parseGetSettingsNode(QDomElement *node);
 
-				void parseQueryExtensions(QDomElement *node, CKnowledgeBaseQueryCommand *queryCommand);
+				void parseQueryExtensions(QDomElement *node, CKnowledgeBaseQueryCommand *queryCommand, bool inversePropDirectSupport);
 				void parseQueryExpectedResult(QDomElement *node, CKnowledgeBaseQueryCommand *queryCommand);
 
 				CQueryResult *parseQueryResult(QDomElement *node);
@@ -173,7 +177,7 @@ namespace Konclude {
 				QString getOWLLinkMappedConfigString(const QString &keyName);
 
 
-				bool requiresComplexQuery(QDomElement *node);
+				bool requiresComplexQuery(QDomElement *node, bool inversePropDirectSupport);
 
 			// protected variables
 			protected:
@@ -181,6 +185,7 @@ namespace Konclude {
 				CCommandRecorder *recorder;
 				CCommandDelegater *delegater;
 
+				bool mConfInversePropDirectSupport;
 
 			// private methods
 			private:

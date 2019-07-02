@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -38,7 +38,14 @@
 
 #include "Reasoner/Generator/CSatisfiableCalculationJobGenerator.h"
 #include "Reasoner/Generator/CConcreteOntologyUpdateBuilder.h"
+#include "Reasoner/Generator/CConcreteOntologyUpdateCollectorBuilder.h"
+#include "Reasoner/Generator/CConcreteOntologyRedlandTriplesDataExpressionMapper.h"
 #include "Reasoner/Generator/CActiveEntitySubExpressionVisitorUpdater.h"
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+#include "Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexer.h"
+#include "Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionConvertionIndexer.h"
+#endif // !KONCLUDE_REDLAND_INTEGRATION
 
 #include "Utilities/Memory/CTempMemoryPoolContainerAllocationManager.h"
 
@@ -55,6 +62,7 @@ namespace Konclude {
 		using namespace Kernel::Task;
 		using namespace Kernel::Manager;
 		using namespace Generator;
+		using namespace Triples;
 
 		namespace Preprocess {
 
@@ -88,6 +96,7 @@ namespace Konclude {
 					virtual bool finishOntologyPreprocessing(CRequirementConfigPreprocessingItem* totallyPreCompItem);
 					virtual bool preprocessingTested(COntologyPreprocessingItem* ontPreCompItem, CPreprocessingTestingItem* preTestItem, CPreprocessingCalculatedCallbackEvent* pcce);
 
+					CConcreteOntology* searchPreviousBuiltOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem);
 					CConcreteOntology* searchPreviousConsistentOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem);
 					CConcreteOntology* searchPreviousClassesClassifiedOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem);
 					CConcreteOntology* searchPreviousClassRealizedOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem);
@@ -97,11 +106,12 @@ namespace Konclude {
 					virtual bool createPreprocess(CRequirementConfigPreprocessingItem* reqConfPreCompItem);
 
 					virtual bool countActiveEntites(CRequirementConfigPreprocessingItem* reqConfPreCompItem);
+					virtual bool mapTriplesToOWL(CRequirementConfigPreprocessingItem* reqConfPreCompItem);
+					virtual bool indexTripleEncodedAssertions(CRequirementConfigPreprocessingItem* reqConfPreCompItem);
 
 
 				// protected variables
 				protected:
-
 
 				// private methods
 				private:

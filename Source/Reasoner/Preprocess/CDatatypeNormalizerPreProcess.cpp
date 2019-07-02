@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -29,6 +29,8 @@ namespace Konclude {
 
 
 			CDatatypeNormalizerPreProcess::CDatatypeNormalizerPreProcess() {
+				mLastDataTypeId = 0;
+				mContext = nullptr;
 			}
 
 
@@ -37,11 +39,16 @@ namespace Konclude {
 
 
 			CConcreteOntology *CDatatypeNormalizerPreProcess::preprocess(CConcreteOntology *ontology, CPreProcessContext* context) {
+				mOntology = ontology;
+				mLastDataTypeId = 0;
+				mContext = context;
 				if (ontology) {
 					mTBox = ontology->getDataBoxes()->getTBox();
 					mABox = ontology->getDataBoxes()->getABox();
 					mRBox = ontology->getDataBoxes()->getRBox();
 					mMBox = ontology->getDataBoxes()->getMBox();
+
+					mBoxContext = ontology->getDataBoxes()->getBoxContext();
 
 
 					mIntegerRestrictionConcept = nullptr;
@@ -66,12 +73,18 @@ namespace Konclude {
 					mDatatpyeDatatypeExpressionHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
 
 					mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
-					mOntology = ontology;
 
 					mValueSpaceTypes = ontology->getDataBoxes()->getDatatypeValueSpaceTypes();
 					mDatatypeVector = mTBox->getDatatypeVector(false);
-					
 
+				}
+
+				return continuePreprocessing();
+			}
+
+
+			CConcreteOntology* CDatatypeNormalizerPreProcess::continuePreprocessing() {
+				if (mOntology) {
 					QList<CDatatype*> datatypeNormalisationList;
 
 
@@ -81,11 +94,11 @@ namespace Konclude {
 							CDatatype* datatype = mDatatypeVector->getData(i);
 							if (datatype) {
 								QString datatypeIRI = datatype->getDatatypeIRI();
-								mIRIDatatypeHash.insert(datatypeIRI,datatype);
+								mIRIDatatypeHash.insert(datatypeIRI, datatype);
 							}
 						}
 
-						for (cint64 i = 0; i < datatypeCount; ++i) {
+						for (cint64 i = mLastDataTypeId; i < datatypeCount; ++i) {
 							CDatatype* datatype = mDatatypeVector->getLocalData(i);
 							if (datatype) {
 								if (!datatype->hasDatatypeConcept()) {
@@ -97,8 +110,8 @@ namespace Konclude {
 									if (!datatypeConcept) {
 										datatypeConcept = createDatatypeConcept(datatype);
 										if (datatypeExpression) {
-											mDataRangeConceptHash->insert(datatypeExpression,datatypeConcept);
-											mConceptDataRangeHash->insert(datatypeConcept,datatypeExpression);
+											mDataRangeConceptHash->insert(datatypeExpression, datatypeConcept);
+											mConceptDataRangeHash->insert(datatypeConcept, datatypeExpression);
 										}
 										datatypeConcept->setDatatype(datatype);
 									}
@@ -109,19 +122,18 @@ namespace Konclude {
 								}
 							}
 						}
+						mLastDataTypeId = datatypeCount;
 
-						foreach (CDatatype* datatype, datatypeNormalisationList) {
-							normalizeDatatype(datatype,context);
+						foreach(CDatatype* datatype, datatypeNormalisationList) {
+							normalizeDatatype(datatype, mContext);
 							datatype->setNormalized(true);
 						}
 
 					}
-
-
 				}
-
-				return ontology;
+				return mOntology;
 			}
+
 
 
 			CConcept* CDatatypeNormalizerPreProcess::createConcept() {
@@ -157,7 +169,7 @@ namespace Konclude {
 					restrictionConcept->setOperatorCode(CCDATARESTRICTION);
 					CDatatype* realDatatype = getDatatype(PREFIX_OWL_REAL_DATATYPE);
 					restrictionConcept->setDatatype(realDatatype);
-					CDataLiteral* dataLiteral = CObjectAllocator<CDataLiteral>::allocateAndConstruct(mMemMan);
+					CDataLiteral* dataLiteral = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemMan, mBoxContext);
 					dataLiteral->initDataLiteral(value,realDatatype);
 					restrictionConcept->setDataLiteral(dataLiteral);
 					mNumberRestrictionConceptHash.insert(QPair<cint64,QString>(restrictionCode,value),restrictionConcept);

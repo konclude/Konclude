@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -35,6 +35,178 @@ namespace Konclude {
 				}
 
 
+
+				bool CIndividualProcessNodeCompareValueSpaceHandler::triggerDataLiteralConcept(CIndividualProcessNode* indiProcNode, CDataLiteral* dataLiteral, bool negated, CDependencyTrackPoint* depTrackPoint, CConcept* triggerConcept, bool otherValueSpacesClosed, bool* directlyTriggeredFlag, CDatatypeDependencyCollection* depCollection, CCalculationAlgorithmContext* calcAlgContext) {
+
+					CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
+					CDataLiteralCompareValue* dataLitCompareValue = dynamic_cast<CDataLiteralCompareValue*>(dataLitValue);
+					CMemoryTemporaryAllocationManager* taskMemMan = calcAlgContext->getUsedTemporaryMemoryAllocationManager();
+
+					CConcreteOntology* ontology = calcAlgContext->getUsedProcessingDataBox()->getOntology();
+					CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+					CDatatypeCompareValueSpaceData* compareValueSpaceData = (CDatatypeCompareValueSpaceData*)datatypesSpaceValue->getValueSpace(mCompareValueSpaceType, true);
+					if (!compareValueSpaceData->isValueSpaceClashed()) {
+						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(true);
+						if (otherValueSpacesClosed && directlyTriggeredFlag && compareValueSpaceMap->hasExcludedMinimum(dataLitCompareValue,false) && compareValueSpaceMap->hasExcludedMaximum(dataLitCompareValue,false)) {
+							compareValueSpaceMap->addValueSpaceDependencies(depCollection);
+							*directlyTriggeredFlag = true;
+							return false;
+						}
+
+						CDatatypeValueSpacesTriggers* valueSpacesTriggers = datatypesSpaceValue->getCustomValueSpacesTriggers(ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false),true);
+						CDatatypeValueSpaceCompareTriggers* compareValueSpaceTriggers = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(mCompareValueSpaceType);
+						CDatatypeValueSpaceConceptTriggerLinker* conceptTriggerLinker = CObjectAllocator< CDatatypeValueSpaceConceptTriggerLinker >::allocateAndConstruct(taskMemMan);
+						conceptTriggerLinker->initConceptTrigger(triggerConcept);
+						compareValueSpaceTriggers->addValueConceptTrigger(dataLitCompareValue, conceptTriggerLinker);
+						compareValueSpaceData->setValueSpaceTriggeringRequired(true);
+						compareValueSpaceData->setValueSpaceTriggeringStarted(false);
+						compareValueSpaceData->setValueSpaceTriggeringCompleted(false);
+						return true;
+					}
+					return false;
+				}
+
+
+				bool CIndividualProcessNodeCompareValueSpaceHandler::triggerDatatypeConcept(CIndividualProcessNode* indiProcNode, CDatatype* datatype, bool negated, CDependencyTrackPoint* depTrackPoint, CConcept* triggerConcept, bool otherValueSpacesClosed, bool* directlyTriggeredFlag, CDatatypeDependencyCollection* depCollection, CCalculationAlgorithmContext* calcAlgContext) {
+
+					CMemoryTemporaryAllocationManager* taskMemMan = calcAlgContext->getUsedTemporaryMemoryAllocationManager();
+
+					CConcreteOntology* ontology = calcAlgContext->getUsedProcessingDataBox()->getOntology();
+					CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+					CDatatypeCompareValueSpaceData* compareValueSpaceData = (CDatatypeCompareValueSpaceData*)datatypesSpaceValue->getValueSpace(mCompareValueSpaceType, true);
+					if (!compareValueSpaceData->isValueSpaceClashed()) {
+
+						if (otherValueSpacesClosed) {
+							*directlyTriggeredFlag = true;
+							return false;
+						}
+
+						CDatatypeValueSpacesTriggers* valueSpacesTriggers = datatypesSpaceValue->getCustomValueSpacesTriggers(ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false), true);
+						CDatatypeValueSpaceCompareTriggers* compareValueSpaceTriggers = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(mCompareValueSpaceType);
+						CDatatypeValueSpaceConceptTriggerLinker* conceptTriggerLinker = CObjectAllocator< CDatatypeValueSpaceConceptTriggerLinker >::allocateAndConstruct(taskMemMan);
+						conceptTriggerLinker->initConceptTrigger(triggerConcept);
+						compareValueSpaceTriggers->addValueSpaceConceptTrigger(conceptTriggerLinker);
+						compareValueSpaceData->setValueSpaceTriggeringRequired(true);
+						compareValueSpaceData->setValueSpaceTriggeringStarted(false);
+						compareValueSpaceData->setValueSpaceTriggeringCompleted(false);
+						return true;
+					}
+					return false;
+				}
+
+
+				bool CIndividualProcessNodeCompareValueSpaceHandler::triggerDataRestrictionConcept(CIndividualProcessNode* indiProcNode, CConcept* dataRestricionConcept, bool negated, CDependencyTrackPoint* depTrackPoint, CConcept* triggerConcept, bool otherValueSpacesClosed, bool* directlyTriggeredFlag, CDatatypeDependencyCollection* depCollection, CCalculationAlgorithmContext* calcAlgContext) {
+					cint64 restrictionCode = dataRestricionConcept->getParameter();
+					CDatatype* datatype = dataRestricionConcept->getDatatype();
+					CDataLiteral* dataLiteral = dataRestricionConcept->getDataLiteral();
+					CDataLiteralValue* restrictionDataLitValue = nullptr;
+					if (dataLiteral) {
+						restrictionDataLitValue = dataLiteral->getDataLiteralValue();
+					}
+					CDataLiteralCompareValue* restrictionDataLitCompareValue = nullptr;
+					if (restrictionDataLitValue) {
+						restrictionDataLitCompareValue = dynamic_cast<CDataLiteralCompareValue*>(restrictionDataLitValue);
+					}
+					CMemoryTemporaryAllocationManager* taskMemMan = calcAlgContext->getUsedTemporaryMemoryAllocationManager();
+					CConcreteOntology* ontology = calcAlgContext->getUsedProcessingDataBox()->getOntology();
+					CDatatypesValueSpaceData* datatypesSpaceValue = indiProcNode->getDatatypesValueSpaceData(true);
+					CDatatypeCompareValueSpaceData* compareValueSpaceData = (CDatatypeCompareValueSpaceData*)datatypesSpaceValue->getValueSpace(mCompareValueSpaceType, true);
+					if (!compareValueSpaceData->isValueSpaceClashed()) {
+						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(true);
+						bool directTriggering = false;
+						if (restrictionDataLitCompareValue) {
+							if (otherValueSpacesClosed && directlyTriggeredFlag) {
+								if (!negated) {
+									if (restrictionCode == CDFC_MIN_EXCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMinimum(restrictionDataLitCompareValue, true)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(mCompareValueSpaceType->getMinimumDataLiteralCompareValue(), true, restrictionDataLitCompareValue, true, depCollection);
+										}
+									} else if (restrictionCode == CDFC_MIN_INCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMinimum(restrictionDataLitCompareValue, false)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(mCompareValueSpaceType->getMinimumDataLiteralCompareValue(), true, restrictionDataLitCompareValue, false, depCollection);
+										}
+									} else if (restrictionCode == CDFC_MAX_INCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMaximum(restrictionDataLitCompareValue, false)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(restrictionDataLitCompareValue, false, mCompareValueSpaceType->getMaximumDataLiteralCompareValue(), true, depCollection);
+										}
+									} else if (restrictionCode == CDFC_MAX_EXCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMaximum(restrictionDataLitCompareValue, true)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(restrictionDataLitCompareValue, true, mCompareValueSpaceType->getMaximumDataLiteralCompareValue(), true, depCollection);
+										}
+									}
+								} else {
+									if (restrictionCode == CDFC_MIN_EXCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMaximum(restrictionDataLitCompareValue, false)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(restrictionDataLitCompareValue, false, mCompareValueSpaceType->getMaximumDataLiteralCompareValue(), true, depCollection);
+										}
+									} else if (restrictionCode == CDFC_MIN_INCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMaximum(restrictionDataLitCompareValue, true)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(restrictionDataLitCompareValue, true, mCompareValueSpaceType->getMaximumDataLiteralCompareValue(), true, depCollection);
+										}
+									} else if (restrictionCode == CDFC_MAX_INCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMinimum(restrictionDataLitCompareValue, true)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(mCompareValueSpaceType->getMinimumDataLiteralCompareValue(), true, restrictionDataLitCompareValue, true, depCollection);
+										}
+									} else if (restrictionCode == CDFC_MAX_EXCLUSIVE) {
+										if (compareValueSpaceMap->hasExcludedMinimum(restrictionDataLitCompareValue, false)) {
+											directTriggering = true;
+											compareValueSpaceMap->addIntervalExclusionDependencies(mCompareValueSpaceType->getMinimumDataLiteralCompareValue(), true, restrictionDataLitCompareValue, false, depCollection);
+										}
+									}
+								}
+							}
+
+
+							if (directTriggering) {
+								*directlyTriggeredFlag = true;
+								return false;
+							}
+
+
+							CDatatypeValueSpacesTriggers* valueSpacesTriggers = datatypesSpaceValue->getCustomValueSpacesTriggers(ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false), true);
+							CDatatypeValueSpaceCompareTriggers* compareValueSpaceTriggers = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(mCompareValueSpaceType);
+							CDatatypeValueSpaceConceptTriggerLinker* conceptTriggerLinker = CObjectAllocator< CDatatypeValueSpaceConceptTriggerLinker >::allocateAndConstruct(taskMemMan);
+							conceptTriggerLinker->initConceptTrigger(triggerConcept);
+
+							if (!negated) {
+								if (restrictionCode == CDFC_MIN_EXCLUSIVE) {
+									compareValueSpaceTriggers->addMinValueConceptTrigger(restrictionDataLitCompareValue, true, conceptTriggerLinker);
+								} else if (restrictionCode == CDFC_MIN_INCLUSIVE) {
+									compareValueSpaceTriggers->addMinValueConceptTrigger(restrictionDataLitCompareValue, false, conceptTriggerLinker);
+								} else if (restrictionCode == CDFC_MAX_INCLUSIVE) {
+									compareValueSpaceTriggers->addMaxValueConceptTrigger(restrictionDataLitCompareValue, false, conceptTriggerLinker);
+								} else if (restrictionCode == CDFC_MAX_EXCLUSIVE) {
+									compareValueSpaceTriggers->addMaxValueConceptTrigger(restrictionDataLitCompareValue, true, conceptTriggerLinker);
+								}
+							} else {
+								if (restrictionCode == CDFC_MIN_EXCLUSIVE) {
+									compareValueSpaceTriggers->addMaxValueConceptTrigger(restrictionDataLitCompareValue, false, conceptTriggerLinker);
+								} else if (restrictionCode == CDFC_MIN_INCLUSIVE) {
+									compareValueSpaceTriggers->addMaxValueConceptTrigger(restrictionDataLitCompareValue, true, conceptTriggerLinker);
+								} else if (restrictionCode == CDFC_MAX_INCLUSIVE) {
+									compareValueSpaceTriggers->addMinValueConceptTrigger(restrictionDataLitCompareValue, true, conceptTriggerLinker);
+								} else if (restrictionCode == CDFC_MAX_EXCLUSIVE) {
+									compareValueSpaceTriggers->addMinValueConceptTrigger(restrictionDataLitCompareValue, false, conceptTriggerLinker);
+								}
+							}
+							compareValueSpaceData->setValueSpaceTriggeringRequired(true);
+							compareValueSpaceData->setValueSpaceTriggeringStarted(false);
+							compareValueSpaceData->setValueSpaceTriggeringCompleted(false);
+
+						}
+
+						return true;
+					}
+					return false;
+
+				}
 
 
 
@@ -228,7 +400,7 @@ namespace Konclude {
 						}
 						CDatatypeCompareValueSpaceMap* compareValueSpaceMap = compareValueSpaceData->getValueSpaceMap(true);
 
-						CDatatypeValueSpacesTriggers* valueSpacesTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
+						CDatatypeValueSpacesTriggers* valueSpacesTriggers = datatypesSpaceValue->getCustomValueSpacesTriggers(ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false));
 						if (valueSpacesTriggers) {
 
 							CDatatypeValueSpaceCompareTriggers* compareValueSpaceTriggers = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(mCompareValueSpaceType);

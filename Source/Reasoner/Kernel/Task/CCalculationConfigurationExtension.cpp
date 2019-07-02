@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -85,6 +85,15 @@ namespace Konclude {
 					mConfAnywhereBlockingCoreConceptCandidateHashSearchChecked = false;
 					mConfRepresentativePropagationChecked = false;
 					mConfDebuggingWriteDataChecked = false;
+					mConfDebuggingWriteDataCompletionTasksChecked = false;
+					mConfDebuggingWriteDataSaturationTasksChecked = false;
+					mConfDebuggingWriteDataOnlyOnSatisfiabilityChecked = false;
+					mConfDebuggingWriteDataForConsistencyTestsChecked = false;
+					mConfDebuggingWriteDataForClassificationTestsChecked = false;
+					mConfDebuggingWriteDataForAnsweringPropagationTestsChecked = false;
+					mConfDebuggingWriteDataForIncrementalExpansionTestsChecked = false;
+					mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsChecked = false;
+					mConfDebuggingWriteDataForAllTestsChecked = false;
 
 					mConfSuccessorConceptSaturationExpansionChecked = false;
 					mConfSaturationCachingChecked = false;
@@ -108,6 +117,11 @@ namespace Konclude {
 					mSaturationReferredNodeCheckingDepthChecked = false;
 					mConfForceManyConceptSaturationChecked = false;
 					mMaxRecProConceptCountChecked = false;
+
+					mAllowBackendNeighbourExpansionBlockingChecked = false;
+					mAllowBackendSuccessorExpansionBlockingChecked = false;
+					mOccurrenceStatisticsCollectionChecked = false;
+					mGeneratingTestQueriesChecked = false;
 				}
 
 
@@ -571,6 +585,91 @@ namespace Konclude {
 					return mConfDebuggingWriteDataActivated;
 				}
 
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataSaturationTasksActivated() {
+					if (!mConfDebuggingWriteDataSaturationTasksChecked) {
+						mConfDebuggingWriteDataSaturationTasksActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataSaturationTasks", false);
+						mConfDebuggingWriteDataSaturationTasksChecked = true;
+					}
+					return mConfDebuggingWriteDataSaturationTasksActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksActivated() {
+					if (!mConfDebuggingWriteDataCompletionTasksChecked) {
+						mConfDebuggingWriteDataCompletionTasksActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasks", false);
+						mConfDebuggingWriteDataCompletionTasksChecked = true;
+					}
+					return mConfDebuggingWriteDataCompletionTasksActivated;
+				}
+
+
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksOnlyOnSatisfiabilityActivated() {
+					if (!mConfDebuggingWriteDataOnlyOnSatisfiabilityChecked) {
+						mConfDebuggingWriteDataOnlyOnSatisfiabilityActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksOnlyOnSatisfiability", false);
+						mConfDebuggingWriteDataOnlyOnSatisfiabilityChecked = true;
+					}
+					return mConfDebuggingWriteDataOnlyOnSatisfiabilityActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForConsistencyTestsActivated() {
+					if (!mConfDebuggingWriteDataForConsistencyTestsChecked) {
+						mConfDebuggingWriteDataForConsistencyTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksForConsistencyTests", false);
+						mConfDebuggingWriteDataForConsistencyTestsChecked = true;
+					}
+					return mConfDebuggingWriteDataForConsistencyTestsActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForClassificationTestsActivated() {
+					if (!mConfDebuggingWriteDataForClassificationTestsChecked) {
+						mConfDebuggingWriteDataForClassificationTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksForClassificationTests", false);
+						mConfDebuggingWriteDataForClassificationTestsChecked = true;
+					}
+					return mConfDebuggingWriteDataForClassificationTestsActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForAnsweringPropagationTestsActivated() {
+					if (!mConfDebuggingWriteDataForAnsweringPropagationTestsChecked) {
+						mConfDebuggingWriteDataForAnsweringPropagationTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksForAnsweringPropagationTests", false);
+						mConfDebuggingWriteDataForAnsweringPropagationTestsChecked = true;
+					}
+					return mConfDebuggingWriteDataForAnsweringPropagationTestsActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForIncrementalExpansionTestsActivated() {
+					if (!mConfDebuggingWriteDataForIncrementalExpansionTestsChecked) {
+						mConfDebuggingWriteDataForIncrementalExpansionTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksForIncrementalExpansionTests", false);
+						mConfDebuggingWriteDataForIncrementalExpansionTestsChecked = true;
+					}
+					return mConfDebuggingWriteDataForIncrementalExpansionTestsActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForRepresentativeCacheRecomputationTestsActivated() {
+					if (!mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsChecked) {
+						mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksForRepresentativeCacheRecomputationTests", false);
+						mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsChecked = true;
+					}
+					return mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForAllTestsActivated() {
+					if (!mConfDebuggingWriteDataForAllTestsChecked) {
+						mConfDebuggingWriteDataForAllTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataForAllTests", false);
+						mConfDebuggingWriteDataForAllTestsChecked = true;
+					}
+					return mConfDebuggingWriteDataForAllTestsActivated;
+				}
+
+
+
+
+
+
+
+
+
 
 
 				bool CCalculationConfigurationExtension::isSuccessorConceptSaturationExpansionActivated() {
@@ -752,6 +851,39 @@ namespace Konclude {
 				}
 
 
+				bool CCalculationConfigurationExtension::isAllowBackendNeighbourExpansionBlockingActivated() {
+					if (!mAllowBackendNeighbourExpansionBlockingChecked) {
+						mAllowBackendNeighbourExpansionBlockingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.AllowBackendNeighbourExpansionBlocking", true);
+						mAllowBackendNeighbourExpansionBlockingChecked = true;
+					}
+					return mAllowBackendNeighbourExpansionBlockingActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isAllowBackendSuccessorExpansionBlockingActivated() {
+					if (!mAllowBackendSuccessorExpansionBlockingChecked) {
+						mAllowBackendSuccessorExpansionBlockingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.AllowBackendSuccessorExpansionBlocking", true);
+						mAllowBackendSuccessorExpansionBlockingChecked = true;
+					}
+					return mAllowBackendSuccessorExpansionBlockingActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isOccurrenceStatisticsCollectionActivated() {
+					if (!mOccurrenceStatisticsCollectionChecked) {
+						mOccurrenceStatisticsCollectionActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.OccurrenceStatisticsCollecting", true);
+						mOccurrenceStatisticsCollectionChecked = true;
+					}
+					return mOccurrenceStatisticsCollectionActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isGeneratingTestQueriesActivated() {
+					if (!mGeneratingTestQueriesChecked) {
+						mGeneratingTestQueriesActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Test.ConjunctiveQueryGeneration.CompletionGraphRandomWalks", true);
+						mGeneratingTestQueriesChecked = true;
+					}
+					return mGeneratingTestQueriesActivated;
+				}
 
 			}; // end namespace Task
 

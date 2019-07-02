@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -28,16 +28,13 @@
 #include "ClassifierSettings.h"
 #include "CSubsumptionClassifier.h"
 #include "CSubsumptionClassifierThread.h"
-#include "CPartialPruningTaxonomy.h"
-#include "CClassificationWorkItem.h"
+#include "CPropertyClassificationComputationItem.h"
 #include "COptimizedKPSetRoleOntologyClassificationItem.h"
-#include "CClassificationPseudoModelIdentifierMessageData.h"
 #include "COptimizedKPSetRolePossibleSubsumptionData.h"
 #include "COptimizedKPSetRoleTestingItem.h"
-#include "CClassificationSubsumptionMessageData.h"
-#include "CClassificationInitializePossibleSubsumptionMessageData.h"
-#include "CClassificationUpdatePossibleSubsumptionMessageData.h"
-#include "CPrecomputedSaturationSubsumerExtractor.h"
+#include "CClassificationPropertySubsumptionMessageData.h"
+#include "CClassificationInitializePossiblePropertySubsumptionMessageData.h"
+#include "CClassificationUpdatePossiblePropertySubsumptionMessageData.h"
 
 // Other includes
 #include "Context/CContextBase.h"
@@ -47,7 +44,15 @@
 #include "Reasoner/Ontology/CConceptProcessData.h"
 #include "Reasoner/Ontology/CConceptSaturationReferenceLinkingData.h"
 
+
+#include "Reasoner/Preprocess/CPreProcessContextBase.h"
+#include "Reasoner/Preprocess/CRoleChainAutomataTransformationPreProcess.h"
+
 #include "Reasoner/Generator/CSatisfiableCalculationJobGenerator.h"
+
+#include "Reasoner/Kernel/Task/CSatisfiableCalculationTask.h"
+#include "Reasoner/Kernel/Task/CConsistenceTaskData.h"
+
 
 #include "Utilities/Memory/CTempMemoryPoolContainerAllocationManager.h"
 
@@ -72,6 +77,7 @@ namespace Konclude {
 		using namespace Revision;
 		using namespace Ontology;
 		using namespace Generator;
+		using namespace Preprocess;
 
 		using namespace Kernel;
 		using namespace Task;
@@ -101,7 +107,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedKPSetRoleSubsumptionClassifierThread(CReasonerManager *reasonerManager);
+					COptimizedKPSetRoleSubsumptionClassifierThread(CReasonerManager *reasonerManager, bool dataRoleClassification);
 
 					//! Destructor
 					virtual ~COptimizedKPSetRoleSubsumptionClassifierThread();
@@ -111,23 +117,30 @@ namespace Konclude {
 
 				// protected methods
 				protected:
-					virtual bool finishOntologyClassification(COntologyClassificationItem *ontClassItem);
-					virtual CSubsumptionClassifierThread *scheduleOntologyClassification(CConcreteOntology *ontology, CTaxonomy *taxonomy, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config);
+					virtual bool finishOntologyClassification(COntologyPropertyRoleClassificationItem *ontPropItem);
+					virtual CSubsumptionClassifierThread *scheduleOntologyClassification(CConcreteOntology *ontology, CClassificationCalculationSupport *classificationSupport, CConfigurationBase *config);
 
-					virtual CSubsumptionClassifierThread *processCalculationJob(CSatisfiableCalculationJob* job, COntologyClassificationItem *ontClassItem, CClassificationWorkItem* workItem);
+
+					COptimizedKPSetRoleSubsumptionClassifierThread* createTemporaryRoleClassificationOntology(COptimizedKPSetRoleOntologyClassificationItem* item);
+					void addTemporaryConceptOperand(CConcept* concept, CConcept* opConcept, bool negated, CConcreteOntology* tmpRoleRealOntology);
+					CConcept* createTemporaryConcept(CConcreteOntology* tmpRoleRealOntology);
+					COptimizedKPSetRoleSubsumptionClassifierThread* createInitialSubsumptionSatisfiabilityTestingOrderFromBuildData(COptimizedKPSetRoleOntologyClassificationItem* ontPropItem);
+
+
+					virtual CSubsumptionClassifierThread *processCalculationJob(CSatisfiableCalculationJob* job, COntologyPropertyRoleClassificationItem *ontPropItem, CPropertyClassificationComputationItem* workItem);
 
 					virtual void readCalculationConfig(CCalculationConfigurationExtension *config);
 
-					virtual bool interpreteSubsumptionResult(COntologyClassificationItem *ontClassItem, CConcept *subsumerConcept, CConcept *subsumedConcept, bool isSubsumption);
-					virtual bool interpreteSatisfiableResult(COntologyClassificationItem *ontClassItem, CConcept *satisfiableConcept, bool isSatis);
+					virtual bool interpreteSubsumptionResult(COntologyPropertyRoleClassificationItem *ontPropItem, CRole *subsumerRole, CRole *subsumedRole, bool isSubsumption);
+					virtual bool interpreteSatisfiableResult(COntologyPropertyRoleClassificationItem *ontPropItem, CRole *satisfiableRole, bool isSatis);
 
 					virtual bool interpreteTestResults(CTestCalculatedCallbackEvent *testResult);
 					
 
 					virtual bool createNextSubsumtionTest();
-					virtual CTaxonomy *createEmptyTaxonomyForOntology(CConcreteOntology *ontology, CConfigurationBase *config);
+					virtual CRolePropertiesHierarchy *createInitialHierarchyForOntology(CConcreteOntology *ontology, CConfigurationBase *config);
 
-					virtual bool interpreteToldSubsumptionResult(COntologyClassificationItem *ontClassItem, const QList<QPair<CConcept *,CConcept *> > &subSumRelList, bool isSubSum);
+					virtual bool interpreteToldSubsumptionResult(COntologyPropertyRoleClassificationItem *ontPropItem, const QList< QPair<CRole*,CRole*> > &subSumRelList, bool isSubSum);
 
 					
 
@@ -135,19 +148,19 @@ namespace Konclude {
 
 
 
-					virtual bool processToldClassificationMessage(COntologyClassificationItem *ontClassItem, CClassificationMessageData* messageData, CMemoryPool* memoryPools);
+					virtual bool processToldClassificationMessage(COntologyClassificationItem *ontPropItem, CClassificationMessageData* messageData, CMemoryPool* memoryPools);
 
 
 
 					bool calculateSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* subsumedItem, COptimizedKPSetRoleTestingItem* possSubsumerItem, COptimizedKPSetRolePossibleSubsumptionData* possSubsumData);
 
-					COptimizedKPSetRolePossibleSubsumptionData* getNextPossibleSubsumptionCalculation(COptimizedKPSetRoleOntologyClassificationItem *ontClassItem, COptimizedKPSetRoleTestingItem* classItem);
+					COptimizedKPSetRolePossibleSubsumptionData* getNextPossibleSubsumptionCalculation(COptimizedKPSetRoleOntologyClassificationItem *ontPropItem, COptimizedKPSetRoleTestingItem* classItem);
 
 
 					bool prunePossibleSubsumptions(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, COptimizedKPSetRolePossibleSubsumptionData* possSubsumData);
 					bool propagateDownSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, COptimizedKPSetRoleTestingItem* subsumerItem);
-					bool pruneDownSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CConcept* subsumerConcept);
-					bool pruneUpNotSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CConcept* notSubsumerConcept);
+					bool pruneDownSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CRole* subsumerRole);
+					bool pruneUpNotSubsumption(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item, CRole* notSubsumerRole);
 					
 					bool propagateUnsatisfiability(COptimizedKPSetRoleOntologyClassificationItem *optKPSetClassificationItem, COptimizedKPSetRoleTestingItem* item);
 
@@ -161,7 +174,7 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					QHash<CClassificationWorkItem *, COntologyClassificationItem *> workOntItemHash;
+					QHash<CPropertyClassificationComputationItem *, COntologyPropertyRoleClassificationItem *> workOntItemHash;
 
 					QStringList satTestedConList;
 					QStringList possSubsumInitConList;
@@ -181,7 +194,7 @@ namespace Konclude {
 					bool mConfPossSubsumCalcOrderTopDown;
 					bool mConfPossSubsumCalcOrderBottomUp;
 
-					bool mConfPossSubsumCalcOrderConceptSorted;
+					bool mConfPossSubsumCalcOrderRoleSorted;
 					bool mConfPossSubsumCalcOrderFewestSubsumptionSorted;
 
 					bool mConfPossSubsumPseudoModelPretest;
@@ -201,6 +214,7 @@ namespace Konclude {
 					cint64 mCreatedCalculationTaskCount;
 					cint64 mRecievedCallbackCount;
 
+					bool mDataRolesClassification;
 
 
 				// private methods

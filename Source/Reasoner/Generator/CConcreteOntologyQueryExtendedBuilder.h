@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -43,13 +43,24 @@
 #include "Reasoner/Query/CFlattenedInstancesQuery.h"
 #include "Reasoner/Query/CAreAxiomsEntailedQuery.h"
 
+#include "Reasoner/Query/CComplexSatisfiabilityAnsweringQuery.h"
+#include "Reasoner/Query/CComplexSuperClassesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexSubClassesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexEquivalentClassesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexIndividualInstancesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringQuery.h"
+#include "Reasoner/Query/CVariableBindingFilteringLiteralComparison.h"
+
 #include "Reasoner/Ontology/CConceptTextFormater.h"
 #include "Reasoner/Ontology/CIRIName.h"
 
 #include "Parser/COntologyBuilder.h"
+#include "Parser/CSPARQLQueryBuilder.h"
 
 #include "Config/CConfigurationBase.h"
 #include "Config/CConfigDataReader.h"
+
+#include "Parser/Expressions/COrderingVariableExpression.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -59,6 +70,7 @@
 namespace Konclude {
 
 	using namespace Parser;
+	using namespace Parser::Expression;
 	using namespace Config;
 
 	namespace Reasoner {
@@ -76,11 +88,11 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CConcreteOntologyQueryExtendedBuilder : public CConcreteOntologyQueryBasicBuilder {
+			class CConcreteOntologyQueryExtendedBuilder : public CConcreteOntologyQueryBasicBuilder, public CSPARQLQueryBuilder {
 				// public methods
 				public:
 					//! Constructor
-					CConcreteOntologyQueryExtendedBuilder(CConcreteOntology* ontology, CConfigurationBase *configuration, COntologyBuilder* ontologyBuilder);
+					CConcreteOntologyQueryExtendedBuilder(CConcreteOntology* baseOntology, CConcreteOntology* ontology, CConfigurationBase *configuration, COntologyBuilder* ontologyBuilder);
 
 					//! Destructor
 					virtual ~CConcreteOntologyQueryExtendedBuilder();
@@ -97,25 +109,37 @@ namespace Konclude {
 					virtual CQueryIsClassSubsumedByExpression* getIsClassSubsumedByQuery(CClassTermExpression* subsumerClassExpression, CClassTermExpression* subsumedClassExpression, const QString& queryName);
 
 
+					virtual bool requiresPreprocessedOntology();
+
+
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, const QString& queryName = "");
+					virtual CQuerySPARQLAskBasicGraphPatternExpression* getSPARQLBasicGraphPatternAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, const QString& queryName = "");
+
+					virtual COrderingVariableExpression* getOrderingVariableExpression(CExpressionVariable* variable, bool ascOrdering);
+					virtual CFilteringComparisonDataLiteralExpression* getFilteringComparisonDataLiteralExpression(CDataLiteralVariableExpression* variable, CDataLiteralExpression* dataLiteralExp, CFilteringComparisonDataLiteralExpression::COMPARING_TYPE comparingType);
+
+
 				// protected methods
 				protected:
 
+					CVariableBindingFiltering* createFilterFromExpression(CFilteringTermExpression* filteringTermExpression);
+
+
 				// protected variables
 				protected:		
-
+					CConcreteOntology* mBaseOntology;
 					COntologyBuilder* mOntologyBuilder;
 
 					CEXPRESSIONLIST<CBuildExpression*> container;
 
 
-					CEXPRESSIONLIST<CQueryIsClassSatisfiableExpression*> classSatExpList;
-					CEXPRESSIONLIST<CQueryAreClassesEquivalentExpression*> classEqExpList;
-					CEXPRESSIONLIST<CQueryIsClassSubsumedByExpression*> classSubsumedExpList;
-					CEXPRESSIONLIST<CQueryAreClassesDisjointExpression*> classDisjointExpList;
-					CEXPRESSIONLIST<CQueryIsInstanceOfExpression*> instanceExpList;
-					CEXPRESSIONLIST<CQueryGetFlattenedTypesExpression*> flattenedTypesExpList;
-					CEXPRESSIONLIST<CQueryGetFlattenedInstancesExpression*> flattenedInstancesExpList;
 					CEXPRESSIONLIST<CQueryIsEntailedExpression*> isEntailedExpList;
+					CEXPRESSIONLIST<CQuerySPARQLSelectBasicGraphPatternExpression*> mSparqlSelectExpList;
+					CEXPRESSIONLIST<CQuerySPARQLAskBasicGraphPatternExpression*> mSparqlAskExpList;
+
+					CEXPRESSIONLIST<CBuildExpression*> mExpContainer;
+
+
 
 				// private methods
 				private:

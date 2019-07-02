@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -26,7 +26,7 @@
 
 // Namespace includes
 #include "ClassifierSettings.h"
-#include "COntologyClassificationItem.h"
+#include "COntologyPropertyRoleClassificationItem.h"
 #include "COptimizedKPSetRoleTestingItem.h"
 
 
@@ -55,7 +55,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedKPSetRoleOntologyClassificationItem : public COntologyClassificationItem {
+			class COptimizedKPSetRoleOntologyClassificationItem : public COntologyPropertyRoleClassificationItem {
 				// public methods
 				public:
 					//! Constructor
@@ -64,10 +64,15 @@ namespace Konclude {
 					//! Destructor
 					virtual ~COptimizedKPSetRoleOntologyClassificationItem();
 
-					QHash<CConcept*,COptimizedKPSetRoleTestingItem*>* getConceptSatisfiableTestItemHash();
-					QList<COptimizedKPSetRoleTestingItem*>* getConceptSatisfiableTestItemContainer();
-					COptimizedKPSetRoleTestingItem* getTopConceptSatisfiableTestItem();
-					COptimizedKPSetRoleTestingItem* getBottomConceptSatisfiableTestItem();
+					QHash<CRole*,COptimizedKPSetRoleTestingItem*>* getRoleSatisfiableTestItemHash();
+					QList<COptimizedKPSetRoleTestingItem*>* getRoleSatisfiableTestItemList();
+					COptimizedKPSetRoleTestingItem* getTopRoleSatisfiableTestItem();
+					COptimizedKPSetRoleTestingItem* getBottomRoleSatisfiableTestItem();
+
+
+					COptimizedKPSetRoleOntologyClassificationItem* setTopRoleSatisfiableTestItem(COptimizedKPSetRoleTestingItem* item);
+					COptimizedKPSetRoleOntologyClassificationItem* setBottomRoleSatisfiableTestItem(COptimizedKPSetRoleTestingItem* item);
+
 
 					QList<COptimizedKPSetRoleTestingItem*>* getNextSatisfiableTestingItemList();
 					QSet<COptimizedKPSetRoleTestingItem*>* getNextCandidateSatisfiableTestingItemSet();
@@ -80,7 +85,7 @@ namespace Konclude {
 					COptimizedKPSetRoleOntologyClassificationItem* initTopBottomSatisfiableTestingItems(COptimizedKPSetRoleTestingItem* topItem, COptimizedKPSetRoleTestingItem* bottomItem);
 
 
-					COptimizedKPSetRoleTestingItem* getConceptSatisfiableTestItem(CConcept* satTestConcept, bool create = false);
+					COptimizedKPSetRoleTestingItem* getRoleSatisfiableTestItem(CRole* satTestRole, bool create = false);
 
 
 					cint64 getRemainingSatisfiableTestsCount();
@@ -95,8 +100,8 @@ namespace Konclude {
 					bool hasRemainingSatisfiableTests();
 
 
-					QList<COptimizedKPSetRoleTestingItem*>* getSatisfiableConceptItemList();
-					COptimizedKPSetRoleOntologyClassificationItem* addSatisfiableConceptItem(COptimizedKPSetRoleTestingItem* item);
+					QList<COptimizedKPSetRoleTestingItem*>* getSatisfiableRoleItemList();
+					COptimizedKPSetRoleOntologyClassificationItem* addSatisfiableRoleItem(COptimizedKPSetRoleTestingItem* item);
 
 					QHash<CConcept*,CClassificationSatisfiableCalculationConceptReferenceLinking*>* getConceptReferenceLinkingDataHash();
 
@@ -148,12 +153,34 @@ namespace Konclude {
 					COptimizedKPSetRoleOntologyClassificationItem* incTruePossibleSubsumerCount(cint64 incSubsumCount = 1);
 					COptimizedKPSetRoleOntologyClassificationItem* incFalsePossibleSubsumerCount(cint64 incSubsumCount = 1);
 					
+
+
+
+					CConcreteOntology* getTemporaryRoleClassificationOntology();
+					COptimizedKPSetRoleOntologyClassificationItem* setTemporaryRoleClassificationOntology(CConcreteOntology* ont);
+
+
+					QHash<CConcept*,COptimizedKPSetRoleTestingItem*>* getMarkerConceptInstancesItemHash();
+
+
+
+
+					CConcept* getTemporaryAllPropagationConcept();
+					COptimizedKPSetRoleOntologyClassificationItem* setTemporaryAllPropagationConcept(CConcept* concept);
+
+
+					CIndividual* getTemporaryPropagationIndividual();
+					CIndividual* getTemporaryMarkerIndividual();
+					COptimizedKPSetRoleOntologyClassificationItem* setTemporaryPropagationIndividual(CIndividual* indi);
+					COptimizedKPSetRoleOntologyClassificationItem* setTemporaryMarkerIndividual(CIndividual* indi);
+
+
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
-					QHash<CConcept*,COptimizedKPSetRoleTestingItem*> mConceptSatItemHash;
+					QHash<CRole*,COptimizedKPSetRoleTestingItem*> mRoleSatItemHash;
 					QList<COptimizedKPSetRoleTestingItem*> mSatTestItemContainer;
 					COptimizedKPSetRoleTestingItem* mTopSatTestItem;
 					COptimizedKPSetRoleTestingItem* mBottomSatTestItem;
@@ -189,6 +216,13 @@ namespace Konclude {
 					QList<COptimizedKPSetRoleTestingItem*> mSatisfiableItemList;
 
 					CMemoryPoolContainer mMemoryPoolContainer;
+
+					CConcreteOntology* mTmpRoleClassificationOnt;
+					QHash<CConcept*,COptimizedKPSetRoleTestingItem*> mMarkerConRolInsItemHash;
+
+					CConcept* mTmpAllPropConcept;
+					CIndividual* mTmpIndiPropagation;
+					CIndividual* mTmpIndiMarker;
 
 				// private methods
 				private:

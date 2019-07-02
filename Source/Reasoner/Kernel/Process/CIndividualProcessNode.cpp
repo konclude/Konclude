@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -89,7 +89,9 @@ namespace Konclude {
 					mSatCacheStoringData = nullptr;
 					mPrevSatCacheStoringData = nullptr;
 					mIndiBlock = nullptr;
+					mIndiVarPropBlockData = nullptr;
 					mPrevIndiBlock = nullptr;
+					mPrevIndiVarPropBlockData = nullptr;
 					mAncestorLink = nullptr;
 
 					mIndiSatBlockData = nullptr;
@@ -107,12 +109,22 @@ namespace Konclude {
 					mInitializingConceptLinkerIt = nullptr;
 					mProcessInitializingConceptLinkerIt = nullptr;
 					mAssertionConceptLinkerIt = nullptr;
+					mAssertionDataLinkerIt = nullptr;
+					mAssertedDataLiteralLinker = nullptr;
+					mLastProcessedAssertionDataLinker = nullptr;
+					mLastAssertedDataLiteralLinker = nullptr;
 					mAssertionRoleLinkerIt = nullptr;
 					mBlockedIndividualsLinker = nullptr;
 					mReverseAssertionRoleLinkerIt = nullptr;
 					mAdditionalRoleAssertionsLinker = nullptr;
+					mAdditionalDataAssertionsLinker = nullptr;
+					mLastProcessedAdditionalDataAssertionsLinker = nullptr;
+					mBaseConceptsInitialized = false;
 					mRoleAssertionsInitialized = false;
 					mReverseRoleAssertionsInitialized = false;
+					mNominalIndiTriplesAssertions = false;
+					mLoadedNominalIndiTriplesAssertions = false;
+					mLoadedNominalIndiRepresentativeBackendData = false;
 
 					mInitConceptDescriptor = nullptr;
 
@@ -150,6 +162,8 @@ namespace Konclude {
 					mDelayedNominalProcessingQueued = false;
 					mNominalProcessingDelayingChecked = false;
 					mBackendSynchronRetestProcessingQueued = false;
+					mBackendIndirectCompatibilityExpansionQueued = false;
+					mBackendDirectInfluenceExpansionQueued = false;
 					mIncrementalCompatibilityCheckingQueued = false;
 					mIncrementalExpansionQueued = false;
 
@@ -189,6 +203,9 @@ namespace Konclude {
 					mUseIndividualMergingHash = nullptr;
 					mRoleAssertionCreationID = 0;
 					mLastMergedIntoIndividualNode = nullptr;
+
+					mLocSuccIndiATMOSTReactivationData = nullptr;
+					mUseSuccIndiATMOSTReactivationData = nullptr;
 				}
 
 
@@ -197,9 +214,12 @@ namespace Konclude {
 					mIndiProcessLinker = nullptr;
 					mConceptProcessLinker = nullptr;
 					mRequiredBackProp = false;
+					mIndiBlock = nullptr;
+					mIndiVarPropBlockData = nullptr;
 					mSubstituteIndiNode = nullptr;
 					mLocReactivationData = nullptr;
 					mLocNominalConnectionSet = nullptr;
+					mLocSuccIndiATMOSTReactivationData = nullptr;
 					mLocDatatypesValueSpaceData = nullptr;
 					mLocIncExpData = nullptr;
 					mLocIndividualMergingHash = nullptr;
@@ -232,16 +252,28 @@ namespace Konclude {
 					mInitializingConceptLinkerIt = prevIndividual->mInitializingConceptLinkerIt;
 					mProcessInitializingConceptLinkerIt = prevIndividual->mProcessInitializingConceptLinkerIt;
 					mAssertionRoleLinkerIt = prevIndividual->mAssertionRoleLinkerIt;
+					mAssertionConceptLinkerIt = prevIndividual->mAssertionConceptLinkerIt;
+					mAssertionDataLinkerIt = prevIndividual->mAssertionDataLinkerIt;
+					mAssertedDataLiteralLinker = prevIndividual->mAssertedDataLiteralLinker;
+					mLastProcessedAssertionDataLinker = prevIndividual->mLastProcessedAssertionDataLinker;
+					mLastAssertedDataLiteralLinker = prevIndividual->mLastAssertedDataLiteralLinker;
 					mReverseAssertionRoleLinkerIt = prevIndividual->mReverseAssertionRoleLinkerIt;
 					mAdditionalRoleAssertionsLinker = prevIndividual->mAdditionalRoleAssertionsLinker;
+					mAdditionalDataAssertionsLinker = prevIndividual->mAdditionalDataAssertionsLinker;
+					mLastProcessedAdditionalDataAssertionsLinker = prevIndividual->mLastProcessedAdditionalDataAssertionsLinker;
+					mBaseConceptsInitialized = prevIndividual->mBaseConceptsInitialized;
 					mRoleAssertionsInitialized = prevIndividual->mRoleAssertionsInitialized;
 					mReverseRoleAssertionsInitialized = prevIndividual->mReverseRoleAssertionsInitialized;
+					mLoadedNominalIndiTriplesAssertions = prevIndividual->mLoadedNominalIndiTriplesAssertions;
+					mLoadedNominalIndiRepresentativeBackendData = prevIndividual->mLoadedNominalIndiRepresentativeBackendData;
+					mNominalIndiTriplesAssertions = prevIndividual->mNominalIndiTriplesAssertions;
 					mBlockedIndividualsLinker = prevIndividual->mBlockedIndividualsLinker;
 					mSuccessorIndiNodeBackwardDependencyLinker = prevIndividual->mSuccessorIndiNodeBackwardDependencyLinker;
 					mBackwardDependencyToAncestorIndividualNode = prevIndividual->mBackwardDependencyToAncestorIndividualNode;
 					mAncestorLink = prevIndividual->mAncestorLink;
 					indiModel = prevIndividual->indiModel;
 					mPrevIndiBlock = prevIndividual->mPrevIndiBlock;
+					mPrevIndiVarPropBlockData = prevIndividual->mPrevIndiVarPropBlockData;
 					mPrevIndiSatBlockData = prevIndividual->mPrevIndiSatBlockData;
 					mPrevIndiUnsatCacheRet = prevIndividual->mPrevIndiUnsatCacheRet;
 					mPrevSigBlockConExpData = prevIndividual->mPrevSigBlockConExpData;
@@ -272,6 +304,8 @@ namespace Konclude {
 					mDepthProcessingQueued = prevIndividual->mDepthProcessingQueued;
 					mBlockedReactProcessingQueued = prevIndividual->mBlockedReactProcessingQueued;
 					mBackendSynchronRetestProcessingQueued = prevIndividual->mBackendSynchronRetestProcessingQueued;
+					mBackendDirectInfluenceExpansionQueued = prevIndividual->mBackendDirectInfluenceExpansionQueued;
+					mBackendIndirectCompatibilityExpansionQueued = prevIndividual->mBackendIndirectCompatibilityExpansionQueued;
 					mIncrementalCompatibilityCheckingQueued = prevIndividual->mIncrementalCompatibilityCheckingQueued;
 					mIncrementalExpansionQueued = prevIndividual->mIncrementalExpansionQueued;
 					mDelayedNominalProcessingQueued = prevIndividual->mDelayedNominalProcessingQueued;
@@ -290,6 +324,7 @@ namespace Konclude {
 					prevIndividual->setRelocalized();
 					mUseReactivationData = prevIndividual->mUseReactivationData;
 					mUseNominalConnectionSet = prevIndividual->mUseNominalConnectionSet;
+					mUseSuccIndiATMOSTReactivationData = prevIndividual->mUseSuccIndiATMOSTReactivationData;
 					mUseDatatypesValueSpaceData = prevIndividual->mUseDatatypesValueSpaceData;
 					mUseIncExpData = prevIndividual->mUseIncExpData;
 					mIncExpID = prevIndividual->mIncExpID;
@@ -308,6 +343,8 @@ namespace Konclude {
 					mConceptProcessLinker = nullptr;
 					mRequiredBackProp = false;
 					mSubstituteIndiNode = nullptr;
+					mIndiBlock = nullptr;
+					mIndiVarPropBlockData = nullptr;
 					mLocReactivationData = nullptr;
 					mLocNominalConnectionSet = nullptr;
 					mLocDatatypesValueSpaceData = nullptr;
@@ -351,6 +388,7 @@ namespace Konclude {
 						mUseDistinctHash = mPrevDistinctHash;
 						mUseReactivationData = prevIndividual->mUseReactivationData;
 						mUseNominalConnectionSet = prevIndividual->mUseNominalConnectionSet;
+						mUseSuccIndiATMOSTReactivationData = prevIndividual->mUseSuccIndiATMOSTReactivationData;
 						mNominalProcessingDelayingChecked = prevIndividual->mNominalProcessingDelayingChecked;
 						mUseDatatypesValueSpaceData = prevIndividual->mUseDatatypesValueSpaceData;
 						mUseIndividualMergingHash = prevIndividual->mUseIndividualMergingHash;
@@ -364,16 +402,28 @@ namespace Konclude {
 						mInitializingConceptLinkerIt = prevIndividual->mInitializingConceptLinkerIt;
 						mProcessInitializingConceptLinkerIt = prevIndividual->mProcessInitializingConceptLinkerIt;
 						mAssertionRoleLinkerIt = prevIndividual->mAssertionRoleLinkerIt;
+						mAssertionConceptLinkerIt = prevIndividual->mAssertionConceptLinkerIt;
+						mAssertionDataLinkerIt = prevIndividual->mAssertionDataLinkerIt;
+						mAssertedDataLiteralLinker = prevIndividual->mAssertedDataLiteralLinker;
+						mLastProcessedAssertionDataLinker = prevIndividual->mLastProcessedAssertionDataLinker;
+						mLastAssertedDataLiteralLinker = prevIndividual->mLastAssertedDataLiteralLinker;
 						mReverseAssertionRoleLinkerIt = prevIndividual->mReverseAssertionRoleLinkerIt;
 						mAdditionalRoleAssertionsLinker = prevIndividual->mAdditionalRoleAssertionsLinker;
+						mAdditionalDataAssertionsLinker = prevIndividual->mAdditionalDataAssertionsLinker;
+						mLastProcessedAdditionalDataAssertionsLinker = prevIndividual->mLastProcessedAdditionalDataAssertionsLinker;
+						mBaseConceptsInitialized = prevIndividual->mBaseConceptsInitialized;
 						mRoleAssertionsInitialized = prevIndividual->mRoleAssertionsInitialized;
 						mReverseRoleAssertionsInitialized = prevIndividual->mReverseRoleAssertionsInitialized;
+						mNominalIndiTriplesAssertions = prevIndividual->mNominalIndiTriplesAssertions;
+						mLoadedNominalIndiTriplesAssertions = prevIndividual->mLoadedNominalIndiTriplesAssertions;
+						mLoadedNominalIndiRepresentativeBackendData = prevIndividual->mLoadedNominalIndiRepresentativeBackendData;
 						mBlockedIndividualsLinker = prevIndividual->mBlockedIndividualsLinker;
 						mSuccessorIndiNodeBackwardDependencyLinker = prevIndividual->mSuccessorIndiNodeBackwardDependencyLinker;
 						mBackwardDependencyToAncestorIndividualNode = prevIndividual->mBackwardDependencyToAncestorIndividualNode;
 						mAncestorLink = prevIndividual->mAncestorLink;
 						indiModel = prevIndividual->indiModel;
 						mPrevIndiBlock = prevIndividual->mPrevIndiBlock;
+						mPrevIndiVarPropBlockData = prevIndividual->mPrevIndiVarPropBlockData;
 						mPrevIndiSatBlockData = prevIndividual->mPrevIndiSatBlockData;
 						mPrevIndiUnsatCacheRet = prevIndividual->mPrevIndiUnsatCacheRet;
 						mPrevSigBlockConExpData = prevIndividual->mPrevSigBlockConExpData;
@@ -409,6 +459,8 @@ namespace Konclude {
 						mDepthProcessingQueued = prevIndividual->mDepthProcessingQueued;
 						mBlockedReactProcessingQueued = prevIndividual->mBlockedReactProcessingQueued;
 						mBackendSynchronRetestProcessingQueued = prevIndividual->mBackendSynchronRetestProcessingQueued;
+						mBackendIndirectCompatibilityExpansionQueued = prevIndividual->mBackendIndirectCompatibilityExpansionQueued;
+						mBackendDirectInfluenceExpansionQueued = prevIndividual->mBackendDirectInfluenceExpansionQueued;
 						mIncrementalCompatibilityCheckingQueued = prevIndividual->mIncrementalCompatibilityCheckingQueued;
 						mIncrementalExpansionQueued = prevIndividual->mIncrementalExpansionQueued;
 						mDelayedNominalProcessingQueued = prevIndividual->mDelayedNominalProcessingQueued;
@@ -485,6 +537,77 @@ namespace Konclude {
 
 				CIndividualProcessNode* CIndividualProcessNode::setAssertionConceptLinker(CConceptAssertionLinker* assertionConceptLinkerIt) {
 					mAssertionConceptLinkerIt = assertionConceptLinkerIt;
+					return this;
+				}
+
+
+
+
+
+				bool CIndividualProcessNode::hasAssertionData() {
+					return mAssertionDataLinkerIt != nullptr;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::clearAssertionData() {
+					mAssertionDataLinkerIt = nullptr;
+					return this;
+				}
+
+
+				CDataAssertionLinker* CIndividualProcessNode::getAssertionDataLinker() {
+					return mAssertionDataLinkerIt;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setAssertionDataLinker(CDataAssertionLinker* assertionDataLinkerIt) {
+					mAssertionDataLinkerIt = assertionDataLinkerIt;
+					return this;
+				}
+
+
+
+				bool CIndividualProcessNode::hasAssertedDataLiterals() {
+					return mAssertedDataLiteralLinker != nullptr;
+				}
+
+				CProcessAssertedDataLiteralLinker* CIndividualProcessNode::getAssertedDataLiteralLinker() {
+					return mAssertedDataLiteralLinker;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setAssertedDataLiteralLinker(CProcessAssertedDataLiteralLinker* dataLiteralLinker) {
+					mAssertedDataLiteralLinker = dataLiteralLinker;
+					return this;
+				}
+
+
+
+				CDataAssertionLinker* CIndividualProcessNode::getLastProcessedAssertionDataLinker() {
+					return mLastProcessedAssertionDataLinker;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setLastProcessedAssertionDataLinker(CDataAssertionLinker* dataLiteralLinker) {
+					mLastProcessedAssertionDataLinker = dataLiteralLinker;
+					return this;
+				}
+
+
+
+				CProcessAssertedDataLiteralLinker* CIndividualProcessNode::getLastAssertedDataLiteralLinker() {
+					return mLastAssertedDataLiteralLinker;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setLastAssertedDataLiteralLinker(CProcessAssertedDataLiteralLinker* dataLiteralLinker) {
+					mLastAssertedDataLiteralLinker = dataLiteralLinker;
+					return this;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::addAssertedDataLiteralLinker(CProcessAssertedDataLiteralLinker* dataLiteralLinker) {
+					mAssertedDataLiteralLinker = dataLiteralLinker->append(mAssertedDataLiteralLinker);
+					return this;
+				}
+
+
+				CIndividualProcessNode* CIndividualProcessNode::clearAssertedDataLiterals() {
+					mAssertedDataLiteralLinker = nullptr;
 					return this;
 				}
 
@@ -574,6 +697,52 @@ namespace Konclude {
 
 
 
+				bool CIndividualProcessNode::hasAdditionalDataAssertionsLinker() {
+					return mAdditionalDataAssertionsLinker != nullptr;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::clearAdditionalDataAssertionsLinker() {
+					mAdditionalDataAssertionsLinker = nullptr;
+					return this;
+				}
+
+				CAdditionalProcessDataAssertionsLinker* CIndividualProcessNode::getAdditionalDataAssertionsLinker() {
+					return mAdditionalDataAssertionsLinker;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setAdditionalDataAssertionsLinker(CAdditionalProcessDataAssertionsLinker* addDataAssertionsLinker) {
+					mAdditionalDataAssertionsLinker = addDataAssertionsLinker;
+					return this;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::addAdditionalDataAssertionsLinker(CAdditionalProcessDataAssertionsLinker* addDataAssertionsLinker) {
+					mAdditionalDataAssertionsLinker = addDataAssertionsLinker->append(mAdditionalDataAssertionsLinker);
+					return this;
+				}
+
+
+				CAdditionalProcessDataAssertionsLinker* CIndividualProcessNode::getLastProcessedAdditionalDataAssertionLinker() {
+					return mLastProcessedAdditionalDataAssertionsLinker;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setLastProcessedAdditionalDataAssertionLinker(CAdditionalProcessDataAssertionsLinker* dataLiteralLinker) {
+					mLastProcessedAdditionalDataAssertionsLinker = dataLiteralLinker;
+					return this;
+				}
+
+
+
+
+				bool CIndividualProcessNode::hasBaseConceptsInitialized() {
+					return mBaseConceptsInitialized;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setBaseConceptsInitialized(bool initialized) {
+					mBaseConceptsInitialized = initialized;
+					return this;
+				}
+
+
 				bool CIndividualProcessNode::hasRoleAssertionsInitialized() {
 					return mRoleAssertionsInitialized;
 				}
@@ -595,11 +764,40 @@ namespace Konclude {
 				}
 
 
-				cint64 CIndividualProcessNode::getIndividualID() {
+
+				bool CIndividualProcessNode::hasNominalIndividualTriplesAssertions() {
+					return mNominalIndiTriplesAssertions;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setNominalIndividualTriplesAssertions(bool hasNominalAssertions) {
+					mNominalIndiTriplesAssertions = hasNominalAssertions;
+					return this;
+				}
+
+				bool CIndividualProcessNode::areNominalIndividualTriplesAssertionsLoaded() {
+					return mLoadedNominalIndiTriplesAssertions;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setNominalIndividualTriplesAssertionsLoaded(bool loaded) {
+					mLoadedNominalIndiTriplesAssertions = loaded;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isNominalIndividualRepresentativeBackendDataLoaded() {
+					return mLoadedNominalIndiRepresentativeBackendData;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setNominalIndividualRepresentativeBackendDataLoaded(bool loaded) {
+					mLoadedNominalIndiRepresentativeBackendData = loaded;
+					return this;
+				}
+
+				cint64 CIndividualProcessNode::getIndividualNodeID() {
 					return mIndiID;
 				}
 
-				CIndividualProcessNode* CIndividualProcessNode::setIndividualID(cint64 indiID) {
+				CIndividualProcessNode* CIndividualProcessNode::setIndividualNodeID(cint64 indiID) {
 					if (mMergeIntoID == mIndiID) {
 						mMergeIntoID = indiID;
 					}
@@ -710,25 +908,25 @@ namespace Konclude {
 
 				bool CIndividualProcessNode::hasRoleSuccessorToIndividual(CRole* role, cint64 destinationIndiID, bool locateable) {
 					if (mUseReapplyRoleSuccHash) {
-						return mUseReapplyRoleSuccHash->hasRoleSuccessorToIndividual(role,getIndividualID(),destinationIndiID,locateable && mReapplyRoleSuccHash);
+						return mUseReapplyRoleSuccHash->hasRoleSuccessorToIndividual(role,getIndividualNodeID(),destinationIndiID,locateable && mReapplyRoleSuccHash);
 					}
 					return false;
 				}
 
 
 				bool CIndividualProcessNode::hasRoleSuccessorToIndividual(CRole* role, CIndividualProcessNode* desIndi, bool locateable) {
-					return hasRoleSuccessorToIndividual(role,desIndi->getIndividualID(),locateable);
+					return hasRoleSuccessorToIndividual(role,desIndi->getIndividualNodeID(),locateable);
 				}
 
 				CIndividualLinkEdge* CIndividualProcessNode::getRoleSuccessorToIndividualLink(CRole* role, cint64 destinationIndiID, bool locateable) {
 					if (mUseReapplyRoleSuccHash) {
-						return mUseReapplyRoleSuccHash->getRoleSuccessorToIndividualLink(role,getIndividualID(),destinationIndiID,locateable && mReapplyRoleSuccHash);
+						return mUseReapplyRoleSuccHash->getRoleSuccessorToIndividualLink(role,getIndividualNodeID(),destinationIndiID,locateable && mReapplyRoleSuccHash);
 					}
-					return false;
+					return nullptr;
 				}
 
 				CIndividualLinkEdge* CIndividualProcessNode::getRoleSuccessorToIndividualLink(CRole* role, CIndividualProcessNode* desIndi, bool locateable) {
-					return getRoleSuccessorToIndividualLink(role,desIndi->getIndividualID(),locateable);
+					return getRoleSuccessorToIndividualLink(role,desIndi->getIndividualNodeID(),locateable);
 				}
 
 
@@ -742,7 +940,7 @@ namespace Konclude {
 
 
 				bool CIndividualProcessNode::hasNegationDisjointToIndividual(CRole* role, CIndividualProcessNode* desIndi) {
-					return hasNegationDisjointToIndividual(role,desIndi->getIndividualID());
+					return hasNegationDisjointToIndividual(role,desIndi->getIndividualNodeID());
 				}
 
 
@@ -798,7 +996,7 @@ namespace Konclude {
 				}
 
 				CDisjointSuccessorRoleIterator CIndividualProcessNode::getDisjointSuccessorRoleIterator(CIndividualProcessNode* indiNode) {
-					return getDisjointSuccessorRoleIterator(indiNode->getIndividualID());
+					return getDisjointSuccessorRoleIterator(indiNode->getIndividualNodeID());
 				}
 
 
@@ -821,7 +1019,7 @@ namespace Konclude {
 				}
 
 				CSuccessorRoleIterator CIndividualProcessNode::getSuccessorRoleIterator(CIndividualProcessNode* indiNode) {
-					return getSuccessorRoleIterator(indiNode->getIndividualID());
+					return getSuccessorRoleIterator(indiNode->getIndividualNodeID());
 				}
 
 				CSuccessorRoleIterator CIndividualProcessNode::getSuccessorRoleIterator(cint64 indiID) {
@@ -835,7 +1033,7 @@ namespace Konclude {
 
 
 				bool CIndividualProcessNode::hasSuccessorIndividualNode(CIndividualProcessNode* indiNode) {
-					return hasSuccessorIndividualNode(indiNode->getIndividualID());
+					return hasSuccessorIndividualNode(indiNode->getIndividualNodeID());
 				}
 
 				bool CIndividualProcessNode::hasSuccessorIndividualNode(cint64 indiID) {
@@ -976,7 +1174,7 @@ namespace Konclude {
 					return mIndiType == BLOCKABLEINDIVIDUALTYPE;
 				}
 
-				bool CIndividualProcessNode::isNominalIndividual() {
+				bool CIndividualProcessNode::isNominalIndividualNode() {
 					return mIndiType == NOMINALINDIVIDUALTYPE;
 				}
 
@@ -996,18 +1194,18 @@ namespace Konclude {
 				}
 
 
-				CIndividualProcessNode* CIndividualProcessNode::installIndividualLink(CIndividualLinkEdge* link, CReapplyQueueIterator* reapplyQueueIt) {
+				cint64 CIndividualProcessNode::installIndividualLink(CIndividualLinkEdge* link, CReapplyQueueIterator* reapplyQueueIt) {
 					if (!mReapplyRoleSuccHash) {
 						getReapplyRoleSuccessorHash(true);
 					}
 					if (!mSuccRoleHash) {
 						getSuccessorRoleHash(true);
 					}
-					mUseReapplyRoleSuccHash->insertRoleSuccessorLink(link->getLinkRole(),link,reapplyQueueIt);
+					cint64 linkCount = mUseReapplyRoleSuccHash->insertRoleSuccessorLink(link->getLinkRole(),link,reapplyQueueIt);
 					cint64 oppIndiID = link->getOppositeIndividualID(mIndiID);
 					mUseSuccRoleHash->insertSuccessorRoleLink(oppIndiID,link);
 					mLastAddedLink = link;
-					return this;
+					return linkCount;
 				}
 
 				CIndividualProcessNode* CIndividualProcessNode::removeIndividualLink(CIndividualLinkEdge* link) {
@@ -1023,12 +1221,12 @@ namespace Konclude {
 					if (!mSuccRoleHash) {
 						getSuccessorRoleHash(true);
 					}
-					mSuccRoleHash->removeSuccessor(indi->getIndividualID());
+					mSuccRoleHash->removeSuccessor(indi->getIndividualNodeID());
 					if (mUseConnSuccSet) {
 						if (!mConnSuccSet) {
 							getConnectionSuccessorSet(true);
 						}
-						mConnSuccSet->removeConnection(indi->getIndividualID());
+						mConnSuccSet->removeConnection(indi->getIndividualNodeID());
 					}
 					return this;
 				}
@@ -1215,6 +1413,22 @@ namespace Konclude {
 					return this;
 				}
 
+
+				CBlockingVariableBindingsAnalogousPropagationData* CIndividualProcessNode::getVariableBindingsPropagationBlockingData(bool localBlockData) {
+					if (localBlockData) {
+						return mIndiVarPropBlockData;
+					} else {
+						return mPrevIndiVarPropBlockData;
+					}
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setVariableBindingsPropagationBlockingData(CBlockingVariableBindingsAnalogousPropagationData* blockData) {
+					mIndiVarPropBlockData = blockData;
+					mPrevIndiVarPropBlockData = blockData;
+					return this;
+				}
+
+
 				cint64 CIndividualProcessNode::getIndividualAncestorDepth() {
 					return indiAncDepth;
 				}
@@ -1234,7 +1448,7 @@ namespace Konclude {
 				}
 
 				cint64 CIndividualProcessNode::getIndividualNominalLevelOrAncestorDepth() {
-					if (isNominalIndividual()) {
+					if (isNominalIndividualNode()) {
 						return getIndividualNominalLevel();
 					}
 					return getIndividualAncestorDepth();
@@ -1622,6 +1836,32 @@ namespace Konclude {
 
 
 
+				CIndividualProcessNode* CIndividualProcessNode::setBackendIndirectCompatibilityExpansionQueued(bool queued) {
+					mBackendIndirectCompatibilityExpansionQueued = queued;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isBackendIndirectCompatibilityExpansionQueued() {
+					return mBackendIndirectCompatibilityExpansionQueued;
+				}
+
+
+
+
+				CIndividualProcessNode* CIndividualProcessNode::setBackendDirectInfluenceExpansionQueued(bool queued) {
+					mBackendDirectInfluenceExpansionQueued = queued;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isBackendDirectInfluenceExpansionQueued() {
+					return mBackendDirectInfluenceExpansionQueued;
+				}
+
+
+
+
 				CIndividualProcessNode* CIndividualProcessNode::setIncrementalCompatibilityCheckingQueued(bool incCompChecking) {
 					mIncrementalCompatibilityCheckingQueued = incCompChecking;
 					return this;
@@ -1654,6 +1894,8 @@ namespace Konclude {
 					mDepthProcessingQueued = false;
 					mDelayedNominalProcessingQueued = false;
 					mBackendSynchronRetestProcessingQueued = false;
+					mBackendDirectInfluenceExpansionQueued = false;
+					mBackendIndirectCompatibilityExpansionQueued = false;
 					mIncrementalCompatibilityCheckingQueued = false;
 					mIncrementalExpansionQueued = false;
 					return this;
@@ -1718,7 +1960,7 @@ namespace Konclude {
 					CNominalCachingLossReactivationData* nominalNodeReactData = nullptr;
 					if (!mLocReactivationData && create) {
 						CNominalCachingLossReactivationData* nominalNodeReactData = CObjectParameterizingAllocator< CNominalCachingLossReactivationData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
-						nominalNodeReactData->initNominalCachingLossReactivationData(getIndividualID(),mUseReactivationData);
+						nominalNodeReactData->initNominalCachingLossReactivationData(getIndividualNodeID(),mUseReactivationData);
 						mLocReactivationData = nominalNodeReactData;
 						mUseReactivationData = nominalNodeReactData;
 					}
@@ -1735,6 +1977,18 @@ namespace Konclude {
 					}
 					return mUseNominalConnectionSet;
 				}
+
+
+				CSuccessorIndividualATMOSTReactivationData* CIndividualProcessNode::getSuccessorIndividualATMOSTReactivationData(bool create) {
+					if (!mLocSuccIndiATMOSTReactivationData && create) {
+						CSuccessorIndividualATMOSTReactivationData* succIndiATMOSTReactivationData = CObjectParameterizingAllocator< CSuccessorIndividualATMOSTReactivationData,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						succIndiATMOSTReactivationData->initSuccessorIndividualATMOSTReactivationData(mUseSuccIndiATMOSTReactivationData);
+						mLocSuccIndiATMOSTReactivationData = succIndiATMOSTReactivationData;
+						mUseSuccIndiATMOSTReactivationData = succIndiATMOSTReactivationData;
+					}
+					return mUseSuccIndiATMOSTReactivationData;
+				}
+
 
 				bool CIndividualProcessNode::hasSuccessorConnectionToNominal(cint64 nominalID) {
 					CSuccessorConnectedNominalSet* nomConnSet = getSuccessorNominalConnectionSet(false);
@@ -1789,6 +2043,8 @@ namespace Konclude {
 					}
 					return mUseIndividualMergingHash;
 				}
+
+
 
 
 				CIndividualProcessNode* CIndividualProcessNode::getLastMergedIntoIndividualNode() {

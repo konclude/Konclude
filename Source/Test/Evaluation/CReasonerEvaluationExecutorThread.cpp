@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -36,8 +36,10 @@ namespace Konclude {
 				mLoaderConfig = config;
 				mCommanderManager = CConfigManagerReader::readCommanderManagerConfig(mLoaderConfig);
 				mReasonerEvalFactory = new CConfigDependendReasonerEvaluationFactory();
-				mReasonerEvaluator = new CReasonerEvaluationEvaluator();
-				mReasonerClient = new CReasonerEvaluationRequestClientThread();
+				mReasonerEvaluatorOWLlink = new CReasonerEvaluationEvaluatorOWLlink();
+				mReasonerEvaluatorSPARQL = new CReasonerEvaluationEvaluatorSPARQL();
+				mReasonerOWLlinkClient = new CReasonerEvaluationRequestClientOWLlinkThread();
+				mReasonerSPARQLClient = new CReasonerEvaluationRequestClientSPARQLThread();
 				mReasonerProvider = nullptr;
 				mNumberStringSize = 4;
 				mNextTestRemainingExecutionCount = 0;
@@ -46,15 +48,21 @@ namespace Konclude {
 				mErrorCommBreakCount = 2;
 				mFirstTest = true;
 				mCriticalProcessesTester = nullptr;
+				mConfTestcaseEvaluationExceptionLimit = -1;
+				mCurrentErrorTestRetryCount = 0;
+				mErrorTestMaximalRetryCount = -1;
+				mErrorTestMaximalRetryWriting = false;
 				startThread();
 			}
 
 
 			CReasonerEvaluationExecutorThread::~CReasonerEvaluationExecutorThread() {
 				delete mReasonerEvalFactory;
-				delete mReasonerEvaluator;
+				delete mReasonerEvaluatorOWLlink;
+				delete mReasonerEvaluatorSPARQL;
 				delete mReasonerProvider;
-				delete mReasonerClient;
+				delete mReasonerOWLlinkClient;
+				delete mReasonerSPARQLClient;
 				delete mCriticalProcessesTester;
 			}
 
@@ -108,7 +116,9 @@ namespace Konclude {
 				} else if (type == CReasonerEvaluationNextEvent::EVENTTYPE) {
 					CReasonerEvaluationNextEvent* nextEvalEvent = (CReasonerEvaluationNextEvent*)event;	
 
-					CReasonerEvaluationRequestResult* requestResults = mReasonerClient->getReasonerEvaluationResult();
+					LOG(INFO, getLogDomain(), logTr("Collecting responses."), this);
+					CReasonerEvaluationRequestResult* requestResults = mCurrentReasonerClient->getReasonerEvaluationResult();
+					LOG(INFO, getLogDomain(), logTr("Destroying reasoner."), this);
 					CReasonerEvaluationTerminationResult* terminationResults = mReasonerProvider->destroyReasoner();
 
 					QString outputFileString = getNextOutputFileString();
@@ -122,8 +132,11 @@ namespace Konclude {
 							QThread::msleep(mWaitingTimeBetweenTests);
 						}
 
+						delete terminationResults;
+						delete requestResults;
+
 					} else {
-						bool succ = evaluateExecutedTest(terminationResults,requestResults,outputFileString);
+						bool succ = evaluateExecutedTest(terminationResults,requestResults,outputFileString, false);
 
 						if (mWaitingTimeBetweenTests > 0) {
 							LOG(INFO,getLogDomain(),logTr("Waiting %1 ms before continuation.").arg(mWaitingTimeBetweenTests),this);
@@ -133,22 +146,55 @@ namespace Konclude {
 						delete terminationResults;
 						delete requestResults;
 
-						if (succ) {
-							if (--mNextTestRemainingExecutionCount > 0) {
-								++mNextTestExecutionNumber;
-								executeNextEvaluationTest(mReasonerInitFileString,mNextTestInputFile);
-							} else {
-								if (prepareNextEvaluationTest()) {
-									executeNextEvaluationTest(mReasonerInitFileString,mNextTestInputFile);
-								} else {
-									finishEvaluationTests();
-								}
-							}
+
+
+						if (mConfTestcaseEvaluationExceptionLimit == 0) {
+							LOG(WARN, getLogDomain(), logTr("Reached testcase evaluation limit, terminating with exception."), this);
+							QCoreApplication::exit(-1);
+
+							//TODO: fix, find a better solution
+							int* x = 0;
+							*x = 1;
 						} else {
-							if (--mErrorCommBreakCount > 0) {
-								executeNextEvaluationTest(mReasonerInitFileString,mNextTestInputFile);
+
+							if (mConfTestcaseEvaluationExceptionLimit != -1) {
+								mConfTestcaseEvaluationExceptionLimit--;
+							}
+
+							if (succ) {
+								mCurrentErrorTestRetryCount = 0;
+								if (--mNextTestRemainingExecutionCount > 0) {
+									++mNextTestExecutionNumber;
+									executeNextEvaluationTest(mReasonerInitFileString, mNextTestInputFile);
+								} else {
+									if (prepareNextEvaluationTest()) {
+										executeNextEvaluationTest(mReasonerInitFileString, mNextTestInputFile);
+									} else {
+										finishEvaluationTests();
+									}
+								}
 							} else {
-								failedEvaluationTests();
+								if (--mErrorCommBreakCount > 0) {
+									if (mErrorTestMaximalRetryCount != -1 && mCurrentErrorTestRetryCount++ > mErrorTestMaximalRetryCount) {
+
+										LOG(ERROR, getLogDomain(), logTr("Reached maximum number of retries for test case '%1'.").arg(mNextTestInputFile), this);
+										if (mErrorTestMaximalRetryWriting) {
+											evaluateExecutedTest(terminationResults, requestResults, outputFileString, true);
+										}
+
+										mCurrentErrorTestRetryCount = 0;
+										if (prepareNextEvaluationTest()) {
+											executeNextEvaluationTest(mReasonerInitFileString, mNextTestInputFile);
+										} else {
+											failedEvaluationTests();
+										}
+									} else {
+										LOG(ERROR, getLogDomain(), logTr("Communication failure %1 with reasoner for test case '%1'.").arg(mCurrentErrorTestRetryCount).arg(mNextTestInputFile), this);
+										executeNextEvaluationTest(mReasonerInitFileString, mNextTestInputFile);
+									}
+								} else {
+									failedEvaluationTests();
+								}
 							}
 						}
 					}
@@ -201,6 +247,10 @@ namespace Konclude {
 				mTestCount = CConfigDataReader::readConfigInteger(mConfiguration,"Konclude.Evaluation.TestingCount");
 
 				mErrorCommBreakCount = CConfigDataReader::readConfigInteger(mConfiguration,"Konclude.Evaluation.CancelReasonerErrorCount");
+				mErrorTestMaximalRetryCount = CConfigDataReader::readConfigInteger(mConfiguration, "Konclude.Evaluation.ReasonerTestErrorMaximalRetryCount");
+				mErrorTestMaximalRetryWriting = CConfigDataReader::readConfigBoolean(mConfiguration, "Konclude.Evaluation.ReasonerTestErrorMaximalRetryWriting");
+
+				mConfTestcaseEvaluationExceptionLimit = CConfigDataReader::readConfigInteger(mConfiguration, "Konclude.Evaluation.TestcaseEvaluationExceptionLimit");
 
 				mTestTimeout = CConfigDataReader::readConfigInteger(mConfiguration,"Konclude.Evaluation.RequestTimeout");
 
@@ -315,10 +365,23 @@ namespace Konclude {
 			}
 
 
-			bool CReasonerEvaluationExecutorThread::evaluateExecutedTest(CReasonerEvaluationTerminationResult* terminationResults, CReasonerEvaluationRequestResult* requestResults, const QString& testcaseOutput) {
-				if (requestResults->hasSucessfullReasonerCommunication()) {
+
+			CReasonerEvaluationEvaluator* CReasonerEvaluationExecutorThread::getReasonerEvaluatorForTestfile(const QString& testFileNameString, CReasonerEvaluationRequestClientBaseThread* reasonerClient) {
+				if (dynamic_cast<CReasonerEvaluationRequestClientOWLlinkThread*>(reasonerClient)) {
+					return mReasonerEvaluatorOWLlink;
+				} else if (dynamic_cast<CReasonerEvaluationRequestClientSPARQLThread*>(reasonerClient)) {
+					return mReasonerEvaluatorSPARQL;
+				}
+				LOG(WARN, getLogDomain(), logTr("No supported evaluator for request file '%1'.").arg(mWaitingTimeAfterReasonerCreation), this);
+				return mReasonerEvaluatorOWLlink;
+			}
+
+
+			bool CReasonerEvaluationExecutorThread::evaluateExecutedTest(CReasonerEvaluationTerminationResult* terminationResults, CReasonerEvaluationRequestResult* requestResults, const QString& testcaseOutput, bool forceWriting) {
+				if (requestResults->hasSucessfullReasonerCommunication() || forceWriting) {
 					LOG(INFO,getLogDomain(),logTr("Evaluate executed test case to '%1'.").arg(testcaseOutput),this);
-					mReasonerEvaluator->evaluateResults(requestResults,terminationResults,mNextTestInputFile,testcaseOutput,mConfiguration);
+					mCurrentReasonerEvaluator = getReasonerEvaluatorForTestfile(mNextTestInputFile, mCurrentReasonerClient);
+					mCurrentReasonerEvaluator->evaluateResults(requestResults,terminationResults,mNextTestInputFile,testcaseOutput,mConfiguration);
 					mExecutedTest = true;
 					return true;
 				} else {
@@ -365,10 +428,24 @@ namespace Konclude {
 					LOG(INFO,getLogDomain(),logTr("Waiting %1 ms after created reasoner.").arg(mWaitingTimeAfterReasonerCreation),this);
 					QThread::msleep(mWaitingTimeAfterReasonerCreation);
 				}
-				mReasonerClient->evaluateReasoner(testcaseInit,testcaseInput,addressString,mConfiguration,new CReasonerEvaluationNextEvent(this,0));
+				mCurrentReasonerClient = getReasonerClientForTestfile(testcaseInput);
+				mCurrentReasonerClient->evaluateReasoner(testcaseInit,testcaseInput,addressString,mConfiguration,new CReasonerEvaluationNextEvent(this,0));
+				LOG(INFO, getLogDomain(), logTr("Reasoner execution for test case '%1' finished.").arg(testcaseInput), this);
 				return true;
 			}
 
+
+
+			CReasonerEvaluationRequestClientBaseThread* CReasonerEvaluationExecutorThread::getReasonerClientForTestfile(const QString& testFileNameString) {
+				if (mReasonerOWLlinkClient->canHandleRequestFile(testFileNameString)) {
+					return mReasonerOWLlinkClient;
+				}
+				if (mReasonerSPARQLClient->canHandleRequestFile(testFileNameString)) {
+					return mReasonerSPARQLClient;
+				}
+				LOG(WARN, getLogDomain(), logTr("No supported client handler for request file '%1'.").arg(mWaitingTimeAfterReasonerCreation), this);
+				return mReasonerOWLlinkClient;
+			}
 
 
 
@@ -399,7 +476,7 @@ namespace Konclude {
 								if (testFileFiltered(fileString,mInputDir,nextDir+"/")) {
 									mRemainingFiles.append(nextDir+"/"+fileString);
 								} else {
-									LOG(INFO,getLogDomain(),logTr("File '%1' in directory '%2' filtered out.").arg(fileString).arg(nextDir),this);
+									//LOG(INFO,getLogDomain(),logTr("File '%1' in directory '%2' filtered out.").arg(fileString).arg(nextDir),this);
 								}
 							}
 						}

@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -39,6 +39,11 @@ namespace Konclude {
 				mProcessingQueuedFlag = false;
 				mSelfSuccsCompletedFlag = false;
 				mHierNode = hierNode;
+				mConceptInstancesTestingFinished = false;
+				mPossibleInstanceMergingDataContainer = nullptr;
+				mIndividualItemPossibleInstanceMergingLinkerHash = nullptr;
+				mPrefferedPossibleInstancesSet = nullptr;
+				mModelMergingCheckedSet = nullptr;
 				return this;
 			}
 
@@ -56,12 +61,12 @@ namespace Konclude {
 				return this;
 			}
 
-			QSet<COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getKnownInstancesSet() {
-				return &mKnownInstancesSet;
+			QMap<cint64, COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getKnownInstancesMap() {
+				return &mKnownInstancesMap;
 			}
 
-			QSet<COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getPossibleInstancesSet() {
-				return &mPossibleInstancesSet;
+			QMap<cint64, COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getPossibleInstancesMap() {
+				return &mPossibleInstancesMap;
 			}
 
 			QList<COptimizedKPSetConceptInstancesItem*>* COptimizedKPSetConceptInstancesItem::getParentItemList() {
@@ -73,26 +78,26 @@ namespace Konclude {
 			}
 
 			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addKnownInstance(COptimizedKPSetIndividualItem* item) {
-				mKnownInstancesSet.insert(item);
+				mKnownInstancesMap.insert(item->getIndividualId(), item);
 				return this;
 			}
 
 			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::removeKnownInstance(COptimizedKPSetIndividualItem* item) {
-				mKnownInstancesSet.remove(item);
+				mKnownInstancesMap.remove(item->getIndividualId());
 				return this;
 			}
 
 			bool COptimizedKPSetConceptInstancesItem::hasKnownInstance(COptimizedKPSetIndividualItem* item) {
-				return mKnownInstancesSet.contains(item);
+				return mKnownInstancesMap.contains(item->getIndividualId());
 			}
 
 
 			bool COptimizedKPSetConceptInstancesItem::hasPossibleInstance(COptimizedKPSetIndividualItem* item) {
-				return mPossibleInstancesSet.contains(item);
+				return mPossibleInstancesMap.contains(item->getIndividualId());
 			}
 
 			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addPossibleInstance(COptimizedKPSetIndividualItem* item) {
-				mPossibleInstancesSet.insert(item);
+				mPossibleInstancesMap.insert(item->getIndividualId(), item);
 				return this;
 			}
 
@@ -185,17 +190,143 @@ namespace Konclude {
 			}
 
 			bool COptimizedKPSetConceptInstancesItem::hasPossibleInstances() {
-				return !mPossibleInstancesSet.isEmpty();
+				return !mPossibleInstancesMap.isEmpty();
 			}
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::removeTestingPossibleInstance(COptimizedKPSetIndividualItem* possInstance) {
+				mPossibleInstancesMap.remove(possInstance->getIndividualId());
+				if (mPrefferedPossibleInstancesSet) {
+					mPrefferedPossibleInstancesSet->remove(possInstance->getIndividualId());
+				}
+				return this;
+			}
+
+			QMap<cint64, COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getPrefferedPossibleInstanceTestingSet() {
+				return mPrefferedPossibleInstancesSet;
+			}
+
 
 			COptimizedKPSetIndividualItem* COptimizedKPSetConceptInstancesItem::takeNextTestingPossibleInstance() {
 				COptimizedKPSetIndividualItem* nextItem = nullptr;
 				if (hasPossibleInstances()) {
-					QSet<COptimizedKPSetIndividualItem*>::iterator it = mPossibleInstancesSet.begin();
-					nextItem = *it;
-					mPossibleInstancesSet.erase(it);
+					if (mIndividualItemPossibleInstanceMergingLinkerHash) {
+						if (!mPrefferedPossibleInstancesSet) {
+							mPrefferedPossibleInstancesSet = new QMap<cint64, COptimizedKPSetIndividualItem *>(mPossibleInstancesMap);
+						}
+					}
+
+					if (mPrefferedPossibleInstancesSet && !mPrefferedPossibleInstancesSet->isEmpty()) {
+						QMap<cint64, COptimizedKPSetIndividualItem*>::iterator it = mPrefferedPossibleInstancesSet->begin();
+						while (it != mPrefferedPossibleInstancesSet->end()) {
+							nextItem = *it;
+							it = mPrefferedPossibleInstancesSet->erase(it);
+							CPossibleInstancesIndividualsMergingLinker* linker = mIndividualItemPossibleInstanceMergingLinkerHash->value(nextItem);
+							if (!linker || linker->isSatisfiableMerged()) {
+								break;
+							}
+						}
+						mPossibleInstancesMap.remove(nextItem->getIndividualId());
+
+					} else {
+
+						QMap<cint64, COptimizedKPSetIndividualItem*>::iterator it = mPossibleInstancesMap.begin();
+						nextItem = *it;
+						mPossibleInstancesMap.erase(it);
+					}
 				}
 				return nextItem;
+			}
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::setConceptInstancesTestingFinished(bool finished) {
+				mConceptInstancesTestingFinished = finished;
+				return this;
+			}
+
+			bool COptimizedKPSetConceptInstancesItem::isConceptInstancesTestingFinished() {
+				return mConceptInstancesTestingFinished;
+			}
+
+
+			QHash<COptimizedKPSetIndividualItem*, CPossibleInstancesIndividualsMergingLinker*>* COptimizedKPSetConceptInstancesItem::getIndividualItemPossibleInstanceMergingLinkerHash(bool create) {
+				if (create && !mIndividualItemPossibleInstanceMergingLinkerHash) {
+					mIndividualItemPossibleInstanceMergingLinkerHash = new QHash<COptimizedKPSetIndividualItem *, CPossibleInstancesIndividualsMergingLinker *>();
+				}
+				return mIndividualItemPossibleInstanceMergingLinkerHash;
+			}
+
+			QList<CPossibleInstancesIndividualsMergingData*>* COptimizedKPSetConceptInstancesItem::getPossibleInstanceMergingDataContainer(bool create) {
+				if (create && !mPossibleInstanceMergingDataContainer) {
+					mPossibleInstanceMergingDataContainer = new QList<CPossibleInstancesIndividualsMergingData *>();
+				}
+				return mPossibleInstanceMergingDataContainer;
+			}
+
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::clearPossibleInstanceMergingData() {
+				if (mPossibleInstanceMergingDataContainer) {
+					qDeleteAll(*mPossibleInstanceMergingDataContainer);
+					delete mPossibleInstanceMergingDataContainer;
+					mPossibleInstanceMergingDataContainer = nullptr;
+				}
+				if (mIndividualItemPossibleInstanceMergingLinkerHash) {
+					delete mIndividualItemPossibleInstanceMergingLinkerHash;
+					mIndividualItemPossibleInstanceMergingLinkerHash = nullptr;
+				}
+				if (mPrefferedPossibleInstancesSet) {
+					delete mPrefferedPossibleInstancesSet;
+					mPrefferedPossibleInstancesSet = nullptr;
+				}
+				if (mModelMergingCheckedSet) {
+					delete mModelMergingCheckedSet;
+					mModelMergingCheckedSet = nullptr;
+				}
+				return this;
+			}
+
+
+			QMap<cint64, COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getModelMergingCheckedSet(bool create) {
+				if (!mModelMergingCheckedSet && create) {
+					mModelMergingCheckedSet = new QMap<cint64, COptimizedKPSetIndividualItem*>();
+				}
+				return mModelMergingCheckedSet;
+			}
+
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addKnownInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item) {
+				mKnownInstancesLabelCacheItemList.append(item);
+				return this;
+			}
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addKnownMostSpecificInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item) {
+				mKnownMostSpecificInstancesLabelCacheItemList.append(item);
+				return this;
+			}
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addPossibleInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item) {
+				mPossibleInstancesLabelCacheItemList.append(item);
+				return this;
+			}
+
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addPossibleMostSpecificInstancesLabelCacheItem(CBackendRepresentativeMemoryLabelCacheItem* item) {
+				mPossibleMostSpecificInstancesLabelCacheItemList.append(item);
+				return this;
+			}
+
+			QList<CBackendRepresentativeMemoryLabelCacheItem*>* COptimizedKPSetConceptInstancesItem::getKnownInstancesLabelCacheItemList() {
+				return &mKnownInstancesLabelCacheItemList;
+			}
+
+			QList<CBackendRepresentativeMemoryLabelCacheItem*>* COptimizedKPSetConceptInstancesItem::getKnownMostSpecificInstancesLabelCacheItemList() {
+				return &mKnownMostSpecificInstancesLabelCacheItemList;
+			}
+
+			QList<CBackendRepresentativeMemoryLabelCacheItem*>* COptimizedKPSetConceptInstancesItem::getPossibleInstancesLabelCacheItemList() {
+				return &mPossibleInstancesLabelCacheItemList;
+			}
+
+			QList<CBackendRepresentativeMemoryLabelCacheItem*>* COptimizedKPSetConceptInstancesItem::getPossibleMostSpecificInstancesLabelCacheItemList() {
+				return &mPossibleMostSpecificInstancesLabelCacheItemList;
 			}
 
 

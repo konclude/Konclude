@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -67,6 +67,27 @@ namespace Konclude {
 
 
 					bool failDebug = false;
+
+					if (!workTestCreated && reqConfPreCompItem->isTriplesMappingStepRequired()) {
+						if (!reqConfPreCompItem->isTriplesMappingStepFinished()) {
+							if (reqConfPreCompItem->areTriplesMappingStepProcessingRequirementSatisfied()) {
+								if (!reqConfPreCompItem->getOntology()->getOntologyTriplesData()->getAllTriplesData()->isEmpty()) {
+									LOG(INFO, getDomain(), logTr("Mapping RDF triples to OWL expressions and axioms."), this);
+								}
+								mapTriplesToOWL(reqConfPreCompItem);
+								reqConfPreCompItem->getTriplesMappingProcessingStep()->setStepFinished(true);
+								reqConfPreCompItem->getTriplesMappingProcessingStep()->submitRequirementsUpdate();
+							}
+							else {
+								reqConfPreCompItem->getTriplesMappingProcessingStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
+							}
+						} else {
+							reqConfPreCompItem->getTriplesMappingProcessingStep()->submitRequirementsUpdate();
+						}
+					}
+
+
+
 					if (!workTestCreated && reqConfPreCompItem->isActiveCountingStepRequired()) {
 						if (!reqConfPreCompItem->isActiveCountingStepFinished()) {
 							if (reqConfPreCompItem->areActiveCountingStepProcessingRequirementSatisfied()) {
@@ -124,6 +145,23 @@ namespace Konclude {
 						}
 					}
 
+
+
+					if (!workTestCreated && reqConfPreCompItem->getTriplesIndexingProcessingStep()) {
+						if (!reqConfPreCompItem->isTriplesIndexingStepFinished()) {
+							if (reqConfPreCompItem->areTriplesIndexingStepProcessingRequirementSatisfied()) {
+								LOG(INFO, getDomain(), logTr("Indexing triple encoded assertions."), this);
+								indexTripleEncodedAssertions(reqConfPreCompItem);
+								reqConfPreCompItem->getTriplesIndexingProcessingStep()->setStepFinished(true);
+								reqConfPreCompItem->getTriplesIndexingProcessingStep()->submitRequirementsUpdate();
+							} else {
+								reqConfPreCompItem->getTriplesIndexingProcessingStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
+							}
+						} else {
+							reqConfPreCompItem->getTriplesIndexingProcessingStep()->submitRequirementsUpdate();
+						}
+					}
+
 					if (!workTestCreated) {
 						if (!reqConfPreCompItem->hasRemainingProcessingRequirements()) {
 							finishOntologyPreprocessing(reqConfPreCompItem);
@@ -140,16 +178,51 @@ namespace Konclude {
 
 
 
+			bool CRequirementConfigPreprocessingThread::mapTriplesToOWL(CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
+				bool newTriplesMapped = false;
+				CConcreteOntology* ontology = reqConfPreCompItem->getOntology();
+				COntologyTriplesData* triplesData = ontology->getOntologyTriplesData();
+				
+				//CConcreteOntologyUpdateCollectorBuilder* updateBuilder = new CConcreteOntologyUpdateCollectorBuilder(ontology);
+				//updateBuilder->initializeBuilding();
+				//CConcreteOntologyRedlandTriplesDataExpressionMapper* triplesMapper = new CConcreteOntologyRedlandTriplesDataExpressionMapper(updateBuilder);
+				//newTriplesMapped = triplesMapper->mapTriples(ontology, triplesData);
+				//updateBuilder->completeBuilding();
+				return newTriplesMapped;
+			}
+
+
+
+			bool CRequirementConfigPreprocessingThread::indexTripleEncodedAssertions(CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
+				bool triplesIndexed = false;
+				CConcreteOntology* ontology = reqConfPreCompItem->getOntology();
+				COntologyTriplesData* triplesData = ontology->getOntologyTriplesData();
+
+				bool convertToIndividualData = CConfigDataReader::readConfigBoolean(reqConfPreCompItem->getConfiguration(), "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.IndividualDataConvertion");
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+				if (convertToIndividualData) {
+					CRedlandStoredTriplesIndividualAssertionConvertionIndexer* triplesMapper = new CRedlandStoredTriplesIndividualAssertionConvertionIndexer();
+					triplesIndexed = triplesMapper->indexABoxIndividuals(ontology, triplesData);
+				} else {
+					CRedlandStoredTriplesIndividualAssertionIndexer* triplesMapper = new CRedlandStoredTriplesIndividualAssertionIndexer();
+					triplesIndexed = triplesMapper->indexABoxIndividuals(ontology, triplesData);
+				}
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+				return triplesIndexed;
+			}
+
+
 			bool CRequirementConfigPreprocessingThread::countActiveEntites(CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
 
 				CConcreteOntology* ontology = reqConfPreCompItem->getOntology();
 				CConfiguration* ontConfig = ontology->getConfiguration();
+				COntologyIncrementalRevisionData* incRevData = ontology->getIncrementalRevisionData();
 
 
 				CONTOLOGYAXIOMLIST< QPair<CAxiomExpression*,bool> >* changeAxiomList = ontology->getBuildData()->getChangeAxiomList();
 				cint64 newAxiomCount = changeAxiomList->size();
 
-				COntologyIncrementalRevisionData* incRevData = ontology->getIncrementalRevisionData();
 				cint64 lastChangeCountedAxiom = incRevData->getLastChangeCountedAxiom();
 				COntologyIncrementalAxiomChangeData* incAxChangeData = incRevData->getAxiomChangeData();
 				bool axiomsChanged = false;
@@ -241,6 +314,8 @@ namespace Konclude {
 					axiomsChanged = true;
 				}
 				incRevData->setLastChangeCountedAxiom(newAxiomCount);
+				COntologyIncrementalAxiomChangeData* cummAxChangeData = incRevData->getCummulativeAxiomChangeData();
+				cummAxChangeData->addAxiomChangeData(incAxChangeData);
 
 
 
@@ -249,6 +324,7 @@ namespace Konclude {
 					COntologyIncrementalRevisionData* incRevData = ontology->getIncrementalRevisionData();
 					ontology->getDataBoxes()->referenceDataBoxes(incRevData->getBasementOntology()->getDataBoxes());
 				} else {
+					incRevData->setPreviousBuiltOntology(searchPreviousBuiltOntologyVersion(incRevData,reqConfPreCompItem));
 					incRevData->setPreviousConsistentOntology(searchPreviousConsistentOntologyVersion(incRevData,reqConfPreCompItem));
 					incRevData->setPreviousClassesClassifiedOntology(searchPreviousClassesClassifiedOntologyVersion(incRevData,reqConfPreCompItem));
 					incRevData->setPreviousClassTypesRealizedOntology(searchPreviousClassRealizedOntologyVersion(incRevData,reqConfPreCompItem));
@@ -284,7 +360,7 @@ namespace Konclude {
 
 			CConcreteOntology* CRequirementConfigPreprocessingThread::searchPreviousClassRealizedOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
 				CConcreteOntology* lastRealizedOntology = nullptr;
-				CConcreteOntology* prevOntology = incRevData->getPreviousOntologyVersion();
+				CConcreteOntology* prevOntology = incRevData->getPreviousConsistentOntology();
 				while (prevOntology && !lastRealizedOntology) {
 					CRealization* prevRealizedData = prevOntology->getRealization();
 					if (prevRealizedData && prevRealizedData->hasConceptRealization()) {
@@ -302,7 +378,7 @@ namespace Konclude {
 
 			CConcreteOntology* CRequirementConfigPreprocessingThread::searchPreviousClassesClassifiedOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
 				CConcreteOntology* lastClassifiedOntology = nullptr;
-				CConcreteOntology* prevOntology = incRevData->getPreviousOntologyVersion();
+				CConcreteOntology* prevOntology = incRevData->getPreviousConsistentOntology();
 				while (prevOntology && !lastClassifiedOntology) {
 					CClassification* prevClassifiedData = prevOntology->getClassification();
 					if (prevClassifiedData && prevClassifiedData->hasClassConceptClassification()) {
@@ -315,6 +391,24 @@ namespace Konclude {
 				return lastClassifiedOntology;
 			}
 
+
+
+
+
+			CConcreteOntology* CRequirementConfigPreprocessingThread::searchPreviousBuiltOntologyVersion(COntologyIncrementalRevisionData* incRevData, CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
+				CConcreteOntology* lastBuiltOntology = nullptr;
+				CConcreteOntology* prevOntology = incRevData->getPreviousOntologyVersion();
+				while (prevOntology && !lastBuiltOntology) {
+					bool prevBuiltData = prevOntology->getDataBoxes()->isIterationBuild();
+					if (prevBuiltData) {
+						lastBuiltOntology = prevOntology;
+					}
+					if (!lastBuiltOntology) {
+						prevOntology = prevOntology->getIncrementalRevisionData()->getPreviousOntologyVersion();
+					}
+				}
+				return lastBuiltOntology;
+			}
 
 
 

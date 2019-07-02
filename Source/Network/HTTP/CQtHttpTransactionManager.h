@@ -16,6 +16,7 @@
 #include "CHttpRequestFactory.h"
 #include "CQtHttpRequest.h"
 #include "CQtHttpResponse.h"
+#include "CQtHttpResponseHandler.h"
 
 // Library includes
 #include <QNetworkAccessManager>
@@ -29,6 +30,7 @@
 #include "Network/HTTP/Events/CReleaseResponseEvent.h"
 #include "Network/HTTP/Events/CAddResponseFinishedCallbackEvent.h"
 #include "Network/HTTP/Events/CInstallRequestFinishedCallbackEvent.h"
+#include "Network/HTTP/Events/CAbortRequestEvent.h"
 
 #include "Concurrent/CIntervalThread.h"
 
@@ -61,7 +63,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CQtHttpTransactionManager(cint64 timeoutInterval = 5*60*1000);
+					CQtHttpTransactionManager(cint64 timeoutInterval = 5*60*1000, cint64 downloadSizeLimit = -1);
 
 					//! Destructor
 					virtual ~CQtHttpTransactionManager();
@@ -79,10 +81,14 @@ namespace Konclude {
 					virtual bool callbackFinished(CQtHttpResponse* response, CCallbackData* callback);
 					virtual bool callbackFinishedRequest(CHttpResponse* response, CCallbackData* callbackData);
 
+					virtual QIODevice* getResponseDataReadDevice(CHttpResponse* response);
 					virtual QString* getExtractedText(CHttpResponse* response);
 					virtual bool callbackResponseData(CHttpResponse* response, QByteArray* dataArray, CCallbackData* callback);
 					virtual QByteArray* getResponseData(CHttpResponse* response);
 					virtual bool hasFinishedSucecssfully(CHttpResponse* response);
+					virtual bool hasBeenAborted(CHttpResponse* response, ABORT_REASON* abortReason = nullptr);
+
+					virtual bool abort(CHttpRequest* request, CHttpResponse* response, ABORT_REASON abortReason = ABORT_NO_REASON);
 
 				// protected slots
 				protected slots:
@@ -101,11 +107,13 @@ namespace Konclude {
 				// protected variables
 				protected:
 					cint64 mTimeoutInterval;
+					cint64 mDownloadSizeLimit;
 					QNetworkAccessManager* mQNAM;
 					QHash<QNetworkReply*,CQtHttpResponse*> mReplyResponseHash;
 					QSet<CQtHttpResponse*> mCriticalTimeoutSet;
 					QSet<CQtHttpResponse*> mNextTimeoutSet;
 					QSet<CQtHttpResponse*> mTimeoutSet;
+					QHash<CQtHttpResponse*, CQtHttpResponseHandler*> mHandlerHash;
 
 					const static qint64 TIMEOUTCHECKTIMER = 1;
 

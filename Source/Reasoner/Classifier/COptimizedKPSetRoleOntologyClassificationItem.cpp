@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -29,7 +29,7 @@ namespace Konclude {
 
 
 			COptimizedKPSetRoleOntologyClassificationItem::COptimizedKPSetRoleOntologyClassificationItem(CConfigurationBase *configuration, CClassifierStatistics *nextClassificationStatistics) 
-					: COntologyClassificationItem(configuration,nextClassificationStatistics) {
+					: COntologyPropertyRoleClassificationItem(configuration,nextClassificationStatistics) {
 				
 				mTopSatTestItem = nullptr;
 				mBottomSatTestItem = nullptr;
@@ -51,6 +51,13 @@ namespace Konclude {
 				mTruePossibleSubsumCount = 0;
 				mFalsePossibleSubsumCount = 0;
 
+				mTmpRoleClassificationOnt = nullptr;
+
+				mTmpAllPropConcept = nullptr;
+
+				mTmpIndiPropagation = nullptr;
+				mTmpIndiMarker = nullptr;
+
 				mInitTime.start();
 			}
 
@@ -59,20 +66,33 @@ namespace Konclude {
 
 
 
-			QHash<CConcept*,COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getConceptSatisfiableTestItemHash() {
-				return &mConceptSatItemHash;
+			QHash<CRole*,COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getRoleSatisfiableTestItemHash() {
+				return &mRoleSatItemHash;
 			}
-			QList<COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getConceptSatisfiableTestItemContainer() {
+			QList<COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getRoleSatisfiableTestItemList() {
 				return &mSatTestItemContainer;
 			}
 
-			COptimizedKPSetRoleTestingItem* COptimizedKPSetRoleOntologyClassificationItem::getTopConceptSatisfiableTestItem() {
+			COptimizedKPSetRoleTestingItem* COptimizedKPSetRoleOntologyClassificationItem::getTopRoleSatisfiableTestItem() {
 				return mTopSatTestItem;
 			}
 
-			COptimizedKPSetRoleTestingItem* COptimizedKPSetRoleOntologyClassificationItem::getBottomConceptSatisfiableTestItem() {
+			COptimizedKPSetRoleTestingItem* COptimizedKPSetRoleOntologyClassificationItem::getBottomRoleSatisfiableTestItem() {
 				return mBottomSatTestItem;
 			}
+
+
+
+			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::setTopRoleSatisfiableTestItem(COptimizedKPSetRoleTestingItem* item) {
+				mTopSatTestItem = item;
+				return this;
+			}
+
+			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::setBottomRoleSatisfiableTestItem(COptimizedKPSetRoleTestingItem* item) {
+				mBottomSatTestItem = item;
+				return this;
+			}
+
 
 			QList<COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getNextSatisfiableTestingItemList() {
 				return &mNextItemList;
@@ -102,16 +122,13 @@ namespace Konclude {
 				return this;
 			}
 
-			COptimizedKPSetRoleTestingItem* COptimizedKPSetRoleOntologyClassificationItem::getConceptSatisfiableTestItem(CConcept* satTestConcept, bool create) {
+			COptimizedKPSetRoleTestingItem* COptimizedKPSetRoleOntologyClassificationItem::getRoleSatisfiableTestItem(CRole* satTestRole, bool create) {
 				COptimizedKPSetRoleTestingItem* item = nullptr;
-				if (satTestConcept->getOperatorCode() == CCEQCAND) {
-					satTestConcept = satTestConcept->getOperandList()->getData();
-				}
-				item = mConceptSatItemHash.value(satTestConcept);
+				item = mRoleSatItemHash.value(satTestRole);
 				if (!item && create) {
 					item = new COptimizedKPSetRoleTestingItem();
-					item->initSatisfiableTestingItem(satTestConcept);
-					mConceptSatItemHash.insert(satTestConcept,item);
+					item->initSatisfiableTestingItem(satTestRole);
+					mRoleSatItemHash.insert(satTestRole,item);
 					mSatTestItemContainer.append(item);
 				}
 				return item;
@@ -156,11 +173,11 @@ namespace Konclude {
 			}
 
 
-			QList<COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getSatisfiableConceptItemList() {
+			QList<COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getSatisfiableRoleItemList() {
 				return &mSatisfiableItemList;
 			}
 
-			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::addSatisfiableConceptItem(COptimizedKPSetRoleTestingItem* item) {
+			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::addSatisfiableRoleItem(COptimizedKPSetRoleTestingItem* item) {
 				mSatisfiableItemList.append(item);
 				return this;
 			}
@@ -327,6 +344,49 @@ namespace Konclude {
 
 			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::incFalsePossibleSubsumerCount(cint64 incSubsumCount) {
 				mFalsePossibleSubsumCount += incSubsumCount;
+				return this;
+			}
+
+
+
+			CConcreteOntology* COptimizedKPSetRoleOntologyClassificationItem::getTemporaryRoleClassificationOntology() {
+				return mTmpRoleClassificationOnt;
+			}
+
+			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::setTemporaryRoleClassificationOntology(CConcreteOntology* ont) {
+				mTmpRoleClassificationOnt = ont;
+				return this;
+			}
+
+
+			QHash<CConcept*,COptimizedKPSetRoleTestingItem*>* COptimizedKPSetRoleOntologyClassificationItem::getMarkerConceptInstancesItemHash() {
+				return &mMarkerConRolInsItemHash;
+			}
+
+			CConcept* COptimizedKPSetRoleOntologyClassificationItem::getTemporaryAllPropagationConcept() {
+				return mTmpAllPropConcept;
+			}
+
+			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::setTemporaryAllPropagationConcept(CConcept* concept) {
+				mTmpAllPropConcept = concept;
+				return this;
+			}
+
+			CIndividual* COptimizedKPSetRoleOntologyClassificationItem::getTemporaryPropagationIndividual() {
+				return mTmpIndiPropagation;
+			}
+
+			CIndividual* COptimizedKPSetRoleOntologyClassificationItem::getTemporaryMarkerIndividual() {
+				return mTmpIndiMarker;
+			}
+
+			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::setTemporaryPropagationIndividual(CIndividual* indi) {
+				mTmpIndiPropagation = indi;
+				return this;
+			}
+
+			COptimizedKPSetRoleOntologyClassificationItem* COptimizedKPSetRoleOntologyClassificationItem::setTemporaryMarkerIndividual(CIndividual* indi) {
+				mTmpIndiMarker = indi;
 				return this;
 			}
 

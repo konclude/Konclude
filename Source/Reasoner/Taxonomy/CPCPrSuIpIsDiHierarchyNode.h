@@ -41,6 +41,8 @@ namespace Konclude {
 
 	namespace Reasoner {
 
+        using namespace Ontology;
+
 		namespace Taxonomy {
 
 #ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED

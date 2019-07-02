@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -54,6 +54,9 @@ namespace Konclude {
 					mMultipleInitMergingNodesClashes = nullptr;
 
 					mDistinctSetNodeRelocated = false;
+					mSuccChoiceTriggeringInstalled = false;
+					mSuccChoiceTriggeringInstalledCount = 0;
+					mLastCheckedSuccChoiceTriggerLinker = nullptr;
 
 					//mList.clear();
 					//mList.append(QString(""));
@@ -90,9 +93,15 @@ namespace Konclude {
 						mInitMergingNodesClashes = prevRest->mInitMergingNodesClashes;
 						mMultipleInitMergingNodesClashes = prevRest->mMultipleInitMergingNodesClashes;
 						mDistinctSetNodeRelocated = prevRest->mDistinctSetNodeRelocated;
+						mSuccChoiceTriggeringInstalled = prevRest->mSuccChoiceTriggeringInstalled;
+						mSuccChoiceTriggeringInstalledCount = prevRest->mSuccChoiceTriggeringInstalledCount;
+						mLastCheckedSuccChoiceTriggerLinker = prevRest->mLastCheckedSuccChoiceTriggerLinker;
 
 						//mList = prevRest->mList;
 					} else {
+						mLastCheckedSuccChoiceTriggerLinker = nullptr;
+						mSuccChoiceTriggeringInstalledCount = 0;
+						mSuccChoiceTriggeringInstalled = false;
 						mDistinctSetNodeRelocated = false;
 						mDistinctMergedNodesSet = nullptr;
 						mMergingNodesLinker = nullptr;
@@ -188,7 +197,7 @@ namespace Konclude {
 						}
 						++mRemainingLinkerMergingCandidateIndiNodeCount;
 						++mRemainingValidMergingCandidateIndiNodeCount;
-						if (linkerIt->getMergingIndividualNodeCandidate()->isNominalIndividual()) {
+						if (linkerIt->getMergingIndividualNodeCandidate()->isNominalIndividualNode()) {
 							mNominalMergingNodesLinker = linkerIt->append(mNominalMergingNodesLinker);
 						} else {
 							mMergingNodesLinker = linkerIt->append(mMergingNodesLinker);
@@ -403,6 +412,41 @@ namespace Konclude {
 					mDistinctSetNodeRelocated = distinctSetNodeRelocated;
 					return this;
 				}
+
+
+				bool CBranchingMergingProcessingRestrictionSpecification::hasSuccessorChoiceTriggeringInstalled() {
+					return mSuccChoiceTriggeringInstalled;
+				}
+
+				CBranchingMergingProcessingRestrictionSpecification* CBranchingMergingProcessingRestrictionSpecification::setSuccessorChoiceTriggeringInstalled(bool succChoiceTriggeringInstalled) {
+					mSuccChoiceTriggeringInstalled = succChoiceTriggeringInstalled;
+					return this;
+				}
+
+				cint64 CBranchingMergingProcessingRestrictionSpecification::getSuccessorChoiceTriggeringInstalledCount() {
+					return mSuccChoiceTriggeringInstalledCount;
+				}
+
+				CBranchingMergingProcessingRestrictionSpecification* CBranchingMergingProcessingRestrictionSpecification::incSuccessorChoiceTriggeringInstalledCount(cint64 count) {
+					mSuccChoiceTriggeringInstalledCount += count;
+					return this;
+				}
+
+				CBranchingMergingProcessingRestrictionSpecification* CBranchingMergingProcessingRestrictionSpecification::decSuccessorChoiceTriggeringInstalledCount(cint64 count) {
+					mSuccChoiceTriggeringInstalledCount -= count;
+					return this;
+				}
+
+
+				CXLinker<CIndividualLinkEdge*>* CBranchingMergingProcessingRestrictionSpecification::getLastCheckedSuccessorChoiceTriggerLinker() {
+					return mLastCheckedSuccChoiceTriggerLinker;
+				}
+
+				CBranchingMergingProcessingRestrictionSpecification* CBranchingMergingProcessingRestrictionSpecification::setLastCheckedSuccessorChoiceTriggerLinker(CXLinker<CIndividualLinkEdge*>* indiLinker) {
+					mLastCheckedSuccChoiceTriggerLinker = indiLinker;
+					return this;
+				}
+
 
 
 				//bool CBranchingMergingProcessingRestrictionSpecification::addIndividualToContainer(cint64 container, cint64 individual) {

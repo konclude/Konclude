@@ -1,20 +1,20 @@
 /*
- *		Copyright (C) 2013, 2014, 2015 by the Konclude Developer Team.
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
  *
  *		This file is part of the reasoning system Konclude.
  *		For details and support, see <http://konclude.com/>.
  *
- *		Konclude is free software: you can redistribute it and/or modify it under
- *		the terms of version 2.1 of the GNU Lesser General Public License (LGPL2.1)
- *		as published by the Free Software Foundation.
- *
- *		You should have received a copy of the GNU Lesser General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU General Public License
+ *		(LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
- *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For more
- *		details, see GNU Lesser General Public License.
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU General Public License for more details.
+ *
+ *		You should have received a copy of the GNU General Public License
+ *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -87,7 +87,7 @@ namespace Konclude {
 
 
 		bool CXMLOWL2StreamHandler::parseXMLAttributs(const QXmlStreamAttributes& atts) {
-			QStringRef xmlBaseStringRef(atts.value("http://www.w3.org/XML/1998/namespace","base"));
+			QStringRef xmlBaseStringRef(atts.value(baseAttributeNamespace, baseAttributeName));
 			if (!xmlBaseStringRef.isEmpty()) {
 				if (mHasCurrentXMLBase) {
 					mXMLBaseStack.push(CStreamXMLBaseStackObject(mCurrentXMLBaseValidDepth,mCurrentXMLBase));
@@ -98,7 +98,7 @@ namespace Konclude {
 			}
 
 			
-			QStringRef xmlNamespaceStringRef(atts.value("http://www.w3.org/XML/1998/namespace","xmlns"));
+			QStringRef xmlNamespaceStringRef(atts.value(xmlnsAttributeNamespace, xmlnsAttributeName));
 			if (!xmlNamespaceStringRef.isEmpty()) {
 				QHash<QString,bool> newOWLNamespaceHash;
 				if (!newOWLNamespaceHash.isEmpty()) {
@@ -823,7 +823,7 @@ namespace Konclude {
 							if (headAtom->mAtomType == CParseRuleAtom::PROPERTYATOM) {
 								bool inversed = false;
 								QString otherVarString = headAtom->getOtherVariable(varString,inversed);
-								CBuildExpression* otherVarExp = mOntoBuilder->getIndividualVariable(otherVarString,mAxiomNumber);
+								CBuildExpression* otherVarExp = mOntoBuilder->getNominalIndividualVariable(otherVarString,mAxiomNumber);
 								CBuildExpression* someExp = mOntoBuilder->getObjectSomeValuesFrom(getNeighbourAtomObjectPropertyExpression(headAtom,inversed),otherVarExp);
 								headExpressionList.append(someExp);
 							} else if (headAtom->mAtomType == CParseRuleAtom::CLASSATOM) {
@@ -831,7 +831,7 @@ namespace Konclude {
 							} else if (headAtom->mAtomType == CParseRuleAtom::DIFFERENTINDIVIDUALSATOM) {
 								bool inversed = false;
 								QString otherVarString = headAtom->getOtherVariable(varString,inversed);
-								CBuildExpression* otherVarExp = mOntoBuilder->getIndividualVariable(otherVarString,mAxiomNumber);
+								CBuildExpression* otherVarExp = mOntoBuilder->getNominalIndividualVariable(otherVarString,mAxiomNumber);
 								CBuildExpression* complExp = mOntoBuilder->getObjectComplementOf(otherVarExp);
 								headExpressionList.append(complExp);
 							}
@@ -938,7 +938,7 @@ namespace Konclude {
 
 		CBuildExpression* CXMLOWL2StreamHandler::createBodyExpresions(const QString& varString, bool direct, QHash<QString,CParseRuleAtom*>& bodyVariableAtomHash, QSet<QString>& processedVarSet, QSet<CParseRuleAtom*>& processedAtomSet, QHash<QString,CParseRuleAtom*>& headVariableAtomHash) {
 			QList<CBuildExpression*> expList;
-			expList.append(mOntoBuilder->getIndividualVariable(varString,mAxiomNumber));
+			expList.append(mOntoBuilder->getNominalIndividualVariable(varString,mAxiomNumber));
 
 			if (!processedVarSet.contains(varString)) {
 				processedVarSet.insert(varString);
@@ -980,7 +980,7 @@ namespace Konclude {
 					} else if (ruleAtom->mAtomType == CParseRuleAtom::DIFFERENTINDIVIDUALSATOM) {
 						bool inversed = false;
 						QString otherVarString = ruleAtom->getOtherVariable(varString,inversed);
-						CBuildExpression* otherVarExp = mOntoBuilder->getIndividualVariable(otherVarString,mAxiomNumber);
+						CBuildExpression* otherVarExp = mOntoBuilder->getNominalIndividualVariable(otherVarString,mAxiomNumber);
 						CBuildExpression* complExp = mOntoBuilder->getObjectComplementOf(otherVarExp);
 						expList.append(complExp);
 					}
@@ -1030,7 +1030,7 @@ namespace Konclude {
 			const CStringRefStringHasher& indiVarName = getEntityName(attributes);
 			CObjectIndividualVariableExpression *indiVarExpression = 0;
 			if (!indiVarName.isEmpty()) {
-				indiVarExpression = mOntoBuilder->getIndividualVariable(indiVarName.toStringRefernce(),mAxiomNumber);
+				indiVarExpression = mOntoBuilder->getNominalIndividualVariable(indiVarName.toStringRefernce(),mAxiomNumber);
 			}
 			return indiVarExpression;
 		}
@@ -1589,6 +1589,9 @@ namespace Konclude {
 			CDataLiteralExpression* exp = nullptr;
 			if (mOntoBuilder && parseStackObj->mIRIParsed) {
 				QString datatypeIRIString = parseStackObj->getParsedIRI();
+				if (datatypeIRIString.isEmpty()) {
+					datatypeIRIString = mDefaultDatatype;
+				}
 				CDatatypeExpression* datatypeExpression = mOntoBuilder->getDatatype(datatypeIRIString);
 				QString valueString = mLastReadText;
 				if (!mLastTextAppendix.isEmpty()) {
