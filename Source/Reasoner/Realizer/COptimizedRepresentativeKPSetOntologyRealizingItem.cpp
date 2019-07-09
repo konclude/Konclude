@@ -774,7 +774,7 @@ namespace Konclude {
 									//CRealizationIndividualInstanceItemReference currentPosIndiItemRef2 = iteratorCopy2->currentIndividualInstanceItemReference();
 									iteratorCopy->moveNext();
 								}
-								//LOG(INFO, "::Konclude::Reasoner::Kernel::Realizer", logTr("Scheduling realization for %1 individuals for preparing realization iterator.").arg(schedulingIndividualCount), this);
+								//LOG(NOTICE, "::Konclude::Reasoner::Kernel::Realizer", logTr("Scheduling realization for %1 individuals for preparing realization iterator.").arg(schedulingIndividualCount), this);
 								iteratorReqDataCallback->setRealizedAllInstances(true);
 								delete iteratorCopy;
 							}
@@ -802,7 +802,7 @@ namespace Konclude {
 			COntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::logRequirementProcessingStartStatistics(COntologyRealizingDynamicRequirmentProcessingStatistics* procStats) {
 				if (procStats) {
 					if (procStats->getIteratorPreparationStartingCount() > 0) {
-						LOG(INFO, "::Konclude::Reasoner::Kernel::Realizer", logTr("Starting preparation of %1 realization iterators.").arg(procStats->getIteratorPreparationStartingCount()), this);
+						LOG(NOTICE, "::Konclude::Reasoner::Kernel::Realizer", logTr("Starting preparation of %1 realization iterators.").arg(procStats->getIteratorPreparationStartingCount()), this);
 					}
 				}
 				return this;
@@ -812,8 +812,8 @@ namespace Konclude {
 			COntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::logRequirementProcessingFinishStatistics(COntologyRealizingDynamicRequirmentProcessingStatistics* procStats) {
 				if (procStats) {
 					if (procStats->getIteratorPreparationFinsihingCount() > 0) {
-						LOG(INFO, "::Konclude::Reasoner::Kernel::Realizer", logTr("Scheduled realization for %1 individuals for preparing %2 realization iterator.").arg(procStats->getmIteratorScheduledIndividualRealizationCount()).arg(procStats->getIteratorPreparationFinsihingCount()), this);
-						LOG(INFO, "::Konclude::Reasoner::Kernel::Realizer", logTr("Finished preparing of %1 realization iterator with %2 role realization initializations as well as %3 role and %4 concept possible instance realizations.")
+						LOG(NOTICE, "::Konclude::Reasoner::Kernel::Realizer", logTr("Scheduled realization for %1 individuals for preparing %2 realization iterator.").arg(procStats->getmIteratorScheduledIndividualRealizationCount()).arg(procStats->getIteratorPreparationFinsihingCount()), this);
+						LOG(NOTICE, "::Konclude::Reasoner::Kernel::Realizer", logTr("Finished preparing of %1 realization iterator with %2 role realization initializations as well as %3 role and %4 concept possible instance realizations.")
 							.arg(procStats->getIteratorPreparationFinsihingCount()).arg(procStats->getIteratorRoleInstancesInitializationCount()).arg(procStats->getIteratorRoleInstancesRealizationCount()).arg(procStats->getIteratorConceptInstancesRealizationCount()), this);
 					}
 				}

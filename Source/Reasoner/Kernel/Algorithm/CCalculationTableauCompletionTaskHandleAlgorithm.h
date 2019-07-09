@@ -966,8 +966,11 @@ namespace Konclude {
 						CIndividualProcessNode* getIntoEmptyMergedIndividualNode(CIndividualProcessNode*& mergingIndividualNode, bool createAsNominal, CIndividualProcessNode* mergerNode, CDependencyTrackPoint* mergeDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
+
+						QString writeGeneratedExtendedDebugIndiModelStringList(const QString& filename, CCalculationAlgorithmContextBase* calcAlgContext);
+
 						QString generateDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext);
-						QString generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext);
+						QString generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext, QStringList* list = nullptr);
 						QString generateDebugIndiStatusString(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						QString generateDebugDependentNominalsString(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						QString generateDebugIncrementalExpansionString(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);

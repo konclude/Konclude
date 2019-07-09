@@ -276,7 +276,7 @@ namespace Konclude {
 					QTime mRealStartTime;
 
 					CBackendRepresentativeMemoryCache* mBackendAssocCache;
-					CBackendRepresentativeMemoryCacheReader* mBackendAssocCacheReader;
+					//CBackendRepresentativeMemoryCacheReader* mBackendAssocCacheReader;
 
 					bool mAlternateShufflePossibleConceptInstanceTestingItemsOnCalculations;
 					bool mConfPossibleInstanceConceptsUpfrontMerging;

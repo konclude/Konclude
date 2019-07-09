@@ -387,7 +387,8 @@ namespace Konclude {
 						QString getDebugIndividualConceptName(CIndividualSaturationProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						QString generateDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext);
-						QString generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext, cint64 firstIndiID = 0, cint64 lastIndiID = -1);
+						QString writeGeneratedExtendedDebugIndiModelStringList(const QString& filename, CCalculationAlgorithmContextBase* calcAlgContext, cint64 firstIndiID = 0, cint64 lastIndiID = -1);
+						QString generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext, cint64 firstIndiID = 0, cint64 lastIndiID = -1, QStringList* list = nullptr);
 						QStringList generateStatusFlagsStringList(CIndividualSaturationProcessNodeStatusFlags* statusFlags, CCalculationAlgorithmContextBase* calcAlgContext);
 
 

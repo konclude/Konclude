@@ -1175,12 +1175,8 @@ namespace Konclude {
 									specializedWritingFileName += "uncategorized-test";
 								}
 
-								mEndTaskDebugIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
-								QFile file(QString("%1%2-task-%3-%4-%5.txt").arg(writingFolder, specializedWritingFileName, QString::number(satCalcTask->getTaskDepth()), QString::number(satCalcTask->getTaskID()), satStopString));
-								if (file.open(QIODevice::WriteOnly)) {
-									file.write(mEndTaskDebugIndiModelString.replace("<br>", "\r\n").toLocal8Bit());
-									file.close();
-								}
+								QString fileName = QString("%1%2-task-%3-%4-%5.txt").arg(writingFolder, specializedWritingFileName, QString::number(satCalcTask->getTaskDepth()), QString::number(satCalcTask->getTaskID()), satStopString);
+								mEndTaskDebugIndiModelString = writeGeneratedExtendedDebugIndiModelStringList(fileName, calcAlgContext);
 
 							}
 
@@ -7676,7 +7672,39 @@ namespace Konclude {
 				}
 
 
-				QString CCalculationTableauCompletionTaskHandleAlgorithm::generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext) {
+
+
+
+				QString CCalculationTableauCompletionTaskHandleAlgorithm::writeGeneratedExtendedDebugIndiModelStringList(const QString& filename, CCalculationAlgorithmContextBase* calcAlgContext) {
+					QStringList indiStringList;
+					QString remainingDebugString = generateExtendedDebugIndiModelStringList(calcAlgContext, &indiStringList);
+
+					QFile file(filename);
+					if (file.open(QIODevice::WriteOnly)) {
+
+						for (const QString& tmpString : indiStringList) {
+
+							QString tmpReplacedString = tmpString;
+							tmpReplacedString = tmpReplacedString.replace("<br>", "\r\n");
+							file.write(tmpReplacedString.toLocal8Bit());
+							file.write(QString("\r\n\r\n\r\n").toLocal8Bit());
+						}
+						file.write(remainingDebugString.toLocal8Bit());
+						file.close();
+					}
+
+					if (indiStringList.size() < 100000) {
+						mDebugIndiModelStringList = indiStringList;
+						mDebugIndiModelString = mDebugIndiModelStringList.join("<br><p><br>\r\n");
+
+						mDebugIndiModelString += remainingDebugString;
+					}
+
+					return mDebugIndiModelString;
+				}
+
+
+				QString CCalculationTableauCompletionTaskHandleAlgorithm::generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext, QStringList* list) {
 					CProcessingDataBox* procDataBox = calcAlgContext->getUsedProcessingDataBox();
 					CIndividualProcessNodeVector* indiVec = procDataBox->getIndividualProcessNodeVector();
 					cint64 indiStart = indiVec->getItemMinIndex();
@@ -7825,25 +7853,29 @@ namespace Konclude {
 					}
 
 
-					if (filteredIndiStringList.size() >= 1000000) {
-						QFile file(QString("./Debugging/CompletionTasks/tmp-%1.txt").arg(calcAlgContext->getUsedSatisfiableCalculationTask()->getTaskDepth()));
-						if (file.open(QIODevice::WriteOnly)) {
+					if (!list) {
+						if (filteredIndiStringList.size() >= 1000000) {
+							QFile file(QString("./Debugging/CompletionTasks/tmp-%1.txt").arg(calcAlgContext->getUsedSatisfiableCalculationTask()->getTaskDepth()));
+							if (file.open(QIODevice::WriteOnly)) {
 
-							for (const QString& tmpString : filteredIndiStringList) {
+								for (const QString& tmpString : filteredIndiStringList) {
 
-								QString tmpReplacedString = tmpString;
-								tmpReplacedString = tmpReplacedString.replace("<br>", "\r\n");
-								file.write(tmpReplacedString.toLocal8Bit());
-								file.write(QString("\r\n\r\n\r\n").toLocal8Bit());
+									QString tmpReplacedString = tmpString;
+									tmpReplacedString = tmpReplacedString.replace("<br>", "\r\n");
+									file.write(tmpReplacedString.toLocal8Bit());
+									file.write(QString("\r\n\r\n\r\n").toLocal8Bit());
+								}
+
+
+								file.close();
 							}
+						} else {
 
-
-							file.close();
+							mDebugIndiModelStringList = filteredIndiStringList;
+							mDebugIndiModelString = mDebugIndiModelStringList.join("<br><p><br>\r\n");
 						}
 					} else {
-
-						mDebugIndiModelStringList = filteredIndiStringList;
-						mDebugIndiModelString = mDebugIndiModelStringList.join("<br><p><br>\r\n");
+						*list = filteredIndiStringList;
 					}
 
 

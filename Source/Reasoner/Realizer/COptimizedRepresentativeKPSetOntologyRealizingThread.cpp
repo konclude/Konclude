@@ -28,9 +28,7 @@ namespace Konclude {
 		namespace Realizer {
 
 
-
-
-			COptimizedRepresentativeKPSetOntologyRealizingThread::COptimizedRepresentativeKPSetOntologyRealizingThread(CReasonerManager *reasonerManager) : CRealizerThread(reasonerManager), CLogDomain("::Konclude::Reasoner::Kernel::Realizer") {
+			COptimizedRepresentativeKPSetOntologyRealizingThread::COptimizedRepresentativeKPSetOntologyRealizingThread(CReasonerManager *reasonerManager) : CRealizerThread(reasonerManager),CLogDomain("::Konclude::Reasoner::Kernel::Realizer") {
 				mTestedPossibleInstancesCount = 0;
 				mOpenPossibleInstancesCount = 0;
 				mRealizingCount = 0;
@@ -39,9 +37,6 @@ namespace Konclude {
 				CBackendCache* backendCache = reasonerManager->getBackendAssociationCache();
 				if (backendCache) {
 					mBackendAssocCache = dynamic_cast<CBackendRepresentativeMemoryCache*>(backendCache);
-					if (mBackendAssocCache) {
-						mBackendAssocCacheReader = mBackendAssocCache->createFixedCacheReader();
-					}
 				}
 			}
 
@@ -51,8 +46,13 @@ namespace Konclude {
 
 
 			COntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingThread::initializeOntologyRealizingItem(CConcreteOntology* ontology, CConfigurationBase* config) {
+				CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader = nullptr;
+				if (mBackendAssocCache) {
+					backendAssocCacheReader = mBackendAssocCache->createOntologyFixedCacheReader(ontology->getOntologyID());
+				}
+
 				COptimizedRepresentativeKPSetOntologyRealizingItem* item = new COptimizedRepresentativeKPSetOntologyRealizingItem();
-				item->initRequirementConfigRealizingItem(ontology, config, mBackendAssocCacheReader);
+				item->initRequirementConfigRealizingItem(ontology,config, backendAssocCacheReader);
 
 				if (mTestedPossibleInstancesCount == mOpenPossibleInstancesCount) {
 					mTestedPossibleInstancesCount = 0;
@@ -84,7 +84,7 @@ namespace Konclude {
 
 					bool configErrorFlag = false;
 					cint64 processorCount = 1;
-					QString processorCountString = CConfigDataReader::readConfigString(config, "Konclude.Calculation.ProcessorCount", QString(), &configErrorFlag);
+					QString processorCountString = CConfigDataReader::readConfigString(config,"Konclude.Calculation.ProcessorCount",QString(),&configErrorFlag);
 					if (!configErrorFlag) {
 						if (processorCountString == "AUTO") {
 							processorCount = CThread::idealThreadCount();
@@ -97,13 +97,13 @@ namespace Konclude {
 					}
 
 					bool mulConfigErrorFlag = false;
-					cint64 multiplicator = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount", 1, &mulConfigErrorFlag);
+					cint64 multiplicator = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount",1,&mulConfigErrorFlag);
 					mConfMaxTestParallelCount = processorCount*multiplicator;
 					bool maxConfigErrorFlag = false;
-					cint64 maxParallel = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MaximumParallelTestingCalculationCount", 1, &maxConfigErrorFlag);
+					cint64 maxParallel = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MaximumParallelTestingCalculationCount",1,&maxConfigErrorFlag);
 					if (!maxConfigErrorFlag) {
 						if (!mulConfigErrorFlag) {
-							mConfMaxTestParallelCount = qMin(mConfMaxTestParallelCount, maxParallel);
+							mConfMaxTestParallelCount = qMin(mConfMaxTestParallelCount,maxParallel);
 						} else {
 							mConfMaxTestParallelCount = maxParallel;
 						}
@@ -165,11 +165,11 @@ namespace Konclude {
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::initializeRepresentativeRoleSetCacheLabelItems(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem) {
 
-				mBackendAssocCacheReader->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* combinedNeighbourRoleLabelCacheItem)->bool {
+				reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* combinedNeighbourRoleLabelCacheItem)->bool {
 
 					COptimizedRepresentativeKPSetCombinedNeighbourRoleSetCacheLabelItemData* combinedNeighbourRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheCombinedNeighbourRoleSetLabelItemData(combinedNeighbourRoleLabelCacheItem);
 
-					mBackendAssocCacheReader->visitLabelsOfAssociatedNeigbourRoleSetCombinationLabel(nullptr, combinedNeighbourRoleLabelCacheItem, [&](CBackendRepresentativeMemoryLabelCacheItem* singleNeighbourRoleLabelCacheItem)->bool {
+					reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelsOfAssociatedNeigbourRoleSetCombinationLabel(nullptr, combinedNeighbourRoleLabelCacheItem, [&](CBackendRepresentativeMemoryLabelCacheItem* singleNeighbourRoleLabelCacheItem)->bool {
 						COptimizedRepresentativeKPSetSingleNeighbourRoleSetCacheLabelItemData* singleNeighbourRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheSingleNeighbourRoleSetLabelItemData(singleNeighbourRoleLabelCacheItem);
 						singleNeighbourRoleLabelCacheItemData->addReferencingCombinedNeighbourRoleLabelDataItem(combinedNeighbourRoleLabelCacheItemData);
 						return true;
@@ -192,7 +192,7 @@ namespace Konclude {
 					QSet<COptimizedKPSetRoleInstancesItem*> singleLabelItemSet;
 					QSet<COptimizedKPSetRoleInstancesItem*> singleInverseLabelItemSet;
 
-					mBackendAssocCacheReader->visitRolesOfAssociatedNeigbourRoleSetLabel(nullptr, singleNeighbourRoleLabelCacheItem, [&](CRole* role, bool roleInversed, bool assertionLinkBase, bool nominalLinkBase, bool nondeterministic)->bool {
+					reqConfPreCompItem->getBackendAssociationCacheReader()->visitRolesOfAssociatedNeigbourRoleSetLabel(nullptr, singleNeighbourRoleLabelCacheItem, [&](CRole* role, bool roleInversed, bool assertionLinkBase, bool nominalLinkBase, bool nondeterministic)->bool {
 
 
 						COptimizedKPSetRoleInstancesRedirectionItem* redRoleItem = (COptimizedKPSetRoleInstancesRedirectionItem*)reqConfPreCompItem->getRoleInstantiatedItem(role);
@@ -226,7 +226,7 @@ namespace Konclude {
 									if (!roleItemLabelData) {
 										roleItemLabelData = new COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData();
 									}
-
+							
 									CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* arrayIndex = (CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData*)combinedNeighbourRoleLabelCacheItem->getExtensionData(CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData::INDIVIDUAL_NEIGHBOUR_ARRAY_INDEX);
 
 									COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData* singleLabelData = new COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData(arrayIndex->getIndex(singleNeighbourRoleLabelCacheItem), singleNeighbourRoleLabelCacheItem);
@@ -277,7 +277,7 @@ namespace Konclude {
 
 
 				function<void(CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem, bool deterministic)> existentialCacheLabelItemHandlingFunction = [&](CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem, bool deterministic) {
-					mBackendAssocCacheReader->visitRolesOfAssociatedCompinationRoleSetLabel(nullptr, cacheLabelItem, [&](CRole* role, bool inversed)->bool {
+					reqConfPreCompItem->getBackendAssociationCacheReader()->visitRolesOfAssociatedCompinationRoleSetLabel(nullptr, cacheLabelItem, [&](CRole* role, bool inversed)->bool {
 
 						COptimizedRepresentativeKPSetCombinedExistentialRoleSetCacheLabelItemData* combinedExistentialRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheCombinedExistentialRoleSetLabelItemData(cacheLabelItem, true);
 						combinedExistentialRoleLabelCacheItemData->setNondeterministic(!deterministic);
@@ -308,11 +308,11 @@ namespace Konclude {
 
 				};
 
-				mBackendAssocCacheReader->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detExistentialRoleLabelCacheItem)->bool {
+				reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detExistentialRoleLabelCacheItem)->bool {
 					existentialCacheLabelItemHandlingFunction(detExistentialRoleLabelCacheItem, true);
 					return true;
 				});
-				mBackendAssocCacheReader->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detExistentialRoleLabelCacheItem)->bool {
+				reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detExistentialRoleLabelCacheItem)->bool {
 					existentialCacheLabelItemHandlingFunction(detExistentialRoleLabelCacheItem, false);
 					return true;
 				});
@@ -322,7 +322,7 @@ namespace Konclude {
 
 
 				function<void(CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem, bool deterministic)> dataCacheLabelItemHandlingFunction = [&](CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem, bool deterministic) {
-					mBackendAssocCacheReader->visitRolesOfAssociatedCompinationRoleSetLabel(nullptr, cacheLabelItem, [&](CRole* role, bool inversed)->bool {
+					reqConfPreCompItem->getBackendAssociationCacheReader()->visitRolesOfAssociatedCompinationRoleSetLabel(nullptr, cacheLabelItem, [&](CRole* role, bool inversed)->bool {
 
 						if (!inversed) {
 							reqConfPreCompItem->addDataRoleCacheLabelItem(role, cacheLabelItem, deterministic);
@@ -331,18 +331,18 @@ namespace Konclude {
 								reqConfPreCompItem->addDataRoleNondeterministicCacheLabelItems(role);
 							}
 						}
-
+						
 						return true;
 					});
 
 				};
 
 
-				mBackendAssocCacheReader->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detDataRoleLabelCacheItem)->bool {
+				reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detDataRoleLabelCacheItem)->bool {
 					dataCacheLabelItemHandlingFunction(detDataRoleLabelCacheItem, true);
 					return true;
 				});
-				mBackendAssocCacheReader->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detDataRoleLabelCacheItem)->bool {
+				reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* detDataRoleLabelCacheItem)->bool {
 					dataCacheLabelItemHandlingFunction(detDataRoleLabelCacheItem, false);
 					return true;
 				});
@@ -364,7 +364,7 @@ namespace Konclude {
 				QList<COptimizedKPSetConceptInstancesItem*> equivClassList;
 				initializeEquivalentClassList(&equivClassList, reqConfPreCompItem);
 
-				mBackendAssocCacheReader->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem)->bool {
+				reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem)->bool {
 
 					if (labelCacheItem->getIndividualAssociationCount() > 0) {
 
@@ -375,7 +375,7 @@ namespace Konclude {
 						QSet<COptimizedKPSetConceptInstancesItem*> singleLabelItemSet;
 						bool hasPossibleConceptCandidates = false;
 						bool hasPossibleConceptInstantiations = false;
-						mBackendAssocCacheReader->visitConceptsOfFullConceptSetLabel(labelCacheItem, [&](CConcept* concept, bool negated, bool deterministic)->bool {
+						reqConfPreCompItem->getBackendAssociationCacheReader()->visitConceptsOfFullConceptSetLabel(labelCacheItem, [&](CConcept* concept, bool negated, bool deterministic)->bool {
 
 							if (!negated && concept->hasClassName()) {
 								COptimizedKPSetConceptInstancesItem* conceptInstancesItem = conceptInstancesItemHash->value(concept);
@@ -400,7 +400,7 @@ namespace Konclude {
 
 
 						if (hasPossibleConceptCandidates) {
-							mBackendAssocCacheReader->visitConceptsOfFullConceptSetLabel(labelCacheItem, [&](CConcept* concept, bool negated, bool deterministic)->bool {
+							reqConfPreCompItem->getBackendAssociationCacheReader()->visitConceptsOfFullConceptSetLabel(labelCacheItem, [&](CConcept* concept, bool negated, bool deterministic)->bool {
 
 								if (!negated && concept->hasClassName() && !deterministic) {
 									COptimizedKPSetConceptInstancesItem* conceptInstancesItem = conceptInstancesItemHash->value(concept);
@@ -520,9 +520,9 @@ namespace Konclude {
 				QList<COptimizedKPSetConceptInstancesItem*>* possibleInstancesItemList = conSetLabelCacheItemData->getPossibleInstancesItemList();
 
 				QList<CIndividualReference> knownSameIndividualIdList;
-				CBackendRepresentativeMemoryLabelCacheItem* knownSameIndilabelItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+				CBackendRepresentativeMemoryLabelCacheItem* knownSameIndilabelItem = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
 				if (knownSameIndilabelItem) {
-					mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, knownSameIndilabelItem, [&](cint64 sameIndiId)->bool {
+					reqConfPreCompItem->getBackendAssociationCacheReader()->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, knownSameIndilabelItem, [&](cint64 sameIndiId)->bool {
 						if (sameIndiId > indiId) {
 							CIndividual* sameIndividual = indiVec->getData(indiId);
 							knownSameIndividualIdList.append(CIndividualReference(sameIndividual, indiId));
@@ -534,10 +534,10 @@ namespace Konclude {
 						return true;
 					});
 				}
-				CBackendRepresentativeMemoryLabelCacheItem* possibleSameIndilabelItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+				CBackendRepresentativeMemoryLabelCacheItem* possibleSameIndilabelItem = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
 				if (possibleSameIndilabelItem) {
-					mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possibleSameIndilabelItem, [&](cint64 possibleSameIndiId)->bool {
-						if (possibleSameIndiId != indiId && !mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(nullptr, knownSameIndilabelItem, possibleSameIndiId)) {
+					reqConfPreCompItem->getBackendAssociationCacheReader()->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possibleSameIndilabelItem, [&](cint64 possibleSameIndiId)->bool {
+						if (possibleSameIndiId != indiId && !reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(nullptr, knownSameIndilabelItem, possibleSameIndiId)) {
 							CIndividual* possibleSameIndividual = indiVec->getData(possibleSameIndiId);
 							(*individualPossibleSameIndividualListHash)[indiId].append(CIndividualReference(possibleSameIndividual, possibleSameIndiId));
 						}
@@ -615,18 +615,18 @@ namespace Konclude {
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::initializeKPSetsForIndividual(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CIndividual* individual, QList<COptimizedKPSetConceptInstancesItem*>& knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>& possibleInstancesList, QList<CIndividualReference>& knownSameIndividualIdList) {
 				COptimizedKPSetIndividualItem* instantiatedItem = reqConfPreCompItem->getIndividualInstantiatedItem(indiId, true, individual);
-				qSort(knownInstancesList.begin(), knownInstancesList.end(), itemSortLessThan);
-				qSort(possibleInstancesList.begin(), possibleInstancesList.end(), itemSortLessThan);
+				qSort(knownInstancesList.begin(),knownInstancesList.end(),itemSortLessThan);
+				qSort(possibleInstancesList.begin(),possibleInstancesList.end(),itemSortLessThan);
 
 				COptimizedKPSetConceptInstancesHash* knownPossibleInstancesHash = instantiatedItem->getKnownPossibleInstancesHash();
 				for (QList<COptimizedKPSetConceptInstancesItem*>::const_iterator it = knownInstancesList.constBegin(), itEnd = knownInstancesList.constEnd(); it != itEnd; ++it) {
 					COptimizedKPSetConceptInstancesItem* instanceItem(*it);
-					addKPSetDirectSuperInstances(reqConfPreCompItem, knownPossibleInstancesHash, instanceItem, true);
+					addKPSetDirectSuperInstances(reqConfPreCompItem,knownPossibleInstancesHash,instanceItem,true);
 				}
 
 				for (QList<COptimizedKPSetConceptInstancesItem*>::const_iterator it = possibleInstancesList.constBegin(), itEnd = possibleInstancesList.constEnd(); it != itEnd; ++it) {
 					COptimizedKPSetConceptInstancesItem* instanceItem(*it);
-					addKPSetDirectSuperInstances(reqConfPreCompItem, knownPossibleInstancesHash, instanceItem, false);
+					addKPSetDirectSuperInstances(reqConfPreCompItem,knownPossibleInstancesHash,instanceItem,false);
 				}
 
 				for (COptimizedKPSetConceptInstancesHash::const_iterator it = knownPossibleInstancesHash->constBegin(), itEnd = knownPossibleInstancesHash->constEnd(); it != itEnd; ++it) {
@@ -646,7 +646,7 @@ namespace Konclude {
 					for (QList<CIndividualReference>::const_iterator it = knownSameIndividualIdList.constBegin(), itEnd = knownSameIndividualIdList.constEnd(); it != itEnd; ++it) {
 						CIndividualReference sameIndividualReference(*it);
 						instantiatedItem->addKnownSameIndividual(sameIndividualReference);
-						reqConfPreCompItem->getIndividualInstantiatedItemHash()->insert(sameIndividualReference.getIndividualID(), instantiatedItem);
+						reqConfPreCompItem->getIndividualInstantiatedItemHash()->insert(sameIndividualReference.getIndividualID(),instantiatedItem);
 					}
 				}
 
@@ -656,10 +656,10 @@ namespace Konclude {
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::initializeEquivalentClassList(QList<COptimizedKPSetConceptInstancesItem*>* equivClassList, COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem) {
 				CTBox* tBox = reqConfPreCompItem->getOntology()->getTBox();
-				CBOXHASH<CConcept*, CConcept*>* eqCandHash = tBox->getEquivalentConceptCandidateHash(false);
-				QHash<CHierarchyNode*, COptimizedKPSetConceptInstancesItem*>* hierItemHash = reqConfPreCompItem->getHierarchyNodeInstancesItemHash();
-				QHash<CConcept*, COptimizedKPSetConceptInstancesItem*>* conInstItemHash = reqConfPreCompItem->getConceptInstancesItemHash();
-				for (QHash<CHierarchyNode*, COptimizedKPSetConceptInstancesItem*>::const_iterator it = hierItemHash->constBegin(), itEnd = hierItemHash->constEnd(); it != itEnd; ++it) {
+				CBOXHASH<CConcept*,CConcept*>* eqCandHash = tBox->getEquivalentConceptCandidateHash(false);
+				QHash<CHierarchyNode*,COptimizedKPSetConceptInstancesItem*>* hierItemHash = reqConfPreCompItem->getHierarchyNodeInstancesItemHash();
+				QHash<CConcept*,COptimizedKPSetConceptInstancesItem*>* conInstItemHash = reqConfPreCompItem->getConceptInstancesItemHash();
+				for (QHash<CHierarchyNode*,COptimizedKPSetConceptInstancesItem*>::const_iterator it = hierItemHash->constBegin(), itEnd = hierItemHash->constEnd(); it != itEnd; ++it) {
 					COptimizedKPSetConceptInstancesItem* item = it.value();
 					CHierarchyNode* hierNode = item->getHierarchyNode();
 					QList<CConcept*>* eqConList = hierNode->getEquivalentConceptList();
@@ -690,7 +690,7 @@ namespace Konclude {
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::extractKnownPossibleIndividualDataFromConsistencyData(CIndividualProcessNode* indiProcNode, QList<COptimizedKPSetConceptInstancesItem*>* knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>* possibleInstancesList, QList<CIndividualReference>* knownSameIndividualList, QList<CIndividualReference>* possibleSameIndividualList, CIndividualProcessNodeVector* indiProcVector, const QList<COptimizedKPSetConceptInstancesItem*>& equivClassList, COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem) {
-				QHash<CConcept*, COptimizedKPSetConceptInstancesItem*>* conInstItemHash = reqConfPreCompItem->getConceptInstancesItemHash();
+				QHash<CConcept*,COptimizedKPSetConceptInstancesItem*>* conInstItemHash = reqConfPreCompItem->getConceptInstancesItemHash();
 
 				bool indiInitialized = false;
 				if (indiProcVector) {
@@ -700,7 +700,7 @@ namespace Konclude {
 						CIndividual* individual = indiProcNode->getNominalIndividual();
 						CIndividualVector* indiVec = reqConfPreCompItem->getOntology()->getABox()->getIndividualVector();
 						bool nondeterministicallyMergedFlag = false;
-						indiProcNode = getMergeCorrectedIndividualProcessNode(indiProcNode, indiProcVector, &nondeterministicallyMergedFlag, reqConfPreCompItem);
+						indiProcNode = getMergeCorrectedIndividualProcessNode(indiProcNode,indiProcVector,&nondeterministicallyMergedFlag,reqConfPreCompItem);
 
 
 						CReapplyConceptLabelSet* conLabelSet = indiProcNode->getReapplyConceptLabelSet(false);
@@ -728,14 +728,15 @@ namespace Konclude {
 											resolved = true;
 										}
 										//if (CIRIName::getRecentIRIName(resolvedConcept->getClassNameLinker()) != "http://uob.iodt.ibm.com/univ-bench-dl.owl#PeopleWithManyHobbies") {
-										COptimizedKPSetConceptInstancesItem* instantiatedItem = conInstItemHash->value(resolvedConcept);
-										if (instantiatedItem) {
-											if (deterministicTrackPoint && !resolved) {
-												knownInstancesList->append(instantiatedItem);
-											} else {
-												possibleInstancesList->append(instantiatedItem);
+											COptimizedKPSetConceptInstancesItem* instantiatedItem = conInstItemHash->value(resolvedConcept);
+											if (instantiatedItem) {
+												if (deterministicTrackPoint && !resolved) {
+													knownInstancesList->append(instantiatedItem);
+												}
+												else {
+													possibleInstancesList->append(instantiatedItem);
+												}
 											}
-										}
 										//}
 									}
 								}
@@ -808,7 +809,7 @@ namespace Konclude {
 													}
 												}
 											}
-										}
+										}													
 									}
 
 									if (stillDeterministicllyMerged) {
@@ -909,11 +910,11 @@ namespace Konclude {
 
 
 					QList<COptimizedKPSetConceptInstancesItem*> equivClassList;
-					initializeEquivalentClassList(&equivClassList, reqConfPreCompItem);
+					initializeEquivalentClassList(&equivClassList,reqConfPreCompItem);
 
-					QHash<CConcept*, COptimizedKPSetConceptInstancesItem*>* conInstItemHash = reqConfPreCompItem->getConceptInstancesItemHash();
+					QHash<CConcept*,COptimizedKPSetConceptInstancesItem*>* conInstItemHash = reqConfPreCompItem->getConceptInstancesItemHash();
 
-					QHash<cint64, QList<CIndividualReference> > individualPossibleSameIndividualListHash;
+					QHash<cint64,QList<CIndividualReference> > individualPossibleSameIndividualListHash;
 
 					CBOXSET<CIndividual*>* activeIndividualSet = reqConfPreCompItem->getOntology()->getABox()->getActiveIndividualSet(false);
 
@@ -949,7 +950,7 @@ namespace Konclude {
 						CBackendRepresentativeMemoryLabelCacheItem* repConSetCacheLabelItem = it.key();
 						COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* repConSetCacheLabelItemData = it.value();
 						if (repConSetCacheLabelItemData->hasPossibleInstances()) {
-							mBackendAssocCacheReader->visitLabelItemIndividualIdAssociations(repConSetCacheLabelItem, [&](cint64 indiId, bool sameIndividualMerged)->bool {
+							reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelItemIndividualIdAssociations(repConSetCacheLabelItem, [&](cint64 indiId, bool sameIndividualMerged)->bool {
 								if (!sameIndividualMerged) {
 									initializeRepresentativeIndividualProcessing(reqConfPreCompItem, indiId, repConSetCacheLabelItem, repConSetCacheLabelItemData, &individualPossibleSameIndividualListHash);
 								}
@@ -975,9 +976,9 @@ namespace Konclude {
 									if (combinedNeigRoleSetLabelData && combinedNeigRoleSetLabelData->hasPossibleInstancesLabelItems()) {
 
 
-										mBackendAssocCacheReader->visitLabelItemIndividualIdAssociations(repCombNeighRoleSetCacheLabelItem, [&](cint64 indiId, bool sameIndividualMerged)->bool {
+										reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelItemIndividualIdAssociations(repCombNeighRoleSetCacheLabelItem, [&](cint64 indiId, bool sameIndividualMerged)->bool {
 											if (!sameIndividualMerged) {
-
+												
 
 												CIndividualVector* indiVec = reqConfPreCompItem->getOntology()->getABox()->getIndividualVector(false);
 
@@ -989,7 +990,7 @@ namespace Konclude {
 												roleNeighbourInstanceHashData.mRoleSuccessorInstancesInitialized = true;
 
 
-												CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiId);
+												CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(indiId);
 												if (indiAssData) {
 													CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* neighbourRoleArray = indiAssData->getRoleSetNeighbourArray();
 
@@ -1056,7 +1057,7 @@ namespace Konclude {
 						for (CBackendRepresentativeMemoryLabelCacheItem* candLabelCacheItem : *labelCacheItemSet) {
 							if (!initLabelCacheItemSet.contains(candLabelCacheItem)) {
 								initLabelCacheItemSet.insert(candLabelCacheItem);
-								mBackendAssocCacheReader->visitLabelItemIndividualIdAssociations(candLabelCacheItem, [&](cint64 indiId, bool sameIndividualMerged)->bool {
+								reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelItemIndividualIdAssociations(candLabelCacheItem, [&](cint64 indiId, bool sameIndividualMerged)->bool {
 									indiComplexRoleDataHash->insert(indiId, nullptr);
 									return true;
 								});
@@ -1100,20 +1101,20 @@ namespace Konclude {
 
 
 
-					mBackendAssocCacheReader->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* possSameIndiLabelCacheItem)->bool {
+					reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* possSameIndiLabelCacheItem)->bool {
 
-						mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possSameIndiLabelCacheItem, [&](cint64 indiId)->bool {
+						reqConfPreCompItem->getBackendAssociationCacheReader()->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possSameIndiLabelCacheItem, [&](cint64 indiId)->bool {
 
 							if (possSameIndiLabelCacheItem->getIndividualAssociationCount() > 0 && !individualPossibleSameIndividualListHash.contains(indiId)) {
 
 								QList<CIndividualReference> possibleSameIndividualList;
 
 
-								CBackendRepresentativeMemoryLabelCacheItem* sameIndilabelItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
-								CBackendRepresentativeMemoryLabelCacheItem* possibleSameIndilabelItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
-								mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possibleSameIndilabelItem, [&](cint64 possibleSameIndiId)->bool {
+								CBackendRepresentativeMemoryLabelCacheItem* sameIndilabelItem = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+								CBackendRepresentativeMemoryLabelCacheItem* possibleSameIndilabelItem = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+								reqConfPreCompItem->getBackendAssociationCacheReader()->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possibleSameIndilabelItem, [&](cint64 possibleSameIndiId)->bool {
 
-									if (possibleSameIndiId != indiId && !mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(nullptr, sameIndilabelItem, possibleSameIndiId)) {
+									if (possibleSameIndiId != indiId && !reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(nullptr, sameIndilabelItem, possibleSameIndiId)) {
 										CIndividual* possibleSameIndividual = indiVec->getData(possibleSameIndiId);
 										possibleSameIndividualList.append(CIndividualReference(possibleSameIndividual, possibleSameIndiId));
 									}
@@ -1137,13 +1138,13 @@ namespace Konclude {
 
 					if (!individualPossibleSameIndividualListHash.isEmpty()) {
 						QSet<COptimizedKPSetIndividualItem*> singleIndividualSet;
-						for (QHash<cint64, QList<CIndividualReference> >::const_iterator it = individualPossibleSameIndividualListHash.constBegin(), itEnd = individualPossibleSameIndividualListHash.constEnd(); it != itEnd; ++it) {
+						for (QHash<cint64,QList<CIndividualReference> >::const_iterator it = individualPossibleSameIndividualListHash.constBegin(), itEnd = individualPossibleSameIndividualListHash.constEnd(); it != itEnd; ++it) {
 							cint64 individualId = it.key();
-							COptimizedKPSetIndividualItem* individualItem = reqConfPreCompItem->getIndividualInstantiatedItem(individualId, true);
+							COptimizedKPSetIndividualItem* individualItem = reqConfPreCompItem->getIndividualInstantiatedItem(individualId,false);
 							if (!singleIndividualSet.contains(individualItem)) {
 								singleIndividualSet.insert(individualItem);
 								const QList<CIndividualReference> possibleSameIndividualList = it.value();
-								initializeSamePossibleIndividuals(reqConfPreCompItem, individualItem, possibleSameIndividualList);
+								initializeSamePossibleIndividuals(reqConfPreCompItem,individualItem,possibleSameIndividualList);
 							}
 						}
 					}
@@ -1157,7 +1158,7 @@ namespace Konclude {
 				reqConfPreCompItem->addPossibleSameIndividualsItem(individualItem);
 				for (QList<CIndividualReference>::const_iterator it = possibleSameIndividualList.constBegin(), itEnd = possibleSameIndividualList.constEnd(); it != itEnd; ++it) {
 					CIndividualReference possSameIndividual(*it);
-					COptimizedKPSetIndividualItem* possSameIndividualItem = reqConfPreCompItem->getIndividualInstantiatedItem(possSameIndividual.getIndividualID(), true);
+					COptimizedKPSetIndividualItem* possSameIndividualItem = reqConfPreCompItem->getIndividualInstantiatedItem(possSameIndividual.getIndividualID(),false);
 					individualItem->addPossibleSameIndividualItem(possSameIndividualItem);
 					possSameIndividualItem->addPossibleSameIndividualItem(individualItem);
 					incOpenPossibleSameIndividualsCount(reqConfPreCompItem);
@@ -1197,7 +1198,7 @@ namespace Konclude {
 				if (possibleInstanceItemSet && possibleInstanceItemSet->count() > 1 && maxMergingCount != 0) {
 					CPossibleInstancesIndividualsMergingData* mergingData = nullptr;
 					cint64 individualId = instantiatedItem->getIndividualId();
-					CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = mBackendAssocCacheReader->getIndividualAssociationData(individualId);
+					CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(individualId);
 					if (assData) {
 						CBackendRepresentativeMemoryLabelCacheItem* conceptLabelDataItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL);
 						// find the individuals with the same/a compatible representative label
@@ -1206,11 +1207,11 @@ namespace Konclude {
 							COptimizedKPSetIndividualItem* otherPossibleInstanceItem(*possibleInstanceItemIt);
 
 							bool iterateNextPossibleInstance = true;
-
+						
 							if (!mergingDataHash || !mergingDataHash->contains(otherPossibleInstanceItem)) {
 								cint64 otherPossibleIndividualId = otherPossibleInstanceItem->getIndividualId();
 								bool otherPossibleIndiSuitable = true;
-								CBackendRepresentativeMemoryCacheIndividualAssociationData* otherPossInstAssData = mBackendAssocCacheReader->getIndividualAssociationData(otherPossibleIndividualId);
+								CBackendRepresentativeMemoryCacheIndividualAssociationData* otherPossInstAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(otherPossibleIndividualId);
 								CBackendRepresentativeMemoryLabelCacheItem* oterConceptLabelItem = otherPossInstAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL);
 								if (oterConceptLabelItem == conceptLabelDataItem) {
 									otherPossibleIndiSuitable = true;
@@ -1221,8 +1222,8 @@ namespace Konclude {
 										otherPossibleIndiSuitable = testConceptLabelSetHash->value(oterConceptLabelItem);
 									} else {
 										otherPossibleIndiSuitable = true;
-										mBackendAssocCacheReader->visitConceptsOfAssociatedConceptSetLabel(assData, conceptLabelDataItem, [&](CConcept* concept, bool negation)->bool {
-											if (mBackendAssocCacheReader->hasConceptInAssociatedFullConceptSetLabel(otherPossInstAssData, oterConceptLabelItem, concept, !negation)) {
+										reqConfPreCompItem->getBackendAssociationCacheReader()->visitConceptsOfAssociatedConceptSetLabel(assData, conceptLabelDataItem, [&](CConcept* concept, bool negation)->bool {
+											if (reqConfPreCompItem->getBackendAssociationCacheReader()->hasConceptInAssociatedFullConceptSetLabel(otherPossInstAssData, oterConceptLabelItem, concept, !negation)) {
 												otherPossibleIndiSuitable = false;
 												return false;
 											}
@@ -1337,7 +1338,7 @@ namespace Konclude {
 
 							for (auto it = singleNeighLabelDataHash->constBegin(), itEnd = singleNeighLabelDataHash->constEnd(); it != itEnd && continueVisiting; ++it) {
 								roleSetNeighbourArray->at(it.value()->getLabelArrayIndex()).visitNeighbourIndividualIds([&](cint64 neighbourId)->bool {
-									CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourIndiAssData = mBackendAssocCacheReader->getIndividualAssociationData(neighbourId);
+									CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourIndiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(neighbourId);
 									continueVisiting = visitFunc(neighbourId, neighbourIndiAssData, true);
 									return continueVisiting;
 								});
@@ -1348,7 +1349,7 @@ namespace Konclude {
 
 							for (auto it = singleNeighLabelDataHash->constBegin(), itEnd = singleNeighLabelDataHash->constEnd(); it != itEnd && continueVisiting; ++it) {
 								roleSetNeighbourArray->at(it.value()->getLabelArrayIndex()).visitNeighbourIndividualIds([&](cint64 neighbourId)->bool {
-									CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourIndiAssData = mBackendAssocCacheReader->getIndividualAssociationData(neighbourId);
+									CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourIndiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(neighbourId);
 									continueVisiting = visitFunc(neighbourId, neighbourIndiAssData, false);
 									return continueVisiting;
 								});
@@ -1380,7 +1381,7 @@ namespace Konclude {
 
 				bool negatedConceptOccurrence = false;
 				bool deterministicOccurrence = false;
-				if (mBackendAssocCacheReader->getConceptOccurrenceInAssociatedFullConceptSetLabel(assData, conceptSetLabelItem, concept, negatedConceptOccurrence, deterministicOccurrence)) {
+				if (reqConfPreCompItem->getBackendAssociationCacheReader()->getConceptOccurrenceInAssociatedFullConceptSetLabel(assData, conceptSetLabelItem, concept, negatedConceptOccurrence, deterministicOccurrence)) {
 					if (negatedConceptOccurrence == conceptNegation) {
 						mergeable = true;
 					} else {
@@ -1453,7 +1454,7 @@ namespace Konclude {
 						CBackendRepresentativeMemoryLabelCacheItem* detExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
 						CBackendRepresentativeMemoryLabelCacheItem* nondetExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
 
-						if (!mBackendAssocCacheReader->hasRoleInAssociatedCompinationRoleSetLabel(assData, detExtLabelItem, role, false) && !mBackendAssocCacheReader->hasRoleInAssociatedCompinationRoleSetLabel(assData, nondetExtLabelItem, role, false)) {
+						if (!reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, detExtLabelItem, role, false) && !reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, nondetExtLabelItem, role, false)) {
 
 							if (visitRepresentativeCacheNeighbours(reqConfPreCompItem, role, assData, [&](cint64 neighbourIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourAssData, bool deterministicNeighbour)->bool {
 
@@ -1552,7 +1553,7 @@ namespace Konclude {
 						CBackendRepresentativeMemoryLabelCacheItem* detExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
 						CBackendRepresentativeMemoryLabelCacheItem* nondetExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
 
-						if (!mBackendAssocCacheReader->hasRoleInAssociatedCompinationRoleSetLabel(assData, detExtLabelItem, role, false) && !mBackendAssocCacheReader->hasRoleInAssociatedCompinationRoleSetLabel(assData, nondetExtLabelItem, role, false)) {
+						if (!reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, detExtLabelItem, role, false) && !reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, nondetExtLabelItem, role, false)) {
 
 							if (visitRepresentativeCacheNeighbours(reqConfPreCompItem, role, assData, [&](cint64 neighbourIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourAssData, bool deterministicNeighbour)->bool {
 								for (CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList(); opConLinkerIt && (allMergable || !oneUnmergeable); opConLinkerIt = opConLinkerIt->getNext()) {
@@ -1590,10 +1591,10 @@ namespace Konclude {
 						if (nominalIndi->getIndividualID() == assData->getAssociatedIndividualId()) {
 							mergeable = true;
 						} else {
-							if (mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID()) ||
-								mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
+							if (reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID()) ||
+								reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
 								mergeable = true;
-							} else if (mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
+							} else if (reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
 								unmergeable = true;
 							}
 						}
@@ -1604,10 +1605,10 @@ namespace Konclude {
 						if (nominalIndi->getIndividualID() == assData->getAssociatedIndividualId()) {
 							unmergeable = true;
 						} else {
-							if (mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID()) ||
-								mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
+							if (reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID()) ||
+								reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
 								mergeable = true;
-							} else if (mBackendAssocCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
+							} else if (reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(assData, assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL), nominalIndi->getIndividualID())) {
 								unmergeable = true;
 							}
 						}
@@ -1935,7 +1936,7 @@ namespace Konclude {
 							}
 						} else {
 
-							CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = mBackendAssocCacheReader->getIndividualAssociationData(instantiatedItem->getIndividualId());
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(instantiatedItem->getIndividualId());
 							CConcept* concept = instancesItem->getHierarchyNode()->getOneEquivalentConcept();
 
 							bool mergeable = false;
@@ -2022,10 +2023,10 @@ namespace Konclude {
 
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(reqConfPreCompItem->getOntology());
-				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(concept, true, indiRef);
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(concept,true, indiRef);
 				satCalcJob->setCalculationConfiguration(reqConfPreCompItem->getCalculationConfiguration());
 				if (reqConfPreCompItem->getPossibleAssertionCollectionSet()) {
-					satCalcJob->setPossibleAssertionCollectionAdapter(new CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter(reqConfPreCompItem->getOntology(), reqConfPreCompItem->getPossibleAssertionCollectionSet()));
+					satCalcJob->setPossibleAssertionCollectionAdapter(new CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter(reqConfPreCompItem->getOntology(),reqConfPreCompItem->getPossibleAssertionCollectionSet()));
 				}
 				if (reqConfPreCompItem->requiresIndividualDependenceTracking()) {
 					if (!instantiatedItem->getIndividualDependenceTrackingCollector()) {
@@ -2043,9 +2044,9 @@ namespace Konclude {
 
 
 
-				CIndividualConceptInstanceTestingItem* testItem = new CIndividualConceptInstanceTestingItem(reqConfPreCompItem, instancesItem, instantiatedItem, procData, possInstanceMergingDataAdapter);
+				CIndividualConceptInstanceTestingItem* testItem = new CIndividualConceptInstanceTestingItem(reqConfPreCompItem,instancesItem,instantiatedItem,procData, possInstanceMergingDataAdapter);
 
-				processCalculationJob(satCalcJob, reqConfPreCompItem, testItem);
+				processCalculationJob(satCalcJob,reqConfPreCompItem,testItem);				
 				return true;
 			}
 
@@ -2059,7 +2060,7 @@ namespace Konclude {
 
 				indItem1->incTestingPossibleRoleInstantiatedCount();
 				indItem1->decPossibleRoleInstantiatedCount();
-				indItem1->setTestingPossibleInstantiated(instancesItem, indItem2);
+				indItem1->setTestingPossibleInstantiated(instancesItem,indItem2);
 
 				CConcept* propConcept = instancesItem->getTemporaryPropagationConcept();
 				CConcept* markConcept = instancesItem->getTemporaryMarkerConcept();
@@ -2068,8 +2069,8 @@ namespace Konclude {
 
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(reqConfPreCompItem->getTemporaryRoleRealizationOntology());
-				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(propConcept, false, indi1);
-				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(markConcept, true, indi2, satCalcJob);
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(propConcept,false,indi1);
+				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(markConcept,true,indi2,satCalcJob);
 				satCalcJob->setCalculationConfiguration(reqConfPreCompItem->getCalculationConfiguration());
 				if (reqConfPreCompItem->requiresIndividualDependenceTracking()) {
 					if (!indItem1->getIndividualDependenceTrackingCollector()) {
@@ -2080,10 +2081,10 @@ namespace Konclude {
 					satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(indItem1->getIndividualDependenceTrackingCollector()));
 				}
 
-				CIndividualPairRoleInstanceTestingItem* testItem = new CIndividualPairRoleInstanceTestingItem(reqConfPreCompItem, instancesItem, itemPair, procData);
+				CIndividualPairRoleInstanceTestingItem* testItem = new CIndividualPairRoleInstanceTestingItem(reqConfPreCompItem,instancesItem,itemPair, procData);
 				reqConfPreCompItem->incTestingPossibleRoleInstanceCount();
 
-				processCalculationJob(satCalcJob, reqConfPreCompItem, testItem);
+				processCalculationJob(satCalcJob,reqConfPreCompItem,testItem);				
 				return true;
 			}
 
@@ -2121,7 +2122,7 @@ namespace Konclude {
 					CIndividualProcessNode* indiProcNode = baseIndiProcNode;
 					bool nondeterministicallyMergedFlag = false;
 					if (indiProcNode) {
-						indiProcNode = getMergeCorrectedIndividualProcessNode(indiProcNode, indiProcVector, &nondeterministicallyMergedFlag, reqConfPreCompItem);
+						indiProcNode = getMergeCorrectedIndividualProcessNode(indiProcNode,indiProcVector,&nondeterministicallyMergedFlag,reqConfPreCompItem);
 					}
 					if (nondeterministicNodeFlag) {
 						*nondeterministicNodeFlag = nondeterministicallyMergedFlag;
@@ -2214,7 +2215,7 @@ namespace Konclude {
 
 
 
-				CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiId);
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(indiId);
 				if (indiAssData) {
 					CBackendRepresentativeMemoryLabelCacheItem* combinedNeighbourRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
 					if (combinedNeighbourRoleSetLabel) {
@@ -2273,7 +2274,7 @@ namespace Konclude {
 					}
 
 
-					workCreated = createNextRoleInitializingTest(reqConfPreCompItem, indiRealItemRef, indiRoleCandTestDataList);
+					workCreated = createNextRoleInitializingTest(reqConfPreCompItem, indiRealItemRef, indiRoleCandTestDataList);					
 
 					delete complexRoleCandidateItemSet;
 					delete inverseComplexRoleCandidateItemSet;
@@ -2328,7 +2329,7 @@ namespace Konclude {
 					CRealizationIndividualInstanceItemReference indiRealItemRef = iterator->currentIndividualInstanceItemReference();
 					workCreated = createNextRoleInitializingTest(reqConfPreCompItem, roleInstancesItem, false, indiRealItemRef);
 					iterator->moveNext();
-				}
+				}				
 
 
 				if (iterator && iterator->atEnd()) {
@@ -2402,8 +2403,8 @@ namespace Konclude {
 							COptimizedKPSetRoleNeighbourInstancesHashData* indiRoleNeighbourHashData = nullptr;
 
 							COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelHash* combinedNeighbourCacheLabelItemDataHash = roleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(inversed);
-
-							CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiRealItemRef.getIndividualID());
+				
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(indiRealItemRef.getIndividualID());
 							CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* assNeighbourRoleSetHash = indiAssData->getNeighbourRoleSetHash();
 							CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetCompinationLabelItem = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
 							COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* combinedNeighbourCacheLabelItemData = combinedNeighbourCacheLabelItemDataHash->value(neighbourRoleSetCompinationLabelItem);
@@ -2494,7 +2495,7 @@ namespace Konclude {
 						propagationList.append(nextProcessingData);
 						if (!nextProcessingData->mIndiComplexRoleData->isInitialized(inversed) || !nextProcessingData->mParentData || !nextProcessingData->mParentData->mIndiComplexRoleData->isInitialized(inversed) || !nextProcessingData->mParentData->mParentData || !nextProcessingData->mParentData->mParentData->mIndiComplexRoleData->isInitialized(inversed)) {
 
-							CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(nextProcessingData->mIndiItemRef.getIndividualID());
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nextProcessingData->mIndiItemRef.getIndividualID());
 							nextProcessingData->mIndiAssData = indiAssData;
 							CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
 							CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = indiAssData->getRoleSetNeighbourArray();
@@ -2633,12 +2634,12 @@ namespace Konclude {
 						processingData->mIndiComplexRoleData->setInitialized(inversed, true);
 						delete processingData;
 					}
+					
 
 
 
 
-
-
+					
 					return true;
 				}
 				return false;
@@ -2722,11 +2723,11 @@ namespace Konclude {
 						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(indiList);
 						satCalcJob->setCalculationConfiguration(reqConfPreCompItem->getCalculationConfiguration());
 						if (reqConfPreCompItem->getPossibleAssertionCollectionSet()) {
-							satCalcJob->setPossibleAssertionCollectionAdapter(new CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter(reqConfPreCompItem->getOntology(), reqConfPreCompItem->getPossibleAssertionCollectionSet()));
+							satCalcJob->setPossibleAssertionCollectionAdapter(new CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter(reqConfPreCompItem->getOntology(),reqConfPreCompItem->getPossibleAssertionCollectionSet()));
 						}
 
 						CIndividualsConsistencyTestingItem* testItem = new CIndividualsConsistencyTestingItem(reqConfPreCompItem);
-						processCalculationJob(satCalcJob, reqConfPreCompItem, testItem);
+						processCalculationJob(satCalcJob,reqConfPreCompItem,testItem);				
 						return true;
 					}
 				}
@@ -2775,15 +2776,15 @@ namespace Konclude {
 				if (testingNominalConcept) {
 					CSatisfiableCalculationJob* satCalcJob = nullptr;
 					CSatisfiableCalculationJobGenerator satCalcJobGen(reqConfPreCompItem->getOntology());
-					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(testingNominalConcept, true, testingIndividualReference);
+					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(testingNominalConcept,true,testingIndividualReference);
 
 					if (temporaryNominalConcept) {
-						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(testingNominalConcept, false, otherTestringIndividualReference, satCalcJob);
+						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(testingNominalConcept,false,otherTestringIndividualReference, satCalcJob);
 					}
 
 					satCalcJob->setCalculationConfiguration(reqConfPreCompItem->getCalculationConfiguration());
 					if (reqConfPreCompItem->getPossibleAssertionCollectionSet()) {
-						satCalcJob->setPossibleAssertionCollectionAdapter(new CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter(reqConfPreCompItem->getOntology(), reqConfPreCompItem->getPossibleAssertionCollectionSet()));
+						satCalcJob->setPossibleAssertionCollectionAdapter(new CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter(reqConfPreCompItem->getOntology(),reqConfPreCompItem->getPossibleAssertionCollectionSet()));
 					}
 					if (reqConfPreCompItem->requiresIndividualDependenceTracking()) {
 						if (!instantiatedItem1->getIndividualDependenceTrackingCollector()) {
@@ -2794,13 +2795,13 @@ namespace Konclude {
 						satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(instantiatedItem1->getIndividualDependenceTrackingCollector()));
 					}
 
-					CIndividualSameTestingItem* testItem = new CIndividualSameTestingItem(reqConfPreCompItem, instantiatedItem1, instantiatedItem2, procData);
+					CIndividualSameTestingItem* testItem = new CIndividualSameTestingItem(reqConfPreCompItem,instantiatedItem1,instantiatedItem2, procData);
 					reqConfPreCompItem->incTestingPossibleSameIndividualCount();
 
-					processCalculationJob(satCalcJob, reqConfPreCompItem, testItem);
+					processCalculationJob(satCalcJob,reqConfPreCompItem,testItem);				
 					return true;
 				} else {
-					LOG(ERROR, getDomain(), logTr("Failed testing whether '%1' and '%2' are same individuals, nominal concepts are not available.").arg(CIRIName::getRecentIRIName(individual1->getIndividualNameLinker())).arg(CIRIName::getRecentIRIName(individual2->getIndividualNameLinker())), this);
+					LOG(ERROR,getDomain(),logTr("Failed testing whether '%1' and '%2' are same individuals, nominal concepts are not available.").arg(CIRIName::getRecentIRIName(individual1->getIndividualNameLinker())).arg(CIRIName::getRecentIRIName(individual2->getIndividualNameLinker())),this);
 					return false;
 				}
 			}
@@ -2882,7 +2883,7 @@ namespace Konclude {
 
 
 
-								if (reqConfPreCompItem->hasRemainingProcessingSameIndividualsItems()) {
+								if (reqConfPreCompItem->hasRemainingProcessingSameIndividualsItems()) {										
 									QList<COptimizedKPSetIndividualItem*>* processingSameIndividualItemList = reqConfPreCompItem->getProcessingPossibleSameIndividualsItemList();
 									while (!workTestCreated && !processingSameIndividualItemList->isEmpty()) {
 										COptimizedKPSetIndividualItem* nextProcessingItem = processingSameIndividualItemList->first();
@@ -2895,7 +2896,7 @@ namespace Konclude {
 												nextPossibleSameIndividualTestItem->removePossibleSameIndividualItem(nextProcessingItem);
 
 												if (!nextPossibleSameIndividualTestItem->isItemSameIndividualMerged()) {
-													workTestCreated = createNextSameIndividualsTest(reqConfPreCompItem, nextProcessingItem, nextPossibleSameIndividualTestItem);
+													workTestCreated = createNextSameIndividualsTest(reqConfPreCompItem,nextProcessingItem,nextPossibleSameIndividualTestItem);
 												}
 											}
 
@@ -2910,8 +2911,8 @@ namespace Konclude {
 									}
 								}
 
-
-								if (!workTestCreated && !reqConfPreCompItem->hasRemainingProcessingSameIndividualsItems()) {
+									
+								if (!workTestCreated && !reqConfPreCompItem->hasRemainingProcessingSameIndividualsItems()) {										
 									if (!reqConfPreCompItem->hasTestingPossibleSameIndividual()) {
 
 
@@ -3043,7 +3044,7 @@ namespace Konclude {
 							if (reqConfPreCompItem->areRealizeRoleStepProcessingRequirementSatisfied()) {
 
 								if (!reqConfPreCompItem->hasRealizationRolesInitialized()) {
-									LOG(INFO, getDomain(), logTr("Create temporary ontology extension for role realization."), this);
+									LOG(INFO,getDomain(),logTr("Create temporary ontology extension for role realization."),this);
 									createTemporaryRoleRealizationOntology(reqConfPreCompItem);
 									//reqConfPreCompItem->initRoleCandidateInitializingIndividualItems();
 									reqConfPreCompItem->setRealizationRolesInitialized(true);
@@ -3080,7 +3081,7 @@ namespace Konclude {
 
 
 
-								if (reqConfPreCompItem->hasRemainingInitializingRoleInstanceItems()) {
+								if (reqConfPreCompItem->hasRemainingInitializingRoleInstanceItems()) {										
 									QList<COptimizedKPSetRoleInstancesItem*>* initializingInstancesItemList = reqConfPreCompItem->getInitializingRoleInstancesItemList();
 									while (!workTestCreated && !initializingInstancesItemList->isEmpty()) {
 										COptimizedKPSetRoleInstancesItem* nextInitializingItem = initializingInstancesItemList->first();
@@ -3109,22 +3110,22 @@ namespace Konclude {
 											initializingInstancesItemList->removeFirst();
 										}
 									}
-								}
+								} 
 
 
-								while (!workTestCreated && (reqConfPreCompItem->hasRemainingInitializingRoleInstanceIndividualItemReferences() || reqConfPreCompItem->hasRemainingInitializingRolePredeccessorInstanceIndividualItemReferencePairs() ||
-									(reqConfPreCompItem->hasEntailmentIndividualsRoleInstanceTestingItems() && !reqConfPreCompItem->hasRemainingInitializingRoleInstanceItems() && !reqConfPreCompItem->hasPropagatingRoleInstanceCandidates()))) {
+								while (!workTestCreated && (reqConfPreCompItem->hasRemainingInitializingRoleInstanceIndividualItemReferences() || reqConfPreCompItem->hasRemainingInitializingRolePredeccessorInstanceIndividualItemReferencePairs() || 
+										(reqConfPreCompItem->hasEntailmentIndividualsRoleInstanceTestingItems() && !reqConfPreCompItem->hasRemainingInitializingRoleInstanceItems() && !reqConfPreCompItem->hasPropagatingRoleInstanceCandidates()))) {
 
-									if (reqConfPreCompItem->hasRemainingInitializingRoleInstanceIndividualItemReferences()) {
+									if (reqConfPreCompItem->hasRemainingInitializingRoleInstanceIndividualItemReferences()) {										
 										QList<CRealizationIndividualInstanceItemReference>* initializingIndividualItemList = reqConfPreCompItem->getInitializingRoleInstancesIndividualItemReferenceList();
 										while (!workTestCreated && !initializingIndividualItemList->isEmpty()) {
 											CRealizationIndividualInstanceItemReference nextInitializingItem = initializingIndividualItemList->first();
-
+										
 											workTestCreated = createNextRoleInitializingTest(reqConfPreCompItem, nextInitializingItem);
 
 											initializingIndividualItemList->removeFirst();
 										}
-									}
+									} 
 
 
 									if (reqConfPreCompItem->hasRemainingInitializingRoleSuccessorInstanceIndividualItemReferencePairs()) {
@@ -3155,7 +3156,7 @@ namespace Konclude {
 									}
 
 									while (!workTestCreated && reqConfPreCompItem->hasEntailmentIndividualsRoleInstanceTestingItems() && !reqConfPreCompItem->hasRemainingInitializingRoleInstanceItems() && !reqConfPreCompItem->hasPropagatingRoleInstanceCandidates() &&
-										!reqConfPreCompItem->hasRemainingInitializingRoleInstanceIndividualItemReferences() && !reqConfPreCompItem->hasRemainingInitializingRolePredeccessorInstanceIndividualItemReferencePairs() && !reqConfPreCompItem->hasRemainingInitializingRoleSuccessorInstanceIndividualItemReferencePairs()) {
+											!reqConfPreCompItem->hasRemainingInitializingRoleInstanceIndividualItemReferences() && !reqConfPreCompItem->hasRemainingInitializingRolePredeccessorInstanceIndividualItemReferencePairs() && !reqConfPreCompItem->hasRemainingInitializingRoleSuccessorInstanceIndividualItemReferencePairs()) {
 
 										QList<CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem*>* entIndsRoleInstTestList = reqConfPreCompItem->getEntailmentIndividualsRoleInstanceTestingItemList();
 										CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem* roleInstTestItem = entIndsRoleInstTestList->takeFirst();
@@ -3259,7 +3260,7 @@ namespace Konclude {
 												COptimizedKPSetIndividualComplexRoleData* indiComplexData = roleItem->getIndividualIdComplexRoleData(indiSourceItemRef.getIndividualID(), true);
 												COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)indiComplexData;
 
-
+		
 												COptimizedKPSetRoleInstancesHash* possNeighbourInstanceHash = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(inversed, false);
 												if (possNeighbourInstanceHash) {
 
@@ -3290,7 +3291,7 @@ namespace Konclude {
 								}
 
 
-								if (reqConfPreCompItem->hasRemainingProcessingRoleInstanceItems()) {
+								if (reqConfPreCompItem->hasRemainingProcessingRoleInstanceItems()) {										
 									QList<COptimizedKPSetRoleInstancesItem*>* processingInstancesItemList = reqConfPreCompItem->getProcessingPossibleRoleInstancesItemList();
 									while (!workTestCreated && !processingInstancesItemList->isEmpty()) {
 										COptimizedKPSetRoleInstancesItem* nextProcessingItem = processingInstancesItemList->first();
@@ -3301,7 +3302,7 @@ namespace Konclude {
 											COptimizedKPSetIndividualItem* secondIndiItem = nextTestItemPair.second;
 
 											if (!firstIndiItem->isItemSameIndividualMerged()) {
-												workTestCreated = createNextRoleInstantiationTest(reqConfPreCompItem, nextProcessingItem, nextTestItemPair);
+												workTestCreated = createNextRoleInstantiationTest(reqConfPreCompItem,nextProcessingItem,nextTestItemPair);
 											} else {
 												incTestedPossibleRoleInstancesCount(reqConfPreCompItem);
 											}
@@ -3312,7 +3313,7 @@ namespace Konclude {
 										}
 									}
 
-								}
+								} 
 
 								if (!workTestCreated && !reqConfPreCompItem->hasRemainingInitializingRoleInstanceItems() && !reqConfPreCompItem->hasRemainingProcessingRoleInstanceItems() && !reqConfPreCompItem->hasRemainingInitializingRoleInstanceIndividualItemReferences() && !reqConfPreCompItem->hasRemainingCandidateConfirmationRoleInstanceItems()) {
 									if (!reqConfPreCompItem->hasTestingPossibleRoleInstances() && !reqConfPreCompItem->hasPropagatingRoleInstanceCandidates() && !reqConfPreCompItem->hasTestingRoleInstanceCandidates()) {
@@ -3361,14 +3362,14 @@ namespace Konclude {
 
 			COptimizedRepresentativeKPSetOntologyRealizingThread* COptimizedRepresentativeKPSetOntologyRealizingThread::addRealizationStatistics(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, CRealizingTestingStep* ontProcStep) {
 				COntologyProcessingStatistics* ontProcStats = ontProcStep->getProcessingStepData()->getProcessingStatistics(true);
-				ontProcStats->setProcessingCountStatisticValue("realization-time", reqConfPreCompItem->getInitializationTime()->elapsed());
+				ontProcStats->setProcessingCountStatisticValue("realization-time",reqConfPreCompItem->getInitializationTime()->elapsed());
 				if (reqConfPreCompItem->getRealizeConceptProcessingStep() == ontProcStep) {
-					ontProcStats->setProcessingCountStatisticValue("realization-concept-instances-possible-testing-count", reqConfPreCompItem->getTestedPossibleConceptInstancesCount());
-					addIndividualDependencyTrackingStatistics(reqConfPreCompItem, ontProcStep, "realization-concept-instances");
-					ontProcStats->setProcessingCountStatisticValue("realization-concept-instances-time", reqConfPreCompItem->getInitializationTime()->elapsed());
+					ontProcStats->setProcessingCountStatisticValue("realization-concept-instances-possible-testing-count",reqConfPreCompItem->getTestedPossibleConceptInstancesCount());
+					addIndividualDependencyTrackingStatistics(reqConfPreCompItem,ontProcStep,"realization-concept-instances");
+					ontProcStats->setProcessingCountStatisticValue("realization-concept-instances-time",reqConfPreCompItem->getInitializationTime()->elapsed());
 				} else if (reqConfPreCompItem->getRealizeSameIndividualsProcessingStep() == ontProcStep) {
-					addIndividualDependencyTrackingStatistics(reqConfPreCompItem, ontProcStep, "realization-same-individuals");
-					ontProcStats->setProcessingCountStatisticValue("realization-same-individuals-possible-testing-count", reqConfPreCompItem->getTestedPossibleSameIndividualsCount());
+					addIndividualDependencyTrackingStatistics(reqConfPreCompItem,ontProcStep,"realization-same-individuals");
+					ontProcStats->setProcessingCountStatisticValue("realization-same-individuals-possible-testing-count",reqConfPreCompItem->getTestedPossibleSameIndividualsCount());
 				}
 				return this;
 			}
@@ -3389,8 +3390,8 @@ namespace Konclude {
 							}
 						}
 					}
-					ontProcStats->setProcessingCountStatisticValue(QString("%1-tracked-node-dependency-size").arg(realizationTypeString), dependencySize);
-					ontProcStats->setProcessingCountStatisticValue(QString("%1-tracked-node-dependency-count").arg(realizationTypeString), dependencyCount);
+					ontProcStats->setProcessingCountStatisticValue(QString("%1-tracked-node-dependency-size").arg(realizationTypeString),dependencySize);
+					ontProcStats->setProcessingCountStatisticValue(QString("%1-tracked-node-dependency-count").arg(realizationTypeString),dependencyCount);
 				}
 				return this;
 			}
@@ -3415,7 +3416,7 @@ namespace Konclude {
 					}
 
 					if (!indiItemNominalCreationList.isEmpty()) {
-						tmpSameRealOntology = new CConcreteOntology(ontology, ontology->getConfiguration());
+						tmpSameRealOntology = new CConcreteOntology(ontology,ontology->getConfiguration());		
 						tmpSameRealOntology->setConsistence(ontology->getConsistence());
 						item->setTemporarySameRealizationOntology(tmpSameRealOntology);
 
@@ -3428,7 +3429,7 @@ namespace Konclude {
 								indi->setTemporaryIndividual(true);
 							}
 
-							CConcept* nominalConcept = createTemporaryConcept(item, tmpSameRealOntology);
+							CConcept* nominalConcept = createTemporaryConcept(item,tmpSameRealOntology);
 							nominalConcept->setNominalIndividual(indi);
 							nominalConcept->setOperatorCode(CCNOMINAL);
 
@@ -3451,10 +3452,11 @@ namespace Konclude {
 				CConcreteOntology* ontology = item->getOntology();
 				CConcreteOntology* tmpRoleRealOntology = item->getTemporaryRoleRealizationOntology();
 				if (!tmpRoleRealOntology) {
-					tmpRoleRealOntology = new CConcreteOntology(ontology, ontology->getConfiguration());
+					tmpRoleRealOntology = new CConcreteOntology(ontology,ontology->getConfiguration());		
+					tmpRoleRealOntology->setOntologyID(ontology->getOntologyID());
 
 					QSet<CConcept*> compTransformConceptSet;
-					QHash<CConcept*, COptimizedKPSetRoleInstancesItem*>* markerConRolInsItemHash = item->getMarkerConceptInstancesItemHash();
+					QHash<CConcept*,COptimizedKPSetRoleInstancesItem*>* markerConRolInsItemHash = item->getMarkerConceptInstancesItemHash();
 
 					COptimizedKPSetRoleInstancesItem* topRoleInstItem = item->getTopRoleInstancesItem();
 					QList<COptimizedKPSetRoleInstancesItem*>* roleItemList = item->getRoleInstancesItemList();
@@ -3462,14 +3464,14 @@ namespace Konclude {
 						COptimizedKPSetRoleInstancesItem* roleItem(*itemIt);
 						if (roleItem != topRoleInstItem) {
 							CRole* role = roleItem->getRole();
-							CConcept* markerConcept = createTemporaryConcept(item, tmpRoleRealOntology);
+							CConcept* markerConcept = createTemporaryConcept(item,tmpRoleRealOntology);
 							markerConcept->setOperatorCode(CCMARKER);
-							CConcept* propConcept = createTemporaryConcept(item, tmpRoleRealOntology);
+							CConcept* propConcept = createTemporaryConcept(item,tmpRoleRealOntology);
 							propConcept->setOperatorCode(CCALL);
 							propConcept->setRole(role);
-							addTemporaryConceptOperand(propConcept, markerConcept, false, item, tmpRoleRealOntology);
+							addTemporaryConceptOperand(propConcept,markerConcept,false,item,tmpRoleRealOntology);
 							roleItem->setTemporaryMarkerConcept(markerConcept);
-							markerConRolInsItemHash->insert(markerConcept, roleItem);
+							markerConRolInsItemHash->insert(markerConcept,roleItem);
 							roleItem->setTemporaryPropagationConcept(propConcept);
 							if (role->isComplexRole()) {
 								compTransformConceptSet.insert(propConcept);
@@ -3477,13 +3479,13 @@ namespace Konclude {
 
 							if (roleItem->hasInverseRole()) {
 								CRole* invRole = roleItem->getInverseRole();
-								CConcept* invMarkerConcept = createTemporaryConcept(item, tmpRoleRealOntology);
+								CConcept* invMarkerConcept = createTemporaryConcept(item,tmpRoleRealOntology);
 								invMarkerConcept->setOperatorCode(CCMARKER);
-								CConcept* invPropConcept = createTemporaryConcept(item, tmpRoleRealOntology);
+								CConcept* invPropConcept = createTemporaryConcept(item,tmpRoleRealOntology);
 								invPropConcept->setOperatorCode(CCALL);
 								invPropConcept->setRole(invRole);
-								addTemporaryConceptOperand(invPropConcept, invMarkerConcept, false, item, tmpRoleRealOntology);
-								markerConRolInsItemHash->insert(invMarkerConcept, roleItem);
+								addTemporaryConceptOperand(invPropConcept,invMarkerConcept,false,item,tmpRoleRealOntology);
+								markerConRolInsItemHash->insert(invMarkerConcept,roleItem);
 								roleItem->setTemporaryInverseMarkerConcept(invMarkerConcept);
 								roleItem->setTemporaryInversePropagationConcept(invPropConcept);
 								if (invRole->isComplexRole()) {
@@ -3494,11 +3496,11 @@ namespace Konclude {
 					}
 
 					if (!compTransformConceptSet.isEmpty()) {
-						CPreProcessContextBase* preprocessContext = new CPreProcessContextBase(tmpRoleRealOntology, ontology->getConfiguration());
+						CPreProcessContextBase* preprocessContext = new CPreProcessContextBase(tmpRoleRealOntology,ontology->getConfiguration());
 						CRoleChainAutomataTransformationPreProcess* roleChainAutomataTransformPreprocessor = new CRoleChainAutomataTransformationPreProcess();
-						roleChainAutomataTransformPreprocessor->preprocess(tmpRoleRealOntology, &compTransformConceptSet, preprocessContext);
+						roleChainAutomataTransformPreprocessor->preprocess(tmpRoleRealOntology,&compTransformConceptSet,preprocessContext);
 						delete preprocessContext;
-						delete roleChainAutomataTransformPreprocessor;
+						delete roleChainAutomataTransformPreprocessor;						
 					}
 
 					tmpRoleRealOntology->setConsistence(ontology->getConsistence());
@@ -3525,7 +3527,7 @@ namespace Konclude {
 				}
 
 				concept->setConceptTag(newConTag);
-				conVec->setData(concept->getConceptTag(), concept);
+				conVec->setData(concept->getConceptTag(),concept);
 				return concept;
 			}
 
@@ -3533,7 +3535,7 @@ namespace Konclude {
 
 			void COptimizedRepresentativeKPSetOntologyRealizingThread::addTemporaryConceptOperand(CConcept* concept, CConcept* opConcept, bool negated, COptimizedRepresentativeKPSetOntologyRealizingItem* item, CConcreteOntology* tmpRoleRealOntology) {
 				CSortedNegLinker<CConcept*>* opConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(tmpRoleRealOntology->getOntologyContext()->getMemoryAllocationManager());
-				opConLinker->init(opConcept, negated);
+				opConLinker->init(opConcept,negated);
 				concept->addOperandLinker(opConLinker);
 				concept->incOperandCount();
 			}
@@ -3589,7 +3591,7 @@ namespace Konclude {
 					if (!updateInstanceItemData->mKnownInstance) {
 						if (updateInstanceItemData->mPossibleInstance) {
 							if (!updateInstanceItemData->mMostSpecific && !updateInstanceItemData->mTestingInstance) {
-								updateInstanceItemData->mMostSpecific = true;
+								updateInstanceItemData->mMostSpecific = true;								
 								incOpenPossibleConceptInstancesCount(reqConfPreCompItem);
 								instantiatedItem->incPossibleInstantiatedCount();
 								updateInstanceItem->addPossibleInstance(instantiatedItem);
@@ -3614,11 +3616,11 @@ namespace Konclude {
 				COptimizedKPSetIndividualItem* indiItem1 = individualItemPair.first;
 				COptimizedKPSetIndividualItem* indiItem2 = individualItemPair.second;
 				COptimizedKPSetRoleNeighbourInstancesHash* knownPossibleRoleNeighbourInstancesHash = indiItem1->getKnownPossibleRoleNeighboursInstancesHash();
-				COptimizedKPSetRoleInstancesData* instanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(instancesItem, indiItem2);
+				COptimizedKPSetRoleInstancesData* instanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(instancesItem,indiItem2);
 				QList<TRoleItemInversionPair> updateItemList;
 				instanceItemData->mTestingInstance = false;
 				if (!instanceItemData->mKnownInstance) {
-					instancesItem->addKnownInstance(COptimizedKPSetIndividualItemPair(indiItem1, indiItem2));
+					instancesItem->addKnownInstance(COptimizedKPSetIndividualItemPair(indiItem1,indiItem2));
 					instanceItemData->mKnownInstance = true;
 					instanceItemData->mPossibleInstance = false;
 					instanceItemData->mMostSpecific = true;
@@ -3632,9 +3634,9 @@ namespace Konclude {
 						bool updateInstanceItemInversion = updateInstanceItemInversionPair.second;
 						COptimizedKPSetRoleInstancesData* updateInstanceItemData = nullptr;
 						if (!updateInstanceItemInversion) {
-							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(updateInstanceItem, indiItem2, false);
+							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(updateInstanceItem,indiItem2, false);
 						} else {
-							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRolePredecessorInstanceItemData(updateInstanceItem, indiItem2, false);
+							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRolePredecessorInstanceItemData(updateInstanceItem,indiItem2, false);
 						}
 						if (updateInstanceItemData) {
 							if (!updateInstanceItemData->mKnownInstance) {
@@ -3658,7 +3660,7 @@ namespace Konclude {
 				COptimizedKPSetIndividualItem* indiItem1 = individualItemPair.first;
 				COptimizedKPSetIndividualItem* indiItem2 = individualItemPair.second;
 				COptimizedKPSetRoleNeighbourInstancesHash* knownPossibleRoleNeighbourInstancesHash = indiItem1->getKnownPossibleRoleNeighboursInstancesHash();
-				COptimizedKPSetRoleInstancesData* instanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(instancesItem, indiItem2);
+				COptimizedKPSetRoleInstancesData* instanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(instancesItem,indiItem2);
 				QList<TRoleItemInversionPair> updateItemList;
 				instanceItemData->mTestingInstance = false;
 				if (!instanceItemData->mKnownInstance) {
@@ -3675,21 +3677,21 @@ namespace Konclude {
 						bool updateInstanceItemInversion = updateInstanceItemInversionPair.second;
 						COptimizedKPSetRoleInstancesData* updateInstanceItemData = nullptr;
 						if (!updateInstanceItemInversion) {
-							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(updateInstanceItem, indiItem2, false);
+							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRoleSuccessorInstanceItemData(updateInstanceItem,indiItem2, false);
 						} else {
-							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRolePredecessorInstanceItemData(updateInstanceItem, indiItem2, false);
+							updateInstanceItemData = knownPossibleRoleNeighbourInstancesHash->getRolePredecessorInstanceItemData(updateInstanceItem,indiItem2, false);
 						}
 						if (updateInstanceItemData && !updateInstanceItemData->mKnownInstance) {
 							if (updateInstanceItemData->mPossibleInstance) {
 								if (!updateInstanceItemData->mMostSpecific && !updateInstanceItemData->mTestingInstance) {
-									updateInstanceItemData->mMostSpecific = true;
+									updateInstanceItemData->mMostSpecific = true;								
 									incOpenPossibleRoleInstancesCount(reqConfPreCompItem);
 									indiItem1->incPossibleRoleInstantiatedCount();
 									indiItem2->incPossibleRoleInstantiatedCount();
 									if (!updateInstanceItemInversion) {
-										updateInstanceItem->addPossibleInstance(COptimizedKPSetIndividualItemPair(indiItem1, indiItem2));
+										updateInstanceItem->addPossibleInstance(COptimizedKPSetIndividualItemPair(indiItem1,indiItem2));
 									} else {
-										updateInstanceItem->addPossibleInstance(COptimizedKPSetIndividualItemPair(indiItem2, indiItem1));
+										updateInstanceItem->addPossibleInstance(COptimizedKPSetIndividualItemPair(indiItem2,indiItem1));
 									}
 									if (updateInstanceItem->hasToProcessPossibleInstancesFlag()) {
 										reqConfPreCompItem->addRoleInstanceItemToProcessPossibleInstances(updateInstanceItem);
@@ -3726,7 +3728,8 @@ namespace Konclude {
 				if (!instantiatedItem->isItemSameIndividualMerged()) {
 					if (isIndividualInstance) {
 						updateCalculatedKnownConceptInstance(instantiatedItem, instancesItem, reqConfPreCompItem);
-					} else {
+					}
+					else {
 						updateCalculatedNonConceptInstance(instantiatedItem, instancesItem, reqConfPreCompItem);
 					}
 				}
@@ -3836,18 +3839,18 @@ namespace Konclude {
 
 						KONCLUCE_DEBUG_PRINTING_REALIZATION_CONCEPT_INSTANCE_TESTING_TIME(
 							QString conceptName = CIRIName::getRecentIRIName(instancesItem->getHierarchyNode()->getOneEquivalentConcept()->getClassNameLinker());
-						QString indiName = CIRIName::getRecentIRIName(instantiatedItem->getIndividual()->getIndividualNameLinker());
+							QString indiName = CIRIName::getRecentIRIName(instantiatedItem->getIndividual()->getIndividualNameLinker());
 
-						QFile testTimeReportFile("./Debugging/Realizing/individual-concept-possible-instance-testing-times.tsv");
-						if (testTimeReportFile.open(QFile::Append)) {
-							QString reportingLine = QString("%1 \t%2 \t%3\t%4\t%5\r\n").arg(conceptName).arg(indiName).arg(indiConInstTestItem->startTime.elapsed()).arg(isIndividualInstance ? 1 : 0).arg(mCurrRunningTestParallelCount);
-							testTimeReportFile.write(reportingLine.toLocal8Bit());
-							testTimeReportFile.close();
-						}
+							QFile testTimeReportFile("./Debugging/Realizing/individual-concept-possible-instance-testing-times.tsv");
+							if (testTimeReportFile.open(QFile::Append)) {
+								QString reportingLine = QString("%1 \t%2 \t%3\t%4\t%5\r\n").arg(conceptName).arg(indiName).arg(indiConInstTestItem->startTime.elapsed()).arg(isIndividualInstance ? 1 : 0).arg(mCurrRunningTestParallelCount);
+								testTimeReportFile.write(reportingLine.toLocal8Bit());
+								testTimeReportFile.close();
+							}
 						)
 
 
-							interpretConceptInstantiationResult(ontPreCompItem, instancesItem, instantiatedItem, isIndividualInstance);
+						interpretConceptInstantiationResult(ontPreCompItem, instancesItem, instantiatedItem, isIndividualInstance);
 
 						delete indiConInstTestItem;
 						processed = true;
@@ -3946,6 +3949,7 @@ namespace Konclude {
 			}
 
 
+
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkFinishSameIndividualProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetIndividualItem* instantiatedItem) {
 				if (instantiatedItem) {
 					if (instantiatedItem->isItemSameIndividualMerged() || (!instantiatedItem->hasToProcessPossibleSameIndividualsFlag() && !instantiatedItem->hasPossibleSameIndividualsTesting() && !instantiatedItem->hasPossibleSameIndividuals())) {
@@ -4014,11 +4018,11 @@ namespace Konclude {
 
 
 
-			bool COptimizedRepresentativeKPSetOntologyRealizingThread::addComplexRoleExplicitIndirectNeighbourLink(COptimizedKPSetRoleInstancesItem* roleInstItem, bool inversed,
-				const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData,
-				COptimizedKPSetRoleNeighbourInstancesHashData* indiRoleNeighbourHashData, COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* combinedNeighbourCacheLabelItemData, CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* assNeighbourRoleSetHash,
-				const CIndividualReference& neighbourIndi, COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* neighbourIndiExplicitIndirectLinkComplexRepresentationData,
-				bool deterministic, COptimizedRepresentativeKPSetOntologyRealizingItem* realItem) {
+			bool COptimizedRepresentativeKPSetOntologyRealizingThread::addComplexRoleExplicitIndirectNeighbourLink(COptimizedKPSetRoleInstancesItem* roleInstItem, bool inversed, 
+					const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData, 
+					COptimizedKPSetRoleNeighbourInstancesHashData* indiRoleNeighbourHashData, COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* combinedNeighbourCacheLabelItemData, CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* assNeighbourRoleSetHash,
+					const CIndividualReference& neighbourIndi, COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* neighbourIndiExplicitIndirectLinkComplexRepresentationData, 
+					bool deterministic, COptimizedRepresentativeKPSetOntologyRealizingItem* realItem) {
 
 				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiRealItemRef.getRealizationInstanceItem();
 				CIndividualReference individualReference = indiRealItemRef;
@@ -4112,7 +4116,7 @@ namespace Konclude {
 
 
 
-						COptimizedKPSetIndividualItem* individualItem = realItem->getIndividualInstantiatedItem(individualReference.getIndividualID(), false);
+						COptimizedKPSetIndividualItem* individualItem = realItem->getIndividualInstantiatedItem(individualReference.getIndividualID(),false);
 						CRealizationIndividualInstanceItemReference indiRealItemRef(individualReference, individualItem);
 						COptimizedKPSetRoleNeighbourInstancesHashData* indiRoleNeighbourHashData = nullptr;
 						if (individualItem && individualItem->getKnownPossibleRoleNeighboursInstancesHash()->contains(roleInstItem)) {
@@ -4121,7 +4125,7 @@ namespace Konclude {
 						}
 
 
-						CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(individualReference.getIndividualID());
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = realItem->getBackendAssociationCacheReader()->getIndividualAssociationData(individualReference.getIndividualID());
 						CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* assNeighbourRoleSetHash = indiAssData->getNeighbourRoleSetHash();
 						CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetCompinationLabelItem = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
 
@@ -4214,9 +4218,9 @@ namespace Konclude {
 					data->mPossibleInstance = !knownInstance;
 					data->mMostSpecific = true;
 					if (knownInstance) {
-						roleInstItem->addKnownInstance(COptimizedKPSetIndividualItemPair(succIndiItem, precIndiItem), inversed);
+						roleInstItem->addKnownInstance(COptimizedKPSetIndividualItemPair(succIndiItem,precIndiItem),inversed);
 					} else {
-						roleInstItem->addPossibleInstance(COptimizedKPSetIndividualItemPair(succIndiItem, precIndiItem), inversed);
+						roleInstItem->addPossibleInstance(COptimizedKPSetIndividualItemPair(succIndiItem,precIndiItem),inversed);
 						incOpenPossibleRoleInstancesCount(reqConfPreCompItem);
 						succIndiItem->incPossibleRoleInstantiatedCount();
 						precIndiItem->incPossibleRoleInstantiatedCount();
@@ -4232,9 +4236,9 @@ namespace Konclude {
 						decOpenPossibleRoleInstancesCount(reqConfPreCompItem);
 						succIndiItem->decPossibleRoleInstantiatedCount();
 						precIndiItem->decPossibleRoleInstantiatedCount();
-						roleInstItem->removePossibleInstance(COptimizedKPSetIndividualItemPair(succIndiItem, precIndiItem), inversed);
+						roleInstItem->removePossibleInstance(COptimizedKPSetIndividualItemPair(succIndiItem,precIndiItem),inversed);
 					}
-					roleInstItem->addKnownInstance(COptimizedKPSetIndividualItemPair(succIndiItem, precIndiItem), inversed);
+					roleInstItem->addKnownInstance(COptimizedKPSetIndividualItemPair(succIndiItem,precIndiItem),inversed);
 					succHashData.mInstanceItemData->mKnownInstance = true;
 					succHashData.mInstanceItemData->mPossibleInstance = false;
 					tmpInstancesList.append(*roleInstItem->getParentItemList());
@@ -4296,17 +4300,17 @@ namespace Konclude {
 										decOpenPossibleRoleInstancesCount(reqConfPreCompItem);
 										superSuccIndiItem->decPossibleRoleInstantiatedCount();
 										superPrecIndiItem->decPossibleRoleInstantiatedCount();
-										superRoleInstanceItem->removePossibleInstance(COptimizedKPSetIndividualItemPair(superSuccIndiItem, superPrecIndiItem), inversed);
+										superRoleInstanceItem->removePossibleInstance(COptimizedKPSetIndividualItemPair(superSuccIndiItem,superPrecIndiItem),inversed);
 										superSuccHashData.mInstanceItemData->mMostSpecific = false;
 									}
 									tmpInstancesList.append(*superRoleInstanceItem->getParentItemList());
 								} else if (superSuccHashData.mInstanceItemData->mKnownInstance && superSuccHashData.mInstanceItemData->mMostSpecific) {
 									superSuccHashData.mInstanceItemData->mMostSpecific = false;
-									superRoleInstanceItem->removeKnownInstance(COptimizedKPSetIndividualItemPair(superSuccIndiItem, superPrecIndiItem), superRoleItemInversed);
+									superRoleInstanceItem->removeKnownInstance(COptimizedKPSetIndividualItemPair(superSuccIndiItem,superPrecIndiItem),superRoleItemInversed);
 								}
 							} else {
 								if (superSuccHashData.mInstanceItemData->mPossibleInstance && superSuccHashData.mInstanceItemData->mMostSpecific) {
-									superRoleInstanceItem->removePossibleInstance(COptimizedKPSetIndividualItemPair(superSuccIndiItem, superPrecIndiItem), inversed);
+									superRoleInstanceItem->removePossibleInstance(COptimizedKPSetIndividualItemPair(superSuccIndiItem,superPrecIndiItem),inversed);
 									superSuccHashData.mInstanceItemData->mMostSpecific = false;
 								}
 							}
@@ -4329,12 +4333,12 @@ namespace Konclude {
 					mergingInstantiatedItem = instantiatedItem1;
 				}
 				mergingInstantiatedItem->setItemSameIndividualMerged(mergedIntoInstantiatedItem);
-				QHash<cint64, COptimizedKPSetIndividualItem*>* indiInstantiatedItemHash = reqConfPreCompItem->getIndividualInstantiatedItemHash();
+				QHash<cint64,COptimizedKPSetIndividualItem*>* indiInstantiatedItemHash = reqConfPreCompItem->getIndividualInstantiatedItemHash();
 				QSet<CIndividualReference>* individualSet = mergingInstantiatedItem->getKnownSameIndividualSet();
 				for (QSet<CIndividualReference>::const_iterator it = individualSet->constBegin(), itEnd = individualSet->constEnd(); it != itEnd; ++it) {
 					CIndividualReference sameIndividual(*it);
 					mergedIntoInstantiatedItem->addKnownSameIndividual(sameIndividual);
-					indiInstantiatedItemHash->insert(sameIndividual.getIndividualID(), mergedIntoInstantiatedItem);
+					indiInstantiatedItemHash->insert(sameIndividual.getIndividualID(),mergedIntoInstantiatedItem);
 				}
 				return this;
 			}
@@ -4545,7 +4549,7 @@ namespace Konclude {
 					if (elapsedTime <= 0 && total > 0) {
 						remainingMilliSeconds = 0.;
 					} else {
-						remainingMilliSeconds = ((double)elapsedTime / (double)tested) * (total - tested);
+						remainingMilliSeconds = ((double)elapsedTime / (double)tested) * (total-tested);
 					}
 					if (total <= 0) {
 						progessPercent = 0.;
@@ -4581,7 +4585,7 @@ namespace Konclude {
 					for (QMap<cint64, COptimizedKPSetIndividualItem*>::const_iterator indiItemIt = knownInstancesSet->constBegin(), indiItemItEnd = knownInstancesSet->constEnd(); indiItemIt != indiItemItEnd; ++indiItemIt) {
 						COptimizedKPSetIndividualItem* indiItem(*indiItemIt);
 						QSet<CIndividualReference>* sameIndiSet = indiItem->getKnownSameIndividualSet();
-						for (QSet<CIndividualReference>::const_iterator sameIndiIt = sameIndiSet->constBegin(), sameIndiItEnd = sameIndiSet->constEnd(); sameIndiIt != sameIndiItEnd; ++sameIndiIt) {
+						for (QSet<CIndividualReference>::const_iterator sameIndiIt = sameIndiSet->constBegin(), sameIndiItEnd = sameIndiSet->constEnd(); sameIndiIt != sameIndiItEnd; ++ sameIndiIt) {
 							CIndividualReference indiRef = *sameIndiIt;
 							CIndividual* indi = realizingItem->getOntology()->getABox()->getIndividualVector(false)->getData(indiRef.getIndividualID());
 							indiTypeStringSet.insert(CIRIName::getRecentIRIName(indi->getIndividualNameLinker()) + " rdf:type " + CIRIName::getRecentIRIName(concept->getClassNameLinker()) + " .");

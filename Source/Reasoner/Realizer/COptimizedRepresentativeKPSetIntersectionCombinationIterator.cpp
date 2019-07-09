@@ -160,6 +160,7 @@ namespace Konclude {
 				if (mIteratingIteratorData && !mIteratingIteratorData->mIterator->atEnd()) {
 					bool moved = mIteratingIteratorData->mIterator->moveNext();
 					if (moved) {
+						++mVisitedIterationCount;
 						CRealizationIndividualInstanceItemReference indiInstItemRef = mIteratingIteratorData->mIterator->currentIndividualInstanceItemReference();
 						for (CRealizationIteratorData* iterationData : mIteratorDataList) {
 							if (iterationData != mIteratingIteratorData) {
@@ -190,7 +191,6 @@ namespace Konclude {
 					positionRequiresInitialization = false;
 					validIteratorPosition = true;
 
-					++mVisitedIterationCount;
 
 					cint64 minIndiId = CINT64_MAX;
 					cint64 maxIndiId = CINT64_MIN;
@@ -240,10 +240,13 @@ namespace Konclude {
 								moveToIndiId = minIndiId;
 								moveToIndiItemRef = minIndiItemRef;
 							}
+							++mVisitedIterationCount;
 							mIteratingIteratorData->mIterator->moveTo(moveToIndiItemRef, false);
 						} else {
 							if (!mIteratingIteratorData->mIterator->moveNext()) {
 								successfullyMoved = false;
+							} else {
+								++mVisitedIterationCount;
 							}
 						}
 					} else {
@@ -265,6 +268,7 @@ namespace Konclude {
 					}
 				}
 				if (successfullyMoved) {
+					++mVisitedIterationCount;
 					if (!moveToValidPosition()) {
 						successfullyMoved = false;
 					}

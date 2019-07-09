@@ -26,9 +26,7 @@
 
 // Namespace includes
 #include "CacheSettings.h"
-#include "CBackendRepresentativeMemoryLabelSignatureResolveCacheItem.h"
-#include "CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem.h"
-#include "CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData.h"
+#include "CBackendRepresentativeMemoryCacheOntologyData.h"
 
 // Other includes
 #include "Utilities/Memory/CMemoryPoolContainer.h"
@@ -69,46 +67,23 @@ namespace Konclude {
 						bool decReader();
 
 
-						CBackendRepresentativeMemoryCacheSlotItem* setSignatureLabelItemHash(cint64 labelType, CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash);
-						CBackendRepresentativeMemoryCacheSlotItem* setSignatureCardinalityItemHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>* sigItemHash);
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* getSignatureLabelItemHash(cint64 labelType);
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>* getSignatureCardinalityItemHash();
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* getNominaIIndividualdIndirectConnectionDataHash();
+						CBackendRepresentativeMemoryCacheOntologyData* getOntologyData(cint64 ontologyIdentifier);
+
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* getOntologyIdentifierDataHash();
+						CBackendRepresentativeMemoryCacheSlotItem* setOntologyIdentifierDataHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* ontIdDataHash);
+
 
 						bool hasCacheReaders();
 
-						bool hasSameIndividualsMergings();
-						CBackendRepresentativeMemoryCacheSlotItem* setSameIndividualsMergings(bool sameIndisMergings);
-
-
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* getIndividualIdAssociationDataHash();
-						CBackendRepresentativeMemoryCacheSlotItem* setIndividualIdAssociationDataHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* indiIdAssoDataHash);
-						CBackendRepresentativeMemoryCacheSlotItem* setNominaIIndividualdIndirectConnectionDataHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* hash);
-
-						cint64 getIndividualIdAssoiationDataVectorSize();
-						CBackendRepresentativeMemoryCacheIndividualAssociationData** getIndividualIdAssoiationDataVector();
-						CBackendRepresentativeMemoryCacheSlotItem* setIndividualIdAssoiationDataVector(cint64 indiIdAssoDataVectorSize, CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector);
-
-						// protected methods
+					// protected methods
 					protected:
 
-						// protected variables
+					// protected variables
 					protected:
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* mSigLabelItemHash[CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT];
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>* mSigCardLabelItemHash;
-
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* mIndiIdAssoDataHash;
-
-						cint64 mIndiIdAssoDataVectorSize;
-						CBackendRepresentativeMemoryCacheIndividualAssociationData** mIndiIdAssoDataVector;
-
-
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* mNominaIIndividualdIndirectConnectionDataHash;
-
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* mOntologyIdentifierDataHash;
 
 						QAtomicInt mReaderSharingCount;
 						bool mReaderUsing;
-						bool mSameIndividalsMergings;
 
 
 					// private methods

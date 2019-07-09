@@ -579,8 +579,13 @@ namespace Konclude {
 				estimation.setMinimalCount(mAssociatedIndiTotalCount - mAssociatedIndiPossibleCount);
 				cint64 remainingEstimation = 0;
 				if (!atEnd()) {
-					cint64 difference = getDifference(currentIndividualInstanceItemReference().getIndividualID(), mFirstIteratorIndiId);
-					remainingEstimation = (mAssociatedIndiTotalCount - difference) / mAverageIterationIncrementSize;
+					if (mIterateAscending) {
+						cint64 difference = getDifference(currentIndividualInstanceItemReference().getIndividualID(), mFirstIteratorIndiId);
+						remainingEstimation = mAssociatedIndiTotalCount - (difference / mAverageIterationIncrementSize);
+					} else {
+						cint64 difference = getDifference(currentIndividualInstanceItemReference().getIndividualID(), 0);
+						remainingEstimation = mAssociatedIndiTotalCount / mAverageIterationIncrementSize;
+					}
 					remainingEstimation = qMin(mAssociatedIndiTotalCount, remainingEstimation);
 					remainingEstimation = qMax((cint64)0, remainingEstimation);
 				}

@@ -34,8 +34,7 @@
 
 #include "Utilities/Memory/CMemoryPoolProvider.h"
 #include "Utilities/Memory/CMemoryPoolAllocationManager.h"
-#include "Utilities/Memory/CNewAllocationMemoryPoolProvider.h"
-#include "Utilities/Memory/CLimitedReserveMemoryPoolAllocationManager.h"
+
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -68,23 +67,16 @@ namespace Konclude {
 
 						~CBackendRepresentativeMemoryCacheContext();
 
-						virtual CMemoryAllocationManager* getMemoryAllocationManager();
-						virtual CMemoryPoolAllocationManager* getMemoryPoolAllocationManager();
+						virtual CMemoryAllocationManager* getMemoryAllocationManager() = 0;
 
-						virtual CMemoryPoolProvider* getMemoryPoolProvider();
+						virtual CMemoryPoolProvider* getMemoryPoolProvider() = 0;
 
-						cint64 getMemoryConsumption();
-						CBackendRepresentativeMemoryCacheContext* releaseTemporaryMemoryPools(CMemoryPool* memoryPools);
-
-						// protected methods
-				protected:
+					// protected methods
+					protected:
 
 					// protected variables
-				protected:
-					CMemoryPoolAllocationManager* mMemMan;
-					CNewAllocationMemoryPoolProvider* mMemoryPoolProvider;
+					protected:
 
-					cint64 mAddRelMemory;
 					// private methods
 					private:
 

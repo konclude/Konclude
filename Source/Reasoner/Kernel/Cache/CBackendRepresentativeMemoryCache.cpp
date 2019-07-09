@@ -34,37 +34,19 @@ namespace Konclude {
 				CBackendRepresentativeMemoryCache::CBackendRepresentativeMemoryCache(CConfiguration* config, QString threadIdentifierName, CWatchDog *watchDogThread) : CThread(threadIdentifierName, watchDogThread) {
 					mWriteDataCount = 0;
 
-					mNextEntryID = 1;
 					mConfig = config;
 
 					mSlotLinker = nullptr;
 					mLastUpdatedSlotLinker = nullptr;
 					mReaderLinker = nullptr;
 
-					mLastMinIncompletelyHandledIndiId = CINT64_MAX;
-					mIncompletelyHandledIndiIdCount = 0;
 					mNextIndiUpdateId = 1;
 					mNextNomConnUpdateId = 1;
-					mZeroIncompletelyHandledIndiIdCountDebugWritten = false;
 
 					CMemoryAllocationManager* memMan = mContext.getMemoryAllocationManager();
-					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT; ++i) {
-						mSigLabelItemHash[i] = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>, CContext* >::allocateAndConstructAndParameterize(memMan, &mContext);
-					}
-					mSigCardItemHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>, CContext* >::allocateAndConstructAndParameterize(memMan, &mContext);
-					//mIndiIdAssoDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>, CContext* >::allocateAndConstructAndParameterize(memMan, &mContext);
+					//mIndiIdAssoDataHash = nullptr;
 
-					mNominalIndiIdIndirectConnectionDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >, CContext* >::allocateAndConstructAndParameterize(memMan, &mContext);
-
-					mIndiIdAssoDataVectorSize = 1000000;
-					mIndiIdAssoDataVector = CObjectAllocator< CBackendRepresentativeMemoryCacheIndividualAssociationData* >::allocateAndConstructArray(memMan, mIndiIdAssoDataVectorSize);
-					for (cint64 i = 0; i < mIndiIdAssoDataVectorSize; ++i) {
-						mIndiIdAssoDataVector[i] = nullptr;
-					}
-
-					mSameMergedIndisInCache = false;
-
-					mLastOntologyId = -1;
+					mOntologyIdentifierDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>, CBackendRepresentativeMemoryCacheBaseContext* >::allocateAndConstructAndParameterize(memMan, &mContext);
 
 					startThread(QThread::HighestPriority);
 				}
@@ -79,41 +61,32 @@ namespace Konclude {
 					return &mCacheStat;
 				}
 
-				void CBackendRepresentativeMemoryCache::createReaderSlotUpdate(CBackendRepresentativeMemoryCacheContext* context) {
+				void CBackendRepresentativeMemoryCache::createReaderSlotUpdate(CBackendRepresentativeMemoryCacheOntologyData* ontologyData, CBackendRepresentativeMemoryCacheBaseContext* context) {
 					CMemoryPoolProvider* memProv = context->getMemoryPoolAllocationManager();
 					CBackendRepresentativeMemoryCacheSlotItem* slot = CObjectMemoryPoolAllocator<CBackendRepresentativeMemoryCacheSlotItem>::allocateAndConstructWithMemroyPool(memProv);
 					CMemoryPoolContainerAllocationManager slotMemMan(slot, memProv);
 					CMemoryAllocationManager* memMan = &slotMemMan;
 					CContextBase tmpContext(memMan);
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* slotSigLabelItemHashArray[CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT];
-					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT; ++i) {
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* slotSigLabelItemHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>, CContext* >::allocateAndConstructAndParameterize(memMan, &tmpContext);
-						slotSigLabelItemHashArray[i] = slotSigLabelItemHash;
-						*slotSigLabelItemHash = *mSigLabelItemHash[i];
-						slotSigLabelItemHash->detach();
-						slot->setSignatureLabelItemHash(i, slotSigLabelItemHash);
-					}
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>* slotSigCardItemHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>, CContext* >::allocateAndConstructAndParameterize(memMan, &tmpContext);
-					//CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* indiIdAssoDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>, CContext* >::allocateAndConstructAndParameterize(memMan, &tmpContext);
 
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* slotNominalIndiIdIndirectConnectionDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >, CContext* >::allocateAndConstructAndParameterize(memMan, &mContext);
 
-					*slotNominalIndiIdIndirectConnectionDataHash = *mNominalIndiIdIndirectConnectionDataHash;
-					slot->setNominaIIndividualdIndirectConnectionDataHash(slotNominalIndiIdIndirectConnectionDataHash);
-					*slotSigCardItemHash = *mSigCardItemHash;
-					//*indiIdAssoDataHash = *mIndiIdAssoDataHash;
-					slotSigCardItemHash->detach();
-					//indiIdAssoDataHash->detach();
-					slot->setSignatureCardinalityItemHash(slotSigCardItemHash);
-					//slot->setIndividualIdAssociationDataHash(indiIdAssoDataHash);
-					slot->setIndividualIdAssoiationDataVector(mIndiIdAssoDataVectorSize, mIndiIdAssoDataVector);
-					slot->setSameIndividualsMergings(mSameMergedIndisInCache);
+					CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* ontologyIdentifierDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>, CContext* >::allocateAndConstructAndParameterize(memMan, &tmpContext);
+					*ontologyIdentifierDataHash = *mOntologyIdentifierDataHash;
+					ontologyIdentifierDataHash->detach();
+					slot->setOntologyIdentifierDataHash(ontologyIdentifierDataHash);
+
 					mLastUpdatedSlotLinker = slot;
 					if (mSlotLinker) {
 						mSlotLinker->append(slot);
 					} else {
 						mSlotLinker = slot;
 					}
+
+
+					for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>::const_iterator it = ontologyIdentifierDataHash->constBegin(), itEnd = ontologyIdentifierDataHash->constEnd(); it != itEnd; ++it) {
+						CBackendRepresentativeMemoryCacheOntologyData* ontologyData = it.value();
+						ontologyData->incUsageCount();
+					}
+
 					CBackendRepresentativeMemoryCacheReader* readerLinkerIt = mReaderLinker;
 					while (readerLinkerIt) {
 						slot->incReader();
@@ -123,7 +96,95 @@ namespace Konclude {
 				}
 
 
-				void CBackendRepresentativeMemoryCache::cleanUnusedSlots(CBackendRepresentativeMemoryCacheContext* context) {
+
+
+
+
+				CBackendRepresentativeMemoryCacheOntologyData* CBackendRepresentativeMemoryCache::prepareOntologyDataUpdate(cint64 ontologyIdentifier) {
+					CBackendRepresentativeMemoryCacheOntologyData*& ontologyData = (*mOntologyIdentifierDataHash)[ontologyIdentifier];
+					CBackendRepresentativeMemoryCacheOntologyData* prevOntologyData = ontologyData;
+
+					ontologyData = new CBackendRepresentativeMemoryCacheOntologyData(&mContext);
+					ontologyData->initOntologyData(ontologyIdentifier);
+
+
+
+					CBackendRepresentativeMemoryCacheContext* tmpContext = ontologyData->getTemporaryContext();
+					CMemoryAllocationManager* tmpMemMan = tmpContext->getMemoryAllocationManager();
+					CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* slotSigLabelItemHashArray[CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT];
+					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT; ++i) {
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* ontoSigLabelItemHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(tmpMemMan, tmpContext);
+						slotSigLabelItemHashArray[i] = ontoSigLabelItemHash;
+						ontologyData->setSignatureLabelItemHash(i, ontoSigLabelItemHash);
+
+						if (prevOntologyData) {
+							*ontoSigLabelItemHash = *prevOntologyData->getSignatureLabelItemHash(i);
+							ontoSigLabelItemHash->detach();
+						}
+					}
+
+					CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* ontologyNominalIndiIdIndirectConnectionDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(tmpMemMan, tmpContext);
+					if (prevOntologyData) {
+						*ontologyNominalIndiIdIndirectConnectionDataHash = *prevOntologyData->getNominaIIndividualdIndirectConnectionDataHash();
+						ontologyNominalIndiIdIndirectConnectionDataHash->detach();
+					}
+					ontologyData->setNominaIIndividualdIndirectConnectionDataHash(ontologyNominalIndiIdIndirectConnectionDataHash);
+
+
+
+					if (!prevOntologyData) {
+						CBackendRepresentativeMemoryCacheOntologyContext* ontologyContext = new CBackendRepresentativeMemoryCacheOntologyContext(&mContext);
+						ontologyData->setOntologyContext(ontologyContext);
+					} else {
+						ontologyData->setOntologyContext(prevOntologyData->getOntologyContext());
+					}
+
+
+
+					if (!prevOntologyData) {
+						cint64 indiIdAssoDataVectorSize = 1000000;
+						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = CObjectAllocator< CBackendRepresentativeMemoryCacheIndividualAssociationData* >::allocateAndConstructArray(ontologyData->getOntologyContext()->getMemoryAllocationManager(), indiIdAssoDataVectorSize);
+						for (cint64 i = 0; i < indiIdAssoDataVectorSize; ++i) {
+							indiIdAssoDataVector[i] = nullptr;
+						}
+						ontologyData->setIndividualIdAssoiationDataVector(indiIdAssoDataVectorSize, indiIdAssoDataVector);
+					} else {
+						cint64 indiIdAssoDataVectorSize = prevOntologyData->getIndividualIdAssoiationDataVectorSize();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = prevOntologyData->getIndividualIdAssoiationDataVector();
+						ontologyData->setIndividualIdAssoiationDataVector(indiIdAssoDataVectorSize, indiIdAssoDataVector);
+					}
+
+
+					if (prevOntologyData) {
+						ontologyData->setSameIndividualsMergings(prevOntologyData->hasSameIndividualsMergings());
+						ontologyData->setMaxIndividualAssociationDataUpdateCount(prevOntologyData->getMaxIndividualAssociationDataUpdateCount());
+						ontologyData->setZeroIncompletelyHandledIndividualIdCountDebugWritten(prevOntologyData->getZeroIncompletelyHandledIndividualIdCountDebugWritten());
+						ontologyData->setIncompletelyHandledIndividualIdCount(prevOntologyData->getIncompletelyHandledIndividualIdCount());
+						ontologyData->setLastMinIncompletelyHandledIndvidualiId(prevOntologyData->getLastMinIncompletelyHandledIndvidualiId());
+					}
+
+
+					ontologyData->incUsageCount();
+					if (prevOntologyData) {
+						prevOntologyData->decUsageCount();
+						if (prevOntologyData->getUsageCount() <= 0) {
+							CMemoryPoolAllocationManager* memMan = mContext.getMemoryPoolAllocationManager();
+							CMemoryPool* memoryPools = prevOntologyData->getTemporaryContext()->getMemoryPoolContainer()->getMemoryPools();
+							memMan->releaseTemporaryMemoryPools(memoryPools);
+							delete prevOntologyData;
+						}
+
+					}
+
+					return ontologyData;
+				}
+
+
+
+
+
+
+				void CBackendRepresentativeMemoryCache::cleanUnusedSlots(CBackendRepresentativeMemoryCacheBaseContext* context) {
 					CMemoryPoolAllocationManager* memMan = context->getMemoryPoolAllocationManager();
 					CBackendRepresentativeMemoryCacheSlotItem* slotLinkerIt = mSlotLinker;
 					CBackendRepresentativeMemoryCacheSlotItem* lastSlotLinker = nullptr;
@@ -139,9 +200,22 @@ namespace Konclude {
 							} else {
 								lastSlotLinker->setNext(nextSlotLinker);
 							}
+
+							CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* ontologyIdentifierDataHash = slotLinkerIt->getOntologyIdentifierDataHash();
+							for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>::const_iterator it = ontologyIdentifierDataHash->constBegin(), itEnd = ontologyIdentifierDataHash->constEnd(); it != itEnd; ++it) {
+								CBackendRepresentativeMemoryCacheOntologyData* ontologyData = it.value();
+								ontologyData->decUsageCount();
+								if (ontologyData->getUsageCount() <= 0) {
+									CMemoryPool* memoryPools = ontologyData->getTemporaryContext()->getMemoryPoolContainer()->getMemoryPools();
+									memMan->releaseTemporaryMemoryPools(memoryPools);
+									delete ontologyData;
+								}
+							}
+
 							CMemoryPool* memoryPools = tmpSlotLinker->getMemoryPools();
 							memMan->releaseTemporaryMemoryPools(memoryPools);
-						} else {
+						}
+						else {
 							lastSlotLinker = slotLinkerIt;
 						}
 						slotLinkerIt = nextSlotLinker;
@@ -159,16 +233,15 @@ namespace Konclude {
 				}
 
 
-				CBackendRepresentativeMemoryCacheReader* CBackendRepresentativeMemoryCache::createFixedCacheReader() {
+				CBackendRepresentativeMemoryCacheReader* CBackendRepresentativeMemoryCache::createOntologyFixedCacheReader(cint64 ontologyIdentifier) {
 					CBackendRepresentativeMemoryCacheReader* reader = new CBackendRepresentativeMemoryCacheReader();
-					mReaderSyncMutex.lock();
-					mReaderLinker = reader->append(mReaderLinker);
-					if (mLastUpdatedSlotLinker) {
-						// assuming that the current slot is not changed any more
-						mLastUpdatedSlotLinker->incReader();
-						mReaderLinker->updateSlot(mLastUpdatedSlotLinker);
+					mFixedOntologyIdentifierDataHashLock.lockForRead();
+					CBackendRepresentativeMemoryCacheOntologyData* ontologyData = mFixedOntologyIdentifierDataHash.value(ontologyIdentifier);
+					if (ontologyData) {
+						ontologyData->incUsageCount();
 					}
-					mReaderSyncMutex.unlock();
+					reader->fixOntologyData(ontologyData);
+					mFixedOntologyIdentifierDataHashLock.unlock();
 					return reader;
 				}
 
@@ -188,7 +261,8 @@ namespace Konclude {
 
 
 
-				void CBackendRepresentativeMemoryCache::installTemporaryCardinalities(CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker, CBackendRepresentativeMemoryCacheContext* context) {
+				void CBackendRepresentativeMemoryCache::installTemporaryCardinalities(CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					for (CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinkerIt = tempCardWriteDataLinker; tempCardWriteDataLinkerIt; tempCardWriteDataLinkerIt = tempCardWriteDataLinkerIt->getNext()) {
 
 						CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* labelWriteDataLinker = tempCardWriteDataLinkerIt->getLabelWriteDataLinker();
@@ -239,7 +313,8 @@ namespace Konclude {
 
 
 
-				void CBackendRepresentativeMemoryCache::installTemporaryLabels(CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheContext* context) {
+				void CBackendRepresentativeMemoryCache::installTemporaryLabels(CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					for (CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinkerIt = tempLabelWriteDataLinker; tempLabelWriteDataLinkerIt; tempLabelWriteDataLinkerIt = tempLabelWriteDataLinkerIt->getNext()) {
 
 						cint64 signature = tempLabelWriteDataLinkerIt->getSignature();
@@ -261,7 +336,7 @@ namespace Konclude {
 
 						CBackendRepresentativeMemoryLabelValueLinker* labelValueLinker = tempLabelWriteDataLinkerIt->getCacheValueLinker();
 						cint64 labelValueCount = tempLabelWriteDataLinkerIt->getCacheValueCount();
-						CBackendRepresentativeMemoryLabelSignatureResolveCacheItem& sigResolveItem = (*mSigLabelItemHash[tempLabelWriteDataLinkerIt->getLabelType()])[signature];
+						CBackendRepresentativeMemoryLabelSignatureResolveCacheItem& sigResolveItem = (*ontologyData->getSignatureLabelItemHash(tempLabelWriteDataLinkerIt->getLabelType()))[signature];
 
 						CBackendRepresentativeMemoryLabelCacheItem* refLabelItem = nullptr;
 						for (CBackendRepresentativeMemoryLabelCacheItem* labelItemLinkerIt = sigResolveItem.getLabelItems(); labelItemLinkerIt && !refLabelItem; labelItemLinkerIt = labelItemLinkerIt->getNext()) {
@@ -285,7 +360,7 @@ namespace Konclude {
 
 						if (!refLabelItem) {
 							refLabelItem = CObjectParameterizingAllocator< CBackendRepresentativeMemoryLabelCacheItem, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
-							refLabelItem->initCacheEntry(signature, mNextEntryID++, (CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE)tempLabelWriteDataLinkerIt->getLabelType());
+							refLabelItem->initCacheEntry(signature, ontologyData->getNextEntryID(), (CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE)tempLabelWriteDataLinkerIt->getLabelType());
 
 							CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelValueLinker*>* labelValueHash = refLabelItem->getTagCacheValueHash(true);
 							for (CBackendRepresentativeMemoryLabelValueLinker* labelValueLinkerIt = labelValueLinker; labelValueLinkerIt; labelValueLinkerIt = labelValueLinkerIt->getNext()) {
@@ -311,7 +386,7 @@ namespace Konclude {
 
 
 						if (tempLabelWriteDataLinkerIt->getLabelType() == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL) {
-							getNeighbourArrayRoleTagResolvingLabelExtensionData(refLabelItem, context);
+							getNeighbourArrayRoleTagResolvingLabelExtensionData(refLabelItem, ontologyData);
 						}
 
 						tempLabelWriteDataLinkerIt->setTemporaryData(refLabelItem);
@@ -321,7 +396,8 @@ namespace Konclude {
 
 
 
-				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCache::getReducedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* label, function<bool(const CCacheValue& cacheValue)> reduceCheckFunction, CBackendRepresentativeMemoryCacheContext* context) {
+				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCache::getReducedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* label, function<bool(const CCacheValue& cacheValue)> reduceCheckFunction, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					CBackendRepresentativeMemoryLabelValueLinker* labelValueLinker = label->getCacheValueLinker();
 					cint64 signature = 0;
 					cint64 newCount = 0;
@@ -340,7 +416,7 @@ namespace Konclude {
 					}
 
 					// test with signature whether reduced label already exists
-					CBackendRepresentativeMemoryLabelSignatureResolveCacheItem& sigResolveItem = (*mSigLabelItemHash[labelType])[signature];
+					CBackendRepresentativeMemoryLabelSignatureResolveCacheItem& sigResolveItem = (*ontologyData->getSignatureLabelItemHash(labelType))[signature];
 
 					for (CBackendRepresentativeMemoryLabelCacheItem* labelItemLinkerIt = sigResolveItem.getLabelItems(); labelItemLinkerIt; labelItemLinkerIt = labelItemLinkerIt->getNext()) {
 						if (labelItemLinkerIt->getCacheValueCount() == newCount) {
@@ -366,7 +442,7 @@ namespace Konclude {
 
 					// create new label item
 					CBackendRepresentativeMemoryLabelCacheItem* refLabelItem = CObjectParameterizingAllocator< CBackendRepresentativeMemoryLabelCacheItem, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
-					refLabelItem->initCacheEntry(signature, mNextEntryID++, (CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE)labelType);
+					refLabelItem->initCacheEntry(signature, ontologyData->getNextEntryID(), (CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE)labelType);
 
 					CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelValueLinker*>* labelValueHash = refLabelItem->getTagCacheValueHash(true);
 					for (CBackendRepresentativeMemoryLabelValueLinker* labelValueLinkerIt = labelValueLinker; labelValueLinkerIt; labelValueLinkerIt = labelValueLinkerIt->getNext()) {
@@ -381,7 +457,7 @@ namespace Konclude {
 					}
 
 					if (refLabelItem->getLabelType() == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL) {
-						getNeighbourArrayRoleTagResolvingLabelExtensionData(refLabelItem, context);
+						getNeighbourArrayRoleTagResolvingLabelExtensionData(refLabelItem, ontologyData);
 					}
 
 
@@ -391,7 +467,8 @@ namespace Konclude {
 
 
 
-				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCache::getAdditionMergedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* additionLabel, CBackendRepresentativeMemoryLabelCacheItem* associatedlabel, CBackendRepresentativeMemoryCacheContext* context) {
+				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCache::getAdditionMergedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* additionLabel, CBackendRepresentativeMemoryLabelCacheItem* associatedlabel, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					if (additionLabel == associatedlabel) {
 						return associatedlabel;
 					}
@@ -415,7 +492,7 @@ namespace Konclude {
 						return associatedlabel;
 					}
 					// test with signature whether extended label already exists
-					CBackendRepresentativeMemoryLabelSignatureResolveCacheItem& sigResolveItem = (*mSigLabelItemHash[labelType])[signature];
+					CBackendRepresentativeMemoryLabelSignatureResolveCacheItem& sigResolveItem = (*ontologyData->getSignatureLabelItemHash(labelType))[signature];
 
 					for (CBackendRepresentativeMemoryLabelCacheItem* labelItemLinkerIt = sigResolveItem.getLabelItems(); labelItemLinkerIt; labelItemLinkerIt = labelItemLinkerIt->getNext()) {
 						if (labelItemLinkerIt->getCacheValueCount() == additionLabel->getCacheValueCount()) {
@@ -447,7 +524,7 @@ namespace Konclude {
 
 					// create new label item
 					CBackendRepresentativeMemoryLabelCacheItem* refLabelItem = CObjectParameterizingAllocator< CBackendRepresentativeMemoryLabelCacheItem, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
-					refLabelItem->initCacheEntry(signature, mNextEntryID++, (CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE)labelType);
+					refLabelItem->initCacheEntry(signature, ontologyData->getNextEntryID(), (CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE)labelType);
 
 					CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelValueLinker*>* labelValueHash = refLabelItem->getTagCacheValueHash(true);
 					for (CBackendRepresentativeMemoryLabelValueLinker* labelValueLinkerIt = associatedLabelValueLinker; labelValueLinkerIt; labelValueLinkerIt = labelValueLinkerIt->getNext()) {
@@ -469,7 +546,7 @@ namespace Konclude {
 					}
 
 					if (refLabelItem->getLabelType() == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL) {
-						getNeighbourArrayRoleTagResolvingLabelExtensionData(refLabelItem, context);
+						getNeighbourArrayRoleTagResolvingLabelExtensionData(refLabelItem, ontologyData);
 					}
 					if (refLabelItem->getLabelType() == CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL) {
 
@@ -517,7 +594,7 @@ namespace Konclude {
 							refLabelItem->setExtensionData(CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData::CARDINALITY_HASH, newExtensionData);
 
 
-						}
+						}	
 
 					}
 
@@ -530,22 +607,23 @@ namespace Konclude {
 
 
 
-				bool CBackendRepresentativeMemoryCache::checkAssociationUsage(CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheContext* context) {
+				bool CBackendRepresentativeMemoryCache::checkAssociationUsage(CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					bool associationsUpdated = false;
 					for (CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinkerIt = tempAssUseDataLinker; tempAssUseDataLinkerIt; tempAssUseDataLinkerIt = tempAssUseDataLinkerIt->getNext()) {
 						cint64 individualID = tempAssUseDataLinkerIt->getIndividualID();
 						cint64 usedUpateID = tempAssUseDataLinkerIt->getUsedAssociationUpdateId();
 
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData = nullptr;
-						if (mIndiIdAssoDataVector && individualID < mIndiIdAssoDataVectorSize) {
-							associationData = mIndiIdAssoDataVector[individualID];
+						if (ontologyData->getIndividualIdAssoiationDataVector() && individualID < ontologyData->getIndividualIdAssoiationDataVectorSize()) {
+							associationData = ontologyData->getIndividualIdAssoiationDataVector()[individualID];
 						}
 
 						mCheckedIndiCount++;
 
 						if (!associationData || (associationData->getAssociationDataUpdateId() != usedUpateID && associationData->isCompletelyHandled())) {
 
-							associationsUpdated = markIndividualAssociationIncompletelyHandled(individualID, associationData, context);
+							associationsUpdated = markIndividualAssociationIncompletelyHandled(individualID, associationData, ontologyData);
 
 							mCheckIncompatibleIndiCount++;
 
@@ -563,7 +641,8 @@ namespace Konclude {
 
 
 
-				bool CBackendRepresentativeMemoryCache::markIndividualAssociationIncompletelyHandled(cint64 individualID, CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData, CBackendRepresentativeMemoryCacheContext* context) {
+				bool CBackendRepresentativeMemoryCache::markIndividualAssociationIncompletelyHandled(cint64 individualID, CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					bool associationsUpdated = false;
 
 					if (!associationData || associationData->isCompletelyHandled()) {
@@ -597,8 +676,9 @@ namespace Konclude {
 
 						locAssociationData->setCompletelyHandled(false);
 						if (!locAssociationData->isIncompletelyMarked()) {
-							mIncompletelyHandledIndiIdCount++;
-							mLastMinIncompletelyHandledIndiId = qMin(mLastMinIncompletelyHandledIndiId, individualID);
+							ontologyData->incIncompletelyHandledIndividualIdCount();
+							ontologyData->setLastMinIncompletelyHandledIndvidualiId(qMin(ontologyData->getLastMinIncompletelyHandledIndvidualiId(), individualID));
+
 							locAssociationData->setIncompletelyMarked(true);
 
 
@@ -610,7 +690,7 @@ namespace Konclude {
 						}
 						associationsUpdated = true;
 
-						setUpdatedIndividualAssociationData(individualID, locAssociationData);
+						setUpdatedIndividualAssociationData(individualID, locAssociationData, ontologyData);
 
 					}
 					return associationsUpdated;
@@ -623,7 +703,8 @@ namespace Konclude {
 
 
 
-				bool CBackendRepresentativeMemoryCache::installAssociationUpdates(CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheContext* context) {
+				bool CBackendRepresentativeMemoryCache::installAssociationUpdates(CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					bool associationsUpdated = false;
 					for (CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinkerIt = tempAssWriteDataLinker; tempAssWriteDataLinkerIt; tempAssWriteDataLinkerIt = tempAssWriteDataLinkerIt->getNext()) {
 						CIndividual* individual = tempAssWriteDataLinkerIt->getIndividual();
@@ -644,8 +725,8 @@ namespace Konclude {
 
 
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData = nullptr;
-						if (mIndiIdAssoDataVector && individualID < mIndiIdAssoDataVectorSize) {
-							associationData = mIndiIdAssoDataVector[individualID];
+						if (ontologyData->getIndividualIdAssoiationDataVector() && individualID < ontologyData->getIndividualIdAssoiationDataVectorSize()) {
+							associationData = ontologyData->getIndividualIdAssoiationDataVector()[individualID];
 						}
 
 						bool incompatibleChanges = false;
@@ -730,9 +811,9 @@ namespace Konclude {
 
 
 						bool integrationUpdated = false;
-						if (!associationData || (associationData && (tempAssWriteDataLinkerIt->hasIndirectlyConnectedIndividualIntegration() && !associationData->hasIndirectlyConnectedIndividualIntegration() ||
-							tempAssWriteDataLinkerIt->isIndirectlyConnectedNominalIndividual() && !associationData->isIndirectlyConnectedNominalIndividual() ||
-							integratedIndirectlyConnectedIndividualsChangeId > 0 && integratedIndirectlyConnectedIndividualsChangeId != associationData->getLastIntegratedIndirectlyConnectedIndividualsChangeId()))) {
+						if (!associationData || (associationData && (tempAssWriteDataLinkerIt->hasIndirectlyConnectedIndividualIntegration() && !associationData->hasIndirectlyConnectedIndividualIntegration() || 
+																	tempAssWriteDataLinkerIt->isIndirectlyConnectedNominalIndividual() && !associationData->isIndirectlyConnectedNominalIndividual() ||
+																	integratedIndirectlyConnectedIndividualsChangeId > 0 && integratedIndirectlyConnectedIndividualsChangeId != associationData->getLastIntegratedIndirectlyConnectedIndividualsChangeId()))) {
 							integrationUpdated = true;
 						}
 
@@ -749,12 +830,12 @@ namespace Konclude {
 								locAssociationData->initAssociationData(individualID);
 							}
 							locAssociationData->setCacheUpdateId(mNextIndiUpdateId++);
-							mMaxIndiAssocDataUpdateCount = qMax(locAssociationData->getAssociationDataUpdateId(), mMaxIndiAssocDataUpdateCount);
+							ontologyData->setMaxIndividualAssociationDataUpdateCount(qMax(locAssociationData->getAssociationDataUpdateId(), ontologyData->getMaxIndividualAssociationDataUpdateCount()));
 
 							locAssociationData->setRepresentativeSameIndividualId(qMax(tempAssWriteDataLinkerIt->getRepresentativeSameIndividualId(), locAssociationData->getRepresentativeSameIndividualId()));
 
 							if (locAssociationData->getRepresentativeSameIndividualId() != locAssociationData->getAssociatedIndividualId()) {
-								mSameMergedIndisInCache = true;
+								ontologyData->setSameIndividualsMergings(true);
 							}
 
 
@@ -764,7 +845,7 @@ namespace Konclude {
 								for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT; ++i) {
 									if (referredLabels[i] || labelReplacement || labelRemoval) {
 										if (locAssociationData->getLabelCacheEntry(i) && labelAddition) {
-											CBackendRepresentativeMemoryLabelCacheItem* mergedLabel = getAdditionMergedLabel(i, referredLabels[i], locAssociationData->getLabelCacheEntry(i), context);
+											CBackendRepresentativeMemoryLabelCacheItem* mergedLabel = getAdditionMergedLabel(i, referredLabels[i], locAssociationData->getLabelCacheEntry(i), ontologyData);
 											locAssociationData->setLabelCacheEntry(i, mergedLabel);
 										} else {
 											locAssociationData->setLabelCacheEntry(i, referredLabels[i]);
@@ -781,14 +862,14 @@ namespace Konclude {
 										if (prevLabelItem) {
 											prevLabelItem->decIndividualAssociationCount();
 											if (exactIndiAssocTracking) {
-												CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(prevLabelItem, context);
+												CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(prevLabelItem, ontologyData);
 												indiAssoExtData->removeIndividualIdAssociation(associationData);
 											}
 										}
 										if (newLabelItem) {
 											newLabelItem->incIndividualAssociationCount();
 											if (exactIndiAssocTracking) {
-												CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(newLabelItem, context);
+												CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(newLabelItem, ontologyData);
 												indiAssoExtData->addIndividualIdAssociation(locAssociationData);
 											}
 										}
@@ -832,6 +913,7 @@ namespace Konclude {
 
 							if (!linksUpdateRequired && prevNeighbourRoleSetCompLabel && newNeighbourRoleSetCompLabel != prevNeighbourRoleSetCompLabel) {
 								linksUpdateRequired = true;
+								associationsUpdated = true;
 							}
 
 
@@ -841,7 +923,7 @@ namespace Konclude {
 								// create role set neighbour array and neighbour role set hash, if addition, then copy previous data
 
 
-								CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* newArrayIndexData = getIndividualNeighbourArrayIndexExtensionData(newNeighbourRoleSetCompLabel, context);
+								CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* newArrayIndexData = getIndividualNeighbourArrayIndexExtensionData(newNeighbourRoleSetCompLabel, ontologyData);
 
 								CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* newNeighbourRoleSetHash = CObjectParameterizingAllocator< CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
 								CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* prevNeighbourRoleSetHash = nullptr;
@@ -966,13 +1048,13 @@ namespace Konclude {
 												return true;
 											}
 											return false;
-										}, context);
+										}, ontologyData);
 
 										if (neighbourRoleSetCombinationLabelSet != reducedNeighbourRoleSetCombinationLabelSet) {
 											locAssociationData->setLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL, reducedNeighbourRoleSetCombinationLabelSet);
 
 
-											CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* reducedArrayIndexData = getIndividualNeighbourArrayIndexExtensionData(reducedNeighbourRoleSetCombinationLabelSet, context);
+											CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* reducedArrayIndexData = getIndividualNeighbourArrayIndexExtensionData(reducedNeighbourRoleSetCombinationLabelSet, ontologyData);
 											CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* reducedArray = CObjectParameterizingAllocator< CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
 											reducedArray->initNeighbourArray(reducedArrayIndexData);
 											// copy data into reduced array
@@ -990,20 +1072,20 @@ namespace Konclude {
 											if (neighbourRoleSetCombinationLabelSet) {
 												neighbourRoleSetCombinationLabelSet->decIndividualAssociationCount();
 												if (exactIndiAssocTracking) {
-													CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(neighbourRoleSetCombinationLabelSet, context);
+													CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(neighbourRoleSetCombinationLabelSet, ontologyData);
 													indiAssoExtData->removeIndividualIdAssociation(locAssociationData);
 												}
 											}
 											if (reducedNeighbourRoleSetCombinationLabelSet) {
 												reducedNeighbourRoleSetCombinationLabelSet->incIndividualAssociationCount();
 												if (exactIndiAssocTracking) {
-													CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(reducedNeighbourRoleSetCombinationLabelSet, context);
+													CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(reducedNeighbourRoleSetCombinationLabelSet, ontologyData);
 													indiAssoExtData->addIndividualIdAssociation(locAssociationData);
 												}
 											}
 
 										}
-
+										
 									}
 
 
@@ -1021,14 +1103,16 @@ namespace Konclude {
 								newNeighbourRoleSetHash->initNeighbourRoleSetHash(associationData->getNeighbourRoleSetHash());
 								locAssociationData->setNeighbourRoleSetHash(newNeighbourRoleSetHash);
 								locAssociationData->setRoleSetNeighbourArray(newArray);
+								associationsUpdated = true;
 							}
 
 
 							if (tempAssWriteDataLinkerIt->hasIndirectlyConnectedIndividualIntegration()) {
-								CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData*& nomConnData = (*mNominalIndiIdIndirectConnectionDataHash)[individualID];
+								CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData*& nomConnData = (*ontologyData->getNominaIIndividualdIndirectConnectionDataHash())[individualID];
 								if (nomConnData || integratedIndirectlyConnectedIndividualsChangeId > 0) {
 									if (integratedIndirectlyConnectedIndividualsChangeId != nomConnData->getLastChangeId()) {
 										locAssociationData->setCompletelyHandled(false);
+										associationsUpdated = true;
 									}
 								}
 							}
@@ -1037,6 +1121,7 @@ namespace Konclude {
 							if (incompatibleChanges && locAssociationData->isCompletelyHandled() && labelsUpdated) {
 								mCheckIncompatibleIndiCount++;
 								locAssociationData->setCompletelyHandled(false);
+								associationsUpdated = true;
 							}
 
 
@@ -1044,7 +1129,7 @@ namespace Konclude {
 
 							if (locAssociationData->isCompletelyHandled()) {
 								if (locAssociationData->isIncompletelyMarked()) {
-									mIncompletelyHandledIndiIdCount--;
+									ontologyData->decIncompletelyHandledIndividualIdCount();
 									//if (!mIncompletelyAssociatedIndividualSet.contains(CIndividualReference(individualID))) {
 									//	bool debug = true;
 									//}
@@ -1053,9 +1138,9 @@ namespace Konclude {
 									associationsUpdated = true;
 								}
 							} else {
-								mLastMinIncompletelyHandledIndiId = qMin(mLastMinIncompletelyHandledIndiId, individualID);
+								ontologyData->setLastMinIncompletelyHandledIndvidualiId(qMin(ontologyData->getLastMinIncompletelyHandledIndvidualiId(), individualID));
 								if (!locAssociationData->isIncompletelyMarked()) {
-									mIncompletelyHandledIndiIdCount++;
+									ontologyData->incIncompletelyHandledIndividualIdCount();
 									//if (mIncompletelyAssociatedIndividualSet.contains(CIndividualReference(individualID))) {
 									//	bool debug = true;
 									//}
@@ -1077,7 +1162,7 @@ namespace Konclude {
 
 
 							if (associationsUpdated) {
-								setUpdatedIndividualAssociationData(individualID, locAssociationData);
+								setUpdatedIndividualAssociationData(individualID, locAssociationData, ontologyData);
 							}
 
 
@@ -1090,7 +1175,8 @@ namespace Konclude {
 
 
 
-				bool CBackendRepresentativeMemoryCache::installNominalIndirectConncetionUpdates(CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheContext* context) {
+				bool CBackendRepresentativeMemoryCache::installNominalIndirectConncetionUpdates(CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					bool connectionDataUpdated = false;
 
 					for (CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinkerIt = tempNomIndirectConnDataLinker; tempNomIndirectConnDataLinkerIt; tempNomIndirectConnDataLinkerIt = tempNomIndirectConnDataLinkerIt->getNext()) {
@@ -1098,22 +1184,22 @@ namespace Konclude {
 						CXLinker<cint64>* indirectlyConnectedIndividualIdLinker = tempNomIndirectConnDataLinkerIt->getIndirectlyConnectedIndividualIdLinker();
 						cint64 lastChangeIntegrationId = tempNomIndirectConnDataLinkerIt->getLastChangeIntegrationId();
 
-						CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData*& nomConnData = (*mNominalIndiIdIndirectConnectionDataHash)[nomIndiId];
+						CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData*& nomConnData = (*ontologyData->getNominaIIndividualdIndirectConnectionDataHash())[nomIndiId];
 						CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* prevNomConnData = nomConnData;
 
 
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* nominalAssociationData = nullptr;
-						if (mIndiIdAssoDataVector && nomIndiId < mIndiIdAssoDataVectorSize) {
-							nominalAssociationData = mIndiIdAssoDataVector[nomIndiId];
+						if (ontologyData->getIndividualIdAssoiationDataVector() && nomIndiId < ontologyData->getIndividualIdAssoiationDataVectorSize()) {
+							nominalAssociationData = ontologyData->getIndividualIdAssoiationDataVector()[nomIndiId];
 						}
 						if (nominalAssociationData && nominalAssociationData->getLastIntegratedIndirectlyConnectedIndividualsChangeId() != lastChangeIntegrationId && lastChangeIntegrationId > 0 ||
-							nominalAssociationData && prevNomConnData && lastChangeIntegrationId == 0 && nominalAssociationData->hasIndirectlyConnectedIndividualIntegration() && prevNomConnData->getLastChangeId() != nominalAssociationData->getLastIntegratedIndirectlyConnectedIndividualsChangeId()) {
+								nominalAssociationData && prevNomConnData && lastChangeIntegrationId == 0 && nominalAssociationData->hasIndirectlyConnectedIndividualIntegration() && prevNomConnData->getLastChangeId() != nominalAssociationData->getLastIntegratedIndirectlyConnectedIndividualsChangeId()) {
 							// mark as incompletely handled
-							connectionDataUpdated |= markIndividualAssociationIncompletelyHandled(nomIndiId, nominalAssociationData, context);
+							connectionDataUpdated |= markIndividualAssociationIncompletelyHandled(nomIndiId, nominalAssociationData, ontologyData);
 						}
 
 
-						CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* newNomConnData = CObjectAllocator< CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData >::allocateAndConstruct(mContext.getMemoryAllocationManager());
+						CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* newNomConnData = CObjectAllocator< CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData >::allocateAndConstruct(context->getMemoryAllocationManager());
 						newNomConnData->initNominalIndividualIndirectConnectionData(prevNomConnData);
 						nomConnData = newNomConnData;
 						newNomConnData->setLastChangeId(mNextNomConnUpdateId++);
@@ -1124,8 +1210,8 @@ namespace Konclude {
 
 							bool alreadyPresent = false;
 							CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData = nullptr;
-							if (mIndiIdAssoDataVector && indiId < mIndiIdAssoDataVectorSize) {
-								associationData = mIndiIdAssoDataVector[indiId];
+							if (ontologyData->getIndividualIdAssoiationDataVector() && indiId < ontologyData->getIndividualIdAssoiationDataVectorSize()) {
+								associationData = ontologyData->getIndividualIdAssoiationDataVector()[indiId];
 							}
 
 							CBackendRepresentativeMemoryLabelCacheItem* indiConnNomIndiIdSetLabel = nullptr;
@@ -1143,7 +1229,7 @@ namespace Konclude {
 
 
 							if (!alreadyPresent) {
-								CXLinker<cint64>* indiLinker = CObjectAllocator< CXLinker<cint64> >::allocateAndConstruct(mContext.getMemoryAllocationManager());
+								CXLinker<cint64>* indiLinker = CObjectAllocator< CXLinker<cint64> >::allocateAndConstruct(context->getMemoryAllocationManager());
 								indiLinker->initLinker(indiId);
 								nomConnData->addIndirectlyConnectedIndividualIdLinker(indiLinker);
 								connectionDataUpdated = true;
@@ -1157,27 +1243,31 @@ namespace Konclude {
 
 
 
-				void CBackendRepresentativeMemoryCache::setUpdatedIndividualAssociationData(cint64 individualID, CBackendRepresentativeMemoryCacheIndividualAssociationData* locAssociationData) {
-					if (individualID >= mIndiIdAssoDataVectorSize) {
-						cint64 prevSize = mIndiIdAssoDataVectorSize;
-						CBackendRepresentativeMemoryCacheIndividualAssociationData** prevIndiIdAssoDataVector = mIndiIdAssoDataVector;
-						mIndiIdAssoDataVectorSize = qMax(mIndiIdAssoDataVectorSize * 10, individualID);
-						mIndiIdAssoDataVector = CObjectAllocator< CBackendRepresentativeMemoryCacheIndividualAssociationData* >::allocateAndConstructArray(mContext.getMemoryAllocationManager(), mIndiIdAssoDataVectorSize);
+				void CBackendRepresentativeMemoryCache::setUpdatedIndividualAssociationData(cint64 individualID, CBackendRepresentativeMemoryCacheIndividualAssociationData* locAssociationData, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
+					CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = ontologyData->getIndividualIdAssoiationDataVector();
+					cint64 indiIdAssoDataVectorSize = ontologyData->getIndividualIdAssoiationDataVectorSize();
+					if (individualID >= indiIdAssoDataVectorSize) {
+						cint64 prevSize = indiIdAssoDataVectorSize;
+						CBackendRepresentativeMemoryCacheIndividualAssociationData** prevIndiIdAssoDataVector = indiIdAssoDataVector;
+						indiIdAssoDataVectorSize = qMax(indiIdAssoDataVectorSize * 10, individualID);
+						indiIdAssoDataVector = CObjectAllocator< CBackendRepresentativeMemoryCacheIndividualAssociationData* >::allocateAndConstructArray(context->getMemoryAllocationManager(), indiIdAssoDataVectorSize);
 						for (cint64 i = 0; i < prevSize; ++i) {
-							mIndiIdAssoDataVector[i] = prevIndiIdAssoDataVector[i];
+							indiIdAssoDataVector[i] = prevIndiIdAssoDataVector[i];
 						}
-						for (cint64 i = prevSize; i < mIndiIdAssoDataVectorSize; ++i) {
-							mIndiIdAssoDataVector[i] = nullptr;
+						for (cint64 i = prevSize; i < indiIdAssoDataVectorSize; ++i) {
+							indiIdAssoDataVector[i] = nullptr;
 						}
+						ontologyData->setIndividualIdAssoiationDataVector(indiIdAssoDataVectorSize, indiIdAssoDataVector);
 					}
-					mIndiIdAssoDataVector[individualID] = locAssociationData;
+					indiIdAssoDataVector[individualID] = locAssociationData;
 					//mIndiIdAssoDataHash->insert(individualID, locAssociationData);
 				}
 
 
-				bool CBackendRepresentativeMemoryCache::getIncompletlyAssociationCachedIndividuals(cint64 ontologyId, QSet<CIndividualReference>* individualSet, cint64 limit) {
+				bool CBackendRepresentativeMemoryCache::getIncompletlyAssociationCachedIndividuals(cint64 ontologyIdentifier, QSet<CIndividualReference>* individualSet, cint64 limit) {
 					CBlockingCallbackData callbackData;
-					postEvent(new CRetrieveIncompletelyAssociationCachedEvent(&callbackData, ontologyId, individualSet, limit));
+					postEvent(new CRetrieveIncompletelyAssociationCachedEvent(&callbackData, ontologyIdentifier, individualSet, limit));
 					callbackData.waitForCallback();
 					return true;
 				}
@@ -1193,7 +1283,8 @@ namespace Konclude {
 				}
 
 
-				CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* CBackendRepresentativeMemoryCache::getIndividualAssociationsExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheContext* context) {
+				CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* CBackendRepresentativeMemoryCache::getIndividualAssociationsExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* extensionData = (CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData*)labelItem->getExtensionData(CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData::INDIVIDUAL_ASSOCIATION_MAP);
 					if (!extensionData) {
 						extensionData = CObjectParameterizingAllocator< CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
@@ -1203,7 +1294,8 @@ namespace Konclude {
 				}
 
 
-				CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* CBackendRepresentativeMemoryCache::getIndividualNeighbourArrayIndexExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheContext* context) {
+				CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* CBackendRepresentativeMemoryCache::getIndividualNeighbourArrayIndexExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* extensionData = (CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData*)labelItem->getExtensionData(CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData::INDIVIDUAL_NEIGHBOUR_ARRAY_INDEX);
 					if (!extensionData) {
 						extensionData = CObjectParameterizingAllocator< CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
@@ -1214,14 +1306,15 @@ namespace Konclude {
 				}
 
 
-				CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData* CBackendRepresentativeMemoryCache::getNeighbourArrayRoleTagResolvingLabelExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheContext* context) {
+				CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData* CBackendRepresentativeMemoryCache::getNeighbourArrayRoleTagResolvingLabelExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
+					CBackendRepresentativeMemoryCacheContext* context = ontologyData->getOntologyContext();
 					CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData* extensionData = (CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData*)labelItem->getExtensionData(CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData::TAG_RESOLVING_HASH);
 					if (!extensionData) {
 						extensionData = CObjectParameterizingAllocator< CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(context->getMemoryAllocationManager(), context);
 						labelItem->setExtensionData(CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData::TAG_RESOLVING_HASH, extensionData);
 						extensionData->initTagLabelResolvingExtensionData();
 
-						CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* indexExtensionData = getIndividualNeighbourArrayIndexExtensionData(labelItem, context);
+						CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* indexExtensionData = getIndividualNeighbourArrayIndexExtensionData(labelItem, ontologyData);
 						for (cint64 i = 0; i < indexExtensionData->getArraySize(); ++i) {
 							CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabelItem = indexExtensionData->getNeighbourRoleSetLabel(i);
 
@@ -1239,7 +1332,7 @@ namespace Konclude {
 								extensionData->appendTagLabelResolvingDataLinker(cacheValue.getTag(), linker);
 							}
 						}
-
+						
 					}
 					return extensionData;
 				}
@@ -1248,61 +1341,71 @@ namespace Konclude {
 					if (CThread::processCustomsEvents(type, event)) {
 						return true;
 
-					} else if (type == EVENTRETRIEVEINCOMPLETELYASSOCIATIONCACHED) {
+					}
+					else if (type == EVENTRETRIEVEINCOMPLETELYASSOCIATIONCACHED) {
 						CRetrieveIncompletelyAssociationCachedEvent* iace = (CRetrieveIncompletelyAssociationCachedEvent*)event;
 						cint64 limit = iace->getRetrievalLimit();
-						cint64 prevLastMinIncompletelyHandledIndiId = mLastMinIncompletelyHandledIndiId;
-						QSet<CIndividualReference>* individualSet = iace->getIndividualSet();
-						if (individualSet) {
-							cint64 count = 0;
-							for (cint64 i = mLastMinIncompletelyHandledIndiId; i < mIndiIdAssoDataVectorSize && count < mIncompletelyHandledIndiIdCount && (count < limit || limit < 0); ++i) {
-								CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mIndiIdAssoDataVector[i];
-								if (indiAssData && !indiAssData->isCompletelyHandled()) {
-									individualSet->insert(i);
-									count++;
-								} else if (i == mLastMinIncompletelyHandledIndiId) {
-									++mLastMinIncompletelyHandledIndiId;
+						cint64 ontologyIdentifier = iace->getOntologyIdentifier();
+
+						CBackendRepresentativeMemoryCacheOntologyData* ontologyData = mOntologyIdentifierDataHash->value(ontologyIdentifier);
+						if (ontologyData) {
+							cint64 prevLastMinIncompletelyHandledIndiId = ontologyData->getLastMinIncompletelyHandledIndvidualiId();
+							QSet<CIndividualReference>* individualSet = iace->getIndividualSet();
+							if (individualSet) {
+								cint64 count = 0;
+								for (cint64 i = ontologyData->getLastMinIncompletelyHandledIndvidualiId(); i < ontologyData->getIndividualIdAssoiationDataVectorSize() && count < ontologyData->getIncompletelyHandledIndividualIdCount() && (count < limit || limit < 0); ++i) {
+									CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = ontologyData->getIndividualIdAssoiationDataVector()[i];
+									if (indiAssData && !indiAssData->isCompletelyHandled()) {
+										individualSet->insert(i);
+										count++;
+									} else if (i == ontologyData->getLastMinIncompletelyHandledIndvidualiId()) {
+										ontologyData->incLastMinIncompletelyHandledIndvidualiId();
+									}
 								}
+
+								/*if (limit < 0 || limit > mIncompletelyAssociatedIndividualSet.size()) {
+									*individualSet = mIncompletelyAssociatedIndividualSet;
+								} else {
+									cint64 count = 0;
+									for (QSet<CIndividualReference>::const_iterator it = mIncompletelyAssociatedIndividualSet.constBegin(), itEnd = mIncompletelyAssociatedIndividualSet.constEnd(); it != itEnd && count < limit; ++it) {
+										individualSet->insert(*it);
+										++count;
+									}
+								}*/
 							}
 
-							/*if (limit < 0 || limit > mIncompletelyAssociatedIndividualSet.size()) {
-							*individualSet = mIncompletelyAssociatedIndividualSet;
-							} else {
-							cint64 count = 0;
-							for (QSet<CIndividualReference>::const_iterator it = mIncompletelyAssociatedIndividualSet.constBegin(), itEnd = mIncompletelyAssociatedIndividualSet.constEnd(); it != itEnd && count < limit; ++it) {
-							individualSet->insert(*it);
-							++count;
-							}
-							}*/
-						}
 
 
+							//if (mIncompletelyHandledIndiIdCount != mIncompletelyAssociatedIndividualSet.size()) {
+							//	bool debug = true;
+							//}
+
+							//if (mIncompletelyHandledIndiIdCount > 0 && individualSet->isEmpty()) {
+							//	cint64 count = 0;
+							//	for (cint64 i = 0; i < mIndiIdAssoDataVectorSize && count < mIncompletelyHandledIndiIdCount && count < limit; ++i) {
+							//		CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mIndiIdAssoDataVector[i];
+							//		if (indiAssData && !indiAssData->isCompletelyHandled()) {
+							//			individualSet->insert(i);
+							//			count++;
+							//		}
+							//	}
+
+							//	count = count;
+							//	bool debug = true;
+							//}
+
+
+							if (ontologyData->getIncompletelyHandledIndividualIdCount() <= 0 && !ontologyData->getZeroIncompletelyHandledIndividualIdCountDebugWritten()) {
+								ontologyData->setZeroIncompletelyHandledIndividualIdCountDebugWritten(true);
+								mFixedOntologyIdentifierDataHashLock.lockForWrite();
+								ontologyData->incUsageCount();
+								mFixedOntologyIdentifierDataHash.insert(ontologyIdentifier, ontologyData);
+								mFixedOntologyIdentifierDataHashLock.unlock();
 #ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
-
-						//if (mIncompletelyHandledIndiIdCount != mIncompletelyAssociatedIndividualSet.size()) {
-						//	bool debug = true;
-						//}
-
-						//if (mIncompletelyHandledIndiIdCount > 0 && individualSet->isEmpty()) {
-						//	cint64 count = 0;
-						//	for (cint64 i = 0; i < mIndiIdAssoDataVectorSize && count < mIncompletelyHandledIndiIdCount && count < limit; ++i) {
-						//		CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mIndiIdAssoDataVector[i];
-						//		if (indiAssData && !indiAssData->isCompletelyHandled()) {
-						//			individualSet->insert(i);
-						//			count++;
-						//		}
-						//	}
-
-						//	count = count;
-						//	bool debug = true;
-						//}
-
-
-						if (mIncompletelyHandledIndiIdCount <= 0 && !mZeroIncompletelyHandledIndiIdCountDebugWritten) {
-							mZeroIncompletelyHandledIndiIdCountDebugWritten = true;
-							writeStringifiedRepresentativeCacheToFile();
-						}
+								writeStringifiedRepresentativeCacheToFile();
 #endif
+							}
+						}
 
 
 						CCallbackData* callbackData = iace->getCallback();
@@ -1312,20 +1415,18 @@ namespace Konclude {
 						return true;
 
 
-					} else if (type == EVENTWRITEBACKENDASSOCIATIONENTRY) {
+					}
+					else if (type == EVENTWRITEBACKENDASSOCIATIONENTRY) {
 						CWriteBackendAssociationCachedEvent* wcde = (CWriteBackendAssociationCachedEvent*)event;
 						CMemoryPool* memoryPools = wcde->getMemoryPools();
 						CBackendRepresentativeMemoryCacheWriteData* newWriteData = (CBackendRepresentativeMemoryCacheWriteData*)wcde->getWriteData();
 						cint64 dataWriteCount = newWriteData->getCount();
-						cint64 ontologyId = newWriteData->getOntologyIdentifier();
-						if (mLastOntologyId == -1) {
-							mLastOntologyId = ontologyId;
-						} else if (mLastOntologyId != ontologyId) {
-							LOG(ERROR, "::Konclude::RepresentativeBackendCache", logTr("No support for multiple (versions of) ontologies, crashes and wrong results are likely!"), this);
-						}
 
 						CBackendRepresentativeMemoryCacheWriteData* dataLinkerIt = newWriteData;
 						++mWriteDataCount;
+
+						cint64 ontologyIdentifier = dataLinkerIt->getOntologyIdentifier();
+						CBackendRepresentativeMemoryCacheOntologyData* ontologyData = prepareOntologyDataUpdate(ontologyIdentifier);
 
 						cint64 prevUpdatedIndiCount = mUpdatedIndiCount;
 						bool allCachingSuccess = true;
@@ -1341,15 +1442,15 @@ namespace Konclude {
 								CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker = baAsWrDa->getTemporaryAssociationUseDataLinker();
 								CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker = baAsWrDa->getTemporaryNominalIndirectConnectionDataLinker();
 
-								installTemporaryLabels(tempLabelWriteDataLinker, &mContext);
-								installTemporaryCardinalities(tempCardWriteDataLinker, &mContext);
+								installTemporaryLabels(tempLabelWriteDataLinker, ontologyData);
+								installTemporaryCardinalities(tempCardWriteDataLinker, ontologyData);
 
 								mTmpIndiAssocPrevUpdateId = mNextIndiUpdateId;
 								mTmpIndiIndirectlyConnNomLabelItemHash.clear();
 
-								bool cached = installAssociationUpdates(tempAssWriteDataLinker, &mContext);
-								cached |= installNominalIndirectConncetionUpdates(tempNomIndirectConnDataLinker, &mContext);
-								cached |= checkAssociationUsage(tempAssUseDataLinker, &mContext);
+								bool cached = installAssociationUpdates(tempAssWriteDataLinker, ontologyData);
+								cached |= installNominalIndirectConncetionUpdates(tempNomIndirectConnDataLinker, ontologyData);
+								cached |= checkAssociationUsage(tempAssUseDataLinker, ontologyData);
 
 								allCachingSuccess &= cached;
 								oneCachingSuccess |= cached;
@@ -1358,16 +1459,15 @@ namespace Konclude {
 							dataLinkerIt = (CBackendRepresentativeMemoryCacheWriteData*)dataLinkerIt->getNext();
 						}
 
-						if (oneCachingExpSuccess) {
-							createReaderSlotUpdate(&mContext);
-							cleanUnusedSlots(&mContext);
-						}
+						createReaderSlotUpdate(ontologyData, &mContext);
+						cleanUnusedSlots(&mContext);
+
 
 						mContext.releaseTemporaryMemoryPools(memoryPools);
 						mCacheStat.setMemoryConsumption(mContext.getMemoryConsumption());
 
 						cint64 updatedIndiCount = mUpdatedIndiCount - prevUpdatedIndiCount;
-						LOG(INFO, "::Konclude::RepresentativeBackendCache", logTr("Update %1 of representative cache, %2 updated individual association data, %3 remaining insufficiently handled individuals.").arg(mWriteDataCount).arg(updatedIndiCount).arg(mIncompletelyHandledIndiIdCount), this);
+						LOG(INFO, "::Konclude::RepresentativeBackendCache", logTr("Update %1 of representative cache, %2 updated individual association data, %3 remaining insufficiently handled individuals.").arg(mWriteDataCount).arg(updatedIndiCount).arg(ontologyData->getIncompletelyHandledIndividualIdCount()), this);
 
 #ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
 						if (mWriteDataCount <= 50 || mWriteDataCount % 500 == 0) {
@@ -1379,6 +1479,11 @@ namespace Konclude {
 					}
 					return false;
 				}
+
+
+
+
+
 
 
 				void CBackendRepresentativeMemoryCache::writeStringifiedRepresentativeCacheToFile() {
@@ -1400,47 +1505,73 @@ namespace Konclude {
 					QString labelTypeString;
 					if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL) {
 						labelTypeString = "DETERMINISTIC_CONCEPT_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_CONCEPT_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_CONCEPT_SET_LABEL) {
 						labelTypeString = "NONDETERMINISTIC_CONCEPT_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL) {
 						labelTypeString = "FULL_CONCEPT_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL) {
+					} 
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL) {
 						labelTypeString = "DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL) {
 						labelTypeString = "NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL) {
 						labelTypeString = "DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL) {
 						labelTypeString = "NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL) {
 						labelTypeString = "NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL) {
 						labelTypeString = "DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL) {
 						labelTypeString = "NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL) {
 						labelTypeString = "DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL) {
 						labelTypeString = "NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL) {
 						labelTypeString = "INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL) {
+					}
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL) {
 						labelTypeString = "NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL) {
+					} 
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL) {
 						labelTypeString = "DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL";
-					} else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL) {
+					} 
+					else if (labelType == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL) {
 						labelTypeString = "NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL";
 					}
 					return labelTypeString;
 				}
 
-
 				QString CBackendRepresentativeMemoryCache::getRepresentativeCacheString() {
+					QString repCacheString;
+					for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>::const_iterator it = mOntologyIdentifierDataHash->constBegin(), itEnd = mOntologyIdentifierDataHash->constEnd(); it != itEnd; ++it) {
+						cint64 ontId = it.key();
+						CBackendRepresentativeMemoryCacheOntologyData* ontologyData = it.value();
+						QString ontologyIdDataString = QString("Ontology: %1\r\n\r\n\r\n%2\r\n\r\n\r\n").arg(ontId).arg(getRepresentativeCacheString(ontologyData));
+						repCacheString += ontologyIdDataString;
+					}
+					return repCacheString;
+				}
+
+
+				QString CBackendRepresentativeMemoryCache::getRepresentativeCacheString(CBackendRepresentativeMemoryCacheOntologyData* ontologyData) {
 					QStringList labelStringList;
 					for (cint64 labelType = 0; labelType < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT; ++labelType) {
 						QString labelTypeString = getRepresentativeCacheLabelItemString(labelType);
 						labelTypeString = QString("\r\n\r\n%1:\r\n").arg(labelTypeString);
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigLabelItemHash = mSigLabelItemHash[labelType];
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigLabelItemHash = ontologyData->getSignatureLabelItemHash(labelType);
 						for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>::const_iterator it = sigLabelItemHash->constBegin(), itEnd = sigLabelItemHash->constEnd(); it != itEnd; ++it) {
 							cint64 signature = it.key();
 							CBackendRepresentativeMemoryLabelSignatureResolveCacheItem sigResolveItem = it.value();
@@ -1483,10 +1614,10 @@ namespace Konclude {
 
 
 					QStringList indiStringList;
-					for (cint64 i = 0; i < mIndiIdAssoDataVectorSize; ++i) {
-						//for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>::const_iterator it = mIndiIdAssoDataHash->constBegin(), itEnd = mIndiIdAssoDataHash->constEnd(); it != itEnd; ++it) {
+					for (cint64 i = 0; i < ontologyData->getIndividualIdAssoiationDataVectorSize(); ++i) {
+					//for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>::const_iterator it = mIndiIdAssoDataHash->constBegin(), itEnd = mIndiIdAssoDataHash->constEnd(); it != itEnd; ++it) {
 						cint64 indiId = i;
-						CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mIndiIdAssoDataVector[indiId];
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = ontologyData->getIndividualIdAssoiationDataVector()[indiId];
 						if (indiAssData) {
 							QString indiAssString = QString("\r\nIndividual %1:\r\n").arg(indiId);
 
@@ -1556,7 +1687,7 @@ namespace Konclude {
 								}
 							}
 
-							CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* indConnData = mNominalIndiIdIndirectConnectionDataHash->value(indiId);
+							CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* indConnData = ontologyData->getNominaIIndividualdIndirectConnectionDataHash()->value(indiId);
 							if (indConnData) {
 								QStringList indConnIndiIds;
 								for (CXLinker<cint64>* indiLinkerIt = indConnData->getIndirectlyConnectedIndividualIdLinker(); indiLinkerIt; indiLinkerIt = indiLinkerIt->getNext()) {
@@ -1579,7 +1710,7 @@ namespace Konclude {
 					}
 
 					QString statusString = QString("\tcache writes: %1,\r\n\ttotal association changes: %2,\r\n\tincompletely handled individuals: %3,\r\n\tincompatible association changes: %4,\r\n\tincompatible association checks: %5,\r\n\tmax individual association changes: %6\r\n")
-						.arg(mWriteDataCount).arg(mNextIndiUpdateId).arg(mIncompletelyHandledIndiIdCount).arg(mUpdateIncompatibleIndiCount).arg(mCheckIncompatibleIndiCount).arg(mMaxIndiAssocDataUpdateCount);
+						.arg(mWriteDataCount).arg(mNextIndiUpdateId).arg(ontologyData->getIncompletelyHandledIndividualIdCount()).arg(mUpdateIncompatibleIndiCount).arg(mCheckIncompatibleIndiCount).arg(ontologyData->getMaxIndividualAssociationDataUpdateCount());
 
 					return QString("STATISTICS:\r\n\r\n%1\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nREPRESENATIVE LABELS:\r\n\r\n%2\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nINDIVIDUAL LABEL ASSOCIATIONS:\r\n%3\r\n").arg(statusString).arg(labelStringList.join("\r\n")).arg(indiStringList.join("\r\n"));
 				}

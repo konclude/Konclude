@@ -67,6 +67,9 @@ namespace Konclude {
 							prevSlot->decReader();
 						}
 						mOntologyData = nullptr;
+						if (mCurrentSlot) {
+							mOntologyData = mCurrentSlot->getOntologyData(mOntologyIdentifier);
+						}
 						return true;
 					}
 					return false;
@@ -80,6 +83,9 @@ namespace Konclude {
 						switchToUpdatedSlotItem();
 					}
 					mOntologyData = nullptr;
+					if (mCurrentSlot) {
+						mOntologyData = mCurrentSlot->getOntologyData(mOntologyIdentifier);
+					}
 					if (mFixedOntologyData) {
 						mOntologyData = mFixedOntologyData;
 					}
@@ -96,12 +102,11 @@ namespace Konclude {
 					if (hasUpdatedSlotItem()) {
 						switchToUpdatedSlotItem();
 					}
-					if (mCurrentSlot) {
-						return mCurrentSlot->hasSameIndividualsMergings();
+					if (mOntologyData) {
+						return mOntologyData->hasSameIndividualsMergings();
 					}
 					return false;
 				}
-
 
 
 
@@ -109,8 +114,8 @@ namespace Konclude {
 					if (hasUpdatedSlotItem()) {
 						switchToUpdatedSlotItem();
 					}
-					if (mCurrentSlot) {
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash = mCurrentSlot->getSignatureLabelItemHash(labelType);
+					if (mOntologyData) {
+						CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash = mOntologyData->getSignatureLabelItemHash(labelType);
 						if (sigItemHash) {
 							return sigItemHash->contains(signature);
 						}
@@ -126,8 +131,8 @@ namespace Konclude {
 					}
 					bool continueVisiting = true;
 					bool visited = false;
-					if (mCurrentSlot) {
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash = mCurrentSlot->getSignatureLabelItemHash(labelType);
+					if (mOntologyData) {
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash = mOntologyData->getSignatureLabelItemHash(labelType);
 						if (sigItemHash) {
 							for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>::const_iterator sigHashIt = sigItemHash->constBegin(), sigHashItEnd = sigItemHash->constEnd(); sigHashIt != sigHashItEnd && continueVisiting; ++sigHashIt) {
 								CBackendRepresentativeMemoryLabelSignatureResolveCacheItem sigResolveCacheItem = sigHashIt.value();
@@ -150,8 +155,8 @@ namespace Konclude {
 					if (hasUpdatedSlotItem()) {
 						switchToUpdatedSlotItem();
 					}
-					if (mCurrentSlot) {
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash = mCurrentSlot->getSignatureLabelItemHash(labelType);
+					if (mOntologyData) {
+						CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash = mOntologyData->getSignatureLabelItemHash(labelType);
 						if (sigItemHash && sigItemHash->contains(signature)) {
 							CBackendRepresentativeMemoryLabelSignatureResolveCacheItem& item = (*sigItemHash)[signature];
 							entry = &item;
@@ -177,13 +182,13 @@ namespace Konclude {
 					if (hasUpdatedSlotItem()) {
 						switchToUpdatedSlotItem();
 					}
-					if (mCurrentSlot) {
-						cint64 indiIdAssoDataVectorSize = mCurrentSlot->getIndividualIdAssoiationDataVectorSize();
-						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = mCurrentSlot->getIndividualIdAssoiationDataVector();
+					if (mOntologyData) {
+						cint64 indiIdAssoDataVectorSize = mOntologyData->getIndividualIdAssoiationDataVectorSize();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = mOntologyData->getIndividualIdAssoiationDataVector();
 						if (indiIdAssoDataVector && indiId < indiIdAssoDataVectorSize) {
 							assData = indiIdAssoDataVector[indiId];
 						}
-						//CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* indiIdAssoDataHash = mCurrentSlot->getIndividualIdAssociationDataHash();
+						//CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* indiIdAssoDataHash = mOntologyData->getIndividualIdAssociationDataHash();
 						//if (indiIdAssoDataHash) {
 						//	assData = indiIdAssoDataHash->value(indiId, nullptr);
 						//}
@@ -200,10 +205,10 @@ namespace Konclude {
 					if (hasUpdatedSlotItem()) {
 						switchToUpdatedSlotItem();
 					}
-					if (mCurrentSlot) {
+					if (mOntologyData) {
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = nullptr;
-						cint64 indiIdAssoDataVectorSize = mCurrentSlot->getIndividualIdAssoiationDataVectorSize();
-						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = mCurrentSlot->getIndividualIdAssoiationDataVector();
+						cint64 indiIdAssoDataVectorSize = mOntologyData->getIndividualIdAssoiationDataVectorSize();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = mOntologyData->getIndividualIdAssoiationDataVector();
 						if (indiIdAssoDataVector && indiId < indiIdAssoDataVectorSize) {
 							assData = indiIdAssoDataVector[indiId];
 						}
@@ -223,8 +228,8 @@ namespace Konclude {
 					if (hasUpdatedSlotItem()) {
 						switchToUpdatedSlotItem();
 					}
-					if (mCurrentSlot) {
-						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* nominaIIndividualdIndirectConnectionDataHash = mCurrentSlot->getNominaIIndividualdIndirectConnectionDataHash();
+					if (mOntologyData) {
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* nominaIIndividualdIndirectConnectionDataHash = mOntologyData->getNominaIIndividualdIndirectConnectionDataHash();
 						if (nominaIIndividualdIndirectConnectionDataHash) {
 							nomConnData = nominaIIndividualdIndirectConnectionDataHash->value(indiId);
 						}

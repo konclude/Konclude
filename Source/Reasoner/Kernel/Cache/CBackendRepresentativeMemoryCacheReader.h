@@ -34,7 +34,6 @@
 #include "CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData.h"
 #include "CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData.h"
 #include "CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData.h"
-#include "CBackendRepresentativeMemoryCacheOntologyData.h"
 
 
 // Other includes

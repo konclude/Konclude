@@ -103,7 +103,7 @@ namespace Konclude {
 						virtual ~CBackendRepresentativeMemoryCache();
 
 						CBackendRepresentativeMemoryCacheReader* createCacheReader();
-						CBackendRepresentativeMemoryCacheReader* createFixedCacheReader();
+						CBackendRepresentativeMemoryCacheReader* createOntologyFixedCacheReader(cint64 ontologyIdentifier);
 						CBackendRepresentativeMemoryCacheWriter* createCacheWriter();
 
 
@@ -111,99 +111,108 @@ namespace Konclude {
 
 						CCacheStatistics* getCacheStatistics();
 
-						bool getIncompletlyAssociationCachedIndividuals(cint64 ontologyId, QSet<CIndividualReference>* individualSet, cint64 limit = -1);
+						bool getIncompletlyAssociationCachedIndividuals(cint64 ontologyIdentifier, QSet<CIndividualReference>* individualSet, cint64 limit = -1);
 
-						// protected methods
-				protected:
+					// protected methods
+					protected:
 
-					void createReaderSlotUpdate(CBackendRepresentativeMemoryCacheContext* context);
-					void cleanUnusedSlots(CBackendRepresentativeMemoryCacheContext* context);
-
-
-					virtual bool processCustomsEvents(QEvent::Type type, CCustomEvent *event);
-
-
-					void installTemporaryCardinalities(CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker, CBackendRepresentativeMemoryCacheContext* context);
-					void installTemporaryLabels(CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheContext* context);
-					bool installAssociationUpdates(CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheContext* context);
-					bool installNominalIndirectConncetionUpdates(CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheContext* context);
-					bool checkAssociationUsage(CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheContext* context);
+						void createReaderSlotUpdate(CBackendRepresentativeMemoryCacheOntologyData* ontologyData, CBackendRepresentativeMemoryCacheBaseContext* context);
+						void cleanUnusedSlots(CBackendRepresentativeMemoryCacheBaseContext* context);
+						
+						
+						virtual bool processCustomsEvents(QEvent::Type type, CCustomEvent *event);
 
 
-					CBackendRepresentativeMemoryLabelCacheItem* getAdditionMergedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* additionLabel, CBackendRepresentativeMemoryLabelCacheItem* associatedlabel, CBackendRepresentativeMemoryCacheContext* context);
-					CBackendRepresentativeMemoryLabelCacheItem* getReducedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* label, function<bool(const CCacheValue& cacheValue)> reduceCheckFunction, CBackendRepresentativeMemoryCacheContext* context);
-
-					void setUpdatedIndividualAssociationData(cint64 individualID, CBackendRepresentativeMemoryCacheIndividualAssociationData* locAssociationData);
-
-					bool markIndividualAssociationIncompletelyHandled(cint64 indiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData, CBackendRepresentativeMemoryCacheContext* context);
-
-
-					QString getRepresentativeCacheString();
-					QString getRepresentativeCacheLabelItemString(cint64 labelType);
-					void writeStringifiedRepresentativeCacheToFile();
+						void installTemporaryCardinalities(CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						void installTemporaryLabels(CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						bool installAssociationUpdates(CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						bool installNominalIndirectConncetionUpdates(CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						bool checkAssociationUsage(CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
 
 
-					bool requiresIndividualAssociations(cint64 labelType);
-					CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* getIndividualAssociationsExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheContext* context);
-					CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* getIndividualNeighbourArrayIndexExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheContext* context);
-					CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData* getNeighbourArrayRoleTagResolvingLabelExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheContext* context);
+						CBackendRepresentativeMemoryLabelCacheItem* getAdditionMergedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* additionLabel, CBackendRepresentativeMemoryLabelCacheItem* associatedlabel, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						CBackendRepresentativeMemoryLabelCacheItem* getReducedLabel(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* label, function<bool(const CCacheValue& cacheValue)> reduceCheckFunction, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+
+						void setUpdatedIndividualAssociationData(cint64 individualID, CBackendRepresentativeMemoryCacheIndividualAssociationData* locAssociationData, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+
+						bool markIndividualAssociationIncompletelyHandled(cint64 indiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+
+
+						QString getRepresentativeCacheString();
+						QString getRepresentativeCacheString(CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						QString getRepresentativeCacheLabelItemString(cint64 labelType);
+						void writeStringifiedRepresentativeCacheToFile();
+
+
+						bool requiresIndividualAssociations(cint64 labelType);
+						CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* getIndividualAssociationsExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* getIndividualNeighbourArrayIndexExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData* getNeighbourArrayRoleTagResolvingLabelExtensionData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+
+
+
+						CBackendRepresentativeMemoryCacheOntologyData* prepareOntologyDataUpdate(cint64 ontologyIdentifier);
+
 
 					// protected variables
-				protected:
-					CConfiguration* mConfig;
-
-
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* mSigLabelItemHash[CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT];
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>* mSigCardItemHash;
-					cint64 mNextEntryID;
-
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* mIndiIdAssoDataHash;
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* mNominalIndiIdIndirectConnectionDataHash;
+					protected:
+						CConfiguration* mConfig;
 
 
 
-					CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItem*> mTmpIndiIndirectlyConnNomLabelItemHash;
-					cint64 mTmpIndiAssocPrevUpdateId;
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* mOntologyIdentifierDataHash;
+						QHash<cint64, CBackendRepresentativeMemoryCacheOntologyData*> mFixedOntologyIdentifierDataHash;
+						QReadWriteLock mFixedOntologyIdentifierDataHashLock;
 
 
-					cint64 mIndiIdAssoDataVectorSize;
-					CBackendRepresentativeMemoryCacheIndividualAssociationData** mIndiIdAssoDataVector;
+						//CCACHINGHASH<cint64,CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* mSigLabelItemHash[CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT];
+						//cint64 mNextEntryID;
 
-					cint64 mLastMinIncompletelyHandledIndiId;
-					cint64 mIncompletelyHandledIndiIdCount;
-					bool mZeroIncompletelyHandledIndiIdCountDebugWritten;
+						////CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* mIndiIdAssoDataHash;
+						//CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* mNominalIndiIdIndirectConnectionDataHash;
 
-					cint64 mMaxIndiAssocDataUpdateCount = 0;
 
-					bool mSameMergedIndisInCache;
 
-					cint64 mWriteDataCount;
-					cint64 mStartWriteCollectCount;
-					cint64 mNextWriteCollectCount;
-					cint64 mCollectCount;
-					CMemoryPool* mCollectMemoryPools;
-					CBackendRepresentativeMemoryCacheWriteData* mCollectWriteData;
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItem*> mTmpIndiIndirectlyConnNomLabelItemHash;
+						cint64 mTmpIndiAssocPrevUpdateId;
 
-					cint64 mLastOntologyId;
 
-					cint64 mNextIndiUpdateId;
-					cint64 mNextNomConnUpdateId;
-					cint64 mUpdatedIndiCount = 0;
-					cint64 mUpdateIncompatibleIndiCount = 0;
-					cint64 mCheckedIndiCount = 0;
-					cint64 mCheckIncompatibleIndiCount = 0;
-					cint64 mReducedNeighbourArrayCount = 0;
+						//cint64 mIndiIdAssoDataVectorSize;
+						//CBackendRepresentativeMemoryCacheIndividualAssociationData** mIndiIdAssoDataVector;
 
-					QSet<CIndividualReference> mIncompletelyAssociatedIndividualSet;
-					CCacheStatistics mCacheStat;
+						//cint64 mLastMinIncompletelyHandledIndiId;
+						//cint64 mIncompletelyHandledIndiIdCount;
+						//bool mZeroIncompletelyHandledIndiIdCountDebugWritten;
 
-					CBackendRepresentativeMemoryCacheSlotItem* mSlotLinker;
-					CBackendRepresentativeMemoryCacheSlotItem* mLastUpdatedSlotLinker;
-					CBackendRepresentativeMemoryCacheReader* mReaderLinker;
+						//cint64 mMaxIndiAssocDataUpdateCount = 0;
 
-					QMutex mReaderSyncMutex;
+						//bool mSameMergedIndisInCache;
 
-					CBackendRepresentativeMemoryCacheContext mContext;
+						cint64 mWriteDataCount;
+						cint64 mStartWriteCollectCount;
+						cint64 mNextWriteCollectCount;
+						cint64 mCollectCount;
+						CMemoryPool* mCollectMemoryPools;
+						CBackendRepresentativeMemoryCacheWriteData* mCollectWriteData;
+
+						cint64 mNextIndiUpdateId;
+						cint64 mNextNomConnUpdateId;
+						cint64 mUpdatedIndiCount = 0;
+						cint64 mUpdateIncompatibleIndiCount = 0;
+						cint64 mCheckedIndiCount = 0;
+						cint64 mCheckIncompatibleIndiCount = 0;
+						cint64 mReducedNeighbourArrayCount = 0;
+
+						QSet<CIndividualReference> mIncompletelyAssociatedIndividualSet;
+						CCacheStatistics mCacheStat;
+
+						CBackendRepresentativeMemoryCacheSlotItem* mSlotLinker;
+						CBackendRepresentativeMemoryCacheSlotItem* mLastUpdatedSlotLinker;
+						CBackendRepresentativeMemoryCacheReader* mReaderLinker;
+
+						QMutex mReaderSyncMutex;
+
+						CBackendRepresentativeMemoryCacheBaseContext mContext;
 
 					// private methods
 					private:

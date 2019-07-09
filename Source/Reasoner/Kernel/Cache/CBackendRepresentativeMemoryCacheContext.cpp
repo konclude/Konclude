@@ -31,44 +31,12 @@ namespace Konclude {
 
 
 				CBackendRepresentativeMemoryCacheContext::CBackendRepresentativeMemoryCacheContext() {
-					mMemoryPoolProvider = new CNewAllocationMemoryPoolProvider();
-					mMemMan = new CLimitedReserveMemoryPoolAllocationManager(mMemoryPoolProvider);
-					mAddRelMemory = 0;
 				}
 
 
 				CBackendRepresentativeMemoryCacheContext::~CBackendRepresentativeMemoryCacheContext() {
-					delete mMemMan;
-					delete mMemoryPoolProvider;
 				}
 
-
-				CMemoryPoolAllocationManager* CBackendRepresentativeMemoryCacheContext::getMemoryPoolAllocationManager() {
-					return mMemMan;
-				}
-
-
-				CMemoryAllocationManager* CBackendRepresentativeMemoryCacheContext::getMemoryAllocationManager() {
-					return mMemMan;
-				}
-
-				CMemoryPoolProvider* CBackendRepresentativeMemoryCacheContext::getMemoryPoolProvider() {
-					return mMemoryPoolProvider;
-				}
-
-				cint64 CBackendRepresentativeMemoryCacheContext::getMemoryConsumption() {
-					return mAddRelMemory + mMemoryPoolProvider->getAllocatedReleaseDifferencePoolSize();
-				}
-
-				CBackendRepresentativeMemoryCacheContext* CBackendRepresentativeMemoryCacheContext::releaseTemporaryMemoryPools(CMemoryPool* memoryPools) {
-					CMemoryPool* memoryPoolIt = memoryPools;
-					while (memoryPoolIt) {
-						mAddRelMemory += memoryPoolIt->getMemoryBlockSize();
-						memoryPoolIt = memoryPoolIt->getNext();
-					}
-					mMemMan->releaseTemporaryMemoryPools(memoryPools);
-					return this;
-				}
 
 			}; // end namespace Cache
 

@@ -30,18 +30,9 @@ namespace Konclude {
 			namespace Cache {
 
 
-
 				CBackendRepresentativeMemoryCacheSlotItem::CBackendRepresentativeMemoryCacheSlotItem(CMemoryPool* memoryPool) : CLinkerBase<CBackendRepresentativeMemoryCacheSlotItem*, CBackendRepresentativeMemoryCacheSlotItem>(this), CMemoryPoolContainer(memoryPool) {
 					mReaderUsing = false;
-					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT; ++i) {
-						mSigLabelItemHash[i] = nullptr;
-					}
-					mNominaIIndividualdIndirectConnectionDataHash = nullptr;
-					mSigCardLabelItemHash = nullptr;
-					mIndiIdAssoDataHash = nullptr;
-					mIndiIdAssoDataVector = nullptr;
-					mIndiIdAssoDataVectorSize = 0;
-					mSameIndividalsMergings = false;
+					mOntologyIdentifierDataHash = nullptr;
 				}
 
 				bool CBackendRepresentativeMemoryCacheSlotItem::incReader() {
@@ -67,75 +58,26 @@ namespace Konclude {
 					return mReaderUsing;
 				}
 
-
-				CBackendRepresentativeMemoryCacheSlotItem* CBackendRepresentativeMemoryCacheSlotItem::setSignatureLabelItemHash(cint64 labelType, CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* sigItemHash) {
-					mSigLabelItemHash[labelType] = sigItemHash;
-					return this;
+				CBackendRepresentativeMemoryCacheOntologyData* CBackendRepresentativeMemoryCacheSlotItem::getOntologyData(cint64 ontologyIdentifier) {
+					CBackendRepresentativeMemoryCacheOntologyData* ontoData = nullptr;
+					if (mOntologyIdentifierDataHash) {
+						ontoData = mOntologyIdentifierDataHash->value(ontologyIdentifier);
+					}
+					return ontoData;
 				}
 
+				CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* CBackendRepresentativeMemoryCacheSlotItem::getOntologyIdentifierDataHash() {
+					return mOntologyIdentifierDataHash;
+				}
 
-				CBackendRepresentativeMemoryCacheSlotItem* CBackendRepresentativeMemoryCacheSlotItem::setSignatureCardinalityItemHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>* sigItemHash) {
-					mSigCardLabelItemHash = sigItemHash;
+				CBackendRepresentativeMemoryCacheSlotItem* CBackendRepresentativeMemoryCacheSlotItem::setOntologyIdentifierDataHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheOntologyData*>* ontIdDataHash) {
+					mOntologyIdentifierDataHash = ontIdDataHash;
 					return this;
 				}
 
 				bool CBackendRepresentativeMemoryCacheSlotItem::hasCacheReaders() {
 					return mReaderUsing;
 				}
-
-				bool CBackendRepresentativeMemoryCacheSlotItem::hasSameIndividualsMergings() {
-					return mSameIndividalsMergings;
-				}
-
-				CBackendRepresentativeMemoryCacheSlotItem* CBackendRepresentativeMemoryCacheSlotItem::setSameIndividualsMergings(bool sameIndisMergings) {
-					mSameIndividalsMergings = sameIndisMergings;
-					return this;
-				}
-
-
-				CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelSignatureResolveCacheItem>* CBackendRepresentativeMemoryCacheSlotItem::getSignatureLabelItemHash(cint64 labelType) {
-					return mSigLabelItemHash[labelType];
-				}
-
-				CCACHINGHASH<cint64, CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem>* CBackendRepresentativeMemoryCacheSlotItem::getSignatureCardinalityItemHash() {
-					return mSigCardLabelItemHash;
-				}
-
-				CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* CBackendRepresentativeMemoryCacheSlotItem::getIndividualIdAssociationDataHash() {
-					return mIndiIdAssoDataHash;
-				}
-
-				CBackendRepresentativeMemoryCacheSlotItem* CBackendRepresentativeMemoryCacheSlotItem::setIndividualIdAssociationDataHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationData*>* indiIdAssoDataHash) {
-					mIndiIdAssoDataHash = indiIdAssoDataHash;
-					return this;
-				}
-
-
-				cint64 CBackendRepresentativeMemoryCacheSlotItem::getIndividualIdAssoiationDataVectorSize() {
-					return mIndiIdAssoDataVectorSize;
-				}
-
-				CBackendRepresentativeMemoryCacheIndividualAssociationData** CBackendRepresentativeMemoryCacheSlotItem::getIndividualIdAssoiationDataVector() {
-					return mIndiIdAssoDataVector;
-				}
-
-				CBackendRepresentativeMemoryCacheSlotItem* CBackendRepresentativeMemoryCacheSlotItem::setIndividualIdAssoiationDataVector(cint64 indiIdAssoDataVectorSize, CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector) {
-					mIndiIdAssoDataVector = indiIdAssoDataVector;
-					mIndiIdAssoDataVectorSize = indiIdAssoDataVectorSize;
-					return this;
-				}
-
-
-				CBackendRepresentativeMemoryCacheSlotItem* CBackendRepresentativeMemoryCacheSlotItem::setNominaIIndividualdIndirectConnectionDataHash(CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* hash) {
-					mNominaIIndividualdIndirectConnectionDataHash = hash;
-					return this;
-				}
-
-
-				CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* CBackendRepresentativeMemoryCacheSlotItem::getNominaIIndividualdIndirectConnectionDataHash() {
-					return mNominaIIndividualdIndirectConnectionDataHash;
-				}
-
 
 
 

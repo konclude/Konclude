@@ -432,16 +432,11 @@ namespace Konclude {
 
 							if (mConfDebuggingWriteData && mConfDebuggingWriteDataSaturationTasks) {
 								writeIndividualSaturationStatistics(calcAlgContext);
-								mEndSaturationDebugIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
 								QString fileName("./Debugging/SaturationTasks/saturation-model.txt");
 								if (separatedSaturation) {
 									fileName = QString("./Debugging/SaturationTasks/saturation-model-individuals-%1.txt").arg(firstProcessedNodeID);
 								}
-								QFile tmpFile(fileName);
-								if (tmpFile.open(QIODevice::WriteOnly)) {
-									tmpFile.write(mEndSaturationDebugIndiModelString.replace("<br>","").replace("<p>","\n").toLocal8Bit());
-									tmpFile.close();
-								}
+								mEndSaturationDebugIndiModelString = writeGeneratedExtendedDebugIndiModelStringList(fileName, calcAlgContext);
 							}
 							satisfiable = true;
 
@@ -7855,9 +7850,36 @@ namespace Konclude {
 
 
 
+				QString CCalculationTableauApproximationSaturationTaskHandleAlgorithm::writeGeneratedExtendedDebugIndiModelStringList(const QString& filename, CCalculationAlgorithmContextBase* calcAlgContext, cint64 firstIndiID, cint64 lastIndiID) {
+					QStringList indiStringList;
+					QString remainingDebugString = generateExtendedDebugIndiModelStringList(calcAlgContext, firstIndiID, lastIndiID, &indiStringList);
+
+					QFile file(filename);
+					if (file.open(QIODevice::WriteOnly)) {
+
+						for (const QString& tmpString : indiStringList) {
+
+							QString tmpReplacedString = tmpString;
+							tmpReplacedString = tmpReplacedString.replace("<br>", "\r\n");
+							file.write(tmpReplacedString.toLocal8Bit());
+							file.write(QString("\r\n\r\n\r\n").toLocal8Bit());
+						}
+						file.write(remainingDebugString.toLocal8Bit());
+						file.close();
+					}
+
+					if (indiStringList.size() < 100000) {
+						mDebugIndiModelStringList = indiStringList;
+						mDebugIndiModelString = mDebugIndiModelStringList.join("<br><p><br>\r\n");
+
+						mDebugIndiModelString += remainingDebugString;
+					}
+
+					return mDebugIndiModelString;
+				}
 
 
-				QString CCalculationTableauApproximationSaturationTaskHandleAlgorithm::generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext, cint64 firstIndiID, cint64 lastIndiID) {
+				QString CCalculationTableauApproximationSaturationTaskHandleAlgorithm::generateExtendedDebugIndiModelStringList(CCalculationAlgorithmContextBase* calcAlgContext, cint64 firstIndiID, cint64 lastIndiID, QStringList* list) {
 					CProcessingDataBox* procDataBox = calcAlgContext->getUsedProcessingDataBox();
 					CIndividualSaturationProcessNodeVector* indiVec = procDataBox->getIndividualSaturationProcessNodeVector();
 					cint64 indiCount = indiVec->getItemCount();
