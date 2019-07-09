@@ -16611,7 +16611,7 @@ namespace Konclude {
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::isLabelConceptEqualSetConsiderNominalsForClashOnly(CReapplyConceptLabelSet* conceptSet1, CReapplyConceptLabelSet* conceptSet2, bool* clashFlag, CCalculationAlgorithmContextBase* calcAlgContext) {
 					STATINC(LABELCONCEPTEQUALSETTESTCOUNT, calcAlgContext);
 					if (clashFlag) {
-						clashFlag = false;
+						*clashFlag = false;
 					}
 					CReapplyConceptLabelSetIterator conSet1It(conceptSet1->getConceptLabelSetIterator(true, false, false));
 					CReapplyConceptLabelSetIterator conSet2It(conceptSet2->getConceptLabelSetIterator(true, false, false));
