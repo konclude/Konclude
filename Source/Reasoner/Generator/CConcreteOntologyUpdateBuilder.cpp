@@ -1962,7 +1962,7 @@ namespace Konclude {
 						// there is only one equivalent concept and is not negated by the linker
 						CConcept* eqConcept = opConLinker->getData();
 						CClassTermExpression* eqClassExp = mConceptClassTermHash->value(eqConcept);
-						if (eqConcept == CCATOM) {
+						if (eqConcept->getOperatorCode() == CCATOM) {
 							concept->setOperandCount(0);
 							concept->setOperandList(nullptr);
 							// order rebuild equivalent class
