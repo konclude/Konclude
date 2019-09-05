@@ -65,6 +65,13 @@ namespace Konclude {
 				}
 
 
+				CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer::writeFlush(cint64 flushNumber) {
+					QString flushString = QString(" <!-- end of part %1 -->\r\n").arg(flushNumber).toUtf8();
+					mCurrentArray->append(flushString);
+					return this;
+				}
+
+
 				CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer::clearTemporaryBuffer() {
 					mTemporaryBuffer.clear();
 					return this;
@@ -82,6 +89,12 @@ namespace Konclude {
 					//}
 					return this;
 				}
+
+				CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer::writeUTF8StringEscaped(const QString& string) {
+					mTemporaryBuffer.append(string.toHtmlEscaped().toUtf8());
+					return this;
+				}
+
 
 
 				CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer::addResultStreamingBindingToTemporaryBuffer(const QStringList& varList, CVariableBindingsAnswerResult* bindings) {
@@ -110,9 +123,10 @@ namespace Konclude {
 								mTemporaryBuffer.append(mBnodeEnd);
 							} else if (varBin->isLiteralBindingType()) {
 								mTemporaryBuffer.append(mLiteralDatatypeBegin);
-								writeUTF8String(varBin->getLiteralDatatypeBindingString());
+								QPair<QString, QString> datatypeDatavalueStringPair = varBin->getLiteralDatatypeDatavalueBindingStringPair();
+								writeUTF8String(datatypeDatavalueStringPair.first);
 								mTemporaryBuffer.append(mLiteralDatatypeEnd);
-								writeUTF8String(varBin->getLiteralDatavalueBindingString());
+								writeUTF8StringEscaped(datatypeDatavalueStringPair.second);
 								mTemporaryBuffer.append(mLiteralEnd);
 							}
 							mTemporaryBuffer.append(mBindingEnd);

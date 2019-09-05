@@ -200,7 +200,11 @@ namespace Konclude {
 					QList<CExpressionVariable*> disVarList;
 					for (QString varString : disVarStringList) {
 						CExpressionVariable* expVar = mNameVarHash.value(varString);
-						disVarList.append(expVar);
+						if (expVar) {
+							disVarList.append(expVar);
+						} else {
+							LOG(WARN, "::Konclude::Parser::SPARQLSimpleQueryParser", logTr("Variable '%1' in SELECT does not occur in WHERE clause, variable is ignored.").arg(varString), this);
+						}
 					}
 					for (CExpressionVariable* varExp : mVarExpSet) {
 						varExpList.append(varExp);
@@ -213,14 +217,23 @@ namespace Konclude {
 
 
 
+					cint64 limit = -1;
+					cint64 offset = 0;
 					bool orderingVarsFinished = false;
 					while (!parsedParts.isEmpty() && !orderingVarsFinished) {
 						QString keyString = parsedParts.first();
 						QString keyUpperString = keyString.toUpper();
-						if (keyUpperString == "LIMIT" || keyUpperString == "OFFSET") {
-							orderingVarsFinished = true;
-						}
-						if (keyUpperString == "ORDER" || keyUpperString == "BY") {
+						if (keyUpperString == "LIMIT") {
+							parsedParts.removeFirst();
+							if (!parsedParts.isEmpty()) {
+								limit = parsedParts.takeFirst().toLongLong();
+							}
+						} else if (keyUpperString == "OFFSET") {
+							parsedParts.removeFirst();
+							if (!parsedParts.isEmpty()) {
+								offset = parsedParts.takeFirst().toLongLong();
+							}
+						} else if (keyUpperString == "ORDER" || keyUpperString == "BY") {
 							parsedParts.removeFirst();
 						} else {
 							parsedParts.removeFirst();
@@ -257,7 +270,7 @@ namespace Konclude {
 						}
 					}
 
-					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternSelectQuery(axiomList, disVarList, orderingList, filteringList, distinctModifier);
+					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternSelectQuery(axiomList, disVarList, orderingList, filteringList, distinctModifier, limit, offset);
 					mSPARQLBGPQueryList.append(sparqlQuery);
 
 

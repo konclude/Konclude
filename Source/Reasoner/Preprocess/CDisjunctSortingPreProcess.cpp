@@ -115,6 +115,8 @@ namespace Konclude {
 					mAtomicDisjList.append(conLinker);
 				} else if (conNegation && conCode == CCSUB) {
 					mPrimNegDisjList.append(conLinker);
+				//} else if (!conNegation && conCode == CCSUB) {
+				//	mPrimDisjList.append(conLinker);
 				} else if (!conNegation && (conCode == CCSELF || conCode == CCVALUE)) {
 					mSimpleExistDisjList.append(conLinker);
 				} else if (!conNegation && (conCode == CCSOME || conCode == CCAQSOME || conCode == CCAQCHOOCE || conCode == CCATLEAST) || conNegation && (conCode == CCALL || conCode == CCATMOST)) {
@@ -143,6 +145,7 @@ namespace Konclude {
 				mExistDisjList.clear();
 				mNegNominalDisjList.clear();
 				mPosNominalDisjList.clear();
+				mPrimDisjList.clear();
 				mPrimNegDisjList.clear();
 				mSimpleExistDisjList.clear();
 				mPropDisjList.clear();
@@ -167,6 +170,7 @@ namespace Konclude {
 				addDisjunctFromList(mOtherDisjList,newOperandLinker,lastNewOperandLinker);
 				addDisjunctFromList(mExistDisjList,newOperandLinker,lastNewOperandLinker);
 				addDisjunctFromList(mPosNominalDisjList,newOperandLinker,lastNewOperandLinker);
+				addDisjunctFromList(mPrimDisjList, newOperandLinker, lastNewOperandLinker);
 				concept->setOperandList(newOperandLinker);
 			}
 

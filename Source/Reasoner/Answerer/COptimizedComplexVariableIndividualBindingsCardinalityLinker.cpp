@@ -38,17 +38,38 @@ namespace Konclude {
 
 			COptimizedComplexVariableIndividualBindingsCardinalityLinker* COptimizedComplexVariableIndividualBindingsCardinalityLinker::initBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalities) {
 				setData(bindings);
-				mCardinality = cardinalities;
+				mCurrentCardinality = cardinalities;
+				mInitialCardinality = cardinalities;
 				return this;
 			}
 
+
+			COptimizedComplexVariableIndividualBindingsCardinalityLinker* COptimizedComplexVariableIndividualBindingsCardinalityLinker::updateCardinality(COptimizedComplexVariableIndividualBindingsCardinality* cardinalities) {
+				mCurrentCardinality = cardinalities;
+				return this;
+			}
+
+			COptimizedComplexVariableIndividualBindingsCardinalityLinker* COptimizedComplexVariableIndividualBindingsCardinalityLinker::setInitialCardinality(COptimizedComplexVariableIndividualBindingsCardinality* cardinalities) {
+				mCurrentCardinality = cardinalities;
+				mInitialCardinality = cardinalities;
+				return this;
+			}
 
 			COptimizedComplexVariableIndividualBindings* COptimizedComplexVariableIndividualBindingsCardinalityLinker::getBindings() const {
 				return data;
 			}
 
-			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexVariableIndividualBindingsCardinalityLinker::getCardinalities() const {
-				return mCardinality;
+			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexVariableIndividualBindingsCardinalityLinker::getCurrentCardinalities() const {
+				return mCurrentCardinality;
+			}
+
+			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexVariableIndividualBindingsCardinalityLinker::getInitialCardinalities() const {
+				return mInitialCardinality;
+			}
+
+			COptimizedComplexVariableIndividualBindingsCardinalityLinker* COptimizedComplexVariableIndividualBindingsCardinalityLinker::clearCardinalities() {
+				mCurrentCardinality = nullptr;
+				return this;
 			}
 
 

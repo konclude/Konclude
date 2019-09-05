@@ -94,7 +94,7 @@ namespace Konclude {
 
 					virtual CConfiguration *getConfiguration();
 
-					virtual CSPARQLStreamingWriter* writeStreamData(QByteArray* buffer, bool last);
+					virtual bool writeStreamData(QByteArray* buffer, bool last);
 					CSPARQLStreamingWriter* writeStreamDataToFile(QByteArray* buffer, bool last);
 
 					bool processCustomsEvents(QEvent::Type type, CCustomEvent *event);
@@ -116,6 +116,7 @@ namespace Konclude {
 
 					QFile* mResponseFile;
 					bool mWritingStarted;
+					bool mWritingFailed;
 					cint64 mChunkPart;
 
 					QByteArray mStreamSPARQLHeader;

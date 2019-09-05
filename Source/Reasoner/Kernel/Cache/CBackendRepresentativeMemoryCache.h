@@ -188,6 +188,8 @@ namespace Konclude {
 
 						//bool mSameMergedIndisInCache;
 
+						cint64 mCheckingRemainingIncompletelyHandledCount;
+						cint64 mEmptyWriteDataCount;
 						cint64 mWriteDataCount;
 						cint64 mStartWriteCollectCount;
 						cint64 mNextWriteCollectCount;
@@ -202,6 +204,13 @@ namespace Konclude {
 						cint64 mCheckedIndiCount = 0;
 						cint64 mCheckIncompatibleIndiCount = 0;
 						cint64 mReducedNeighbourArrayCount = 0;
+
+						cint64 mReaderSlotUpdateCount;
+						cint64 mOntologyDataUpdateCount;
+						cint64 mOntologyDataReleasedCount;
+						cint64 mOntologyDataReleasedWhileNewCreationCount;
+						cint64 mOntologyDataReleasedWhileSlotUpdateCount;
+						cint64 mReaderSlotReleasedCount;
 
 						QSet<CIndividualReference> mIncompletelyAssociatedIndividualSet;
 						CCacheStatistics mCacheStat;

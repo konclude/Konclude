@@ -26,6 +26,7 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
+#include "CComputedItemDataNotificationLinker.h"
 
 // Other includes
 #include "Utilities/UtilitiesSettings.h"
@@ -58,23 +59,17 @@ namespace Konclude {
 					CRequirementWaitingDependencyData();
 
 
-					bool hasQueryProcessingLinker();
-					CXLinker<CComplexQueryProcessingData*>* takeQueryProcessingLinker();
-					CRequirementWaitingDependencyData* addQueryProcessingLinker(CXLinker<CComplexQueryProcessingData*>* queryProcessingLinker);
+					bool hasNotificationLinker();
+					CComputedItemDataNotificationLinker* takeNotificationLinker();
+					CRequirementWaitingDependencyData* addNotificationLinker(CComputedItemDataNotificationLinker* notLinker);
 
-
-
-					bool hasBuildingVariableItemProcessingLinker();
-					CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* takeBuildingVariableItemProcessingLinker();
-					CRequirementWaitingDependencyData* addBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* queryProcessingLinker);
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
-					CXLinker<CComplexQueryProcessingData*>* mQueryProcessingLinker;
-					CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* mBuildingVariableItemProcessingLinker;
+					CComputedItemDataNotificationLinker* mNotificationLinker;
 
 
 				// private methods

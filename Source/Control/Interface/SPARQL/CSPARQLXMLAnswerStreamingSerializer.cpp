@@ -113,11 +113,9 @@ namespace Konclude {
 
 				CSPARQLXMLAnswerStreamingSerializer* CSPARQLXMLAnswerStreamingSerializer::addResultSerialization(CBooleanQueryResult* booleanResult) {
 					forceHeaderWritten();
-					QString result;
-
 					mStreamWriter->writeStartElement("head");
 					mStreamWriter->writeEndElement();
-
+					QString result;
 					if (booleanResult->getResult()) {
 						result = "true";
 					} else {

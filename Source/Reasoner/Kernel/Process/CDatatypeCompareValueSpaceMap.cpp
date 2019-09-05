@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CDatatypeCompareValueSpaceMap* CDatatypeCompareValueSpaceMap::initDatatypeCompareValueSpaceMap(CDatatypeCompareValueSpaceMap* map) {
 					if (map) {
-						*this = *map;
+						CPROCESSMAP<CDatatypeCompareValueSpaceMapArranger, CDatatypeCompareValueSpaceMapData>::operator=(*map);
 						mAbsoluteMinimumExclusionValue = map->mAbsoluteMinimumExclusionValue;
 						mAbsoluteMaximumExclusionValue = map->mAbsoluteMaximumExclusionValue;
 					}

@@ -1136,6 +1136,11 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ImplicitJoiningBindingReduction",
+						"Determines whether bindings for variable mappings are reduced/eliminated while joining.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.BindingReducingForNonDistinctAnswerQueries",
 						"Determines whether bindings for variable mappings can be reduced even for queries with answer variables.",
@@ -1144,8 +1149,8 @@ namespace Konclude {
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.BindingReductionMappingSize",
 						"Determines at which variable mappings sizes a reduction is allowed.",
-						new CIntegerConfigType(5000)),
-						new CIntegerConfigType(5000));
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.SamplingBasedJoinMappingSize",
 						"Determines at which variable mappings sizes a sampling based joining is used.",
@@ -1156,6 +1161,11 @@ namespace Konclude {
 						"Determines whether bindings for variable mappings are joined with other mappings while propagating them over roles.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.PropagationReplacement",
+						"Determines whether bindings for variable mappings are replaced with other mappings while propagating them over roles.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.AnonymousToDistinguishedVariableOnlyFullConversion",
 						"Determines whether anonymous variables are converted to distinguished variables only if it is possible for all.",
@@ -1174,11 +1184,47 @@ namespace Konclude {
 						new CBooleanConfigType(false));
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.ExtendedLogging",
-					"Determines whether additional logging is output for complex query answering.",
+						"Determines whether additional logging is output for complex query answering.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables",
+						"Determines whether non-answer individual variables are interpreted as anonymous variables.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NonAnswerIndividualVariablesAsAnonymousVariablesInterpretingPrefixString",
+						"Determines whether the prefix that non-answer individual variables must have to be interpreted as anonymous variables.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinComputation",
+						"Determines whether bindings are joined concurrently.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinComputationTaskCount",
+						"Determines with how many tasks bindings are concurrently joined.",
+						new CIntegerConfigType(211)),
+						new CIntegerConfigType(211));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinPerformanceLogging",
+						"Determines whether some performance metrics are logged for the concurrent join.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinDirectJoiningForCheckingSide",
+						"Determines whether joined variable bindings are directly created for the checking side, i.e., the side that is not inserted into the joining hash.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinPartitionizedMemoryManagement",
+						"Determines whether the memory management bindings for the concurrent joins of bindings is partitionized.",
+						new CBooleanConfigType(false)), 
+						new CBooleanConfigType(false));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Answering.MaximumParallelTestingCalculationCount",
 						"Determines how many calculation jobs are maximally created per answerer at one time.",
@@ -1200,7 +1246,81 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.MaximumBatchMappingsComputationSize",
+						"Determines the maximum size for the batch based variable mappings computations.",
+						new CIntegerConfigType(100000000)),
+						new CIntegerConfigType(100000000));
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.BatchMappingsComputationSizeIncreasingFactorPercent",
+						"Determines the increasing factor (in percent) for the size of the variable mapping computations batches.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.FirstBatchMappingsComputationSize",
+						"Determines the size of the first batch for batch-based variable mappings computations.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.MinimalMappingsComputationSize",
+						"Determines the minimum size for the variable mappings computations, i.e., how many mappings are computed by default in each step.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.MappingsRepeatedlyInsufficientDependencyComputationIncreasingFactorPercent",
+						"Determines the factor (in percent) that is used to increase the required mapping size of dependent steps if they are repeatedly insufficiently.",
+						new CIntegerConfigType(130)),
+						new CIntegerConfigType(130));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.MappingsComputationUnlimitedInterpretationSize",
+						"Determines the size for variable mappings computations that is interpreted as unlimited.",
+						new CIntegerConfigType(Q_UINT64_C(100000000000000))),
+						new CIntegerConfigType(Q_UINT64_C(100000000000000)));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ContinueMappingsCompuationWhenResultsNotWriteable",
+						"Determines whether the computation of variable mappings is continued even if the answers cannot be written/sent (e.g., for benchmarking).",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.LazyExistentialQueryPartAbsorption",
+						"Determines whether existential parts of query are lazily absorbed, i.e., only if the non-existential part is computed.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.BooleanQueryExistentialPartOrdinaryEvaluation",
+						"Determines whether existential parts of Boolean queries are first ordinarily evaluated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.FullQueryMaterialization",
+						"Determines whether the query is materialized at the beginning before query answers computation is started.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.DistinctUnecessaryVariablesReductionBeforeAnswerGeneration",
+						"Determines whether the all bindings for non-answer variables are reduced for queries with distinct modifier.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AlwaysUnecessaryVariablesReductionBeforeAnswerGeneration",
+						"Determines whether the all bindings for non-answer variables are reduced for all queries.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConceptItemExpectedCountSamplingSize",
+						"Determines the sampling size for determining the expected instances count for complex concept items.",
+						new CIntegerConfigType(30)),
+						new CIntegerConfigType(30));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConceptItemExpectedCountSamplingRetrievedPercentageLimit",
+						"Determines the limit (in percent) for the retrieved instances up to which the expected count is sampled.",
+						new CIntegerConfigType(75)),
+						new CIntegerConfigType(75));
 
 
 				// Testing/Debugging configurations
@@ -1977,6 +2097,18 @@ namespace Konclude {
 					"Filepath for writing SPARQL response file.",
 					new CStringConfigType("")),
 					new CStringConfigType(""));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.ComparisonFile",
+						"Filepath of the SPARQL comparison file.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Comparison.DifferencesLoggingLimit",
+						"The number of differences that are reported as logging output (-1 is no limit).",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
 
 				addConfigProperty(new CConfigDescription("Konclude.SPARQL.WriteResponseToStandardOutput",
 					"Write SPARQL response direct to program standard output channel.",

@@ -288,13 +288,13 @@ namespace Konclude {
 					CIndividualVector* indiVec = tempRoleRealAbox->getIndividualVector(true);
 
 					CIndividual* tmpIndiProp = new CIndividual();
-					tmpIndiProp->initIndividual(abox->getNextIndividualId(true));
+					tmpIndiProp->initIndividual(tempRoleRealAbox->getNextIndividualId(true));
 					indiVec->setData(tmpIndiProp->getIndividualID(),tmpIndiProp);
 					CIndividual* tmpIndiMarker = new CIndividual();
-					tmpIndiMarker->initIndividual(abox->getNextIndividualId(true));
+					tmpIndiMarker->initIndividual(tempRoleRealAbox->getNextIndividualId(true));
 					indiVec->setData(tmpIndiMarker->getIndividualID(),tmpIndiMarker);
-					tmpIndiProp->setTemporaryIndividual(true);
-					tmpIndiMarker->setTemporaryIndividual(true);
+					tmpIndiProp->setTemporaryFakeIndividual(true);
+					tmpIndiMarker->setTemporaryFakeIndividual(true);
 
 
 					item->setTemporaryMarkerIndividual(tmpIndiMarker);
@@ -504,7 +504,7 @@ namespace Konclude {
 				QList<COptimizedKPSetRoleTestingItem*>* propertyList = optKPSetClassificationItem->getRoleSatisfiableTestItemList();
 				foreach (COptimizedKPSetRoleTestingItem* item, *propertyList) {
 					QString iriPropertyNameString = CIRIName::getRecentIRIName(item->getTestingRole()->getPropertyNameLinker());
-					QString propertyDebugString = QString("Class: %1\r\n").arg(iriPropertyNameString);
+					QString propertyDebugString = QString("Property: %1\r\n").arg(iriPropertyNameString);
 					QString subsumString;
 					foreach (COptimizedKPSetRoleTestingItem* subsumItem, *item->getSubsumerRoleItemList()) {
 						QString subsumIRIPropertyNameString = CIRIName::getRecentIRIName(subsumItem->getTestingRole()->getPropertyNameLinker());
@@ -813,7 +813,7 @@ namespace Konclude {
 								}
 
 								if (mConfWriteDebuggingData) {
-									createDebugKPSetString(optKPSetClassificationItem,"./Debugging/Classification/classkpsets-inital-pruned.txt");
+									createDebugKPSetString(optKPSetClassificationItem,"./Debugging/Classification/propertykpsets-inital-pruned.txt");
 								}
 
 							}

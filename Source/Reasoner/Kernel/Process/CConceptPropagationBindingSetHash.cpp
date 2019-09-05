@@ -37,7 +37,7 @@ namespace Konclude {
 
 				CConceptPropagationBindingSetHash* CConceptPropagationBindingSetHash::initConceptPropagationBindingSetHash(CConceptPropagationBindingSetHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<cint64, CConceptPropagationBindingSetHashData>::operator=(*prevHash);
 						mLastPropagationBindingDescriptor = prevHash->mLastPropagationBindingDescriptor;
 					} else {
 						CPROCESSHASH<cint64,CConceptPropagationBindingSetHashData>::clear();

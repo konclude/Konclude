@@ -29,40 +29,26 @@ namespace Konclude {
 
 
 			CRequirementWaitingDependencyData::CRequirementWaitingDependencyData() {
-				mQueryProcessingLinker = nullptr;
-				mBuildingVariableItemProcessingLinker = nullptr;
+				mNotificationLinker = nullptr;
 			}
 
 
 
 
-			bool CRequirementWaitingDependencyData::hasQueryProcessingLinker() {
-				return mQueryProcessingLinker;
+			bool CRequirementWaitingDependencyData::hasNotificationLinker() {
+				return mNotificationLinker;
 			}
 
-			CXLinker<CComplexQueryProcessingData*>* CRequirementWaitingDependencyData::takeQueryProcessingLinker() {
-				return mQueryProcessingLinker;
+			CComputedItemDataNotificationLinker* CRequirementWaitingDependencyData::takeNotificationLinker() {
+				return mNotificationLinker;
 			}
 
-			CRequirementWaitingDependencyData* CRequirementWaitingDependencyData::addQueryProcessingLinker(CXLinker<CComplexQueryProcessingData*>* queryProcessingLinker) {
-				mQueryProcessingLinker = queryProcessingLinker->append(mQueryProcessingLinker);
+			CRequirementWaitingDependencyData* CRequirementWaitingDependencyData::addNotificationLinker(CComputedItemDataNotificationLinker* notLinker) {
+				mNotificationLinker = notLinker->append(mNotificationLinker);
 				return this;
 			}
 
 
-
-			bool CRequirementWaitingDependencyData::hasBuildingVariableItemProcessingLinker() {
-				return mBuildingVariableItemProcessingLinker;
-			}
-
-			CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* CRequirementWaitingDependencyData::takeBuildingVariableItemProcessingLinker() {
-				return mBuildingVariableItemProcessingLinker;
-			}
-
-			CRequirementWaitingDependencyData* CRequirementWaitingDependencyData::addBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* buildingVariableItemProcessingLinker) {
-				mBuildingVariableItemProcessingLinker = buildingVariableItemProcessingLinker->append(mBuildingVariableItemProcessingLinker);
-				return this;
-			}
 
 
 		}; // end namespace Answerer

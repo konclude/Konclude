@@ -28,11 +28,19 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexVariableRolePropagationAbstractItem::COptimizedComplexVariableRolePropagationAbstractItem(COptimizedComplexVariableCompositionItem* baseItem, CRole* role, bool inversed, cint64 propVarIdx) {
+			COptimizedComplexVariableRolePropagationAbstractItem::COptimizedComplexVariableRolePropagationAbstractItem(COptimizedComplexVariableCompositionItem* baseItem, CRole* role, bool inversed, cint64 propVarIdx) : COptimizedComplexVariableCompositionSingleDependenceItem(baseItem) {
 				mBaseItem = baseItem;
 				mRole = role;
 				mInversed = inversed;
 				mPropagationVarIdx = propVarIdx;
+				mComputationDependentItemList.append(mBaseItem);
+
+				mFillerInstanceItemCount = 0;
+				mRealizationFinishedFillerInstanceItemCount = 0;
+				mPropagationHandledInstanceItemCount = 0;
+				mScheduledRealizationCount = 0;
+				mPropagatedInstanceItemCount = 0;
+				mExpectedFillerAllPropagationItemCount = 0;
 			}
 
 
@@ -57,25 +65,122 @@ namespace Konclude {
 			}
 
 
-			COptimizedComplexVariableIndividualMapping::const_iterator COptimizedComplexVariableRolePropagationAbstractItem::getVariableMappingPropagationIterator() {
-				return mVariableMappingIterator;
-			}
-
-			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::setVariableMappingPropagationIterator(COptimizedComplexVariableIndividualMapping::const_iterator iterator) {
-				mVariableMappingIterator = iterator;
-				return this;
-			}
 
 
 			QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* COptimizedComplexVariableRolePropagationAbstractItem::getWaitingProcessedRealizationIteratorDataList() {
 				return &mWaitingProcessedRealizationIteratorDataList;
 			}
 
+
+			QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* COptimizedComplexVariableRolePropagationAbstractItem::getSchedulingRealizationIteratorDataList() {
+				return &mSchedulingRealizationIteratorDataList;
+			}
+
+
 			QHash<CRealizationIndividualInstanceItemReference, COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* COptimizedComplexVariableRolePropagationAbstractItem::getInstanceItemRolePropagationInstanceIterationDataHash() {
 				return &mInstItemRolePropInstIterationDataHash;
 			}
 
 
+			QList<COntologyProcessingRequirement*>* COptimizedComplexVariableRolePropagationAbstractItem::geSchedulingRealizationRequirementIteratorDataList() {
+				return &mSchedulingRealizationRequirementIteratorDataList;
+			}
+
+
+			cint64 COptimizedComplexVariableRolePropagationAbstractItem::getFillerInstanceItemCount() {
+				return mFillerInstanceItemCount;
+			}
+
+			cint64 COptimizedComplexVariableRolePropagationAbstractItem::getPropagationInstanceItemCount() {
+				return mInstItemRolePropInstIterationDataHash.size();
+			}
+
+
+			cint64 COptimizedComplexVariableRolePropagationAbstractItem::getRealizationFinishedFillerInstanceItemCount() {
+				return mRealizationFinishedFillerInstanceItemCount;
+			}
+
+			cint64 COptimizedComplexVariableRolePropagationAbstractItem::getPropagationHandledInstanceItemCount() {
+				return mPropagationHandledInstanceItemCount;
+			}
+
+
+			cint64 COptimizedComplexVariableRolePropagationAbstractItem::getScheduledRealizationCount() {
+				return mScheduledRealizationCount;
+			}
+
+
+			cint64 COptimizedComplexVariableRolePropagationAbstractItem::getPropagatedInstanceItemCount() {
+				return mPropagatedInstanceItemCount;
+			}
+
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::setFillerInstanceItemCount(cint64 count) {
+				mFillerInstanceItemCount = count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::setRealizationFinishedFillerInstanceItemCount(cint64 count) {
+				mRealizationFinishedFillerInstanceItemCount = count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::setPropagationHandledInstanceItemCount(cint64 count) {
+				mPropagationHandledInstanceItemCount = count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::setScheduledRealizationCount(cint64 count) {
+				mScheduledRealizationCount = count;
+				return this;
+			}
+
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::incPropagatedInstanceItemCount(cint64 count) {
+				mPropagatedInstanceItemCount += count;
+				return this;
+			}
+
+
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::incFillerInstanceItemCount(cint64 count) {
+				mFillerInstanceItemCount += count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::incRealizationFinishedFillerInstanceItemCount(cint64 count) {
+				mRealizationFinishedFillerInstanceItemCount += count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::incPropagationHandledInstanceItemCount(cint64 count) {
+				mPropagationHandledInstanceItemCount += count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::incScheduledRealizationCount(cint64 count) {
+				mScheduledRealizationCount += count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::decScheduledRealizationCount(cint64 count) {
+				mScheduledRealizationCount -= count;
+				return this;
+			}
+
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::incExpectedFillerAllPropagationItemCount(double count) {
+				mExpectedFillerAllPropagationItemCount += count;
+				return this;
+			}
+
+			double COptimizedComplexVariableRolePropagationAbstractItem::getExpectedFillerAllPropagationItemCount() {
+				return mExpectedFillerAllPropagationItemCount;
+			}
+
+			double COptimizedComplexVariableRolePropagationAbstractItem::getExpectedFillerPerPropagationItemCount() {
+				return mExpectedFillerAllPropagationItemCount / getPropagationInstanceItemCount();
+			}
 
 		}; // end namespace Answerer
 

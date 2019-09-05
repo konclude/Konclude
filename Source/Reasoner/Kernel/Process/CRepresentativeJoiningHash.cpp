@@ -37,7 +37,7 @@ namespace Konclude {
 
 				CRepresentativeJoiningHash* CRepresentativeJoiningHash::initRepresentativeJoiningHash(CRepresentativeJoiningHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<TRepIDPair, CRepresentativeJoiningHashData>::operator=(*prevHash);
 					} else {
 						CPROCESSHASH<TRepIDPair,CRepresentativeJoiningHashData>::clear();
 					}

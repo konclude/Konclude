@@ -29,9 +29,19 @@ namespace Konclude {
 
 
 			COptimizedComplexVariableCompositionItem::COptimizedComplexVariableCompositionItem() {
-				mVariableMappingComputed = false;
+				mVariableMappingsComputed = false;
+				mVariableMappingsInitialized = false;
 				mComputationQueued = false;
 				mVariableMapping = nullptr;
+				mVariableMappingsComputationRequirement = 1;
+				mVariableMappingsExpectedCount = 0;
+				mDependencyUpdatingCount = 0;
+				mRepeatedRequirementInsufficientDependencyComputationIncreaseFactor = 1.;
+				mComputationStepId = 0;
+				mComputationAttempt = 1;
+#ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
+				debugVarItemIndexMapping = nullptr;
+#endif
 			}
 
 
@@ -39,12 +49,21 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexVariableCompositionItem::isVariableMappingComputed() {
-				return mVariableMappingComputed;
+			bool COptimizedComplexVariableCompositionItem::isVariableMappingsComputed() {
+				return mVariableMappingsComputed;
 			}
 
-			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setVariableMappingComputed(bool computed) {
-				mVariableMappingComputed = computed;
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setVariableMappingsComputed(bool computed) {
+				mVariableMappingsComputed = computed;
+				return this;
+			}
+
+			bool COptimizedComplexVariableCompositionItem::isVariableMappingsInitialized() {
+				return mVariableMappingsInitialized;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setVariableMappingsInitialized(bool initialized) {
+				mVariableMappingsInitialized = initialized;
 				return this;
 			}
 
@@ -97,12 +116,12 @@ namespace Konclude {
 				return mJoiningItemHash.contains(bindingPosMapping);
 			}
 
-			COptimizedComplexVariableIndividualMapping* COptimizedComplexVariableCompositionItem::getVariableMapping() {
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableCompositionItem::getVariableMapping() {
 				return mVariableMapping;
 			}
 
 
-			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setVariableMapping(COptimizedComplexVariableIndividualMapping* variableMapping) {
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setVariableMapping(COptimizedComplexVariableIndividualMappings* variableMapping) {
 				mVariableMapping = variableMapping;
 				return this;
 			}
@@ -117,6 +136,130 @@ namespace Konclude {
 				return mReductionItemHash[varIdx];
 			}
 
+
+			QList<COptimizedComplexVariableCompositionItem*>* COptimizedComplexVariableCompositionItem::getComputationDependentItemList() {
+				return &mComputationDependentItemList;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::addComputationDependentItem(COptimizedComplexVariableCompositionItem* depCompItem) {
+				mComputationDependentItemList.append(depCompItem);
+				return this;
+			}
+
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setComputationDependentItemList(const QList<COptimizedComplexVariableCompositionItem*>& computationDependentItemList) {
+				mComputationDependentItemList = computationDependentItemList;
+				return this;
+			}
+
+			cint64 COptimizedComplexVariableCompositionItem::getVariableMappingsComputationRequirement() {
+				return mVariableMappingsComputationRequirement;
+			}
+
+
+			bool COptimizedComplexVariableCompositionItem::requiresMoreVariableMappingsComputation() {
+				return getVariableMappingsComputationRequirement() < 0 || getVariableMappingsCurrentCount() < getVariableMappingsComputationRequirement();
+			}
+
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setVariableMappingsComputationRequirement(cint64 limit) {
+				mVariableMappingsComputationRequirement = limit;
+				return this;
+			}
+
+			cint64 COptimizedComplexVariableCompositionItem::getVariableMappingsCurrentCount() {
+				if (mVariableMapping) {
+					return mVariableMapping->getBindingCount();
+				} else {
+					return 0;
+				}
+			}
+
+			double COptimizedComplexVariableCompositionItem::getVariableMappingsRemainingCount() {
+				return getVariableMappingsExpectedCount() - (double)getVariableMappingsCurrentCount();
+			}
+
+			double COptimizedComplexVariableCompositionItem::getVariableMappingsExpectedCount() {
+				return mVariableMappingsExpectedCount;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setVariableMappingsExpectedCount(double count) {
+				mVariableMappingsExpectedCount = count;
+				return this;
+			}
+
+
+
+
+
+			QList<COptimizedComplexVariableCompositionItem*>* COptimizedComplexVariableCompositionItem::getComputationUpdateItemList() {
+				return &mComputationUpdateItemList;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::addComputationUpdateItem(COptimizedComplexVariableCompositionItem* updateCompItem) {
+				mComputationUpdateItemList.append(updateCompItem);
+				return this;
+			}
+
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setComputationUpdateItemList(const QList<COptimizedComplexVariableCompositionItem*>& computationDependentItemList) {
+				mComputationUpdateItemList = computationDependentItemList;
+				return this;
+			}
+
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::decDependencyUpdatingCount(cint64 count) {
+				mDependencyUpdatingCount -= count;
+				return this;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::incDependencyUpdatingCount(cint64 count) {
+				mDependencyUpdatingCount += count;
+				return this;
+			}
+
+			cint64 COptimizedComplexVariableCompositionItem::getDependencyUpdatingCount() {
+				return mDependencyUpdatingCount;
+			}
+
+
+
+			double COptimizedComplexVariableCompositionItem::repeatedRequirementInsufficientDependencyComputationIncreaseFactor() {
+				return mRepeatedRequirementInsufficientDependencyComputationIncreaseFactor;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setRepeatedRequirementInsufficientDependencyComputationIncreaseFactor(double factor) {
+				mRepeatedRequirementInsufficientDependencyComputationIncreaseFactor = factor;
+				return this;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::increaseRepeatedRequirementInsufficientDependencyComputationIncreaseFactor(double increaseFactor) {
+				mRepeatedRequirementInsufficientDependencyComputationIncreaseFactor *= increaseFactor;
+				return this;
+			}
+
+
+			cint64 COptimizedComplexVariableCompositionItem::getComputationStepId() {
+				return mComputationStepId;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setComputationStepId(cint64 step) {
+				mComputationStepId = step;
+				return this;
+			}
+
+			cint64 COptimizedComplexVariableCompositionItem::getComputationAttempt(bool increase) {
+				cint64 attempt = mComputationAttempt;
+				if (increase) {
+					++mComputationAttempt;
+				}
+				return attempt;
+			}
+
+			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItem::setComputationAttempt(cint64 attempt) {
+				mComputationAttempt = attempt;
+				return this;
+			}
 
 
 		}; // end namespace Answerer

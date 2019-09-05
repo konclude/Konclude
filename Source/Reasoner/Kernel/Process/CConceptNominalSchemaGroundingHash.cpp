@@ -37,7 +37,7 @@ namespace Konclude {
 
 				CConceptNominalSchemaGroundingHash* CConceptNominalSchemaGroundingHash::initConceptNominalSchemaGroundingHash(CConceptNominalSchemaGroundingHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<CConceptNominalSchemaGroundingHasher, CConceptNominalSchemaGroundingData*>::operator=(*prevHash);
 					} else {
 						CPROCESSHASH<CConceptNominalSchemaGroundingHasher,CConceptNominalSchemaGroundingData*>::clear();
 					}

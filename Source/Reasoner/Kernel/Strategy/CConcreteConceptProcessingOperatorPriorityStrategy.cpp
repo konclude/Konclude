@@ -90,7 +90,7 @@ namespace Konclude {
 					symAccessPri[CCDATARESTRICTION]		= nextPriority;
 					symAccessPri[-CCDATARESTRICTION]	= nextPriority;
 
-					mDisjDelConsidPriOffset = -11.0;
+					mDisjDelConsidPriOffset = -9.0;
 					mDisjDelProcessPriOffset = -11.5;
 
 

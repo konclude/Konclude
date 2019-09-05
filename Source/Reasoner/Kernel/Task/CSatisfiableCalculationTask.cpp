@@ -84,6 +84,7 @@ namespace Konclude {
 					depSatCalcTask->mRepresentativeBackendUpdatingAdapter = mRepresentativeBackendUpdatingAdapter;
 					depSatCalcTask->mAnswererBindingPropagationAdapter = mAnswererBindingPropagationAdapter;
 					depSatCalcTask->mSatisfiablePossibleInstancesMergingAdapter = mSatisfiablePossibleInstancesMergingAdapter;
+					depSatCalcTask->mAnswererMaterializationAdapter = mAnswererMaterializationAdapter;
 					return this;
 				}
 
@@ -102,6 +103,7 @@ namespace Konclude {
 					mRepresentativeBackendUpdatingAdapter = nullptr;
 					mAnswererBindingPropagationAdapter = nullptr;
 					mSatisfiablePossibleInstancesMergingAdapter = nullptr;
+					mAnswererMaterializationAdapter = nullptr;
 					mSatIncConsTestingAdapter = nullptr;
 					getProcessContext(context);
 					mProcessingDataBox = CObjectParameterizingAllocator< CProcessingDataBox,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
@@ -124,6 +126,7 @@ namespace Konclude {
 					mAnswererBindingPropagationAdapter = nullptr;
 					mSatisfiablePossibleInstancesMergingAdapter = nullptr;
 					mSatIncConsTestingAdapter = nullptr;
+					mAnswererMaterializationAdapter = nullptr;
 					mSatIndDepTrackAdapter = nullptr;
 					mCalcStatColl = calcStatCollector;
 					mCalculationConfig = calculationConfig;
@@ -146,6 +149,7 @@ namespace Konclude {
 					mAnswererBindingPropagationAdapter = nullptr;
 					mAnswererInstancePropagationMessageAdapter = nullptr;
 					mRepresentativeBackendUpdatingAdapter = nullptr;
+					mAnswererMaterializationAdapter = nullptr;
 					mSatisfiablePossibleInstancesMergingAdapter = nullptr;
 					mCalcStatColl = calcStatCollector;
 					mCalculationConfig = calculationConfig;
@@ -346,6 +350,19 @@ namespace Konclude {
 				CSatisfiableTaskRepresentativeBackendUpdatingAdapter* CSatisfiableCalculationTask::getSatisfiableRepresentativeBackendCacheUpdatingAdapter() {
 					return mRepresentativeBackendUpdatingAdapter;
 				}
+
+
+
+
+				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setSatisfiableAnswererMaterializationAdapter(CSatisfiableTaskAnswererQueryingMaterializationAdapter* representativeBackendUpdatingAdapter) {
+					mAnswererMaterializationAdapter = representativeBackendUpdatingAdapter;
+					return this;
+				}
+
+				CSatisfiableTaskAnswererQueryingMaterializationAdapter* CSatisfiableCalculationTask::getSatisfiableAnswererMaterializationAdapter() {
+					return mAnswererMaterializationAdapter;
+				}
+
 
 			}; // end namespace Task
 

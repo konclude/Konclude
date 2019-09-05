@@ -86,7 +86,7 @@ namespace Konclude {
 						individualID = satCalcConsConstruct->getIndividualID();
 						nominalIndi = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan);
 						nominalIndi->initIndividual(individualID);
-						nominalIndi->setTemporaryIndividual(true);
+						nominalIndi->setTemporaryFakeIndividual(true);
 						indiVector->setLocalData(individualID, nominalIndi);
 
 						if (satIndiRefLink) {
@@ -310,6 +310,7 @@ namespace Konclude {
 					satCalcTask->setSatisfiableAnswererBindingPropagationAdapter(satCalcJob->getSatisfiableAnswererBindingPropagationAdapter());
 					satCalcTask->setSatisfiablePossibleInstancesMergingAdapter(satCalcJob->getSatisfiablePossibleInstancesMergingAdapter());
 					satCalcTask->setSatisfiableRepresentativeBackendCacheUpdatingAdapter(satCalcJob->getSatisfiableRepresentativeBackendCacheUpdatingAdapter());
+					satCalcTask->setSatisfiableAnswererMaterializationAdapter(satCalcJob->getSatisfiableAnswererMaterializationAdapter());
 
 
 					CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();
@@ -383,7 +384,7 @@ namespace Konclude {
 							individualNodeID = -satCalcConstruct->getIndividualID();							
 							individual = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan);
 							individual->initIndividual(-individualNodeID);
-							individual->setTemporaryIndividual(true);
+							individual->setTemporaryFakeIndividual(true);
 							baseIndiVec->setLocalData(-individualNodeID, individual);
 
 							nominalIndiTriplesAssertions = true;

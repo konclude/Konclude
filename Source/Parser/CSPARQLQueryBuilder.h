@@ -76,6 +76,7 @@ namespace Konclude {
 				virtual ~CSPARQLQueryBuilder();
 
 
+				virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName = "") = 0;
 				virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinct, const QString& queryName = "") = 0;
 				virtual CQuerySPARQLAskBasicGraphPatternExpression* getSPARQLBasicGraphPatternAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, const QString& queryName = "") = 0;
 

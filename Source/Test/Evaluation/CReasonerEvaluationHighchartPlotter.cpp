@@ -42,6 +42,9 @@ namespace Konclude {
 				mReasDiffTemplateStringHash.insert("-horizontal-chart",loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerDifference/horizontal-chart.html"));
 				mReasDiffTemplateStringHash.insert("-vertical-chart",loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerDifference/vertical-chart.html"));
 
+				mReasSubsumptionTemplateStringHash.insert("-horizontal-chart", loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerSubsumption/horizontal-chart.html"));
+				mReasSubsumptionTemplateStringHash.insert("-vertical-chart", loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerSubsumption/vertical-chart.html"));
+
 				mReasErrorTemplateStringHash.insert("-horizontal-chart",loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerError/horizontal-chart.html"));
 				mReasErrorTemplateStringHash.insert("-vertical-chart",loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerError/vertical-chart.html"));
 
@@ -385,6 +388,9 @@ namespace Konclude {
 			}
 
 
+			CReasonerEvaluationHighchartPlotter* CReasonerEvaluationHighchartPlotter::createReasonerSubsumptionPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& outputFile, const QString& selectionString) {
+				return createReasonerPlot(dataFileString, plotTitle, reasonerNameList, outputFile, mReasSubsumptionTemplateStringHash, selectionString);
+			}
 
 			CReasonerEvaluationHighchartPlotter* CReasonerEvaluationHighchartPlotter::createReasonerErrorPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& outputFile, const QString& selectionString) {
 				return createReasonerPlot(dataFileString,plotTitle,reasonerNameList,outputFile,mReasErrorTemplateStringHash,selectionString);

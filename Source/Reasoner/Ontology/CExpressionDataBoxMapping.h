@@ -51,6 +51,7 @@
 #include "Parser/Expressions/CDataRangeTermExpression.h"
 #include "Parser/Expressions/CDatatypeExpression.h"
 #include "Parser/Expressions/CDataPropertyAxiomExpression.h"
+#include "Parser/Expressions/CDataLexicalValueExpression.h"
 
 #include "Reasoner/Generator/CExpressionHasher.h"
 
@@ -113,6 +114,7 @@ namespace Konclude {
 					CBUILDHASH<CDatatypeExpression*,CDatatype*>* getDatatypeExpressionDatatypeHash();
 					CBUILDHASH<CDatatype*,CDatatypeExpression*>* getDatatypeDatatypeExpessionHash();
 
+					CBUILDHASH<QPair<CDataLexicalValueExpression*, CDatatype*>, CDataLiteral*>* getDataLexicalValueExpressionDatatypePairDataLiteralHash();
 
 					CBUILDHASH<CClassAxiomExpression*,bool>* getUpdatedClassAxiomTellOrRetractHash();
 					CBUILDHASH<CObjectPropertyAxiomExpression*,bool>* getUpdateObjectPropertyAxiomHash();
@@ -227,6 +229,7 @@ namespace Konclude {
 					CBUILDHASH<CDatatypeExpression*,CDatatype*>* mDatatypeExpDatatypeHash;
 					CBUILDHASH<CDatatype*,CDatatypeExpression*>* mDatatypeDatatypeExpHash;
 
+					CBUILDHASH<QPair<CDataLexicalValueExpression*, CDatatype*>, CDataLiteral*>* mLexicalDataExpDatatypePairDataLiteralHash;
 
 					CBUILDHASH<CClassAxiomExpression*,bool>* mUpdateClassAxiomHash;
 					CBUILDHASH<CObjectPropertyAxiomExpression*,bool>* mUpdateObjectPropertyAxiomHash;

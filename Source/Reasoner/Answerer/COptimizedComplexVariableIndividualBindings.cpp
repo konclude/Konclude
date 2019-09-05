@@ -27,13 +27,22 @@ namespace Konclude {
 
 		namespace Answerer {
 
+			COptimizedComplexVariableIndividualBindings::COptimizedComplexVariableIndividualBindings() {
+				mBindingSize = 0;
+				mBindingArray = nullptr;
+			}
+
+
+			COptimizedComplexVariableIndividualBindings::COptimizedComplexVariableIndividualBindings(cint64 bindingSize, TIndividualInstanceItemDataBinding* bindingArray) {
+				mBindingArray = bindingArray;
+				mBindingSize = bindingSize;
+			}
 
 			COptimizedComplexVariableIndividualBindings::COptimizedComplexVariableIndividualBindings(cint64 bindingSize) {
 				mBindingArray = nullptr;
 				mBindingSize = bindingSize;
 				initIndividualBindings(mBindingSize);
 			}
-
 
 			COptimizedComplexVariableIndividualBindings::COptimizedComplexVariableIndividualBindings(const COptimizedComplexVariableIndividualBindings& varBindings) {
 				mBindingArray = nullptr;
@@ -62,6 +71,12 @@ namespace Konclude {
 			}
 
 
+			COptimizedComplexVariableIndividualBindings* COptimizedComplexVariableIndividualBindings::initIndividualBindings(cint64 bindingSize, TIndividualInstanceItemDataBinding* bindingArray) {
+				mBindingArray = bindingArray;
+				mBindingSize = bindingSize;
+				return this;
+			}
+
 			TIndividualInstanceItemDataBinding* COptimizedComplexVariableIndividualBindings::getBindingArray() const {
 				return mBindingArray;
 			}
@@ -85,8 +100,7 @@ namespace Konclude {
 				cint64 hashValue = mBindingSize;
 				cint64 multiplier = 13;
 				for (cint64 i = 0; i < mBindingSize; ++i) {
-					multiplier = multiplier * 2 + 1;
-					hashValue += multiplier*(cint64)mBindingArray[i].getHashValue();
+					hashValue = multiplier * hashValue + (cint64)mBindingArray[i].getHashValue();
 				}
 				return hashValue;
 			}

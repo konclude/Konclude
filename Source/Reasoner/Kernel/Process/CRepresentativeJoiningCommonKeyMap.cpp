@@ -35,7 +35,7 @@ namespace Konclude {
 
 				CRepresentativeJoiningCommonKeyMap* CRepresentativeJoiningCommonKeyMap::initRepresentativeJoiningCommonKeyMap(CRepresentativeJoiningCommonKeyMap* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSMAP<cint64, CRepresentativeJoiningCommonKeyData>::operator=(*prevMap);
 					} else {
 						CPROCESSMAP<cint64,CRepresentativeJoiningCommonKeyData>::clear();
 					}

@@ -26,7 +26,7 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "COptimizedComplexVariableCompositionItem.h"
+#include "COptimizedComplexVariableCompositionSingleDependenceItem.h"
 #include "COptimizedComplexConceptItem.h"
 #include "COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData.h"
 
@@ -55,7 +55,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexVariableRolePropagationAbstractItem : public COptimizedComplexVariableCompositionItem {
+			class COptimizedComplexVariableRolePropagationAbstractItem : public COptimizedComplexVariableCompositionSingleDependenceItem {
 				// public methods
 				public:
 					//! Constructor
@@ -70,11 +70,40 @@ namespace Konclude {
 					cint64 getPropagationVariableIndex();
 
 
-					COptimizedComplexVariableIndividualMapping::const_iterator getVariableMappingPropagationIterator();
-					COptimizedComplexVariableRolePropagationAbstractItem* setVariableMappingPropagationIterator(COptimizedComplexVariableIndividualMapping::const_iterator iterator);
 
 					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* getWaitingProcessedRealizationIteratorDataList();
 					QHash<CRealizationIndividualInstanceItemReference, COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* getInstanceItemRolePropagationInstanceIterationDataHash();
+
+					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* getSchedulingRealizationIteratorDataList();
+					QList<COntologyProcessingRequirement*>* geSchedulingRealizationRequirementIteratorDataList();
+
+
+					cint64 getFillerInstanceItemCount();
+					cint64 getPropagationInstanceItemCount();
+					cint64 getRealizationFinishedFillerInstanceItemCount();
+					cint64 getPropagationHandledInstanceItemCount();
+					cint64 getPropagatedInstanceItemCount();
+					cint64 getScheduledRealizationCount();
+
+
+
+					COptimizedComplexVariableRolePropagationAbstractItem* setFillerInstanceItemCount(cint64 count);
+					COptimizedComplexVariableRolePropagationAbstractItem* setRealizationFinishedFillerInstanceItemCount(cint64 count);
+					COptimizedComplexVariableRolePropagationAbstractItem* setPropagationHandledInstanceItemCount(cint64 count);
+					COptimizedComplexVariableRolePropagationAbstractItem* setScheduledRealizationCount(cint64 count);
+
+
+					COptimizedComplexVariableRolePropagationAbstractItem* incFillerInstanceItemCount(cint64 count = 1);
+					COptimizedComplexVariableRolePropagationAbstractItem* incRealizationFinishedFillerInstanceItemCount(cint64 count = 1);
+					COptimizedComplexVariableRolePropagationAbstractItem* incPropagationHandledInstanceItemCount(cint64 count = 1);
+					COptimizedComplexVariableRolePropagationAbstractItem* incScheduledRealizationCount(cint64 count = 1);
+					COptimizedComplexVariableRolePropagationAbstractItem* decScheduledRealizationCount(cint64 count = 1);
+					COptimizedComplexVariableRolePropagationAbstractItem* incPropagatedInstanceItemCount(cint64 count = 1);
+
+
+					COptimizedComplexVariableRolePropagationAbstractItem* incExpectedFillerAllPropagationItemCount(double count = 1);
+					double getExpectedFillerAllPropagationItemCount();
+					double getExpectedFillerPerPropagationItemCount();
 
 
 				// protected methods
@@ -87,11 +116,22 @@ namespace Konclude {
 					bool mInversed;
 					cint64 mPropagationVarIdx;
 
-					COptimizedComplexVariableIndividualMapping::const_iterator mVariableMappingIterator;
 					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*> mWaitingProcessedRealizationIteratorDataList;
+					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*> mSchedulingRealizationIteratorDataList;
 					QHash<CRealizationIndividualInstanceItemReference, COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*> mInstItemRolePropInstIterationDataHash;
 
+					QList<COntologyProcessingRequirement*> mSchedulingRealizationRequirementIteratorDataList;
 
+					cint64 mFillerInstanceItemCount;
+
+					cint64 mRealizationFinishedFillerInstanceItemCount;
+					cint64 mPropagationHandledInstanceItemCount;
+
+					cint64 mScheduledRealizationCount;
+
+					double mExpectedFillerAllPropagationItemCount;
+
+					cint64 mPropagatedInstanceItemCount;
 
 				// private methods
 				private:

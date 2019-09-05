@@ -26,7 +26,7 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "COptimizedComplexVariableIndividualMapping.h"
+#include "COptimizedComplexVariableIndividualMappings.h"
 #include "COptimizedComplexVariableJoiningBindingPositionMapping.h"
 
 
@@ -52,11 +52,6 @@ namespace Konclude {
 		namespace Answerer {
 
 
-#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
-
-			#define OPTIMIZED_ANSWERER_DEBUG_STRINGS
-
-#endif
 
 			/*! 
 			 *
@@ -82,8 +77,19 @@ namespace Konclude {
 					
 
 
-					bool isVariableMappingComputed();
-					COptimizedComplexVariableCompositionItem* setVariableMappingComputed(bool computed);
+					bool isVariableMappingsComputed();
+					COptimizedComplexVariableCompositionItem* setVariableMappingsComputed(bool computed);
+
+					bool isVariableMappingsInitialized();
+					COptimizedComplexVariableCompositionItem* setVariableMappingsInitialized(bool initialized);
+
+
+					double repeatedRequirementInsufficientDependencyComputationIncreaseFactor();
+					COptimizedComplexVariableCompositionItem* setRepeatedRequirementInsufficientDependencyComputationIncreaseFactor(double factor);
+					COptimizedComplexVariableCompositionItem* increaseRepeatedRequirementInsufficientDependencyComputationIncreaseFactor(double increaseFactor);
+
+
+
 
 					bool isComputationQueued();
 					COptimizedComplexVariableCompositionItem* setComputationQueued(bool queued);
@@ -104,19 +110,55 @@ namespace Konclude {
 					bool hasRoleInversePropagationItem(CRole* role, bool inversed, cint64 varIdx);
 
 
-					COptimizedComplexVariableIndividualMapping* getVariableMapping();
+					COptimizedComplexVariableIndividualMappings* getVariableMapping();
 
 
-					COptimizedComplexVariableCompositionItem* setVariableMapping(COptimizedComplexVariableIndividualMapping* variableMapping);
+					COptimizedComplexVariableCompositionItem* setVariableMapping(COptimizedComplexVariableIndividualMappings* variableMapping);
 
 
 					COptimizedComplexVariableDataLiteralExtensionItem*& getDataLiteralExtensionItem(CRole* dataRole, cint64 varIdx);
 					COptimizedComplexVariableReductionItem*& getReductionItem(cint64 varIdx);
 
 
+					QList<COptimizedComplexVariableCompositionItem*>* getComputationDependentItemList();
+					COptimizedComplexVariableCompositionItem* addComputationDependentItem(COptimizedComplexVariableCompositionItem* depCompItem);
+					COptimizedComplexVariableCompositionItem* setComputationDependentItemList(const QList<COptimizedComplexVariableCompositionItem*>& computationDependentItemList);
+
+
+					QList<COptimizedComplexVariableCompositionItem*>* getComputationUpdateItemList();
+					COptimizedComplexVariableCompositionItem* addComputationUpdateItem(COptimizedComplexVariableCompositionItem* updateCompItem);
+					COptimizedComplexVariableCompositionItem* setComputationUpdateItemList(const QList<COptimizedComplexVariableCompositionItem*>& computationUpdateItemList);
+
+
+
+					bool requiresMoreVariableMappingsComputation();
+					cint64 getVariableMappingsComputationRequirement();
+					COptimizedComplexVariableCompositionItem* setVariableMappingsComputationRequirement(cint64 limit);
+
+					cint64 getVariableMappingsCurrentCount();
+					double getVariableMappingsRemainingCount();
+					double getVariableMappingsExpectedCount();
+					COptimizedComplexVariableCompositionItem* setVariableMappingsExpectedCount(double count);
+
+
+					COptimizedComplexVariableCompositionItem* decDependencyUpdatingCount(cint64 count = 1);
+					COptimizedComplexVariableCompositionItem* incDependencyUpdatingCount(cint64 count = 1);
+					cint64 getDependencyUpdatingCount();
+
+
+
+					cint64 getComputationStepId();
+					COptimizedComplexVariableCompositionItem* setComputationStepId(cint64 step);
+
+					cint64 getComputationAttempt(bool increase = true);
+					COptimizedComplexVariableCompositionItem* setComputationAttempt(cint64 attempt);
+
+
+
 #ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
 					QStringList debugVariableNameStringList;
 					QString debugCreationString;
+					COptimizedComplexVariableCompositionItemVariableIndexMapping* debugVarItemIndexMapping;
 #endif
 
 				// protected methods
@@ -124,10 +166,13 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					COptimizedComplexVariableIndividualMapping* mVariableMapping;
+					COptimizedComplexVariableIndividualMappings* mVariableMapping;
 
-					bool mVariableMappingComputed;
+					bool mVariableMappingsComputed;
+					bool mVariableMappingsInitialized;
 					bool mComputationQueued;
+
+					double mRepeatedRequirementInsufficientDependencyComputationIncreaseFactor;
 
 
 
@@ -139,6 +184,18 @@ namespace Konclude {
 					QHash< QPair<CRole*, cint64>, COptimizedComplexVariableDataLiteralExtensionItem* > mDataLiteralExtensionItemHash;
 
 					QHash< cint64, COptimizedComplexVariableReductionItem* > mReductionItemHash;
+
+
+					QList<COptimizedComplexVariableCompositionItem*> mComputationDependentItemList;
+					QList<COptimizedComplexVariableCompositionItem*> mComputationUpdateItemList;
+					cint64 mVariableMappingsComputationRequirement;
+
+					double mVariableMappingsExpectedCount;
+					cint64 mDependencyUpdatingCount;
+
+
+					cint64 mComputationStepId;
+					cint64 mComputationAttempt;
 
 
 				// private methods

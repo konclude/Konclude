@@ -38,7 +38,7 @@ namespace Konclude {
 
 				CConnectionSuccessorCorrectionHash* CConnectionSuccessorCorrectionHash::initConnectionSuccessorCorrectionHash(CConnectionSuccessorCorrectionHash* connSuccCorrHash) {
 					if (connSuccCorrHash) {
-						*this = *connSuccCorrHash;
+						CPROCESSHASH<cint64, cint64>::operator =(*connSuccCorrHash);
 					} else {
 						CPROCESSHASH<cint64,cint64>::clear();
 					}

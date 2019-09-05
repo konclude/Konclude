@@ -37,7 +37,7 @@ namespace Konclude {
 
 				CVariableBindingTriggerHash* CVariableBindingTriggerHash::initVariableBindingTriggerHash(CVariableBindingTriggerHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<TVariableIndividualPair, CVariableBindingTriggerData>::operator=(*prevHash);
 					} else {
 						CPROCESSHASH<TVariableIndividualPair,CVariableBindingTriggerData>::clear();
 					}

@@ -26,8 +26,7 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "COptimizedComplexVariableIndividualBindings.h"
-#include "COptimizedComplexVariableIndividualBindingsCardinalityLinker.h"
+#include "COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker.h"
 
 
 // Other includes
@@ -61,16 +60,25 @@ namespace Konclude {
 					//! Constructor
 					COptimizedComplexVariableJoiningData();
 
-					COptimizedComplexVariableJoiningData* addLeftBindingLinker(CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* linker);
-					COptimizedComplexVariableJoiningData* addRightBindingLinker(CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* linker);
+					COptimizedComplexVariableJoiningData* addLeftBindingLinker(COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker);
+					COptimizedComplexVariableJoiningData* addRightBindingLinker(COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker);
 
-					CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* getLeftBindingLinker() const;
-					CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* getRightBindingLinker() const;
+					COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* getLeftBindingLinker() const;
+					COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* getRightBindingLinker() const;
 
 
-					COptimizedComplexVariableJoiningData* addBindingLinker(bool left, CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* linker);
-					CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* getBindingLinker(bool left) const;
+					COptimizedComplexVariableJoiningData* addBindingLinker(bool left, COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker);
+					COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* getBindingLinker(bool left) const;
 					bool hasBindings(bool left) const;
+
+#ifdef CONCURRENT_JOIN_COMPUTATION_PERFORMANCE_MEASUREMENT
+					mutable cint64 mLeftAdded = 0;
+					mutable cint64 mRightAdded = 0;
+
+					mutable cint64 mJoinedCount = 0;
+					mutable cint64 mInsertionCount = 0;
+					mutable cint64 mCheckingCount = 0;
+#endif //CONCURRENT_JOIN_COMPUTATION_PERFORMANCE_MEASUREMENT
 
 
 				// protected methods
@@ -78,8 +86,8 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* mLeftBindingLinker;
-					CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* mRightBindingLinker;
+					COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* mLeftBindingLinker;
+					COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* mRightBindingLinker;
 
 
 				// private methods

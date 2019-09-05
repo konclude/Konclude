@@ -190,6 +190,7 @@ namespace Konclude {
 						newTempRefLabel->initLabelWriteData(conSetSigValue, CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL);
 						newTempRefLabel->setCompletelySaturated(false);
 						newTempRefLabel->setCompletelyHandled(true);
+						newTempRefLabel->setCompletelyPropagated(true);
 						for (CConceptDescriptor* conDesIt = conSet->getAddingSortedConceptDescriptionLinker(); conDesIt; conDesIt = conDesIt->getNext()) {
 							CConcept* concept = conDesIt->getConcept();
 							bool negation = conDesIt->isNegated();
@@ -309,6 +310,7 @@ namespace Konclude {
 						newTempRefLabel->initLabelWriteData(conSetSigValue, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_CONCEPT_SET_LABEL);
 						newTempRefLabel->setCompletelySaturated(false);
 						newTempRefLabel->setCompletelyHandled(true);
+						newTempRefLabel->setCompletelyPropagated(true);
 						for (CConceptDescriptor* conDesIt = conSet->getAddingSortedConceptDescriptionLinker(); conDesIt; conDesIt = conDesIt->getNext()) {
 							CConcept* concept = conDesIt->getConcept();
 							bool negation = conDesIt->isNegated();
@@ -409,6 +411,7 @@ namespace Konclude {
 						newTempRefLabel->initLabelWriteData(conSetSigValue, labelType);
 						newTempRefLabel->setCompletelySaturated(false);
 						newTempRefLabel->setCompletelyHandled(true);
+						newTempRefLabel->setCompletelyPropagated(true);
 						for (CConceptDescriptor* conDesIt = conSet->getAddingSortedConceptDescriptionLinker(); conDesIt; conDesIt = conDesIt->getNext()) {
 							CConcept* concept = conDesIt->getConcept();
 							bool negation = conDesIt->isNegated();
@@ -532,6 +535,7 @@ namespace Konclude {
 						newTempRefLabel->initLabelWriteData(indiSetSigValue, labelType);
 						newTempRefLabel->setCompletelySaturated(false);
 						newTempRefLabel->setCompletelyHandled(true);
+						newTempRefLabel->setCompletelyPropagated(true);
 						for (CIndividualMergingHash::const_iterator it = indiMergingHash->constBegin(), itEnd = indiMergingHash->constEnd(); it != itEnd; ++it) {
 							if (it.value().isMergedWithIndividual()) {
 								cint64 mergedIndiId = it.key();
@@ -656,6 +660,7 @@ namespace Konclude {
 						newTempRefLabel->initLabelWriteData(indiSetSigValue, labelType);
 						newTempRefLabel->setCompletelySaturated(false);
 						newTempRefLabel->setCompletelyHandled(true);
+						newTempRefLabel->setCompletelyPropagated(true);
 						for (CDistinctHash::const_iterator it = indiDistinctHash->constBegin(), itEnd = indiDistinctHash->constEnd(); it != itEnd; ++it) {
 							cint64 distinctIndiId = -it.key();
 							if (distinctIndiId >= 0 && distinctIndiId != indiId) {
@@ -1536,6 +1541,7 @@ namespace Konclude {
 							
 								assoLoadingData.setIndividualIntegrated(true);
 								newAssWriteDataLinker->setCompletelyHandled(true);
+								newAssWriteDataLinker->setCompletelyPropagated(true);
 
 								if (assoLoadingData.hasIndirectlyConnectedIndividualsIntegration()) {
 									newAssWriteDataLinker->setIndirectlyConnectedIndividualIntegration(true);
@@ -1584,6 +1590,7 @@ namespace Konclude {
 
 							CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* writeDataLinker = conceptSetLabelHasherWriteDataLinkerHasher->value(hasher);
 							tmpDelayedInitResolvingLabel->setCompletelyHandled(true);
+							tmpDelayedInitResolvingLabel->setCompletelyPropagated(true);
 
 							//CIndividualProcessNode* queuIndiNode = nullptr;
 							//if (!writeDataLinker) {

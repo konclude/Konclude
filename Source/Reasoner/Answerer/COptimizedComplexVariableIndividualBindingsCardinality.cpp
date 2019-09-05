@@ -29,12 +29,12 @@ namespace Konclude {
 
 
 			COptimizedComplexVariableIndividualBindingsCardinality::COptimizedComplexVariableIndividualBindingsCardinality() {
-				initCardinalities(1, 1);
+				initCardinalities(1, 1, 0);
 			}
 
 
-			COptimizedComplexVariableIndividualBindingsCardinality::COptimizedComplexVariableIndividualBindingsCardinality(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality) {
-				initCardinalities(sameIndividualsSeparatlyConsideredCardinality, sameIndividualsJointlyConsideredCardinality);
+			COptimizedComplexVariableIndividualBindingsCardinality::COptimizedComplexVariableIndividualBindingsCardinality(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality, cint64 cardUpId) {
+				initCardinalities(sameIndividualsSeparatlyConsideredCardinality, sameIndividualsJointlyConsideredCardinality, cardUpId);
 			}
 
 
@@ -44,9 +44,16 @@ namespace Konclude {
 				return this;
 			}
 
-			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexVariableIndividualBindingsCardinality::initCardinalities(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality) {
+			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexVariableIndividualBindingsCardinality::substractCardinalities(COptimizedComplexVariableIndividualBindingsCardinality* cardinalities) {
+				mSameIndividualsSeparatlyConsideredCardinality -= cardinalities->mSameIndividualsSeparatlyConsideredCardinality;
+				mSameIndividualsJointlyConsideredCardinality -= cardinalities->mSameIndividualsJointlyConsideredCardinality;
+				return this;
+			}
+
+			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexVariableIndividualBindingsCardinality::initCardinalities(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality, cint64 cardUpId) {
 				mSameIndividualsSeparatlyConsideredCardinality = sameIndividualsSeparatlyConsideredCardinality;
 				mSameIndividualsJointlyConsideredCardinality = sameIndividualsJointlyConsideredCardinality;
+				mCardinalityUpdateId = cardUpId;
 				return this;
 			}
 
@@ -70,6 +77,14 @@ namespace Konclude {
 				return mSameIndividualsJointlyConsideredCardinality;
 			}
 
+			cint64 COptimizedComplexVariableIndividualBindingsCardinality::getCardinalityUpdateId() {
+				return mCardinalityUpdateId;
+			}
+
+			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexVariableIndividualBindingsCardinality::setCardinalityUpdateId(cint64 cardUpId) {
+				mCardinalityUpdateId = cardUpId;
+				return this;
+			}
 
 
 		}; // end namespace Answerer

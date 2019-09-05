@@ -28,9 +28,24 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexVariableJoiningItem::COptimizedComplexVariableJoiningItem(COptimizedComplexVariableCompositionItem* itemLeft, COptimizedComplexVariableCompositionItem* itemRight, const COptimizedComplexVariableJoiningBindingPositionMapping& positionMapping) : mPositionMapping(positionMapping) {
+			COptimizedComplexVariableJoiningItem::COptimizedComplexVariableJoiningItem(COptimizedComplexVariableCompositionItem* itemLeft, COptimizedComplexVariableCompositionItem* itemRight, const COptimizedComplexVariableJoiningBindingPositionMapping& positionMapping) : mPositionMapping(positionMapping), mLeftItemDep(itemLeft), mRightItemDep(itemRight) {
 				mItemLeft = itemLeft;
 				mItemRight = itemRight;
+				mComputationDependentItemList.append(mItemLeft);
+				mComputationDependentItemList.append(mItemRight);
+
+				mJoiningHash = nullptr;
+
+				mLeftSampleKeyCount = 0;
+				mRightSampleKeyCount = 0;
+				mLeftSampleInsertionCount = 0;
+				mRightSampleInsertionCount = 0;
+
+				mSamplingCompleted = false;
+
+
+				mInsertionSideDecided = false;
+				mInsertionSideLeft = false;
 			}
 
 
@@ -50,8 +65,69 @@ namespace Konclude {
 				return mItemRight;
 			}
 
+			COptimizedComplexVariableCompositionItemDependence* COptimizedComplexVariableJoiningItem::getLeftItemDependence() {
+				return &mLeftItemDep;
+			}
+
+			COptimizedComplexVariableCompositionItemDependence* COptimizedComplexVariableJoiningItem::getRightItemDependence() {
+				return &mRightItemDep;
+			}
+
 			COptimizedComplexVariableJoiningBindingPositionMapping* COptimizedComplexVariableJoiningItem::getPositionMapping() {
 				return &mPositionMapping;
+			}
+
+			QVector<COptimizedComplexVariableJoiningHashMemoryManaged*>& COptimizedComplexVariableJoiningItem::getJoiningHashVector() {
+				return mJoiningHashVector;
+			}
+
+
+			COptimizedComplexVariableJoiningHash*& COptimizedComplexVariableJoiningItem::getJoiningHash() {
+				return mJoiningHash;
+			}
+
+			cint64& COptimizedComplexVariableJoiningItem::getLeftSampleKeyCount() {
+				return mLeftSampleKeyCount;
+			}
+
+			cint64& COptimizedComplexVariableJoiningItem::getRightSampleKeyCount() {
+				return mRightSampleKeyCount;
+			}
+
+			cint64& COptimizedComplexVariableJoiningItem::getLeftSampleInsertionCount() {
+				return mLeftSampleInsertionCount;
+			}
+
+			cint64& COptimizedComplexVariableJoiningItem::getRightSampleInsertionCount() {
+				return mRightSampleInsertionCount;
+			}
+
+			bool COptimizedComplexVariableJoiningItem::isSamplingCompleted() {
+				return mSamplingCompleted;
+			}
+
+			COptimizedComplexVariableJoiningItem* COptimizedComplexVariableJoiningItem::setSamplingCompleted(bool completed) {
+				mSamplingCompleted = completed;
+				return this;
+			}
+
+
+			bool COptimizedComplexVariableJoiningItem::isInsertionSideDecided() {
+				return mInsertionSideDecided;
+			}
+
+			bool COptimizedComplexVariableJoiningItem::isInsertionSideLeft() {
+				return mInsertionSideLeft;
+			}
+
+			COptimizedComplexVariableJoiningItem* COptimizedComplexVariableJoiningItem::setInsertionSideDecided(bool decided) {
+				mInsertionSideDecided = decided;
+				return this;
+			}
+
+			COptimizedComplexVariableJoiningItem* COptimizedComplexVariableJoiningItem::setInsertionSideLeft(bool left) {
+				mInsertionSideLeft = left;
+				return this;
 			}
 
 

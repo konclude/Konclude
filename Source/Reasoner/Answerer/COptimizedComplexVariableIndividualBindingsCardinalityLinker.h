@@ -69,10 +69,16 @@ namespace Konclude {
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalities);
 
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker* initBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalities);
+					COptimizedComplexVariableIndividualBindingsCardinalityLinker* updateCardinality(COptimizedComplexVariableIndividualBindingsCardinality* cardinalities);
+					COptimizedComplexVariableIndividualBindingsCardinalityLinker* setInitialCardinality(COptimizedComplexVariableIndividualBindingsCardinality* cardinalities);
 
 
 					COptimizedComplexVariableIndividualBindings* getBindings() const;
-					COptimizedComplexVariableIndividualBindingsCardinality* getCardinalities() const;
+					COptimizedComplexVariableIndividualBindingsCardinality* getCurrentCardinalities() const;
+					COptimizedComplexVariableIndividualBindingsCardinality* getInitialCardinalities() const;
+
+					COptimizedComplexVariableIndividualBindingsCardinalityLinker* clearCardinalities();
+
 
 
 				// protected methods
@@ -80,7 +86,8 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					COptimizedComplexVariableIndividualBindingsCardinality* mCardinality;
+					COptimizedComplexVariableIndividualBindingsCardinality* mCurrentCardinality;
+					COptimizedComplexVariableIndividualBindingsCardinality* mInitialCardinality;
 
 
 

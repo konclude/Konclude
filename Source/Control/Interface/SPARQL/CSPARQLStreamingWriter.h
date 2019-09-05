@@ -61,7 +61,7 @@ namespace Konclude {
 						//! Constructor
 						CSPARQLStreamingWriter();
 
-						virtual CSPARQLStreamingWriter* writeStreamData(QByteArray* buffer, bool last) = 0;
+						virtual bool writeStreamData(QByteArray* buffer, bool last) = 0;
 
 					// protected methods
 					protected:

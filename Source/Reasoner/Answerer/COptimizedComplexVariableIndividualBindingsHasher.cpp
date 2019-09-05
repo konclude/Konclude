@@ -30,14 +30,32 @@ namespace Konclude {
 
 			COptimizedComplexVariableIndividualBindingsHasher::COptimizedComplexVariableIndividualBindingsHasher(COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingsLinker) {
 				mBindings = bindingsLinker->getBindings();
+				calculateHashValue();
+			}
+
+			COptimizedComplexVariableIndividualBindingsHasher::COptimizedComplexVariableIndividualBindingsHasher(COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingsLinker, cint64 calculatedHashValue) {
+				mBindings = bindingsLinker->getBindings();
+				mHashValue = calculatedHashValue;
 			}
 
 			COptimizedComplexVariableIndividualBindingsHasher::COptimizedComplexVariableIndividualBindingsHasher(COptimizedComplexVariableIndividualBindings* bindings) {
 				mBindings = bindings;
+				calculateHashValue();
 			}
 
+
+			COptimizedComplexVariableIndividualBindingsHasher* COptimizedComplexVariableIndividualBindingsHasher::calculateHashValue() {
+				if (mBindings) {
+					mHashValue = mBindings->getHashValue();
+				} else {
+					mHashValue = 0;
+				}
+				return this;
+			}
+
+
 			cint64 COptimizedComplexVariableIndividualBindingsHasher::getHashValue() const {
-				return mBindings->getHashValue();
+				return mHashValue;
 			}
 
 			COptimizedComplexVariableIndividualBindings* COptimizedComplexVariableIndividualBindingsHasher::getBindings() const {
@@ -45,6 +63,9 @@ namespace Konclude {
 			}
 
 			bool COptimizedComplexVariableIndividualBindingsHasher::operator==(const COptimizedComplexVariableIndividualBindingsHasher& hasher) const {
+				if (mHashValue != hasher.mHashValue) {
+					return false;
+				}
 				COptimizedComplexVariableIndividualBindings* bindings = hasher.getBindings();
 				return mBindings->operator==(*bindings);
 			}

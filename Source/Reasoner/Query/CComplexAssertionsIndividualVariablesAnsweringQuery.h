@@ -75,6 +75,15 @@ namespace Konclude {
 					bool isBooleanEntailmentResultRequired();
 					CComplexAssertionsIndividualVariablesAnsweringQuery* setBooleanEntailmentResultRequired(bool booleanEntailmentResultRequired);
 
+					cint64 getResultLimit();
+					CComplexAssertionsIndividualVariablesAnsweringQuery* setResultLimit(cint64 resultLimit);
+
+					cint64 getResultOffset();
+					CComplexAssertionsIndividualVariablesAnsweringQuery* setResultOffset(cint64 resultOffset);
+
+					cint64 getResultLimitIncludingOffset();
+
+
 
 				// protected methods
 				protected:
@@ -86,6 +95,9 @@ namespace Konclude {
 
 					bool mDistinct;
 					bool mBooleanEntailmentResult;
+
+					cint64 mResultLimit;
+					cint64 mResultOffset;
 
 
 				// private methods

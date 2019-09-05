@@ -75,12 +75,21 @@
 #include "CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem.h"
 #include "CAnsweringMessageDataInstancePropagationsData.h"
 #include "CAnsweringMessageDataInstancePossiblePropagationsData.h"
+#include "CAnsweringMessageDataCalculationMaterializedConcepts.h"
 #include "CAnsweringMessageDataInstanceCertainPropagationsData.h"
 #include "CAnsweringProgress.h"
 #include "COptimizedComplexVariableIndividualBindingsCardinality.h"
 #include "COptimizedComplexVariableIndividualBindingsCardinalityLinker.h"
+#include "CAnsweringMessageDataCalculationCompletedQueryMaterialization.h"
+#include "COptimizedComplexVariableIndividualMappingsHash.h"
+#include "COptimizedComplexVariableIndividualMappingsMultiHash.h"
 
 // Other includes
+#include "Reasoner/Answerer/Composition/CAbstractVariableMappingsCompositionJoinComputator.h"
+#include "Reasoner/Answerer/Composition/CSequentialVariableMappingsCompositionJoinComputator.h"
+#include "Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinComputator.h"
+
+
 #include "Context/CContextBase.h"
 
 #include "Reasoner/Revision/COntologyRevision.h"
@@ -124,6 +133,7 @@
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationTask.h"
 #include "Reasoner/Kernel/Task/CConsistenceTaskData.h"
 #include "Reasoner/Kernel/Task/CSatisfiableTaskAnswererBindingPropagationAdapter.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskAnswererQueryingMaterializationAdapter.h"
 
 #include "Reasoner/Realizer/COptimizedKPSetIndividualItem.h"
 #include "Reasoner/Realizer/COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator.h"
@@ -166,15 +176,17 @@ namespace Konclude {
 
 		namespace Answerer {
 
+			using namespace Composition;
 
 
 
 			typedef QPair<COptimizedComplexConceptItem*, QSet<COptimizedComplexConceptItem*>*> TConceptItemPredecessorSet;
 			typedef QPair<CRole*, CIndividual*> TRoleIndividualPair;
 
-			typedef QPair<CIndividualVariableExpression*, cint64> TRemainingVariableMappingCountSortingItem;
+			typedef QPair<CIndividualVariableExpression*, double> TRemainingVariableMappingCountSortingItem;
 
-			typedef QPair<cint64, CAxiomExpression*> TDepthTermpPair;
+			typedef QPair<cint64, CAxiomExpression*> TDepthTermPair;
+			typedef QPair<QPair<cint64, CHierarchyNode*>, QPair<CConcept*, CClassTermExpression*>> TDepthHierarchyNodeConceptClassTermExpressionTuple;
 
 			/*! 
 			 *
@@ -201,6 +213,9 @@ namespace Konclude {
 					virtual bool prepareProcessing(CAnswererContext* answererContext);
 
 					virtual bool continueCalculationCreation(CAnswererContext* answererContext);
+
+					bool generateOrdinaryVariableBuiltItemEvaluationFromAbsorptionBasedPart(CComplexQueryProcessingData* queryProcessingData, CAnswererContext* answererContext, QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *>* absorbingQueryPartsList, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool processing);
+
 
 					virtual bool processCalculationMessage(CAnsweringMessageData* message, CAnswererContext* answererContext);
 					virtual bool processRequirementMessage(CAnsweringMessageData* message, CAnswererContext* answererContext);
@@ -274,10 +289,16 @@ namespace Konclude {
 
 
 					void computeVariableCompositionItemDataLiteralExtension(COptimizedComplexVariableCompositionItem* compVarItem, CAnswererContext* answererContext, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
+
+					void configureDependentComputationIncreaseFactor(bool dependentItemRescheduled, bool mappingProcessed, COptimizedComplexVariableCompositionItem* compVarItem);
+
 					void computeVariableCompositionItemAbsorptionBasedExtension(COptimizedComplexVariableCompositionItem* compVarItem, bool &processing, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool &continueProcessingBuildingVarItem);
 					void computeVariableCompositionItemFromDataLiteralBase(COptimizedComplexVariableCompositionItem* compVarItem, CAnswererContext* answererContext, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
-					void computeVariableCompositionItemFromConceptItemBase(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
+					void computeVariableCompositionItemFromConceptItemBase(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool& processing);
 					void computeVariableCompositionItemReduction(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
+
+					bool expectedUpdatedReschedulingDependentItemComputation(COptimizedComplexVariableCompositionItemDependence* baseItemDep, COptimizedComplexVariableIndividualMappings* reducedVarMapping, COptimizedComplexVariableCompositionItem* reductionItem, COptimizedComplexVariableCompositionItem* baseItem, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
+
 					COptimizedComplexConceptAnsweringHandler* computeVariableCompositionItemPropagation(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing);
 					COptimizedComplexConceptAnsweringHandler* computeVariableCompositionItemJoin(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool& processing);
 
@@ -292,6 +313,30 @@ namespace Konclude {
 
 					COptimizedComplexConceptAnsweringHandler* readConfig();
 					COptimizedComplexConceptAnsweringHandler* initializeQueryProcessing(CComplexQueryProcessingData* queryProcessingData, CAnswererContext* answererContext);
+
+					bool tryAnonymousToIndividualVariablesConversion(QSet<CExpressionVariable *> &anonymousIndiVariableSet, QSet<CExpressionVariable *> &varExpSet, bool distinct, CAnswererContext* answererContext, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, bool& allAnonymousVariables, QSet<CExpressionVariable*>& convertedVariableSet);
+
+					bool finishConceptAndAbsorptionItemsGeneration(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& rolledVarExpSet, const QSet<CExpressionVariable *>& anonymousIndiVariableSet, const QHash<CExpressionVariable *, CBuildExpression *>& rebuiltVarClassTermExp, const QHash<CExpressionVariable *, CAxiomExpression *>& varExpAxiomExpHash,
+						bool allAnonymousVariables, const QSet<CExpressionVariable *>& initialAnonymousIndiVariableSet, const QList<CDataPropertyAssertionExpression *>& bothVarDataPropAssPropagationList, const QList<CObjectPropertyAssertionExpression *>& bothVarPropAssPropagationList, const QList<CDataPropertyAssertionExpression *>& onlyDataVarDataPropAssList, COptimizedComplexBuildingVariableCompositionsItem* varBuildItem, CAnswererContext* answererContext);
+
+					bool schedulingConceptItemsProcessingForBuildItem(const QList<QPair<CIndividualVariableExpression *, TConceptNegPair>> &varConNegInstTestExpList, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, COptimizedComplexBuildingVariableCompositionsItem* varBuildItem);
+
+					QList<QPair<CIndividualVariableExpression*, TConceptNegPair>> upgradeExistTopToIndividualTriggers(QList<QPair<CIndividualVariableExpression *, CClassTermExpression *>> varClassInstTestExpList, QHash<CExpressionVariable *, CBuildExpression *> individualTriggerUpdatableHash, CAnswererContext* answererContext);
+
+					bool identifyNonInstantiation(const QList<CAxiomExpression *>& assExps, const QSet<CExpressionVariable *> &answerIndiVariableSet, CAnswererContext* answererContext);
+
+					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *> generateAbsorptionBasedQueryParts(const QSet<CExpressionVariable *> &anonymousIndiVariableSet, bool allAnonymousVariables, QSet<CExpressionVariable *> &reductionForbiddenVarSet, const QSet<CExpressionVariable *> &rolledVarExpSet,
+						const QSet<CExpressionVariable *>& initialAnonymousIndiVariableSet, const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& prepareIndiVarSet, const QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash, const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash);
+
+					QHash<CExpressionVariable*, CBuildExpression*> rebuildVariablesClassTermExpressions(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *> &rolledVarExpSet, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash);
+
+
+					QList<QPair<CIndividualVariableExpression *, CClassTermExpression *>> generateConceptItemExpressions(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *> &rolledVarExpSet, const QSet<CExpressionVariable *> &anonymousIndiVariableSet, const QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash,
+						const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, QHash<CExpressionVariable *, CBuildExpression *> &individualTriggerUpdatableHash, QSet<CExpressionVariable *> &prepareIndiVarSet, CComplexQueryProcessingData* queryProcessingData);
+
+					void expressionsRollingUp(QSet<CExpressionVariable *> &anonymousIndiVariableSet, QSet<CExpressionVariable *> &rolledVarExpSet, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, CConcreteOntology* testingOnto, QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash);
+
+					void absorbExistentialQueryPart(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data, CAnswererContext* answererContext);
 
 					bool checkUsesQueryOnlyKnownEntities(CConcreteOntology* expressionOntology);
 
@@ -316,7 +361,10 @@ namespace Konclude {
 					bool createInvidiualItemInstanceTest(COptimizedComplexConceptItem* conceptItem, const CRealizationIndividualInstanceItemReference& testingItemRef, CAnswererContext* answererContext);
 					bool createCandidatePropagationInstanceTest(COptimizedComplexConceptItem* conceptItem, CConceptOfInterestActivationTriggeringData activationTriggeringData, CAnswererContext* answererContext);
 
-					bool createQueryMaterializationTest(QHash<CExpressionVariable*, CAxiomExpression*>* varExpAxiomExpHash, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CAnswererContext* answererContext);
+					CConcreteOntology* createQueryMaterializationData(QSet<CExpressionVariable *> varExpSet, QSet<CExpressionVariable *> rolledVarExpSet, QSet<CExpressionVariable *> anonymousIndiVariableSet, QHash<CExpressionVariable *, CBuildExpression *> rebuiltVarClassTermExp, QHash<CExpressionVariable *, CAxiomExpression *> varExpAxiomExpHash,
+						bool allAnonymousVariables, QSet<CExpressionVariable *> initialAnonymousIndiVariableSet, QList<CDataPropertyAssertionExpression *> bothVarDataPropAssPropagationList, QList<CObjectPropertyAssertionExpression *> bothVarPropAssPropagationList, QList<CDataPropertyAssertionExpression *> onlyDataVarDataPropAssList, COptimizedComplexBuildingVariableCompositionsItem* varBuildItem, CAnswererContext* answererContext);
+
+					bool createQueryMaterializationTest(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext);
 
 					bool visitAllIndividuals(function<bool(const CIndividualReference& indiRef)> visitFunc);
 
@@ -345,11 +393,13 @@ namespace Konclude {
 					bool processInstanceEntailmentCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceEntailment* message, CAnswererContext* answererContext);
 					bool processIndividualItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceItem* message, CAnswererContext* answererContext);
 					bool processIndividualCandidatePropagationCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem* message, CAnswererContext* answererContext);
+					bool processQueryMaterializationCalculationCompleted(CAnsweringMessageDataCalculationCompletedQueryMaterialization* message, CAnswererContext* answererContext);
 					bool processExtractedClassSubsumers(CAnsweringMessageDataCalculationClassSubsumers* message, CAnswererContext* answererContext);
 					bool processExtractedPossibleClassSubsumers(CAnsweringMessageDataCalculationPossibleClassSubsumers* message, CAnswererContext* answererContext);
 					bool processExtractedVariableBindingPropagations(CAnsweringMessageDataVariableBindingPropagations* variableBindingsPropagationMessage, CAnswererContext* answererContext);
 					bool processExtractedInstanceCertainPropagations(CAnsweringMessageDataInstanceCertainPropagationsData* instanceCandidatePropagationMessage, CAnswererContext* answererContext);
 					bool processExtractedInstanceCandidatePossiblePropagations(CAnsweringMessageDataInstancePossiblePropagationsData* instanceCandidatePropagationMessage, CAnswererContext* answererContext);
+					bool processExtractedMaterializationConcept(CAnsweringMessageDataCalculationMaterializedConcepts* matConceptsMessage, CAnswererContext* answererContext);
 
 					CSatisfiableCalculationJob* extendProcessingByTopPropagation(CSatisfiableCalculationJobGenerator& satCalcJobGen, CSatisfiableCalculationJob* satCalcJob, bool hasTopObjectPropertyPropagation, CAnswererContext* answererContext);
 
@@ -357,8 +407,9 @@ namespace Konclude {
 					QSet<CHierarchyNode*>* getDirectReducedSuperNodeSet(const QSet<CHierarchyNode*>& superClassesSet);
 
 					bool finishCalculationStepProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext);
-					bool notifyWaitingComplexQueryProcessingData(CXLinker<CComplexQueryProcessingData*>* queryProcDataLinker, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext);
-					bool notifyWaitingComplexBuildingVariableCompositionsItems(CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* buildVarItemProcDataLinker, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext);
+
+					bool notifyWaitingItemData(CComputedItemDataNotificationLinker* notLinker, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext);
+
 					bool updateComputedInstancesCount(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepInstanceComputationProcess* compStep, CAnswererContext* answererContext);
 
 
@@ -407,19 +458,24 @@ namespace Konclude {
 
 					QList<QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*>> reuseJoinedVariableCompositionItems(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp);
 
-					bool finishVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
+					bool finishVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, bool allMappingsComputed);
+					bool rescheduleVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItem* depSchedulingCompItem, cint64 additionalRequiredMappingCount);
 
 
-					QHash<CExpressionVariable*, cint64> getReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CObjectPropertyAssertionExpression* propAss);
+					QHash<CExpressionVariable*, cint64> getPropagationReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CObjectPropertyAssertionExpression* propAss);
 					QHash<CExpressionVariable*, cint64> getReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping);
+					QSet<CExpressionVariable*> getJoinReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* minLeftItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* minLeftItemIndexMapping, COptimizedComplexVariableCompositionItem* maxRightItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* maxRightItemIndexMapping, bool itemSameVarReduction);
 
-					QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> buildVariableReductionItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, QHash<CExpressionVariable*, cint64>& reductionVarExpIndHash, bool* processing = nullptr);
+					QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> buildAbsorbedPartHandlingItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart, QHash<CExpressionVariable *, QSet<COptimizedComplexVariableCompositionItem *> *>* varExpVarComItemHash, bool* processing);
+					QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> buildVariableReductionItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool allopReductionForVar, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, QHash<CExpressionVariable*, cint64>& reductionVarExpIndHash, bool* processing = nullptr);
 
 
 					QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> buildJoinedVariableJoiningItems(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool* processing);
 					QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> buildVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool itemSameVarReduction, COptimizedComplexVariableCompositionItem* joiningItem1, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1 = nullptr, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2 = nullptr, bool* processing = nullptr);
 
 					QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> buildVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* destVarExp, bool itemSameVarReduction, CExpressionVariable* varExp1, COptimizedComplexVariableCompositionItem* joiningItem1, CExpressionVariable* varExp2, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1 = nullptr, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2 = nullptr, bool* processing = nullptr);
+
+					cint64 fillJoiningBindingPositionMapping(COptimizedComplexVariableCompositionItemVariableIndexMapping* minLeftItemIndexMapping, COptimizedComplexVariableJoiningBindingPositionMapping &joiningBindingPositionMapping, COptimizedComplexVariableCompositionItemVariableIndexMapping* maxRightItemIndexMapping, bool itemSameVarReduction, QSet<CExpressionVariable *> &reductionVarExpSet);
 
 
 					QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> buildVariableRolePropagationItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CIndividualVariableExpression* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, QHash<CExpressionVariable*, cint64>& reductionVarExpIndHash, CObjectPropertyAssertionExpression* propAss = nullptr, bool* processing = nullptr, CAnswererContext* answererContext = nullptr);
@@ -448,11 +504,11 @@ namespace Konclude {
 					bool debugCheckVariableMappingContainsSolution(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
 
 					bool debugWriteVariableMappingToFile(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
-					QSet<QString> debugGetVariableMappingStringSet(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
+					QSet<QString> debugGetVariableMappingStringSet(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, cint64** sortArray = nullptr);
 					bool debugCheckVariableMappingFromFile(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
-					QString debugGetVariableMappingsHeaderString(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
+					QString debugGetVariableMappingsHeaderString(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, cint64** sortArray = nullptr);
 
-					bool debugWriteVariableMappingToFileWithHeader(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
+					bool debugWriteVariableMappingToFileWithHeader(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, const QString& suffix = QString());
 
 
 
@@ -470,6 +526,7 @@ namespace Konclude {
 
 #ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
 					QStringList debugCreationStringList;
+					QString debugCreationString;
 #endif
 					cint64 nextBindingsFileId = 0;
 
@@ -514,7 +571,14 @@ namespace Konclude {
 					};
 
 
-					bool mConfUseNonAnswerVariablesAsAnonymousVariables;
+					bool mConfConcurrentJoining;
+					cint64 mConcurrentJoinComputationTaskCount = 50;
+					CAbstractVariableMappingsCompositionJoinComputator* mJoinComputer;
+
+
+					bool mConfInterpretNonAnswerIndividualVariablesAsAnonymousVariables;
+					QString mConfNonAnswerIndividualVariablesAsAnonymousVariablesInterpretingPrefixString;
+
 					bool mConfDebugTestingOntologyWriting;
 					bool mConfFailOnUnknownEntity;
 
@@ -531,22 +595,48 @@ namespace Konclude {
 					bool mConfRedundantTermReduction;
 					bool mConfRedundantlyRestrictedVariablesElimination;
 					bool mConfPropagationJoining;
+					bool mConfPropagationReplacement;
 					bool mConfDebugWriteVariableCompositionItems;
 					bool mConfBindingReducingForNonDistinctAnswerQueries;
 					bool mConfDetailedMissingEntityReporting;
 
+					bool mConfDistinctUnecessaryVariablesReduction;
+					bool mConfAlwaysUnecessaryVariablesReduction;
+
+					cint64 mConfMaximumBatchMappingsComputationSize;
+					double mConfBatchMappingsComputationSizeIncreasingFactor;
+					cint64 mConfFirstBatchMappingsComputationSize;
+					cint64 mConfMinimalMappingsComputationSize;
+					double mConfMappingsRepeatedlyInsufficientDependencyComputationIncreasingFactor;
+					cint64 mConfMappingsComputationUnlimitedInterpretationSize;
+					bool mConfContinueMappingsCompuationWhenResultsNotWriteable;
+
 					bool mConfAllowBindingReduction;
 					cint64 mConfMappingSizeBindingReduction;
+					bool mConfAllowJoiningBindingReduction;
+
+
+					cint64 mConfConceptItemExpectedCountSamplingSize;
+					double mConfConceptItemExpectedCountSamplingRetrievedPercentageLimit;
 
 
 					cint64 mConfSamplingBasedJoinMappingSize;
 
 
 
+					bool mConfLazyExistentialPartAbsorption;
+					bool mConfBooleanQueryExistentialPartOrdinaryEvaluation;
+
+
 					bool mConfExtendedLogging;
 
 					double mConfConceptItemInstanceCandiateRetrievingSizeIncreaseFactor;
 					double mConfConceptItemInstanceCandiateRetrievingMaxSize;
+
+
+
+					bool mConfFullQueryMaterialization;
+
 
 
 					COntologyQueryExtendedConfigDependedPreProcesser* mTestingOntologyPreprocessor;
@@ -561,6 +651,8 @@ namespace Konclude {
 					CRealizationIndividualSorting mDefaultRealizationSorting;
 					CRealizationIndividualSorting mRoleFillerRealizationSorting;
 					CAnswererContext* mAnswererContext;
+
+
 
 				// private methods
 				private:

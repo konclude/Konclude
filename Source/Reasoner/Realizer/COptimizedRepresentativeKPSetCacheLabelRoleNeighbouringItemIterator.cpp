@@ -183,56 +183,61 @@ namespace Konclude {
 
 
 					QHash<cint64, COptimizedKPSetIndividualComplexRoleData*>* complexRoleDataHash = roleInstancesItem->getIndividualIdComplexRoleDataHash();
-					COptimizedKPSetIndividualComplexRoleData* complexRoleData = complexRoleDataHash->value(indiId);
-					if (!complexRoleData || !complexRoleData->isInitialized(inversed)) {
-						iteratorData->mInitializationRequired = true;
+					if (!complexRoleDataHash->contains(indiId)) {
 						isValidInstanceFlag = false;
 						return;
 					} else {
+						COptimizedKPSetIndividualComplexRoleData* complexRoleData = complexRoleDataHash->value(indiId);
+						if (!complexRoleData || !complexRoleData->isInitialized(inversed)) {
+							iteratorData->mInitializationRequired = true;
+							isValidInstanceFlag = false;
+							return;
+						} else {
 
-						COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)complexRoleData;
-						COptimizedKPSetRoleInstancesHash* possNeighbourInstanceHash = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(inversed, false);
-						if (possNeighbourInstanceHash) {
+							COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)complexRoleData;
+							COptimizedKPSetRoleInstancesHash* possNeighbourInstanceHash = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(inversed, false);
+							if (possNeighbourInstanceHash) {
 
-							cint64 maxRemainingNeighbourInvestigationCount = 50;
-							cint64 remainingNeighbourInvestigationCount = -1;
-							bool somePossibleInstanceFlag = false;
-							bool someInitializationRequired = false;
+								cint64 maxRemainingNeighbourInvestigationCount = 50;
+								cint64 remainingNeighbourInvestigationCount = -1;
+								bool somePossibleInstanceFlag = false;
+								bool someInitializationRequired = false;
 
-							for (COptimizedKPSetRoleInstancesHash::const_iterator itNeighInst = possNeighbourInstanceHash->constBegin(), itNeighInstEnd = possNeighbourInstanceHash->constEnd(); itNeighInst != itNeighInstEnd && remainingNeighbourInvestigationCount != 0; ++itNeighInst) {
-								// TODO: optimize by using pointer/counter/flag to/for next possible instance data that is a known instance
-								if (remainingNeighbourInvestigationCount > 0) {
-									remainingNeighbourInvestigationCount--;
+								for (COptimizedKPSetRoleInstancesHash::const_iterator itNeighInst = possNeighbourInstanceHash->constBegin(), itNeighInstEnd = possNeighbourInstanceHash->constEnd(); itNeighInst != itNeighInstEnd && remainingNeighbourInvestigationCount != 0; ++itNeighInst) {
+									// TODO: optimize by using pointer/counter/flag to/for next possible instance data that is a known instance
+									if (remainingNeighbourInvestigationCount > 0) {
+										remainingNeighbourInvestigationCount--;
+									}
+									const COptimizedKPSetRoleInstancesHashData& destIndiInstanceDat = itNeighInst.value();
+									cint64 destIndiId = itNeighInst.key();
+									COptimizedKPSetRoleInstancesData* instanceData = destIndiInstanceDat.mInstanceItemData;
+									if (instanceData && instanceData->mKnownInstance) {
+										return;
+									} else if (mAllowPossibleInstances) {
+										somePossibleInstanceFlag = true;
+										if (remainingNeighbourInvestigationCount == -1) {
+											remainingNeighbourInvestigationCount = maxRemainingNeighbourInvestigationCount;
+										}
+									} else if (instanceData->mPossibleInstance && !instanceData->mTestedInstance && !instanceData->mDerived) {
+										someInitializationRequired = true;
+										if (remainingNeighbourInvestigationCount == -1) {
+											remainingNeighbourInvestigationCount = maxRemainingNeighbourInvestigationCount;
+										}
+									}
 								}
-								const COptimizedKPSetRoleInstancesHashData& destIndiInstanceDat = itNeighInst.value();
-								cint64 destIndiId = itNeighInst.key();
-								COptimizedKPSetRoleInstancesData* instanceData = destIndiInstanceDat.mInstanceItemData;
-								if (instanceData && instanceData->mKnownInstance) {
+
+
+								if (somePossibleInstanceFlag) {
+									isValidKnownInstanceFlag = false;
 									return;
-								} else if (mAllowPossibleInstances) {
-									somePossibleInstanceFlag = true;
-									if (remainingNeighbourInvestigationCount == -1) {
-										remainingNeighbourInvestigationCount = maxRemainingNeighbourInvestigationCount;
-									}
-								} else if (instanceData->mPossibleInstance && !instanceData->mTestedInstance && !instanceData->mDerived) {
-									someInitializationRequired = true;
-									if (remainingNeighbourInvestigationCount == -1) {
-										remainingNeighbourInvestigationCount = maxRemainingNeighbourInvestigationCount;
-									}
 								}
-							}
+								if (someInitializationRequired) {
+									iteratorData->mInitializationRequired = true;
+									isValidInstanceFlag = false;
+									return;
+								}
 
-
-							if (somePossibleInstanceFlag) {
-								isValidKnownInstanceFlag = false;
-								return;
 							}
-							if (someInitializationRequired) {
-								iteratorData->mInitializationRequired = true;
-								isValidInstanceFlag = false;
-								return;
-							}
-
 						}
 					}
 

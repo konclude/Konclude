@@ -30,6 +30,8 @@ namespace Konclude {
 
 			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData() {
 				mRealizationIterator = nullptr;
+				mRealizationScheduled = false;
+				mExpectedFillerCount = 0;
 			}
 
 
@@ -40,6 +42,19 @@ namespace Konclude {
 
 			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::addVariableMappingPropagationIterator(COptimizedComplexVariableIndividualBindingsCardinalityLinker* iterator) {
 				mVariableMappingIteratorList.append(iterator);
+				return this;
+			}
+
+
+
+
+
+			QList<COptimizedComplexVariableIndividualUpdateCardinalityLinker*>* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::getCardinalityUpdatePropagationIteratorList() {
+				return &mUpdateCardinalityIteratorList;
+			}
+
+			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::addCardinalityUpdatePropagationIterator(COptimizedComplexVariableIndividualUpdateCardinalityLinker* iterator) {
+				mUpdateCardinalityIteratorList.append(iterator);
 				return this;
 			}
 
@@ -58,7 +73,23 @@ namespace Konclude {
 				return &mInstItemRolePropInstItemSet;
 			}
 
+			bool COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::isRealizationScheduled() {
+				return mRealizationScheduled;
+			}
 
+			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::setRealizationScheduled(bool scheduled) {
+				mRealizationScheduled = scheduled;
+				return this;
+			}
+
+			cint64 COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::getExpectedFillerCount() {
+				return mExpectedFillerCount;
+			}
+
+			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::setExpectedFillerCount(cint64 count) {
+				mExpectedFillerCount = count;
+				return this;
+			}
 
 
 		}; // end namespace Answerer

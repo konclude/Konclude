@@ -61,7 +61,7 @@ namespace Konclude {
 						//! Constructor
 						CSPARQLResultStreamingController();
 
-						virtual CSPARQLResultStreamingController* notifyWriteRequest(cint64 sequenceNumber) = 0;
+						virtual bool notifyWriteRequest(cint64 sequenceNumber) = 0;
 
 					// protected methods
 					protected:

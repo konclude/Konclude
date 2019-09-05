@@ -90,10 +90,13 @@ namespace Konclude {
 
 						virtual CVariableBindingsAnswersStreamingHandler* streamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1);
 
+						virtual bool streamingFlush();
+
 						virtual CVariableBindingsAnswersStreamingHandler* finishResultStreaming();
 
 						virtual CSPARQLResultStreamingData* handleQueryResult(CQuery* query, CQueryResult* queryResult);
 						virtual CSPARQLResultStreamingData* handleQueryError(CQuery* query, const QString& error);
+
 
 
 						CSPARQLResultStreamingData* finalize();
@@ -116,10 +119,14 @@ namespace Konclude {
 						cint64 mSequenceNumber;
 						CVariableBindingsAnswersStreamingResult* mStreamingResult;
 						QStringList mVarNames;
+						cint64 mMaxBufferSize;
 						cint64 mBufferSize;
 						bool mStreamingFinished;
 						bool mStreamingInitialized;
 						bool mFinalized;
+						bool mContinueSerialization;
+
+						cint64 mFlushId;
 
 						QList<QByteArray*> mUsedBufferList;
 						cint64 mUsedBufferSize;

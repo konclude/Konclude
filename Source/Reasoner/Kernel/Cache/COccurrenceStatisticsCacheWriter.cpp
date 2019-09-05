@@ -66,17 +66,19 @@ namespace Konclude {
 				COccurrenceStatisticsCacheWriter* COccurrenceStatisticsCacheWriter::incConceptInstanceOccurrencceStatistics(CConcreteOntology* ontology, cint64 conceptId, cint64 deterministicCount, cint64 nondeterministicCount, cint64 individualCount, cint64 existentialCount) {
 					loadOntologyDataVectors(ontology);
 					COccurrenceStatisticsConceptData* conceptData = mConceptDataVector->getOccurrenceStatisticsData(conceptId);
-					if (deterministicCount != 0) {
-						conceptData->incDeterministicInstanceOccurrencesCount(deterministicCount);
-					}
-					if (nondeterministicCount != 0) {
-						conceptData->incNonDeterministicInstanceOccurrencesCount(nondeterministicCount);
-					}
-					if (existentialCount != 0) {
-						conceptData->incExistentialInstanceOccurrencesCount(existentialCount);
-					}
-					if (individualCount != 0) {
-						conceptData->incIndividualInstanceOccurrencesCount(individualCount);
+					if (conceptData) {
+						if (deterministicCount != 0) {
+							conceptData->incDeterministicInstanceOccurrencesCount(deterministicCount);
+						}
+						if (nondeterministicCount != 0) {
+							conceptData->incNonDeterministicInstanceOccurrencesCount(nondeterministicCount);
+						}
+						if (existentialCount != 0) {
+							conceptData->incExistentialInstanceOccurrencesCount(existentialCount);
+						}
+						if (individualCount != 0) {
+							conceptData->incIndividualInstanceOccurrencesCount(individualCount);
+						}
 					}
 					return this;
 				}
@@ -84,23 +86,25 @@ namespace Konclude {
 				COccurrenceStatisticsCacheWriter* COccurrenceStatisticsCacheWriter::incRoleInstanceOccurrencceStatistics(CConcreteOntology* ontology, cint64 roleId, cint64 deterministicCount, cint64 nondeterministicCount, cint64 individualCount, cint64 existentialCount, cint64 outgoingCount, cint64 incomingCount) {
 					loadOntologyDataVectors(ontology);
 					COccurrenceStatisticsRoleData* roleData = mRoleDataVector->getOccurrenceStatisticsData(roleId);
-					if (deterministicCount != 0) {
-						roleData->incDeterministicInstanceOccurrencesCount(deterministicCount);
-					}
-					if (nondeterministicCount != 0) {
-						roleData->incNonDeterministicInstanceOccurrencesCount(nondeterministicCount);
-					}
-					if (existentialCount != 0) {
-						roleData->incExistentialInstanceOccurrencesCount(existentialCount);
-					}
-					if (individualCount != 0) {
-						roleData->incIndividualInstanceOccurrencesCount(individualCount);
-					}
-					if (outgoingCount != 0) {
-						roleData->incOutgoingNodeInstanceOccurrencesCount(outgoingCount);
-					}
-					if (incomingCount != 0) {
-						roleData->incIncomingNodeInstanceOccurrencesCount(incomingCount);
+					if (roleData) {
+						if (deterministicCount != 0) {
+							roleData->incDeterministicInstanceOccurrencesCount(deterministicCount);
+						}
+						if (nondeterministicCount != 0) {
+							roleData->incNonDeterministicInstanceOccurrencesCount(nondeterministicCount);
+						}
+						if (existentialCount != 0) {
+							roleData->incExistentialInstanceOccurrencesCount(existentialCount);
+						}
+						if (individualCount != 0) {
+							roleData->incIndividualInstanceOccurrencesCount(individualCount);
+						}
+						if (outgoingCount != 0) {
+							roleData->incOutgoingNodeInstanceOccurrencesCount(outgoingCount);
+						}
+						if (incomingCount != 0) {
+							roleData->incIncomingNodeInstanceOccurrencesCount(incomingCount);
+						}
 					}
 					return this;
 				}

@@ -91,7 +91,7 @@ namespace Konclude {
 						virtual CCommandRecorder *recordData(CCommandRecordData *recData);
 
 
-						virtual CSPARQLResultStreamingController* notifyWriteRequest(cint64 sequenceNumber);
+						virtual bool notifyWriteRequest(cint64 sequenceNumber);
 
 
 					// protected methods
@@ -100,7 +100,7 @@ namespace Konclude {
 						QString getErrorLevelString(double level);
 
 
-						CSPARQLResultStreamingController* writeStreamingData(CSPARQLResultStreamingData* seqData, bool lastData);
+						bool writeStreamingData(CSPARQLResultStreamingData* seqData, bool lastData);
 
 
 					// protected variables

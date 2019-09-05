@@ -28,9 +28,11 @@ namespace Konclude {
 		namespace Expression {
 
 
-			CQuerySPARQLSelectBasicGraphPatternExpression::CQuerySPARQLSelectBasicGraphPatternExpression(const QString& name, const QList<CAxiomExpression*>& axiomExpressionList, const QList<CExpressionVariable*>& answerVariables, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinct)
+			CQuerySPARQLSelectBasicGraphPatternExpression::CQuerySPARQLSelectBasicGraphPatternExpression(const QString& name, const QList<CAxiomExpression*>& axiomExpressionList, const QList<CExpressionVariable*>& answerVariables, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinct, cint64 limit, cint64 offset)
 					: CQuerySPARQLBasicGraphPatternExpression(name, axiomExpressionList, filteringList), COrderedListVariableAssociator(answerVariables), COrderedListOrderingTermExpressionAssociator(orderingList) {
 				mDistinct = distinct;
+				mLimit = limit;
+				mOffset = offset;
 			}
 
 
@@ -61,6 +63,15 @@ namespace Konclude {
 			bool CQuerySPARQLSelectBasicGraphPatternExpression::isDistinct() {
 				return mDistinct;
 			}
+
+			cint64 CQuerySPARQLSelectBasicGraphPatternExpression::getLimit() {
+				return mLimit;
+			}
+
+			cint64 CQuerySPARQLSelectBasicGraphPatternExpression::getOffset() {
+				return mOffset;
+			}
+
 
 			bool CQuerySPARQLSelectBasicGraphPatternExpression::visitSubExpressions(CSubExpressionVisitor* subExpressionVisitor) {
 				if (subExpressionVisitor) {

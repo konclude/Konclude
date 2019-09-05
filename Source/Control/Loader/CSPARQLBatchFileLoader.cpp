@@ -136,14 +136,9 @@ namespace Konclude {
 					if (file.open(QIODevice::ReadOnly)) {
 						QString fileContentString = file.readAll();
 
-						mSPARQLInterpreter = nullptr;
-						if (!resFileString.isEmpty()) {
-							mSPARQLInterpreter = new CSPARQLRecordResultStreamingInterpreter(this, preSynchronizer,mLoaderConfig);
-							defaultCommandDelegater = mSPARQLInterpreter;
-							preSynchronizer = new CPreconditionSynchronizer(mSPARQLInterpreter);
-						} else {
-							defaultCommandDelegater = preSynchronizer;
-						}
+						mSPARQLInterpreter = new CSPARQLRecordResultStreamingInterpreter(this, preSynchronizer, mLoaderConfig);
+						defaultCommandDelegater = mSPARQLInterpreter;
+						preSynchronizer = new CPreconditionSynchronizer(mSPARQLInterpreter);
 
 						CParseProcessSPARQLTextCommand* parseProcSPARQLCommand = new CParseProcessSPARQLTextCommand(fileContentString);
 						CCommandProcessedCallbackEvent *proComm = new CCommandProcessedCallbackEvent(this, parseProcSPARQLCommand);
@@ -154,6 +149,7 @@ namespace Konclude {
 						mWritingStarted = false;
 						mChunkPart = 0;
 						mResponseFile = nullptr;
+						mWritingFailed = false;
 
 
 						if (mConfLogProcessingTimes) {
@@ -171,9 +167,9 @@ namespace Konclude {
 
 
 
-			CSPARQLStreamingWriter* CSPARQLBatchFileLoader::writeStreamData(QByteArray* buffer, bool last) {
+			bool CSPARQLBatchFileLoader::writeStreamData(QByteArray* buffer, bool last) {
 				postEvent(new CResultStreamingWriteEvent(buffer, last));
-				return this;
+				return !mWritingFailed;
 			}
 
 			CSPARQLStreamingWriter* CSPARQLBatchFileLoader::writeStreamDataToFile(QByteArray* buffer, bool last) {
@@ -185,6 +181,7 @@ namespace Konclude {
 					if (!resFileString.isEmpty()) {
 						mResponseFile = new QFile(resFileString);
 						if (!mResponseFile->open(QIODevice::WriteOnly)) {
+							LOG(ERROR, getLogDomain(), logTr("Opening file '%1' for writing failed.").arg(resFileString), this);
 							delete mResponseFile;
 							mResponseFile = nullptr;
 						} else {
@@ -195,6 +192,11 @@ namespace Konclude {
 				}
 				if (mResponseFile) {
 					mResponseFile->write(*buffer);
+				} else {
+					if (!mConfDirectConsoleOutput && !mConfDirectErrorOutput) {
+						// answers are not further used, no need to continue computation
+						mWritingFailed = true;
+					}
 				}
 				if (mConfDirectConsoleOutput) {
 					std::cout << buffer->data();
@@ -211,6 +213,7 @@ namespace Konclude {
 				} else {
 					if (mResponseFile) {
 						LOG(INFO, getLogDomain(), logTr("Writing part %1 with %2 bytes to file.").arg(mChunkPart).arg(buffer->size()), this);
+						mResponseFile->flush();
 					}
 				}
 				delete buffer;

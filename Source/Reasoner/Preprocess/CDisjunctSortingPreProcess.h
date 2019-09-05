@@ -89,6 +89,7 @@ namespace Konclude {
 
 					QList< CSortedNegLinker<CConcept*>* > mAtomicDisjList;
 					QList< CSortedNegLinker<CConcept*>* > mPrimNegDisjList;
+					QList< CSortedNegLinker<CConcept*>* > mPrimDisjList;
 					QList< CSortedNegLinker<CConcept*>* > mSimpleExistDisjList;
 					QList< CSortedNegLinker<CConcept*>* > mExistDisjList;
 					QList< CSortedNegLinker<CConcept*>* > mNegNominalDisjList;

@@ -59,6 +59,7 @@ namespace Konclude {
 					if (mConfDirectCardinalityInsufficient) {
 						tmpAssWriteDataLinker->setCompletelyHandled(false);
 						tmpAssWriteDataLinker->setCompletelySaturated(false);
+						tmpAssWriteDataLinker->setCompletelyPropagated(false);
 						return false;
 					} else {
 						function<void(CPROCESSHASH<cint64, CRoleCardinalityCountData>* superRoleTagUsedCardCountHash)> initFunc = [&](CPROCESSHASH<cint64, CRoleCardinalityCountData>* superRoleTagUsedCardCountHash)->void {
@@ -189,6 +190,7 @@ namespace Konclude {
 					if (!insufficient) {
 						newTempRefLabel->setCompletelySaturated(true);
 						newTempRefLabel->setCompletelyHandled(true);
+						newTempRefLabel->setCompletelyPropagated(true);
 					}
 					for (CConceptSaturationDescriptor* conSatDesIt = conSet->getConceptSaturationDescriptionLinker(); conSatDesIt; conSatDesIt = conSatDesIt->getNext()) {
 						CConcept* concept = conSatDesIt->getConcept();
@@ -494,7 +496,7 @@ namespace Konclude {
 									if (succData->mActiveCount > 0) {
 										CIndividualSaturationProcessNode* succSatNode = succData->mSuccIndiNode;
 										bool collectSuccessorNode = true;
-										if (succSatNode->isABoxIndividualRepresentationNode()) {
+										if (succSatNode && succSatNode->isABoxIndividualRepresentationNode()) {
 											collectSuccessorNode = false;
 										}
 										if (succSatNode && succSatNode->getIntegratedNominalIndividual() || succData->mVALUENominalConnection) {
@@ -1410,6 +1412,9 @@ namespace Konclude {
 								newAssWriteDataLinker->setCompletelySaturated(false);
 								newAssWriteDataLinker->setCompletelyHandled(false);
 							}
+
+							newAssWriteDataLinker->setCompletelyPropagated(!dirFlags->hasPropagationIncompleteFlag());
+
 
 							if (indiLoadedAssocHash && indiLoadedAssocHash->contains(satNode->getIndividualID())) {
 								CIndividualRepresentativeBackendCacheLoadedAssociationData& assoLoadingData = (*indiLoadedAssocHash)[satNode->getIndividualID()];

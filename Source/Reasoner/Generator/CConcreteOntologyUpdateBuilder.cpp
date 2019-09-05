@@ -97,6 +97,7 @@ namespace Konclude {
 				mDatatypeExpDatatypeHash = mOntoData->getExpressionDataBoxMapping()->getDatatypeExpressionDatatypeHash();
 				mDatatypeDatatypeExpHash = mOntoData->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
 
+				mLexicalDataExpDatatypePairDataLiteralHash = mOntoData->getExpressionDataBoxMapping()->getDataLexicalValueExpressionDatatypePairDataLiteralHash();
 
 
 				mObjPropTermObjPropAxiomSet = mOntoData->getExpressionDataBoxMapping()->getObjectPropertyTermObjectPropertyAxiomSet();
@@ -2095,8 +2096,11 @@ namespace Konclude {
 				CDatatypeExpression* datatypeExp = dataLiteralExp->getDatatypeExpression();
 				CDataLexicalValueExpression* lexDatValueExp = dataLiteralExp->getDataLexicalValueExpression();
 				CDatatype* datatype = getDatatypeForDatatypeExpression(datatypeExp);
-				CDataLiteral* dataLiteral = CObjectParameterizingAllocator<CDataLiteral,CContext*>::allocateAndConstructAndParameterize(mMemManager, mBoxContext);
-				dataLiteral->initDataLiteral(lexDatValueExp->getName(),datatype);
+				CDataLiteral*& dataLiteral = (*mLexicalDataExpDatatypePairDataLiteralHash)[QPair<CDataLexicalValueExpression*, CDatatype*>(lexDatValueExp, datatype)];
+				if (!dataLiteral) {
+					dataLiteral = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemManager, mBoxContext);
+					dataLiteral->initDataLiteral(lexDatValueExp->getName(), datatype);
+				}
 				return dataLiteral;
 			}
 

@@ -47,6 +47,11 @@ namespace Konclude {
 				return getVariableBindingType() == VBTLITERAL;
 			}
 
+			QPair<QString, QString> CVariableBindingResult::getLiteralDatatypeDatavalueBindingStringPair() {
+				return QPair<QString, QString>(getLiteralDatatypeBindingString(), getLiteralDatavalueBindingString());
+			}
+
+
 		}; // end namespace Query
 
 	}; // end namespace Reasoner

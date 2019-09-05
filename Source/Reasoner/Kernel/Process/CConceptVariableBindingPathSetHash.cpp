@@ -37,7 +37,7 @@ namespace Konclude {
 
 				CConceptVariableBindingPathSetHash* CConceptVariableBindingPathSetHash::initConceptVariableBindingPathSetHash(CConceptVariableBindingPathSetHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<cint64, CConceptVariableBindingPathSetHashData>::operator=(*prevHash);
 						mLastVarBindDesLinker = prevHash->mLastVarBindDesLinker;
 					} else {
 						mLastVarBindDesLinker = nullptr;

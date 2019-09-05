@@ -88,6 +88,10 @@ namespace Konclude {
 										++markedPropagationIntoCreationDirectionConceptCount;
 										conProData->setPropagationIntoCreationDirection(true);
 									}
+									CRoleProcessData* roleProData = (CRoleProcessData*)role->getRoleData();
+									if (roleProData && !roleProData->hasPropagationAndCreationConceptsFlag()) {
+										roleProData->setPropagationAndCreationConceptsFlag(true);
+									}
 								}
 							}
 						}

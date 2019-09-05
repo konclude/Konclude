@@ -36,6 +36,7 @@
 #include "CAnsweringCalculationStatisticsCollectionStrings.h"
 #include "CAnsweringStatisticsCollectionStrings.h"
 #include "CAnsweringHandlingStatistics.h"
+#include "CComputedItemDataNotificationLinker.h"
 
 
 // Other includes
@@ -88,6 +89,9 @@ namespace Konclude {
 
 				COptimizedComplexConceptItem* getComplexConceptItem(CConcept* concept, bool negation, bool create = true, bool* created = nullptr);
 				QHash< TConceptNegPair, COptimizedComplexConceptItem* >* getComplexConceptNegationItemHash();
+
+				CComputedItemDataNotificationLinker* createComputedItemDataNotificationLinker();
+				COptimizedComplexConceptOntologyAnsweringItem* releaseComputedItemDataNotificationLinker(CComputedItemDataNotificationLinker* itemLinker);
 
 				CXLinker<CComplexQueryProcessingData*>* createQueryProcessingLinker();
 				COptimizedComplexConceptOntologyAnsweringItem* releaseQueryProcessingLinker(CXLinker<CComplexQueryProcessingData*>* queryLinker);
@@ -168,6 +172,17 @@ namespace Konclude {
 
 				CAnsweringHandlingStatistics* getAnsweringHandlingStatistics();
 
+
+				cint64 getNextComputationStepId(bool next = true);
+
+
+				bool hasRequirementProcessingSchedulingReported();
+				COptimizedComplexConceptOntologyAnsweringItem* setRequirementProcessingSchedulingReported(bool reported);
+
+
+				QHash<QPair<QString, CDatatype*>, CDataLiteral*>* getDataValueDatatypeSingleLiteralHash();
+
+
 				// protected methods
 			protected:
 
@@ -175,6 +190,9 @@ namespace Konclude {
 			protected:
 				CConcreteOntology* mTestingOntology;
 
+				cint64 mNextComputationStepId;
+
+				CComputedItemDataNotificationLinker* mItemNotificationLinker;
 				CXLinker<CComplexQueryProcessingData*>* mQueryProcessingLinker;
 				CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* mBuildingVarItemProcessingLinker;
 
@@ -218,6 +236,11 @@ namespace Konclude {
 
 				QList<CIndividual*> mTestingIndiList;
 				cint64 mNextTestingIndiId = 0;
+
+				bool mRequirementProcessingSchedulingReported;
+
+				QHash<QPair<QString, CDatatype*>, CDataLiteral*> mDataValueDatatypeSingleLiteralHash;
+
 
 				// private methods
 				private:

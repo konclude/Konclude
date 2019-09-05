@@ -142,7 +142,7 @@ namespace Konclude {
 															// handle SPARQL binding results
 															QHash<QString, cint64> variableNameIndexHash;
 															if (!variableBindingsResult) {
-																variableBindingsResult = mSPARQLResultParser.parseVariableBindings(&resultElement, &variableNameIndexHash);
+																variableBindingsResult = mSPARQLResultParser.parseVariableBindings(&resultElement, &variableNameIndexHash, true);
 															}
 
 															QString otherResponseFileString = otherResponseFileStringList.first();

@@ -65,12 +65,15 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData(const QSet<CExpressionVariable*>& anonymousVariableSet, const QSet<CExpressionVariable*>& prepareIndiVariableSet);
+					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData(const QSet<CExpressionVariable*>& anonymousVariableSet, const QSet<CExpressionVariable*>& restrictedAbsorptionVariableSet);
 
 
 
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* addVariableClassExpressions(CExpressionVariable* variable, QList<CBuildExpression*>& classExpressions);
 					QList<CBuildExpression*> getVariableClassExpressions(CExpressionVariable* variable);
+
+					QHash<CExpressionVariable*, CBuildExpression*>* getVariableBuiltExpressionsHash();
+
 
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* addVariableNeighbouringPropertyAssertion(CObjectPropertyAssertionExpression* propertyAssertion);
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* addVariableSelfPropertyAssertion(CObjectPropertyAssertionExpression* propertyAssertion);
@@ -78,6 +81,8 @@ namespace Konclude {
 
 					bool isVariableHandled(CExpressionVariable* variable);
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setVariableHandled(CExpressionVariable* variable);
+
+					QSet<CExpressionVariable*>* getRestrictedAbsorptionVariableSet();
 
 					QSet<CExpressionVariable*>* getAbsorptionVariableSet();
 					QSet<CExpressionVariable*>* getIndividualVariableSet();
@@ -157,11 +162,17 @@ namespace Konclude {
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setInitialObjectPropertyPropagatedTriggerConcept(CObjectPropertyTermExpression* objectPropertyExp, bool inversion, CConcept* propagatedTriggerConcept);
 					CConcept* getInitialObjectPropertyPropagatedTriggerConcept(CObjectPropertyTermExpression* objectPropertyExp, bool inversion);
 
+
+					QSet<CObjectPropertyAssertionExpression*>* getPropertyAssertionSet();
+
+
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					QSet<CObjectPropertyAssertionExpression*> mAxiomAssertionSet;
+
 					QHash<CExpressionVariable*, CBuildExpression*> mVariableBuiltExpressionsHash;
 					QHash<CExpressionVariable*, CObjectPropertyAssertionExpression*> mVarPropNeighbouringAssHash;
 					QHash<CExpressionVariable*, CObjectPropertyAssertionExpression*> mVarPropSelfAssHash;
@@ -174,6 +185,9 @@ namespace Konclude {
 					QSet<CExpressionVariable*> mIndividualVariableSet;
 					QSet<CExpressionVariable*> mBindingsVariableSet;
 					QSet<CExpressionVariable*> mIndividualBindingsVariableSet;
+
+					QSet<CExpressionVariable*> mRestrictedAbsorptionVariableSet;
+
 
 					QSet<CExpressionVariable*> mVariableAbsorptionSet;
 

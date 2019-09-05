@@ -22,13 +22,16 @@
 #define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEJOININGITEM_H
 
 // Libraries includes
-
+#include <QVector>
 
 // Namespace includes
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableCompositionItem.h"
 #include "COptimizedComplexConceptItem.h"
 #include "COptimizedComplexVariableJoiningBindingPositionMapping.h"
+#include "COptimizedComplexVariableJoiningHash.h"
+#include "COptimizedComplexVariableJoiningHashMemoryManaged.h"
+#include "COptimizedComplexVariableCompositionItemDependence.h"
 
 
 
@@ -69,19 +72,61 @@ namespace Konclude {
 					COptimizedComplexVariableCompositionItem* getLeftItem();
 					COptimizedComplexVariableCompositionItem* getRightItem();
 
+					COptimizedComplexVariableCompositionItemDependence* getLeftItemDependence();
+					COptimizedComplexVariableCompositionItemDependence* getRightItemDependence();
+
 					COptimizedComplexVariableJoiningBindingPositionMapping* getPositionMapping();
 
+
+					COptimizedComplexVariableJoiningHash*& getJoiningHash();
+					QVector<COptimizedComplexVariableJoiningHashMemoryManaged*>& getJoiningHashVector();
+
+
+					cint64& getLeftSampleKeyCount();
+					cint64& getRightSampleKeyCount();
+
+					cint64& getLeftSampleInsertionCount();
+					cint64& getRightSampleInsertionCount();
+
+
+					bool isSamplingCompleted();
+					COptimizedComplexVariableJoiningItem* setSamplingCompleted(bool completed);
+
+					bool isInsertionSideDecided();
+					bool isInsertionSideLeft();
+
+					COptimizedComplexVariableJoiningItem* setInsertionSideDecided(bool decided);
+					COptimizedComplexVariableJoiningItem* setInsertionSideLeft(bool left);
+
+					//QHash<QString, cint64> debugVarBindStringCardHash;
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					COptimizedComplexVariableCompositionItemDependence mLeftItemDep;
+					COptimizedComplexVariableCompositionItemDependence mRightItemDep;
+
 					COptimizedComplexVariableCompositionItem* mItemLeft;
 					COptimizedComplexVariableCompositionItem* mItemRight;
 					COptimizedComplexVariableJoiningBindingPositionMapping mPositionMapping;
 
 
+					COptimizedComplexVariableJoiningHash* mJoiningHash;
+					QVector<COptimizedComplexVariableJoiningHashMemoryManaged*> mJoiningHashVector;
+
+
+					cint64 mLeftSampleKeyCount;
+					cint64 mRightSampleKeyCount;
+
+					cint64 mLeftSampleInsertionCount;
+					cint64 mRightSampleInsertionCount;
+
+					bool mSamplingCompleted;
+
+					bool mInsertionSideDecided;
+					bool mInsertionSideLeft;
 
 
 				// private methods

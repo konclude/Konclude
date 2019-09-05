@@ -30,6 +30,9 @@
 #include "COptimizedComplexVariableCompositionItemVariableExpressionMapping.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem.h"
+#include "CRequirementWaitingDependencyData.h"
+#include "CComplexQueryMaterializationData.h"
+#include "CComplexQueryFinishingBuildingVariableCompositionsItemData.h"
 
 
 
@@ -37,6 +40,7 @@
 #include "Reasoner/Ontology/CConcept.h"
 #include "Reasoner/Ontology/OntologySettings.h"
 #include "Reasoner/Ontology/CConceptProcessData.h"
+#include "Reasoner/Ontology/CConcreteOntology.h"
 
 #include "Parser/Expressions/CIndividualVariableExpression.h"
 #include "Parser/Expressions/CObjectPropertyAssertionExpression.h"
@@ -65,11 +69,32 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexBuildingVariableCompositionsItem {
+			class COptimizedComplexBuildingVariableCompositionsItem : public CRequirementWaitingDependencyData {
 				// public methods
 				public:
 					//! Constructor
 					COptimizedComplexBuildingVariableCompositionsItem(CComplexQueryProcessingData* queryProcessingData);
+					~COptimizedComplexBuildingVariableCompositionsItem();
+
+
+
+					COptimizedComplexBuildingVariableCompositionsItem* createExtendingBuildingVariableCompositionsItem();
+
+
+
+
+
+					CComplexQueryMaterializationData* getMaterializationData();
+					COptimizedComplexBuildingVariableCompositionsItem* setMaterializationData(CComplexQueryMaterializationData* tmpOnto);
+
+
+					CComplexQueryFinishingBuildingVariableCompositionsItemData* getBuildingFinishingData();
+					COptimizedComplexBuildingVariableCompositionsItem* setBuildingFinishingData(CComplexQueryFinishingBuildingVariableCompositionsItemData* tmpOnto);
+
+
+
+					QHash<CExpressionVariable*, CBuildExpression*>* getVariableClassTermExpressionHash();
+					COptimizedComplexBuildingVariableCompositionsItem* setVariableClassTermExpressionHash(const QHash<CExpressionVariable*, CBuildExpression*>& hash);
 
 
 					COptimizedComplexBuildingVariableCompositionsItem* addVariableComplexConceptItem(CIndividualVariableExpression* varExp, COptimizedComplexConceptItem* conItem);
@@ -81,6 +106,9 @@ namespace Konclude {
 					QSet<CIndividualVariableExpression*>* getRemainingVariableExpressionSet();
 
 					QList<CObjectPropertyAssertionExpression*> getUnhanledPropertyAssertionsExpressions(CIndividualVariableExpression* varExp);
+
+
+
 
 
 
@@ -114,10 +142,19 @@ namespace Konclude {
 
 
 
-					cint64 hasWaitingVariableCompositionItems();
+					bool hasWaitingVariableCompositionItems();
 					cint64 getVariableCompositionItemWaitingCount();
 					COptimizedComplexBuildingVariableCompositionsItem* incVariableCompositionItemWaitingCount(cint64 incCount = 1);
 					COptimizedComplexBuildingVariableCompositionsItem* decVariableCompositionItemWaitingCount(cint64 decCount = 1);
+
+
+
+					bool isWaitingSubVariableBuildingItems();
+					cint64 getWaitingSubVariableBuildingItemCount();
+					COptimizedComplexBuildingVariableCompositionsItem* incWaitingSubVariableBuildingItemCount(cint64 incCount = 1);
+					COptimizedComplexBuildingVariableCompositionsItem* decWaitingSubVariableBuildingItemCount(cint64 decCount = 1);
+
+
 
 
 					QList<COptimizedComplexVariableCompositionItem*>* getComputeVariableMappingItemList();
@@ -211,6 +248,16 @@ namespace Konclude {
 
 
 
+					COptimizedComplexBuildingVariableCompositionsItem* getAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem();
+					COptimizedComplexBuildingVariableCompositionsItem* setAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem(COptimizedComplexBuildingVariableCompositionsItem* subItem);
+
+					bool hasAbsorptionBasedQueryPartsOrdinaryEvaluated();
+					COptimizedComplexBuildingVariableCompositionsItem* setAbsorptionBasedQueryPartsOrdinaryEvaluated(bool ordnaryEvaluated);
+
+					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* getAbsorbingQueryPartsList();
+					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbingQueryParts(const QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>& list);
+					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbingQueryPart(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data);
+
 
 					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* getAbsorbedQueryPartItemExtensionHandlingList();
 					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbedBasedQueryPartsItemExtensionHandling(const QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>& list);
@@ -247,11 +294,19 @@ namespace Konclude {
 					COptimizedComplexBuildingVariableCompositionsItem* setBindingsReducible(bool reducible);
 
 
+					QList<COptimizedComplexVariableCompositionItem*>* getUsedComplexVariableCompositionItemList();
+					COptimizedComplexBuildingVariableCompositionsItem* addUsedComplexVariableCompositionItem(COptimizedComplexVariableCompositionItem* item);
+
+
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+
+					QHash<CExpressionVariable*, CBuildExpression*> mVariableClassTermExpressionHash;
+
+
 					QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*> mVarVarCompItemHash;
 
 					QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*> mVarConItemHash;
@@ -266,7 +321,13 @@ namespace Konclude {
 					QSet<CObjectPropertyAssertionExpression*> mHandledPropAssSet;
 
 					cint64 mVarCompItemWaitingCount;
+					cint64 mSubVarBuildItemWaitingCount;
 					QList<COptimizedComplexVariableCompositionItem*> mComputeMappingItemList;
+
+					bool mAbsorptionBasedQueryPartsOrdinaryEvaluated;
+					COptimizedComplexBuildingVariableCompositionsItem* mAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem;
+					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*> mAbsorbingQueryPartsList;
+
 
 					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*> mAbsorptionBasedQueryPartItemExtensionHandlingList;
 					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*> mAbsorptionBasedQueryPartEntailmentCheckingHandlingList;
@@ -322,6 +383,16 @@ namespace Konclude {
 					bool mBindingsReducible;
 
 					QSet<CExpressionVariable*> mVariableSingleCardinalitySet;
+
+					QList<COptimizedComplexVariableCompositionItem*> mUsedComplexVariableCompositionItemList;
+
+
+
+
+					CComplexQueryMaterializationData* mTemporaryMaterializationData;
+
+					CComplexQueryFinishingBuildingVariableCompositionsItemData* mBuildingFinishingData;
+
 
 				// private methods
 				private:

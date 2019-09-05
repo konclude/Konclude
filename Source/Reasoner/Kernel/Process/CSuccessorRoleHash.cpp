@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CSuccessorRoleHash* CSuccessorRoleHash::initSuccessorRoleHash(CSuccessorRoleHash* prevRoleSuccHash) {
 					if (prevRoleSuccHash) {
-						*this = *prevRoleSuccHash;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>::operator=(*prevRoleSuccHash);
 					} else {
 						CPROCESSHASH<cint64,CIndividualLinkEdge*>::clear();
 					}

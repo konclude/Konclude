@@ -419,7 +419,7 @@ namespace Konclude {
 					R *otherSubStringRelation = otherStringHierarchy->getSubStringRelation(otherStringSynset,false);
 
 					if (!subStringRelation && otherSubStringRelation || subStringRelation && !otherSubStringRelation) {
-						LOG(ERROR,"::Konclude::Reasoner::Query::StringHierarchyResult",logTr("Sub relations of '%1' does not match.").arg(stringSynset->getEquivalentStringNameList().join(", ")),this);
+						LOG(ERROR,"::Konclude::Reasoner::Query::StringHierarchyResult",logTr("Sub relations of '%1' do not match.").arg(stringSynset->getEquivalentStringNameList().join(", ")),this);
 						return false;
 					}
 
@@ -427,7 +427,7 @@ namespace Konclude {
 
 						if (subStringRelation->getSubStringsSynsetCount() != otherSubStringRelation->getSubStringsSynsetCount()) {
 							wrongResult = true;
-							LOG(ERROR,"::Konclude::Reasoner::Query::StringHierarchyResult",logTr("Sub relations of '%1' does not match.").arg(stringSynset->getEquivalentStringNameList().join(", ")),this);
+							LOG(ERROR,"::Konclude::Reasoner::Query::StringHierarchyResult",logTr("Sub relations of '%1' do not match.").arg(stringSynset->getEquivalentStringNameList().join(", ")),this);
 						}
 
 

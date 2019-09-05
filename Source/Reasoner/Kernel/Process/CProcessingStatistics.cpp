@@ -316,6 +316,13 @@ namespace Konclude {
 				const CProcessingStatisticDescription CProcessingStatistics::statSATURATIONCACHELOSECOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"saturation-caching-lose-count");
 
 
+				const CProcessingStatisticDescription CProcessingStatistics::statNODESUCCESSOREXPANSIONSATURATIONRESOLVINGTRYINGCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "node-successor-expansion-saturation-resolving-trying-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statNODESUCCESSOREXPANSIONSATURATIONRESOLVEDCOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "node-successor-expansion-saturation-resolved-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statNODESUCCESSOREXPANSIONSATURATIONRESOLVEDCONCEPTCANDIDATECOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "node-successor-expansion-saturation-resolved-concept-candidate-count");
+				const CProcessingStatisticDescription CProcessingStatistics::statNODESUCCESSOREXPANSIONSATURATIONRESOLVINGCONCEPTCANDIDATECOUNT(registratorInstance, ++CProcessingStatistics::statisticCount, "node-successor-expansion-saturation-resolving-concept-candidate-count");
+
+
+
 				const CProcessingStatisticDescription CProcessingStatistics::statSATURATIONCRITICALTESTCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"saturation-critical-concept-test-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statSATURATIONCRITICALALLCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"saturation-critical-ALL-concept-test-count");
 				const CProcessingStatisticDescription CProcessingStatistics::statSATURATIONCRITICALORCOUNT(registratorInstance,++CProcessingStatistics::statisticCount,"saturation-critical-OR-concept-test-count");

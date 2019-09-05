@@ -200,6 +200,7 @@ namespace Konclude {
 					void propagateExistInitializationFlag(CSaturationConceptDataItem* ontConSatDataItem);
 
 					void extendDisjunctionsCandidateAlternativesItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem, CSaturationConceptDataItem* ontConSatDataItem, QList<CSaturationConceptDataItem*>* newDisjunctionCandidateAlternativeList);
+					CConcept* getDisjunctCheckingConcept(CConcept* opConcept, bool opConNegation, bool* checkingNegation);
 
 					bool isAllAssertionIndividualSaturationSufficient(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 

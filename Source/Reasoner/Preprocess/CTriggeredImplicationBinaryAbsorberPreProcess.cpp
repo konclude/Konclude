@@ -58,6 +58,9 @@ namespace Konclude {
 				mConfCardinalityQualificationTriggerAbsorption = true;
 				mConfPartialCardinalityQualificationTriggerAbsorption = true;
 				mConfOnlyPositiveCardinalityQualificationTriggerAbsorption = false;
+
+				mConfGlobalNegatedSelfRestrictionsToRoleDomainAbsorption = true;
+
 				mLastDisjunctId = 0;
 				mOnto = nullptr;
 			}
@@ -277,6 +280,14 @@ namespace Konclude {
 							++mStatGCIAssertionAbsorbed;
 							absorbed = true;
 						}
+
+
+						if (!absorbed && mConfGlobalNegatedSelfRestrictionsToRoleDomainAbsorption && absorbNegatedSelfToRoleDomain(opCon, opNegation)) {
+							// better for saturation
+							++mStatGCIAssertionAbsorbed;
+							absorbed = true;
+						}
+
 
 						if (!absorbed && absorbNominalSchemaGCIConceptsToTriggeredImplications(opCon,opNegation)) {
 							++mStatGCINormalSchemaAbsorbed;
@@ -1710,6 +1721,9 @@ namespace Konclude {
 
 
 
+
+
+
 			bool CTriggeredImplicationBinaryAbsorberPreProcess::absorbNominalConceptsToAssertions(CConcept* orConcept, bool negated) {
 				bool absorbed = false;
 				cint64 opCode = orConcept->getOperatorCode();
@@ -1770,6 +1784,23 @@ namespace Konclude {
 					}
 
 
+				}
+				return absorbed;
+			}
+
+
+			bool CTriggeredImplicationBinaryAbsorberPreProcess::absorbNegatedSelfToRoleDomain(CConcept* concept, bool negated) {
+				bool absorbed = false;
+				cint64 opCode = concept->getOperatorCode();
+				if (negated && opCode == CCSELF) {
+
+					CRole* role = concept->getRole();
+					CRole* locatedRole = CConceptRoleIndividualLocator::getLocatedRole(role, mOnto);
+					CSortedNegLinker<CConcept*>* domainConLinker = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
+					domainConLinker->init(concept, true);
+					locatedRole->addDomainConceptLinker(domainConLinker);
+
+					absorbed = true;
 				}
 				return absorbed;
 			}

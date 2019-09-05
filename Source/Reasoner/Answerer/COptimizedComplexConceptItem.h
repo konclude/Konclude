@@ -28,6 +28,7 @@
 #include "AnswererSettings.h"
 #include "CComplexConceptItemComputationProcess.h"
 #include "CRequirementWaitingDependencyData.h"
+#include "COptimizedComplexConceptInstanziatedIndividualItemHash.h"
 
 
 
@@ -178,10 +179,10 @@ namespace Konclude {
 					COptimizedComplexConceptItem* setKnownInstanceIndividualSet(QSet<CIndividualReference>* instanceSet);
 
 					QSet<CRealizationIndividualInstanceItemReference>* getPossibleInstanceItemSet();
-					QSet<CRealizationIndividualInstanceItemReference>* getKnownInstanceItemSet();
+					COptimizedComplexConceptInstanziatedIndividualItemHash* getKnownInstanceItems();
 
 					COptimizedComplexConceptItem* setPossibleInstanceItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet);
-					COptimizedComplexConceptItem* setKnownInstanceItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet);
+					COptimizedComplexConceptItem* setKnownInstanceItems(COptimizedComplexConceptInstanziatedIndividualItemHash* instanceItems);
 
 
 					cint64 getPossibleTestedNonInstanceCount();
@@ -189,6 +190,16 @@ namespace Konclude {
 
 					cint64 getRealizationRetrievedInstanceCandidateCount();
 					COptimizedComplexConceptItem* inRealizationRetrievedInstanceCandidateCount(cint64 incCount = 1);
+
+
+					cint64 getRealizationRetrievingExpectedInstanceCandidateCount();
+					COptimizedComplexConceptItem* setRealizationRetrievingExpectedInstanceCandidateCount(cint64 count);
+
+
+
+					double getRealizationIteratorSamplingExpectedCount();
+					COptimizedComplexConceptItem* setRealizationIteratorSamplingExpectedCount(double expectedCount);
+
 
 
 
@@ -267,6 +278,12 @@ namespace Konclude {
 					cint64 getConceptItemId();
 					COptimizedComplexConceptItem* setConceptItemId(cint64 id);
 
+
+#ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
+					QStringList debugVariableNameUseList;
+#endif
+
+
 				// protected methods
 				protected:
 
@@ -314,11 +331,15 @@ namespace Konclude {
 
 					QSet<CIndividualReference>* mKnownInstanceSet;
 					QSet<CIndividualReference>* mPossibleInstanceSet;
+					COptimizedComplexConceptInstanziatedIndividualItemHash* mKnownInstanceItems;
+
 
 					QSet<CRealizationIndividualInstanceItemReference>* mPossibleInstanceItemSet;
-					QSet<CRealizationIndividualInstanceItemReference>* mKnownInstanceItemSet;
 					cint64 mPossibleTestedNonInstanceCount;
 					cint64 mRealizationRetrievedInstanceCandidateCount;
+
+					cint64 mRealizationRetrievingExpectedInstanceCandidateCount;
+					cint64 mRealizationIteratorSamplingExpectedCount;
 
 
 

@@ -189,7 +189,7 @@ namespace Konclude {
 											failedEvaluationTests();
 										}
 									} else {
-										LOG(ERROR, getLogDomain(), logTr("Communication failure %1 with reasoner for test case '%1'.").arg(mCurrentErrorTestRetryCount).arg(mNextTestInputFile), this);
+										LOG(ERROR, getLogDomain(), logTr("Communication failure %1 with reasoner for test case '%2'.").arg(mCurrentErrorTestRetryCount).arg(mNextTestInputFile), this);
 										executeNextEvaluationTest(mReasonerInitFileString, mNextTestInputFile);
 									}
 								} else {
@@ -430,7 +430,7 @@ namespace Konclude {
 				}
 				mCurrentReasonerClient = getReasonerClientForTestfile(testcaseInput);
 				mCurrentReasonerClient->evaluateReasoner(testcaseInit,testcaseInput,addressString,mConfiguration,new CReasonerEvaluationNextEvent(this,0));
-				LOG(INFO, getLogDomain(), logTr("Reasoner execution for test case '%1' finished.").arg(testcaseInput), this);
+				LOG(INFO, getLogDomain(), logTr("Executing reasoner for test case '%1'.").arg(testcaseInput), this);
 				return true;
 			}
 

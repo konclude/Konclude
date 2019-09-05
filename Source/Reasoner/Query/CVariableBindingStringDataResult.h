@@ -74,8 +74,11 @@ namespace Konclude {
 
 					virtual CVariableBindingResult* createCopy();
 
+					virtual QPair<QString, QString> getLiteralDatatypeDatavalueBindingStringPair();
+
 				// protected methods
 				protected:
+					virtual bool enfoceBindingString();
 
 				// protected variables
 				protected:

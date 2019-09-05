@@ -65,6 +65,9 @@ namespace Konclude {
 					virtual CVariableBindingsAnswersStreamingResult* addResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1);
 					virtual CVariableBindingsAnswersResult* addReusedResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1);
 
+					virtual bool flushResults();
+					
+
 					virtual CVariableBindingsAnswersResultIterator* getVariableBindingsAnswersIterator(CVariableBindingsAnswersResultIterator* reuseIt = nullptr);
 
 

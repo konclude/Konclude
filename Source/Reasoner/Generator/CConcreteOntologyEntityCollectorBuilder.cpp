@@ -615,6 +615,9 @@ namespace Konclude {
 				return nullptr;
 			}
 
+			CObjectPropertyTermExpression* CConcreteOntologyEntityCollectorBuilder::getBottomObjectProberty() {
+				return nullptr;
+			}
 
 			CSubObjectPropertyOfExpression* CConcreteOntologyEntityCollectorBuilder::getSubObjectPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) {
 				return nullptr;

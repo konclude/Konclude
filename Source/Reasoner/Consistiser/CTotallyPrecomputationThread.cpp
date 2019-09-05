@@ -1032,6 +1032,31 @@ namespace Konclude {
 
 
 
+			CConcept* CTotallyPrecomputationThread::getDisjunctCheckingConcept(CConcept* opConcept, bool opConNegation, bool* checkingNegation) {
+				if (opConcept->getOperatorCode() == CCAQCHOOCE) {
+					cint64 replaceCount = 0;
+					CConcept* replaceCheckingConcept = nullptr;
+					CSortedNegLinker<CConcept*>* opConceptOpLinkerIt = opConcept->getOperandList();
+					while (opConceptOpLinkerIt) {
+						CConcept* opOpConcept = opConceptOpLinkerIt->getData();
+						bool opOpNegation = opConceptOpLinkerIt->isNegated();
+						if (opOpNegation == opConNegation) {
+							replaceCheckingConcept = opOpConcept;
+							replaceCount++;
+						}
+						opConceptOpLinkerIt = opConceptOpLinkerIt->getNext();
+					}
+
+					if (replaceCount == 1 && replaceCheckingConcept) {
+						if (checkingNegation) {
+							*checkingNegation = false;
+						}
+						return replaceCheckingConcept;
+					}
+				}
+				return opConcept;
+			}
+
 
 			void CTotallyPrecomputationThread::extendDisjunctionsCandidateAlternativesItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem, CSaturationConceptDataItem* ontConSatDataItem, QList<CSaturationConceptDataItem*>* newDisjunctionCandidateAlternativeList) {
 				CConcept* concept = ontConSatDataItem->getSaturationConcept();
@@ -1092,17 +1117,20 @@ namespace Konclude {
 							CConcept* opConcept = opConIt->getData();
 							bool opNegation = opConIt->isNegated()^nextNegation;
 
-							CConceptProcessData* conProcData = (CConceptProcessData*)opConcept->getConceptData();
+							bool opCheckingNegation = opNegation;
+							CConcept* opCheckConcept = getDisjunctCheckingConcept(opConcept, opNegation, &opCheckingNegation);
+
+							CConceptProcessData* conProcData = (CConceptProcessData*)opCheckConcept->getConceptData();
 							CConceptSaturationReferenceLinkingData* conRefSatLinking = (CConceptSaturationReferenceLinkingData*)conProcData->getConceptReferenceLinking();
 							if (!conRefSatLinking) {
 								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
 							}
-							if (conRefSatLinking->getConceptSaturationReferenceLinkingData(opNegation) == nullptr) {
-								CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(opConcept,opNegation,true);
-								conRefSatLinking->setSaturationReferenceLinkingData(conItem,opNegation);
+							if (conRefSatLinking->getConceptSaturationReferenceLinkingData(opCheckingNegation) == nullptr) {
+								CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(opCheckConcept, opCheckingNegation,true);
+								conRefSatLinking->setSaturationReferenceLinkingData(conItem, opCheckingNegation);
 								newDisjunctionCandidateAlternativeList->append(conItem);
-								if (!opConcept->hasClassName() || opNegation) {
+								if (!opCheckConcept->hasClassName() || opCheckingNegation) {
 									conItem->setInvalidSpecialItemReference(true);
 								}
 							}
@@ -1285,7 +1313,7 @@ namespace Konclude {
 					if (createAllAssertionIndi && (!assConNegPairSet.isEmpty() && !assRoleSet.isEmpty())) {
 						CIndividual* tmpAllAssertionIndi = new CIndividual();
 						tmpAllAssertionIndi->initIndividual(totallyPreCompItem->getOntology()->getABox()->getNextIndividualId(false));
-						tmpAllAssertionIndi->setTemporaryIndividual(true);
+						tmpAllAssertionIndi->setTemporaryFakeIndividual(true);
 
 						for (QSet<TConceptNegPair>::const_iterator it = assConNegPairSet.constBegin(), itEnd = assConNegPairSet.constEnd(); it != itEnd; ++it) {
 							constConReqSatAdded = true;

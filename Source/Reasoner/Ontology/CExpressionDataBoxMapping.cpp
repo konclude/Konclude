@@ -48,6 +48,7 @@ namespace Konclude {
 				mDatatypeExpDatatypeHash = CObjectParameterizingAllocator< CBUILDHASH<CDatatypeExpression*,CDatatype*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mDatatypeDatatypeExpHash = CObjectParameterizingAllocator< CBUILDHASH<CDatatype*,CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
+				mLexicalDataExpDatatypePairDataLiteralHash = CObjectParameterizingAllocator< CBUILDHASH<QPair<CDataLexicalValueExpression*, CDatatype*>, CDataLiteral*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 				mUpdateClassAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CClassAxiomExpression*,bool>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mUpdateObjectPropertyAxiomHash = CObjectParameterizingAllocator< CBUILDHASH<CObjectPropertyAxiomExpression*,bool>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
@@ -126,6 +127,7 @@ namespace Konclude {
 
 				COPADestroyAndRelease(mDatatypeExpDatatypeHash,memAllocMan);
 				COPADestroyAndRelease(mDatatypeDatatypeExpHash,memAllocMan);
+				COPADestroyAndRelease(mLexicalDataExpDatatypePairDataLiteralHash, memAllocMan);
 
 				COPADestroyAndRelease(mUpdateClassAxiomHash,memAllocMan);
 				COPADestroyAndRelease(mUpdateObjectPropertyAxiomHash,memAllocMan);
@@ -183,6 +185,7 @@ namespace Konclude {
 
 				*mDatatypeExpDatatypeHash = *dataBoxMapping->mDatatypeExpDatatypeHash;
 				*mDatatypeDatatypeExpHash = *dataBoxMapping->mDatatypeDatatypeExpHash;
+				*mLexicalDataExpDatatypePairDataLiteralHash = *dataBoxMapping->mLexicalDataExpDatatypePairDataLiteralHash;
 
 				mActiveEntityCountVector->initActiveEntityCountVector(dataBoxMapping->mActiveEntityCountVector);
 
@@ -310,6 +313,11 @@ namespace Konclude {
 				return mIndiIndividulTermHash;
 			}
 
+
+
+			CBUILDHASH<QPair<CDataLexicalValueExpression*, CDatatype*>, CDataLiteral*>* CExpressionDataBoxMapping::getDataLexicalValueExpressionDatatypePairDataLiteralHash() {
+				return mLexicalDataExpDatatypePairDataLiteralHash;
+			}
 
 
 			CBUILDHASH<CDatatypeExpression*,CDatatype*>* CExpressionDataBoxMapping::getDatatypeExpressionDatatypeHash() {

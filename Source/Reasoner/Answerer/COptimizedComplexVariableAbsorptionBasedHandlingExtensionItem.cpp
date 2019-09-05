@@ -32,6 +32,8 @@ namespace Konclude {
 				mAbsorptionData = absorptionData;
 				mPossibleVariableMapping = nullptr;
 				mTestingVariableMapping = nullptr;
+				mPropatationTestCreated = false;
+				mDependentMappingsComputationScheduled = false;
 			}
 
 
@@ -43,6 +45,10 @@ namespace Konclude {
 				return ABSOROPTION_BASED_EXTENSION;
 			}
 
+
+			QHash<CExpressionVariable*, COptimizedComplexVariableCompositionItem*>* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getVariableExpressionCompositionItemHash() {
+				return &mVariableExpressionBaseItem;
+			}
 
 
 			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getVariableCompositionItem(CExpressionVariable* variableExpression) {
@@ -83,23 +89,44 @@ namespace Konclude {
 				return &mVariableIndexHash;
 			}
 
-			COptimizedComplexVariableIndividualMapping* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getPossibleVariableMapping() {
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getPossibleVariableMapping() {
 				return mPossibleVariableMapping;
 			}
 
-			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setPossibleVariableMapping(COptimizedComplexVariableIndividualMapping* possibleVariableMapping) {
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setPossibleVariableMapping(COptimizedComplexVariableIndividualMappings* possibleVariableMapping) {
 				mPossibleVariableMapping = possibleVariableMapping;
 				return this;
 			}
 
-			COptimizedComplexVariableIndividualMapping* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getTestingVariableMapping() {
+			QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getTestingVariableMapping() {
 				return mTestingVariableMapping;
 			}
 
-			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setTestingVariableMapping(COptimizedComplexVariableIndividualMapping* testingVariableMapping) {
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setTestingVariableMapping(QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* testingVariableMapping) {
 				mTestingVariableMapping = testingVariableMapping;
 				return this;
 			}
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::isPropatationTestCreated() {
+				return mPropatationTestCreated;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setPropatationTestCreated(bool created) {
+				mPropatationTestCreated = created;
+				return this;
+			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::isDependentMappingsComputationSchedluled() {
+				return mDependentMappingsComputationScheduled;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setDependentMappingsComputationSchedluled(bool scheduled) {
+				mDependentMappingsComputationScheduled = scheduled;
+				return this;
+			}
+
+
 
 		}; // end namespace Answerer
 

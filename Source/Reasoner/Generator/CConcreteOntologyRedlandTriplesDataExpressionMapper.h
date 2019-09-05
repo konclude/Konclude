@@ -92,6 +92,7 @@ namespace Konclude {
 							CRedlandNodeProcessingData(librdf_node* redlandNode, CBuildExpression* expression) {
 								mRedlandNode = redlandNode;
 								mExpression = expression;
+								mCurrentId = nextId++;
 							}
 
 						public:
@@ -102,7 +103,11 @@ namespace Konclude {
 							bool mBuilt = false;
 							bool mProcessed = false;
 							bool mStacked = false;
+							cint64 mCurrentId = 0;
+
+							static int nextId;
 					};
+
 
 					
 					class CRedlandTripleStream : public CLinkerBase<CRedlandTripleStream*, CRedlandTripleStream> {
@@ -258,6 +263,8 @@ namespace Konclude {
 					CConcreteOntologyRedlandTriplesDataExpressionMapper* buildAxiomExpressionFromRDFNodeListWithNewHandling(librdf_node* listNode, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, function<CRedlandNodeProcessingData*(librdf_node* node)> newHandlingFunc, QList<CBuildExpression*>& expressionList, function<CAxiomExpression*(const QList<CBuildExpression*>&)> buildFunction, QList<CAxiomExpression*>& axiomExpressions);
 
 
+					CConcreteOntologyRedlandTriplesDataExpressionMapper* addBaseNodeExpression(const char* uri, CBuildExpression* expr, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, QList<CRedlandNodeProcessingData*>& nodeHandlingList, CRedlandStoredTriplesData* redlandTriplesData);
+					CConcreteOntologyRedlandTriplesDataExpressionMapper* addBaseNodeExpression(librdf_node* node, CBuildExpression* expr, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, QList<CRedlandNodeProcessingData*>& nodeHandlingList);
 
 					CConcreteOntologyRedlandTriplesDataExpressionMapper* handleDeclaration(librdf_node* node, function<CBuildExpression*(const QString &uri)> buildEntityFunc, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, QList<CRedlandNodeProcessingData*>& nodeHandlingList);
 					CConcreteOntologyRedlandTriplesDataExpressionMapper* handleClassExpressionRestriction(librdf_node* node);

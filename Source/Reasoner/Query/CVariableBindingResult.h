@@ -81,6 +81,7 @@ namespace Konclude {
 					virtual QString getNamedIndividualBindingString() = 0;
 					virtual QString getLiteralDatatypeBindingString() = 0;
 					virtual QString getLiteralDatavalueBindingString() = 0;
+					virtual QPair<QString, QString> getLiteralDatatypeDatavalueBindingStringPair();
 
 					virtual CVariableBindingResult* createCopy() = 0;
 

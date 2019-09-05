@@ -28,6 +28,10 @@ namespace Konclude {
 		namespace Query {
 
 
+			const QString CVariableBindingStringResult::PREFIX_XML_PLAINLITERAL_DATATYPE_STRING = QString(PREFIX_XML_PLAINLITERAL_DATATYPE);
+			const QStringRef CVariableBindingStringResult::PREFIX_XML_PLAINLITERAL_DATATYPE_STRINGREF = CVariableBindingStringResult::PREFIX_XML_PLAINLITERAL_DATATYPE_STRING.midRef(0);
+
+
 			CVariableBindingStringResult::CVariableBindingStringResult() {
 			}
 
@@ -84,6 +88,7 @@ namespace Konclude {
 
 
 			const QString& CVariableBindingStringResult::getBindingString() {
+				enfoceBindingString();
 				return mBindingString;
 			}
 
@@ -103,6 +108,7 @@ namespace Konclude {
 			}
 
 			QString CVariableBindingStringResult::getQueryResultString() {
+				enfoceBindingString();
 				return mBindingString;
 			}
 
@@ -114,6 +120,7 @@ namespace Konclude {
 				if (otherStringBinRes->getVariableBindingType() != mType) {
 					return false;
 				}
+				enfoceBindingString();
 				if (otherStringBinRes->getBindingString() != mBindingString) {
 					return false;
 				}
@@ -122,6 +129,7 @@ namespace Konclude {
 
 			QString CVariableBindingStringResult::getNamedIndividualBindingString() {
 				if (mType == CVariableBindingResult::VBTNAMEDINDIVIDUAL) {
+					enfoceBindingString();
 					return mBindingString;
 				}
 				return QString();
@@ -129,12 +137,13 @@ namespace Konclude {
 
 			QString CVariableBindingStringResult::getLiteralDatatypeBindingString() {
 				if (mType == CVariableBindingResult::VBTLITERAL) {
+					enfoceBindingString();
 					if (mBindingString.endsWith("\"")) {
-						return QString(PREFIX_XML_PLAINLITERAL_DATATYPE);
+						return PREFIX_XML_PLAINLITERAL_DATATYPE_STRING;
 					} else {
 						cint64 separator = mBindingString.lastIndexOf("\"^^");
 						if (separator < 0) {
-							return QString(PREFIX_XML_PLAINLITERAL_DATATYPE);
+							return PREFIX_XML_PLAINLITERAL_DATATYPE_STRING;
 						}
 						else {
 							return mBindingString.mid(separator + 3);
@@ -146,6 +155,7 @@ namespace Konclude {
 
 			QString CVariableBindingStringResult::getLiteralDatavalueBindingString() {
 				if (mType == CVariableBindingResult::VBTLITERAL) {
+					enfoceBindingString();
 					if (mBindingString.endsWith("\"")) {
 						return mBindingString.mid(1, mBindingString.length() - 2);
 					} else {
@@ -161,9 +171,39 @@ namespace Konclude {
 				return QString();
 			}
 
+
+			QPair<QString, QString> CVariableBindingStringResult::getLiteralDatatypeDatavalueBindingStringPair() {
+				QString datatypeString;
+				QString datavalueString;
+				if (mType == CVariableBindingResult::VBTLITERAL) {
+					enfoceBindingString();
+					if (mBindingString.endsWith("\"")) {
+						datatypeString = PREFIX_XML_PLAINLITERAL_DATATYPE_STRING;
+						datavalueString = mBindingString.mid(1, mBindingString.length() - 2);
+					} else {
+						cint64 separator = mBindingString.lastIndexOf("\"^^");
+						if (separator < 0) {
+							datatypeString = PREFIX_XML_PLAINLITERAL_DATATYPE_STRING;
+							datavalueString = mBindingString.mid(1, mBindingString.length() - 2);
+						} else {
+							datatypeString = mBindingString.mid(separator + 3);
+							datavalueString = mBindingString.mid(1, separator - 1);
+						}
+					}
+				}
+				return QPair<QString, QString>(datatypeString, datavalueString);
+			}
+
+
+
 			CVariableBindingResult* CVariableBindingStringResult::createCopy() {
 				CVariableBindingStringResult* copy = new CVariableBindingStringResult(*this);
 				return copy;
+			}
+
+
+			bool CVariableBindingStringResult::enfoceBindingString() {
+				return false;
 			}
 
 

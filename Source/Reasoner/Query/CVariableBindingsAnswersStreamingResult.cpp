@@ -59,6 +59,12 @@ namespace Konclude {
 			}
 
 
+			bool CVariableBindingsAnswersStreamingResult::flushResults() {
+				return mHandler->streamingFlush();
+			}
+
+
+
 			QString CVariableBindingsAnswersStreamingResult::getQueryResultString() {
 				return QString();
 			}

@@ -35,7 +35,7 @@ namespace Konclude {
 
 				CRepresentativePropagationMap* CRepresentativePropagationMap::initRepresentativePropagationMap(CRepresentativePropagationMap* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSMAP<cint64, CRepresentativePropagationMapData>::operator=(*prevMap);
 					} else {
 						CPROCESSMAP<cint64,CRepresentativePropagationMapData>::clear();
 					}

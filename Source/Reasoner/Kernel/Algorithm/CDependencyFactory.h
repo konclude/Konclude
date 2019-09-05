@@ -69,6 +69,7 @@
 #include "Reasoner/Kernel/Process/Dependency/CPROPAGATECONNECTIONAWAYDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CBINDPROPAGATEGROUNDINGDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CSAMEINDIVIDUALSMERGEDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CORONLYOPTIONDependencyNode.h"
 
 #include "Reasoner/Kernel/Process/Dependency/CVARBINDPROPAGATEANDDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CVARBINDPROPAGATEALLDependencyNode.h"
@@ -179,6 +180,7 @@ namespace Konclude {
 						CMERGEDCONCEPTDependencyNode* createMERGEDCONCEPTDependency(CDependencyTrackPoint*& mergedConceptContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* conceptPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CMERGEDLINKDependencyNode* createMERGEDLINKDependency(CDependencyTrackPoint*& mergedLinkContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* linkPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CIMPLICATIONDependencyNode* createIMPLICATIONDependency(CDependencyTrackPoint*& implContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext);
+						CORONLYOPTIONDependencyNode* createORONLYOPTIONDependency(CDependencyTrackPoint*& orContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext);
 						CEXPANDEDDependencyNode* createEXPANDEDDependency(CDependencyTrackPoint*& expContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext);
 						CCONNECTIONDependencyNode* createCONNECTIONDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CDATATYPETRIGGERDependencyNode* createDATATYPETRIGGERDependency(CDependencyTrackPoint*& triggerContinueDepTrackPoint, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext);

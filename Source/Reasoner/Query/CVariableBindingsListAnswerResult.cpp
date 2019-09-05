@@ -51,6 +51,12 @@ namespace Konclude {
 				}
 			}
 
+			CVariableBindingsListAnswerResult* CVariableBindingsListAnswerResult::clearResultVariableBindings() {
+				mBindingsList.clear();
+				return this;
+			}
+
+
 
 			CVariableBindingsListAnswerResult* CVariableBindingsListAnswerResult::addResultVariableBinding(CVariableBindingResult* varBinding) {
 				mBindingsList.append(varBinding);
@@ -80,7 +86,11 @@ namespace Konclude {
 
 
 			QString CVariableBindingsListAnswerResult::getQueryResultString() {
-				return QString();
+				QStringList bindingsStringList;
+				for (auto binding : mBindingsList) {
+					bindingsStringList.append(binding->getBindingString());
+				}
+				return bindingsStringList.join(", ");
 			}
 
 

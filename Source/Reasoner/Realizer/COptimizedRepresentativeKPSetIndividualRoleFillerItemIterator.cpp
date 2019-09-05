@@ -393,7 +393,12 @@ namespace Konclude {
 							--mNeighbourIndiIdsMapIt;
 						}
 					}
-					moveToValidPosition(mNeighbourIndiIdsMapIt);
+					if (mNeighbourIndiIdsMapIt != mNeighbourIndiIdsMap.end()) {
+						moveToValidPosition(mNeighbourIndiIdsMapIt);
+					} else {
+						mHasCurrentIndiId = false;
+						mCurentIndividual = nullptr;
+					}
 				}
 				if (moveOverCursor) {
 					moveNext();

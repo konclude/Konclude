@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CRepresentativeVariableBindingPathJoiningKeyHash* CRepresentativeVariableBindingPathJoiningKeyHash::initRepresentativeVariableBindingPathJoiningKeyHash(CRepresentativeVariableBindingPathJoiningKeyHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<CRepresentativeVariableBindingPathJoiningKeyHasher, CRepresentativeVariableBindingPathJoiningKeyHashData>::operator=(*prevHash);
 						mNextRepVarBindPathJoiningKeyTag = prevHash->mNextRepVarBindPathJoiningKeyTag;
 					} else {
 						CPROCESSHASH<CRepresentativeVariableBindingPathJoiningKeyHasher,CRepresentativeVariableBindingPathJoiningKeyHashData>::clear();

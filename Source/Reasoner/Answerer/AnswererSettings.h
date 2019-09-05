@@ -75,6 +75,7 @@ namespace Konclude {
 			class COptimizedComplexVariableJoiningItem;
 			class COptimizedComplexVariableDataLiteralExtensionItem;
 			class COptimizedComplexVariableReductionItem;
+			class COptimizedComplexVariableCompositionItemVariableIndexMapping;
 
 
 			// Custom Events >= 2000
@@ -100,6 +101,22 @@ namespace Konclude {
 
 
 #define CVARIABLEBINDINGMESSAGELIST CQtManagedRestrictedModificationList
+
+
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+
+	#define OPTIMIZED_ANSWERER_DEBUG_STRINGS
+
+#endif
+
+
+
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+
+#define CONCURRENT_JOIN_COMPUTATION_PERFORMANCE_MEASUREMENT
+
+#endif
+
 
 		}; // end namespace Answerer
 

@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CVariableBindingPathMergingHash* CVariableBindingPathMergingHash::initVariableBindingPathMergingHash(CVariableBindingPathMergingHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<TPathIDPair, CVariableBindingPathMergingHashData>::operator=(*prevHash);
 					} else {
 						CPROCESSHASH<TPathIDPair,CVariableBindingPathMergingHashData>::clear();
 					}

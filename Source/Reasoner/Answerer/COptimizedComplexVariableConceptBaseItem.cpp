@@ -30,6 +30,9 @@ namespace Konclude {
 
 			COptimizedComplexVariableConceptBaseItem::COptimizedComplexVariableConceptBaseItem(COptimizedComplexConceptItem* conceptItem) {
 				mConceptItem = conceptItem;
+				mInstanceItemProcessingLinker = nullptr;
+				mInstanceItemProcessedLinker = nullptr;
+				mInstanceItemRetrievedLinker = nullptr;
 			}
 
 
@@ -43,6 +46,33 @@ namespace Konclude {
 
 			COptimizedComplexConceptItem* COptimizedComplexVariableConceptBaseItem::getConceptItem() {
 				return mConceptItem;
+			}
+
+			COptimizedComplexConceptInstanziatedIndividualItemLinker* COptimizedComplexVariableConceptBaseItem::getInstanceItemProcessingLinker() {
+				return mInstanceItemProcessingLinker;
+			}
+
+			COptimizedComplexConceptInstanziatedIndividualItemLinker* COptimizedComplexVariableConceptBaseItem::getInstanceItemProcessedLinker() {
+				return mInstanceItemProcessedLinker;
+			}
+
+			COptimizedComplexConceptInstanziatedIndividualItemLinker* COptimizedComplexVariableConceptBaseItem::getInstanceItemRetrievedLinker() {
+				return mInstanceItemRetrievedLinker;
+			}
+			
+			COptimizedComplexVariableConceptBaseItem* COptimizedComplexVariableConceptBaseItem::setInstanceItemProcessingLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker) {
+				mInstanceItemProcessingLinker = linker;
+				return this;
+			}
+
+			COptimizedComplexVariableConceptBaseItem* COptimizedComplexVariableConceptBaseItem::setInstanceItemProcessedLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker) {
+				mInstanceItemProcessedLinker = linker;
+				return this;
+			}
+
+			COptimizedComplexVariableConceptBaseItem* COptimizedComplexVariableConceptBaseItem::setInstanceItemRetrievedLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker) {
+				mInstanceItemRetrievedLinker = linker;
+				return this;
 			}
 
 

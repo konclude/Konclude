@@ -357,141 +357,143 @@ namespace Konclude {
 						CConceptDescriptor* lastConDes = satBlockData->getLastConfirmedConceptDescriptior();
 						CIndividualSaturationProcessNode* satIndiNode = satBlockData->getSaturationIndividualNode();
 						CSaturationConceptDataItem* conceptSatItem = (CSaturationConceptDataItem*)satIndiNode->getSaturationConceptReferenceLinking();;
-						CConcept* saturationConcept = conceptSatItem->getSaturationConcept();
+						if (conceptSatItem) {
+							CConcept* saturationConcept = conceptSatItem->getSaturationConcept();
 
-						//if (CIRIName::getRecentIRIName(saturationConcept->getClassNameLinker()) == "http://www.owllink.org/testsuite/galen#Transport") {
-						//	bool debug = true;
-						//}
+							//if (CIRIName::getRecentIRIName(saturationConcept->getClassNameLinker()) == "http://www.owllink.org/testsuite/galen#Transport") {
+							//	bool debug = true;
+							//}
 
-						CReapplyConceptLabelSet* conSet = individualProcessNode->getReapplyConceptLabelSet(false);
-						cint64 totalConceptCount = conSet->getConceptCount();
-						cint64 conSetSignature = conSet->getConceptSignature()->getSignatureValue();
+							CReapplyConceptLabelSet* conSet = individualProcessNode->getReapplyConceptLabelSet(false);
+							cint64 totalConceptCount = conSet->getConceptCount();
+							cint64 conSetSignature = conSet->getConceptSignature()->getSignatureValue();
 
 
-						CConceptDescriptor* conDes = conSet->getAddingSortedConceptDescriptionLinker();
-						CConceptDescriptor* lastPossiblyNonDeterministicConDes = nullptr;
-						CConceptDescriptor* satConDes = nullptr;
-						CDependencyTrackPoint* satConDepTrackPoint = nullptr;
-						if (conSet->getConceptDescriptor(saturationConcept,satConDes,satConDepTrackPoint)) {
-							for (CConceptDescriptor* conDesIt = conDes; conDesIt != lastConDes; conDesIt = conDesIt->getNext()) {
-								CDependencyTrackPoint* depTrackPoint = conDesIt->getDependencyTrackPoint();
-								if (onlyAllNondeterministic) {
-									lastPossiblyNonDeterministicConDes = conDesIt;
-								} else if (!isDeterministicallyDependingOnSaturationConcept(individualProcessNode,depTrackPoint,satConDes,calcAlgContext)) {
-									lastPossiblyNonDeterministicConDes = conDesIt;
+							CConceptDescriptor* conDes = conSet->getAddingSortedConceptDescriptionLinker();
+							CConceptDescriptor* lastPossiblyNonDeterministicConDes = nullptr;
+							CConceptDescriptor* satConDes = nullptr;
+							CDependencyTrackPoint* satConDepTrackPoint = nullptr;
+							if (conSet->getConceptDescriptor(saturationConcept,satConDes,satConDepTrackPoint)) {
+								for (CConceptDescriptor* conDesIt = conDes; conDesIt != lastConDes; conDesIt = conDesIt->getNext()) {
+									CDependencyTrackPoint* depTrackPoint = conDesIt->getDependencyTrackPoint();
+									if (onlyAllNondeterministic) {
+										lastPossiblyNonDeterministicConDes = conDesIt;
+									} else if (!isDeterministicallyDependingOnSaturationConcept(individualProcessNode,depTrackPoint,satConDes,calcAlgContext)) {
+										lastPossiblyNonDeterministicConDes = conDesIt;
+									}
 								}
-							}
-							if (!cachingOnlyIfDeterministic || lastPossiblyNonDeterministicConDes == nullptr) {
+								if (!cachingOnlyIfDeterministic || lastPossiblyNonDeterministicConDes == nullptr) {
 
-								prepareCacheMessages(calcAlgContext);
-								CTaskMemoryPoolAllocationManager* satCacheMemMan = mMemAllocMan;
-								CContextBase* tmpContext = mTmpContext;
+									prepareCacheMessages(calcAlgContext);
+									CTaskMemoryPoolAllocationManager* satCacheMemMan = mMemAllocMan;
+									CContextBase* tmpContext = mTmpContext;
 
-								CSaturationNodeAssociatedExpansionCacheExpansionWriteData* detExpWriteData = nullptr;
-								CSaturationNodeAssociatedExpansionCacheExpansionWriteData* nondetExpWriteData = nullptr;
+									CSaturationNodeAssociatedExpansionCacheExpansionWriteData* detExpWriteData = nullptr;
+									CSaturationNodeAssociatedExpansionCacheExpansionWriteData* nondetExpWriteData = nullptr;
 
 
-								bool hasTightAtMostRestriction = false;
-								for (CConceptDescriptor* conDesIt = conDes; conDesIt && !hasTightAtMostRestriction; conDesIt = conDesIt->getNext()) {
-									CConcept* concept = conDesIt->getConcept();
-									bool negation = conDesIt->isNegated();
-									cint64 conCode = concept->getConceptOperator()->getOperatorCode();
-									if (negation && conCode == CCATLEAST || !negation && conCode == CCATMOST) {
-										CRole* role = concept->getRole();
-										cint64 parameter = concept->getParameter();
-										cint64 cardinality = parameter+1*negation;
+									bool hasTightAtMostRestriction = false;
+									for (CConceptDescriptor* conDesIt = conDes; conDesIt && !hasTightAtMostRestriction; conDesIt = conDesIt->getNext()) {
+										CConcept* concept = conDesIt->getConcept();
+										bool negation = conDesIt->isNegated();
+										cint64 conCode = concept->getConceptOperator()->getOperatorCode();
+										if (negation && conCode == CCATLEAST || !negation && conCode == CCATMOST) {
+											CRole* role = concept->getRole();
+											cint64 parameter = concept->getParameter();
+											cint64 cardinality = parameter+1*negation;
 
-										if (individualProcessNode->getRoleSuccessorCount(role) >= cardinality) {
-											hasTightAtMostRestriction = true;
+											if (individualProcessNode->getRoleSuccessorCount(role) >= cardinality) {
+												hasTightAtMostRestriction = true;
+											}
 										}
 									}
-								}
 
-								CSaturationNodeAssociatedDependentNominalSet* nomDepSet = nullptr;
+									CSaturationNodeAssociatedDependentNominalSet* nomDepSet = nullptr;
 
-								CSuccessorConnectedNominalSet* successorNominalConnSet = individualProcessNode->getSuccessorNominalConnectionSet(false);
-								if (successorNominalConnSet) {
-									nomDepSet = CObjectParameterizingAllocator< CSaturationNodeAssociatedDependentNominalSet,CContext* >::allocateAndConstructAndParameterize(satCacheMemMan,tmpContext);
-									for (CSuccessorConnectedNominalSet::const_iterator it = successorNominalConnSet->constBegin(), itEnd = successorNominalConnSet->constEnd(); it != itEnd; ++it) {
-										cint64 nominalID = -(*it);
-										nomDepSet->insert(nominalID);
-									}
-								}
-
-
-								if (lastPossiblyNonDeterministicConDes) {
-									// create non-deterministic expansion data
-									nondetExpWriteData = CObjectAllocator< CSaturationNodeAssociatedExpansionCacheExpansionWriteData >::allocateAndConstruct(satCacheMemMan);
-
-									CSaturationNodeAssociatedConceptLinker* nonDetConceptLinker = nullptr;
-									CConceptDescriptor* conDesStop = lastPossiblyNonDeterministicConDes->getNext();
-									for (CConceptDescriptor* conDesIt = conDes; conDesIt != conDesStop; conDesIt = conDesIt->getNext()) {
-										const CCacheValue& cacheValue(getCacheValueForConcept(conDesIt->getConcept(),conDesIt->isNegated(),calcAlgContext));
-										CSaturationNodeAssociatedConceptLinker* assConceptLinker = CObjectAllocator< CSaturationNodeAssociatedConceptLinker >::allocateAndConstruct(satCacheMemMan);
-										assConceptLinker->initConceptLinker(cacheValue);
-										nonDetConceptLinker = assConceptLinker->append(nonDetConceptLinker);
+									CSuccessorConnectedNominalSet* successorNominalConnSet = individualProcessNode->getSuccessorNominalConnectionSet(false);
+									if (successorNominalConnSet) {
+										nomDepSet = CObjectParameterizingAllocator< CSaturationNodeAssociatedDependentNominalSet,CContext* >::allocateAndConstructAndParameterize(satCacheMemMan,tmpContext);
+										for (CSuccessorConnectedNominalSet::const_iterator it = successorNominalConnSet->constBegin(), itEnd = successorNominalConnSet->constEnd(); it != itEnd; ++it) {
+											cint64 nominalID = -(*it);
+											nomDepSet->insert(nominalID);
+										}
 									}
 
-									nondetExpWriteData->initExpansionWriteData(satIndiNode,nonDetConceptLinker);
-									nondetExpWriteData->setDeterministicExpansion(false);
-									nondetExpWriteData->setTightAtMostRestriction(hasTightAtMostRestriction);
-									nondetExpWriteData->setConceptSetSignature(conSetSignature);
-									nondetExpWriteData->setTotalConceptCount(totalConceptCount);
-									nondetExpWriteData->setDependentNominalSet(nomDepSet);
 
-								}
-
-
-								if (!lastPossiblyNonDeterministicConDes || lastPossiblyNonDeterministicConDes->getNext() != lastConDes) {
-
-									CSaturationNodeAssociatedDeterministicConceptExpansion* detConExp = nullptr;
-									if (cacheEntry) {
-										detConExp = cacheEntry->getDeterministicConceptExpansion();
-									}
-									CSaturationNodeAssociatedConceptLinker* detConceptLinker = nullptr;
-
-									CConceptDescriptor* conDesStart = nullptr;
 									if (lastPossiblyNonDeterministicConDes) {
-										conDesStart = lastPossiblyNonDeterministicConDes->getNext();
-									}
-									if (!conDesStart) {
-										conDesStart = conDes;
-									}
-									for (CConceptDescriptor* conDesIt = conDesStart; conDesIt != lastConDes; conDesIt = conDesIt->getNext()) {
-										CCacheValue cacheValue(getCacheValueForConcept(conDesIt->getConcept(),conDesIt->isNegated(),calcAlgContext));
-										if (!detConExp || !detConExp->hasConceptExpansionLinker(&cacheValue)) {
+										// create non-deterministic expansion data
+										nondetExpWriteData = CObjectAllocator< CSaturationNodeAssociatedExpansionCacheExpansionWriteData >::allocateAndConstruct(satCacheMemMan);
+
+										CSaturationNodeAssociatedConceptLinker* nonDetConceptLinker = nullptr;
+										CConceptDescriptor* conDesStop = lastPossiblyNonDeterministicConDes->getNext();
+										for (CConceptDescriptor* conDesIt = conDes; conDesIt != conDesStop; conDesIt = conDesIt->getNext()) {
+											const CCacheValue& cacheValue(getCacheValueForConcept(conDesIt->getConcept(),conDesIt->isNegated(),calcAlgContext));
 											CSaturationNodeAssociatedConceptLinker* assConceptLinker = CObjectAllocator< CSaturationNodeAssociatedConceptLinker >::allocateAndConstruct(satCacheMemMan);
 											assConceptLinker->initConceptLinker(cacheValue);
-											detConceptLinker = assConceptLinker->append(detConceptLinker);
+											nonDetConceptLinker = assConceptLinker->append(nonDetConceptLinker);
+										}
+
+										nondetExpWriteData->initExpansionWriteData(satIndiNode,nonDetConceptLinker);
+										nondetExpWriteData->setDeterministicExpansion(false);
+										nondetExpWriteData->setTightAtMostRestriction(hasTightAtMostRestriction);
+										nondetExpWriteData->setConceptSetSignature(conSetSignature);
+										nondetExpWriteData->setTotalConceptCount(totalConceptCount);
+										nondetExpWriteData->setDependentNominalSet(nomDepSet);
+
+									}
+
+
+									if (!lastPossiblyNonDeterministicConDes || lastPossiblyNonDeterministicConDes->getNext() != lastConDes) {
+
+										CSaturationNodeAssociatedDeterministicConceptExpansion* detConExp = nullptr;
+										if (cacheEntry) {
+											detConExp = cacheEntry->getDeterministicConceptExpansion();
+										}
+										CSaturationNodeAssociatedConceptLinker* detConceptLinker = nullptr;
+
+										CConceptDescriptor* conDesStart = nullptr;
+										if (lastPossiblyNonDeterministicConDes) {
+											conDesStart = lastPossiblyNonDeterministicConDes->getNext();
+										}
+										if (!conDesStart) {
+											conDesStart = conDes;
+										}
+										for (CConceptDescriptor* conDesIt = conDesStart; conDesIt != lastConDes; conDesIt = conDesIt->getNext()) {
+											CCacheValue cacheValue(getCacheValueForConcept(conDesIt->getConcept(),conDesIt->isNegated(),calcAlgContext));
+											if (!detConExp || !detConExp->hasConceptExpansionLinker(&cacheValue)) {
+												CSaturationNodeAssociatedConceptLinker* assConceptLinker = CObjectAllocator< CSaturationNodeAssociatedConceptLinker >::allocateAndConstruct(satCacheMemMan);
+												assConceptLinker->initConceptLinker(cacheValue);
+												detConceptLinker = assConceptLinker->append(detConceptLinker);
+											}
+										}
+
+										if (detConceptLinker || !detConExp || detConExp->requiresNonDeterministicExpansion() && !detConceptLinker) {
+											detExpWriteData = CObjectAllocator< CSaturationNodeAssociatedExpansionCacheExpansionWriteData >::allocateAndConstruct(satCacheMemMan);
+											detExpWriteData->initExpansionWriteData(satIndiNode,detConceptLinker);
+											detExpWriteData->setDeterministicExpansion(true);
+											if (!lastPossiblyNonDeterministicConDes) {
+												detExpWriteData->setRequiresNondeterministicExpansion(false);
+												detExpWriteData->setTightAtMostRestriction(hasTightAtMostRestriction);
+												detExpWriteData->setConceptSetSignature(conSetSignature);
+												detExpWriteData->setTotalConceptCount(totalConceptCount);
+												detExpWriteData->setDependentNominalSet(nomDepSet);
+											}
 										}
 									}
 
-									if (detConceptLinker || !detConExp || detConExp->requiresNonDeterministicExpansion() && !detConceptLinker) {
-										detExpWriteData = CObjectAllocator< CSaturationNodeAssociatedExpansionCacheExpansionWriteData >::allocateAndConstruct(satCacheMemMan);
-										detExpWriteData->initExpansionWriteData(satIndiNode,detConceptLinker);
-										detExpWriteData->setDeterministicExpansion(true);
-										if (!lastPossiblyNonDeterministicConDes) {
-											detExpWriteData->setRequiresNondeterministicExpansion(false);
-											detExpWriteData->setTightAtMostRestriction(hasTightAtMostRestriction);
-											detExpWriteData->setConceptSetSignature(conSetSignature);
-											detExpWriteData->setTotalConceptCount(totalConceptCount);
-											detExpWriteData->setDependentNominalSet(nomDepSet);
-										}
+
+									bool wroteCacheData = false;
+									if (nondetExpWriteData) {
+										wroteCacheData = true;
+										addCacheMessages(nondetExpWriteData,calcAlgContext);
 									}
-								}
+									if (detExpWriteData) {
+										wroteCacheData = true;
+										addCacheMessages(detExpWriteData,calcAlgContext);
+									}
+									return wroteCacheData;
 
-
-								bool wroteCacheData = false;
-								if (nondetExpWriteData) {
-									wroteCacheData = true;
-									addCacheMessages(nondetExpWriteData,calcAlgContext);
 								}
-								if (detExpWriteData) {
-									wroteCacheData = true;
-									addCacheMessages(detExpWriteData,calcAlgContext);
-								}
-								return wroteCacheData;
-
 							}
 						}
 					}

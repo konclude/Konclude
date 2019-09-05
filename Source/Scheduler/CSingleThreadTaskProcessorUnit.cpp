@@ -594,6 +594,60 @@ namespace Konclude {
 			return this;
 		}
 
+
+		bool CSingleThreadTaskProcessorUnit::updateTaskStatusDown(CTask* task, cint64 depth) {
+			if (depth < 1000) {
+				bool downProp = false;
+				bool upProp = false;
+				CTask* updateTask = task;
+				updateTask->setTaskID(-1);
+				if (mTaskStatusPropagator && mTaskStatusPropagator->updateTaskStatus(updateTask, downProp, upProp)) {
+					INCTASKPROCESSINGSTAT(mStats.incStatisticTasksUpdatedCount(1));
+
+					if (downProp) {
+						CXNegLinker<CTask*>* refTaskIt = updateTask->getReferencedTaskLinker();
+						while (refTaskIt) {
+							if (refTaskIt->isNegated()) {
+								// task still exists, update task status
+								// TODO: check better not recursive?
+								CTask* refTask = refTaskIt->getData();
+								updateTaskStatusDown(refTask, depth + 1);
+							}
+							refTaskIt = refTaskIt->getNext();
+						}
+					}
+				}
+
+			} else {
+				QList<CTask*> updateTaskList;
+				updateTaskList.append(task);
+				while (!updateTaskList.isEmpty()) {
+					bool downProp = false;
+					bool upProp = false;
+					CTask* updateTask = updateTaskList.takeFirst();
+					if (mTaskStatusPropagator && mTaskStatusPropagator->updateTaskStatus(updateTask, downProp, upProp)) {
+						INCTASKPROCESSINGSTAT(mStats.incStatisticTasksUpdatedCount(1));
+
+						if (downProp) {
+							CXNegLinker<CTask*>* refTaskIt = updateTask->getReferencedTaskLinker();
+							while (refTaskIt) {
+								if (refTaskIt->isNegated()) {
+									// task still exists, update task status
+									// TODO: check better not recursive?
+									CTask* refTask = refTaskIt->getData();
+									updateTaskList.append(refTask);
+								}
+								refTaskIt = refTaskIt->getNext();
+							}
+						}
+					}
+
+				}
+			}
+			return true;
+		}
+
+
 		bool CSingleThreadTaskProcessorUnit::updateTaskStatus(CTask* task) {
 			CTask* updateTask = task;
 			bool downProp = false;
@@ -608,7 +662,7 @@ namespace Konclude {
 								// task still exists, update task status
 								// TODO: check better not recursive?
 								CTask* refTask = refTaskIt->getData();
-								updateTaskStatus(refTask);
+								updateTaskStatusDown(refTask, 0);
 							}
 							refTaskIt = refTaskIt->getNext();
 						}

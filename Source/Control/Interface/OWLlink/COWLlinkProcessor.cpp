@@ -78,7 +78,12 @@ namespace Konclude {
 					bool turtleParserAdded = false;
 					bool owl2RDFXMLParserAdded = false;
 					QString upperFileString = fileName.toUpper();
-					if (!owl2RDFXMLParserAdded && (upperFileString.endsWith(".OWL") || upperFileString.endsWith(".RDF.XML") || upperFileString.endsWith(".OWL.RDF.XML"))) {
+					if (!owl2RDFXMLParserAdded && (upperFileString.endsWith(".OWX") || upperFileString.endsWith(".OWL"))) {
+						owl2RDFXMLParserAdded = true;
+						owl2XMLParserAdded = true;
+						parserList.append(QString("OWL2XML"));
+						parserList.append(QString("OWLRDFXML"));
+					}if (!owl2RDFXMLParserAdded && (upperFileString.endsWith(".RDF.XML") || upperFileString.endsWith(".OWL.RDF.XML"))) {
 						owl2RDFXMLParserAdded = true;
 						parserList.append(QString("OWLRDFXML"));
 					}

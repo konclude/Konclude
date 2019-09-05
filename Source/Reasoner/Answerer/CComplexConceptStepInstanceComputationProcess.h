@@ -27,6 +27,7 @@
 // Namespace includes
 #include "AnswererSettings.h"
 #include "CComplexConceptStepComputationProcess.h"
+#include "CComputedItemDataNotificationLinker.h"
 
 
 
@@ -71,16 +72,22 @@ namespace Konclude {
 					CComplexConceptStepInstanceComputationProcess* setAllInstanceComputationRequired(bool allInstancesRequired);
 
 
+					bool hasAllInstancesComputed();
+					CComplexConceptStepInstanceComputationProcess* setAllInstancesComputed(bool allInstancesComputed);
+
+
+					double getExpectedInstancesCount();
+					CComplexConceptStepInstanceComputationProcess* setExpectedInstancesCount(double expectedCount);
 
 					cint64 getComputedInstancesCount();
 					cint64 getRequiredInstancesCount();
 					cint64 getAdditionalRequiredComputedInstancesCount();
 
-					CComplexConceptStepInstanceComputationProcess* updateComputedInstancesCount(cint64 instancesCount, function<void(CXLinker<CComplexQueryProcessingData*>* waitingQueryProcessingLinker, CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* waitingBuildingVariableItemProcessingLinker)> waitingHandlerFunction);
-					CComplexConceptStepInstanceComputationProcess* updateAllInstancesComputed(function<void(CXLinker<CComplexQueryProcessingData*>* waitingQueryProcessingLinker, CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* waitingBuildingVariableItemProcessingLinker)> waitingHandlerFunction);
+					CComplexConceptStepInstanceComputationProcess* updateComputedInstancesCount(cint64 instancesCount, function<void(CComputedItemDataNotificationLinker* notificationLinker)> waitingHandlerFunction);
+					CComplexConceptStepInstanceComputationProcess* updateAllInstancesComputed(function<void(CComputedItemDataNotificationLinker* notificationLinker)> waitingHandlerFunction);
 
 
-					CComplexConceptStepInstanceComputationProcess* addComputedInstancesCountRequirement(cint64 count, CXLinker<CComplexQueryProcessingData*>* waitingQueryProcessingLinker, CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* waitingBuildingVariableItemProcessingLinker);
+					CComplexConceptStepInstanceComputationProcess* addComputedInstancesCountRequirement(cint64 count, CComputedItemDataNotificationLinker* notificationLinker);
 
 
 
@@ -91,7 +98,12 @@ namespace Konclude {
 				protected:
 					QMap<cint64, CRequirementWaitingDependencyData> mCountDataMap;
 
-					cint64 mRequiredAllInstances;
+					bool mRequiredAllInstances;
+
+
+					bool mAllInstancesComputed;
+
+					double mExpectedInstancesCount;
 
 
 					cint64 mComputedInstancesCount;

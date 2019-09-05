@@ -26,7 +26,7 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "COptimizedComplexVariableCompositionItem.h"
+#include "COptimizedComplexVariableCompositionSingleDependenceItem.h"
 #include "COptimizedComplexConceptItem.h"
 #include "COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData.h"
 
@@ -55,7 +55,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexVariableReductionItem : public COptimizedComplexVariableCompositionItem {
+			class COptimizedComplexVariableReductionItem : public COptimizedComplexVariableCompositionSingleDependenceItem {
 				// public methods
 				public:
 					//! Constructor
@@ -77,7 +77,6 @@ namespace Konclude {
 				protected:
 					COptimizedComplexVariableCompositionItem* mBaseItem;
 					cint64 mReductionVarIdx;
-
 
 
 				// private methods

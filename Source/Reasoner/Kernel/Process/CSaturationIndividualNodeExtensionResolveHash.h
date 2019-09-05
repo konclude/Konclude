@@ -68,6 +68,7 @@ namespace Konclude {
 						CPROCESSHASH< QPair<void*,bool> ,CSaturationIndividualNodeExtensionResolveHashData>* getIndividualNodeExtensionResolveHash();
 
 						CSaturationIndividualNodeExtensionResolveHashData& getResolvedIndividualNodeExtensionData(CConcept* concept, bool negation);
+						CSaturationIndividualNodeExtensionResolveHashData getNonCreatingResolvedIndividualNodeExtensionData(CConcept* concept, bool negation);
 						CSaturationIndividualNodeExtensionResolveHashData& getResolvedIndividualNodeExtensionData(CIndividualSaturationProcessNode* indiNode);
 						CSaturationIndividualNodeExtensionResolveHashData& getResolvedIndividualNodeExtensionData(CRole* role);
 						CSaturationIndividualNodeExtensionResolveHashData& getResolvedNeighbourIndividualNodeExtensionData();

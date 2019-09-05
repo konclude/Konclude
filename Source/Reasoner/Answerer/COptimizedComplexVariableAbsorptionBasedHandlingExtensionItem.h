@@ -67,6 +67,8 @@ namespace Konclude {
 					virtual COMPOSITION_TYPE getCompositionType();
 
 					
+					QHash<CExpressionVariable*, COptimizedComplexVariableCompositionItem*>* getVariableExpressionCompositionItemHash();
+
 					COptimizedComplexVariableCompositionItem* getVariableCompositionItem(CExpressionVariable* variableExpression);
 					COptimizedComplexVariableCompositionItem* getVariableCompositionItem(CVariable* variable);
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* getAbsorptionBasedHandlingData();
@@ -84,11 +86,19 @@ namespace Konclude {
 					QHash<CVariable*, cint64>* getVariableIndexHash();
 
 
-					COptimizedComplexVariableIndividualMapping* getPossibleVariableMapping();
-					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setPossibleVariableMapping(COptimizedComplexVariableIndividualMapping* possibleVariableMapping);
+					COptimizedComplexVariableIndividualMappings* getPossibleVariableMapping();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setPossibleVariableMapping(COptimizedComplexVariableIndividualMappings* possibleVariableMapping);
 
-					COptimizedComplexVariableIndividualMapping* getTestingVariableMapping();
-					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setTestingVariableMapping(COptimizedComplexVariableIndividualMapping* testingVariableMapping);
+					QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* getTestingVariableMapping();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setTestingVariableMapping(QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* testingVariableMapping);
+
+
+					bool isPropatationTestCreated();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setPropatationTestCreated(bool created);
+
+					bool isDependentMappingsComputationSchedluled();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setDependentMappingsComputationSchedluled(bool scheduled);
+
 
 				// protected methods
 				protected:
@@ -109,10 +119,11 @@ namespace Konclude {
 					QHash<CVariable*, cint64> mVariableIndexHash;
 
 
-					COptimizedComplexVariableIndividualMapping* mPossibleVariableMapping;
-					COptimizedComplexVariableIndividualMapping* mTestingVariableMapping;
+					COptimizedComplexVariableIndividualMappings* mPossibleVariableMapping;
+					QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* mTestingVariableMapping;
 
-
+					bool mPropatationTestCreated;
+					bool mDependentMappingsComputationScheduled;
 
 				// private methods
 				private:

@@ -101,6 +101,7 @@ namespace Konclude {
 				bool CSatisfiableTaskComplexAnsweringMessageAnalyser::analyseSatisfiableTask(CSatisfiableCalculationTask* statCalcTask, CCalculationAlgorithmContext* calcAlgContext) {
 					bool analysed = false;
 					mStatCalcTask = statCalcTask;
+					analysed |= analyseSatisfiableTaskMaterialization(mStatCalcTask, calcAlgContext);
 					analysed |= analyseSatisfiableTaskSubsumption(mStatCalcTask, calcAlgContext);
 					analysed |= analyseSatisfiableTaskInstancePropagation(mStatCalcTask, calcAlgContext);
 					return analysed;
@@ -396,6 +397,113 @@ namespace Konclude {
 					return false;
 				}
 
+
+
+
+				bool CSatisfiableTaskComplexAnsweringMessageAnalyser::analyseSatisfiableTaskMaterialization(CSatisfiableCalculationTask* statCalcTask, CCalculationAlgorithmContext* calcAlgContext) {
+					mStatCalcTask = statCalcTask;
+					CSatisfiableTaskAnswererQueryingMaterializationAdapter* matAdapter = statCalcTask->getSatisfiableAnswererMaterializationAdapter();
+					if (matAdapter) {
+						CAnsweringMessageDataObserver* conceptMessClassObserver = matAdapter->getAnswererMessageDataObserver();
+						CAnsweringMessageData* subsumMessageDataLinker = nullptr;
+
+
+						CTaskProcessorContext* taskProcessorContext = calcAlgContext->getUsedTaskProcessorContext();
+						CTaskHandleMemoryAllocationManager* taskMemMan = calcAlgContext->getTemporaryMemoryAllocationManager();
+						QList<CIndividual*> varIndiList = matAdapter->getIndividualList();
+
+
+						CAnsweringHandler* answeringHandler = matAdapter->getAnsweringHandler();
+						CConcreteOntology* testOntology = matAdapter->getTestingOntology();
+						CProcessingDataBox* processingDataBox = statCalcTask->getProcessingDataBox();
+						CIndividualProcessNodeVector* indiNodeVec = processingDataBox->getIndividualProcessNodeVector();
+
+						cint64 maxDetBranchTag = processingDataBox->getMaximumDeterministicBranchTag();
+
+						cint64 matDataIdentifer = matAdapter->getMaterializationDataIdentifier();
+
+
+
+						if (testOntology && !varIndiList.isEmpty()) {
+
+
+
+							CMemoryPoolContainer memPoolCon;
+							CTaskMemoryPoolAllocationManager classMessMemManCreaterMemMan(&memPoolCon, calcAlgContext->getTemporaryMemoryAllocationManager());
+							mTempMemAllocMan = CObjectAllocator<CTaskMemoryPoolAllocationManager>::allocateAndConstruct(&classMessMemManCreaterMemMan);
+							mTempMemAllocMan->initTaskMemoryPoolAllocationManager(&memPoolCon, calcAlgContext->getTemporaryMemoryAllocationManager());
+							mTmpContext = CObjectParameterizingAllocator< CContextBase, CMemoryAllocationManager* >::allocateAndConstructAndParameterize(mTempMemAllocMan, mTempMemAllocMan);
+
+
+
+							for (CIndividual* varIndi : varIndiList) {
+
+								cint64 baseIndiID = -varIndi->getIndividualID();
+								CIndividualProcessNode* baseIndiNode = indiNodeVec->getData(baseIndiID);
+								bool nondetMerged = false;
+								baseIndiNode = getCorrectedIndividualID(baseIndiNode, indiNodeVec, &nondetMerged);
+								if (nondetMerged) {
+									maxDetBranchTag = 0;
+								}
+
+								CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>* subsumerList = nullptr;
+
+								CReapplyConceptLabelSet* conSet = baseIndiNode->getReapplyConceptLabelSet(false);
+								if (conSet) {
+									CReapplyConceptLabelSetIterator conSetIt = conSet->getConceptLabelSetIterator(true, true, true);
+									while (conSetIt.hasNext()) {
+										CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
+										if (conDes) {
+											CConcept* concept = conDes->getConcept();
+											bool negated = conDes->getNegation();
+
+											if (!negated && concept->hasClassName()) {
+												CDependencyTrackPoint* depTrackPoint = conSetIt.getDependencyTrackPoint();
+												bool deterministic = false;
+												if (depTrackPoint) {
+													if (depTrackPoint->getBranchingTag() <= maxDetBranchTag) {
+														deterministic = true;
+													}
+												}
+
+												if (deterministic) {
+													if (!subsumerList) {
+														subsumerList = CObjectParameterizingAllocator< CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>, CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan, mTmpContext);
+													}
+													subsumerList->append(concept);
+												}
+											}
+										}
+										conSetIt.moveNext();
+									}
+
+
+								}
+
+								CAnsweringMessageDataCalculationMaterializedConcepts* subsumMessageData = CObjectAllocator<CAnsweringMessageDataCalculationMaterializedConcepts>::allocateAndConstruct(mTempMemAllocMan);
+								subsumMessageData->initMaterializedConceptsMessageData(varIndi, subsumerList, nullptr, matDataIdentifer);
+								subsumMessageDataLinker = subsumMessageData->append(subsumMessageDataLinker);
+								subsumerList = nullptr;
+
+							}
+
+
+
+							CAnsweringMessageData* messageDataLinker = subsumMessageDataLinker;
+							if (messageDataLinker) {
+								conceptMessClassObserver->sendMessage(answeringHandler, messageDataLinker, memPoolCon.takeMemoryPools());
+							} else {
+								taskMemMan->releaseTemporaryMemoryPools(memPoolCon.takeMemoryPools());
+							}
+
+
+
+							return true;
+
+						}
+					}
+					return false;
+				}
 
 
 

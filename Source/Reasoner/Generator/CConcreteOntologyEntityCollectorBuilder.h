@@ -238,6 +238,7 @@ namespace Konclude {
 					virtual CObjectPropertyExpression* getObjectProberty(const QString& probertyName);
 					virtual CObjectPropertyExpression* getObjectProberty(const QStringRef& probertyName);
 					virtual CObjectPropertyTermExpression* getTopObjectProberty();
+					virtual CObjectPropertyTermExpression* getBottomObjectProberty();
 
 					virtual CSubObjectPropertyOfExpression* getSubObjectPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
 					virtual CSubObjectPropertyOfExpression* getSubObjectPropertyOf(CBuildExpression* expression1, CBuildExpression* expression2);

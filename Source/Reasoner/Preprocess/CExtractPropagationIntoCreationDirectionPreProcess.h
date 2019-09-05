@@ -30,6 +30,7 @@
 
 // Other includes
 #include "Reasoner/Ontology/CConceptProcessData.h"
+#include "Reasoner/Ontology/CRoleProcessData.h"
 #include "Reasoner/Ontology/CConceptOperator.h"
 
 // Logger includes

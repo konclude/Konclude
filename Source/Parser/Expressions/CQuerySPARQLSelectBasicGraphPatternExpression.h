@@ -61,7 +61,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CQuerySPARQLSelectBasicGraphPatternExpression(const QString& name, const QList<CAxiomExpression*>& axiomExpressionList, const QList<CExpressionVariable*>& answerVariables, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinct);
+					CQuerySPARQLSelectBasicGraphPatternExpression(const QString& name, const QList<CAxiomExpression*>& axiomExpressionList, const QList<CExpressionVariable*>& answerVariables, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinct, cint64 limit = -1, cint64 offset = 0);
 
 					//! Destructor
 					virtual ~CQuerySPARQLSelectBasicGraphPatternExpression();
@@ -73,6 +73,10 @@ namespace Konclude {
 
 					bool isDistinct();
 
+					cint64 getLimit();
+					cint64 getOffset();
+
+
 					virtual bool visitSubExpressions(CSubExpressionVisitor* subExpressionVisitor);
 
 
@@ -82,6 +86,8 @@ namespace Konclude {
 				// protected variables
 				protected:
 					bool mDistinct;
+					cint64 mLimit;
+					cint64 mOffset;
 
 				// private methods
 				private:

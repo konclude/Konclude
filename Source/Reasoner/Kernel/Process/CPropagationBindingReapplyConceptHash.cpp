@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CPropagationBindingReapplyConceptHash* CPropagationBindingReapplyConceptHash::initPropagationBindingReapplyConceptHash(CPropagationBindingReapplyConceptHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<TIndividualConceptPair, CPropagationBindingReapplyConceptHashData>::operator=(*prevHash);
 					} else {
 						CPROCESSHASH<TIndividualConceptPair,CPropagationBindingReapplyConceptHashData>::clear();
 					}

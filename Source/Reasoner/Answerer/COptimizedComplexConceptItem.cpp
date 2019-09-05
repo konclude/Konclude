@@ -59,7 +59,6 @@ namespace Konclude {
 				mKnownInstanceSet = nullptr;
 				mPossibleInstanceSet = nullptr;
 
-				mKnownInstanceItemSet = nullptr;
 				mPossibleInstanceItemSet = nullptr;
 
 				mMaximumSubClassNodeSet = nullptr;
@@ -79,6 +78,8 @@ namespace Konclude {
 
 				mVarConBaseItem = nullptr;
 
+				mRealizationRetrievingExpectedInstanceCandidateCount = 0;
+
 				mCompletelyHandledReducedInstanceTestingConceptNegation = false;
 				mCompletelyHandledReducedInstanceTestingConcept = nullptr;
 				mAllAtomicConceptsCompletelyHandled = false;
@@ -93,6 +94,10 @@ namespace Konclude {
 				mLastRetrievingCertainInstanceItemCount = 0;
 
 				mMinimalRetrievingInstanceItemSize = 0.1;
+
+				mKnownInstanceItems = nullptr;
+
+				mRealizationIteratorSamplingExpectedCount = -1;
 			}
 
 
@@ -375,24 +380,22 @@ namespace Konclude {
 				return this;
 			}
 
-
-
 			QSet<CRealizationIndividualInstanceItemReference>* COptimizedComplexConceptItem::getPossibleInstanceItemSet() {
 				return mPossibleInstanceItemSet;
 			}
 
-			QSet<CRealizationIndividualInstanceItemReference>* COptimizedComplexConceptItem::getKnownInstanceItemSet() {
-				return mKnownInstanceItemSet;
+			COptimizedComplexConceptInstanziatedIndividualItemHash* COptimizedComplexConceptItem::getKnownInstanceItems() {
+				return mKnownInstanceItems;
 			}
 
 
-			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setPossibleInstanceItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet) {
-				mPossibleInstanceItemSet = instanceSet;
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setKnownInstanceItems(COptimizedComplexConceptInstanziatedIndividualItemHash* instanceItems) {
+				mKnownInstanceItems = instanceItems;
 				return this;
 			}
 
-			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setKnownInstanceItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet) {
-				mKnownInstanceItemSet = instanceSet;
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setPossibleInstanceItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet) {
+				mPossibleInstanceItemSet = instanceSet;
 				return this;
 			}
 
@@ -415,6 +418,31 @@ namespace Konclude {
 				mRealizationRetrievedInstanceCandidateCount += incCount;
 				return this;
 			}
+
+
+			cint64 COptimizedComplexConceptItem::getRealizationRetrievingExpectedInstanceCandidateCount() {
+				return mRealizationRetrievingExpectedInstanceCandidateCount;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setRealizationRetrievingExpectedInstanceCandidateCount(cint64 count) {
+				mRealizationRetrievingExpectedInstanceCandidateCount = count;
+				return this;
+			}
+
+
+
+
+			double COptimizedComplexConceptItem::getRealizationIteratorSamplingExpectedCount() {
+				return mRealizationIteratorSamplingExpectedCount;
+			}
+
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setRealizationIteratorSamplingExpectedCount(double expectedCount) {
+				mRealizationIteratorSamplingExpectedCount = expectedCount;
+				return this;
+			}
+
+
 
 
 			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setMaximumSubClassNodeSet(QSet<CHierarchyNode*>* maxSubClassNodeSet) {

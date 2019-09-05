@@ -31,6 +31,7 @@ namespace Konclude {
 			COptimizedComplexConceptOntologyAnsweringItem::COptimizedComplexConceptOntologyAnsweringItem(CConcreteOntology* ontology, CConfigurationBase* configuration) : COntologyAnsweringItem(ontology,configuration) {
 				mTestingOntology = nullptr;
 				mQueryProcessingLinker = nullptr;
+				mItemNotificationLinker = nullptr;
 				mBuildingVarItemProcessingLinker = nullptr;
 				mCurrentlyAnsweringQueryCount = 0;
 				mTopConceptItem = nullptr;
@@ -42,6 +43,10 @@ namespace Konclude {
 				mCalcStatCollStrings = new CAnsweringCalculationStatisticsCollectionStrings();
 				mDiffStoredStatCollStrings = nullptr;
 				mOntologyBuildingAndPreprocessingPrepared = false;
+
+				mRequirementProcessingSchedulingReported = false;
+
+				mNextComputationStepId = 1;
 
 				mNextTestingIndiId = ontology->getABox()->getNextIndividualId(false);
 				if (ontology->getOntologyTriplesData() && ontology->getOntologyTriplesData()->getTripleAssertionAccessor()) {
@@ -135,6 +140,28 @@ namespace Konclude {
 					mTopConceptItem = getComplexConceptItem(mOntology->getTBox()->getTopConcept(), false, true);
 				}
 				return mTopConceptItem;
+			}
+
+
+
+
+
+
+
+			CComputedItemDataNotificationLinker* COptimizedComplexConceptOntologyAnsweringItem::createComputedItemDataNotificationLinker() {
+				CComputedItemDataNotificationLinker* itemLinker = mItemNotificationLinker;
+				if (itemLinker) {
+					mItemNotificationLinker = mItemNotificationLinker->getNext();
+				} else {
+					itemLinker = new CComputedItemDataNotificationLinker();
+				}
+				itemLinker->clearNext();
+				return itemLinker;
+			}
+
+			COptimizedComplexConceptOntologyAnsweringItem* COptimizedComplexConceptOntologyAnsweringItem::releaseComputedItemDataNotificationLinker(CComputedItemDataNotificationLinker* itemLinker) {
+				mItemNotificationLinker = itemLinker->append(mItemNotificationLinker);
+				return this;
 			}
 
 
@@ -369,7 +396,7 @@ namespace Konclude {
 				if (!nextTestingIndi) {
 					nextTestingIndi = new CIndividual();
 					nextTestingIndi->initIndividual(mNextTestingIndiId++);
-					nextTestingIndi->setTemporaryIndividual(true);
+					nextTestingIndi->setTemporaryFakeIndividual(true);
 				}
 				return nextTestingIndi;
 			}
@@ -379,8 +406,27 @@ namespace Konclude {
 				return this;
 			}
 
+			cint64 COptimizedComplexConceptOntologyAnsweringItem::getNextComputationStepId(bool next) {
+				cint64 compStep = mNextComputationStepId;
+				if (next) {
+					mNextComputationStepId++;
+				}
+				return compStep;
+			}
 
 
+			bool COptimizedComplexConceptOntologyAnsweringItem::hasRequirementProcessingSchedulingReported() {
+				return mRequirementProcessingSchedulingReported;
+			}
+
+			COptimizedComplexConceptOntologyAnsweringItem* COptimizedComplexConceptOntologyAnsweringItem::setRequirementProcessingSchedulingReported(bool reported) {
+				mRequirementProcessingSchedulingReported = reported;
+				return this;
+			}
+
+			QHash<QPair<QString, CDatatype*>, CDataLiteral*>* COptimizedComplexConceptOntologyAnsweringItem::getDataValueDatatypeSingleLiteralHash() {
+				return &mDataValueDatatypeSingleLiteralHash;
+			}
 
 		}; // end namespace Answerer
 

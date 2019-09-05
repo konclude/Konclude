@@ -36,6 +36,7 @@ namespace Konclude {
 				mNominalConcept = nullptr;
 				mAnonymousIndividual = false;
 				mTemporaryIndividual = false;
+				mFakeIndividual = false;
 				mIndividualData = nullptr;
 			}
 
@@ -138,6 +139,7 @@ namespace Konclude {
 				mNominalConcept = nullptr;
 				mAnonymousIndividual = false;
 				mTemporaryIndividual = false;
+				mFakeIndividual = false;
 				return this;
 			}
 
@@ -158,6 +160,7 @@ namespace Konclude {
 
 				mNominalConcept = individual->mNominalConcept;
 				mAnonymousIndividual = individual->mAnonymousIndividual;
+				mFakeIndividual = individual->mFakeIndividual;
 				mTemporaryIndividual = individual->mTemporaryIndividual;
 				return this;
 			}
@@ -184,6 +187,13 @@ namespace Konclude {
 				return mAnonymousIndividual;
 			}
 
+
+			CIndividual* CIndividual::setTemporaryFakeIndividual(bool temporaryFake) {
+				mFakeIndividual = mTemporaryIndividual = temporaryFake;
+				return this;
+			}
+
+
 			CIndividual* CIndividual::setTemporaryIndividual(bool temporary) {
 				mTemporaryIndividual = temporary;
 				return this;
@@ -192,6 +202,18 @@ namespace Konclude {
 			bool CIndividual::isTemporaryIndividual() {
 				return mTemporaryIndividual;
 			}
+
+
+
+			CIndividual* CIndividual::setFakeIndividual(bool fake) {
+				mFakeIndividual = fake;
+				return this;
+			}
+
+			bool CIndividual::isFakeIndividual() {
+				return mFakeIndividual;
+			}
+
 
 
 			bool CIndividual::hasIndividualData() {

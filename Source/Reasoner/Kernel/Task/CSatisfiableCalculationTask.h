@@ -42,6 +42,7 @@
 #include "CSatisfiableTaskAnswererInstancePropagationMessageAdapter.h"
 #include "CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h"
 #include "CSaturationOccurrenceStatisticsCollectingAdapter.h"
+#include "CSatisfiableTaskAnswererQueryingMaterializationAdapter.h"
 
 
 // Other includes
@@ -151,6 +152,8 @@ namespace Konclude {
 						CSatisfiableCalculationTask* setOccurrenceStatisticsCollectingAdapter(CSaturationOccurrenceStatisticsCollectingAdapter* collAdapter);
 						CSaturationOccurrenceStatisticsCollectingAdapter* getOccurrenceStatisticsCollectingAdapter();
 
+						CSatisfiableCalculationTask* setSatisfiableAnswererMaterializationAdapter(CSatisfiableTaskAnswererQueryingMaterializationAdapter* collAdapter);
+						CSatisfiableTaskAnswererQueryingMaterializationAdapter* getSatisfiableAnswererMaterializationAdapter();
 
 						bool isCalculationTableauCompletionTask();
 						bool isCalculationTableauSaturationTask();
@@ -191,6 +194,7 @@ namespace Konclude {
 						CSatisfiableTaskAnswererInstancePropagationMessageAdapter* mAnswererInstancePropagationMessageAdapter;
 						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* mRepresentativeBackendUpdatingAdapter;
 						CSaturationOccurrenceStatisticsCollectingAdapter* mOccurrenceStatisticsCollectingAdapter;
+						CSatisfiableTaskAnswererQueryingMaterializationAdapter* mAnswererMaterializationAdapter;
 
 					// private methods
 					private:

@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CDatatypeStringValueSpaceMap* CDatatypeStringValueSpaceMap::initDatatypeStringValueSpaceMap(CDatatypeStringValueSpaceMap* map) {
 					if (map) {
-						*this = *map;
+						CPROCESSMAP<CDatatypeStringValueSpaceMapArranger, CDatatypeStringValueSpaceMapData>::operator=(*map);
 						mAbsoluteMinimumExclusionValue = map->mAbsoluteMinimumExclusionValue;
 						mAbsoluteMaximumExclusionValue = map->mAbsoluteMaximumExclusionValue;
 					}

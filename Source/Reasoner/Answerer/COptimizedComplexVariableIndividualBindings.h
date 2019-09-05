@@ -118,11 +118,14 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
+					COptimizedComplexVariableIndividualBindings();
+					COptimizedComplexVariableIndividualBindings(cint64 bindingSize, TIndividualInstanceItemDataBinding* bindingArray);
 					COptimizedComplexVariableIndividualBindings(cint64 bindingSize);
 					COptimizedComplexVariableIndividualBindings(const COptimizedComplexVariableIndividualBindings& varBindings);
 					~COptimizedComplexVariableIndividualBindings();
 
 					COptimizedComplexVariableIndividualBindings* initIndividualBindings(cint64 bindingSize);
+					COptimizedComplexVariableIndividualBindings* initIndividualBindings(cint64 bindingSize, TIndividualInstanceItemDataBinding* bindingArray);
 
 					
 					TIndividualInstanceItemDataBinding* getBindingArray() const;

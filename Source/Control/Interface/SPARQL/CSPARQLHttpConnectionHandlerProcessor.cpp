@@ -121,6 +121,7 @@ namespace Konclude {
 
 										mSPARQLInterpreter = new CSPARQLRecordResultStreamingInterpreter(this, mOriginPreSynchronizer, mLoaderConfig);
 										mWritingStarted = false;
+										mWritingFailed = false;
 										mDataWritten = false;
 										mChunkPart = 0;
 										defaultCommandDelegater = mSPARQLInterpreter;
@@ -207,11 +208,11 @@ namespace Konclude {
 				}
 
 
-				CSPARQLStreamingWriter* CSPARQLHttpConnectionHandlerProcessor::writeStreamData(QByteArray* buffer, bool last) {
+				bool CSPARQLHttpConnectionHandlerProcessor::writeStreamData(QByteArray* buffer, bool last) {
 					postEvent(new CResultStreamingWriteEvent(buffer, last));
 					//writeStreamDataToSocket(buffer, last);
 					//mDataWritten = true;
-					return this;
+					return !mWritingFailed;
 				}
 
 
@@ -254,6 +255,7 @@ namespace Konclude {
 							delete buffer;
 						}
 					} else {
+						mWritingFailed = true;
 						LOG(INFO, "::Konclude::Control::Interface::SPARQL::SPARQLHTTPConnectionProcessor", logTr("Cannot write HTTP response data since connection already closed."), this);
 					}
 					return this;

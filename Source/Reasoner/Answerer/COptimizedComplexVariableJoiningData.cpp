@@ -34,27 +34,27 @@ namespace Konclude {
 			}
 
 
-			COptimizedComplexVariableJoiningData* COptimizedComplexVariableJoiningData::addLeftBindingLinker(CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* linker) {
+			COptimizedComplexVariableJoiningData* COptimizedComplexVariableJoiningData::addLeftBindingLinker(COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker) {
 				mLeftBindingLinker = linker->append(mLeftBindingLinker);
 				return this;
 			}
 
-			COptimizedComplexVariableJoiningData* COptimizedComplexVariableJoiningData::addRightBindingLinker(CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* linker) {
+			COptimizedComplexVariableJoiningData* COptimizedComplexVariableJoiningData::addRightBindingLinker(COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker) {
 				mRightBindingLinker = linker->append(mRightBindingLinker);
 				return this;
 			}
 
 
-			CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* COptimizedComplexVariableJoiningData::getLeftBindingLinker() const {
+			COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* COptimizedComplexVariableJoiningData::getLeftBindingLinker() const {
 				return mLeftBindingLinker;
 			}
 
-			CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* COptimizedComplexVariableJoiningData::getRightBindingLinker() const {
+			COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* COptimizedComplexVariableJoiningData::getRightBindingLinker() const {
 				return mRightBindingLinker;
 			}
 
 
-			COptimizedComplexVariableJoiningData* COptimizedComplexVariableJoiningData::addBindingLinker(bool left, CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* linker) {
+			COptimizedComplexVariableJoiningData* COptimizedComplexVariableJoiningData::addBindingLinker(bool left, COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker) {
 				if (left) {
 					return addLeftBindingLinker(linker);
 				} else {
@@ -62,7 +62,7 @@ namespace Konclude {
 				}
 			}
 
-			CXLinker<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* COptimizedComplexVariableJoiningData::getBindingLinker(bool left) const {
+			COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* COptimizedComplexVariableJoiningData::getBindingLinker(bool left) const {
 				if (left) {
 					return getLeftBindingLinker();
 				} else {

@@ -140,6 +140,7 @@ namespace Konclude {
 
 				virtual cint64 completeTask(CTask* task);
 				virtual bool updateTaskStatus(CTask* task);
+				virtual bool updateTaskStatusDown(CTask* task, cint64 depth);
 				virtual bool processTask(CTask* task);
 
 				virtual bool handleEvents();

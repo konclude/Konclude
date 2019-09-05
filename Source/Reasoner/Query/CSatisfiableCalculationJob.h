@@ -45,6 +45,7 @@
 #include "Reasoner/Kernel/Task/CSatisfiableTaskRealizationPossibleInstancesMergingAdapter.h"
 #include "Reasoner/Kernel/Task/CSatisfiableTaskAnswererInstancePropagationMessageAdapter.h"
 #include "Reasoner/Kernel/Task/CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskAnswererQueryingMaterializationAdapter.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -137,6 +138,11 @@ namespace Konclude {
 					CSatisfiableCalculationJob* setSatisfiableRepresentativeBackendCacheUpdatingAdapter(CSatisfiableTaskRepresentativeBackendUpdatingAdapter* answererMessageAdapter);
 					CSatisfiableTaskRepresentativeBackendUpdatingAdapter* getSatisfiableRepresentativeBackendCacheUpdatingAdapter();
 
+
+					CSatisfiableCalculationJob* setSatisfiableAnswererMaterializationAdapter(CSatisfiableTaskAnswererQueryingMaterializationAdapter* collAdapter);
+					CSatisfiableTaskAnswererQueryingMaterializationAdapter* getSatisfiableAnswererMaterializationAdapter();
+
+
 					cint64 getNextRelativeNodeID(bool moveNext = true);
 
 				// protected methods
@@ -162,6 +168,7 @@ namespace Konclude {
 					CSatisfiableTaskRealizationPossibleInstancesMergingAdapter* mSatisfiablePossibleInstancesMergingAdapter;
 					CSatisfiableTaskAnswererInstancePropagationMessageAdapter* mAnswererInstancePropagationMessageAdapter;
 					CSatisfiableTaskRepresentativeBackendUpdatingAdapter* mRepresentativeBackendUpdatingAdapter;
+					CSatisfiableTaskAnswererQueryingMaterializationAdapter* mAnswererMaterializationAdapter;
 
 				// private methods
 				private:

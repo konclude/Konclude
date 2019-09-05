@@ -149,12 +149,42 @@ namespace Konclude {
 
 
 
+				bool CIndividualSaturationProcessNodeStatusFlags::hasPropagationIncompleteFlag() {
+					return hasFlags(INDSATFLAGPROPAGATIONINCOMPLETE,false);
+				}
+
+				CIndividualSaturationProcessNodeStatusFlags* CIndividualSaturationProcessNodeStatusFlags::setPropagationIncompleteFlag(bool value) {
+					setFlags(INDSATFLAGPROPAGATIONINCOMPLETE,value);
+					return this;
+				}
+
+
+				bool CIndividualSaturationProcessNodeStatusFlags::hasUnregisteredPropagationFlag() {
+					return hasFlags(INDSATFLAGUNREGISTEREDPROPAGATION, false);
+				}
+
+				CIndividualSaturationProcessNodeStatusFlags* CIndividualSaturationProcessNodeStatusFlags::setUnregisteredPropagationFlag(bool value) {
+					setFlags(INDSATFLAGUNREGISTEREDPROPAGATION, value);
+					return this;
+				}
+
+
 				bool CIndividualSaturationProcessNodeStatusFlags::hasUnprocessedFlag() {
-					return hasFlags(INDSATFLAGUNPROCESSED,false);
+					return hasFlags(INDSATFLAGUNPROCESSED, false);
 				}
 
 				CIndividualSaturationProcessNodeStatusFlags* CIndividualSaturationProcessNodeStatusFlags::setUnprocessedFlag(bool value) {
-					setFlags(INDSATFLAGUNPROCESSED,value);
+					setFlags(INDSATFLAGUNPROCESSED, value);
+					return this;
+				}
+
+
+				bool CIndividualSaturationProcessNodeStatusFlags::hasUnmarkedRoleAssertionFlag() {
+					return hasFlags(INDSATFLAGUNMARKEDROLEASSERTION, false);
+				}
+
+				CIndividualSaturationProcessNodeStatusFlags* CIndividualSaturationProcessNodeStatusFlags::setUnmarkedRoleAssertionFlag(bool value) {
+					setFlags(INDSATFLAGUNMARKEDROLEASSERTION, value);
 					return this;
 				}
 

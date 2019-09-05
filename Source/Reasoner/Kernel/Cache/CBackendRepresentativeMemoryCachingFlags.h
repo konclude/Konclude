@@ -66,13 +66,17 @@ namespace Konclude {
 						bool isCompletelySaturated();
 						CBackendRepresentativeMemoryCachingFlags* setCompletelySaturated(bool completelySaturated);
 
+						bool isCompletelyPropagated();
+						CBackendRepresentativeMemoryCachingFlags* setCompletelyPropagated(bool completelyPropagated);
+
 						bool hasNondeterministicElements();
 						CBackendRepresentativeMemoryCachingFlags* setNondeterministicElements(bool nondeterministicElements);
 
 
 						static const cint64 FLAG_COMPLETELY_HANDLED								= 0x0001;
 						static const cint64 FLAG_COMPLETELY_SATURATED							= 0x0002;
-						static const cint64 FLAG_NONDETERMINISTIC_ELEMENTS						= 0x0004;
+						static const cint64 FLAG_COMPLETELY_PROPAGATED							= 0x0004;
+						static const cint64 FLAG_NONDETERMINISTIC_ELEMENTS						= 0x0008;
 
 
 						bool hasStatusFlags(cint64 flags);

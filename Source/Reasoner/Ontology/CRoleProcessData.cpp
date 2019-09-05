@@ -29,6 +29,7 @@ namespace Konclude {
 
 			CRoleProcessData::CRoleProcessData() {
 				mInferRelevantFlag = false;
+				PropagationAndCreationConceptsFlag = false;
 			}
 
 
@@ -43,6 +44,16 @@ namespace Konclude {
 
 			CRoleProcessData* CRoleProcessData::setInferRelevantFlag(bool flag) {
 				mInferRelevantFlag = flag;
+				return this;
+			}
+
+
+			bool CRoleProcessData::hasPropagationAndCreationConceptsFlag() {
+				return PropagationAndCreationConceptsFlag;
+			}
+
+			CRoleProcessData* CRoleProcessData::setPropagationAndCreationConceptsFlag(bool flag) {
+				PropagationAndCreationConceptsFlag = flag;
 				return this;
 			}
 

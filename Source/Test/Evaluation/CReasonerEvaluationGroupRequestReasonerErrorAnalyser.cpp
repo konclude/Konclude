@@ -156,7 +156,7 @@ namespace Konclude {
 					title = title.mid(slashPos+1);
 				}
 				title.replace("-"," ");
-				title.replace("error","Reaoner Errors and Timeouts, ");
+				title.replace("error","Reaoner Errors, ");
 				title.replace("sorted","Sorted");
 				if (title.contains(" ascending")) {
 					title.replace(" ascending","");

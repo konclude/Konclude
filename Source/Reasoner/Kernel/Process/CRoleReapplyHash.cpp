@@ -40,7 +40,7 @@ namespace Konclude {
 
 				CRoleReapplyHash* CRoleReapplyHash::initRoleReapplyHash(CRoleReapplyHash* prevRoleReapplyHash) {
 					if (prevRoleReapplyHash) {
-						*this = *prevRoleReapplyHash;
+						CPROCESSHASH<CRole*, CReapplyQueue>::operator =(*prevRoleReapplyHash);
 					} else {
 						CPROCESSHASH<CRole*,CReapplyQueue>::clear();
 					}

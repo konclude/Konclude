@@ -59,6 +59,8 @@ namespace Konclude {
 					//! Destructor
 					virtual ~CVariableBindingsListAnswerResult();
 
+					CVariableBindingsListAnswerResult* clearResultVariableBindings();
+
 					virtual CVariableBindingsListAnswerResult* addResultVariableBinding(CVariableBindingResult* varBinding);
 					virtual CVariableBindingsListAnswerResult* setResultVariableBindings(const QList<CVariableBindingResult*>& bindingsList);
 					virtual QList<CVariableBindingResult*>* getResult();

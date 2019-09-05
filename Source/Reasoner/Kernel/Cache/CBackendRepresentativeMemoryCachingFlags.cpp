@@ -47,7 +47,7 @@ namespace Konclude {
 
 				CBackendRepresentativeMemoryCachingFlags* CBackendRepresentativeMemoryCachingFlags::setCompletelyHandled(bool completelyHandled) {
 					if (completelyHandled) {
-						setStatusFlags(FLAG_COMPLETELY_HANDLED);
+						addStatusFlags(FLAG_COMPLETELY_HANDLED);
 					} else {
 						clearStatusFlags(FLAG_COMPLETELY_HANDLED);
 					}
@@ -61,9 +61,23 @@ namespace Konclude {
 
 				CBackendRepresentativeMemoryCachingFlags* CBackendRepresentativeMemoryCachingFlags::setCompletelySaturated(bool completelySaturated) {
 					if (completelySaturated) {
-						setStatusFlags(FLAG_COMPLETELY_SATURATED);
+						addStatusFlags(FLAG_COMPLETELY_SATURATED);
 					} else {
 						clearStatusFlags(FLAG_COMPLETELY_SATURATED);
+					}
+					return this;
+				}
+
+
+				bool CBackendRepresentativeMemoryCachingFlags::isCompletelyPropagated() {
+					return hasStatusFlags(FLAG_COMPLETELY_PROPAGATED);
+				}
+
+				CBackendRepresentativeMemoryCachingFlags* CBackendRepresentativeMemoryCachingFlags::setCompletelyPropagated(bool completelyPropagated) {
+					if (completelyPropagated) {
+						addStatusFlags(FLAG_COMPLETELY_PROPAGATED);
+					} else {
+						clearStatusFlags(FLAG_COMPLETELY_PROPAGATED);
 					}
 					return this;
 				}
@@ -76,7 +90,7 @@ namespace Konclude {
 
 				CBackendRepresentativeMemoryCachingFlags* CBackendRepresentativeMemoryCachingFlags::setNondeterministicElements(bool completelySaturated) {
 					if (completelySaturated) {
-						setStatusFlags(FLAG_NONDETERMINISTIC_ELEMENTS);
+						addStatusFlags(FLAG_NONDETERMINISTIC_ELEMENTS);
 					} else {
 						clearStatusFlags(FLAG_NONDETERMINISTIC_ELEMENTS);
 					}

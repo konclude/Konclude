@@ -550,6 +550,16 @@ namespace Konclude {
 					return depNode;
 				}
 
+				CORONLYOPTIONDependencyNode* CDependencyFactory::createORONLYOPTIONDependency(CDependencyTrackPoint*& orContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext) {
+					CORONLYOPTIONDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CORONLYOPTIONDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initORONLYOPTIONDependencyNode(conDes, prevDepTrackPoint, prevOtherDependencies);
+						orContinueDepTrackPoint = depNode->getContinueDependencyTrackPoint();
+					}
+					return depNode;
+				}
+
 
 				CEXPANDEDDependencyNode* CDependencyFactory::createEXPANDEDDependency(CDependencyTrackPoint*& expContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContext* calcAlgContext) {
 					CEXPANDEDDependencyNode* depNode = nullptr;

@@ -32,6 +32,8 @@ namespace Konclude {
 				mDisVariables = disVariables;
 				mDistinct = false;
 				mBooleanEntailmentResult = false;
+				mResultLimit = -1;
+				mResultOffset = 0;
 			}
 
 			CComplexAssertionsIndividualVariablesAnsweringQuery::~CComplexAssertionsIndividualVariablesAnsweringQuery() {
@@ -64,6 +66,32 @@ namespace Konclude {
 				mBooleanEntailmentResult = booleanEntailmentResultRequired;
 				return this;
 			}
+
+			cint64 CComplexAssertionsIndividualVariablesAnsweringQuery::getResultLimit() {
+				return mResultLimit;
+			}
+
+			CComplexAssertionsIndividualVariablesAnsweringQuery* CComplexAssertionsIndividualVariablesAnsweringQuery::setResultLimit(cint64 resultLimit) {
+				mResultLimit = resultLimit;
+				return this;
+			}
+
+			cint64 CComplexAssertionsIndividualVariablesAnsweringQuery::getResultOffset() {
+				return mResultOffset;
+			}
+
+			CComplexAssertionsIndividualVariablesAnsweringQuery* CComplexAssertionsIndividualVariablesAnsweringQuery::setResultOffset(cint64 resultOffset) {
+				mResultOffset = resultOffset;
+				return this;
+			}
+
+			cint64 CComplexAssertionsIndividualVariablesAnsweringQuery::getResultLimitIncludingOffset() {
+				if (mResultLimit == -1) {
+					return mResultLimit;
+				}
+				return mResultOffset + mResultLimit;
+			}
+
 
 		}; // end namespace Query
 

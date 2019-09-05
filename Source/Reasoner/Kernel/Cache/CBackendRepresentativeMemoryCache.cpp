@@ -32,7 +32,6 @@ namespace Konclude {
 
 
 				CBackendRepresentativeMemoryCache::CBackendRepresentativeMemoryCache(CConfiguration* config, QString threadIdentifierName, CWatchDog *watchDogThread) : CThread(threadIdentifierName, watchDogThread) {
-					mWriteDataCount = 0;
 
 					mConfig = config;
 
@@ -42,6 +41,19 @@ namespace Konclude {
 
 					mNextIndiUpdateId = 1;
 					mNextNomConnUpdateId = 1;
+
+					mReaderSlotUpdateCount = 0;
+					mOntologyDataUpdateCount = 0;
+					mOntologyDataReleasedCount = 0;
+					mOntologyDataReleasedWhileNewCreationCount = 0;
+					mOntologyDataReleasedWhileSlotUpdateCount = 0;
+					mReaderSlotReleasedCount = 0;
+					mCheckingRemainingIncompletelyHandledCount = 0;
+					mEmptyWriteDataCount = 0;
+					mWriteDataCount = 0;
+					mStartWriteCollectCount = 0;
+					mNextWriteCollectCount = 0;
+
 
 					CMemoryAllocationManager* memMan = mContext.getMemoryAllocationManager();
 					//mIndiIdAssoDataHash = nullptr;
@@ -73,6 +85,8 @@ namespace Konclude {
 					*ontologyIdentifierDataHash = *mOntologyIdentifierDataHash;
 					ontologyIdentifierDataHash->detach();
 					slot->setOntologyIdentifierDataHash(ontologyIdentifierDataHash);
+
+					mReaderSlotUpdateCount++;
 
 					mLastUpdatedSlotLinker = slot;
 					if (mSlotLinker) {
@@ -107,7 +121,7 @@ namespace Konclude {
 					ontologyData = new CBackendRepresentativeMemoryCacheOntologyData(&mContext);
 					ontologyData->initOntologyData(ontologyIdentifier);
 
-
+					mOntologyDataUpdateCount++;
 
 					CBackendRepresentativeMemoryCacheContext* tmpContext = ontologyData->getTemporaryContext();
 					CMemoryAllocationManager* tmpMemMan = tmpContext->getMemoryAllocationManager();
@@ -161,6 +175,7 @@ namespace Konclude {
 						ontologyData->setZeroIncompletelyHandledIndividualIdCountDebugWritten(prevOntologyData->getZeroIncompletelyHandledIndividualIdCountDebugWritten());
 						ontologyData->setIncompletelyHandledIndividualIdCount(prevOntologyData->getIncompletelyHandledIndividualIdCount());
 						ontologyData->setLastMinIncompletelyHandledIndvidualiId(prevOntologyData->getLastMinIncompletelyHandledIndvidualiId());
+						ontologyData->setNextEntryID(prevOntologyData->getNextEntryID(false));
 					}
 
 
@@ -168,6 +183,8 @@ namespace Konclude {
 					if (prevOntologyData) {
 						prevOntologyData->decUsageCount();
 						if (prevOntologyData->getUsageCount() <= 0) {
+							++mOntologyDataReleasedCount;
+							++mOntologyDataReleasedWhileNewCreationCount;
 							CMemoryPoolAllocationManager* memMan = mContext.getMemoryPoolAllocationManager();
 							CMemoryPool* memoryPools = prevOntologyData->getTemporaryContext()->getMemoryPoolContainer()->getMemoryPools();
 							memMan->releaseTemporaryMemoryPools(memoryPools);
@@ -206,6 +223,9 @@ namespace Konclude {
 								CBackendRepresentativeMemoryCacheOntologyData* ontologyData = it.value();
 								ontologyData->decUsageCount();
 								if (ontologyData->getUsageCount() <= 0) {
+									++mOntologyDataReleasedCount;
+									++mOntologyDataReleasedWhileSlotUpdateCount;
+
 									CMemoryPool* memoryPools = ontologyData->getTemporaryContext()->getMemoryPoolContainer()->getMemoryPools();
 									memMan->releaseTemporaryMemoryPools(memoryPools);
 									delete ontologyData;
@@ -214,6 +234,7 @@ namespace Konclude {
 
 							CMemoryPool* memoryPools = tmpSlotLinker->getMemoryPools();
 							memMan->releaseTemporaryMemoryPools(memoryPools);
+							++mReaderSlotReleasedCount;
 						}
 						else {
 							lastSlotLinker = slotLinkerIt;
@@ -1124,6 +1145,10 @@ namespace Konclude {
 								associationsUpdated = true;
 							}
 
+							if (locAssociationData->isCompletelyPropagated() && !tempAssWriteDataLinkerIt->isCompletelyPropagated()) {
+								locAssociationData->setCompletelyPropagated(false);
+								associationsUpdated = true;
+							}
 
 
 
@@ -1347,6 +1372,8 @@ namespace Konclude {
 						cint64 limit = iace->getRetrievalLimit();
 						cint64 ontologyIdentifier = iace->getOntologyIdentifier();
 
+						++mCheckingRemainingIncompletelyHandledCount;
+
 						CBackendRepresentativeMemoryCacheOntologyData* ontologyData = mOntologyIdentifierDataHash->value(ontologyIdentifier);
 						if (ontologyData) {
 							cint64 prevLastMinIncompletelyHandledIndiId = ontologyData->getLastMinIncompletelyHandledIndvidualiId();
@@ -1457,6 +1484,10 @@ namespace Konclude {
 								oneCachingExpSuccess |= cached;
 							}
 							dataLinkerIt = (CBackendRepresentativeMemoryCacheWriteData*)dataLinkerIt->getNext();
+						}
+
+						if (!oneCachingSuccess) {
+							++mEmptyWriteDataCount;
 						}
 
 						createReaderSlotUpdate(ontologyData, &mContext);
@@ -1631,6 +1662,12 @@ namespace Konclude {
 								statusStrings += "completely saturated";
 							} else {
 								statusStrings += "incompletely saturated";
+							}
+
+							if (indiAssData->isCompletelyPropagated()) {
+								statusStrings += "completely propagated";
+							} else {
+								statusStrings += "incompletely propagated";
 							}
 
 							if (indiAssData->isCompletelyHandled()) {

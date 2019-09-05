@@ -82,15 +82,24 @@ namespace Konclude {
 					virtual QString getLiteralDatatypeBindingString();
 					virtual QString getLiteralDatavalueBindingString();
 
+					virtual QPair<QString, QString> getLiteralDatatypeDatavalueBindingStringPair();
+
+
+
 					virtual CVariableBindingResult* createCopy();
 
 				// protected methods
 				protected:
+					virtual bool enfoceBindingString();
 
 				// protected variables
 				protected:
 					QString mBindingString;
 					VariableBindingType mType;
+
+
+					static const QString PREFIX_XML_PLAINLITERAL_DATATYPE_STRING;
+					static const QStringRef PREFIX_XML_PLAINLITERAL_DATATYPE_STRINGREF;
 
 				// private methods
 				private:

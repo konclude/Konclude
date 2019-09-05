@@ -34,7 +34,7 @@ namespace Konclude {
 
 			CDatatypeValueSpaceTriggeringMap* CDatatypeValueSpaceTriggeringMap::initValueSpaceTriggeringMap(CDatatypeValueSpaceTriggeringMap* map) {
 				if (map) {
-					*this = *map;
+					CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger, CDatatypeValueSpaceTriggeringMapData>::operator =(*map);
 				} else {
 					CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::clear();
 				}

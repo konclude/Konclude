@@ -115,6 +115,8 @@ namespace Konclude {
 					loader = new CCLILoadingBatchProcessingLoader();
 				} else if (loaderName == "SPARQLHttpServerLoader") {
 					loader = new CSPARQLHttpServerLoader();
+				} else if (loaderName == "SPARQLResultsComparisonLoader") {
+					loader = new CSPARQLResultsComparisonLoader();
 				}
 				return loader;
 			}
@@ -198,6 +200,8 @@ namespace Konclude {
 				} else if (loaderName == "CLILoadingBatchProcessingLoader") {
 					canLoad = true;
 				} else if (loaderName == "SPARQLHttpServerLoader") {
+					canLoad = true;
+				} else if (loaderName == "SPARQLResultsComparisonLoader") {
 					canLoad = true;
 				}
 				return canLoad;

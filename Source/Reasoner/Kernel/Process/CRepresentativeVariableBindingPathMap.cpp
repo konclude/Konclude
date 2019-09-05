@@ -35,7 +35,7 @@ namespace Konclude {
 
 				CRepresentativeVariableBindingPathMap* CRepresentativeVariableBindingPathMap::initVariableBindingPathMap(CRepresentativeVariableBindingPathMap* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSMAP<cint64, CRepresentativeVariableBindingPathMapData>::operator=(*prevMap);
 					} else {
 						CPROCESSMAP<cint64,CRepresentativeVariableBindingPathMapData>::clear();
 					}

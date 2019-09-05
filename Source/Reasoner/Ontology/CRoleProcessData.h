@@ -63,12 +63,16 @@ namespace Konclude {
 					bool hasInferRelevantFlag();
 					CRoleProcessData* setInferRelevantFlag(bool flag);
 
+					bool hasPropagationAndCreationConceptsFlag();
+					CRoleProcessData* setPropagationAndCreationConceptsFlag(bool flag);
+
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
 					bool mInferRelevantFlag;
+					bool PropagationAndCreationConceptsFlag;
 
 				// private methods
 				private:

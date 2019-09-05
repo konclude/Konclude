@@ -224,6 +224,7 @@ namespace Konclude {
 
 
 					bool absorbNominalConceptsToAssertions(CConcept* concept, bool negated);
+					bool absorbNegatedSelfToRoleDomain(CConcept* concept, bool negated);
 					bool absorbNominalSchemaGCIConceptsToTriggeredImplications(CConcept* concept, bool negated);
 
 					void createGCINominalSchemaAbsorbedTriggeredImplication(CConcept* orConcept, bool negated, QList<TConceptNegationPair>& absorbList, QList<TConceptNegationPair>& partialAbsorbList, QList<TConceptNegationPair>& candList, CNominalSchemaTemplate* nsTemplate);
@@ -358,6 +359,9 @@ namespace Konclude {
 					bool mConfCardinalityQualificationTriggerAbsorption;
 					bool mConfPartialCardinalityQualificationTriggerAbsorption;
 					bool mConfOnlyPositiveCardinalityQualificationTriggerAbsorption;
+
+
+					bool mConfGlobalNegatedSelfRestrictionsToRoleDomainAbsorption;
 
 
 					bool mConfNominalSchemaPathPreabsorption;

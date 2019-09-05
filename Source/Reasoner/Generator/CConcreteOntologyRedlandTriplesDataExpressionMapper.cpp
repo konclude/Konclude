@@ -28,6 +28,10 @@ namespace Konclude {
 
 		namespace Generator {
 
+
+			int CConcreteOntologyRedlandTriplesDataExpressionMapper::CRedlandNodeProcessingData::nextId = 0;
+
+
 			CConcreteOntologyRedlandTriplesDataExpressionMapper::CConcreteOntologyRedlandTriplesDataExpressionMapper(COntologyBuilder* ontologyBuilder) : CConcreteOntologyTriplesExpressionMapper(ontologyBuilder) {
 
 				mConfSuccessorRetrieval = true;
@@ -279,6 +283,8 @@ namespace Konclude {
 
 
 			CConcreteOntologyRedlandTriplesDataExpressionMapper* CConcreteOntologyRedlandTriplesDataExpressionMapper::buildDeclarations() {
+
+
 				releaseRedlandNodeStreamWrapper(getOWLClassInstanceNodesStream()->forEach([&](librdf_node* node) {
 					handleDeclaration(node, [&](const QString &uri)->CBuildExpression* { 
 						return mOntologyBuilder->getClass(uri); 
@@ -1815,7 +1821,7 @@ namespace Konclude {
 
 					librdf_uri* datatypeUri = librdf_node_get_literal_value_datatype_uri(node);
 					if (datatypeUri) {
-						if (librdf_uri_equals(mBooleanDatatypeUri, datatypeUri) != 0) {
+						if (librdf_uri_equals(mBooleanDatatypeUri, datatypeUri) == 0) {
 							return false;
 						}
 					} else {
@@ -2199,7 +2205,7 @@ namespace Konclude {
 							if (!elementNodes) {
 								elementNodes = new QList<librdf_node*>();
 							}
-							elementNodes->append(node);
+							elementNodes->append(librdf_new_node_from_node(node));
 						}));
 
 
@@ -2245,6 +2251,28 @@ namespace Konclude {
 
 
 
+			CConcreteOntologyRedlandTriplesDataExpressionMapper* CConcreteOntologyRedlandTriplesDataExpressionMapper::addBaseNodeExpression(const char* uri, CBuildExpression* expr, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, QList<CRedlandNodeProcessingData*>& nodeHandlingList, CRedlandStoredTriplesData* redlandTriplesData) {
+				librdf_node* node = librdf_new_node_from_uri_string(redlandTriplesData->getRedlandWorld(), (const unsigned char*)uri);
+				addBaseNodeExpression(node, expr, nodeIdentifierDataHash, nodeHandlingList);
+				librdf_free_node(node);
+				return this;
+			}
+
+
+
+			CConcreteOntologyRedlandTriplesDataExpressionMapper* CConcreteOntologyRedlandTriplesDataExpressionMapper::addBaseNodeExpression(librdf_node* node, CBuildExpression* expression, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, QList<CRedlandNodeProcessingData*>& nodeHandlingList) {
+				librdf_node* nodeCopy = librdf_new_node_from_node(node);
+				CRedlandNodeProcessingData*& processingData = nodeIdentifierDataHash[CRedlandNodeHasher(nodeCopy)];
+				if (!processingData) {
+					processingData = new CRedlandNodeProcessingData(nodeCopy, expression);
+					nodeHandlingList.append(processingData);
+				}
+				return this;
+			}
+
+
+
+
 
 			CConcreteOntologyRedlandTriplesDataExpressionMapper* CConcreteOntologyRedlandTriplesDataExpressionMapper::handleClassExpressionRestriction(librdf_node* node) {
 				bool anonym = true;
@@ -2272,7 +2300,7 @@ namespace Konclude {
 				mRedlandTriplesData = redlandTriplesData;
 
 				initPartialFilteringStatement(nullptr, PREFIX_RDF_TYPE, PREFIX_OWL_CLASS, mPartialFilteringStatementForAllRDFTypeOfOwlClass);
-				initPartialFilteringStatement(nullptr, PREFIX_RDF_TYPE, PREFIX_OWL_WITH_RESTRICTION, mPartialFilteringStatementForAllRDFTypeOfOwlRestriction);
+				initPartialFilteringStatement(nullptr, PREFIX_RDF_TYPE, PREFIX_OWL_RESTRICTION, mPartialFilteringStatementForAllRDFTypeOfOwlRestriction);
 				initPartialFilteringStatement(nullptr, PREFIX_RDF_TYPE, PREFIX_OWL_OBJECT_PROPERTY, mPartialFilteringStatementForAllRDFTypeOfOwlObjectProperty);
 				initPartialFilteringStatement(nullptr, PREFIX_RDF_TYPE, PREFIX_OWL_DATATYPE_PROPERTY, mPartialFilteringStatementForAllRDFTypeOfOwlDataProperty);
 				initPartialFilteringStatement(nullptr, PREFIX_RDF_TYPE, PREFIX_RDFS_DATATYPE, mPartialFilteringStatementForAllRDFTypeOfRDFSDatatype);
@@ -2472,6 +2500,17 @@ namespace Konclude {
 				initDatatypeMapping(redlandTriplesData, PREFIX_XML_XML_DATATYPE);
 				initDatatypeMapping(redlandTriplesData, PREFIX_XML_DATETIME_DATATYPE);
 				initDatatypeMapping(redlandTriplesData, PREFIX_XML_DATETIMESTAMP_DATATYPE);
+
+
+
+				addBaseNodeExpression(PREFIX_OWL_THING, mOntologyBuilder->getTopClass(), mClassNodeIdentifierDataHash, mClassNodeHandlingList, redlandTriplesData);
+				addBaseNodeExpression(PREFIX_OWL_NOTHING, mOntologyBuilder->getBottomClass(), mClassNodeIdentifierDataHash, mClassNodeHandlingList, redlandTriplesData);
+				addBaseNodeExpression(PREFIX_OWL_TOPOBJECTPROPERTY, mOntologyBuilder->getTopObjectProberty(), mObjectPropertyNodeIdentifierDataHash, mObjectPropertyNodeHandlingList, redlandTriplesData);
+				addBaseNodeExpression(PREFIX_OWL_BOTTOMOBJECTPROPERTY, mOntologyBuilder->getBottomObjectProberty(), mObjectPropertyNodeIdentifierDataHash, mObjectPropertyNodeHandlingList, redlandTriplesData);
+				addBaseNodeExpression(PREFIX_OWL_TOPDATAPROPERTY, mOntologyBuilder->getTopObjectProberty(), mDataPropertyNodeIdentifierDataHash, mDataPropertyNodeHandlingList, redlandTriplesData);
+				addBaseNodeExpression(PREFIX_OWL_BOTTOMDATAPROPERTY, mOntologyBuilder->getTopObjectProberty(), mDataPropertyNodeIdentifierDataHash, mDataPropertyNodeHandlingList, redlandTriplesData);
+				addBaseNodeExpression(PREFIX_OWL_TOP_DATATYPE, mOntologyBuilder->getTopDataRange(), mDatatypeNodeIdentifierDataHash, mDatatypeNodeHandlingList, redlandTriplesData);
+				addBaseNodeExpression(PREFIX_OWL_BOTTOM_DATATYPE, mOntologyBuilder->getBottomDataRange(), mDatatypeNodeIdentifierDataHash, mDatatypeNodeHandlingList, redlandTriplesData);
 
 				return this;
 			}

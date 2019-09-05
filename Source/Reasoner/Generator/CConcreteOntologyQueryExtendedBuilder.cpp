@@ -189,6 +189,13 @@ namespace Konclude {
 
 
 
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, orderingList, filteringList, distinctModifier, limit, offset);
+				mSparqlSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+
 			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, const QString& queryName) {
 				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, orderingList, filteringList, distinctModifier);
 				mSparqlSelectExpList.append(sparqlQuery);
@@ -404,6 +411,8 @@ namespace Konclude {
 						query->addResultFiltering(filtering);
 					}
 
+					query->setResultLimit(sparqlBgpExp->getLimit());
+					query->setResultOffset(sparqlBgpExp->getOffset());
 					query->setDistinctRequired(sparqlBgpExp->isDistinct());
 					CQueryStatisticsCollectionStrings* queryStats = nullptr;
 					if (confBuildQueryStats) {

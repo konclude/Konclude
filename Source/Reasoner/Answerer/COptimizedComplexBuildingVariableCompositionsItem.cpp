@@ -42,8 +42,78 @@ namespace Konclude {
 				mInitializedConceptDataVariableExtensionItems = false;
 				mSatisfiable = true;
 				mVarCompItemWaitingCount = 0;
+				mSubVarBuildItemWaitingCount = 0;
 				mBindingsReducible = false;
+				mAbsorptionBasedQueryPartsOrdinaryEvaluated = false;
+				mTemporaryMaterializationData = nullptr;
+				mBuildingFinishingData = nullptr;
+				mAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem = nullptr;
 			}
+
+
+			COptimizedComplexBuildingVariableCompositionsItem::~COptimizedComplexBuildingVariableCompositionsItem() {
+				if (mBuildingFinishingData) {
+					delete mBuildingFinishingData;
+				}
+				if (mTemporaryMaterializationData) {
+					delete mTemporaryMaterializationData;
+				}
+				if (mAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem) {
+					delete mAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem;
+				}
+			}
+
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::createExtendingBuildingVariableCompositionsItem() {
+				COptimizedComplexBuildingVariableCompositionsItem* extBuildingVarItem = new COptimizedComplexBuildingVariableCompositionsItem(mQueryProcessingData);
+				extBuildingVarItem->mVarItemIndexMappingHash = mVarItemIndexMappingHash;
+				extBuildingVarItem->mVarVarCompItemHash = mVarVarCompItemHash;
+				extBuildingVarItem->mUsedComplexVariableCompositionItemList = mUsedComplexVariableCompositionItemList;
+				extBuildingVarItem->mVarLastItemHash = mVarLastItemHash;
+				extBuildingVarItem->mVarLastItemAssociatedVariableHash = mVarLastItemAssociatedVariableHash;
+				extBuildingVarItem->mLastHandVarExp = mLastHandVarExp;
+				extBuildingVarItem->mAllVarExpSet = mAllVarExpSet;
+				return extBuildingVarItem;
+			}
+
+
+
+
+
+			CComplexQueryMaterializationData* COptimizedComplexBuildingVariableCompositionsItem::getMaterializationData() {
+				return mTemporaryMaterializationData;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::setMaterializationData(CComplexQueryMaterializationData* tmpOnto) {
+				mTemporaryMaterializationData = tmpOnto;
+				return this;
+			}
+
+
+
+			CComplexQueryFinishingBuildingVariableCompositionsItemData* COptimizedComplexBuildingVariableCompositionsItem::getBuildingFinishingData() {
+				return mBuildingFinishingData;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::setBuildingFinishingData(CComplexQueryFinishingBuildingVariableCompositionsItemData* data) {
+				mBuildingFinishingData = data;
+				return this;
+			}
+
+
+
+
+
+			QHash<CExpressionVariable*, CBuildExpression*>* COptimizedComplexBuildingVariableCompositionsItem::getVariableClassTermExpressionHash() {
+				return &mVariableClassTermExpressionHash;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::setVariableClassTermExpressionHash(const QHash<CExpressionVariable*, CBuildExpression*>& hash) {
+				mVariableClassTermExpressionHash = hash;
+				return this;
+			}
+
+
 
 
 
@@ -74,6 +144,8 @@ namespace Konclude {
 			}
 
 			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addVariablePropertyAssertion(CIndividualVariableExpression* varExp, CObjectPropertyAssertionExpression* propAssExp) {
+				mRemainingVarExpSet.insert(varExp);
+				mReuseVarExpComputationsCheckSet.insert(varExp);
 				mVarPropAssHash.insertMulti(varExp, propAssExp);
 				return this;
 			}
@@ -290,7 +362,7 @@ namespace Konclude {
 
 
 
-			cint64 COptimizedComplexBuildingVariableCompositionsItem::hasWaitingVariableCompositionItems() {
+			bool COptimizedComplexBuildingVariableCompositionsItem::hasWaitingVariableCompositionItems() {
 				return mVarCompItemWaitingCount > 0;
 			}
 
@@ -307,6 +379,33 @@ namespace Konclude {
 				mVarCompItemWaitingCount -= decCount;
 				return this;
 			}
+
+
+
+
+
+
+
+
+
+			bool COptimizedComplexBuildingVariableCompositionsItem::isWaitingSubVariableBuildingItems() {
+				return mSubVarBuildItemWaitingCount > 0;
+			}
+
+			cint64 COptimizedComplexBuildingVariableCompositionsItem::getWaitingSubVariableBuildingItemCount() {
+				return mSubVarBuildItemWaitingCount;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::incWaitingSubVariableBuildingItemCount(cint64 incCount) {
+				mSubVarBuildItemWaitingCount += incCount;
+				return this;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::decWaitingSubVariableBuildingItemCount(cint64 decCount) {
+				mSubVarBuildItemWaitingCount -= decCount;
+				return this;
+			}
+
 
 
 
@@ -360,7 +459,7 @@ namespace Konclude {
 
 
 			bool COptimizedComplexBuildingVariableCompositionsItem::isWaitingComputation() {
-				return hasWaitingVariableCompositionItems() || isWaitingRoleTargetsRealization() || isWaitingComputationStep() || isWaitingVariableBindingsPropagation() || isWaitingVariableBindingsConfirmation();
+				return hasWaitingVariableCompositionItems() || isWaitingSubVariableBuildingItems() || isWaitingRoleTargetsRealization() || isWaitingComputationStep() || isWaitingVariableBindingsPropagation() || isWaitingVariableBindingsConfirmation();
 			}
 
 
@@ -547,6 +646,44 @@ namespace Konclude {
 			}
 
 
+
+			bool COptimizedComplexBuildingVariableCompositionsItem::hasAbsorptionBasedQueryPartsOrdinaryEvaluated() {
+				return mAbsorptionBasedQueryPartsOrdinaryEvaluated;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::setAbsorptionBasedQueryPartsOrdinaryEvaluated(bool ordnaryEvaluated) {
+				mAbsorptionBasedQueryPartsOrdinaryEvaluated = ordnaryEvaluated;
+				return this;
+			}
+
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::getAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem() {
+				return mAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::setAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem(COptimizedComplexBuildingVariableCompositionsItem* subItem) {
+				mAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem = subItem;
+				return this;
+			}
+
+
+
+			QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* COptimizedComplexBuildingVariableCompositionsItem::getAbsorbingQueryPartsList() {
+				return &mAbsorbingQueryPartsList;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addAbsorbingQueryParts(const QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>& list) {
+				mAbsorbingQueryPartsList.append(list);
+				return this;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addAbsorbingQueryPart(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data) {
+				mAbsorbingQueryPartsList.append(data);
+				return this;
+			}
+
+
+
 			QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* COptimizedComplexBuildingVariableCompositionsItem::getAbsorbedQueryPartItemExtensionHandlingList() {
 				return &mAbsorptionBasedQueryPartItemExtensionHandlingList;
 			}
@@ -623,6 +760,7 @@ namespace Konclude {
 						mVarLastItemHash.insert(variable, lastHandledItem);
 						mVarLastItemAssociatedVariableHash.insert(variable, lastHandledVarExp);
 					}
+					mVarLastItemHash.insert(lastHandledVarExp, lastHandledItem);
 				}
 				return this;
 			}
@@ -671,6 +809,14 @@ namespace Konclude {
 				return this;
 			}
 
+			QList<COptimizedComplexVariableCompositionItem*>* COptimizedComplexBuildingVariableCompositionsItem::getUsedComplexVariableCompositionItemList() {
+				return &mUsedComplexVariableCompositionItemList;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addUsedComplexVariableCompositionItem(COptimizedComplexVariableCompositionItem* item) {
+				mUsedComplexVariableCompositionItemList.append(item);
+				return this;
+			}
 
 
 		}; // end namespace Answerer

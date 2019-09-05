@@ -28,7 +28,7 @@ namespace Konclude {
 
 
 
-		CRDFRedlandRaptorParser::CRDFRedlandRaptorParser(COntologyBuilder* ontologyBuilder, CTRIPLES_DATA_UPDATE_TYPE updateType, QString redlandParsingFormat, CConfiguration* configuration) {
+		CRDFRedlandRaptorParser::CRDFRedlandRaptorParser(COntologyBuilder* ontologyBuilder, CTRIPLES_DATA_UPDATE_TYPE updateType, QString redlandParsingFormat, CConfiguration* configuration) : CLogIdentifier("::Konclude::Parser::RDFRedlandRaptorParser", this) {
 			mOntologyBuilder = ontologyBuilder;
 			mUpdateType = updateType;
 			mRedlandParsingFormat = redlandParsingFormat;
@@ -207,6 +207,9 @@ namespace Konclude {
 					mParsingError = true;
 				}
 
+				librdf_node* critPredicate = librdf_new_node_from_uri_string(tripleData->getRedlandWorld(), (const unsigned char*)PREFIX_RDFS_SUBCLASS_OF);
+				bool warningNoStore = false;
+
 				CXLinker<librdf_statement*>* statementLinker = nullptr;
 				CXLinker<librdf_statement*>* lastStatementLinker = nullptr;
 				while (!librdf_stream_end(tripleStream)) {
@@ -225,10 +228,16 @@ namespace Konclude {
 						}
 						if (mConfLoadTriplesIntoStore) {
 							librdf_model_add_statement(tripleData->getRedlandIndexedModel(), statement);
+						} else {
+							if (!warningNoStore  && librdf_node_equals(critPredicate, librdf_statement_get_predicate(statementCopy))) {
+								warningNoStore = true;
+								LOG(WARN, getLogDomain(), logTr("(Nontrivial) OWL axioms and expressions cannot be extracted from triples since they are not loaded into the triple store."), this);
+							}
 						}
 					}
 					librdf_stream_next(tripleStream);
 				}
+				librdf_free_node(critPredicate);
 				tripleData->setRedlandStatementLinker(statementLinker);
 			}
 

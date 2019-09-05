@@ -36,9 +36,9 @@ namespace Konclude {
 
 				CMarkerIndividualNodeHash* CMarkerIndividualNodeHash::initMarkerIndividualNodeHash(CMarkerIndividualNodeHash* prevMarkerIndiNodeHash) {
 					if (prevMarkerIndiNodeHash) {
-						*this = *prevMarkerIndiNodeHash;
+						CPROCESSHASH< CConcept*, CMarkerIndividualNodeData >::operator=(*prevMarkerIndiNodeHash);
 					} else {
-						clear();
+						CPROCESSHASH< CConcept*, CMarkerIndividualNodeData >::clear();
 					}
 					return this;
 				}

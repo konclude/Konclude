@@ -38,7 +38,7 @@ namespace Konclude {
 
 				CSuccessorConnectedNominalSet* CSuccessorConnectedNominalSet::initSuccessorConnectedNominalSet(CSuccessorConnectedNominalSet* nominalSet) {
 					if (nominalSet) {
-						*this = *nominalSet;
+						CPROCESSSET<cint64>::operator=(*nominalSet);
 					} else {
 						CPROCESSSET<cint64>::clear();
 					}

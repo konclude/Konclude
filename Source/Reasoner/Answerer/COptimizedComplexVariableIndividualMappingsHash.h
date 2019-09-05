@@ -18,17 +18,15 @@
  *
  */
 
-#ifndef KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALMAPPING_H
-#define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALMAPPING_H
+#ifndef KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALMAPPINGSHASH_H
+#define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALMAPPINGSHASH_H
 
 // Libraries includes
 
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "COptimizedComplexVariableIndividualBindings.h"
-#include "COptimizedComplexVariableIndividualBindingsHasher.h"
-#include "COptimizedComplexVariableIndividualBindingsCardinalityLinker.h"
+#include "COptimizedComplexVariableIndividualMappings.h"
 
 
 // Other includes
@@ -49,35 +47,22 @@ namespace Konclude {
 
 			/*! 
 			 *
-			 *		\class		COptimizedComplexVariableIndividualMapping
+			 *		\class		COptimizedComplexVariableIndividualMappingsHash
 			 *		\author		Andreas Steigmiller
 			 *		\version	0.1
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexVariableIndividualMapping : public QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*> {
+			class COptimizedComplexVariableIndividualMappingsHash : public COptimizedComplexVariableIndividualMappings {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedComplexVariableIndividualMapping(cint64 bindingSize);
-					~COptimizedComplexVariableIndividualMapping();
-
-
-					enum VARIABLE_TYPE {
-						INDIVIDUAL_VARIABLE, DATA_LITERAL_VARIABLE
-					};
+					COptimizedComplexVariableIndividualMappingsHash(cint64 bindingSize);
+					virtual ~COptimizedComplexVariableIndividualMappingsHash();
 
 
 
-					VARIABLE_TYPE getBindingMapping(cint64 idx);
-					COptimizedComplexVariableIndividualMapping* setBindingMapping(cint64 idx, VARIABLE_TYPE varType);
-
-					cint64 getBindingSize();
-
-					COptimizedComplexVariableIndividualBindingsCardinalityLinker* getLastAddedBindingsCardinalityLinker();
-					COptimizedComplexVariableIndividualMapping* setLastAddedBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker);
-
-
+					bool addBindingsCardinalities(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* addedCardinalites);
 
 					bool addInsertingBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker, bool addCardinalitiesIfAlreadyPresent);
 
@@ -89,12 +74,9 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					cint64 mBindingSize;
-					VARIABLE_TYPE* mBindingMapping;
-
-					COptimizedComplexVariableIndividualBindingsCardinalityLinker* mLastAddedBindingsCardinalityLinker;
 
 
+					QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*> mMappingCardinalityHash;
 
 
 				// private methods
@@ -111,4 +93,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALMAPPING_H
+#endif // KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALMAPPINGSHASH_H

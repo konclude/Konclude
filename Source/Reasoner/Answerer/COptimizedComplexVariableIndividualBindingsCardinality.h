@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef KONCLUDE_REASONER_ANSWERER_COptimizedComplexVariableIndividualBindingsCardinality_H
-#define KONCLUDE_REASONER_ANSWERER_COptimizedComplexVariableIndividualBindingsCardinality_H
+#ifndef KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALBINDINGSCARDINALITY_H
+#define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALBINDINGSCARDINALITY_H
 
 // Libraries includes
 
@@ -63,10 +63,11 @@ namespace Konclude {
 				public:
 					//! Constructor
 					COptimizedComplexVariableIndividualBindingsCardinality();
-					COptimizedComplexVariableIndividualBindingsCardinality(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality);
+					COptimizedComplexVariableIndividualBindingsCardinality(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality, cint64 cardUpId = 0);
 
-					COptimizedComplexVariableIndividualBindingsCardinality* initCardinalities(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality);
+					COptimizedComplexVariableIndividualBindingsCardinality* initCardinalities(cint64 sameIndividualsSeparatlyConsideredCardinality, cint64 sameIndividualsJointlyConsideredCardinality, cint64 cardUpId = 0);
 					COptimizedComplexVariableIndividualBindingsCardinality* addCardinalities(COptimizedComplexVariableIndividualBindingsCardinality* cardinalities);
+					COptimizedComplexVariableIndividualBindingsCardinality* substractCardinalities(COptimizedComplexVariableIndividualBindingsCardinality* cardinalities);
 
 
 					COptimizedComplexVariableIndividualBindingsCardinality* setSameIndividualsSeparatlyConsideredCardinality(cint64 cardinality);
@@ -77,6 +78,8 @@ namespace Konclude {
 					cint64 getSameIndividualsJointlyConsideredCardinality() const;
 
 
+					cint64 getCardinalityUpdateId();
+					COptimizedComplexVariableIndividualBindingsCardinality* setCardinalityUpdateId(cint64 cardUpId);
 
 				// protected methods
 				protected:
@@ -85,6 +88,8 @@ namespace Konclude {
 				protected:
 					cint64 mSameIndividualsSeparatlyConsideredCardinality;
 					cint64 mSameIndividualsJointlyConsideredCardinality;
+
+					cint64 mCardinalityUpdateId;
 
 
 
@@ -103,4 +108,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_REASONER_ANSWERER_COptimizedComplexVariableIndividualBindingsCardinality_H
+#endif // KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEINDIVIDUALBINDINGSCARDINALITY_H

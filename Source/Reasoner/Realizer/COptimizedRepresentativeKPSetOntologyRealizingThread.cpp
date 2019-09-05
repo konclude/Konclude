@@ -147,6 +147,42 @@ namespace Konclude {
 					ontProcStep->setStepFinished(true);
 					ontProcStep->submitRequirementsUpdate();
 					LOG(INFO, getDomain(), logTr("Realization items initialized for ontology."), this);
+
+
+					//COptimizedKPSetRoleInstancesItem* testRoleInstancesItem = nullptr;
+					//bool testRoleInversion = false;
+					//CRBox* rbox = reqConfPreCompItem->getOntology()->getRBox();
+					//for (cint64 i = 0; i < rbox->getRoleCount(); i++) {
+					//	CRole* role = rbox->getRoleVector()->getData(i);
+					//	if (role && CIRIName::getRecentIRIName(role->getPropertyNameLinker())== "http://ontology.dumontierlab.com/hasPart") {
+					//		COptimizedKPSetRoleInstancesRedirectionItem* redRoleItem = (COptimizedKPSetRoleInstancesRedirectionItem*)reqConfPreCompItem->getRoleInstantiatedItem(role);
+					//		if (redRoleItem) {
+					//			COptimizedKPSetRoleInstancesItem* roleInstancesItem = redRoleItem->getRedirectedItem();
+					//			bool itemInversed = redRoleItem->isInversed();
+					//			testRoleInstancesItem = roleInstancesItem;
+
+					//			if (CIRIName::getRecentIRIName(role->getPropertyNameLinker()) == "http://ontology.dumontierlab.com/hasPart" && !itemInversed) {
+					//				testRoleInversion = true;
+					//			}
+					//			break;
+					//		}
+					//	}
+					//}
+					//QList<CRealizationIndividualInstanceItemReference> list;
+					//CABox* abox = reqConfPreCompItem->getOntology()->getABox();
+					//for (cint64 i = 0; i < abox->getIndividualCount(); i++) {
+					//	CIndividual* indi = abox->getIndividualVector()->getData(i);
+					//	if (indi && CIRIName::getRecentIRIName(indi->getIndividualNameLinker()).contains("http://ontology.dumontierlab.com/eswc-example-graph-3#x") && !CIRIName::getRecentIRIName(indi->getIndividualNameLinker()).contains("http://ontology.dumontierlab.com/eswc-example-graph-3#xx")) {
+					//		CRealizationIndividualInstanceItemReference indiItemRef(indi, i, nullptr);
+					//		list.append(indiItemRef);
+					//	}
+					//}
+					//		
+					//for (CRealizationIndividualInstanceItemReference itemRef : list) {
+					//	COptimizedKPSetIndividualComplexRoleData* indiComplexSubRoleData = testRoleInstancesItem->getIndividualIdComplexRoleData(itemRef.getIndividualID(), true);
+					//	collectTransitiveLinks(reqConfPreCompItem, testRoleInstancesItem, testRoleInversion, itemRef, indiComplexSubRoleData);
+					//}
+
 				}
 				return true;
 			}
@@ -167,13 +203,16 @@ namespace Konclude {
 
 				reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* combinedNeighbourRoleLabelCacheItem)->bool {
 
-					COptimizedRepresentativeKPSetCombinedNeighbourRoleSetCacheLabelItemData* combinedNeighbourRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheCombinedNeighbourRoleSetLabelItemData(combinedNeighbourRoleLabelCacheItem);
+					if (combinedNeighbourRoleLabelCacheItem->getIndividualAssociationCount() > 0) {
 
-					reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelsOfAssociatedNeigbourRoleSetCombinationLabel(nullptr, combinedNeighbourRoleLabelCacheItem, [&](CBackendRepresentativeMemoryLabelCacheItem* singleNeighbourRoleLabelCacheItem)->bool {
-						COptimizedRepresentativeKPSetSingleNeighbourRoleSetCacheLabelItemData* singleNeighbourRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheSingleNeighbourRoleSetLabelItemData(singleNeighbourRoleLabelCacheItem);
-						singleNeighbourRoleLabelCacheItemData->addReferencingCombinedNeighbourRoleLabelDataItem(combinedNeighbourRoleLabelCacheItemData);
-						return true;
-					});
+						COptimizedRepresentativeKPSetCombinedNeighbourRoleSetCacheLabelItemData* combinedNeighbourRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheCombinedNeighbourRoleSetLabelItemData(combinedNeighbourRoleLabelCacheItem);
+
+						reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelsOfAssociatedNeigbourRoleSetCombinationLabel(nullptr, combinedNeighbourRoleLabelCacheItem, [&](CBackendRepresentativeMemoryLabelCacheItem* singleNeighbourRoleLabelCacheItem)->bool {
+							COptimizedRepresentativeKPSetSingleNeighbourRoleSetCacheLabelItemData* singleNeighbourRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheSingleNeighbourRoleSetLabelItemData(singleNeighbourRoleLabelCacheItem);
+							singleNeighbourRoleLabelCacheItemData->addReferencingCombinedNeighbourRoleLabelDataItem(combinedNeighbourRoleLabelCacheItemData);
+							return true;
+						});
+					}
 					return true;
 				});
 
@@ -279,26 +318,29 @@ namespace Konclude {
 				function<void(CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem, bool deterministic)> existentialCacheLabelItemHandlingFunction = [&](CBackendRepresentativeMemoryLabelCacheItem* cacheLabelItem, bool deterministic) {
 					reqConfPreCompItem->getBackendAssociationCacheReader()->visitRolesOfAssociatedCompinationRoleSetLabel(nullptr, cacheLabelItem, [&](CRole* role, bool inversed)->bool {
 
-						COptimizedRepresentativeKPSetCombinedExistentialRoleSetCacheLabelItemData* combinedExistentialRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheCombinedExistentialRoleSetLabelItemData(cacheLabelItem, true);
-						combinedExistentialRoleLabelCacheItemData->setNondeterministic(!deterministic);
+						if (!inversed) {
 
-						for (COptimizedKPSetRoleInstancesItem* complexRoleItemCandidate : reqConfPreCompItem->getComplexStarterCandidateRoleInstancesItems(role)) {
-							combinedExistentialRoleLabelCacheItemData->addComplexCandiateInstancesItem(complexRoleItemCandidate, false);
-							complexRoleItemCandidate->addComplexStarterCandidateCombinedExistentialRoleLabelCacheItem(false, combinedExistentialRoleLabelCacheItemData->getCombinedNeighbourRoleLabelCacheItem());
-						}
+							COptimizedRepresentativeKPSetCombinedExistentialRoleSetCacheLabelItemData* combinedExistentialRoleLabelCacheItemData = reqConfPreCompItem->getRepresentativeCacheCombinedExistentialRoleSetLabelItemData(cacheLabelItem, true);
+							combinedExistentialRoleLabelCacheItemData->setNondeterministic(!deterministic);
 
-						for (COptimizedKPSetRoleInstancesItem* complexRoleItemCandidate : reqConfPreCompItem->getInverseComplexStarterCandidateRoleInstancesItems(role)) {
-							combinedExistentialRoleLabelCacheItemData->addComplexCandiateInstancesItem(complexRoleItemCandidate, true);
-							complexRoleItemCandidate->addComplexStarterCandidateCombinedExistentialRoleLabelCacheItem(true, combinedExistentialRoleLabelCacheItemData->getCombinedNeighbourRoleLabelCacheItem());
-						}
+							for (COptimizedKPSetRoleInstancesItem* complexRoleItemCandidate : reqConfPreCompItem->getComplexStarterCandidateRoleInstancesItems(role)) {
+								combinedExistentialRoleLabelCacheItemData->addComplexCandiateInstancesItem(complexRoleItemCandidate, false);
+								complexRoleItemCandidate->addComplexStarterCandidateCombinedExistentialRoleLabelCacheItem(false, combinedExistentialRoleLabelCacheItemData->getCombinedNeighbourRoleLabelCacheItem());
+							}
+
+							for (COptimizedKPSetRoleInstancesItem* complexRoleItemCandidate : reqConfPreCompItem->getInverseComplexStarterCandidateRoleInstancesItems(role)) {
+								combinedExistentialRoleLabelCacheItemData->addComplexCandiateInstancesItem(complexRoleItemCandidate, true);
+								complexRoleItemCandidate->addComplexStarterCandidateCombinedExistentialRoleLabelCacheItem(true, combinedExistentialRoleLabelCacheItemData->getCombinedNeighbourRoleLabelCacheItem());
+							}
 
 
-						COptimizedKPSetRoleInstancesRedirectionItem* redRoleItem = (COptimizedKPSetRoleInstancesRedirectionItem*)reqConfPreCompItem->getRoleInstantiatedItem(role);
-						if (redRoleItem) {
-							COptimizedKPSetRoleInstancesItem* roleInstancesItem = redRoleItem->getRedirectedItem();
-							bool itemInversed = redRoleItem->isInversed();
+							COptimizedKPSetRoleInstancesRedirectionItem* redRoleItem = (COptimizedKPSetRoleInstancesRedirectionItem*)reqConfPreCompItem->getRoleInstantiatedItem(role);
+							if (redRoleItem) {
+								COptimizedKPSetRoleInstancesItem* roleInstancesItem = redRoleItem->getRedirectedItem();
+								bool itemInversed = redRoleItem->isInversed();
 
-							roleInstancesItem->addExistentialRoleLabelCacheItem(itemInversed, cacheLabelItem);
+								roleInstancesItem->addExistentialRoleLabelCacheItem(itemInversed, cacheLabelItem);
+							}
 						}
 
 
@@ -1140,7 +1182,7 @@ namespace Konclude {
 						QSet<COptimizedKPSetIndividualItem*> singleIndividualSet;
 						for (QHash<cint64,QList<CIndividualReference> >::const_iterator it = individualPossibleSameIndividualListHash.constBegin(), itEnd = individualPossibleSameIndividualListHash.constEnd(); it != itEnd; ++it) {
 							cint64 individualId = it.key();
-							COptimizedKPSetIndividualItem* individualItem = reqConfPreCompItem->getIndividualInstantiatedItem(individualId,false);
+							COptimizedKPSetIndividualItem* individualItem = reqConfPreCompItem->getIndividualInstantiatedItem(individualId, true);
 							if (!singleIndividualSet.contains(individualItem)) {
 								singleIndividualSet.insert(individualItem);
 								const QList<CIndividualReference> possibleSameIndividualList = it.value();
@@ -1158,7 +1200,7 @@ namespace Konclude {
 				reqConfPreCompItem->addPossibleSameIndividualsItem(individualItem);
 				for (QList<CIndividualReference>::const_iterator it = possibleSameIndividualList.constBegin(), itEnd = possibleSameIndividualList.constEnd(); it != itEnd; ++it) {
 					CIndividualReference possSameIndividual(*it);
-					COptimizedKPSetIndividualItem* possSameIndividualItem = reqConfPreCompItem->getIndividualInstantiatedItem(possSameIndividual.getIndividualID(),false);
+					COptimizedKPSetIndividualItem* possSameIndividualItem = reqConfPreCompItem->getIndividualInstantiatedItem(possSameIndividual.getIndividualID(),true);
 					individualItem->addPossibleSameIndividualItem(possSameIndividualItem);
 					possSameIndividualItem->addPossibleSameIndividualItem(individualItem);
 					incOpenPossibleSameIndividualsCount(reqConfPreCompItem);
@@ -2292,6 +2334,10 @@ namespace Konclude {
 					reqConfPreCompItem->incPropagatingRoleInstanceCandidatesCount();
 					CIndividualReference indiRef = indiRealItemRef;
 
+					//if (CIRIName::getRecentIRIName(indiRef.getIndividual()->getIndividualNameLinker()) == "http://ontology.dumontierlab.com/eswc-example-graph-3#datapoint1") {
+					//	bool debug = true;
+					//}
+
 					CSatisfiableCalculationJob* satCalcJob = nullptr;
 					CSatisfiableCalculationJobGenerator satCalcJobGen(reqConfPreCompItem->getTemporaryRoleRealizationOntology());
 					for (QList<CIndividualRoleCandidateTestingData>::const_iterator it = indiRoleCandTestDataList.constBegin(), itEnd = indiRoleCandTestDataList.constEnd(); it != itEnd; ++it) {
@@ -2347,6 +2393,15 @@ namespace Konclude {
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::createNextRoleInitializingTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, const CRealizationIndividualInstanceItemReference& indiRealItemRef) {
 				bool workCreated = false;
 				cint64 indiId = indiRealItemRef.getIndividualID();
+
+				//QString indiString = CIRIName::getRecentIRIName(indiRealItemRef.getIndividual()->getIndividualNameLinker());
+				//QString roleString = CIRIName::getRecentIRIName(roleInstancesItem->getRole()->getPropertyNameLinker());
+				//QString inverseRoleString = CIRIName::getRecentIRIName(roleInstancesItem->getInverseRole()->getPropertyNameLinker());
+				//if (indiString == "http://purl.obolibrary.org/obo/CHROMOSOME-7227_X" && (roleString == "http://purl.obolibrary.org/obo/RO_0002131" || inverseRoleString == "http://purl.obolibrary.org/obo/RO_0002131")) {
+				//	bool debug = true;
+				//}
+
+
 				COptimizedKPSetIndividualComplexRoleData* indiComplexRoleData = roleInstancesItem->getIndividualIdComplexRoleData(indiId, true);
 				if (!indiComplexRoleData->isInitializing(inversed)) {
 					indiComplexRoleData->setInitializing(inversed, true);
@@ -2363,7 +2418,7 @@ namespace Konclude {
 				cint64 indiId = indiRealItemRef.getIndividualID();
 
 
-				//if (CIRIName::getRecentIRIName(indiRealItemRef.getIndividual()->getIndividualNameLinker()) == "http://www.owl-ontologies.com/NPOntology.owl#CellLine_12179") {
+				//if (CIRIName::getRecentIRIName(indiRealItemRef.getIndividual()->getIndividualNameLinker()) == "http://ontology.dumontierlab.com/eswc-example-graph-3#datapoint1") {
 				//	bool debug = true;
 				//}
 
@@ -2448,8 +2503,11 @@ namespace Konclude {
 				cint64 indiId = indiRealItemRef.getIndividualID();
 
 
-
-				//if (CIRIName::getRecentIRIName(indiRealItemRef.getIndividual()->getIndividualNameLinker()) == "http://www.owl-ontologies.com/NPOntology.owl#CellLine_12179") {
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+				mDebugTransitiveCollectionStringList.append(QString("Starting collection over %2 %3for %1").arg(CIRIName::getRecentIRIName(indiRealItemRef.getIndividual()->getIndividualNameLinker())).arg(CIRIName::getRecentIRIName(roleInstancesItem->getRole()->getPropertyNameLinker())).arg(inversed? "inversed " : ""));
+				mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+				//if (CIRIName::getRecentIRIName(indiRealItemRef.getIndividual()->getIndividualNameLinker()) == "http://ontology.dumontierlab.com/eswc-example-graph-3#datapoint1") {
 				//	bool debug = true;
 				//}
 
@@ -2492,13 +2550,24 @@ namespace Konclude {
 					while (!processingList.isEmpty()) {
 						RecursiveComplexTransitiveProcessingData* nextProcessingData = processingList.takeFirst();
 
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+						mDebugTransitiveCollectionStringList.append(QString("Analysing %1").arg(CIRIName::getRecentIRIName(nextProcessingData->mIndiItemRef.getIndividual()->getIndividualNameLinker())));
+						mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
 						propagationList.append(nextProcessingData);
-						if (!nextProcessingData->mIndiComplexRoleData->isInitialized(inversed) || !nextProcessingData->mParentData || !nextProcessingData->mParentData->mIndiComplexRoleData->isInitialized(inversed) || !nextProcessingData->mParentData->mParentData || !nextProcessingData->mParentData->mParentData->mIndiComplexRoleData->isInitialized(inversed)) {
+						if (!nextProcessingData->mIndiComplexRoleData->isInitialized(inversed)) {
 
 							CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nextProcessingData->mIndiItemRef.getIndividualID());
 							nextProcessingData->mIndiAssData = indiAssData;
 							CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
 							CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = indiAssData->getRoleSetNeighbourArray();
+
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+							mDebugTransitiveCollectionStringList.append(QString("Analysing neighours of %1").arg(CIRIName::getRecentIRIName(nextProcessingData->mIndiItemRef.getIndividual()->getIndividualNameLinker())));
+							mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
 
 							COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* roleItemCompNeighLabelData = roleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(inversed)->value(combinedNeigRoleSetLabel);
 							if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasKnownInstancesLabelItems()) {
@@ -2517,16 +2586,35 @@ namespace Konclude {
 												// TODO: check and handle cycles
 												if (!successorProcessingData->mParentData) {
 													successorProcessingData->mParentData = nextProcessingData;
+
+
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+													mDebugTransitiveCollectionStringList.append(QString("Readding %1 as single").arg(CIRIName::getRecentIRIName(neighbourIndiItemRef.getIndividual()->getIndividualNameLinker())));
+													mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
 												} else {
 													if (!successorProcessingData->mAdditionalPropgationList) {
 														successorProcessingData->mAdditionalPropgationList = new QList<RecursiveComplexTransitiveProcessingData*>();
 													}
 													successorProcessingData->mAdditionalPropgationList->append(nextProcessingData);
+
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+													mDebugTransitiveCollectionStringList.append(QString("Readding %1 as multiple").arg(CIRIName::getRecentIRIName(neighbourIndiItemRef.getIndividual()->getIndividualNameLinker())));
+													mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
 												}
 
 											} else {
 												successorProcessingData = new RecursiveComplexTransitiveProcessingData();
 												successorProcessingData->mIndiItemRef = neighbourIndiItemRef;
+
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+												mDebugTransitiveCollectionStringList.append(QString("Adding %1").arg(CIRIName::getRecentIRIName(neighbourIndiItemRef.getIndividual()->getIndividualNameLinker())));
+												mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
 												successorProcessingData->mIndiComplexRoleData = roleInstancesItem->getIndividualIdComplexRoleData(neighbourIndiItemRef.getIndividualID(), true);
 												successorProcessingData->mParentData = nextProcessingData;
 												successorProcessingData->mIndiComplexRoleData->setInitializing(inversed, true);
@@ -2546,6 +2634,9 @@ namespace Konclude {
 						RecursiveComplexTransitiveProcessingData* nextProcessingData = propagationList.takeLast();
 
 
+						//if (CIRIName::getRecentIRIName(nextProcessingData->mIndiItemRef.getIndividual()->getIndividualNameLinker()) == "http://ontology.dumontierlab.com/eswc-example-graph-3#plot") {
+						//	bool debug = true;
+						//}
 
 
 						if (nextProcessingData->mParentData) {
@@ -2557,11 +2648,15 @@ namespace Konclude {
 
 							QList<RecursiveComplexTransitiveProcessingData*> propagationDataList;
 							for (RecursiveComplexTransitiveProcessingData* parentData : parentDataList) {
-								if (parentData->mParentData) {
-									propagationDataList.append(parentData->mParentData);
-								}
-								if (parentData->mAdditionalPropgationList) {
-									propagationDataList.append(*parentData->mAdditionalPropgationList);
+								if (!nextProcessingData->mExpanded) {
+									propagationDataList.append(parentData);
+								} else {
+									if (parentData->mParentData) {
+										propagationDataList.append(parentData->mParentData);
+									}
+									if (parentData->mAdditionalPropgationList) {
+										propagationDataList.append(*parentData->mAdditionalPropgationList);
+									}
 								}
 							}
 
@@ -2571,6 +2666,30 @@ namespace Konclude {
 
 								QList<CRealizationIndividualInstanceItemReference> linkAddingSuccessorIndividualReferenceList;
 								linkAddingSuccessorIndividualReferenceList.append(nextProcessingData->mIndiItemRef);
+
+
+								if (!nextProcessingData->mExpanded) {
+									CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nextProcessingData->mIndiItemRef.getIndividualID());
+									nextProcessingData->mIndiAssData = indiAssData;
+									CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+									CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = indiAssData->getRoleSetNeighbourArray();
+
+									COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* roleItemCompNeighLabelData = roleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(inversed)->value(combinedNeigRoleSetLabel);
+									if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasKnownInstancesLabelItems()) {
+										QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelDataHash = roleItemCompNeighLabelData->getKnownInstancesLabelItemDataHash();
+
+										for (auto it = singleNeighLabelDataHash->constBegin(), itEnd = singleNeighLabelDataHash->constEnd(); it != itEnd; ++it) {
+											roleSetNeighbourArray->at(it.value()->getLabelArrayIndex()).visitNeighbourIndividualIds([&](cint64 neighbourId)->bool {
+												// check same individual merged
+												CRealizationIndividualInstanceItemReference neighbourIndiItemRef = reqConfPreCompItem->getInstanceItemReference(neighbourId, false);
+												if (!reqConfPreCompItem->isSameIndividualsMerged(neighbourIndiItemRef)) {
+													linkAddingSuccessorIndividualReferenceList.append(neighbourIndiItemRef);
+												}
+												return true;
+											});
+										}
+									}
+								}
 
 								COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* successorIndiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)nextProcessingData->mIndiComplexRoleData;
 								COptimizedKPSetRoleInstancesHash* succInstanceDatahash = successorIndiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(inversed, false);
@@ -2588,6 +2707,7 @@ namespace Konclude {
 
 
 								for (CRealizationIndividualInstanceItemReference succIndiItemRef : linkAddingSuccessorIndividualReferenceList) {
+
 
 									QSet<RecursiveComplexTransitiveProcessingData*> propagatedDataSet;
 									QList<RecursiveComplexTransitiveProcessingData*> processingPropagationDataList(propagationDataList);
@@ -2628,16 +2748,11 @@ namespace Konclude {
 
 
 
-
-
 					for (auto processingData : indiProcessingDataHash) {
 						processingData->mIndiComplexRoleData->setInitialized(inversed, true);
 						delete processingData;
 					}
 					
-
-
-
 
 					
 					return true;
@@ -3149,6 +3264,8 @@ namespace Konclude {
 											CRealizationIndividualInstanceItemReference nextInitializingItem = nextInitializingItemPair.first;
 											COptimizedKPSetRoleInstancesItem* roleIntancesItem = nextInitializingItemPair.second;
 
+
+
 											workTestCreated = createNextRoleInitializingTest(reqConfPreCompItem, roleIntancesItem, true, nextInitializingItem);
 
 											initializingIndividualItemPairList->removeFirst();
@@ -3165,14 +3282,15 @@ namespace Konclude {
 										CRealizationIndividualInstanceItemReference indiDestItemRef = roleInstTestItem->getIndividualDestinationItemReference();
 										COntologyRealizingDynamicRequirmentProcessingData* procData = roleInstTestItem->getProcessingData();
 										bool inversed = roleInstTestItem->isRoleInversed();
+										COptimizedKPSetIndividualItem* indiSourceItem = (COptimizedKPSetIndividualItem*)indiSourceItemRef.getRealizationInstanceItem();
 
-										//QString indiString = CIRIName::getRecentIRIName(indiSourceItem->getIndividual()->getIndividualNameLinker());
+										//QString indiString = CIRIName::getRecentIRIName(indiSourceItemRef.getIndividual()->getIndividualNameLinker());
 										//QString roleString = CIRIName::getRecentIRIName(roleItem->getRole()->getPropertyNameLinker());
-										//if (indiString == "http://www.Department2.University0.edu" && (roleString == "http://swat.cse.lehigh.edu/onto/univ-bench.owl#subOrganizationOf")) {
-										//	bool bug = true;
+										//QString inverseRoleString = CIRIName::getRecentIRIName(roleItem->getInverseRole()->getPropertyNameLinker());
+										//if (indiString == "http://purl.obolibrary.org/obo/CHROMOSOME-7227_X" && (roleString == "http://purl.obolibrary.org/obo/RO_0002131" || inverseRoleString == "http://purl.obolibrary.org/obo/RO_0002131")) {
+										//	bool debug = true;
 										//}
 
-										COptimizedKPSetIndividualItem* indiSourceItem = (COptimizedKPSetIndividualItem*)indiSourceItemRef.getRealizationInstanceItem();
 										if (indiSourceItem) {
 											indiSourceItem = getMergingResolvedIndividualItem(indiSourceItem);
 										}
@@ -3426,7 +3544,7 @@ namespace Konclude {
 
 							if (!indi) {
 								indi = new CIndividual(indiItem->getIndividualId());
-								indi->setTemporaryIndividual(true);
+								indi->setTemporaryFakeIndividual(true);
 							}
 
 							CConcept* nominalConcept = createTemporaryConcept(item,tmpSameRealOntology);
@@ -3454,6 +3572,7 @@ namespace Konclude {
 				if (!tmpRoleRealOntology) {
 					tmpRoleRealOntology = new CConcreteOntology(ontology,ontology->getConfiguration());		
 					tmpRoleRealOntology->setOntologyID(ontology->getOntologyID());
+					tmpRoleRealOntology->setConsistence(ontology->getConsistence());
 
 					QSet<CConcept*> compTransformConceptSet;
 					QHash<CConcept*,COptimizedKPSetRoleInstancesItem*>* markerConRolInsItemHash = item->getMarkerConceptInstancesItemHash();
@@ -3503,7 +3622,6 @@ namespace Konclude {
 						delete roleChainAutomataTransformPreprocessor;						
 					}
 
-					tmpRoleRealOntology->setConsistence(ontology->getConsistence());
 					item->setTemporaryRoleRealizationOntology(tmpRoleRealOntology);
 				}
 				return this;
@@ -4073,6 +4191,13 @@ namespace Konclude {
 						}
 						COptimizedKPSetRoleInstancesHashData& otherInstanceHashData = otherIndiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(!inversed, true)->operator[](indiRealItemRef.getIndividualID());
 						otherInstanceHashData.mInstanceItemData = instanceData;
+
+
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+						mDebugTransitiveCollectionStringList.append(QString("Added connection between %1 and %2 over role %3%4").arg(CIRIName::getRecentIRIName(indiRealItemRef.getIndividual()->getIndividualNameLinker())).arg(CIRIName::getRecentIRIName(neighbourIndi.getIndividual()->getIndividualNameLinker())).arg(CIRIName::getRecentIRIName(roleInstItem->getRole()->getPropertyNameLinker())).arg(inversed ? " inversed" : ""));
+						mDebugTransitiveCollectionString = mDebugTransitiveCollectionStringList.join("\r\n");
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
 					}
 
 					bool wasAlreadyPossibleMarked = instanceData->mPossibleInstance;

@@ -310,7 +310,7 @@ namespace Konclude {
 #define PREFIX_OWL_DATATYPE_PROPERTY "http://www.w3.org/2002/07/owl#DatatypeProperty"
 #define PREFIX_RDFS_DATATYPE "http://www.w3.org/2000/01/rdf-schema#Datatype"
 #define PREFIX_RDF_TYPE "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-#define PREFIX_OWL_RESTRICTION "http://www.w3.org/2002/07/owl#Class"
+#define PREFIX_OWL_RESTRICTION "http://www.w3.org/2002/07/owl#Restriction"
 #define PREFIX_OWL_NAMED_INDIVIDUAL "http://www.w3.org/2002/07/owl#NamedIndividual"
 
 #define PREFIX_OWL_INTERSECTION_OF "http://www.w3.org/2002/07/owl#intersectionOf"
@@ -319,7 +319,7 @@ namespace Konclude {
 #define PREFIX_OWL_ONE_OF "http://www.w3.org/2002/07/owl#oneOf"
 #define PREFIX_OWL_DATATYPE_COMPLEMENT_OF "http://www.w3.org/2002/07/owl#datatypeComplementOf"
 #define PREFIX_OWL_ON_DATATYPE "http://www.w3.org/2002/07/owl#onDatatype"
-#define PREFIX_OWL_WITH_RESTRICTION "http://www.w3.org/2002/07/owl#Restriction"
+#define PREFIX_OWL_WITH_RESTRICTION "http://www.w3.org/2002/07/owl#withRestrictions"
 #define PREFIX_OWL_ON_PROPERTY "http://www.w3.org/2002/07/owl#onProperty"
 #define PREFIX_OWL_ON_CLASS "http://www.w3.org/2002/07/owl#onClass"
 

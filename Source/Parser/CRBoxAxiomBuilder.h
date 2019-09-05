@@ -93,6 +93,7 @@ namespace Konclude {
 				virtual CObjectPropertyExpression* getObjectProberty(const QString& probertyName) = 0;
 				virtual CObjectPropertyExpression* getObjectProberty(const QStringRef& probertyName) = 0;
 				virtual CObjectPropertyTermExpression* getTopObjectProberty() = 0;
+				virtual CObjectPropertyTermExpression* getBottomObjectProberty() = 0;
 
 
 				virtual CDataPropertyExpression* getDataProberty(const QString& dataPropertyName) = 0;

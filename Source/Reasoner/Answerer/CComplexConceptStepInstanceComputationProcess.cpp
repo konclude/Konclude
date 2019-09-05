@@ -32,6 +32,8 @@ namespace Konclude {
 				mMaximalRequiredInstancesCount = 0;
 				mComputedInstancesCount = 0;
 				mRequiredAllInstances = false;
+				mAllInstancesComputed = false;
+				mExpectedInstancesCount = 0;
 			}
 
 
@@ -60,14 +62,13 @@ namespace Konclude {
 			}
 
 
-			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::updateComputedInstancesCount(cint64 instancesCount, function<void(CXLinker<CComplexQueryProcessingData*>* waitingQueryProcessingLinker, CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* waitingBuildingVariableItemProcessingLinker)> waitingHandlerFunction) {
+			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::updateComputedInstancesCount(cint64 instancesCount, function<void(CComputedItemDataNotificationLinker* notificationLinker)> waitingHandlerFunction) {
 				mComputedInstancesCount = instancesCount;
 				while (!mCountDataMap.isEmpty() && mCountDataMap.begin().key() <= instancesCount) {
 					CRequirementWaitingDependencyData& waitDepData = mCountDataMap.begin().value();
-					CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* buildingVariableItemProcessingLinker = waitDepData.takeBuildingVariableItemProcessingLinker();
-					CXLinker<CComplexQueryProcessingData*>* queryProcessingLinker = waitDepData.takeQueryProcessingLinker();
-					if (buildingVariableItemProcessingLinker || queryProcessingLinker) {
-						waitingHandlerFunction(queryProcessingLinker, buildingVariableItemProcessingLinker);
+					CComputedItemDataNotificationLinker* notificationLinker = waitDepData.takeNotificationLinker();
+					if (notificationLinker) {
+						waitingHandlerFunction(notificationLinker);
 					}
 					mCountDataMap.erase(mCountDataMap.begin());
 				}
@@ -76,13 +77,13 @@ namespace Konclude {
 
 
 
-			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::updateAllInstancesComputed(function<void(CXLinker<CComplexQueryProcessingData*>* waitingQueryProcessingLinker, CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* waitingBuildingVariableItemProcessingLinker)> waitingHandlerFunction) {
+			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::updateAllInstancesComputed(function<void(CComputedItemDataNotificationLinker* notificationLinker)> waitingHandlerFunction) {
+				mAllInstancesComputed = true;
 				while (!mCountDataMap.isEmpty()) {
 					CRequirementWaitingDependencyData& waitDepData = mCountDataMap.begin().value();
-					CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* buildingVariableItemProcessingLinker = waitDepData.takeBuildingVariableItemProcessingLinker();
-					CXLinker<CComplexQueryProcessingData*>* queryProcessingLinker = waitDepData.takeQueryProcessingLinker();
-					if (buildingVariableItemProcessingLinker || queryProcessingLinker) {
-						waitingHandlerFunction(queryProcessingLinker, buildingVariableItemProcessingLinker);
+					CComputedItemDataNotificationLinker* notificationLinker = waitDepData.takeNotificationLinker();
+					if (notificationLinker) {
+						waitingHandlerFunction(notificationLinker);
 					}
 					mCountDataMap.erase(mCountDataMap.begin());
 				}
@@ -91,13 +92,10 @@ namespace Konclude {
 
 
 
-			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::addComputedInstancesCountRequirement(cint64 count, CXLinker<CComplexQueryProcessingData*>* waitingQueryProcessingLinker, CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* waitingBuildingVariableItemProcessingLinker) {
+			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::addComputedInstancesCountRequirement(cint64 count, CComputedItemDataNotificationLinker* notificationLinker) {
 				CRequirementWaitingDependencyData& depData = mCountDataMap[count];
-				if (waitingQueryProcessingLinker) {
-					depData.addQueryProcessingLinker(waitingQueryProcessingLinker);
-				}
-				if (waitingBuildingVariableItemProcessingLinker) {
-					depData.addBuildingVariableItemProcessingLinker(waitingBuildingVariableItemProcessingLinker);
+				if (notificationLinker) {
+					depData.addNotificationLinker(notificationLinker);
 				}
 				mMaximalRequiredInstancesCount = qMax(mMaximalRequiredInstancesCount, count);
 				return this;
@@ -115,6 +113,25 @@ namespace Konclude {
 				return this;
 			}
 
+
+			bool CComplexConceptStepInstanceComputationProcess::hasAllInstancesComputed() {
+				return mAllInstancesComputed;
+			}
+
+			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::setAllInstancesComputed(bool allInstancesComputed) {
+				mAllInstancesComputed = allInstancesComputed;
+				return this;
+			}
+
+
+			double CComplexConceptStepInstanceComputationProcess::getExpectedInstancesCount() {
+				return mExpectedInstancesCount;
+			}
+
+			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::setExpectedInstancesCount(double expectedCount) {
+				mExpectedInstancesCount = expectedCount;
+				return this;
+			}
 
 			
 		}; // end namespace Answerer

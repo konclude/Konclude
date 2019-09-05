@@ -36,12 +36,14 @@ namespace Konclude {
 			}
 
 			CMemoryPoolContainer* CMemoryPoolContainer::appendMemoryPool(CMemoryPool* memoryPool) {
-				memoryPool->getLastListLink()->setNextMemoryPool(mMemoryPool);
-				mMemoryPool = memoryPool;
+				if (memoryPool) {
+					memoryPool->getLastListLink()->setNextMemoryPool(mMemoryPool);
+					mMemoryPool = memoryPool;
+				}
 				return this;
 			}
 
-			CMemoryPool* CMemoryPoolContainer::getMemoryPools() {
+			CMemoryPool* CMemoryPoolContainer::getMemoryPools() const {
 				return mMemoryPool;
 			}
 

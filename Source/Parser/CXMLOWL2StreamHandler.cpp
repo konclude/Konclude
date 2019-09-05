@@ -2013,7 +2013,6 @@ namespace Konclude {
 		}
 
 		void CXMLOWL2StreamHandler::jumpFunctionUnsupportedRDFNode(CStreamParseStackObject* parseStackObj) {
-			LOG(ERROR,getLogDomain(),logTr("RDF/XML is currently not supported (Protege can be used to convert ontologies into OWL/XML)."),this);
 		}
 
 

@@ -28,6 +28,7 @@
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableCompositionItem.h"
 #include "COptimizedComplexConceptItem.h"
+#include "COptimizedComplexConceptInstanziatedIndividualItemLinker.h"
 
 
 
@@ -67,6 +68,14 @@ namespace Konclude {
 					COptimizedComplexConceptItem* getConceptItem();
 
 
+					COptimizedComplexConceptInstanziatedIndividualItemLinker* getInstanceItemProcessingLinker();
+					COptimizedComplexConceptInstanziatedIndividualItemLinker* getInstanceItemProcessedLinker();
+					COptimizedComplexConceptInstanziatedIndividualItemLinker* getInstanceItemRetrievedLinker();
+
+					COptimizedComplexVariableConceptBaseItem* setInstanceItemProcessingLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker);
+					COptimizedComplexVariableConceptBaseItem* setInstanceItemProcessedLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker);
+					COptimizedComplexVariableConceptBaseItem* setInstanceItemRetrievedLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker);
+
 				// protected methods
 				protected:
 
@@ -75,6 +84,9 @@ namespace Konclude {
 					COptimizedComplexConceptItem* mConceptItem;
 
 
+					COptimizedComplexConceptInstanziatedIndividualItemLinker* mInstanceItemProcessingLinker;
+					COptimizedComplexConceptInstanziatedIndividualItemLinker* mInstanceItemProcessedLinker;
+					COptimizedComplexConceptInstanziatedIndividualItemLinker* mInstanceItemRetrievedLinker;
 
 
 				// private methods

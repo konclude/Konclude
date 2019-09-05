@@ -165,6 +165,10 @@ namespace Konclude {
 					mUseNominalProcessingQueue = nullptr;
 					mPrevNominalProcessingQueue = nullptr;
 
+					mNominalDeterministicProcessingQueue = nullptr;
+					mUseNominalDeterministicProcessingQueue = nullptr;
+					mPrevNominalDeterministicProcessingQueue = nullptr;
+
 					mIncrementalExansionInitializingProcessingQueue = nullptr;
 					mUseIncrementalExansionInitializingProcessingQueue = nullptr;
 					mPrevIncrementalExansionInitializingProcessingQueue = nullptr;
@@ -503,6 +507,7 @@ namespace Konclude {
 					clearIndividualImmediatelyProcessingQueue();
 					clearVariableBindingConceptBatchProcessingQueue();
 					clearIndividualDepthProcessingQueue();
+					clearNominalDeterministicProcessingQueue();
 					clearNominalProcessingQueue();
 					clearIndividualDepthDeterministicExpansionPreprocessingQueue();
 					clearIndividualDepthFirstDeterministicExpansionProcessingQueue();
@@ -909,6 +914,27 @@ namespace Konclude {
 				}
 
 
+
+
+
+
+
+				CIndividualDepthProcessingQueue* CProcessingDataBox::getNominalDeterministicProcessingQueue(bool create) {
+					if (!mNominalDeterministicProcessingQueue && create) {
+						mNominalDeterministicProcessingQueue = CObjectParameterizingAllocator< CIndividualDepthProcessingQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mNominalDeterministicProcessingQueue->initProcessingQueue(mPrevNominalDeterministicProcessingQueue);
+						mUseNominalDeterministicProcessingQueue = mNominalDeterministicProcessingQueue;
+					}
+					return mUseNominalDeterministicProcessingQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearNominalDeterministicProcessingQueue() {
+					mNominalDeterministicProcessingQueue = nullptr;
+					mUseNominalDeterministicProcessingQueue = nullptr;
+					mPrevNominalDeterministicProcessingQueue = nullptr;
+					return this;
+				}
 
 
 

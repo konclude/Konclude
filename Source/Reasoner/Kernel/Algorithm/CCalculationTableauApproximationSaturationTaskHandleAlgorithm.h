@@ -176,6 +176,9 @@ namespace Konclude {
 						void applyDATALITERALRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 
 
+						CConcept* getDisjunctCheckingConcept(CConcept* opConcept, bool opConNegation, bool* checkingNegation, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
 						void createSuccessorForDataLiteral(CIndividualSaturationProcessNode*& processIndi, CRole* role, CDataLiteral* dataLiteral, CCalculationAlgorithmContextBase* calcAlgContext);
 						void associateDataLiteralWithNode(CIndividualSaturationProcessNode*& processIndi, CDataLiteral* dataLiteral, CDatatype* datatype, CCalculationAlgorithmContextBase* calcAlgContext);
 						void handleDatatypeValueSpaceTriggers(CIndividualSaturationProcessNode*& processIndi, CDatatype* datatype, bool &dataValueTriviallySat, bool &dataValueTriviallyUnsat, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -305,6 +308,7 @@ namespace Konclude {
 
 
 						void checkNextCriticalConcepts(CCalculationAlgorithmContextBase* calcAlgContext);
+						void checkCriticalIndividuals(CCalculationAlgorithmContextBase* calcAlgContext);
 						bool hasNextCriticalConcepts(CCalculationAlgorithmContextBase* calcAlgContext);
 
 						void addCriticalConceptDescriptor(CConceptSaturationDescriptor* conDes, CCriticalSaturationConceptTypeQueues::CRITICALSATURATIONCONCEPTQUEUETYPE conceptType, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);

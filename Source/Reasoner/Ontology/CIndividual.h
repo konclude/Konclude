@@ -104,8 +104,13 @@ namespace Konclude {
 					CIndividual* setAnonymousIndividual(bool anonymous);
 					bool isAnonymousIndividual();
 
+					CIndividual* setTemporaryFakeIndividual(bool temporaryFake);
 					CIndividual* setTemporaryIndividual(bool temporary);
 					bool isTemporaryIndividual();
+
+					CIndividual* setFakeIndividual(bool fake);
+					bool isFakeIndividual();
+
 
 					bool hasIndividualData();
 					CIndividualData* getIndividualData();
@@ -123,6 +128,7 @@ namespace Konclude {
 					CConcept* mNominalConcept;
 					bool mAnonymousIndividual;
 					bool mTemporaryIndividual;
+					bool mFakeIndividual;
 
 					CIndividualData* mIndividualData;
 

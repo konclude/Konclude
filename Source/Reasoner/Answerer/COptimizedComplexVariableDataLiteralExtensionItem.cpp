@@ -28,10 +28,11 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexVariableDataLiteralExtensionItem::COptimizedComplexVariableDataLiteralExtensionItem(COptimizedComplexVariableCompositionItem* baseItem, CRole* role, cint64 varIdx) {
+			COptimizedComplexVariableDataLiteralExtensionItem::COptimizedComplexVariableDataLiteralExtensionItem(COptimizedComplexVariableCompositionItem* baseItem, CRole* role, cint64 varIdx) : COptimizedComplexVariableCompositionSingleDependenceItem(baseItem) {
 				mBaseItem = baseItem;
 				mRole = role;
 				mVarIdx = varIdx;
+				mComputationDependentItemList.append(mBaseItem);
 			}
 
 

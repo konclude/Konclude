@@ -34,6 +34,7 @@
 #include "Reasoner/Query/CVariableBindingsAnswersStreamingResult.h"
 #include "Reasoner/Query/CVariableBindingsAnswersResult.h"
 #include "Reasoner/Query/CBooleanQueryResult.h"
+#include "Reasoner/Query/CVariableBindingStringResult.h"
 #include "Reasoner/Query/CQueryStatistics.h"
 
 #include "Reasoner/Kernel/Process/CProcessingStatistics.h"
@@ -83,12 +84,18 @@ namespace Konclude {
 						CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* clearTemporaryBuffer();
 
 
+
+						CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* writeFlush(cint64 flushNumber);
+
+
 					// protected methods
 					protected:
 						virtual CSPARQLXMLAnswerStreamingSerializer* writeResultStreamingStart();
 						virtual CSPARQLXMLAnswerStreamingSerializer* writeResultStreamingEnd();
 
 						CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* writeUTF8String(const QString& string);
+						CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* writeUTF8StringEscaped(const QString& string);
+
 
 					// protected variables
 					protected:

@@ -17,7 +17,7 @@ message("Preparing source code of Konclude.")
 TEMPLATE = lib
 TARGET = Konclude
 DESTDIR = ./Release
-QT += xml network
+QT += xml network concurrent
 CONFIG += release warn_off c++11
 DEFINES += QT_XML_LIB QT_NETWORK_LIB KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED KONCLUDE_COMPILE_JNI_INTERFACE
 INCLUDEPATH += ./generatedfiles \

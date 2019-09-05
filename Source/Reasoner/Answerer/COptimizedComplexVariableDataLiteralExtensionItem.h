@@ -28,6 +28,8 @@
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableCompositionItem.h"
 #include "COptimizedComplexConceptItem.h"
+#include "COptimizedComplexVariableCompositionSingleDependenceItem.h"
+
 
 
 
@@ -54,7 +56,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexVariableDataLiteralExtensionItem : public COptimizedComplexVariableCompositionItem {
+			class COptimizedComplexVariableDataLiteralExtensionItem : public COptimizedComplexVariableCompositionSingleDependenceItem {
 				// public methods
 				public:
 					//! Constructor

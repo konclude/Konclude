@@ -47,6 +47,12 @@ namespace Konclude {
 					return indiNodeExtResolveHashData;
 				}
 
+
+				CSaturationIndividualNodeExtensionResolveHashData CSaturationIndividualNodeExtensionResolveHash::getNonCreatingResolvedIndividualNodeExtensionData(CConcept* concept, bool negation) {
+					return mIndiNodeExtensionResolveHash.value(QPair<void*, bool>(concept, negation));
+				}
+
+
 				CSaturationIndividualNodeExtensionResolveHashData& CSaturationIndividualNodeExtensionResolveHash::getResolvedIndividualNodeExtensionData(CIndividualSaturationProcessNode* indiNode) {
 					CSaturationIndividualNodeExtensionResolveHashData& indiNodeExtResolveHashData = mIndiNodeExtensionResolveHash[QPair<void*,bool>(indiNode,false)];
 					return indiNodeExtResolveHashData;

@@ -129,6 +129,7 @@
 #include "Reasoner/Ontology/CConceptProcessData.h"
 #include "Reasoner/Ontology/CConceptTextFormater.h"
 #include "Reasoner/Ontology/CDisjunctionBranchingStatistics.h"
+#include "Reasoner/Ontology/CConceptNegationPair.h"
 
 #include "Utilities/Memory/CObjectMemoryPoolAllocator.h"
 #include "Utilities/Memory/CMemoryAllocationException.h"
@@ -528,6 +529,7 @@ namespace Konclude {
 
 						void addDataAssertion(CIndividualProcessNode*& processIndi, CDataAssertionLinker* dataAssertionLinker, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 
+						bool checkBackendCachedNominalConnection(CIndividualProcessNode*& processIndi, CRole* role, cint64 nominalId, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						void applyAutomatChooseRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
 						void applyBOTTOMRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -624,6 +626,7 @@ namespace Konclude {
 						CMERGEDLINKDependencyNode* createMERGEDLINKDependency(CDependencyTrackPoint*& mergedLinkContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* linkPrevDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 						CMERGEDIndividualDependencyNode* createMERGEDINDIVIDUALDependency(CDependencyTrackPoint*& mergedIndividualContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* individualPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 
+						CORONLYOPTIONDependencyNode* createORONLYOPTIONDependency(CDependencyTrackPoint*& orContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIMPLICATIONDependencyNode* createIMPLICATIONDependency(CDependencyTrackPoint*& implContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContextBase* calcAlgContext);
 						CEXPANDEDDependencyNode* createEXPANDEDDependency(CDependencyTrackPoint*& expContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependency* prevOtherDependencies, CCalculationAlgorithmContextBase* calcAlgContext);
 						CCONNECTIONDependencyNode* createCONNECTIONDependency(CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -660,6 +663,10 @@ namespace Konclude {
 						CSatisfiableCalculationTask* createDistinctBranchingTask(CIndividualProcessNode*& processIndiNode, CConceptProcessDescriptor*& conProDes, CIndividualProcessNode*& distinctIndiNode, bool createAsNominal, CNonDeterministicDependencyNode* mergeDependencyNode, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						
+
+						bool getAdditionalDisjunctCheckingConcept(CConcept* opConcept, bool opConNegation, CConcept** checkingConcept, bool* checkingNegation, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
 						bool hasSaturatedClashedFlagForConcept(CConcept* concept, bool negation, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool initializeORProcessing(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CBranchingORProcessingRestrictionSpecification** plannedBranchingProcessRestriction, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool planORProcessing(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CBranchingORProcessingRestrictionSpecification** plannedBranchingProcessRestriction, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -867,9 +874,11 @@ namespace Konclude {
 						CIndividualProcessNode* getLocalizedSuccessorIndividual(CIndividualProcessNode*& indi, CIndividualLinkEdge* link, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualProcessNode* createSuccessorIndividual(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, CIndividualSaturationProcessNode* saturationIndiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualProcessNode* tryExtendFunctionalSuccessorIndividual(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, CIndividualSaturationProcessNode* saturationIndiNode, CCalculationAlgorithmContextBase* calcAlgContext);
-						void createDistinctSuccessorIndividuals(CIndividualProcessNode*& indi, CPROCESSINGLIST<CIndividualProcessNode*>& indiList, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, cint64 succCardCount, CCalculationAlgorithmContextBase* calcAlgContext);
+						void createDistinctSuccessorIndividuals(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CPROCESSINGLIST<CIndividualProcessNode*>& indiList, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, cint64 succCardCount, CCalculationAlgorithmContextBase* calcAlgContext);
 						void createNominalsSuccessorIndividuals(CIndividualProcessNode*& indi, CSortedNegLinker<CRole*>* roleLinkerIt, CRole* ancRole, CSortedNegLinker<CConcept*>* conceptLinkerIt, bool negate, CDependencyTrackPoint* depTrackPoint, cint64 succCardCount, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualSaturationProcessNode* getCreationSuccessorSaturationNode(CIndividualProcessNode*& indi, CConceptDescriptor* conDes, CCalculationAlgorithmContextBase* calcAlgContext);
+						CIndividualSaturationProcessNode* getSaturationResolvedIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CPROCESSINGHASH<cint64, CConceptNegationPair>* conExtensionMap, CCalculationAlgorithmContextBase* calcAlgContext);
+						void collectReapplyAutomatTransactionsRestrictions(CIndividualProcessNode*& processIndi, CRole* collectingRole, CConcept* concept, bool negated, CPROCESSINGHASH<cint64, CConceptNegationPair>*& conExtensionMap, CReapplyConceptSaturationLabelSet* conSet, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 
@@ -900,6 +909,7 @@ namespace Konclude {
 
 						bool testIndividualNodeBackendCacheNewMergings(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeConceptBackendCacheNeighbourExpansionBlockingCritical(CConcept* concept, bool conNegation, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool debugCheckDirectlyInfluencedNeighbourWithPropagationPossible(CConcept* concept, bool conNegation, CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeBackendCacheNominalIndirectConnectionBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -917,6 +927,7 @@ namespace Konclude {
 						CPROCESSHASH< QPair<CRole*, bool>, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationRoleNeighbourExpansionData >* getBackendSynchronizationFilledRoleNeighbourExpansionDataHash(CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool expandIndividualAllNeighboursFromBackendCache(CIndividualProcessNode* indiNode, CIndividualProcessNode* backendSyncDataIndiNode, bool forceExpansion, CDependencyTrackPoint* backSyncDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool expandIndividualNeighbourNodeFromBackendCache(CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, cint64 neighbourIndiId, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData& neighbourExpansionData, bool forceExpansion, bool forceProcessing, CDependencyTrackPoint* baseDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool expandIndividualNeighbourNodeFromBackendCache(CIndividualProcessNode* indiNode, cint64 neighbourIndiId, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* getLocalizedIndividualBackendCacheSnychronisationData(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
@@ -956,6 +967,10 @@ namespace Konclude {
 
 						void propagateIndividualNodeConnectedNominalToAncestors(CIndividualProcessNode*& indi, cint64 nominalID, CCalculationAlgorithmContextBase* calcAlgContext);
 						void propagateIndividualNodeNominalConnectionStatusToAncestors(CIndividualProcessNode*& indi, CIndividualProcessNode* copyFromIndiNode, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+						bool expandBackendCacheIndividualNodesNominalMerging(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool expandBackendCacheIndividualNodesNominalMergingNeighbouringConnections(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool isIndividualNodesMergeable(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CClashedDependencyDescriptor*& clashDescriptors, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualNodesMergeableWithoutNewRuleApplications(CIndividualProcessNode* mergeIntoIndi1, CIndividualProcessNode* indi2, bool* mergingPossiblyRequiresRuleApplications, bool cancelOnPossiblyNewRuleApplications, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -1004,6 +1019,8 @@ namespace Konclude {
 
 						CIndividualProcessingQueue* mProcessingQueue;
 						CIndividualDepthProcessingQueue* mNominalProcessingQueue;
+						CIndividualDepthProcessingQueue* mNominalDeterministicProcessingQueue;
+
 						CIndividualUnsortedProcessingQueue* mDepthFirstProcessingQueue;
 						CIndividualUnsortedProcessingQueue* mNominalCachingLossReactivationProcessingQueue;
 						CSignatureBlockingReviewSet* mSigBlockRevSet;
@@ -1231,6 +1248,7 @@ namespace Konclude {
 
 
 						bool mConfExpandCreatedSuccessorsFromSaturation;
+						bool mConfSuccessorSaturationExpansionRestrictionsResolving;
 						bool mConfCachingBlockingFromSaturation;
 
 						bool mConfMergeConstructedIndividualNode;

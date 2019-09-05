@@ -27,6 +27,8 @@
 // Namespace includes
 #include "AnswererSettings.h"
 #include "CComplexConceptStepComputationProcess.h"
+#include "CComplexQueryFinishingHandler.h"
+#include "CAnsweringHandlingStatistics.h"
 
 
 
@@ -113,6 +115,18 @@ namespace Konclude {
 					qint64 getProcessingTime();
 
 
+					CComplexQueryFinishingHandler* getFinishingHandler();
+					CComplexQueryProcessingData* setFinishingHandler(CComplexQueryFinishingHandler* finishingHandler);
+
+
+
+					cint64 getOffsetSkippedMappingCount();
+					CComplexQueryProcessingData* setOffsetSkippedMappingCount(cint64 skippedMappingCount);
+					CComplexQueryProcessingData* incOffsetSkippedMappingCount(cint64 incSkippedMappingCount);
+
+					CAnsweringHandlingStatistics* getQueryProcessingInitializedAnsweringStatistics();
+					CComplexQueryProcessingData* setQueryProcessingInitializedAnsweringStatistics(CAnsweringHandlingStatistics* stats);
+
 				// protected methods
 				protected:
 
@@ -135,6 +149,14 @@ namespace Konclude {
 					bool mProcessingFinished = false;
 					qint64 mProcessingTime = 0;
 					QTime mProcessingTimer;
+
+
+					CComplexQueryFinishingHandler* mFinishingHandler;
+
+					CAnsweringHandlingStatistics* mQueryProcessingInitializedAnsweringStatistics;
+
+					cint64 mOffsetSkippedMappingCount;
+
 
 				// private methods
 				private:

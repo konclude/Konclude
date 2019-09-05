@@ -35,7 +35,7 @@ namespace Konclude {
 
 				CVariableBindingPathMap* CVariableBindingPathMap::initVariableBindingPathMap(CVariableBindingPathMap* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSMAP<cint64, CVariableBindingPathMapData>::operator=(*prevMap);
 					} else {
 						CPROCESSMAP<cint64,CVariableBindingPathMapData>::clear();
 					}

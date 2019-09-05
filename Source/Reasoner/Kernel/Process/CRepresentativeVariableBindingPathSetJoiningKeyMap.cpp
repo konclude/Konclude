@@ -35,7 +35,7 @@ namespace Konclude {
 
 				CRepresentativeVariableBindingPathSetJoiningKeyMap* CRepresentativeVariableBindingPathSetJoiningKeyMap::initRepresentativeVariableBindingPathSetJoiningKeyMap(CRepresentativeVariableBindingPathSetJoiningKeyMap* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSMAP<cint64, CRepresentativeVariableBindingPathSetJoiningKeyMapData>::operator=(*prevMap);
 					} else {
 						CPROCESSMAP<cint64,CRepresentativeVariableBindingPathSetJoiningKeyMapData>::clear();
 					}

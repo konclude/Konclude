@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CDatatypeRealValueSpaceMap* CDatatypeRealValueSpaceMap::initDatatypeRealValueSpaceMap(CDatatypeRealValueSpaceMap* map) {
 					if (map) {
-						*this = *map;
+						CPROCESSMAP<CDatatypeRealValueSpaceMapArranger, CDatatypeRealValueSpaceMapData>::operator=(*this);
 						mAbsoluteMinimumExclusionValue = map->mAbsoluteMinimumExclusionValue;
 						mAbsoluteMaximumExclusionValue = map->mAbsoluteMaximumExclusionValue;
 					}

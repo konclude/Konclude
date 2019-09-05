@@ -62,7 +62,7 @@ namespace Konclude {
 
 					CMemoryPoolContainer* appendMemoryPool(CMemoryPool* memoryPool);
 
-					CMemoryPool* getMemoryPools();
+					CMemoryPool* getMemoryPools() const;
 					CMemoryPool* takeMemoryPools();
 
 

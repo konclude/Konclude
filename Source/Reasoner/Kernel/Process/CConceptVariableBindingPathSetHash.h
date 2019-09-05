@@ -67,12 +67,12 @@ namespace Konclude {
 						CVariableBindingPathDescriptor* getLastVariableBindingDescriptionLinker();
 						CConceptVariableBindingPathSetHash* setLastVariableBindingDescriptionLinker(CVariableBindingPathDescriptor* varBindDes);
 
+						CProcessContext* mProcessContext;
 					// protected methods
 					protected:
 
 					// protected variables
 					protected:
-						CProcessContext* mProcessContext;
 						CVariableBindingPathDescriptor* mLastVarBindDesLinker;
 
 					// private methods

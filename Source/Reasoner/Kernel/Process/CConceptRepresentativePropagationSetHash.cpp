@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CConceptRepresentativePropagationSetHash* CConceptRepresentativePropagationSetHash::initConceptRepresentativePropagationSetHash(CConceptRepresentativePropagationSetHash* prevHash) {
 					if (prevHash) {
-						*this = *prevHash;
+						CPROCESSHASH<cint64, CConceptRepresentativePropagationSetHashData>::operator =(*prevHash);
 					} else {
 						CPROCESSHASH<cint64,CConceptRepresentativePropagationSetHashData>::clear();
 					}

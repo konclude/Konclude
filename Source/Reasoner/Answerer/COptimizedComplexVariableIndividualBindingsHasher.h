@@ -60,6 +60,7 @@ namespace Konclude {
 				public:
 					//! Constructor
 					COptimizedComplexVariableIndividualBindingsHasher(COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingsLinker);
+					COptimizedComplexVariableIndividualBindingsHasher(COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingsLinker, cint64 calculatedHashValue);
 					COptimizedComplexVariableIndividualBindingsHasher(COptimizedComplexVariableIndividualBindings* bindings);
 
 					cint64 getHashValue() const;
@@ -70,9 +71,11 @@ namespace Konclude {
 
 				// protected methods
 				protected:
+					COptimizedComplexVariableIndividualBindingsHasher* calculateHashValue();
 
 				// protected variables
 				protected:
+					cint64 mHashValue;
 					COptimizedComplexVariableIndividualBindings* mBindings;
 
 				// private methods

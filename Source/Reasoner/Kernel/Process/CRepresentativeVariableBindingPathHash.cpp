@@ -35,7 +35,7 @@ namespace Konclude {
 
 				CRepresentativeVariableBindingPathHash* CRepresentativeVariableBindingPathHash::initRepresentativeVariableBindingPathHash(CRepresentativeVariableBindingPathHash* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSHASH<cint64, CRepresentativeVariableBindingPathSetHashData>::operator=(*prevMap);
 					} else {
 						CPROCESSHASH<cint64,CRepresentativeVariableBindingPathSetHashData>::clear();
 					}

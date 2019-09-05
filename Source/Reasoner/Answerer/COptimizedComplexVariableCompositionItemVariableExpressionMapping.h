@@ -61,6 +61,9 @@ namespace Konclude {
 					~COptimizedComplexVariableCompositionItemVariableExpressionMapping();
 
 
+					COptimizedComplexVariableCompositionItemVariableExpressionMapping* removeItemVariableExpressionMapping(COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping = nullptr);
+
+
 				// protected methods
 				protected:
 

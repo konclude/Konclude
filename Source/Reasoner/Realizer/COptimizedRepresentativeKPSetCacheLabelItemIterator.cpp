@@ -275,7 +275,7 @@ namespace Konclude {
 
 						if (!foundNext) {
 							iteratorData->mIterator.moveNext();
-							iteratorData->mCurrentIndiRealizationItem = nullptr;
+							clearInstanceIndividualAssociationsIteratorData(iteratorData);
 						}
 					}
 					if (foundNext) {
@@ -456,6 +456,7 @@ namespace Konclude {
 					}
 
 					if (!atEnd() || mInitializationRequired) {
+						cint64 prevLastIndiId = mLastIndiId;
 						mLastIndiId = -1;
 						if (mInitializationRequired || !reachedCursorCheckFunc(mCurrentIteratorData)) {
 							mInitializationRequired = false;
@@ -482,6 +483,13 @@ namespace Konclude {
 
 							if (mCurrentIteratorData && mCurrentIteratorData->mInitializationRequired) {
 								mInitializationRequired = true;
+							}
+						}
+						if (mCurrentIteratorData) {
+							if (!mInitializationRequired) {
+								mLastIndiId = currentIndividualInstanceItemReference().getIndividualID();
+							} else {
+								mLastIndiId = prevLastIndiId;
 							}
 						}
 					}

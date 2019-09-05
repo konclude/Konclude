@@ -112,6 +112,8 @@ namespace Konclude {
 				mExtraConsistencyTesting = false;
 				mExtraConsistencyTested = false;
 
+				mIteratorNothingToDoWarning = false;
+
 				mIndiDepTrackReq = false;
 				if (CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Realization.IndividualDependenceTracking",true)) {
 					mIndiDepTrackReq = true;
@@ -237,7 +239,7 @@ namespace Konclude {
 
 								CRole* firstInverseRole = nullptr;
 								if (roleChain->getInverseRoleChainLinker()) {
-									firstInverseRole = roleChain->getInverseRoleChainLinker()->getData();
+									firstInverseRole = roleChain->getInverseRoleChainLinker()->getData()->getInverseRole();
 								}
 								CRoleInstantiatedItem* roleItem = getRoleInstantiatedItem(role);
 								COptimizedKPSetRoleInstancesRedirectionItem* redRoleItem = (COptimizedKPSetRoleInstancesRedirectionItem*)roleItem;
@@ -295,7 +297,7 @@ namespace Konclude {
 										}
 										if (superRoleInversed) {
 											if (firstInverseRole) {
-												superRoleItem->addComplexRoleStarterCandidate(firstInverseRole->getInverseRole());
+												superRoleItem->addComplexRoleStarterCandidate(firstInverseRole);
 											}
 											if (superRoleItem->hasInverseRole()) {
 												superRoleItem->addComplexInverseRoleStarterCandidate(firstRole);
@@ -303,7 +305,7 @@ namespace Konclude {
 										} else {
 											superRoleItem->addComplexRoleStarterCandidate(firstRole);
 											if (firstInverseRole && superRoleItem->hasInverseRole()) {
-												superRoleItem->addComplexInverseRoleStarterCandidate(firstInverseRole->getInverseRole());
+												superRoleItem->addComplexInverseRoleStarterCandidate(firstInverseRole);
 											}
 										}
 									}
@@ -322,7 +324,7 @@ namespace Konclude {
 							CRole* subRole = roleStarterExpPair.second;
 
 							QSet<CRole*> subRolesCandidateSet;
-							QList<CRole*> subRolesCandidateList(complexRoleInverseStarterCandExpansionHash.values(subRole));
+							QList<CRole*> subRolesCandidateList(complexRoleStarterCandExpansionHash.values(subRole));
 							for (CRole* role : subRolesCandidateList) {
 								subRolesCandidateSet.insert(role);
 							}
@@ -366,8 +368,8 @@ namespace Konclude {
 
 							while (!subRolesCandidateList.isEmpty()) {
 								CRole* role = subRolesCandidateList.takeFirst();
-								if (!superRoleItem->hasComplexInverseRoleStarterCandidate(role->getInverseRole())) {
-									superRoleItem->addComplexInverseRoleStarterCandidate(role->getInverseRole());
+								if (!superRoleItem->hasComplexInverseRoleStarterCandidate(role)) {
+									superRoleItem->addComplexInverseRoleStarterCandidate(role);
 
 									QList<CRole*> nextSubRolesCandidateList(complexRoleStarterCandExpansionHash.values(role));
 									for (CRole* nextSubRole : nextSubRolesCandidateList) {
@@ -738,7 +740,7 @@ namespace Konclude {
 				if (!processing) {
 					//CRealizationIndividualInstanceItemReference prevCheckingPosIndiItemRef = iterator->currentIndividualInstanceItemReference();
 					//CRealizationIndividualInstanceItemReferenceIterator* iterator2 = iterator->getCopy();
-					if (!iterator->atEnd() && !processing && (dynamicIteratorRealReq->getRealizationRequiredInstancesCount() < 0 || iteratorReqDataCallback->getFoundInstancesCount() < dynamicIteratorRealReq->getRealizationRequiredInstancesCount())) {
+					if (!iterator->atEnd() && !processing && (realReqInstCount < 0 || iteratorReqDataCallback->getFoundInstancesCount() < realReqInstCount)) {
 						if (iterator->requiresInitialization()) {
 
 							cint64 schedulingIndividualCount = 0;
@@ -747,7 +749,7 @@ namespace Konclude {
 								++schedulingIndividualCount;
 							}
 
-							if (processing && dynamicIteratorRealReq->getRealizationRequiredInstancesCount() < 0) {
+							if (processing && (realReqInstCount < 0 || realReqInstCount > 1 && iteratorReqDataCallback->getFoundInstancesCount() + schedulingIndividualCount < realReqInstCount)) {
 								CRealizationIndividualInstanceItemReferenceIterator* iteratorCopy = iterator->getCopy();
 								//CRealizationIndividualInstanceItemReferenceIterator* iteratorCopy2 = iterator->getCopy();
 								iteratorCopy->moveNext();
@@ -758,7 +760,7 @@ namespace Konclude {
 								} else {
 									initializationCheckIteratorCopyList.append(iteratorCopy);
 								}
-								while (!iteratorCopy->atEnd()) {
+								while (!iteratorCopy->atEnd() && (realReqInstCount < 0 || realReqInstCount > 1 && iteratorReqDataCallback->getFoundInstancesCount() + schedulingIndividualCount < realReqInstCount)) {
 									CRealizationIndividualInstanceItemReference currentPosIndiItemRef = iteratorCopy->currentIndividualInstanceItemReference();
 									if (currentPosIndiItemRef.getIndividualID() == -1 || iteratorCopy->requiresInitialization()) {
 										if (ensureIteratorPositionRealization(iteratorReqDataCallback, newReqProcDat, iteratorCopy, initializationCheckIteratorCopyList)) {
@@ -775,7 +777,9 @@ namespace Konclude {
 									iteratorCopy->moveNext();
 								}
 								//LOG(NOTICE, "::Konclude::Reasoner::Kernel::Realizer", logTr("Scheduling realization for %1 individuals for preparing realization iterator.").arg(schedulingIndividualCount), this);
-								iteratorReqDataCallback->setRealizedAllInstances(true);
+								if (realReqInstCount < 0) {
+									iteratorReqDataCallback->setRealizedAllInstances(true);
+								}
 								delete iteratorCopy;
 							}
 
@@ -905,7 +909,10 @@ namespace Konclude {
 						if (handleIteratorRequirement(iteratorReqDataCallback, newReqProcDat, procData)) {
 							procData->incProcessingItemCount();
 						} else {
-							LOG(WARN, "::Konclude::Reasoner::Kernel::Realizer", logTr("Nothing to do for realization iterator."), this);
+							if (!mIteratorNothingToDoWarning) {
+								LOG(WARN, "::Konclude::Reasoner::Kernel::Realizer", logTr("Nothing to do for realization iterator."), this);
+								mIteratorNothingToDoWarning = true;
+							}
 							delete newReqProcDat;
 							delete reqCallbackData;
 						}
@@ -2429,150 +2436,173 @@ namespace Konclude {
 					}
 				}
 
+				bool unsatisfiable = false;
 				if (!emptyIteratorList.isEmpty()) {
-					for (CRealizationIndividualInstanceItemReferenceIterator* iterator : takeIteratorList) {
-						delete iterator;
+					qDeleteAll(takeIteratorList);
+					unmergeableIteratorList.clear();
+					conceptSetCacheLabelIteratorList.clear();
+					roleNeighbouringCacheLabelIteratorList.clear();
+					unsatisfiable = true;
+				}
+
+
+
+				if (!unsatisfiable) {
+					if (conceptSetCacheLabelIteratorList.size() > 1) {
+						// merge concept set label iterators
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> validKnownLabelSet;
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> validPossibleLabelSet;
+						bool hasValidLabelSets = false;
+
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidKnownLabelSet;
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidPossibleLabelSet;
+
+						QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>> possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash;
+						QSet<TConceptInstancesItemMostSpecificFlagPair> conceptInstancesItemOnlyMostSpecificFlagPairSet;
+
+
+						// at the moment it is just assumed that all have the same values for cursor/sorting/moveOverCursor
+						// TODO: make sure all have the same values for cursor/sorting/moveOverCursor or combine only those that have the same values or determine a new minimal/maximal cursor
+						CRealizationIndividualSorting sorting = conceptSetCacheLabelIteratorList.first()->getSorting();
+						CRealizationIndividualInstanceItemReference indiInstItemRefCursor = conceptSetCacheLabelIteratorList.first()->getIndividualInstanceItemReferenceCursor();
+						bool moveOverCursor = conceptSetCacheLabelIteratorList.first()->hasMoveOverCursor();
+
+
+						for (COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* conceptSetCacheLabelIterator : conceptSetCacheLabelIteratorList) {
+
+							conceptInstancesItemOnlyMostSpecificFlagPairSet.unite(*conceptSetCacheLabelIterator->getConceptInstancesItemOnlyMostSpecificFlagPairSet());
+							QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>* possibleLabelConceptInstancesItemMostSpecificPairSetHash = conceptSetCacheLabelIterator->getPossibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash();
+							for (QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>::const_iterator it = possibleLabelConceptInstancesItemMostSpecificPairSetHash->constBegin(), itEnd = possibleLabelConceptInstancesItemMostSpecificPairSetHash->constEnd(); it != itEnd; ++it) {
+								QSet<TConceptInstancesItemMostSpecificFlagPair>& instancesItemMostSpecificPairSet = possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash[it.key()];
+								instancesItemMostSpecificPairSet.unite(it.value());
+							}
+												
+							for (CBackendRepresentativeMemoryLabelCacheItem* label : *conceptSetCacheLabelIterator->getKnownInstancesLabelCacheItemList()) {
+								if (!hasValidLabelSets || validKnownLabelSet.contains(label) && !nextValidPossibleLabelSet.contains(label)) {
+									nextValidKnownLabelSet.insert(label);
+								}
+								if (validPossibleLabelSet.contains(label)) {
+									nextValidPossibleLabelSet.insert(label);
+								}
+							}
+
+							for (CBackendRepresentativeMemoryLabelCacheItem* label : *conceptSetCacheLabelIterator->getPossibleInstancesLabelCacheItemList()) {
+								if (!hasValidLabelSets || validPossibleLabelSet.contains(label)) {
+									nextValidPossibleLabelSet.insert(label);
+								} else if (validKnownLabelSet.contains(label)) {
+									nextValidKnownLabelSet.remove(label);
+									nextValidPossibleLabelSet.insert(label);
+								}
+							}
+
+							hasValidLabelSets = true;
+							validKnownLabelSet = nextValidKnownLabelSet;
+							validPossibleLabelSet = nextValidPossibleLabelSet;
+							nextValidKnownLabelSet.clear();
+							nextValidPossibleLabelSet.clear();
+						}
+					
+						qDeleteAll(conceptSetCacheLabelIteratorList);
+						conceptSetCacheLabelIteratorList.clear();
+						if (!validKnownLabelSet.isEmpty() || !validPossibleLabelSet.isEmpty()) {
+							COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, conceptInstancesItemOnlyMostSpecificFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor);
+							unmergeableIteratorList.append(cacheLabelInstancesIterator);
+						} else {
+							unsatisfiable = true;
+						}
+
+					} else if (!conceptSetCacheLabelIteratorList.isEmpty()) {
+						unmergeableIteratorList.append(conceptSetCacheLabelIteratorList.first());
+						conceptSetCacheLabelIteratorList.clear();
 					}
+				}
+
+
+
+
+				if (!unsatisfiable) {
+					if (roleNeighbouringCacheLabelIteratorList.size() > 1) {
+						// merge concept set label iterators
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> validKnownLabelSet;
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> validPossibleLabelSet;
+						bool hasValidLabelSets = false;
+
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidKnownLabelSet;
+						QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidPossibleLabelSet;
+
+
+						QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>> possibleLabelRoleInstancesItemInversedFlagPairSetHash;
+						QSet<TRoleInstancesItemInversedFlagPair> roleInstancesItemInversedFlagPairSet;
+
+						// at the moment it is just assumed that all have the same values for cursor/sorting/moveOverCursor
+						// TODO: make sure all have the same values for cursor/sorting/moveOverCursor or combine only those that have the same values or determine a new minimal/maximal cursor
+						CRealizationIndividualSorting sorting = roleNeighbouringCacheLabelIteratorList.first()->getSorting();
+						CRealizationIndividualInstanceItemReference indiInstItemRefCursor = roleNeighbouringCacheLabelIteratorList.first()->getIndividualInstanceItemReferenceCursor();
+						bool moveOverCursor = roleNeighbouringCacheLabelIteratorList.first()->hasMoveOverCursor();
+
+
+						for (COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* roleNeighbouringSetCacheLabelIterator : roleNeighbouringCacheLabelIteratorList) {
+
+							roleInstancesItemInversedFlagPairSet.unite(*roleNeighbouringSetCacheLabelIterator->getRoleInstancesItemInversionPairSet());
+							QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>>* possibleLabelRoleInstancesItemInversionPairSetHash = roleNeighbouringSetCacheLabelIterator->getPossibleLabelRoleInstancesItemInversionPairSetHash();
+							for (QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>>::const_iterator it = possibleLabelRoleInstancesItemInversionPairSetHash->constBegin(), itEnd = possibleLabelRoleInstancesItemInversionPairSetHash->constEnd(); it != itEnd; ++it) {
+								QSet<TRoleInstancesItemInversedFlagPair>& existSet = possibleLabelRoleInstancesItemInversedFlagPairSetHash[it.key()];
+								existSet.unite(it.value());
+							}
+						
+							for (CBackendRepresentativeMemoryLabelCacheItem* label : *roleNeighbouringSetCacheLabelIterator->getKnownInstancesLabelCacheItemList()) {
+								if (!hasValidLabelSets || validKnownLabelSet.contains(label) && !nextValidPossibleLabelSet.contains(label)) {
+									nextValidKnownLabelSet.insert(label);
+								}
+								if (validPossibleLabelSet.contains(label)) {
+									nextValidPossibleLabelSet.insert(label);
+								}
+							}
+
+							for (CBackendRepresentativeMemoryLabelCacheItem* label : *roleNeighbouringSetCacheLabelIterator->getPossibleInstancesLabelCacheItemList()) {
+								if (!hasValidLabelSets || validPossibleLabelSet.contains(label)) {
+									nextValidPossibleLabelSet.insert(label);
+								} else if (validKnownLabelSet.contains(label)) {
+									nextValidKnownLabelSet.remove(label);
+									nextValidPossibleLabelSet.insert(label);
+								}
+							}
+
+
+							hasValidLabelSets = true;
+							validKnownLabelSet = nextValidKnownLabelSet;
+							validPossibleLabelSet = nextValidPossibleLabelSet;
+							nextValidKnownLabelSet.clear();
+							nextValidPossibleLabelSet.clear();
+						}
+
+						qDeleteAll(roleNeighbouringCacheLabelIteratorList);
+						roleNeighbouringCacheLabelIteratorList.clear();
+						if (!validKnownLabelSet.isEmpty() || !validPossibleLabelSet.isEmpty()) {
+							COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelRoleInstancesItemInversedFlagPairSetHash, roleInstancesItemInversedFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor);
+							unmergeableIteratorList.append(cacheLabelInstancesIterator);
+						} else {
+							unsatisfiable = true;
+						}
+
+					} else if (!roleNeighbouringCacheLabelIteratorList.isEmpty()) {
+						unmergeableIteratorList.append(roleNeighbouringCacheLabelIteratorList.first());
+						roleNeighbouringCacheLabelIteratorList.clear();
+					}
+				}
+
+				if (unsatisfiable) {
+					qDeleteAll(unmergeableIteratorList);
+					qDeleteAll(conceptSetCacheLabelIteratorList);
+					qDeleteAll(roleNeighbouringCacheLabelIteratorList);
 					unmergeableIteratorList.clear();
 					conceptSetCacheLabelIteratorList.clear();
 					roleNeighbouringCacheLabelIteratorList.clear();
 				}
 
 
-				if (conceptSetCacheLabelIteratorList.size() > 1) {
-					// merge concept set label iterators
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> validKnownLabelSet;
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> validPossibleLabelSet;
-					bool hasValidLabelSets = false;
-
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidKnownLabelSet;
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidPossibleLabelSet;
-
-					QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>> possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash;
-					QSet<TConceptInstancesItemMostSpecificFlagPair> conceptInstancesItemOnlyMostSpecificFlagPairSet;
-
-
-					// at the moment it is just assumed that all have the same values for cursor/sorting/moveOverCursor
-					// TODO: make sure all have the same values for cursor/sorting/moveOverCursor or combine only those that have the same values or determine a new minimal/maximal cursor
-					CRealizationIndividualSorting sorting = conceptSetCacheLabelIteratorList.first()->getSorting();
-					CRealizationIndividualInstanceItemReference indiInstItemRefCursor = conceptSetCacheLabelIteratorList.first()->getIndividualInstanceItemReferenceCursor();
-					bool moveOverCursor = conceptSetCacheLabelIteratorList.first()->hasMoveOverCursor();
-
-
-					for (COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* conceptSetCacheLabelIterator : conceptSetCacheLabelIteratorList) {
-
-						conceptInstancesItemOnlyMostSpecificFlagPairSet.unite(*conceptSetCacheLabelIterator->getConceptInstancesItemOnlyMostSpecificFlagPairSet());
-						QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>* possibleLabelConceptInstancesItemMostSpecificPairSetHash = conceptSetCacheLabelIterator->getPossibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash();
-						for (QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>::const_iterator it = possibleLabelConceptInstancesItemMostSpecificPairSetHash->constBegin(), itEnd = possibleLabelConceptInstancesItemMostSpecificPairSetHash->constEnd(); it != itEnd; ++it) {
-							QSet<TConceptInstancesItemMostSpecificFlagPair>& instancesItemMostSpecificPairSet = possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash[it.key()];
-							instancesItemMostSpecificPairSet.unite(it.value());
-						}
-												
-						for (CBackendRepresentativeMemoryLabelCacheItem* label : *conceptSetCacheLabelIterator->getKnownInstancesLabelCacheItemList()) {
-							if (!hasValidLabelSets || validKnownLabelSet.contains(label) && !nextValidPossibleLabelSet.contains(label)) {
-								nextValidKnownLabelSet.insert(label);
-							}
-							if (validPossibleLabelSet.contains(label)) {
-								nextValidPossibleLabelSet.insert(label);
-							}
-						}
-
-						for (CBackendRepresentativeMemoryLabelCacheItem* label : *conceptSetCacheLabelIterator->getPossibleInstancesLabelCacheItemList()) {
-							if (!hasValidLabelSets || validPossibleLabelSet.contains(label)) {
-								nextValidPossibleLabelSet.insert(label);
-							} else if (validKnownLabelSet.contains(label)) {
-								nextValidKnownLabelSet.remove(label);
-								nextValidPossibleLabelSet.insert(label);
-							}
-						}
-
-						hasValidLabelSets = true;
-						validKnownLabelSet = nextValidKnownLabelSet;
-						validPossibleLabelSet = nextValidPossibleLabelSet;
-						nextValidKnownLabelSet.clear();
-						nextValidPossibleLabelSet.clear();
-					}
-					
-					qDeleteAll(conceptSetCacheLabelIteratorList);
-					conceptSetCacheLabelIteratorList.clear();
-					if (!validKnownLabelSet.isEmpty() || !validPossibleLabelSet.isEmpty()) {
-						COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, conceptInstancesItemOnlyMostSpecificFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor);
-						unmergeableIteratorList.append(cacheLabelInstancesIterator);
-					}
-
-				} else if (!conceptSetCacheLabelIteratorList.isEmpty()) {
-					unmergeableIteratorList.append(conceptSetCacheLabelIteratorList.first());
-					conceptSetCacheLabelIteratorList.clear();
-				}
-
-
-
-
-
-				if (roleNeighbouringCacheLabelIteratorList.size() > 1) {
-					// merge concept set label iterators
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> validKnownLabelSet;
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> validPossibleLabelSet;
-					bool hasValidLabelSets = false;
-
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidKnownLabelSet;
-					QSet<CBackendRepresentativeMemoryLabelCacheItem*> nextValidPossibleLabelSet;
-
-
-					QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>> possibleLabelRoleInstancesItemInversedFlagPairSetHash;
-					QSet<TRoleInstancesItemInversedFlagPair> roleInstancesItemInversedFlagPairSet;
-
-					// at the moment it is just assumed that all have the same values for cursor/sorting/moveOverCursor
-					// TODO: make sure all have the same values for cursor/sorting/moveOverCursor or combine only those that have the same values or determine a new minimal/maximal cursor
-					CRealizationIndividualSorting sorting = roleNeighbouringCacheLabelIteratorList.first()->getSorting();
-					CRealizationIndividualInstanceItemReference indiInstItemRefCursor = roleNeighbouringCacheLabelIteratorList.first()->getIndividualInstanceItemReferenceCursor();
-					bool moveOverCursor = roleNeighbouringCacheLabelIteratorList.first()->hasMoveOverCursor();
-
-
-					for (COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* roleNeighbouringSetCacheLabelIterator : roleNeighbouringCacheLabelIteratorList) {
-
-						roleInstancesItemInversedFlagPairSet.unite(*roleNeighbouringSetCacheLabelIterator->getRoleInstancesItemInversionPairSet());
-						QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>>* possibleLabelRoleInstancesItemInversionPairSetHash = roleNeighbouringSetCacheLabelIterator->getPossibleLabelRoleInstancesItemInversionPairSetHash();
-						for (QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>>::const_iterator it = possibleLabelRoleInstancesItemInversionPairSetHash->constBegin(), itEnd = possibleLabelRoleInstancesItemInversionPairSetHash->constEnd(); it != itEnd; ++it) {
-							possibleLabelRoleInstancesItemInversedFlagPairSetHash.insert(it.key(), it.value());
-						}
-						
-						for (CBackendRepresentativeMemoryLabelCacheItem* label : *roleNeighbouringSetCacheLabelIterator->getKnownInstancesLabelCacheItemList()) {
-							if (!hasValidLabelSets || validKnownLabelSet.contains(label) && !nextValidPossibleLabelSet.contains(label)) {
-								nextValidKnownLabelSet.insert(label);
-							}
-							if (validPossibleLabelSet.contains(label)) {
-								nextValidPossibleLabelSet.insert(label);
-							}
-						}
-
-						for (CBackendRepresentativeMemoryLabelCacheItem* label : *roleNeighbouringSetCacheLabelIterator->getPossibleInstancesLabelCacheItemList()) {
-							if (!hasValidLabelSets || validPossibleLabelSet.contains(label)) {
-								nextValidPossibleLabelSet.insert(label);
-							} else if (validKnownLabelSet.contains(label)) {
-								nextValidKnownLabelSet.remove(label);
-								nextValidPossibleLabelSet.insert(label);
-							}
-						}
-
-
-						hasValidLabelSets = true;
-						validKnownLabelSet = nextValidKnownLabelSet;
-						validPossibleLabelSet = nextValidPossibleLabelSet;
-						nextValidKnownLabelSet.clear();
-						nextValidPossibleLabelSet.clear();
-					}
-
-					qDeleteAll(roleNeighbouringCacheLabelIteratorList);
-					roleNeighbouringCacheLabelIteratorList.clear();
-					if (!validKnownLabelSet.isEmpty() || !validPossibleLabelSet.isEmpty()) {
-						COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelRoleInstancesItemInversedFlagPairSetHash, roleInstancesItemInversedFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor);
-						unmergeableIteratorList.append(cacheLabelInstancesIterator);
-					}
-
-				} else if (!roleNeighbouringCacheLabelIteratorList.isEmpty()) {
-					unmergeableIteratorList.append(roleNeighbouringCacheLabelIteratorList.first());
-					roleNeighbouringCacheLabelIteratorList.clear();
+				if (unmergeableIteratorList.size() == 1) {
+					return unmergeableIteratorList.first();
 				}
 
 				COptimizedRepresentativeKPSetIntersectionCombinationIterator* combinedIterator = new COptimizedRepresentativeKPSetIntersectionCombinationIterator(unmergeableIteratorList);

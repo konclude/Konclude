@@ -93,6 +93,18 @@ namespace Konclude {
 						CIndividualSaturationProcessNodeStatusFlags* setSuccessorNodeExtensionsFlag(bool value);
 
 
+						bool hasPropagationIncompleteFlag();
+						CIndividualSaturationProcessNodeStatusFlags* setPropagationIncompleteFlag(bool value);
+
+						bool hasUnregisteredPropagationFlag();
+						CIndividualSaturationProcessNodeStatusFlags* setUnregisteredPropagationFlag(bool value);
+
+						bool hasUnmarkedRoleAssertionFlag();
+						CIndividualSaturationProcessNodeStatusFlags* setUnmarkedRoleAssertionFlag(bool value);
+
+
+
+
 						bool hasUnprocessedFlag();
 						CIndividualSaturationProcessNodeStatusFlags* setUnprocessedFlag(bool value);
 
@@ -116,6 +128,11 @@ namespace Konclude {
 						const static cint64 INDSATFLAGCARDINALITYPROPLEMATIC	= 0x0040;
 						const static cint64 INDMISSEDABOXCONSISTENCYDATA		= 0x0080;
 						const static cint64 INDSUCCESSORNODEEXTENSIONS			= 0x0100;
+						const static cint64 INDSATFLAGPROPAGATIONINCOMPLETE		= 0x0200;
+
+
+						const static cint64 INDSATFLAGUNREGISTEREDPROPAGATION	= 0x0400;
+						const static cint64 INDSATFLAGUNMARKEDROLEASSERTION		= 0x0800;
 
 
 						const static cint64 INDSATFLAGINITIALIZED				= 0x1000;

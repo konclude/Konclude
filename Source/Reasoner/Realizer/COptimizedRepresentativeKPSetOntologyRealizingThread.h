@@ -68,6 +68,14 @@
 #include "Logger/CLogger.h"
 
 
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+
+	//#define REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
+#endif
+
+
+
 namespace Konclude {
 
 	using namespace Utilities::Memory;
@@ -284,6 +292,13 @@ namespace Konclude {
 					bool mConfPossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel;
 					cint64 mConfPossibleInstanceIndividualsAfterwardsMergingProvidingCount;
 					cint64 mConfPossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount;
+
+
+#ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+					QStringList mDebugTransitiveCollectionStringList;
+					QString mDebugTransitiveCollectionString;
+#endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
+
 
 				// private methods
 				private:

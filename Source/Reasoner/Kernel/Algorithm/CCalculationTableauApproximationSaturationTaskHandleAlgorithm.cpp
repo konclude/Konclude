@@ -402,6 +402,7 @@ namespace Konclude {
 									while (hasNextCriticalConcepts(mCalcAlgContext)) {
 										checkNextCriticalConcepts(mCalcAlgContext);
 									}
+									checkCriticalIndividuals(mCalcAlgContext);
 								}
 
 
@@ -853,6 +854,41 @@ namespace Konclude {
 					}
 				}
 
+				void CCalculationTableauApproximationSaturationTaskHandleAlgorithm::checkCriticalIndividuals(CCalculationAlgorithmContextBase* calcAlgContext) {
+					CProcessingDataBox* procDataBox = calcAlgContext->getUsedProcessingDataBox();
+					CIndividualSaturationProcessNodeLinker* indiSaturationAnalysingNodeLinker = procDataBox->getIndividualSaturationAnalysationNodeLinker();
+					CCriticalIndividualNodeConceptTestSet* criticalIndiNodeConTestSet = procDataBox->getSaturationCriticalIndividualNodeConceptTestSet(true);
+					if (indiSaturationAnalysingNodeLinker && calcAlgContext->getSatisfiableCalculationTask()->getSaturationIndividualsAnalysationObserver()) {
+						for (CIndividualSaturationProcessNodeLinker* indiSaturationAnalysingNodeLinkerIt = indiSaturationAnalysingNodeLinker; indiSaturationAnalysingNodeLinkerIt; indiSaturationAnalysingNodeLinkerIt = indiSaturationAnalysingNodeLinkerIt->getNext()) {
+							CIndividualSaturationProcessNode* satIndiNode = indiSaturationAnalysingNodeLinkerIt->getProcessingIndividual();
+							CIndividualSaturationProcessNodeStatusFlags* indStatFlags = satIndiNode->getIndirectStatusFlags();
+							CIndividualSaturationProcessNodeStatusFlags* dirStatFlags = satIndiNode->getDirectStatusFlags();
+							if (!indStatFlags->hasClashedFlag() && !dirStatFlags->hasPropagationIncompleteFlag()) {
+								CReapplyConceptSaturationLabelSet* succConSet = satIndiNode->getReapplyConceptSaturationLabelSet(false);
+								if (succConSet) {
+									for (CConceptSaturationDescriptor* conSatDesIt = succConSet->getConceptSaturationDescriptionLinker(); conSatDesIt && !dirStatFlags->hasPropagationIncompleteFlag(); conSatDesIt = conSatDesIt->getNext()) {
+										CConcept* concept = conSatDesIt->getConcept();
+										bool negation = conSatDesIt->isNegated();
+										if (!negation && concept->getConceptOperator()->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE) || negation && concept->getConceptOperator()->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_SOME_TYPE)) {
+
+											if (!criticalIndiNodeConTestSet->isConceptTestedForIndividual(conSatDesIt, satIndiNode)) {
+												criticalIndiNodeConTestSet->insertConceptTestedForIndividual(conSatDesIt, satIndiNode);
+												STATINC(SATURATIONCRITICALTESTCOUNT, calcAlgContext);
+												if (isCriticalALLConceptDescriptorInsufficient(conSatDesIt, satIndiNode, calcAlgContext)) {
+													updateDirectAddingIndividualStatusFlags(satIndiNode, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT, calcAlgContext);
+													updateDirectAddingIndividualStatusFlags(satIndiNode, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGPROPAGATIONINCOMPLETE, calcAlgContext);
+													setInsufficientNodeOccured(calcAlgContext);
+													++mInsufficientALLCount;
+												}
+											}
+
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 
 				CSaturationSuccessorExtensionData* CCalculationTableauApproximationSaturationTaskHandleAlgorithm::getSucessorExtensionData(CLinkedRoleSaturationSuccessorData* succData, bool create, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CSaturationSuccessorExtensionData*& succExtData = succData->mExtensionData;
@@ -2459,16 +2495,16 @@ namespace Konclude {
 
 
 				CSaturationIndividualNodeExtensionResolveData* CCalculationTableauApproximationSaturationTaskHandleAlgorithm::getResolvedIndividualNodeExtension(CSaturationIndividualNodeExtensionResolveData* resolveData, CConcept* concept, bool negation, CIndividualSaturationProcessNode*& copyIndiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CReapplyConceptSaturationLabelSet* conSet = copyIndiProcSatNode->getReapplyConceptSaturationLabelSet(false);
+					if (conSet && conSet->containsConcept(concept, negation)) {
+						return resolveData;
+					}
+
 					CSaturationIndividualNodeExtensionResolveHashData& resolveHashData = resolveData->getIndividualNodeExtensionResolveHash(true)->getResolvedIndividualNodeExtensionData(concept,negation);
 					if (!resolveHashData.mResolveData) {
-						CReapplyConceptSaturationLabelSet* conSet = copyIndiProcSatNode->getReapplyConceptSaturationLabelSet(false);
-						if (conSet && conSet->containsConcept(concept,negation)) {
-							resolveHashData.mResolveData = resolveData;
-						} else {
-							resolveHashData.mResolveData = CObjectParameterizingAllocator< CSaturationIndividualNodeExtensionResolveData,CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(),calcAlgContext->getUsedProcessContext());
-							cint64 nextResolveIndiID = calcAlgContext->getUsedProcessingDataBox()->getNextSaturationResolvedSuccessorExtensionIndividualNodeID();
-							resolveHashData.mResolveData->initExtensionResolveData(nextResolveIndiID);
-						}
+						resolveHashData.mResolveData = CObjectParameterizingAllocator< CSaturationIndividualNodeExtensionResolveData, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						cint64 nextResolveIndiID = calcAlgContext->getUsedProcessingDataBox()->getNextSaturationResolvedSuccessorExtensionIndividualNodeID();
+						resolveHashData.mResolveData->initExtensionResolveData(nextResolveIndiID);
 					}
 					if (resolveHashData.mResolveData->hasProcessingIndividualNode()) {
 						copyIndiProcSatNode = resolveHashData.mResolveData->getProcessingIndividualNode();
@@ -2969,6 +3005,9 @@ namespace Konclude {
 									STATINC(SATURATIONCRITICALTESTCOUNT,calcAlgContext);
 									if (isCriticalALLConceptDescriptorInsufficient(criticalConDes,indiProcSatNode,calcAlgContext)) {
 										updateDirectAddingIndividualStatusFlags(indiProcSatNode,CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT,calcAlgContext);
+										if (indiProcSatNode->isABoxIndividualRepresentationNode()) {
+											updateDirectAddingIndividualStatusFlags(indiProcSatNode, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGPROPAGATIONINCOMPLETE, calcAlgContext);
+										}
 										setInsufficientNodeOccured(calcAlgContext);
 										++mInsufficientALLCount;
 									} else {
@@ -3516,7 +3555,11 @@ namespace Konclude {
 						for (CSortedNegLinker<CConcept*>* opLinkerIt = concept->getOperandList(); opLinkerIt; opLinkerIt = opLinkerIt->getNext()) {
 							CConcept* opConcept = opLinkerIt->getData();
 							bool opConceptNegation = opLinkerIt->isNegated()^conceptNegation;
-							if (conSet->containsConcept(opConcept,opConceptNegation)) {
+
+							bool checkingNegation = opConceptNegation;
+							CConcept* opCheckingConcept = getDisjunctCheckingConcept(opConcept, opConceptNegation, &checkingNegation, calcAlgContext);
+
+							if (conSet->containsConcept(opCheckingConcept, checkingNegation)) {
 								return false;
 							}
 						}
@@ -4879,9 +4922,13 @@ namespace Konclude {
 						++disjCount;
 						CConcept* disjunctConcept = disjunctConceptLinkerIt->getData();
 						bool disjunctNegation = disjunctConceptLinkerIt->isNegated()^disjunctionNegation;
-						CConceptProcessData* conProData = (CConceptProcessData*)disjunctConcept->getConceptData();
+
+						bool checkingNegation = disjunctNegation;
+						CConcept* disjunctHandling = getDisjunctCheckingConcept(disjunctConcept, disjunctNegation, &checkingNegation, calcAlgContext);
+
+						CConceptProcessData* conProData = (CConceptProcessData*)disjunctHandling->getConceptData();
 						CConceptSaturationReferenceLinkingData* confSatRefLinkingData = (CConceptSaturationReferenceLinkingData*)conProData->getConceptReferenceLinking();
-						CSaturationConceptReferenceLinking* disjunctConceptRefLinkData = confSatRefLinkingData->getConceptSaturationReferenceLinkingData(disjunctNegation);
+						CSaturationConceptReferenceLinking* disjunctConceptRefLinkData = confSatRefLinkingData->getConceptSaturationReferenceLinkingData(checkingNegation);
 						CIndividualSaturationProcessNode* disConIndiNode = (CIndividualSaturationProcessNode*)disjunctConceptRefLinkData->getIndividualProcessNodeForConcept();
 						addUninitializedIndividualToProcessingQueue(disConIndiNode,calcAlgContext);
 
@@ -4953,6 +5000,13 @@ namespace Konclude {
 							}
 						} else {
 							addNewLinkedExtensionProcessingRole(superRole,sourceNode,true,true,mCalcAlgContext);
+
+							CRoleProcessData* roleProData = (CRoleProcessData*)superRole->getRoleData();
+							if (!roleProData || roleProData->hasPropagationAndCreationConceptsFlag()) {
+								updateDirectAddingIndividualStatusFlags(sourceNode, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGUNMARKEDROLEASSERTION, mCalcAlgContext);
+							}
+
+
 						}
 						superRoleIt = superRoleIt->getNext();
 					}
@@ -5889,6 +5943,34 @@ namespace Konclude {
 					applyORRule(processIndi,conProLinker);
 				}
 
+
+
+				CConcept* CCalculationTableauApproximationSaturationTaskHandleAlgorithm::getDisjunctCheckingConcept(CConcept* opConcept, bool opConNegation, bool* checkingNegation, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (opConcept->getOperatorCode() == CCAQCHOOCE) {
+						cint64 replaceCount = 0;
+						CConcept* replaceCheckingConcept = nullptr;
+						CSortedNegLinker<CConcept*>* opConceptOpLinkerIt = opConcept->getOperandList();
+						while (opConceptOpLinkerIt) {
+							CConcept* opOpConcept = opConceptOpLinkerIt->getData();
+							bool opOpNegation = opConceptOpLinkerIt->isNegated();
+							if (opOpNegation == opConNegation) {
+								replaceCheckingConcept = opOpConcept;
+								replaceCount++;
+							}
+							opConceptOpLinkerIt = opConceptOpLinkerIt->getNext();
+						}
+
+						if (replaceCount == 1 && replaceCheckingConcept) {
+							if (checkingNegation) {
+								*checkingNegation = false;
+							}
+							return replaceCheckingConcept;
+						}
+					}
+					return opConcept;
+				}
+
+
 				void CCalculationTableauApproximationSaturationTaskHandleAlgorithm::applyORRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conSatProLinker) {
 					CConceptSaturationDescriptor* conDes = conSatProLinker->getConceptSaturationDescriptor();
 					bool conNegation = conDes->getNegation();
@@ -6045,11 +6127,19 @@ namespace Konclude {
 					CConceptProcessData* conProData = (CConceptProcessData*)concept->getConceptData();
 					if (conProData) {
 						if (conProData->hasPropagationIntoCreationDirection()) {
-							addALLConceptExtensionProcessingRole(role,backPropHashData,processIndi,mCalcAlgContext);
-							updateDirectAddingIndividualStatusFlags(processIndi,CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCRITICAL,mCalcAlgContext);
-							addCriticalConceptDescriptor(conDes,CCriticalSaturationConceptTypeQueues::CCT_FORALL,processIndi,mCalcAlgContext);
+							addALLConceptExtensionProcessingRole(role, backPropHashData, processIndi, mCalcAlgContext);
+							updateDirectAddingIndividualStatusFlags(processIndi, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCRITICAL, mCalcAlgContext);
+							addCriticalConceptDescriptor(conDes, CCriticalSaturationConceptTypeQueues::CCT_FORALL, processIndi, mCalcAlgContext);
+						} else {
+							// if node has unregistered propagation, then mark node for checking all propagations in the end 
+							CRoleProcessData* roleProData = (CRoleProcessData*)role->getRoleData();
+							if (!roleProData || roleProData->hasPropagationAndCreationConceptsFlag()) {
+								updateDirectAddingIndividualStatusFlags(processIndi, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGUNREGISTEREDPROPAGATION, mCalcAlgContext);
+							}
 						}
 					}
+					
+
 
 				}
 
@@ -7860,7 +7950,7 @@ namespace Konclude {
 						for (const QString& tmpString : indiStringList) {
 
 							QString tmpReplacedString = tmpString;
-							tmpReplacedString = tmpReplacedString.replace("<br>", "\r\n");
+							tmpReplacedString = tmpReplacedString.replace("<br>", "").replace("<p>", "\n");
 							file.write(tmpReplacedString.toLocal8Bit());
 							file.write(QString("\r\n\r\n\r\n").toLocal8Bit());
 						}
@@ -7930,6 +8020,7 @@ namespace Konclude {
 							QString conSetString;
 							CReapplyConceptSaturationLabelSet* conSet = indi->getReapplyConceptSaturationLabelSet(false);
 							if (conSet) {
+								CCriticalIndividualNodeConceptTestSet* criticalIndiNodeConTestSet = calcAlgContext->getProcessingDataBox()->getSaturationCriticalIndividualNodeConceptTestSet(false);
 								CConceptSaturationDescriptor* conDesIt = conSet->getConceptSaturationDescriptionLinker();
 								while (conDesIt) {
 									CConceptSaturationDescriptor* conDes = conDesIt;
@@ -7944,6 +8035,9 @@ namespace Konclude {
 											conSetString += QString("<br>\n");
 										}
 										conSetString += conceptString;
+										if (criticalIndiNodeConTestSet && criticalIndiNodeConTestSet->isConceptTestedForIndividual(conDes, indi)) {
+											conSetString += " {critical checked}";
+										}
 									}
 									conDesIt = conDesIt->getNextConceptDesciptor();
 								}
@@ -8124,8 +8218,33 @@ namespace Konclude {
 					}
 
 
-					mDebugIndiModelStringList = indiStringList;
-					mDebugIndiModelString = mDebugIndiModelStringList.join("<br>\n<p><br>\n\r\n");
+					if (!list) {
+						if (indiStringList.size() >= 1000000) {
+							QFile file(QString("./Debugging/SaturationTasks/tmp-%1.txt").arg(calcAlgContext->getUsedSatisfiableCalculationTask()->getTaskDepth()));
+							if (file.open(QIODevice::WriteOnly)) {
+
+								for (const QString& tmpString : indiStringList) {
+
+									QString tmpReplacedString = tmpString;
+									tmpReplacedString = tmpReplacedString.replace("<br>", "\r\n");
+									file.write(tmpReplacedString.toLocal8Bit());
+									file.write(QString("\r\n\r\n\r\n").toLocal8Bit());
+								}
+
+
+								file.close();
+							}
+						} else {
+
+							mDebugIndiModelStringList = indiStringList;
+							mDebugIndiModelString = mDebugIndiModelStringList.join("<br>\n<p><br>\n\r\n");
+						}
+					} else {
+						mDebugIndiModelString.clear();
+						*list = indiStringList;
+					}
+
+
 					return mDebugIndiModelString;
 				}
 
@@ -8160,6 +8279,15 @@ namespace Konclude {
 					}
 					if (statusFlags->hasUnprocessedFlag()) {
 						flagsStringList += QString("unprocessed");
+					}
+					if (statusFlags->hasUnmarkedRoleAssertionFlag()) {
+						flagsStringList += QString("unmarked role assertion");
+					}
+					if (statusFlags->hasUnregisteredPropagationFlag()) {
+						flagsStringList += QString("unregistered role assertion");
+					}
+					if (statusFlags->hasPropagationIncompleteFlag()) {
+						flagsStringList += QString("propagation incomplete");
 					}
 					if (flagsStringList.isEmpty()) {
 						flagsStringList += QString("none");

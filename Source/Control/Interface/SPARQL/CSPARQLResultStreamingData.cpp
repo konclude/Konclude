@@ -50,17 +50,20 @@ namespace Konclude {
 
 				CSPARQLResultStreamingData* CSPARQLResultStreamingData::init(cint64 sequenceNumber, cint64 bufferSize, CSPARQLResultStreamingController* streamingController) {
 					mStreamingController = streamingController;
-					mBufferSize = bufferSize;
+					mBufferSize = 1000000;
+					mMaxBufferSize = bufferSize;
 					mSequenceNumber = sequenceNumber;
 					mStreamingResult = nullptr;
 
 					QByteArray* bufferArray = new QByteArray();
-					bufferArray->reserve(bufferSize + 10000);
+					bufferArray->reserve(mBufferSize + 10000);
 					mSerializer = new CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer(bufferArray, false);
 					mStreamingFinished = false;
 					mStreamingInitialized = false;
 					mFinalized = false;
 					mUsedBufferSize = 0;
+					mFlushId = 0;
+					mContinueSerialization = true;
 					return this;
 				}
 
@@ -73,7 +76,7 @@ namespace Konclude {
 						CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(mQuery);
 						if (compAssIndVarQuery) {
 							if (!compAssIndVarQuery->getQueryResult()) {
-								if (!compAssIndVarQuery->isDistinctRequired() && !compAssIndVarQuery->getResultOrderingLinker() && !compAssIndVarQuery->isBooleanEntailmentResultRequired()) {
+								if (!compAssIndVarQuery->getResultOrderingLinker() && !compAssIndVarQuery->isBooleanEntailmentResultRequired()) {
 
 									LOG(NOTICE, "::Konclude::Control::Interface::SPARQL::SPARQLResultStreamer", logTr("Enabling results streaming for query '%1'.").arg(mQuery->getQueryName()), this);
 
@@ -103,25 +106,39 @@ namespace Konclude {
 				}
 
 				CVariableBindingsAnswersStreamingHandler* CSPARQLResultStreamingData::streamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality) {
-					if (mStreamingInitialized && !mStreamingFinished) {
+					if (mStreamingInitialized && !mStreamingFinished && mContinueSerialization) {
 						mSerializer->addResultStreamingBindingToTemporaryBuffer(mVarNames, varBindings);
 						for (cint64 i = 0; i < cardinality; ++i) {
 							mSerializer->addTemporaryBuffer();
 							if (mSerializer->getBufferWrittenSize() > mBufferSize) {
-								QByteArray* bufferArray = new QByteArray();
-								bufferArray->reserve(mBufferSize + 10000);
-								QByteArray* usedBuffer = mSerializer->updateWriteBuffer(bufferArray);
-								mBufferMutex.lock();
-								mUsedBufferSize += usedBuffer->size();
-								mUsedBufferList.append(usedBuffer);
-								mBufferMutex.unlock();
-								mStreamingController->notifyWriteRequest(mSequenceNumber);
+								mBufferSize *= 2;								
+								if (mBufferSize > mMaxBufferSize) {
+									mBufferSize = mMaxBufferSize;
+								}
+								mContinueSerialization &= streamingFlush();
 							}
 						}
 						mSerializer->clearTemporaryBuffer();
 					}
 					return this;
 				}
+
+
+				bool CSPARQLResultStreamingData::streamingFlush() {
+					if (mSerializer->getBufferWrittenSize() > 0) {
+						mSerializer->writeFlush(++mFlushId);
+						QByteArray* bufferArray = new QByteArray();
+						bufferArray->reserve(mBufferSize + 10000);
+						QByteArray* usedBuffer = mSerializer->updateWriteBuffer(bufferArray);
+						mBufferMutex.lock();
+						mUsedBufferSize += usedBuffer->size();
+						mUsedBufferList.append(usedBuffer);
+						mBufferMutex.unlock();
+						mContinueSerialization &= mStreamingController->notifyWriteRequest(mSequenceNumber);
+					}
+					return mContinueSerialization;
+				}
+
 
 				CVariableBindingsAnswersStreamingHandler* CSPARQLResultStreamingData::finishResultStreaming() {
 					if (mStreamingInitialized && !mStreamingFinished) {

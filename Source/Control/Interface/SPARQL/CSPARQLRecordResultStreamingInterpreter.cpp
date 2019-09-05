@@ -74,23 +74,25 @@ namespace Konclude {
 				}
 
 
-				CSPARQLResultStreamingController* CSPARQLRecordResultStreamingInterpreter::notifyWriteRequest(cint64 sequenceNumber) {
+				bool CSPARQLRecordResultStreamingInterpreter::notifyWriteRequest(cint64 sequenceNumber) {
+					bool continueWriting = true;
 					if (mCurrentProcessingSeqNumber == sequenceNumber) {
 						CSPARQLResultStreamingData* seqData = mSequenceDataHash.value(sequenceNumber);
-						writeStreamingData(seqData, false);
+						continueWriting = writeStreamingData(seqData, false);
 					}
-					return this;
+					return continueWriting;
 				}
 
 
-				CSPARQLResultStreamingController* CSPARQLRecordResultStreamingInterpreter::writeStreamingData(CSPARQLResultStreamingData* seqData, bool lastData) {
+				bool CSPARQLRecordResultStreamingInterpreter::writeStreamingData(CSPARQLResultStreamingData* seqData, bool lastData) {
 					QList<QByteArray*> bufferList = seqData->takeWriteableBuffers();
 					cint64 count = bufferList.size();
 					cint64 i = 0;
+					bool continueWriting = true;
 					for (QByteArray* buffer : bufferList) {
-						mResultStreamingWriter->writeStreamData(buffer, ++i == count && lastData);
+						continueWriting &= mResultStreamingWriter->writeStreamData(buffer, ++i == count && lastData);
 					}
-					return this;
+					return continueWriting;
 				}
 
 

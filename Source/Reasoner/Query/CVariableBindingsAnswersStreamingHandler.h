@@ -64,6 +64,7 @@ namespace Konclude {
 
 					virtual CVariableBindingsAnswersStreamingHandler* streamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1) = 0;
 
+					virtual bool streamingFlush() = 0;
 
 
 				// protected methods

@@ -94,7 +94,7 @@ namespace Konclude {
 						bool isHandlerQueued();
 						CSPARQLHttpConnectionHandlerProcessor* setHandlerQueued(bool queued);
 
-						virtual CSPARQLStreamingWriter* writeStreamData(QByteArray* buffer, bool last);
+						virtual bool writeStreamData(QByteArray* buffer, bool last);
 						virtual CSPARQLStreamingWriter* writeStreamDataToSocket(QByteArray* buffer, bool last);
 
 					// protected methods
@@ -131,6 +131,7 @@ namespace Konclude {
 						CSPARQLRecordResultStreamingInterpreter* mSPARQLInterpreter;
 						bool mWritingStarted;
 						bool mDataWritten;
+						bool mWritingFailed;
 						CCommand* mProcessingCommand;
 
 						CConfiguration* mLoaderConfig;

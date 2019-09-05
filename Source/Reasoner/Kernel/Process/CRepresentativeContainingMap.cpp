@@ -36,7 +36,7 @@ namespace Konclude {
 
 				CRepresentativeContainingMap* CRepresentativeContainingMap::initRepresentativeContainingMap(CRepresentativeContainingMap* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSMAP<cint64, CRepresentativeContainingMapData>::operator=(*prevMap);
 					} else {
 						CPROCESSMAP<cint64,CRepresentativeContainingMapData>::clear();
 					}

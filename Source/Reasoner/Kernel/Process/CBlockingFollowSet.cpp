@@ -37,7 +37,7 @@ namespace Konclude {
 
 				CBlockingFollowSet* CBlockingFollowSet::initBlockingFollowSet(CBlockingFollowSet* sigBlockFollowSet) {
 					if (sigBlockFollowSet) {
-						*this = *sigBlockFollowSet;
+						CPROCESSSET<cint64>::operator=(*sigBlockFollowSet);
 						initBlockingFollowTag(sigBlockFollowSet->getBlockingFollowTag());
 					} else {
 						CPROCESSSET<cint64>::clear();

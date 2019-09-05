@@ -57,22 +57,38 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedComplexVariableJoiningBindingPositionMapping(COptimizedComplexVariableCompositionItem* joiningVarItem);
+					COptimizedComplexVariableJoiningBindingPositionMapping(COptimizedComplexVariableCompositionItem* joiningVarItem, cint64 leftSize, cint64 rightSize);
+					~COptimizedComplexVariableJoiningBindingPositionMapping();
+
+					COptimizedComplexVariableJoiningBindingPositionMapping(const COptimizedComplexVariableJoiningBindingPositionMapping& mapping);
 
 
-					QHash<cint64, cint64>* getJoiningItemPositionMapping();
 					COptimizedComplexVariableCompositionItem* getJoiningVariableItem();
 
-					COptimizedComplexVariableJoiningBindingPositionMapping* addBindingPositionMapping(cint64 varIdx, cint64 mappedVarIdx);
-					cint64 getMappedBindingPosition(cint64 varIdx);
+					COptimizedComplexVariableJoiningBindingPositionMapping* addBindingPositionMapping(bool left, cint64 varIdx, cint64 mappedVarIdx);
+					cint64 getMappedBindingPosition(bool left, cint64 varIdx);
 
 					bool isSelfSameVariableReduction();
 					COptimizedComplexVariableJoiningBindingPositionMapping* setSelfSameVariableReduction(bool selfSameVariableReduction);
 
+					bool isVariableReduction();
+					COptimizedComplexVariableJoiningBindingPositionMapping* setVariableReduction(bool variableReduction);
 
 
 					cint64 getHashValue() const;
 					bool operator==(const COptimizedComplexVariableJoiningBindingPositionMapping& mapping) const;
+
+
+					CXLinker<cint64>* getLeftKeyBindingLinker();
+					CXLinker<cint64>* getRightKeyBindingLinker();
+
+					COptimizedComplexVariableJoiningBindingPositionMapping* setLeftKeyBindingLinker(CXLinker<cint64>* linker);
+					COptimizedComplexVariableJoiningBindingPositionMapping* setRightKeyBindingLinker(CXLinker<cint64>* linker);
+
+
+					cint64* getRightPosMapArray();
+					cint64* getLeftPosMapArray();
+
 
 				// protected methods
 				protected:
@@ -80,10 +96,16 @@ namespace Konclude {
 				// protected variables
 				protected:
 					bool mSelfSameVariableReduction;
+					bool mVariableReduction;
 					mutable bool mHashValueCaluclated;
 					mutable cint64 mHashValue;
 					COptimizedComplexVariableCompositionItem* mJoiningVarItem;
-					QHash<cint64, cint64> mJoiningItemPositionMapping;
+					CXLinker<cint64>* mLeftKeyBindingLinker;
+					CXLinker<cint64>* mRightKeyBindingLinker;
+					cint64* mRightPosMapArray;
+					cint64* mLeftPosMapArray;
+					cint64 mLeftMapSize;
+					cint64 mRightMapSize;
 
 
 				// private methods

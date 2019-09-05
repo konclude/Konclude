@@ -706,7 +706,7 @@ namespace Konclude {
 					QList<CRealizationEntailmentQueuedIndividualsSameInstanceTestingItem*> mEntIndsSameInstTestList;
 
 
-
+					bool mIteratorNothingToDoWarning;
 
 					cint64 mProvidedPossibleInstancesMergingIndividualsCount;
 					cint64 mProvidedPossibleInstancesMergingsCount;

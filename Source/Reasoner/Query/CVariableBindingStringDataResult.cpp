@@ -73,13 +73,6 @@ namespace Konclude {
 			}
 
 			CVariableBindingResult* CVariableBindingStringDataResult::initVariableBinding(CDataLiteral* dataLiteral) {
-				QString literalString = "\"" + dataLiteral->getDataLiteralValue()->getValueString()+ "\"";
-				if (dataLiteral->getDatatype()->getDatatypeType() != CDatatype::DT_PLAINLITERAL) {
-					literalString += "\"^^" + dataLiteral->getDatatype()->getDatatypeIRI();
-				} else {
-					literalString += "\"";
-				}
-				mBindingString = literalString;
 				mType = CVariableBindingResult::VBTLITERAL;
 				mData = dataLiteral;
 				return this;
@@ -96,6 +89,36 @@ namespace Konclude {
 			cint64 CVariableBindingStringDataResult::getDataIndividualId() {
 				return (cint64)mData;
 			}
+
+
+			bool CVariableBindingStringDataResult::enfoceBindingString() {
+				if (mType == CVariableBindingResult::VBTLITERAL && mBindingString.isEmpty()) {
+					CDataLiteral* dataLiteral = (CDataLiteral*)mData;
+					QString literalString = "\"" + dataLiteral->getDataLiteralValue()->getValueString() + "\"";
+					if (dataLiteral->getDatatype()->getDatatypeType() != CDatatype::DT_PLAINLITERAL) {
+						literalString += "\"^^" + dataLiteral->getDatatype()->getDatatypeIRI();
+					} else {
+						literalString += "\"";
+					}
+					mBindingString = literalString;
+					return true;
+				}
+				return false;
+			}
+
+
+
+			QPair<QString, QString> CVariableBindingStringDataResult::getLiteralDatatypeDatavalueBindingStringPair() {
+				QString datatypeString;
+				QString datatvalueString;
+				if (mType == CVariableBindingResult::VBTLITERAL) {
+					CDataLiteral* dataLiteral = (CDataLiteral*)mData;
+					datatypeString = dataLiteral->getDatatype()->getDatatypeIRI();
+					datatvalueString = dataLiteral->getDataLiteralValue()->getValueString();
+				}
+				return QPair<QString, QString>(datatypeString, datatvalueString);
+			}
+
 
 
 			CVariableBindingStringDataResult::~CVariableBindingStringDataResult() {

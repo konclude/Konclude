@@ -46,6 +46,7 @@
 
 // Logger includes
 #include "Logger/CLogger.h"
+#include "Logger/CLogIdentifier.h"
 
 using namespace Konclude::Logger;
 
@@ -69,7 +70,7 @@ namespace Konclude {
 		 *		\brief		TODO
 		 *
 		 */
-		class CRDFRedlandRaptorParser {
+		class CRDFRedlandRaptorParser : public CLogIdentifier {
 			// public methods
 			public:
 				//! Constructor

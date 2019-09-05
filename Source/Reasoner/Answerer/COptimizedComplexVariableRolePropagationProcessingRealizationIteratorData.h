@@ -64,22 +64,40 @@ namespace Konclude {
 					QList<COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* getVariableMappingPropagationIteratorList();
 					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* addVariableMappingPropagationIterator(COptimizedComplexVariableIndividualBindingsCardinalityLinker* iterator);
 
+
+					QList<COptimizedComplexVariableIndividualUpdateCardinalityLinker*>* getCardinalityUpdatePropagationIteratorList();
+					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* addCardinalityUpdatePropagationIterator(COptimizedComplexVariableIndividualUpdateCardinalityLinker* iterator);
+
+
 					CRealizationIndividualInstanceItemReferenceIterator* getRealizationIterator();
 					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* setRealizationIterator(CRealizationIndividualInstanceItemReferenceIterator* iterator);
 
 					QSet<CRealizationIndividualInstanceItemReference>* getPropagationInstanceItemSet();
 
 
+					bool isRealizationScheduled();
+					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* setRealizationScheduled(bool scheduled);
+
+
+					cint64 getExpectedFillerCount();
+					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* setExpectedFillerCount(cint64 count);
+
+
+					//CRealizationIndividualInstanceItemReference debugPropInstItemRef;
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
 					QList<COptimizedComplexVariableIndividualBindingsCardinalityLinker*> mVariableMappingIteratorList;
+					QList<COptimizedComplexVariableIndividualUpdateCardinalityLinker*> mUpdateCardinalityIteratorList;
 					CRealizationIndividualInstanceItemReferenceIterator* mRealizationIterator;
 					QSet<CRealizationIndividualInstanceItemReference> mInstItemRolePropInstItemSet;
 
+					bool mRealizationScheduled;
 
+
+					cint64 mExpectedFillerCount;
 
 				// private methods
 				private:

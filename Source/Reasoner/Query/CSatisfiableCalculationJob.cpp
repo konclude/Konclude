@@ -44,6 +44,7 @@ namespace Konclude {
 				mAnswererSubsumptionMessageAdapter = nullptr;
 				mAnswererInstancePropagationMessageAdapter = nullptr;
 				mRepresentativeBackendUpdatingAdapter = nullptr;
+				mAnswererMaterializationAdapter = nullptr;
 				mAnswererBindingPropagationAdapter = nullptr;
 				mSatisfiablePossibleInstancesMergingAdapter = nullptr;
 				mNextRelativeNodeID = 0;
@@ -229,6 +230,16 @@ namespace Konclude {
 
 			CSatisfiableTaskRepresentativeBackendUpdatingAdapter* CSatisfiableCalculationJob::getSatisfiableRepresentativeBackendCacheUpdatingAdapter() {
 				return mRepresentativeBackendUpdatingAdapter;
+			}
+
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setSatisfiableAnswererMaterializationAdapter(CSatisfiableTaskAnswererQueryingMaterializationAdapter* representativeBackendUpdatingAdapter) {
+				mAnswererMaterializationAdapter = representativeBackendUpdatingAdapter;
+				return this;
+			}
+
+			CSatisfiableTaskAnswererQueryingMaterializationAdapter* CSatisfiableCalculationJob::getSatisfiableAnswererMaterializationAdapter() {
+				return mAnswererMaterializationAdapter;
 			}
 
 		}; // end namespace Query

@@ -158,6 +158,11 @@ namespace Konclude {
 						CIndividualDepthProcessingQueue* getNominalProcessingQueue(bool create = true);
 						CProcessingDataBox* clearNominalProcessingQueue();
 
+
+						CIndividualDepthProcessingQueue* getNominalDeterministicProcessingQueue(bool create = true);
+						CProcessingDataBox* clearNominalDeterministicProcessingQueue();
+
+
 						CIndividualUnsortedProcessingQueue* getIndividualDepthFirstDeterministicExpansionProcessingQueue(bool create = true);
 						CProcessingDataBox* clearIndividualDepthFirstDeterministicExpansionProcessingQueue();
 
@@ -583,6 +588,11 @@ namespace Konclude {
 						CIndividualDepthProcessingQueue* mNominalProcessingQueue;
 						CIndividualDepthProcessingQueue* mUseNominalProcessingQueue;
 						CIndividualDepthProcessingQueue* mPrevNominalProcessingQueue;
+
+
+						CIndividualDepthProcessingQueue* mNominalDeterministicProcessingQueue;
+						CIndividualDepthProcessingQueue* mUseNominalDeterministicProcessingQueue;
+						CIndividualDepthProcessingQueue* mPrevNominalDeterministicProcessingQueue;
 
 
 						CIndividualUnsortedProcessingQueue* mIndiDepthFirstProcessQueue;

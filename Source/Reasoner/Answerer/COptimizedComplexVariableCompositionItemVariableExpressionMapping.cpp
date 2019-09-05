@@ -37,6 +37,19 @@ namespace Konclude {
 			}
 
 
+			COptimizedComplexVariableCompositionItemVariableExpressionMapping* COptimizedComplexVariableCompositionItemVariableExpressionMapping::removeItemVariableExpressionMapping(COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping) {
+				if (!itemIndexMapping) {
+					remove(varCompItem);
+				} else {
+					COptimizedComplexVariableCompositionItemVariableExpressionMapping::iterator it = find(varCompItem);					
+					while (it != end() && it.value() == itemIndexMapping) {
+						it = erase(it);
+					}
+				}
+				return this;
+			}
+
+
 
 		}; // end namespace Answerer
 

@@ -35,7 +35,7 @@ namespace Konclude {
 
 				CPropagationBindingMap* CPropagationBindingMap::initPropagationBindingMap(CPropagationBindingMap* prevMap) {
 					if (prevMap) {
-						*this = *prevMap;
+						CPROCESSMAP<cint64, CPropagationBindingMapData>::operator=(*prevMap);
 					} else {
 						CPROCESSMAP<cint64,CPropagationBindingMapData>::clear();
 					}

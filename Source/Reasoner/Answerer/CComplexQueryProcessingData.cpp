@@ -37,10 +37,16 @@ namespace Konclude {
 				mWaitingEntailmentComputationsCount = 0;
 				mBuildingVariableItemCount = 0;
 				mVariableBuildingItem = nullptr;
+				mFinishingHandler = nullptr;
+				mOffsetSkippedMappingCount = 0;
+				mQueryProcessingInitializedAnsweringStatistics = nullptr;
 			}
 
 
 			CComplexQueryProcessingData::~CComplexQueryProcessingData() {
+				if (mQueryProcessingInitializedAnsweringStatistics) {
+					delete mQueryProcessingInitializedAnsweringStatistics;
+				}
 			}
 
 			CComplexAnsweringQuery* CComplexQueryProcessingData::getQuery() {
@@ -153,6 +159,41 @@ namespace Konclude {
 				return mProcessingTime;
 			}
 
+			CComplexQueryFinishingHandler* CComplexQueryProcessingData::getFinishingHandler() {
+				return mFinishingHandler;
+			}
+
+			CComplexQueryProcessingData* CComplexQueryProcessingData::setFinishingHandler(CComplexQueryFinishingHandler* finishingHandler) {
+				mFinishingHandler = finishingHandler;
+				return this;
+			}
+
+
+			cint64 CComplexQueryProcessingData::getOffsetSkippedMappingCount() {
+				return mOffsetSkippedMappingCount;
+			}
+
+			CComplexQueryProcessingData* CComplexQueryProcessingData::setOffsetSkippedMappingCount(cint64 skippedMappingCount) {
+				mOffsetSkippedMappingCount = skippedMappingCount;
+				return this;
+			}
+
+			CComplexQueryProcessingData* CComplexQueryProcessingData::incOffsetSkippedMappingCount(cint64 incSkippedMappingCount) {
+				mOffsetSkippedMappingCount += incSkippedMappingCount;
+				return this;
+			}
+
+			CAnsweringHandlingStatistics* CComplexQueryProcessingData::getQueryProcessingInitializedAnsweringStatistics() {
+				return mQueryProcessingInitializedAnsweringStatistics;
+			}
+
+			CComplexQueryProcessingData* CComplexQueryProcessingData::setQueryProcessingInitializedAnsweringStatistics(CAnsweringHandlingStatistics* stats) {
+				if (mQueryProcessingInitializedAnsweringStatistics) {
+					delete mQueryProcessingInitializedAnsweringStatistics;
+				}
+				mQueryProcessingInitializedAnsweringStatistics = stats;
+				return this;
+			}
 
 		}; // end namespace Answerer
 

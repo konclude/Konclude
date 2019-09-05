@@ -28,9 +28,9 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData(const QSet<CExpressionVariable*>& anonymousVariableSet, const QSet<CExpressionVariable*>& prepareIndiVariableSet) {
+			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData(const QSet<CExpressionVariable*>& anonymousVariableSet, const QSet<CExpressionVariable*>& restrictedAbsorptionVariableSet) {
 				mAnonymousVariableSet = anonymousVariableSet;
-				mPrepareIndiVariableSet = prepareIndiVariableSet;
+				mRestrictedAbsorptionVariableSet = restrictedAbsorptionVariableSet;
 				mPropagationFinalizationConcept = nullptr;
 				mInitializerConcept = nullptr;
 				mLastTriggerConcept = nullptr;
@@ -59,8 +59,19 @@ namespace Konclude {
 			}
 
 
+			QHash<CExpressionVariable*, CBuildExpression*>* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::getVariableBuiltExpressionsHash() {
+				return &mVariableBuiltExpressionsHash;
+			}
+
+
+
+			QSet<CObjectPropertyAssertionExpression*>* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::getPropertyAssertionSet() {
+				return &mAxiomAssertionSet;
+			}
+
 
 			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::addVariableNeighbouringPropertyAssertion(CObjectPropertyAssertionExpression* propertyAssertion) {
+				mAxiomAssertionSet.insert(propertyAssertion);
 				CExpressionVariable* var1Exp = dynamic_cast<CExpressionVariable*>(propertyAssertion->getFirstIndividualTermExpression());
 				CExpressionVariable* var2Exp = dynamic_cast<CExpressionVariable*>(propertyAssertion->getSecondIndividualTermExpression());
 				if (!mVarPropAssSet.contains(QPair<CExpressionVariable*, CObjectPropertyAssertionExpression*>(var1Exp, propertyAssertion))) {
@@ -76,6 +87,7 @@ namespace Konclude {
 
 
 			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::addVariableSelfPropertyAssertion(CObjectPropertyAssertionExpression* propertyAssertion) {
+				mAxiomAssertionSet.insert(propertyAssertion);
 				CExpressionVariable* varExp = dynamic_cast<CExpressionVariable*>(propertyAssertion->getFirstIndividualTermExpression());
 				if (!mVarPropAssSet.contains(QPair<CExpressionVariable*, CObjectPropertyAssertionExpression*>(varExp, propertyAssertion))) {
 					mVarPropAssSet.insert(QPair<CExpressionVariable*, CObjectPropertyAssertionExpression*>(varExp, propertyAssertion));
@@ -93,6 +105,12 @@ namespace Konclude {
 				mHandledVariableSet.insert(variable);
 				return this;
 			}
+
+
+			QSet<CExpressionVariable*>* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::getRestrictedAbsorptionVariableSet() {
+				return &mRestrictedAbsorptionVariableSet;
+			}
+
 
 			QSet<CExpressionVariable*>* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::getAbsorptionVariableSet() {
 				return &mVariableAbsorptionSet;

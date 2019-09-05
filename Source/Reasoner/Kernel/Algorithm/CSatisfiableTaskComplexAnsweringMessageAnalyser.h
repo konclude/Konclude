@@ -38,6 +38,7 @@
 #include "Reasoner/Answerer/CAnsweringMessageDataCalculationPossibleClassSubsumersData.h"
 #include "Reasoner/Answerer/CAnsweringMessageDataCalculationPossibleClassSubsumers.h"
 #include "Reasoner/Answerer/CAnsweringMessageDataCalculationClassSubsumers.h"
+#include "Reasoner/Answerer/CAnsweringMessageDataCalculationMaterializedConcepts.h"
 
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationTask.h"
 #include "Reasoner/Kernel/Task/CSatisfiableTaskAnswererSubsumptionMessageAdapter.h"
@@ -102,6 +103,7 @@ namespace Konclude {
 
 						bool analyseSatisfiableTaskSubsumption(CSatisfiableCalculationTask* statCalcTask, CCalculationAlgorithmContext* calcAlgContext);
 						bool analyseSatisfiableTaskInstancePropagation(CSatisfiableCalculationTask* statCalcTask, CCalculationAlgorithmContext* calcAlgContext);
+						bool analyseSatisfiableTaskMaterialization(CSatisfiableCalculationTask* statCalcTask, CCalculationAlgorithmContext* calcAlgContext);
 
 
 						bool addIndividualToReferenceList(CCLASSSUBSUMPTIONMESSAGELIST<CIndividualReference>*& indiRefList, CIndividual* candIndividual);

@@ -2418,6 +2418,11 @@ namespace Konclude {
 				return mTopObjPropExpression;
 			}
 
+
+			CObjectPropertyTermExpression* CConcreteOntologyBuildDataUpdater::getBottomObjectProberty() {
+				return mBottomObjPropExpression;
+			}
+
 			CClassTermExpression* CConcreteOntologyBuildDataUpdater::getTopClass() {
 				CClassTermExpression* expression = mTopClassExpression;
 				return expression;
