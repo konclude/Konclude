@@ -28,18 +28,21 @@ namespace Konclude {
 		namespace Query {
 
 
-			CIndividualSynsetResultVisitorGenerator::CIndividualSynsetResultVisitorGenerator(CIndividualSynsetResult* indiSynsetResult, bool abbreviatedIRIs, CIndividualNameResolver* indiNameResolver) {
+			CIndividualSynsetResultVisitorGenerator::CIndividualSynsetResultVisitorGenerator(CIndividualSynsetResult* indiSynsetResult, bool abbreviatedIRIs, bool integrateAnonymousIndividuals, CIndividualNameResolver* indiNameResolver) {
 				mIndividualSynsetResult = indiSynsetResult;
 				mAbbreviatedIRIs = abbreviatedIRIs;
 				mIndiNameResolver = indiNameResolver;
+				mIntegrateAnonymousIndividuals = integrateAnonymousIndividuals;
 			}
 
 
 
 			bool CIndividualSynsetResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CConceptRealization* conRealization) {
-				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
-				if (!individualString.isEmpty()) {
-					mIndividualSynsetResult->addEquivalentIndividualName(individualString);
+				if (mIntegrateAnonymousIndividuals || !mIndiNameResolver->isAnonymous(indiRef)) {
+					QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
+					if (!individualString.isEmpty()) {
+						mIndividualSynsetResult->addEquivalentIndividualName(individualString);
+					}
 				}
 				return true;
 			}
@@ -47,9 +50,11 @@ namespace Konclude {
 
 
 			bool CIndividualSynsetResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
-				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
-				if (!individualString.isEmpty()) {
-					mIndividualSynsetResult->addEquivalentIndividualName(individualString);
+				if (mIntegrateAnonymousIndividuals || !mIndiNameResolver->isAnonymous(indiRef)) {
+					QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
+					if (!individualString.isEmpty()) {
+						mIndividualSynsetResult->addEquivalentIndividualName(individualString);
+					}
 				}
 				return true;
 			}

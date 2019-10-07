@@ -34,6 +34,9 @@ namespace Konclude {
 					mMinNecessaryArguments = true;
 					mFirstArgumentTranslation = false;
 					mSPARQLQueryFileTranslated = false;
+					mReasonerConfList.append(QString("+=Konclude.Calculation.Querying.ComplexQueryingSupport=true"));
+					mReasonerConfList.append(QString("+=Konclude.Calculation.Optimization.RepresentativePropagation=false"));
+					mReasonerConfList.append(QString("+=Konclude.Calculation.Optimization.SignatureMirroringBlocking=false"));
 				}
 
 
@@ -83,7 +86,7 @@ namespace Konclude {
 						}
 
 
-						translatedArgList += QString("-SPARQLBatchFileLoader +=Konclude.SPARQL.CloseAfterProcessedRequest=true +=Konclude.SPARQL.RequestFile=%1 +=Konclude.SPARQL.ResponseFile=%2").arg(mSPARQLQueryFileName).arg(mSPARQLResponseFileName);
+						translatedArgList += QString("-SPARQLBatchFileLoader +=Konclude.SPARQL.CloseAfterProcessedRequest=true +=Konclude.SPARQL.BlockUntilProcessedRequest=true +=Konclude.SPARQL.RequestFile=%1 +=Konclude.SPARQL.ResponseFile=%2").arg(mSPARQLQueryFileName).arg(mSPARQLResponseFileName);
 
 
 						translatedArgList += mMiscellaneousList;
@@ -116,7 +119,7 @@ namespace Konclude {
 							argumentTranslated = true;
 							mSPARQLResponseFileName = "response.xml";
 							if (remainingArgList.count() > 0) {
-								mSPARQLResponseFileName = remainingArgList.first();
+								mSPARQLResponseFileName = remainingArgList.takeFirst();
 								if (mSPARQLResponseFileName.trimmed().indexOf("-") == 0 || mSPARQLResponseFileName.trimmed().indexOf("+") == 0) {
 									mSPARQLResponseFileName = "response.xml";
 								}

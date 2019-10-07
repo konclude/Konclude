@@ -94,8 +94,8 @@ namespace Konclude {
 
 					virtual CConfiguration *getConfiguration();
 
-					virtual bool writeStreamData(QByteArray* buffer, bool last);
-					CSPARQLStreamingWriter* writeStreamDataToFile(QByteArray* buffer, bool last);
+					virtual bool writeStreamData(const QList<CSPARQLResultBufferWriteData>& bufferList, bool last);
+					CSPARQLStreamingWriter* writeStreamDataToFile(QList<CSPARQLResultBufferWriteData>* bufferList, bool last);
 
 					bool processCustomsEvents(QEvent::Type type, CCustomEvent *event);
 
@@ -121,6 +121,10 @@ namespace Konclude {
 
 					QByteArray mStreamSPARQLHeader;
 					QByteArray mStreamSPARQLFooter;
+
+					QSemaphore* mWriteLimitSemaphore;
+					bool mBlockingWarned;
+
 
 				// private methods
 				private:

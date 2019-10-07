@@ -20,6 +20,7 @@
 
 #include "CRealizingTestingStep.h"
 #include "COntologyRealizingItem.h"
+#include "COntologyRealizingDynamicRequirmentProcessingData.h"
 
 
 namespace Konclude {
@@ -105,23 +106,24 @@ namespace Konclude {
 					mUpdatingSet.swap(mRequirementProcDataSet);
 					for (QSet<COntologyRealizingDynamicRequirmentProcessingData*>::iterator it = mUpdatingSet.begin(), itEnd = mUpdatingSet.end(); it != itEnd; ++it) {
 						COntologyRealizingDynamicRequirmentProcessingData* reqProcData(*it);
-						COntologyProcessingRequirement* procReq = reqProcData->getProcessingRequirement();
-						if (procReq) {
-							procReq->submitRequirementUpdate(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, flags);
-							reqProcData->setProcessingRequirement(nullptr);
-						}
-						COntologyRealizingDynamicRequirmentCallbackData* callbackData = reqProcData->getCallbackData();
-						if (callbackData) {
-							callbackData->decProcessingRequirmentCount();
-							if (!callbackData->hasCurrentProcessingRequirmentCount()) {
-								CCallbackData* callback = callbackData->getProcessingFinishedCallback();
-								callback->doCallback();
-								delete callbackData;
-							}
-							reqProcData->setCallbackData(nullptr);
-						}
-						reqProcData->setAssociatedRelizationTestingStep(nullptr);
+						reqProcData->decProcessingItemCount(this);
+						reqProcData->clearAssociatedRelizationTestingStep(getRealizingTestingType());
 						if (!reqProcData->hasCurrentProcessingItemCount()) {
+							COntologyProcessingRequirement* procReq = reqProcData->getProcessingRequirement();
+							if (procReq) {
+								procReq->submitRequirementUpdate(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, flags);
+								reqProcData->setProcessingRequirement(nullptr);
+							}
+							COntologyRealizingDynamicRequirmentCallbackData* callbackData = reqProcData->getCallbackData();
+							if (callbackData) {
+								callbackData->decProcessingRequirmentCount();
+								if (!callbackData->hasCurrentProcessingRequirmentCount()) {
+									CCallbackData* callback = callbackData->getProcessingFinishedCallback();
+									callback->doCallback();
+									delete callbackData;
+								}
+								reqProcData->setCallbackData(nullptr);
+							}
 							delete reqProcData;
 						}
 					}
@@ -137,7 +139,9 @@ namespace Konclude {
 			}
 
 			CRealizingTestingStep* CRealizingTestingStep::removeRequirementProcessingData(COntologyRealizingDynamicRequirmentProcessingData* procData) {
-				mRequirementProcDataSet.remove(procData);
+				if (mRequirementProcDataSet.contains(procData)) {
+					mRequirementProcDataSet.remove(procData);
+				}
 				return this;
 			}
 

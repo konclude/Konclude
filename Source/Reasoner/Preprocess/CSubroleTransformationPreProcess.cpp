@@ -279,14 +279,14 @@ namespace Konclude {
 				CConcept* universalConnNominalValueCon = nullptr;
 				CConcept* universalConnNominalCon = nullptr;
 				if (!mABox->hasUniversalConnectionIndividual()) {
-					univConnIndiID = mIndiVec->getItemCount();
+					univConnIndiID = mTBox->getNextConceptID();
 					mABox->setUniversalConnectionIndividualID(univConnIndiID);
 					mABox->setHasUniversalConnectionIndividual(true);
 					universalConnIndi = CObjectAllocator< CIndividual >::allocateAndConstruct(mMemMan);
 					universalConnIndi->initIndividual(univConnIndiID);
 					mIndiVec->setData(univConnIndiID,universalConnIndi);
 
-					cint64 valueConTag = mConceptVector->getItemCount();
+					cint64 valueConTag = mTBox->getNextConceptID();
 					universalConnNominalValueCon = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
 					universalConnNominalValueCon->initConcept();
 					universalConnNominalValueCon->setConceptTag(valueConTag);
@@ -297,7 +297,7 @@ namespace Konclude {
 					mTBox->setUniversalConnectionNominalValueConcept(universalConnNominalValueCon);
 
 
-					cint64 nominalConTag = mConceptVector->getItemCount();
+					cint64 nominalConTag = mTBox->getNextConceptID();
 					universalConnNominalCon = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
 					universalConnNominalCon->initConcept();
 					universalConnNominalCon->setConceptTag(nominalConTag);
@@ -416,7 +416,7 @@ namespace Konclude {
 						topConcept = CConceptRoleIndividualLocator::getLocatedConcept(topConcept, mOntology);
 					}
 					CConcept* univSelfCon = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-					cint64 conCount = mConceptVector->getItemCount();
+					cint64 conCount = mTBox->getNextConceptID();
 					univSelfCon->initConcept();
 					univSelfCon->setConceptTag(conCount);
 					univSelfCon->setRole(mTopObjectRole);
@@ -432,7 +432,7 @@ namespace Konclude {
 						topConcept = CConceptRoleIndividualLocator::getLocatedConcept(topConcept, mOntology);
 					}
 					CConcept* univSelfCon = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-					cint64 conCount = mConceptVector->getItemCount();
+					cint64 conCount = mTBox->getNextConceptID();
 					univSelfCon->initConcept();
 					univSelfCon->setConceptTag(conCount);
 					univSelfCon->setRole(mTopObjectRole);

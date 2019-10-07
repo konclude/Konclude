@@ -41,6 +41,11 @@ namespace Konclude {
 				
 				mPreprocessContext = new CPreProcessContextBase(updateConcreteOntology, updateConcreteOntology->getConfiguration());
 
+				mAnonymousOntologyIdentifier = updateConcreteOntology->getOntologyName() + ":";
+				if (!mAnonymousOntologyIdentifier.startsWith("_:")) {
+					mAnonymousOntologyIdentifier = "_:" + mAnonymousOntologyIdentifier;
+				}
+
 				bool newTriplesMapped = false;
 				for (CTriplesData* tripleData : *ontologyTripleData->getAllTriplesData()) {
 					CRedlandStoredTriplesData* redlandTriplesData = dynamic_cast<CRedlandStoredTriplesData*>(tripleData);
@@ -123,6 +128,7 @@ namespace Konclude {
 							if (librdf_node_equals(predicateNode, rdfTypePredicate)) {
 								if (librdf_node_equals(objectNode, namedIndividualObject)) {
 									lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
+									lastIndiData->mIndividual->setAnonymousIndividual(false);
 								} else {
 									CConceptNodeData* conceptData = mConceptNodeDataHash.value(CRedlandNodeHasher(objectNode));
 									if (conceptData) {
@@ -132,11 +138,17 @@ namespace Konclude {
 										lastIndiData->mIndividual->addAssertionConceptLinker(conceptAssertionLinker);
 										conceptAssertionCount++;
 									}
+									if (lastIndiData && librdf_node_is_resource(subjectNode)) {
+										lastIndiData->mIndividual->setAnonymousIndividual(false);
+									}
 								}
 							} else {
 								CRoleNodeData* roleData = mRoleNodeDataHash.value(CRedlandNodeHasher(predicateNode));
 								if (roleData) {
 									lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
+									if (librdf_node_is_resource(subjectNode)) {
+										lastIndiData->mIndividual->setAnonymousIndividual(false);
+									}
 									if (roleData->mDataRole) {
 										if (librdf_node_is_literal(objectNode)) {
 											const char* literalValue = (const char*)librdf_node_get_literal_value(objectNode);
@@ -157,6 +169,9 @@ namespace Konclude {
 									} else {
 										if (!librdf_node_is_literal(objectNode)) {
 											CIndividualNodeData* targetIndiNode = getIndividualData(objectNode, updateConcreteOntology);
+											if (librdf_node_is_resource(objectNode)) {
+												targetIndiNode->mIndividual->setAnonymousIndividual(false);
+											}
 											CRoleAssertionLinker* roleAssertionLinker = CObjectAllocator<CRoleAssertionLinker>::allocateAndConstruct(mMemMan);
 											roleAssertionLinker->initRoleAssertionLinker(roleData->mRole, targetIndiNode->mIndividual);
 											lastIndiData->mIndividual->addAssertionRoleLinker(roleAssertionLinker);
@@ -209,20 +224,30 @@ namespace Konclude {
 					librdf_node* nodeCopy = librdf_new_node_from_node(indiNode);
 					CIndividual* nextIndi = CObjectAllocator<CIndividual>::allocateAndConstruct(mMemMan);
 					nextIndi->initIndividual(mNextIndiId++);
+					nextIndi->setAnonymousIndividual(true);
 					indiNodeData = new CIndividualNodeData(nodeCopy, nextIndi);
 					mIndividualNodeDataHash.insert(nodeCopy, indiNodeData);
 
 
 					const char* indiNameCharPointer = nullptr;
+					bool blankNode = false;
 					if (!librdf_node_is_blank(indiNode)) {
 						librdf_uri* uri = librdf_node_get_uri(indiNode);
 						indiNameCharPointer = (const char*)librdf_uri_as_string(uri);
 					} else {
 						indiNameCharPointer = (const char*)librdf_node_get_blank_identifier(indiNode);
+						blankNode = true;
 					}
 
 					CIRIName* newName = CObjectAllocator<CIRIName>::allocateAndConstruct(mMemMan);
 					QString indiName = QString::fromUtf8(indiNameCharPointer);
+					if (blankNode) {
+						if (!indiName.startsWith("_:")) {
+							indiName = mAnonymousOntologyIdentifier + indiName;
+						} else {
+							indiName = mAnonymousOntologyIdentifier + indiName.mid(2);
+						}
+					}
 					newName->init(indiName);
 					CLinker<CName*>* newNameLinker = CObjectAllocator< CLinker<CName*> >::allocateAndConstruct(mMemMan);
 					newNameLinker->init(newName);

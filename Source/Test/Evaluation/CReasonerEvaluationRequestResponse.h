@@ -66,12 +66,14 @@ namespace Konclude {
 					CReasonerEvaluationRequestResponse* setEvaluationError(bool evaluationError);
 					CReasonerEvaluationRequestResponse* setResponseTime(cint64 responseTime);
 					CReasonerEvaluationRequestResponse* setEvaluationErrorString(const QString& errorString);
+					CReasonerEvaluationRequestResponse* setResponseErrorString(const QString& errorString);
 
 					cint64 getResponseTime();
 					bool isTimedOut();
 					bool hasResponseError();
 					bool hasEvaluationError();
 					QString getEvaluationErrorString();
+					QString getResponseErrorString();
 
 
 				// protected methods
@@ -84,6 +86,7 @@ namespace Konclude {
 					bool mResponseError;
 					bool mEvaluationError;
 					QString mEvaluationErrorString;
+					QString mResponseErrorString;
 
 				// private methods
 				private:

@@ -824,22 +824,14 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createImpliedConcept() {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCAND);
-				mConceptVec->setLocalData(nextConTag,concept);
 				return concept;
 			}
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createCandidateEquivalentConcept(CConcept* eqConcept) {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
-				mConceptVec->setLocalData(nextConTag,concept);
+				CConcept* concept = createNewConcept();
 				addUnfoldingConceptForConcept(concept,eqConcept,false);
 				concept->setOperatorCode(CCEQCAND);
 				return concept;
@@ -880,12 +872,18 @@ namespace Konclude {
 				return true;
 			}
 
-
-			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createImplicationConcept(CConcept* impliedConcept, bool negated) {
+			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createNewConcept() {
 				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
 				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
+				cint64 nextConTag = mTBox->getNextConceptID();
 				concept->initTag(nextConTag);
+				mConceptVec->setLocalData(nextConTag, concept);
+				return concept;
+			}
+
+
+			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createImplicationConcept(CConcept* impliedConcept, bool negated) {
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCIMPL);
 
 				CSortedNegLinker<CConcept*>* newBaseOpCon = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
@@ -893,7 +891,6 @@ namespace Konclude {
 				concept->setOperandList(newBaseOpCon);
 				concept->incOperandCount();
 
-				mConceptVec->setLocalData(nextConTag,concept);
 				++mStatImplConceptsGenerated;
 				return concept;
 			}
@@ -901,12 +898,8 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createImplicationTriggerConcept(CConcept* impConcept, bool negated) {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCIMPLTRIG);
-				mConceptVec->setLocalData(nextConTag,concept);
 				if (impConcept) {
 					addConceptToImplied(concept,impConcept,negated);
 				}
@@ -924,14 +917,11 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createTriggerPropagationConcept(CConcept* destConcept, CRole* backwardPropRole, bool branchTiggerCreation, bool invsereRolePropagation) {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
+				CConcept* concept = createNewConcept();
 				CRole* propRole = backwardPropRole;
 				if (invsereRolePropagation) {
 					propRole = getInverseRole(backwardPropRole);
 				}
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
 				if (branchTiggerCreation) {
 					concept->setOperatorCode(CCBRANCHALL);
 				} else {
@@ -942,24 +932,19 @@ namespace Konclude {
 				newTriggerOpCon->init(destConcept,false);
 				concept->setOperandList(newTriggerOpCon);
 				concept->incOperandCount();
-				mConceptVec->setLocalData(nextConTag,concept);
 				return concept;
 			}
 
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createNominalImplication(CConcept* destConcept, CIndividual* nominalIndi) {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCNOMINALIMPLI);
 				concept->setNominalIndividual(nominalIndi);
 				CSortedNegLinker<CConcept*>* newTriggerOpCon = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
 				newTriggerOpCon->init(destConcept, false);
 				concept->setOperandList(newTriggerOpCon);
 				concept->incOperandCount();
-				mConceptVec->setLocalData(nextConTag, concept);
 				return concept;
 			}
 
@@ -968,43 +953,32 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createDatatypeImplication(CConcept* destConcept, CDatatype* datatype) {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCDATATYPEIMPLI);
 				concept->setDatatype(datatype);
 				CSortedNegLinker<CConcept*>* newTriggerOpCon = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
 				newTriggerOpCon->init(destConcept, false);
 				concept->setOperandList(newTriggerOpCon);
 				concept->incOperandCount();
-				mConceptVec->setLocalData(nextConTag, concept);
 				return concept;
 			}
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createDataLiteralImplication(CConcept* destConcept, CDataLiteral* dataLiteral) {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCDATALITERALIMPLI);
 				concept->setDataLiteral(dataLiteral);
 				CSortedNegLinker<CConcept*>* newTriggerOpCon = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
 				newTriggerOpCon->init(destConcept, false);
 				concept->setOperandList(newTriggerOpCon);
 				concept->incOperandCount();
-				mConceptVec->setLocalData(nextConTag, concept);
 				return concept;
 			}
 
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createDataRestrictionImplication(CConcept* destConcept, CDatatype* datatype, CDataLiteral* dataliteral, cint64 restrictionCode) {
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				concept->initTag(nextConTag);
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCDATARESTRICTIONIMPLI);
 				concept->setDatatype(datatype);
 				concept->setDataLiteral(dataliteral);
@@ -1013,7 +987,6 @@ namespace Konclude {
 				newTriggerOpCon->init(destConcept, false);
 				concept->setOperandList(newTriggerOpCon);
 				concept->incOperandCount();
-				mConceptVec->setLocalData(nextConTag, concept);
 				return concept;
 			}
 
@@ -1915,12 +1888,8 @@ namespace Konclude {
 				bool createNewTemplate = false;
 				if (groundConceptList.count() > 1) {
 
-					CConcept* orConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-					orConcept->initConcept();
-					cint64 nextConTag = mConceptVec->getItemCount();
-					orConcept->initTag(nextConTag);
+					CConcept* orConcept = createNewConcept();
 					orConcept->setOperatorCode(CCOR);
-					mConceptVec->setLocalData(nextConTag,orConcept);
 
 
 					for (QList<TConceptNegationPair>::const_iterator it = groundConceptList.constBegin(), itEnd = groundConceptList.constEnd(); it != itEnd; ++it) {
@@ -2051,13 +2020,9 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingGroundingConcept(CNominalSchemaTemplate* nsTemplate, cint64 groundOpCode) {
-				CConcept* groundingConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				groundingConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				groundingConcept->initTag(nextConTag);
+				CConcept* groundingConcept = createNewConcept();
 				groundingConcept->setOperatorCode(groundOpCode);
 				groundingConcept->setParameter(nsTemplate->getNominalSchemaTemplateTag());
-				mConceptVec->setLocalData(nextConTag,groundingConcept);
 				return groundingConcept;
 			}
 
@@ -2297,26 +2262,18 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingToSuccessorPropagationConcept(CConcept* followingConcept, CRole* role) {
-				CConcept* succPropConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				succPropConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				succPropConcept->initTag(nextConTag);
+				CConcept* succPropConcept = createNewConcept();
 				succPropConcept->setOperatorCode(CCPBINDALL);
 				succPropConcept->setRole(role);
-				mConceptVec->setLocalData(nextConTag,succPropConcept);
 				addConceptOperand(succPropConcept,followingConcept,false);
 				return succPropConcept;
 			}
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingFromSuccessorPropagationConcept(CConcept* followingConcept, CRole* role) {
 				CRole* inverseRole = getInverseRole(role);
-				CConcept* succPropConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				succPropConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				succPropConcept->initTag(nextConTag);
+				CConcept* succPropConcept = createNewConcept();
 				succPropConcept->setOperatorCode(CCPBINDALL);
 				succPropConcept->setRole(inverseRole);
-				mConceptVec->setLocalData(nextConTag,succPropConcept);
 				addConceptOperand(succPropConcept,followingConcept,false);
 				return succPropConcept;
 			}
@@ -2332,12 +2289,8 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingTriggerConcept() {
-				CConcept* triggConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				triggConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				triggConcept->initTag(nextConTag);
+				CConcept* triggConcept = createNewConcept();
 				triggConcept->setOperatorCode(CCPBINDTRIG);
-				mConceptVec->setLocalData(nextConTag,triggConcept);
 				return triggConcept;
 			}
 
@@ -2345,10 +2298,7 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingImplicationTriggeredConcept(CConcept* triggeredConcept, CConcept* impliedConcept) {
-				CConcept* implicationConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				implicationConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				implicationConcept->initTag(nextConTag);
+				CConcept* implicationConcept = createNewConcept();
 				implicationConcept->setOperatorCode(CCPBINDIMPL);
 
 				CSortedNegLinker<CConcept*>* newBaseOpCon1 = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
@@ -2358,17 +2308,13 @@ namespace Konclude {
 				implicationConcept->setOperandList(newBaseOpCon2);
 				implicationConcept->incOperandCount(2);
 
-				mConceptVec->setLocalData(nextConTag,implicationConcept);
 				return implicationConcept;
 			}
 
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingCycleCloseConcept(CConcept* cycleCloseTriggerConcept, CConcept* impliedTriggerConcept) {
-				CConcept* cycleConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				cycleConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				cycleConcept->initTag(nextConTag);
+				CConcept* cycleConcept = createNewConcept();
 				cycleConcept->setOperatorCode(CCPBINDCYCLE);
 
 				CSortedNegLinker<CConcept*>* newBaseOpCon1 = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
@@ -2378,22 +2324,17 @@ namespace Konclude {
 				cycleConcept->setOperandList(newBaseOpCon2);
 				cycleConcept->incOperandCount(2);
 
-				mConceptVec->setLocalData(nextConTag,cycleConcept);
 				return cycleConcept;
 			}
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingVariableConcept(CConcept* followingConcept, CVariable* variable) {
-				CConcept* bindConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				bindConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				bindConcept->initTag(nextConTag);
+				CConcept* bindConcept = createNewConcept();
 				bindConcept->setOperatorCode(CCPBINDVARIABLE);
 				bindConcept->setVariableLinker(CObjectAllocator< CSortedLinker<CVariable*> >::allocateAndConstruct(mMemMan)->init(variable));
 
 				addConceptOperand(bindConcept,followingConcept,false);
 
-				mConceptVec->setLocalData(nextConTag,bindConcept);
 				return bindConcept;
 			}
 
@@ -2784,63 +2725,43 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createVariableBindingPropagationBindVariableConcept(CConcept* followingConcept, CVariable* variable) {
-				CConcept* bindConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				bindConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				bindConcept->initTag(nextConTag);
+				CConcept* bindConcept = createNewConcept();
 				bindConcept->setOperatorCode(CCVARBINDVARIABLE);
 				bindConcept->setVariableLinker(CObjectAllocator< CSortedLinker<CVariable*> >::allocateAndConstruct(mMemMan)->init(variable));
 
 				addConceptOperand(bindConcept,followingConcept,false);
 
-				mConceptVec->setLocalData(nextConTag,bindConcept);
 				return bindConcept;
 			}
 
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingBackPropagationActivationTriggerConcept() {
-				CConcept* triggConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				triggConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				triggConcept->initTag(nextConTag);
+				CConcept* triggConcept = createNewConcept();
 				triggConcept->setOperatorCode(CCBACKACTIVTRIG);
-				mConceptVec->setLocalData(nextConTag,triggConcept);
 				return triggConcept;
 			}
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingBackPropagationTriggerConcept() {
-				CConcept* triggConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				triggConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				triggConcept->initTag(nextConTag);
+				CConcept* triggConcept = createNewConcept();
 				triggConcept->setOperatorCode(CCVARPBACKTRIG);
-				mConceptVec->setLocalData(nextConTag,triggConcept);
 				return triggConcept;
 			}
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingBackPropagationToSuccessorConcept(CConcept* followingConcept, CRole* role) {
-				CConcept* succPropConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				succPropConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				succPropConcept->initTag(nextConTag);
+				CConcept* succPropConcept = createNewConcept();
 				succPropConcept->setOperatorCode(CCVARPBACKALL);
 				succPropConcept->setRole(role);
-				mConceptVec->setLocalData(nextConTag,succPropConcept);
 				addConceptOperand(succPropConcept,followingConcept,false);
 				return succPropConcept;
 			}
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createVariableBindingPropagationFromSuccessorConcept(CConcept* followingConcept, CRole* role) {
 				CRole* inverseRole = getInverseRole(role);
-				CConcept* succPropConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				succPropConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				succPropConcept->initTag(nextConTag);
+				CConcept* succPropConcept = createNewConcept();
 				succPropConcept->setOperatorCode(CCVARBINDALL);
 				succPropConcept->setRole(inverseRole);
-				mConceptVec->setLocalData(nextConTag,succPropConcept);
 				addConceptOperand(succPropConcept,followingConcept,false);
 				return succPropConcept;
 			}
@@ -2865,10 +2786,7 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createBindingBackPropagationImplicationTriggeredConcept(CConcept* triggeredConcept, CConcept* impliedConcept) {
-				CConcept* implicationConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				implicationConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				implicationConcept->initTag(nextConTag);
+				CConcept* implicationConcept = createNewConcept();
 				implicationConcept->setOperatorCode(CCBACKACTIVIMPL);
 
 				CSortedNegLinker<CConcept*>* newBaseOpCon1 = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
@@ -2878,16 +2796,12 @@ namespace Konclude {
 				implicationConcept->setOperandList(newBaseOpCon2);
 				implicationConcept->incOperandCount(2);
 
-				mConceptVec->setLocalData(nextConTag,implicationConcept);
 				return implicationConcept;
 			}
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createVariableBindingPropagationImplicationTriggeredConcept(CConcept* triggeredConcept, CConcept* impliedConcept) {
-				CConcept* implicationConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				implicationConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				implicationConcept->initTag(nextConTag);
+				CConcept* implicationConcept = createNewConcept();
 				implicationConcept->setOperatorCode(CCVARBINDIMPL);
 
 				CSortedNegLinker<CConcept*>* newBaseOpCon1 = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
@@ -2897,18 +2811,13 @@ namespace Konclude {
 				implicationConcept->setOperandList(newBaseOpCon2);
 				implicationConcept->incOperandCount(2);
 
-				mConceptVec->setLocalData(nextConTag,implicationConcept);
 				return implicationConcept;
 			}
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createVariableBindingPropagationTriggerConcept() {
-				CConcept* triggConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				triggConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				triggConcept->initTag(nextConTag);
+				CConcept* triggConcept = createNewConcept();
 				triggConcept->setOperatorCode(CCVARBINDTRIG);
-				mConceptVec->setLocalData(nextConTag,triggConcept);
 				return triggConcept;
 			}
 
@@ -2916,10 +2825,7 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createVariableBindingPropagationJoiningConcept(CConcept* joinConcept1, CConcept* joinConcept2, CConcept* impliedConcept) {
-				CConcept* joiningConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				joiningConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				joiningConcept->initTag(nextConTag);
+				CConcept* joiningConcept = createNewConcept();
 				joiningConcept->setOperatorCode(CCVARBINDJOIN);
 
 				CSortedNegLinker<CConcept*>* newBaseOpCon1 = CObjectAllocator< CSortedNegLinker<CConcept*> >::allocateAndConstruct(mMemMan);
@@ -2931,7 +2837,6 @@ namespace Konclude {
 				joiningConcept->setOperandList(newBaseOpCon3);
 				joiningConcept->incOperandCount(3);
 
-				mConceptVec->setLocalData(nextConTag,joiningConcept);
 				return joiningConcept;
 			}
 
@@ -3529,27 +3434,19 @@ namespace Konclude {
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createMarkerConcept() {
-				CConcept* markerConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				markerConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				markerConcept->initTag(nextConTag);
+				CConcept* markerConcept = createNewConcept();
 				markerConcept->setOperatorCode(CCMARKER);
-				mConceptVec->setLocalData(nextConTag, markerConcept);
 				return markerConcept;
 			}
 
 
 			CConcept* CTriggeredImplicationBinaryAbsorberPreProcess::createTriggerConcept(bool branchTrigger) {
-				CConcept* triggerConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				triggerConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				triggerConcept->initTag(nextConTag);
+				CConcept* triggerConcept = createNewConcept();
 				if (branchTrigger) {
 					triggerConcept->setOperatorCode(CCBRANCHTRIG);
 				} else {
 					triggerConcept->setOperatorCode(CCIMPLTRIG);
 				}
-				mConceptVec->setLocalData(nextConTag,triggerConcept);
 				return triggerConcept;
 			}
 
@@ -4579,30 +4476,30 @@ namespace Konclude {
 											if (compareDataLitValue) {
 												CDatatypeValueSpaceType* valueSpaceType = nullptr;
 												CDataLiteralValue::DATA_LITERAL_VALUE_TYPE dataLiteralValueType = compareDataLitValue->getDataValueType();
-												if (valueSpaceType) {
-													CDatatypeValueSpaceTypes* valueSpaceTypes = CDatatypeValueSpaceTypes::getValueSpaceTypes();
-													if (dataLiteralValueType == CDataLiteralValue::DLVT_REAL) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceRealType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_STRING) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceStringType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BOOLEAN) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceBooleanType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DOUBLE) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceDoubleType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_FLOAT) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceFloatType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_IRI) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceIRIType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_XML) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceXMLType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_HEXBINARY) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceBinaryHexDataType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BASE64BINARY) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceBinaryBase64DataType();
-													} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DATETIME) {
-														valueSpaceType = valueSpaceTypes->getValueSpaceDateTimeType();
-													}
+												CDatatypeValueSpaceTypes* valueSpaceTypes = CDatatypeValueSpaceTypes::getValueSpaceTypes();
+												if (dataLiteralValueType == CDataLiteralValue::DLVT_REAL) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceRealType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_STRING) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceStringType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BOOLEAN) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceBooleanType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DOUBLE) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceDoubleType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_FLOAT) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceFloatType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_IRI) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceIRIType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_XML) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceXMLType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_HEXBINARY) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceBinaryHexDataType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BASE64BINARY) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceBinaryBase64DataType();
+												} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DATETIME) {
+													valueSpaceType = valueSpaceTypes->getValueSpaceDateTimeType();
+												}
 
+												if (valueSpaceType) {
 													CDatatypeValueSpacesTriggers* valueSpacesTriggers = mMBox->getValueSpacesTriggers(true);
 													CDatatypeValueSpaceCompareTriggers* compareValueSpaceConceptTrigger = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(valueSpaceType);
 													if (compareValueSpaceConceptTrigger) {

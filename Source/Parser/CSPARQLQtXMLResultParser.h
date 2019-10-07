@@ -74,10 +74,12 @@ namespace Konclude {
 
 				CQueryResult *parseQueryResult(QDomElement *node);
 
-				CVariableBindingsAnswersSetResult* parseVariableBindings(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash = nullptr, bool locallyRenameBlankNamesBindings = false);
+				CVariableBindingsAnswersSetResult* parseVariableBindingsSet(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash = nullptr, bool locallyRenameBlankNamesBindings = false);
+				CVariableBindingsAnswersListResult* parseVariableBindingsList(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash = nullptr, bool locallyRenameBlankNamesBindings = false);
 
 			// protected methods
 			protected:
+				CVariableBindingsAnswersResult* parseVariableBindings(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash = nullptr, bool locallyRenameBlankNamesBindings = false, bool parseAsSet = true);
 
 			// protected variables
 			protected:

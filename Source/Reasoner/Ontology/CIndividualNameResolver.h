@@ -55,7 +55,7 @@ namespace Konclude {
 					CIndividualNameResolver();
 
 					virtual QString getIndividualName(const CIndividualReference& indiRef, bool abbreviated = false) const = 0;
-
+					virtual bool isAnonymous(const CIndividualReference& indiRef) const = 0;
 
 				// protected methods
 				protected:

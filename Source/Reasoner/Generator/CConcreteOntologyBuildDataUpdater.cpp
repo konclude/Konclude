@@ -1632,8 +1632,6 @@ namespace Konclude {
 				if (!expression) {
 					expression = new CDataLiteralExpression(dataLexicalValue,datatype);
 					addHashedExpression(expression);
-					mBuildDataRangeSet->insert(expression);
-					mBuildDataRangeList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALITERAL);
 				}
 				return expression;
@@ -1652,6 +1650,10 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(expression2) && !mBuildDataRangeSet->contains(expression2)) {
+						mBuildDataRangeSet->insert(expression2);
+						mBuildDataRangeList->append(expression2);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATASOMEVALUEFROM);
 				}
 				return expression;
@@ -1668,6 +1670,10 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(expression2) && !mBuildDataRangeSet->contains(expression2)) {
+						mBuildDataRangeSet->insert(expression2);
+						mBuildDataRangeList->append(expression2);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAHASVALUE);
 				}
 				return expression;
@@ -1683,6 +1689,10 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(expression2) && !mBuildDataRangeSet->contains(expression2)) {
+						mBuildDataRangeSet->insert(expression2);
+						mBuildDataRangeList->append(expression2);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAALLVALUEFROM);
 				}
 				return expression;
@@ -1702,6 +1712,10 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(expression2) && !mBuildDataRangeSet->contains(expression2)) {
+						mBuildDataRangeSet->insert(expression2);
+						mBuildDataRangeList->append(expression2);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAMAXCARDINALITY);
 					mBuildExpCounter->setMaxDataCardinalityMinimumMaximumCandidate(cardinality);
 				}
@@ -1721,6 +1735,10 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(expression2) && !mBuildDataRangeSet->contains(expression2)) {
+						mBuildDataRangeSet->insert(expression2);
+						mBuildDataRangeList->append(expression2);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAMINCARDINALITY);
 					mBuildExpCounter->setMinDataCardinalityMinimumMaximumCandidate(cardinality);
 				}
@@ -1742,6 +1760,10 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildConceptSet->insert(expression);
 					mBuildConceptList->append(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(expression2) && !mBuildDataRangeSet->contains(expression2)) {
+						mBuildDataRangeSet->insert(expression2);
+						mBuildDataRangeList->append(expression2);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAEXACTCARDINALITY);
 					mBuildExpCounter->setMaxDataCardinalityMinimumMaximumCandidate(cardinality);
 					mBuildExpCounter->setMinDataCardinalityMinimumMaximumCandidate(cardinality);
@@ -1758,6 +1780,10 @@ namespace Konclude {
 				if (!expression) {
 					expression = new CDataFacetRestrictionExpression(dataLiteralExpression,dataFacet);
 					addHashedExpression(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(dataLiteralExpression) && !mBuildDataRangeSet->contains(dataLiteralExpression)) {
+						mBuildDataRangeSet->insert(dataLiteralExpression);
+						mBuildDataRangeList->append(dataLiteralExpression);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATATYPERESTRICTION);
 				}
 				return expression;
@@ -1777,6 +1803,12 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					for (CDataRangeTermExpression* exp: expressions) {
+						if (dynamic_cast<CDataLiteralExpression*>(exp) && !mBuildDataRangeSet->contains(exp)) {
+							mBuildDataRangeSet->insert(exp);
+							mBuildDataRangeList->append(exp);
+						}
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAINTERSECTIONOF);
 				}
 				return expression;
@@ -1791,6 +1823,12 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					for (CDataRangeTermExpression* exp : expressions) {
+						if (dynamic_cast<CDataLiteralExpression*>(exp) && !mBuildDataRangeSet->contains(exp)) {
+							mBuildDataRangeSet->insert(exp);
+							mBuildDataRangeList->append(exp);
+						}
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAONEOF);
 				}
 				return expression;
@@ -1805,6 +1843,12 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					for (CDataRangeTermExpression* exp : expressions) {
+						if (dynamic_cast<CDataLiteralExpression*>(exp) && !mBuildDataRangeSet->contains(exp)) {
+							mBuildDataRangeSet->insert(exp);
+							mBuildDataRangeList->append(exp);
+						}
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATAUNIONOF);
 				}
 				return expression;
@@ -1819,6 +1863,10 @@ namespace Konclude {
 					addHashedExpression(expression);
 					mBuildDataRangeSet->insert(expression);
 					mBuildDataRangeList->append(expression);
+					if (dynamic_cast<CDataLiteralExpression*>(expression1) && !mBuildDataRangeSet->contains(expression1)) {
+						mBuildDataRangeSet->insert(expression1);
+						mBuildDataRangeList->append(expression1);
+					}
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATACOMPLEMENTOF);
 				}
 				return expression;
@@ -2898,10 +2946,14 @@ namespace Konclude {
 
 			CAnonymousIndividualExpression* CConcreteOntologyBuildDataUpdater::getAnonymousIndividual(const QString& ontologyName, const QString& individualName) {
 				CAnonymousIndividualExpression* expression = nullptr;
-				QPair<CStringRefStringHasher,CStringRefStringHasher> namePair(ontologyName,individualName);
+				QStringRef useIndividualName(&individualName);
+				if (individualName.startsWith("_:")) {
+					useIndividualName = individualName.midRef(2);
+				}
+				QPair<CStringRefStringHasher,CStringRefStringHasher> namePair(ontologyName, useIndividualName);
 				expression = mAnoIndividualBuildHash->value(namePair);
 				if (!expression) {
-					expression = new CAnonymousIndividualExpression(ontologyName,individualName);
+					expression = new CAnonymousIndividualExpression(ontologyName, useIndividualName.toString());
 					expression->setEntityID(mNextEntityNumber++);
 					mAnoIndividualBuildHash->insert(namePair,expression);
 					mBuildIndividualSet->insert(expression);
@@ -2914,11 +2966,15 @@ namespace Konclude {
 
 			CAnonymousIndividualExpression* CConcreteOntologyBuildDataUpdater::getAnonymousIndividual(const QStringRef& ontologyName, const QStringRef& individualName) {
 				CAnonymousIndividualExpression* expression = nullptr;
+				QStringRef useIndividualName(individualName);
+				if (individualName.startsWith("_:")) {
+					useIndividualName = individualName.mid(2);
+				}
 				QPair<CStringRefStringHasher,CStringRefStringHasher> namePair(ontologyName,individualName);
 				expression = mAnoIndividualBuildHash->value(namePair);
 				if (!expression) {
 					QString ontologyNameString(ontologyName.toString());
-					QString individualNameString(individualName.toString());
+					QString individualNameString(useIndividualName.toString());
 					expression = new CAnonymousIndividualExpression(ontologyNameString,individualNameString);
 					expression->setEntityID(mNextEntityNumber++);
 					mAnoIndividualBuildHash->insert(QPair<CStringRefStringHasher,CStringRefStringHasher>(ontologyNameString,individualNameString),expression);

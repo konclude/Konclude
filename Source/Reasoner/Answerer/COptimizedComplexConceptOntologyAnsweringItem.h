@@ -43,12 +43,15 @@
 #include "Reasoner/Ontology/CConceptReferenceLinking.h"
 #include "Reasoner/Preprocess/COntologyQueryExtendedConfigDependedPreProcesser.h"
 
+#include "Context/CMemoryPoolNewAllocationIncreasingContext.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
 
 
 namespace Konclude {
+
+	using namespace Context;
 
 	namespace Reasoner {
 
@@ -182,6 +185,7 @@ namespace Konclude {
 
 				QHash<QPair<QString, CDatatype*>, CDataLiteral*>* getDataValueDatatypeSingleLiteralHash();
 
+				CContext* getDataValueMemoryManagementContext();
 
 				// protected methods
 			protected:
@@ -241,6 +245,7 @@ namespace Konclude {
 
 				QHash<QPair<QString, CDatatype*>, CDataLiteral*> mDataValueDatatypeSingleLiteralHash;
 
+				CMemoryPoolNewAllocationIncreasingContext mDataValueMemoryManagementContext;
 
 				// private methods
 				private:

@@ -33,6 +33,11 @@ namespace Konclude {
 				mTripleData = tripleData;
 				mIndividualAssertionIndexCache = individualAssertionIndexCache;
 				mOntology = ontology;
+
+				mAnonymousOntologyIdentifier = mOntology->getOntologyName() + ":";
+				if (!mAnonymousOntologyIdentifier.startsWith("_:")) {
+					mAnonymousOntologyIdentifier = "_:" + mAnonymousOntologyIdentifier;
+				}
 			}
 
 			CRedlandStoredTriplesSimpleABoxAssertionsAccessor::~CRedlandStoredTriplesSimpleABoxAssertionsAccessor() {
@@ -55,13 +60,22 @@ namespace Konclude {
 				return false;
 			}
 
+			QString CRedlandStoredTriplesSimpleABoxAssertionsAccessor::getAnonymousResolvedIndividualName(CRedlandStoredTriplesIndividualAssertionIndexCacheData* indiCacheData) {
+				QString indiName = indiCacheData->getIndividualName();
+				if (indiCacheData->isAnonymous()) {
+					if (indiName.startsWith("_:")) {
+						indiName = indiName.mid(2);
+					}
+					return mAnonymousOntologyIdentifier + indiName;
+				}
+				return indiName;
+			}
 
 
 			bool CRedlandStoredTriplesSimpleABoxAssertionsAccessor::visitIndividualName(cint64 individualId, COntologyTriplesIndividualNamesVisitor* visitor) {
 				CRedlandStoredTriplesIndividualAssertionIndexCacheData* indiCacheData = mIndividualAssertionIndexCache->getIndividualAssertionIndexCacheData(individualId);
 				if (indiCacheData) {
-					librdf_node* indiNode = librdf_new_node_from_node(indiCacheData->getIndividualNode());
-					visitor->visitIndividualName(indiCacheData->getIndividualName(), this);
+					visitor->visitIndividualName(getAnonymousResolvedIndividualName(indiCacheData), this);
 					return true;
 				}
 				return false;
@@ -71,12 +85,22 @@ namespace Konclude {
 			bool CRedlandStoredTriplesSimpleABoxAssertionsAccessor::visitIndividualName(cint64 individualId, function<bool(const QString& indiName)> visitFunc) {
 				CRedlandStoredTriplesIndividualAssertionIndexCacheData* indiCacheData = mIndividualAssertionIndexCache->getIndividualAssertionIndexCacheData(individualId);
 				if (indiCacheData) {
-					librdf_node* indiNode = librdf_new_node_from_node(indiCacheData->getIndividualNode());
-					visitFunc(indiCacheData->getIndividualName());
+					visitFunc(getAnonymousResolvedIndividualName(indiCacheData));
 					return true;
 				}
 				return false;
 			}
+
+
+			bool CRedlandStoredTriplesSimpleABoxAssertionsAccessor::visitIndividualAnonymity(cint64 individualId, function<bool(bool anonymous)> visitFunc) {
+				CRedlandStoredTriplesIndividualAssertionIndexCacheData* indiCacheData = mIndividualAssertionIndexCache->getIndividualAssertionIndexCacheData(individualId);
+				if (indiCacheData) {
+					visitFunc(indiCacheData->isAnonymous());
+					return true;
+				}
+				return false;
+			}
+
 
 
 
@@ -124,6 +148,7 @@ namespace Konclude {
 									librdf_stream_next(stream);
 								}
 								librdf_free_stream(stream);
+								librdf_free_statement(partial_statement);
 							}
 						}
 
@@ -149,6 +174,7 @@ namespace Konclude {
 									librdf_stream_next(stream);
 								}
 								librdf_free_stream(stream);
+								librdf_free_statement(partial_statement);
 							}
 						}
 
@@ -183,6 +209,7 @@ namespace Konclude {
 									librdf_stream_next(stream);
 								}
 								librdf_free_stream(stream);
+								librdf_free_statement(partial_statement);
 							}
 						}
 
@@ -325,6 +352,7 @@ namespace Konclude {
 					librdf_stream_next(stream);
 				}
 				librdf_free_stream(stream);
+				librdf_free_statement(partial_statement);
 				return true;
 
 			}

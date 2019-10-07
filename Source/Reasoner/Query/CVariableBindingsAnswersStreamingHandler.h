@@ -23,6 +23,7 @@
 
 // Libraries includes
 #include "CVariableBindingsAnswersResult.h"
+#include "CVariableBindingsAnswersConcurrentStreamingHandler.h"
 
 
 // Namespace includes
@@ -59,12 +60,16 @@ namespace Konclude {
 					virtual ~CVariableBindingsAnswersStreamingHandler();
 
 
-					virtual CVariableBindingsAnswersStreamingHandler* initResultStreaming(const QStringList& varNames) = 0;
+					virtual bool initResultStreaming(const QStringList& varNames) = 0;
 
 
 					virtual CVariableBindingsAnswersStreamingHandler* streamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1) = 0;
 
 					virtual bool streamingFlush() = 0;
+
+
+					virtual CVariableBindingsAnswersConcurrentStreamingHandler* getConcurrentStreamingHandler() = 0;
+					virtual CVariableBindingsAnswersStreamingHandler* releaseConcurrentStreamingHandler(CVariableBindingsAnswersConcurrentStreamingHandler* handler) = 0;
 
 
 				// protected methods

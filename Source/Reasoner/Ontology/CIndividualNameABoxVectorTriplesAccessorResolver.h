@@ -57,6 +57,7 @@ namespace Konclude {
 					CIndividualNameABoxVectorTriplesAccessorResolver(CConcreteOntology* ontology);
 
 					virtual QString getIndividualName(const CIndividualReference& indiRef, bool abbreviated = false) const;
+					virtual bool isAnonymous(const CIndividualReference& indiRef) const;
 
 
 				// protected methods

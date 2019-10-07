@@ -41,6 +41,7 @@ namespace Konclude {
 				mResult = nullptr;
 
 				mUseAbbreviatedIRIs = CConfigDataReader::readConfigBoolean(configuration,"Konclude.OWLlink.AbbreviatedIRIs",false);
+				mAnonymousIndividuals = CConfigDataReader::readConfigBoolean(configuration, "Konclude.OWLlink.ResultAnonymousIndividualsIntegration", false);
 
 				mRealizationCalcError = false;
 				mQueryConstructError = false;
@@ -77,7 +78,7 @@ namespace Konclude {
 					CSameRealization* sameRealization = realization->getSameRealization();
 					if (sameRealization) {
 						mResult = new CIndividualSynonymsResult();
-						CIndividualsResultVisitorGenerator resultGenerator(mResult,mUseAbbreviatedIRIs, mOntology->getIndividualNameResolver());
+						CIndividualsResultVisitorGenerator resultGenerator(mResult,mUseAbbreviatedIRIs, mAnonymousIndividuals, mOntology->getIndividualNameResolver());
 						sameRealization->visitSameIndividuals(mIndividual,&resultGenerator);
 					}
 				}

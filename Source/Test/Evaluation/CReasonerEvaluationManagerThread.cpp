@@ -592,7 +592,7 @@ namespace Konclude {
 
 
 
-							if (ananysingString == "ReasonerEvaluationResultSubsumptionComparer") {
+							if (ananysingString == "ReasonerEvaluationResultSubsumptionsComparer") {
 
 								QString outputDirectory = getAnalyserOutputDirectory(analysingDirectoryString, evaluationProgramName, plattform, "ResultSubsumptionComparison");
 
@@ -633,6 +633,56 @@ namespace Konclude {
 									analysed = true;
 								} else {
 									LOG(WARNING, getLogDomain(), logTr("Result subsumptions for '%1' in '%2' already up to date.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory), this);
+								}
+							}
+
+
+
+
+
+
+
+							if (ananysingString == "ReasonerEvaluationResultCountingComparer") {
+
+								QString outputDirectory = getAnalyserOutputDirectory(analysingDirectoryString, evaluationProgramName, plattform, "ResultCountingComparison");
+
+								CReasonerEvaluationAnalyserChecker analysingUpdateChecker;
+								if (analysingUpdateChecker.checkAnalysingUpdateNecessary(mReasonerOutputDirStringList, outputDirectory + "AnalysingUpdateCheckingData.dat", testCountCut)) {
+
+									LOG(INFO, getLogDomain(), logTr("Analysing result counting for '%1' to '%2'.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory), this);
+
+									CReasonerEvaluationSpecifiedTimeExtractor* respFileExtractor = new CReasonerEvaluationSpecifiedTimeExtractor(CReasonerEvaluationExtractor::RESPONSECOUNTEXTRACTOR, timeoutCut, errorPunishmentTime, dataValueCacher);
+
+									CReasonerEvaluationAvaragerSummarizer* avarageSummarize = new CReasonerEvaluationAvaragerSummarizer();
+
+									CReasonerEvaluationAnalyseContext* reasonerEvaluationContext = new CReasonerEvaluationAnalyseContext(mConfig);
+
+									CReasonerEvaluationCollector* collector = new CReasonerEvaluationCollector(respFileExtractor, avarageSummarize, mFiltering);
+
+									CReasonerEvaluationDataValueGroupCollectionReasonerComparison* reasonerComp = new CReasonerEvaluationDataValueGroupCollectionReasonerComparison(mReasonerNameStringList);
+
+									for (QStringList::const_iterator it1 = mReasonerNameStringList.constBegin(), it2 = mReasonerOutputDirStringList.constBegin(), it1End = mReasonerNameStringList.constEnd(), it2End = mReasonerOutputDirStringList.constEnd(); it1 != it1End && it2 != it2End; ++it1, ++it2) {
+										QString reasonerName(*it1);
+										QString reasonerPath(*it2);
+										LOG(INFO, getLogDomain(), logTr("Collecting response files for '%1' reasoner in directory '%2'.").arg(reasonerName).arg(reasonerPath), this);
+										collector->collectReasonerEvaluationDataValues(reasonerComp, reasonerName, reasonerPath);
+									}
+
+
+									LOG(INFO, getLogDomain(), logTr("Comparing result counting for '%1'.").arg(mReasonerNameStringList.join(", ")), this);
+
+									CReasonerEvaluationGroupRequestSelector* selectors = getSelectors(requestDirectory);
+
+
+									CReasonerEvaluationGroupRequestReasonerResultCountingAnalyser* analyser1 = new CReasonerEvaluationGroupRequestReasonerResultCountingAnalyser();
+									analyser1->analyseEvaluationData(reasonerComp, reasonerEvaluationContext, outputDirectory, selectors);
+
+
+									LOG(INFO, getLogDomain(), logTr("Result counting for '%1' compared to '%2'.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory), this);
+									analysingUpdateChecker.saveAnalysingUpdateCheckFile(outputDirectory + "AnalysingUpdateCheckingData.dat");
+									analysed = true;
+								} else {
+									LOG(WARNING, getLogDomain(), logTr("Result counting for '%1' in '%2' already up to date.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory), this);
 								}
 							}
 

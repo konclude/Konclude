@@ -30,19 +30,40 @@ namespace Konclude {
 
 			CVariableBindingsAnswersStreamingResult::CVariableBindingsAnswersStreamingResult(CVariableBindingsAnswersStreamingHandler* handler) {
 				mHandler = handler;
+				mConcurrentHandler = nullptr;
 				mResultCount = 0;
 			}
 
+			CVariableBindingsAnswersStreamingResult::CVariableBindingsAnswersStreamingResult(CVariableBindingsAnswersConcurrentStreamingHandler* concurrentHandler) {
+				mHandler = nullptr;
+				mConcurrentHandler = concurrentHandler;
+				mResultCount = 0;
+			}
 
-			CVariableBindingsAnswersStreamingResult* CVariableBindingsAnswersStreamingResult::initResult(const QStringList& varNames) {
+			bool CVariableBindingsAnswersStreamingResult::initResult(const QStringList& varNames) {
 				mVariableNames = varNames;
-				mHandler->initResultStreaming(varNames);
-				return this;
+				return mHandler->initResultStreaming(varNames);
 			}
 
 
 			CVariableBindingsAnswersStreamingResult::~CVariableBindingsAnswersStreamingResult() {
 			}
+
+
+
+			CVariableBindingsAnswersStreamingResult* CVariableBindingsAnswersStreamingResult::getConcurrentlyWriteableStreamingResults() {
+				return new CVariableBindingsAnswersStreamingResult(mHandler->getConcurrentStreamingHandler());
+			}
+
+			CVariableBindingsAnswersStreamingResult* CVariableBindingsAnswersStreamingResult::releaseConcurrentlyWriteableStreamingResults(CVariableBindingsAnswersStreamingResult* result) {
+				mResultCount += result->getResultCount();
+				mHandler->releaseConcurrentStreamingHandler(result->mConcurrentHandler);
+				delete result;
+				return this;
+			}
+
+
+
 
 
 			CVariableBindingsAnswersStreamingResult* CVariableBindingsAnswersStreamingResult::addResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality) {
@@ -54,13 +75,23 @@ namespace Konclude {
 			
 			CVariableBindingsAnswersResult* CVariableBindingsAnswersStreamingResult::addReusedResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality) {
 				mResultCount += cardinality;
-				mHandler->streamResultVariableBindings(varBindings, cardinality);
+				if (varBindings) {
+					if (mHandler) {
+						mHandler->streamResultVariableBindings(varBindings, cardinality);
+					} else if (mConcurrentHandler) {
+						mConcurrentHandler->concurrentlyStreamResultVariableBindings(varBindings, cardinality);
+					}
+				}
 				return this;
 			}
 
 
 			bool CVariableBindingsAnswersStreamingResult::flushResults() {
-				return mHandler->streamingFlush();
+				if (mHandler) {
+					return mHandler->streamingFlush();
+				} else {
+					return true;
+				}
 			}
 
 

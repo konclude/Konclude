@@ -29,6 +29,8 @@ namespace Konclude {
 
 			namespace SPARQL {
 
+
+
 				CSPARQLResultStreamingData::CSPARQLResultStreamingData(CQueryCommandProvider* queryProvider, cint64 sequenceNumber, cint64 bufferSize, CSPARQLResultStreamingController* streamingController) {
 					init(sequenceNumber, bufferSize, streamingController);
 					mQueryProvider = queryProvider;
@@ -45,12 +47,15 @@ namespace Konclude {
 
 				CSPARQLResultStreamingData::~CSPARQLResultStreamingData() {
 					delete mSerializer;
+					delete mBufferMutex;
 				}
 
 
 				CSPARQLResultStreamingData* CSPARQLResultStreamingData::init(cint64 sequenceNumber, cint64 bufferSize, CSPARQLResultStreamingController* streamingController) {
+					mBufferMutex = new QMutex(QMutex::Recursive);
 					mStreamingController = streamingController;
-					mBufferSize = 1000000;
+					mInitialBufferSize = 1000000;
+					mBufferSize = mInitialBufferSize;
 					mMaxBufferSize = bufferSize;
 					mSequenceNumber = sequenceNumber;
 					mStreamingResult = nullptr;
@@ -64,6 +69,8 @@ namespace Konclude {
 					mUsedBufferSize = 0;
 					mFlushId = 0;
 					mContinueSerialization = true;
+					mWritingScheduled = false;
+					mConcurrentFinishCount = 0;
 					return this;
 				}
 
@@ -96,13 +103,13 @@ namespace Konclude {
 
 
 
-				CVariableBindingsAnswersStreamingHandler* CSPARQLResultStreamingData::initResultStreaming(const QStringList& varNames) {
+				bool  CSPARQLResultStreamingData::initResultStreaming(const QStringList& varNames) {
 					mVarNames = varNames;
 					if (!mStreamingInitialized) {
 						mStreamingInitialized = true;
 						mSerializer->addResultStreamingStart(mVarNames);
 					}
-					return this;
+					return mStreamingController->canWrite();
 				}
 
 				CVariableBindingsAnswersStreamingHandler* CSPARQLResultStreamingData::streamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality) {
@@ -111,6 +118,7 @@ namespace Konclude {
 						for (cint64 i = 0; i < cardinality; ++i) {
 							mSerializer->addTemporaryBuffer();
 							if (mSerializer->getBufferWrittenSize() > mBufferSize) {
+								mWritingScheduled = true;
 								mBufferSize *= 2;								
 								if (mBufferSize > mMaxBufferSize) {
 									mBufferSize = mMaxBufferSize;
@@ -125,15 +133,18 @@ namespace Konclude {
 
 
 				bool CSPARQLResultStreamingData::streamingFlush() {
-					if (mSerializer->getBufferWrittenSize() > 0) {
-						mSerializer->writeFlush(++mFlushId);
-						QByteArray* bufferArray = new QByteArray();
-						bufferArray->reserve(mBufferSize + 10000);
-						QByteArray* usedBuffer = mSerializer->updateWriteBuffer(bufferArray);
-						mBufferMutex.lock();
-						mUsedBufferSize += usedBuffer->size();
-						mUsedBufferList.append(usedBuffer);
-						mBufferMutex.unlock();
+					if (mSerializer->getBufferWrittenSize() > 0 || !mUsedBufferList.isEmpty()) {
+						mWritingScheduled = true;
+						if (mSerializer->getBufferWrittenSize() > 0) {
+							mSerializer->writeFlush(++mFlushId);
+							QByteArray* bufferArray = new QByteArray();
+							bufferArray->reserve(mBufferSize + 10000);
+							QByteArray* usedBuffer = mSerializer->updateWriteBuffer(bufferArray);
+							mBufferMutex->lock();
+							mUsedBufferSize += usedBuffer->size();
+							mUsedBufferList.append(CSPARQLResultBufferWriteData(1, usedBuffer));
+							mBufferMutex->unlock();
+						}
 						mContinueSerialization &= mStreamingController->notifyWriteRequest(mSequenceNumber);
 					}
 					return mContinueSerialization;
@@ -142,6 +153,7 @@ namespace Konclude {
 
 				CVariableBindingsAnswersStreamingHandler* CSPARQLResultStreamingData::finishResultStreaming() {
 					if (mStreamingInitialized && !mStreamingFinished) {
+						streamingFlush();
 						mStreamingFinished = true;
 						mSerializer->addResultSerialization(mVarNames, mStreamingResult);
 					}
@@ -152,10 +164,10 @@ namespace Konclude {
 				CSPARQLResultStreamingData* CSPARQLResultStreamingData::finalize() {
 					if (!mFinalized) {
 						QByteArray* usedBuffer = mSerializer->updateWriteBuffer(nullptr);
-						mBufferMutex.lock();
+						mBufferMutex->lock();
 						mUsedBufferSize += usedBuffer->size();
-						mUsedBufferList.append(usedBuffer);
-						mBufferMutex.unlock();
+						mUsedBufferList.append(CSPARQLResultBufferWriteData(1, usedBuffer));
+						mBufferMutex->unlock();
 						mFinalized = true;
 					}
 					return this;
@@ -198,20 +210,42 @@ namespace Konclude {
 				}
 
 
+				CSPARQLResultConcurrentStreamingDataBufferReciever* CSPARQLResultStreamingData::transferConcurrentBuffers(QList<CSPARQLResultBufferWriteData>& bufferList, cint64& bufferSize) {
+					mBufferMutex->lock();
+					mUsedBufferList.append(bufferList);
+					mUsedBufferSize += bufferSize;
+					bool flush = false;
+					if (mUsedBufferSize > mBufferSize && !mWritingScheduled) {
+						mBufferSize *= 2;
+						if (mBufferSize > mMaxBufferSize) {
+							mBufferSize = mMaxBufferSize;
+						}
+						flush = true;
+						mWritingScheduled = true;
+					}
+					if (flush) {
+						mContinueSerialization &= streamingFlush();
+					}
+					mBufferMutex->unlock();
+					bufferSize = 0;
+					bufferList.clear();
+					return this;
+				}
 
-				QList<QByteArray*> CSPARQLResultStreamingData::takeWriteableBuffers() {
-					mBufferMutex.lock();
-					QList<QByteArray*> tmpList = mUsedBufferList;
+				QList<CSPARQLResultBufferWriteData> CSPARQLResultStreamingData::takeWriteableBuffers() {
+					mBufferMutex->lock();
+					mWritingScheduled = false;
+					QList<CSPARQLResultBufferWriteData> tmpList = mUsedBufferList;
 					mUsedBufferList.clear();
 					mUsedBufferSize = 0;
-					mBufferMutex.unlock();
+					mBufferMutex->unlock();
 					return tmpList;
 				}
 
 				cint64 CSPARQLResultStreamingData::getWriteableBufferSize() {
 					return mUsedBufferSize;
 				}
-
+				
 				cint64 CSPARQLResultStreamingData::getWriteableBufferCount() {
 					return mUsedBufferList.size();
 				}
@@ -219,6 +253,39 @@ namespace Konclude {
 
 				cint64 CSPARQLResultStreamingData::getSequenceNumber() {
 					return mSequenceNumber;
+				}
+
+
+
+
+				CVariableBindingsAnswersConcurrentStreamingHandler* CSPARQLResultStreamingData::getConcurrentStreamingHandler() {
+					CSPARQLResultConcurrentStreamingData* conStreamData = new CSPARQLResultConcurrentStreamingData(mInitialBufferSize, mMaxBufferSize, &mVarNames, &mContinueSerialization, this);
+					return conStreamData;
+				}
+
+
+				CVariableBindingsAnswersStreamingHandler* CSPARQLResultStreamingData::releaseConcurrentStreamingHandler(CVariableBindingsAnswersConcurrentStreamingHandler* handler) {
+					CSPARQLResultConcurrentStreamingData* conStreamData = (CSPARQLResultConcurrentStreamingData*)handler;
+					if (conStreamData->hasData()) {
+						mBufferMutex->lock();
+						++mConcurrentFinishCount;
+						conStreamData->addBuffers(mUsedBufferList, mUsedBufferSize);
+						bool flush = false;
+						if (mUsedBufferSize > mBufferSize && !mWritingScheduled) {
+							mBufferSize *= 2;
+							if (mBufferSize > mMaxBufferSize) {
+								mBufferSize = mMaxBufferSize;
+							}
+							flush = true;
+							mWritingScheduled = true;
+						}
+						mBufferMutex->unlock();
+						if (flush) {
+							mContinueSerialization &= streamingFlush();
+						}
+					}
+					delete conStreamData;
+					return this;
 				}
 
 

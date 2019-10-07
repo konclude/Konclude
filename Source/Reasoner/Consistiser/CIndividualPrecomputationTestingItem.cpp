@@ -28,9 +28,8 @@ namespace Konclude {
 		namespace Consistiser {
 
 
-			CIndividualPrecomputationTestingItem::CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem) : CPrecomputationTestingItem(preCompItem),mObserver(observer) {
+			CIndividualPrecomputationTestingItem::CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem, bool* unstatFlagPointer) : CPrecomputationTestingItem(preCompItem),mObserver(observer), mRepresentativeCacheUpdatingAdapter(indiComCoordHash, unstatFlagPointer) {
 				mTaskPreyingAdapter.setConsitenceObserver(observer);
-				mRepresentativeCacheUpdatingAdapter.setIndividualComputationCoordinationHash(indiComCoordHash);
 				mIndiCompCoordHash = indiComCoordHash;
 			}
 

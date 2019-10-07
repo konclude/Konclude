@@ -178,6 +178,7 @@ namespace Konclude {
 
 						bool isGeneratingTestQueriesActivated();
 
+						bool isBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated();
 
 					// protected methods
 					protected:
@@ -285,6 +286,7 @@ namespace Konclude {
 						cint64 mMaxRecProConceptCount;
 						bool mOccurrenceStatisticsCollectionActivated;
 						bool mGeneratingTestQueriesActivated;
+						bool mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated;
 
 
 						bool mConfDependencyTrackingChecked;
@@ -387,6 +389,8 @@ namespace Konclude {
 						bool mMaxRecProConceptCountChecked;
 						bool mOccurrenceStatisticsCollectionChecked;
 						bool mGeneratingTestQueriesChecked;
+
+						bool mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesChecked;
 
 					// private methods
 					private:

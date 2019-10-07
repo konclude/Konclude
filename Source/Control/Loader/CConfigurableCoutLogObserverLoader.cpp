@@ -60,7 +60,8 @@ namespace Konclude {
 				infoDomainList<<QString("::Konclude::Loader::OWLlinkTranslationHelpLoader");
 				infoDomainList<<QString("::Konclude::Loader::CommandLineTranslator");
 				infoDomainList<<QString("::Konclude::CLIBatchProcessor");
-				infoDomainList<<QString("::Konclude::Reasoner::Kernel::Answerer");
+				infoDomainList << QString("::Konclude::Reasoner::Kernel::Answerer");
+				infoDomainList << QString("::Konclude::Loader::SPARQLResultComparer");
 
 				consoleSingletonLogObserver = new CConsolePrintConfigurableLogObserver(infoDomainList,60.,true,false,true,true);
 				CLogger::getInstance()->addLogObserver(consoleSingletonLogObserver);				

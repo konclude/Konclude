@@ -29,6 +29,7 @@
 
 // Namespace includes
 #include "../SPARQLSettings.h"
+#include "../CSPARQLResultBufferWriteData.h"
 
 
 // Other includes
@@ -64,12 +65,12 @@ namespace Konclude {
 						// public methods
 						public:
 							//! Constructor
-							CResultStreamingWriteEvent(QByteArray* buffer, bool last);
+							CResultStreamingWriteEvent(const QList<CSPARQLResultBufferWriteData>& bufferList, bool last);
 
 							//! Destructor
 							virtual ~CResultStreamingWriteEvent();
 
-							QByteArray* getBuffer();
+							QList<CSPARQLResultBufferWriteData>* getBufferList();
 							bool isLast();
 
 
@@ -80,7 +81,7 @@ namespace Konclude {
 
 						// protected variables
 						protected:
-							QByteArray* mBuffer;
+							QList<CSPARQLResultBufferWriteData> mBufferList;
 							bool mLast;
 
 

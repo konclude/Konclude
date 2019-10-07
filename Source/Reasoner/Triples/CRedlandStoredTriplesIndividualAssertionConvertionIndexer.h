@@ -148,6 +148,7 @@ namespace Konclude {
 
 					QHash<CRedlandUriHasher, CDatatype*> mDatatypeIriDatatypeHash;
 					bool mDatatypeHashInitialized = false;
+					QString mAnonymousOntologyIdentifier;
 
 					CDatatype* mDefaultDatatype;
 					CDataLiteralNormalizerPreProcess mDataLiteralNormalizer;

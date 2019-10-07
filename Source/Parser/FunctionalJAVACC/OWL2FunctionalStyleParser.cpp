@@ -464,7 +464,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::anonymousIndividual() {QString x;
     x = nodeId();
     }
     
-return getBuilder()->getAnonymousIndividual(getBuilder()->getOntologyName(),x);
+return getBuilder()->getAnonymousIndividual(getBuilder()->getAnonymousOntologyIdentifier(),x);
 assert(false);
   }
 

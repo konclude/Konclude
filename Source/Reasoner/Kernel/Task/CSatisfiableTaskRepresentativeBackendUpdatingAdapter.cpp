@@ -29,8 +29,9 @@ namespace Konclude {
 
 			namespace Task {
 
-				CSatisfiableTaskRepresentativeBackendUpdatingAdapter::CSatisfiableTaskRepresentativeBackendUpdatingAdapter(CIndividualPrecomputationCoordinationHash* indiComCoordHash) {
+				CSatisfiableTaskRepresentativeBackendUpdatingAdapter::CSatisfiableTaskRepresentativeBackendUpdatingAdapter(CIndividualPrecomputationCoordinationHash* indiComCoordHash, bool *unstatFlagPointer) {
 					mIndiCompCoordHash = indiComCoordHash;
+					mUnstatFlagPointer = unstatFlagPointer;
 				}
 
 
@@ -72,6 +73,15 @@ namespace Konclude {
 				cint64 CSatisfiableTaskRepresentativeBackendUpdatingAdapter::getAllAssertionIndividualId() {
 					return mAllAssertionIndiID;
 				}
+
+
+				bool CSatisfiableTaskRepresentativeBackendUpdatingAdapter::hasUnsatisfiableComputed() {
+					if (mUnstatFlagPointer) {
+						return *mUnstatFlagPointer;
+					}
+					return false;
+				}
+
 
 
 			}; // end namespace Task

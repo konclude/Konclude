@@ -42,6 +42,12 @@ namespace Konclude {
 				mBatchDependentItemMappingsCount = 0;
 				mBatchDependentItemMappingsSize = 0;
 				mLastRequestedMappingsComputationCount = 0;
+
+				mSingleLoadedBindingsCardinalityLinker = false;
+
+				mCurrentLoadedBindingsCardinalityBatchLinker = nullptr;
+				mStartLoadedBindingsCardinalityBatchLinker = nullptr;
+				mEndLoadedBindingsCardinalityBatchLinker = nullptr;
 			}
 
 
@@ -93,33 +99,139 @@ namespace Konclude {
 
 
 			bool COptimizedComplexVariableCompositionItemDependence::isBatchProcessed(bool considerCardinalityUpdates) {
-				return !getBatchCurrentBindingsCardinalityLinker(false) && (!considerCardinalityUpdates || !getBatchCurrentUpdatedCardinalityLinker(false));
+				return !getBatchCurrentBindingsCardinalityLinker(false) && mCurrentLoadedBindingsCardinalityBatchLinker == nullptr && (!considerCardinalityUpdates || !getBatchCurrentUpdatedCardinalityLinker(false));
 			}
 
 			bool COptimizedComplexVariableCompositionItemDependence::loadNextBatch(bool considerCardinalityUpdates) {
-				COptimizedComplexVariableIndividualMappings* depMappings = mDependentItem->getVariableMapping();
-				if (mBatchCurrentBindingsCardinalityLinker == mBatchEndBindingsCardinalityLinker) {
-					mBatchEndBindingsCardinalityLinker = mBatchStartBindingsCardinalityLinker;
+				if (mStartLoadedBindingsCardinalityBatchLinker) {
+					return loadNextBatchProvidedBatch(considerCardinalityUpdates);
+				} else {
+					COptimizedComplexVariableIndividualMappings* depMappings = mDependentItem->getVariableMapping();
+					if (mBatchCurrentBindingsCardinalityLinker == mBatchEndBindingsCardinalityLinker) {
+						mSingleLoadedBindingsCardinalityLinker = true;
+						mBatchEndBindingsCardinalityLinker = mBatchStartBindingsCardinalityLinker;
 
-					mBatchStartBindingsCardinalityLinker = depMappings->getLastAddedBindingsCardinalityLinker();
+						mBatchStartBindingsCardinalityLinker = depMappings->getLastAddedBindingsCardinalityLinker();
+						mBatchCurrentBindingsCardinalityLinker = mBatchStartBindingsCardinalityLinker;
+
+						cint64 prevDepItemMappingCount = mBatchDependentItemMappingsCount;
+						mBatchDependentItemMappingsCount = depMappings->getBindingCount();
+						mBatchDependentItemMappingsSize = mBatchDependentItemMappingsCount - prevDepItemMappingCount;
+
+						mBatchProcessedBindingsCardinalityLinkerCount = 0;
+					}
+
+					if (considerCardinalityUpdates && mBatchCurrentUpdatedCardinalityLinker == mBatchEndUpdatedCardinalityLinker) {
+						mSingleLoadedBindingsCardinalityLinker = true;
+						mBatchEndUpdatedCardinalityLinker = mBatchStartUpdatedCardinalityLinker;
+						mBatchStartUpdatedCardinalityLinker = depMappings->getLastUpdatedCardinalityLinker();
+						mBatchCurrentUpdatedCardinalityLinker = mBatchStartUpdatedCardinalityLinker;
+					}
+
+
+					return !isBatchProcessed(considerCardinalityUpdates);
+				}
+			}
+
+
+
+			COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* COptimizedComplexVariableCompositionItemDependence::getBatchProvidedBindingCardinalityBatchLinker(bool moveNext) {
+				if (!mCurrentLoadedBindingsCardinalityBatchLinker) {
+					return nullptr;
+				}
+				COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* linker = mCurrentLoadedBindingsCardinalityBatchLinker;
+
+				if (mBatchCurrentBindingsCardinalityLinker == mBatchEndBindingsCardinalityLinker && moveNext) {
+					mBatchStartBindingsCardinalityLinker = mCurrentLoadedBindingsCardinalityBatchLinker->getStartBindingsCardinalityLinker();
 					mBatchCurrentBindingsCardinalityLinker = mBatchStartBindingsCardinalityLinker;
+					mBatchEndBindingsCardinalityLinker = mCurrentLoadedBindingsCardinalityBatchLinker->getEndBindingsCardinalityLinker();
+					if (mBatchEndBindingsCardinalityLinker) {
+						mBatchEndBindingsCardinalityLinker = mBatchEndBindingsCardinalityLinker->getNext();
+					}
 
 					cint64 prevDepItemMappingCount = mBatchDependentItemMappingsCount;
-					mBatchDependentItemMappingsCount = depMappings->getBindingCount();
-					mBatchDependentItemMappingsSize = mBatchDependentItemMappingsCount - prevDepItemMappingCount;
+					mBatchDependentItemMappingsCount = prevDepItemMappingCount + mCurrentLoadedBindingsCardinalityBatchLinker->getLinkerCount();
+					mBatchDependentItemMappingsSize = mCurrentLoadedBindingsCardinalityBatchLinker->getLinkerCount();
+
 
 					mBatchProcessedBindingsCardinalityLinkerCount = 0;
 				}
 
-				if (considerCardinalityUpdates && mBatchCurrentUpdatedCardinalityLinker == mBatchEndUpdatedCardinalityLinker) {
-					mBatchEndUpdatedCardinalityLinker = mBatchStartUpdatedCardinalityLinker;
-					mBatchStartUpdatedCardinalityLinker = depMappings->getLastUpdatedCardinalityLinker();
-					mBatchCurrentUpdatedCardinalityLinker = mBatchStartUpdatedCardinalityLinker;
+				if (mCurrentLoadedBindingsCardinalityBatchLinker && moveNext) {
+					if (mCurrentLoadedBindingsCardinalityBatchLinker == mEndLoadedBindingsCardinalityBatchLinker) {
+						mCurrentLoadedBindingsCardinalityBatchLinker = nullptr;
+					} else {
+						mCurrentLoadedBindingsCardinalityBatchLinker = mCurrentLoadedBindingsCardinalityBatchLinker->getNext();
+					}
 				}
 
 
-				return !isBatchProcessed(considerCardinalityUpdates);
+				return linker;
 			}
+
+
+			bool COptimizedComplexVariableCompositionItemDependence::setBatchProvidedBindingCardinalityLinkersProcessed(COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* batchLinker) {
+				if (batchLinker->getStartBindingsCardinalityLinker() == mBatchCurrentBindingsCardinalityLinker) {
+					mBatchCurrentBindingsCardinalityLinker = mBatchEndBindingsCardinalityLinker;
+
+					mBatchProcessedBindingsCardinalityLinkerCount += batchLinker->getLinkerCount();
+					mTotalProcessedBindingsCardinalityLinkerCount += batchLinker->getLinkerCount();
+
+					return true;
+				}
+				return false;
+			}
+
+
+
+
+			bool COptimizedComplexVariableCompositionItemDependence::loadNextBatchProvidedBatch(bool considerCardinalityUpdates) {
+				COptimizedComplexVariableIndividualMappings* depMappings = mDependentItem->getVariableMapping();
+				COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* lastAddedBindingsCardinalityBatchLinker = depMappings->getLastAddedBindingsCardinalityBatchLinker();
+				COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* firstAddedBindingsCardinalityBatchLinker = depMappings->getFirstAddedBindingsCardinalityBatchLinker();
+				if (lastAddedBindingsCardinalityBatchLinker && !mSingleLoadedBindingsCardinalityLinker) {
+
+					if (mCurrentLoadedBindingsCardinalityBatchLinker == nullptr && lastAddedBindingsCardinalityBatchLinker != mEndLoadedBindingsCardinalityBatchLinker) {
+
+						if (!mEndLoadedBindingsCardinalityBatchLinker) {
+							mStartLoadedBindingsCardinalityBatchLinker = firstAddedBindingsCardinalityBatchLinker;
+						} else {
+							mStartLoadedBindingsCardinalityBatchLinker = mEndLoadedBindingsCardinalityBatchLinker->getNext();
+						}
+
+						mEndLoadedBindingsCardinalityBatchLinker = lastAddedBindingsCardinalityBatchLinker;
+						mCurrentLoadedBindingsCardinalityBatchLinker = mStartLoadedBindingsCardinalityBatchLinker;
+					}
+
+
+					if (mBatchCurrentBindingsCardinalityLinker == mBatchEndBindingsCardinalityLinker && mCurrentLoadedBindingsCardinalityBatchLinker != nullptr) {
+						mBatchStartBindingsCardinalityLinker = mCurrentLoadedBindingsCardinalityBatchLinker->getStartBindingsCardinalityLinker();
+						mBatchCurrentBindingsCardinalityLinker = mBatchStartBindingsCardinalityLinker;
+						mBatchEndBindingsCardinalityLinker = mCurrentLoadedBindingsCardinalityBatchLinker->getEndBindingsCardinalityLinker();
+						if (mBatchEndBindingsCardinalityLinker) {
+							mBatchEndBindingsCardinalityLinker = mBatchEndBindingsCardinalityLinker->getNext();
+						}
+
+						cint64 prevDepItemMappingCount = mBatchDependentItemMappingsCount;
+						mBatchDependentItemMappingsCount = prevDepItemMappingCount + mCurrentLoadedBindingsCardinalityBatchLinker->getLinkerCount();
+						mBatchDependentItemMappingsSize = mCurrentLoadedBindingsCardinalityBatchLinker->getLinkerCount();
+
+
+						mBatchProcessedBindingsCardinalityLinkerCount = 0;
+					}
+
+					if (considerCardinalityUpdates && mBatchCurrentUpdatedCardinalityLinker == mBatchEndUpdatedCardinalityLinker) {
+						mBatchEndUpdatedCardinalityLinker = mBatchStartUpdatedCardinalityLinker;
+						mBatchStartUpdatedCardinalityLinker = depMappings->getLastUpdatedCardinalityLinker();
+						mBatchCurrentUpdatedCardinalityLinker = mBatchStartUpdatedCardinalityLinker;
+					}
+
+					return !isBatchProcessed(considerCardinalityUpdates);
+				} else {
+					return loadNextBatch(considerCardinalityUpdates);
+				}
+			}
+
 
 
 			bool COptimizedComplexVariableCompositionItemDependence::isProcessingFinished(bool considerCardinalityUpdates) {

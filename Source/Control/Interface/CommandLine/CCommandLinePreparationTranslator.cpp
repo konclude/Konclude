@@ -98,7 +98,9 @@ namespace Konclude {
 					}
 					while (processList.count() > 0) {
 						QString arg = processList.takeFirst();
-						translate(arg,processList);
+						if (!translate(arg,processList)) {
+							mRemainingLoadList.append(arg);
+						}
 					}
 
 
@@ -120,6 +122,7 @@ namespace Konclude {
 					} else {
 						translatedArgList = argList;
 					}
+					translatedArgList.append(mRemainingLoadList);
 					return translatedArgList;
 				}
 
@@ -141,6 +144,12 @@ namespace Konclude {
 
 							if (mLoaderFac->canCreateLoaderFromName(modArgText)) {
 								argumentTranslated = true;
+								mRemainingLoadList += argumentText;
+
+								while (!remainingArgList.isEmpty() && remainingArgList.first().startsWith("+")) {
+									mRemainingLoadList.append(remainingArgList.takeFirst());
+								}
+
 							} else if (modArgText.indexOf("t") == 0 || modArgText.indexOf("T") == 0) {
 								mSkipTranslation = true;
 								argumentTranslated = true;

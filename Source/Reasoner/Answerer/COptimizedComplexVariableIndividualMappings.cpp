@@ -33,14 +33,32 @@ namespace Konclude {
 				mBindingCount = 0;
 				mBindingMapping = new VARIABLE_TYPE[bindingSize];
 				mLastAddedBindingsCardinalityLinker = nullptr;
+				mLastAddedBindingsCardinalityBatchLinker = nullptr;
+				mFirstAddedBindingsCardinalityBatchLinker = nullptr;
 				mLastUpdateCardinalityLinker = nullptr;
 				mCurrentUpdateId = 0;
+				mLastAddedBindingsCardinalityBatchLinkerUpdateId = 0;
+				mMaximumCardinalitySameIndividualsJointlyConsidered = 0;
+				mMaximumCardinalitySameIndividualsSeparatelyConsidered = 0;
+
+				mLinkerBatchingSizeIncreasingFactor = 1.25;
+				mCurrentLinkerBatchingSize = 100;
 			}
 
 
 			COptimizedComplexVariableIndividualMappings::~COptimizedComplexVariableIndividualMappings() {
 				delete[] mBindingMapping;
 			}
+
+
+			cint64 COptimizedComplexVariableIndividualMappings::getMaximumCardinalitySameIndividualsJointlyConsidered() {
+				return mMaximumCardinalitySameIndividualsJointlyConsidered;
+			}
+
+			cint64 COptimizedComplexVariableIndividualMappings::getMaximumCardinalitySameIndividualsSeparatelyConsidered() {
+				return mMaximumCardinalitySameIndividualsSeparatelyConsidered;
+			}
+
 
 
 			COptimizedComplexVariableIndividualMappings::VARIABLE_TYPE COptimizedComplexVariableIndividualMappings::getBindingMapping(cint64 idx) {
@@ -65,6 +83,7 @@ namespace Konclude {
 			}
 
 			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappings::addLastAddedBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker) {
+				extendAddedBindingsCardinalityBatchLinker(linker);
 				mLastAddedBindingsCardinalityLinker = linker->append(mLastAddedBindingsCardinalityLinker);
 				return this;
 			}
@@ -92,6 +111,45 @@ namespace Konclude {
 
 			cint64 COptimizedComplexVariableIndividualMappings::getCurrentUpdateId() {
 				return mCurrentUpdateId;
+			}
+
+			COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* COptimizedComplexVariableIndividualMappings::getLastAddedBindingsCardinalityBatchLinker() {
+				return mLastAddedBindingsCardinalityBatchLinker;
+			}
+
+
+			COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* COptimizedComplexVariableIndividualMappings::getFirstAddedBindingsCardinalityBatchLinker() {
+				return mFirstAddedBindingsCardinalityBatchLinker;
+			}
+
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappings::extendAddedBindingsCardinalityBatchLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker) {
+				COptimizedComplexVariableIndividualBindingsCardinalityLinker* stopLinker = nullptr;
+				if (mLastAddedBindingsCardinalityBatchLinker) {
+					stopLinker = mLastAddedBindingsCardinalityBatchLinker->getStartBindingsCardinalityLinker();
+				}
+				cint64 count = 0;
+				COptimizedComplexVariableIndividualBindingsCardinalityLinker* lastLinker = nullptr;
+				for (COptimizedComplexVariableIndividualBindingsCardinalityLinker* linkerIt = linker; linkerIt && linkerIt != stopLinker; linkerIt = linkerIt->getNext()) {
+					++count;
+					lastLinker = linkerIt;
+				}
+				if (mLastAddedBindingsCardinalityBatchLinkerUpdateId == mCurrentUpdateId && mLastAddedBindingsCardinalityBatchLinker && mLastAddedBindingsCardinalityBatchLinker->getLinkerCount() < mCurrentLinkerBatchingSize && mLastAddedBindingsCardinalityBatchLinker->getStartBindingsCardinalityLinker() == mLastAddedBindingsCardinalityLinker) {
+					mLastAddedBindingsCardinalityBatchLinker->addStartBindingsCardLinker(linker, count);
+				} else {
+					if (mLastAddedBindingsCardinalityBatchLinker) {
+						mCurrentLinkerBatchingSize *= mLinkerBatchingSizeIncreasingFactor;
+					}
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* newLastAddedBindingsCardinalityBatchLinker = new COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker(linker, lastLinker, count);
+					if (mLastAddedBindingsCardinalityBatchLinker) {
+						mLastAddedBindingsCardinalityBatchLinker->setNext(newLastAddedBindingsCardinalityBatchLinker);
+					} else {
+						mFirstAddedBindingsCardinalityBatchLinker = newLastAddedBindingsCardinalityBatchLinker;
+					}
+					//newLastAddedBindingsCardinalityBatchLinker->setNext(mLastAddedBindingsCardinalityBatchLinker);
+					mLastAddedBindingsCardinalityBatchLinker = newLastAddedBindingsCardinalityBatchLinker;
+					mLastAddedBindingsCardinalityBatchLinkerUpdateId = mCurrentUpdateId;
+				}
+				return this;
 			}
 
 

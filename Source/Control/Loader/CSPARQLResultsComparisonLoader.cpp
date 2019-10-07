@@ -85,7 +85,7 @@ namespace Konclude {
 								break;
 
 							} else if (resultElement.nodeName() == "results") {
-								CVariableBindingsAnswersSetResult* varBindingResult = mSPARQLResultParser.parseVariableBindings(&resultElement, variableNameIndexHash, true);
+								CVariableBindingsAnswersSetResult* varBindingResult = mSPARQLResultParser.parseVariableBindingsSet(&resultElement, variableNameIndexHash, true);
 								if (varBindingResult) {
 									++comparedResultCount;
 									if (!isVariableBindingResultSimilarTo(varBindingResult, currNodeNumber, otherResponseFileString, variableNameIndexHash, reportingFileName)) {
@@ -132,7 +132,7 @@ namespace Konclude {
 								break;
 
 							} else if (currNodeNumber == nodeNumber && resultElement.nodeName() == "results") {
-								CVariableBindingsAnswersSetResult* otherVarBindingResult = mSPARQLResultParser.parseVariableBindings(&resultElement, variableNameIndexHash, true);
+								CVariableBindingsAnswersSetResult* otherVarBindingResult = mSPARQLResultParser.parseVariableBindingsSet(&resultElement, variableNameIndexHash, true);
 								if (otherVarBindingResult) {
 
 									if (!varBindingResult || !varBindingResult->isResultEquivalentTo(otherVarBindingResult)) {
@@ -207,6 +207,10 @@ namespace Konclude {
 					LOG(ERROR, mLogIdentifier.getLogDomain(), logTr("Comparison file '%1' cannot be opened.").arg(otherResponseFileString), this);
 				}
 
+				if (!resultFound) {
+					LOG(WARN, mLogIdentifier.getLogDomain(), logTr("Result %1 not found in comparison file.").arg(nodeNumber + 1), this);
+					resultSimilar = false;
+				}
 
 
 				return resultSimilar;

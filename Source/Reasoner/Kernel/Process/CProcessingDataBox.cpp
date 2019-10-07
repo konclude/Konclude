@@ -250,6 +250,12 @@ namespace Konclude {
 				}
 
 
+				CProcessingDataBox* CProcessingDataBox::setProcessingOntology(CConcreteOntology* ontology) {
+					mOntology = ontology;
+					return this;
+				}
+
+
 				CProcessingDataBox* CProcessingDataBox::initProcessingDataBox(CProcessingDataBox* processingDataBox) {
 					CIndividualProcessNodeVector* prevIndiProcVec = nullptr;
 					mUseIndiProcessQueue = nullptr;

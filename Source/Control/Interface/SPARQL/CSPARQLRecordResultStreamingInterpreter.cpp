@@ -35,13 +35,13 @@ namespace Konclude {
 					mResultStreamingWriter = resultStreamingWriter;
 
 
-					mConfBufferSize = 524288000;
+					mConfBufferSize = 104857600;
 
 					mDelegater = commandDelegater;
 					mCurrentProcessingSeqNumber = 0;
 
 					mConfig = config;
-					mConfBufferSize = CConfigDataReader::readConfigInteger(mConfig, "Konclude.SPARQL.Server.ChunkEncodingSize", 524288000);
+					mConfBufferSize = CConfigDataReader::readConfigInteger(mConfig, "Konclude.SPARQL.Serialization.ChunkEncodingSize", 104857600);
 					mNextSeqNumber = 0;
 				}
 
@@ -85,16 +85,19 @@ namespace Konclude {
 
 
 				bool CSPARQLRecordResultStreamingInterpreter::writeStreamingData(CSPARQLResultStreamingData* seqData, bool lastData) {
-					QList<QByteArray*> bufferList = seqData->takeWriteableBuffers();
-					cint64 count = bufferList.size();
-					cint64 i = 0;
+					QList<CSPARQLResultBufferWriteData> bufferList = seqData->takeWriteableBuffers();
 					bool continueWriting = true;
-					for (QByteArray* buffer : bufferList) {
-						continueWriting &= mResultStreamingWriter->writeStreamData(buffer, ++i == count && lastData);
+					if (mResultStreamingWriter) {
+						continueWriting &= mResultStreamingWriter->writeStreamData(bufferList, lastData);
+					} else {
+						continueWriting = false;
 					}
 					return continueWriting;
 				}
 
+				bool CSPARQLRecordResultStreamingInterpreter::canWrite() {
+					return mResultStreamingWriter != nullptr;
+				}
 
 
 				CCommandRecorder* CSPARQLRecordResultStreamingInterpreter::recordData(CCommandRecordData *recData) {

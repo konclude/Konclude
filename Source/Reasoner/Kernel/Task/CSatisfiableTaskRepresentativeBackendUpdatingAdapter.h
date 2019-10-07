@@ -59,7 +59,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CSatisfiableTaskRepresentativeBackendUpdatingAdapter(CIndividualPrecomputationCoordinationHash* indiComCoordHash = nullptr);
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter(CIndividualPrecomputationCoordinationHash* indiComCoordHash = nullptr, bool *unstatFlagPointer = nullptr);
 
 
 						CIndividualPrecomputationCoordinationHash* getIndividualComputationCoordinationHash();
@@ -75,6 +75,7 @@ namespace Konclude {
 						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setAllAssertionIndividualId(cint64 id);
 						cint64 getAllAssertionIndividualId();
 
+						bool hasUnsatisfiableComputed();
 
 					// protected methods
 					protected:
@@ -85,6 +86,8 @@ namespace Konclude {
 						cint64 mFirstIndividualID;
 						cint64 mRepCacheCompID;
 						cint64 mAllAssertionIndiID = -1;
+
+						bool* mUnstatFlagPointer;
 
 						// private methods
 						private:

@@ -101,6 +101,7 @@ namespace Konclude {
 
 					void addConceptOperand(CConcept* concept, CConcept* opConcept, bool negated);
 
+					CConcept* createNewConcept();
 
 				// protected variables
 				protected:

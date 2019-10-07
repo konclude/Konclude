@@ -235,6 +235,69 @@ namespace Konclude {
 			}
 
 
+			CReasonerEvaluationDoubleDataValue* CReasonerEvaluationSpecifiedTimeExtractor::extractResultCountingEvaluationData(QDomDocument& document, const QString& responseFileString) {
+				CReasonerEvaluationDoubleDataValue* doubleEvalValue = nullptr;
+
+				if (mCacher) {
+					doubleEvalValue = dynamic_cast<CReasonerEvaluationDoubleDataValue*>(mCacher->getCachedDataValue(responseFileString, (cint64)CReasonerEvaluationExtractor::RESPONSECOUNTEXTRACTOR));
+				}
+
+				if (!doubleEvalValue) {
+					double doubleValue = 0;
+					bool errorOccured = false;
+					bool allRespTimeValid = true;
+					bool lastTimeoutOccured = false;
+
+					QDomElement rootEl = document.documentElement();
+
+
+					QDomElement childEl = rootEl.firstChildElement();
+					while (!childEl.isNull()) {
+						QString timeoutString = childEl.attribute("timeout");
+						if (timeoutString == "1") {
+							lastTimeoutOccured = true;
+						}
+
+						QString requestCommandString = childEl.attribute("request-command");
+						if (requestCommandString == "SelectQuery") {
+							bool validResponseCount = false;
+							QString respTimeString = childEl.attribute("response-count", "");
+							double reportedResCount = respTimeString.toDouble(&validResponseCount);
+							if (validResponseCount) {
+								doubleValue += reportedResCount;
+							}
+							QDomElement resultsEl = childEl.nextSiblingElement("results");
+							while (!resultsEl.isNull()) {
+
+								QDomElement resultEl = resultsEl.firstChildElement("result");
+								while (!resultEl.isNull()) {
+									doubleValue++;
+									resultEl = resultEl.nextSiblingElement("result");
+								}
+
+								resultsEl = resultsEl.nextSiblingElement("results");
+							}
+						}
+						childEl = childEl.nextSiblingElement();
+					}
+
+					//if (errorOccured || !allRespTimeValid) {
+					//	if (mTimelimit >= 0) {
+					//		doubleValue = mTimelimit+mErrorPunishmentTime;
+					//	} else {
+					//		doubleValue = mErrorPunishmentTime;
+					//	}
+					//}
+					doubleEvalValue = new CReasonerEvaluationDoubleDataValue(doubleValue);
+
+					if (mCacher) {
+						mCacher->addDataValueToCache(responseFileString, (cint64)CReasonerEvaluationExtractor::RESPONSECOUNTEXTRACTOR, doubleEvalValue);
+					}
+
+				}
+				return doubleEvalValue;
+			}
+
 
 
 
@@ -532,6 +595,10 @@ namespace Konclude {
 						CReasonerEvaluationDoubleDataValue* doubleLoadingEvalValue = extractLoadingEvaluationData(document,responseFileString);
 						if (mExtractorType == CReasonerEvaluationExtractor::LOADINGTIMEEXTRACTOR) {
 							evalValue = doubleLoadingEvalValue;
+						}
+						CReasonerEvaluationDoubleDataValue* doubleResponseCountEvalValue = extractResultCountingEvaluationData(document, responseFileString);
+						if (mExtractorType == CReasonerEvaluationExtractor::RESPONSECOUNTEXTRACTOR) {
+							evalValue = doubleResponseCountEvalValue;
 						}
 						CReasonerEvaluationDoubleDataValue* doubleTotalEvalValue = extractTotalResponseEvaluationData(document,responseFileString);
 						if (mExtractorType == CReasonerEvaluationExtractor::TOTALRESPONSETIMEEXTRACTOR) {

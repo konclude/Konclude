@@ -18,26 +18,56 @@
  *
  */
 
-#include "CComplexQueryFinishingHandler.h"
+#ifndef KONCLUDE_REASONER_ANSWERER_CONCLUSION_CONCLUSIONSETTINGS
+#define KONCLUDE_REASONER_ANSWERER_CONCLUSION_CONCLUSIONSETTINGS
+
+// Libraries includes
+#include <QtGlobal>
+#include <QEvent>
+
+// Namespace includes
+
+
+// Other includes
+#include "Utilities/Container/CQtManagedRestrictedModificationList.h"
+#include "Utilities/Container/CQtManagedRestrictedModificationMap.h"
+#include "Utilities/Container/CQtManagedRestrictedModificationHash.h"
+
+// Logger includes
 
 
 namespace Konclude {
+
+	using namespace Utilities::Container;
 
 	namespace Reasoner {
 
 		namespace Answerer {
 
+			namespace Conclusion {
 
-			CComplexQueryFinishingHandler::CComplexQueryFinishingHandler() {
-			}
+				/*! 
+				 *
+				 *		\file		ConclusionSettings
+				 *		\author		Andreas Steigmiller
+				 *		\version	0.1
+				 *		\brief		TODO
+				 *
+				 */
 
 
-			CComplexQueryFinishingHandler::~CComplexQueryFinishingHandler() {
-			}
+				// forward declarations
 
+
+
+
+			}; // end namespace Conclusion
 
 		}; // end namespace Answerer
 
 	}; // end namespace Reasoner
 
 }; // end namespace Konclude
+
+
+#endif // end KONCLUDE_REASONER_ANSWERER_CONCLUSION_CONCLUSIONSETTINGS

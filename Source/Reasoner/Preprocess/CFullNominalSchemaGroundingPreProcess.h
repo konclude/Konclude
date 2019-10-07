@@ -105,6 +105,7 @@ namespace Konclude {
 					cint64 mIndividualCount;
 					CConcreteOntology* mOnto;
 					CMBox* mMBox;
+					CTBox* mTBox;
 
 					CNominalSchemaTemplateVector* mNomSchTemplVec;
 

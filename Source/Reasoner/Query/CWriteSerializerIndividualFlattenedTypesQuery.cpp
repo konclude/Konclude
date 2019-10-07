@@ -53,10 +53,22 @@ namespace Konclude {
 			}
 
 
-			void CWriteSerializerIndividualFlattenedTypesQuery::writeIndividualDeclaration(const QString& className) {
-				mSerializer->writeIndividualDeclaration(className);
+
+			void CWriteSerializerIndividualFlattenedTypesQuery::writeIndividualDeclaration(const QString& individualName, bool anonymous) {
+				if (anonymous) {
+					mSerializer->writeAnonymousIndividualDeclaration(individualName);
+				} else {
+					mSerializer->writeNamedIndividualDeclaration(individualName);
+				}
 			}
 
+			void CWriteSerializerIndividualFlattenedTypesQuery::writeNamedIndividualDeclaration(const QString& className) {
+				mSerializer->writeNamedIndividualDeclaration(className);
+			}
+
+			void CWriteSerializerIndividualFlattenedTypesQuery::writeAnonymousIndividualDeclaration(const QString& className) {
+				mSerializer->writeAnonymousIndividualDeclaration(className);
+			}
 
 			void CWriteSerializerIndividualFlattenedTypesQuery::writeClassDeclaration(const QString& className) {
 				mSerializer->writeClassDeclaration(className);
@@ -78,8 +90,20 @@ namespace Konclude {
 			}
 
 
-			void CWriteSerializerIndividualFlattenedTypesQuery::writeIndividualType(const QString& individualName, const QString& className) {
-				mSerializer->writeIndividualType(individualName,className);
+			void CWriteSerializerIndividualFlattenedTypesQuery::writeIndividualType(const QString& individualName, bool anonymous, const QString& className) {
+				if (anonymous) {
+					mSerializer->writeAnonymousIndividualType(individualName, className);
+				} else {
+					mSerializer->writeNamedIndividualType(individualName, className);
+				}
+			}
+
+			void CWriteSerializerIndividualFlattenedTypesQuery::writeNamedIndividualType(const QString& individualName, const QString& className) {
+				mSerializer->writeNamedIndividualType(individualName, className);
+			}
+
+			void CWriteSerializerIndividualFlattenedTypesQuery::writeAnonymousIndividualType(const QString& individualName, const QString& className) {
+				mSerializer->writeAnonymousIndividualType(individualName, className);
 			}
 
 

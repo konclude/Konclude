@@ -103,6 +103,8 @@ namespace Konclude {
 						CProcessingDataBox* initProcessingDataBox(CConcreteOntology* ontology);
 						CProcessingDataBox* initProcessingDataBox(CProcessingDataBox* processingDataBox);
 
+						CProcessingDataBox* setProcessingOntology(CConcreteOntology* ontology);
+
 
 						bool hasClashedDescriptorLinker();
 						CClashedDependencyDescriptor* getClashedDescriptorLinker();

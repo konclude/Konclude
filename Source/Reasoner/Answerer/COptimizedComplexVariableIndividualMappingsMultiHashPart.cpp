@@ -41,6 +41,16 @@ namespace Konclude {
 				mFreeCardCopy = nullptr;
 				mFreeBindCardLinkerCopy = nullptr;
 				mFreeBindingsCopy = nullptr;
+
+				mCurrentLinkerBatchingSize = 100;
+				mLinkerBatchingSizeIncreasingFactor = 1.25;
+
+				mLastAddedBindingsCardinalityBatchLinker = nullptr;
+				mFirstAddedBindingsCardinalityBatchLinker = nullptr;
+
+				mLastAddedBindingsCardinalityBatchLinkerUpdateId = 0;
+				mMaximumCardinalitySameIndividualsJointlyConsidered = 0;
+				mMaximumCardinalitySameIndividualsSeparatelyConsidered = 0;
 			}
 
 
@@ -48,6 +58,14 @@ namespace Konclude {
 			}
 
 
+
+			cint64 COptimizedComplexVariableIndividualMappingsMultiHashPart::getMaximumCardinalitySameIndividualsJointlyConsidered() {
+				return mMaximumCardinalitySameIndividualsJointlyConsidered;
+			}
+
+			cint64 COptimizedComplexVariableIndividualMappingsMultiHashPart::getMaximumCardinalitySameIndividualsSeparatelyConsidered() {
+				return mMaximumCardinalitySameIndividualsSeparatelyConsidered;
+			}
 
 
 			cint64 COptimizedComplexVariableIndividualMappingsMultiHashPart::getLastUpdatedBindingCount(bool update) {
@@ -68,6 +86,7 @@ namespace Konclude {
 			}
 
 			COptimizedComplexVariableIndividualMappingsMultiHashPart* COptimizedComplexVariableIndividualMappingsMultiHashPart::addLastAddedBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker) {
+				extendAddedBindingsCardinalityBatchLinker(linker);
 				if (!mFirstAddedBindingsCardinalityLinker) {
 					mFirstAddedBindingsCardinalityLinker = linker;
 				}
@@ -121,6 +140,8 @@ namespace Konclude {
 					hashedLinker = linkerCopy;
 					if (linkerCopy->getCurrentCardinalities()) {
 						linkerCopy->getCurrentCardinalities()->setCardinalityUpdateId(mCurrentUpdateId);
+						mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, linkerCopy->getCurrentCardinalities()->getSameIndividualsJointlyConsideredCardinality());
+						mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, linkerCopy->getCurrentCardinalities()->getSameIndividualsSeparatlyConsideredCardinality());
 					}
 					addLastAddedBindingsCardinalityLinker(linkerCopy);
 					mBindingCount = mMappingCardinalityHash.size();
@@ -131,12 +152,16 @@ namespace Konclude {
 					if (cardinalities) {
 						if (hashedLinker->getCurrentCardinalities() && hashedLinker->getCurrentCardinalities()->getCardinalityUpdateId() == mCurrentUpdateId) {
 							hashedLinker->getCurrentCardinalities()->addCardinalities(cardinalities);
+							mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsJointlyConsideredCardinality());
+							mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsSeparatlyConsideredCardinality());
 						} else {
 							cardinalities = getBindingsCardinalityCopy(cardinalities);
 							COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalities = hashedLinker->getCurrentCardinalities();
 							if (prevCardinalities) {
 								cardinalities->addCardinalities(prevCardinalities);
 							}
+							mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, cardinalities->getSameIndividualsJointlyConsideredCardinality());
+							mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, cardinalities->getSameIndividualsSeparatlyConsideredCardinality());
 							hashedLinker->updateCardinality(cardinalities);
 							cardinalities->setCardinalityUpdateId(mCurrentUpdateId);
 							addCreatingUpdateCardinalityLinker(hashedLinker, prevCardinalities);
@@ -154,11 +179,15 @@ namespace Konclude {
 				if (hashedLinker) {
 					if (hashedLinker->getCurrentCardinalities() && hashedLinker->getCurrentCardinalities()->getCardinalityUpdateId() == mCurrentUpdateId) {
 						hashedLinker->getCurrentCardinalities()->addCardinalities(addedCardinalites);
+						mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsJointlyConsideredCardinality());
+						mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsSeparatlyConsideredCardinality());
 					} else {
 						COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalities = hashedLinker->getCurrentCardinalities();
 						if (prevCardinalities) {
 							addedCardinalites->addCardinalities(prevCardinalities);
 						}
+						mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, addedCardinalites->getSameIndividualsJointlyConsideredCardinality());
+						mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, addedCardinalites->getSameIndividualsSeparatlyConsideredCardinality());
 						addedCardinalites->setCardinalityUpdateId(mCurrentUpdateId);
 						hashedLinker->updateCardinality(getBindingsCardinalityCopy(addedCardinalites));
 						addCreatingUpdateCardinalityLinker(hashedLinker, prevCardinalities);
@@ -300,6 +329,52 @@ namespace Konclude {
 				return this;
 			}
 
+
+			COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* COptimizedComplexVariableIndividualMappingsMultiHashPart::getLastAddedBindingsCardinalityBatchLinker() {
+				return mLastAddedBindingsCardinalityBatchLinker;
+			}
+
+			COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* COptimizedComplexVariableIndividualMappingsMultiHashPart::getFirstAddedBindingsCardinalityBatchLinker() {
+				return mFirstAddedBindingsCardinalityBatchLinker;
+			}
+
+			COptimizedComplexVariableIndividualMappingsMultiHashPart* COptimizedComplexVariableIndividualMappingsMultiHashPart::clearBindingsCardinalityBatchLinker() {
+				mLastAddedBindingsCardinalityBatchLinker = nullptr;
+				mFirstAddedBindingsCardinalityBatchLinker = nullptr;
+				return this;
+			}
+
+
+
+			COptimizedComplexVariableIndividualMappingsMultiHashPart* COptimizedComplexVariableIndividualMappingsMultiHashPart::extendAddedBindingsCardinalityBatchLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker) {
+				COptimizedComplexVariableIndividualBindingsCardinalityLinker* stopLinker = nullptr;
+				if (mLastAddedBindingsCardinalityBatchLinker) {
+					stopLinker = mLastAddedBindingsCardinalityBatchLinker->getStartBindingsCardinalityLinker();
+				}
+				cint64 count = 0;
+				COptimizedComplexVariableIndividualBindingsCardinalityLinker* lastLinker = nullptr;
+				for (COptimizedComplexVariableIndividualBindingsCardinalityLinker* linkerIt = linker; linkerIt && linkerIt != stopLinker; linkerIt = linkerIt->getNext()) {
+					++count;
+					lastLinker = linkerIt;
+				}
+				if (mLastAddedBindingsCardinalityBatchLinkerUpdateId == mCurrentUpdateId && mLastAddedBindingsCardinalityBatchLinker && mLastAddedBindingsCardinalityBatchLinker->getLinkerCount() < mCurrentLinkerBatchingSize && mLastAddedBindingsCardinalityBatchLinker->getStartBindingsCardinalityLinker() == mLastAddedBindingsCardinalityLinker) {
+					mLastAddedBindingsCardinalityBatchLinker->addStartBindingsCardLinker(linker, count);
+				} else {
+					if (mLastAddedBindingsCardinalityBatchLinker) {
+						mCurrentLinkerBatchingSize *= mLinkerBatchingSizeIncreasingFactor;
+					}
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* newLastAddedBindingsCardinalityBatchLinker = new COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker(linker, lastLinker, count);
+					if (mLastAddedBindingsCardinalityBatchLinker) {
+						mLastAddedBindingsCardinalityBatchLinker->setNext(newLastAddedBindingsCardinalityBatchLinker);
+					} else {
+						mFirstAddedBindingsCardinalityBatchLinker = newLastAddedBindingsCardinalityBatchLinker;
+					}
+					//newLastAddedBindingsCardinalityBatchLinker->setNext(mLastAddedBindingsCardinalityBatchLinker);
+					mLastAddedBindingsCardinalityBatchLinker = newLastAddedBindingsCardinalityBatchLinker;
+					mLastAddedBindingsCardinalityBatchLinkerUpdateId = mCurrentUpdateId;
+				}
+				return this;
+			}
 
 		}; // end namespace Answerer
 

@@ -122,6 +122,7 @@ namespace Konclude {
 					mAllowBackendSuccessorExpansionBlockingChecked = false;
 					mOccurrenceStatisticsCollectionChecked = false;
 					mGeneratingTestQueriesChecked = false;
+					mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesChecked = false;
 				}
 
 
@@ -883,6 +884,14 @@ namespace Konclude {
 						mGeneratingTestQueriesChecked = true;
 					}
 					return mGeneratingTestQueriesActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated() {
+					if (!mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesChecked) {
+						mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BlockingTestsIgnoringCompletionGraphCachedNonBlockedNodes", true);
+						mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesChecked = true;
+					}
+					return mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated;
 				}
 
 			}; // end namespace Task

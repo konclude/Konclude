@@ -435,6 +435,14 @@ namespace Konclude {
 			}
 
 
+			CConcept* COptimizedComplexVariableAbstractNonDisconnectingAbsorptionBasedQueryPartHandler::createNewConcept() {
+				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
+				concept->initConcept();
+				cint64 nextConTag = mTBox->getNextConceptID();
+				concept->initTag(nextConTag);
+				mConceptVec->setLocalData(nextConTag, concept);
+				return concept;
+			}
 
 
 		}; // end namespace Answerer

@@ -87,6 +87,7 @@ namespace Konclude {
 					virtual CReasonerEvaluationDoubleDataValue* extractTimeoutEvaluationData(QDomDocument& document, const QString& responseFileString);
 					virtual CReasonerEvaluationStringValue* extractResponseFileEvaluationData(QDomDocument& document, const QString& responseFileString);
 					virtual CReasonerEvaluationStringValue* extractRequestFileEvaluationData(QDomDocument& document, const QString& responseFileString);
+					virtual CReasonerEvaluationDoubleDataValue* extractResultCountingEvaluationData(QDomDocument& document, const QString& responseFileString);
 
 				// protected variables
 				protected:

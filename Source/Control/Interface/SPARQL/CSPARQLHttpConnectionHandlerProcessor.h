@@ -24,6 +24,7 @@
 // Libraries includes
 #include <QTcpSocket>
 #include <QHostAddress>
+#include <QAtomicInt>
 
 // Namespace includes
 #include "SPARQLSettings.h"
@@ -94,8 +95,8 @@ namespace Konclude {
 						bool isHandlerQueued();
 						CSPARQLHttpConnectionHandlerProcessor* setHandlerQueued(bool queued);
 
-						virtual bool writeStreamData(QByteArray* buffer, bool last);
-						virtual CSPARQLStreamingWriter* writeStreamDataToSocket(QByteArray* buffer, bool last);
+						virtual bool writeStreamData(const QList<CSPARQLResultBufferWriteData>& bufferList, bool last);
+						virtual CSPARQLStreamingWriter* writeStreamDataToSocket(QList<CSPARQLResultBufferWriteData>* bufferList, bool last);
 
 					// protected methods
 					protected:
@@ -147,6 +148,9 @@ namespace Konclude {
 
 						QByteArray mStreamSPARQLHeader;
 						QByteArray mStreamSPARQLFooter;
+
+						QSemaphore* mWriteLimitSemaphore;
+						bool mBlockingWarned;
 
 
 					// private slots

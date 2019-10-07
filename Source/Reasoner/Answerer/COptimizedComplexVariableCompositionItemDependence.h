@@ -72,6 +72,8 @@ namespace Konclude {
 
 					bool isBatchProcessed(bool considerCardinalityUpdates = true);
 					bool loadNextBatch(bool considerCardinalityUpdates = true);
+					bool loadNextBatchProvidedBatch(bool considerCardinalityUpdates = true);
+
 
 					bool isProcessingFinished(bool considerCardinalityUpdates = true);
 
@@ -80,6 +82,8 @@ namespace Konclude {
 					COptimizedComplexVariableCompositionItemDependence* setLastRequestedMappingsComputationCount(cint64 count);
 					bool hasMappingsCountComputationRequested(cint64 count);
 
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* getBatchProvidedBindingCardinalityBatchLinker(bool moveNext);
+					bool setBatchProvidedBindingCardinalityLinkersProcessed(COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* batchLinker);
 
 				// protected methods
 				protected:
@@ -88,7 +92,11 @@ namespace Konclude {
 				protected:
 					COptimizedComplexVariableCompositionItem* mDependentItem;
 
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* mStartLoadedBindingsCardinalityBatchLinker;
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* mCurrentLoadedBindingsCardinalityBatchLinker;
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* mEndLoadedBindingsCardinalityBatchLinker;
 
+					bool mSingleLoadedBindingsCardinalityLinker;
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker* mBatchStartBindingsCardinalityLinker;
 					COptimizedComplexVariableIndividualUpdateCardinalityLinker* mBatchStartUpdatedCardinalityLinker;
 

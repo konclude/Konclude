@@ -45,6 +45,9 @@ namespace Konclude {
 				mReasSubsumptionTemplateStringHash.insert("-horizontal-chart", loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerSubsumption/horizontal-chart.html"));
 				mReasSubsumptionTemplateStringHash.insert("-vertical-chart", loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerSubsumption/vertical-chart.html"));
 
+				mReasCountingTemplateStringHash.insert("-horizontal-chart", loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerCounting/horizontal-chart.html"));
+				mReasCountingTemplateStringHash.insert("-vertical-chart", loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerCounting/vertical-chart.html"));
+
 				mReasErrorTemplateStringHash.insert("-horizontal-chart",loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerError/horizontal-chart.html"));
 				mReasErrorTemplateStringHash.insert("-vertical-chart",loadTemplateFromFile("Evaluation/Templates/Highcharts/Charts/ReasonerError/vertical-chart.html"));
 
@@ -390,6 +393,11 @@ namespace Konclude {
 
 			CReasonerEvaluationHighchartPlotter* CReasonerEvaluationHighchartPlotter::createReasonerSubsumptionPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& outputFile, const QString& selectionString) {
 				return createReasonerPlot(dataFileString, plotTitle, reasonerNameList, outputFile, mReasSubsumptionTemplateStringHash, selectionString);
+			}
+
+
+			CReasonerEvaluationHighchartPlotter* CReasonerEvaluationHighchartPlotter::createReasonerCountingPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& outputFile, const QString& selectionString) {
+				return createReasonerPlot(dataFileString, plotTitle, reasonerNameList, outputFile, mReasCountingTemplateStringHash, selectionString);
 			}
 
 			CReasonerEvaluationHighchartPlotter* CReasonerEvaluationHighchartPlotter::createReasonerErrorPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& outputFile, const QString& selectionString) {

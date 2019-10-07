@@ -25,6 +25,7 @@
 // Libraries includes
 #include <QMap>
 #include <QHash>
+#include <Redland.h>
 
 // Namespace includes
 #include "TriplesSettings.h"
@@ -89,6 +90,9 @@ namespace Konclude {
 					cint64 getTotalIndividualCount();
 					
 					cint64 getTagElementCount();
+
+					librdf_node*& getRedlandTagNode();
+
 					
 				// protected methods
 				protected:
@@ -108,6 +112,8 @@ namespace Konclude {
 					QSet<CRedlandStoredTriplesIndividualAssertionIndexCacheData*> mIndiDataSet;
 					cint64 mActiveCount = 0;
 					cint64 mTotalCount = 0;
+
+					librdf_node* mTagNode;
 
 
 				// private methods

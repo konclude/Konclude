@@ -29,10 +29,12 @@ namespace Konclude {
 
 			namespace Algorithm {
 
-				CCompletionGraphCacheHandler::CCompletionGraphCacheHandler() {
+				CCompletionGraphCacheHandler::CCompletionGraphCacheHandler(CIndividualNodeBackendCacheHandler* backendCacheHandler) {
 					mLastOntology = nullptr;
 					mLastLoadedCachedCompletionGraph = false;
 					mPreviousConsistencyCachedCompletionGraph = false;
+					mLastConfig = nullptr;
+					mBackendCacheHandler = backendCacheHandler;
 				}
 
 
@@ -45,8 +47,10 @@ namespace Konclude {
 					CConcreteOntology* ontology = calcAlgContext->getProcessingDataBox()->getOntology();
 					mCalcTask = calcAlgContext->getUsedSatisfiableCalculationTask();
 					mIndiProcNodeVec = mCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector();
-					if (mLastOntology != ontology) {
+					CConfiguration* config = calcAlgContext->getSatisfiableCalculationTask()->getCalculationConfiguration();
+					if (mLastOntology != ontology || mLastConfig != config) {
 						mLastOntology = ontology;
+						mLastConfig = config;
 						mIncrementalExpansionCaching = false;
 						mLastLoadedCachedCompletionGraph = false;
 						mPreviousConsistencyCachedCompletionGraph = false;
@@ -116,10 +120,10 @@ namespace Konclude {
 								for (CIndividualMergingHash::const_iterator it = mergingHash->constBegin(), itEnd = mergingHash->constEnd(); it != itEnd; ++it) {
 									if (it.value().isMergedWithIndividual()) {
 										cint64 mergedIndiID = it.key();
-										CIndividualProcessNode* compGraphCachedMergedIndiNode = mCompGraphCachedProcNodeVec->getData(mergedIndiID);
+										CIndividualProcessNode* compGraphCachedMergedIndiNode = mCompGraphCachedProcNodeVec->getData(-mergedIndiID);
 										CIndividualProcessNode* detSatMergedIndiNode = nullptr;
-										if (mergedIndiID <= detSatIndiCount) {
-											detSatMergedIndiNode = mDetSatProcNodeVec->getData(mergedIndiID);
+										if (-mergedIndiID <= detSatIndiCount) {
+											detSatMergedIndiNode = mDetSatProcNodeVec->getData(-mergedIndiID);
 										}
 										if (compGraphCachedMergedIndiNode != detSatMergedIndiNode && detSatMergedIndiNode) {
 											addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatMergedIndiNode, true);
@@ -199,6 +203,28 @@ namespace Konclude {
 					}
 					return false;
 				}
+
+
+				bool CCompletionGraphCacheHandler::isIndividualNodeCompletionGraphConsistencePresentNonBlocked(CIndividualProcessNode* individualNode, CCalculationAlgorithmContext* calcAlgContext) {
+					if (loadConsistenceModelData(calcAlgContext)) {
+						if (mIncrementalExpansionCaching) {
+							if (individualNode->getIncrementalExpansionID() >= mCurrentIncrementalExpansionID) {
+								return false;
+							}
+						}
+						cint64 nonDetSatIndiCount = mCompGraphCachedProcNodeVec->getItemMaxIndex();
+						cint64 indiID = individualNode->getIndividualNodeID();
+						if (indiID <= nonDetSatIndiCount) {
+							CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(indiID);
+							if (compGraphCachedIndiNode) {
+								bool blocked = compGraphCachedIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFDIRECTBLOCKED | CIndividualProcessNode::PRFINDIRECTBLOCKED | CIndividualProcessNode::PRFPROCESSINGBLOCKED);
+								return !blocked;
+							}							
+						}
+					}
+					return false;
+				}
+
 
 
 				bool CCompletionGraphCacheHandler::testConceptLabelExtended(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext) {
@@ -414,103 +440,9 @@ namespace Konclude {
 					CRole* role = concept->getRole();
 					CConceptOperator* conOperator = concept->getConceptOperator();
 					if (!containedFlag) {
-						if (!conNegation && (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE)) || conNegation && opCode == CCSOME) {
-							CRoleSuccessorLinkIterator succLinkIt = individualNode->getRoleSuccessorLinkIterator(role);
-							while (succLinkIt.hasNext()) {
-								CIndividualLinkEdge* link = succLinkIt.next();
-								CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
-								if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
-									succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
-								}
-								if (succIndi->getLocalizationTag() > mDetLocalizationTag && !succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)
-											|| succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
-
-									CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList();
-									while (opConLinkerIt) {
-										bool opNegated = opConLinkerIt->isNegated()^conNegation;
-										CConcept* opCon = opConLinkerIt->getData();
-										CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
-										if (!succConSet || !succConSet->containsConcept(opCon,opNegated)) {
-											return true;
-										}
-										if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCF_PBINDAQALL | CConceptOperator::CCF_PBINDALL)) {
-											CConceptPropagationBindingSetHash* compGraphCachedPropBindSetHash = compGraphCachedIndiNode->getConceptPropagationBindingSetHash(false);
-											if (compGraphCachedPropBindSetHash) {
-												CPropagationBindingSet* compGraphCachedPropBindSet = compGraphCachedPropBindSetHash->getPropagationBindingSet(concept,false);
-												if (compGraphCachedPropBindSet) {
-													CPropagationBindingMap* compGraphCachedPropBindMap = compGraphCachedPropBindSet->getPropagationBindingMap();
-													if (!compGraphCachedPropBindMap->empty()) {
-														CConceptPropagationBindingSetHash* succPropBindSetHash = succIndi->getConceptPropagationBindingSetHash(false);
-														if (!succPropBindSetHash) {
-															return true;
-														}
-														CPropagationBindingSet* succPropBindSet = succPropBindSetHash->getPropagationBindingSet(opCon,false);
-														if (!succPropBindSet) {
-															return true;
-														}
-														CPropagationBindingMap* succPropBindMap = succPropBindSet->getPropagationBindingMap();
-
-														if (!compGraphCachedPropBindMap->isKeySubSetOf(succPropBindMap)) {
-															return true;
-														}
-													}
-												}
-											}
-										}
-										if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCF_VARBINDAQALL | CConceptOperator::CCF_VARBINDALL)) {
-											CConceptVariableBindingPathSetHash* compGraphCachedVarBindSetHash = compGraphCachedIndiNode->getConceptVariableBindingPathSetHash(false);
-											if (compGraphCachedVarBindSetHash) {
-												CVariableBindingPathSet* compGraphCachedVarBindSet = compGraphCachedVarBindSetHash->getVariableBindingPathSet(concept,false);
-												if (compGraphCachedVarBindSet) {
-													CVariableBindingPathMap* compGraphCachedVarBindMap = compGraphCachedVarBindSet->getVariableBindingPathMap();
-													if (!compGraphCachedVarBindMap->empty()) {
-														CConceptVariableBindingPathSetHash* succVarBindSetHash = succIndi->getConceptVariableBindingPathSetHash(false);
-														if (!succVarBindSetHash) {
-															return true;
-														}
-														CVariableBindingPathSet* succVarBindSet = succVarBindSetHash->getVariableBindingPathSet(opCon,false);
-														if (!succVarBindSet) {
-															return true;
-														}
-														CVariableBindingPathMap* succVarBindMap = succVarBindSet->getVariableBindingPathMap();
-
-														if (!compGraphCachedVarBindMap->isKeySubSetOf(succVarBindMap)) {
-															return true;
-														}
-													}
-												}
-											}
-											CConceptRepresentativePropagationSetHash* compGraphCachedVarRepBindSetHash = compGraphCachedIndiNode->getConceptRepresentativePropagationSetHash(false);
-											if (compGraphCachedVarRepBindSetHash) {
-												CRepresentativePropagationSet* compGraphCachedVarRepBindSet = compGraphCachedVarRepBindSetHash->getRepresentativePropagationSet(concept,false);
-												if (compGraphCachedVarRepBindSet) {
-													CRepresentativePropagationMap* compGraphCachedVarRepBindMap = compGraphCachedVarRepBindSet->getRepresentativePropagationMap();
-													if (!compGraphCachedVarRepBindMap->empty()) {
-														CConceptRepresentativePropagationSetHash* succVarRepBindSetHash = succIndi->getConceptRepresentativePropagationSetHash(false);
-														if (!succVarRepBindSetHash) {
-															return true;
-														}
-														CRepresentativePropagationSet* succVarRepBindSet = succVarRepBindSetHash->getRepresentativePropagationSet(opCon,false);
-														if (!succVarRepBindSet) {
-															return true;
-														}
-														CRepresentativePropagationMap* succVarRepBindMap = succVarRepBindSet->getRepresentativePropagationMap();
-
-														if (!compGraphCachedVarRepBindMap->isKeySubSetOf(succVarRepBindMap)) {
-															return true;
-														}
-													}
-												}
-											}
-										}
-										opConLinkerIt = opConLinkerIt->getNext();
-									}
-								}
-							}
-						} else if (!conNegation && (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AQAND_TYPE))) {
-							return testCriticalB2AutomateTransitionOperands(individualNode,detSatIndiNode,compGraphCachedIndiNode,concept,calcAlgContext);
+						if (!conNegation && (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE)) || conNegation && opCode == CCSOME || !conNegation && (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AQAND_TYPE))) {
+							return testCriticalB2AutomateTransitionOperands(individualNode,detSatIndiNode,compGraphCachedIndiNode,concept, conNegation,calcAlgContext);
 						}
-
 					}
 					if (!conNegation && opCode == CCATMOST || conNegation && opCode == CCATLEAST) {
 						// check cardinality
@@ -523,59 +455,30 @@ namespace Konclude {
 						while (updatedCardinality <= cardinality && succLinkIt.hasNext()) {
 							CIndividualLinkEdge* link = succLinkIt.next();
 							CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList();
-							if (!opConLinkerIt) {
-
-								CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
-								if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
-									succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
-								}
-								//CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualID());
-								//while (corrCachedSuccIndi && corrCachedSuccIndi->getMergedIntoIndividualNodeID() != corrCachedSuccIndi->getIndividualID()) {
-								//	corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(corrCachedSuccIndi->getMergedIntoIndividualNodeID());
-								//}
-								if (succIndi->getLocalizationTag() > mDetLocalizationTag) {
-									if (succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
-										CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualNodeID());
-										if (corrCachedSuccIndi->getMergedIntoIndividualNodeID() != succIndi->getIndividualNodeID() || corrCachedSuccIndi->getLastMergedIntoIndividualNode() != succIndi->getLastMergedIntoIndividualNode()) {
-											++updatedCardinality;
-										}
+							CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
+							if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
+								succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
+							}
+							if (nominalIndiNode) {
+								if (link->getCreatorIndividualID() != individualNode->getIndividualNodeID()) {
+									if (succIndi->isBlockableIndividual()) {
+										// requires NN-rule
+										return true;
 									}
 								}
-
-								if (nominalIndiNode) {
-									if (link->getCreatorIndividualID() != individualNode->getIndividualNodeID()) {
-										if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
-											succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
-										}
-										if (succIndi->isBlockableIndividual()) {
-											// requires NN-rule
-											return true;
-										}
-									}
-								}
-							} else {
-								CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
-								if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
-									succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
-								}
-								if (nominalIndiNode) {
-									if (link->getCreatorIndividualID() != individualNode->getIndividualNodeID()) {
-										if (succIndi->isBlockableIndividual()) {
-											// requires NN-rule
-											return true;
-										}
-									}
-								}
-								if (succIndi->getLocalizationTag() > mDetLocalizationTag) {
-									if (succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
-										bool containsSomeOps = false;
+							}
+							if (succIndi->getLocalizationTag() > mDetLocalizationTag) {
+								if (succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+									bool containsSomeOps = true;
+									if (opConLinkerIt) {
+										containsSomeOps = false;
 										while (opConLinkerIt && !containsSomeOps) {
-											bool opNegated = opConLinkerIt->isNegated()^conNegation;
+											bool opNegated = opConLinkerIt->isNegated() ^ conNegation;
 											CConcept* opCon = opConLinkerIt->getData();
 											bool containsNegated = false;
 											CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
 											if (succConSet) {
-												if (succConSet->containsConcept(opCon,&containsNegated)) {
+												if (succConSet->containsConcept(opCon, &containsNegated)) {
 													if (containsNegated == opNegated) {
 														containsSomeOps = true;
 													}
@@ -587,41 +490,10 @@ namespace Konclude {
 										}
 										if (containsSomeOps) {
 											CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualNodeID());
-											if (corrCachedSuccIndi->getMergedIntoIndividualNodeID() != succIndi->getIndividualNodeID() || corrCachedSuccIndi->getLastMergedIntoIndividualNode() != succIndi->getLastMergedIntoIndividualNode()) {
+											if (!corrCachedSuccIndi || corrCachedSuccIndi->getMergedIntoIndividualNodeID() != succIndi->getIndividualNodeID() || corrCachedSuccIndi->getLastMergedIntoIndividualNode() != succIndi->getLastMergedIntoIndividualNode()) {
 												++updatedCardinality;
 											}
 										}
-
-										//CIndividualProcessNode* succIndi = link->getOppositeIndividual(individualNode);
-										//CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualID());
-										//while (corrCachedSuccIndi && corrCachedSuccIndi->getMergedIntoIndividualNodeID() != corrCachedSuccIndi->getIndividualID()) {
-										//	corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(corrCachedSuccIndi->getMergedIntoIndividualNodeID());
-										//}
-										//if (!corrCachedSuccIndi) {
-										//	++updatedCardinality;
-										//} else {
-										//	bool cachedContainsSomeOps = false;
-										//	CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList();
-										//	while (opConLinkerIt && !cachedContainsSomeOps) {
-										//		bool opNegated = opConLinkerIt->isNegated()^conNegation;
-										//		CConcept* opCon = opConLinkerIt->getData();
-										//		bool containsNegated = false;
-										//		CReapplyConceptLabelSet* cachedSuccConSet = corrCachedSuccIndi->getReapplyConceptLabelSet(false);
-										//		if (cachedSuccConSet) {
-										//			if (cachedSuccConSet->containsConcept(opCon,&containsNegated)) {
-										//				if (containsNegated == opNegated) {
-										//					cachedContainsSomeOps = true;
-										//				}
-										//			} else {
-										//				cachedContainsSomeOps = true;
-										//			}
-										//		}
-										//		opConLinkerIt = opConLinkerIt->getNext();
-										//	}
-										//	if (!cachedContainsSomeOps) {
-										//		++updatedCardinality;
-										//	}
-										//}
 									}
 								}
 							}
@@ -631,10 +503,70 @@ namespace Konclude {
 							return true;
 						}
 
+
+
 						CReapplyRoleSuccessorHash* cachedSuccHash = compGraphCachedIndiNode->getReapplyRoleSuccessorHash(false);
 						if (cachedSuccHash) {
 							cint64 linkCount = 0;
-							CRoleSuccessorLinkIterator succLinkIt = cachedSuccHash->getRoleSuccessorLinkIterator(role,&linkCount);
+							CRoleSuccessorLinkIterator succLinkIt = cachedSuccHash->getRoleSuccessorLinkIterator(role, &linkCount);
+
+							// check whether some links are lazily expanded from backend cache
+							if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENNEIGHBOURDPARTIALEXPANSION)) {
+
+								visitMergedIndividualsBackendSynchronisationData(individualNode, [&](CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* mergedDataIndiNode) -> bool {
+									CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* mergedBackendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)mergedDataIndiNode->getIndividualBackendCacheSynchronisationData(false);
+									if (mergedBackendSyncData) {
+										CBackendRepresentativeMemoryCacheIndividualAssociationData* mergedAssocData = mergedBackendSyncData->getAssocitaionData();
+										mBackendCacheHandler->visitNeighbourIndividualIdsForRole(mergedAssocData, role, [&](cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)->bool {
+
+											CIndividualProcessNode* neighbourIndiNode = mIndiProcNodeVec->getData(-neighbourIndividualId);
+											while (neighbourIndiNode->getMergedIntoIndividualNodeID() != neighbourIndiNode->getIndividualNodeID()) {
+												neighbourIndiNode = mIndiProcNodeVec->getData(neighbourIndiNode->getMergedIntoIndividualNodeID());
+											}
+
+											if (!neighbourIndiNode || neighbourIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+
+												CIndividualProcessNode* neighbourCompCachedIndiNode = mCompGraphCachedProcNodeVec->getData(-neighbourIndividualId);
+												while (neighbourCompCachedIndiNode && neighbourCompCachedIndiNode->getMergedIntoIndividualNodeID() != neighbourCompCachedIndiNode->getIndividualNodeID()) {
+													neighbourCompCachedIndiNode = mCompGraphCachedProcNodeVec->getData(neighbourCompCachedIndiNode->getMergedIntoIndividualNodeID());
+												}
+
+												if (neighbourCompCachedIndiNode && compGraphCachedIndiNode->hasRoleSuccessorToIndividual(role, neighbourCompCachedIndiNode, false)) {
+
+													bool containsSomeOps = true;
+													CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList();
+													if (opConLinkerIt) {
+														containsSomeOps = false;
+														while (opConLinkerIt && !containsSomeOps) {
+															bool opNegated = opConLinkerIt->isNegated();
+															CConcept* opCon = opConLinkerIt->getData();
+															CReapplyConceptLabelSet* succConSet = neighbourCompCachedIndiNode->getReapplyConceptLabelSet(false);
+															if (succConSet && succConSet->containsConcept(opCon, opNegated)) {
+																containsSomeOps = true;
+															}
+															opConLinkerIt = opConLinkerIt->getNext();
+														}
+													}
+													if (containsSomeOps && !neighbourIndiNode || !individualNode->hasRoleSuccessorToIndividual(role, neighbourIndiNode, false)) {
+														++updatedCardinality;
+													}
+
+												}
+											}
+
+											return updatedCardinality <= cardinality;
+										}, true, calcAlgContext);
+									}
+
+									return updatedCardinality <= cardinality;
+								}, calcAlgContext);
+
+
+								if (updatedCardinality > cardinality) {
+									return true;
+								}
+							}
+
 							if (cardinality - linkCount < updatedCardinality) {
 
 								cint64 cachedCardinality = 0;
@@ -674,20 +606,58 @@ namespace Konclude {
 					return false;
 				}
 
-				bool CCompletionGraphCacheHandler::testCriticalB2AutomateTransitionOperands(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConcept* concept, CCalculationAlgorithmContext* calcAlgContext) {
+
+
+
+
+
+
+				bool CCompletionGraphCacheHandler::visitMergedIndividualsBackendSynchronisationData(CIndividualProcessNode* indiNode, function<bool(CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* mergedDataIndiNode)> visitFunc, CCalculationAlgorithmContext* calcAlgContext) {
+					bool visited = false;
+					bool continueVisiting = true;
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
+					if (backendSyncData) {
+						continueVisiting = visitFunc(indiNode, indiNode);
+						visited = true;
+					}
+					CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
+					CBackendRepresentativeMemoryLabelCacheItem* detSameIndiLabel = assocData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+					CIndividualMergingHash* mergingHash = indiNode->getIndividualMergingHash(false);
+					if (mergingHash) {
+						for (CXLinker<cint64>* newIndiMergedLinkerIt = mergingHash->getMergedIndividualLinker(); newIndiMergedLinkerIt && continueVisiting; newIndiMergedLinkerIt = newIndiMergedLinkerIt->getNext()) {
+							cint64 newIndiMergedId = newIndiMergedLinkerIt->getData();
+
+							if (!mBackendCacheHandler->hasIndividualIdsInAssociatedIndividualSetLabel(assocData, detSameIndiLabel, newIndiMergedId)) {
+
+								CIndividualProcessNode* backendSyncDataIndiNode = mIndiProcNodeVec->getData(-newIndiMergedId);
+
+								if (backendSyncDataIndiNode->getIndividualBackendCacheSynchronisationData(false)) {
+									continueVisiting = visitFunc(indiNode, backendSyncDataIndiNode);
+									visited = true;
+								}
+							}
+						}
+					}
+					return visited;
+				}
+
+
+
+
+				bool CCompletionGraphCacheHandler::testCriticalB2AutomateTransitionOperands(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConcept* concept, bool conNegation, CCalculationAlgorithmContext* calcAlgContext) {
 					cint64 opCode = concept->getOperatorCode();
 					CConceptOperator* conOperator = concept->getConceptOperator();
-					if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AQAND_TYPE)) {
+					if (!conNegation && conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AQAND_TYPE)) {
 						// recursive
 						CSortedNegLinker<CConcept*>* opLinkerIt = concept->getOperandList();
 						while (opLinkerIt) {
 							CConcept* opConcept = opLinkerIt->getData();
-							if (testCriticalB2AutomateTransitionOperands(individualNode,detSatIndiNode,compGraphCachedIndiNode,opConcept,calcAlgContext)) {
+							if (testCriticalB2AutomateTransitionOperands(individualNode,detSatIndiNode,compGraphCachedIndiNode,opConcept, opLinkerIt->isNegated() ^ conNegation,calcAlgContext)) {
 								return true;
 							}
 							opLinkerIt = opLinkerIt->getNext();
 						}
-					} else if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_AQALL_TYPE)) {
+					} else if (!conNegation && (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE)) || conNegation && opCode == CCSOME) {
 						CRole* conRole = concept->getRole();
 						CRoleSuccessorLinkIterator succLinkIt = individualNode->getRoleSuccessorLinkIterator(conRole);
 						while (succLinkIt.hasNext()) {
@@ -696,24 +666,152 @@ namespace Konclude {
 							if (link->isLocalizationTagUpdated(calcAlgContext->getUsedProcessTagger())) {
 								succIndi = mIndiProcNodeVec->getData(link->getOppositeIndividualID(individualNode));
 							}
-							if (succIndi->getLocalizationTag() > mDetLocalizationTag) {
-								CSortedNegLinker<CConcept*>* opLinkerIt = concept->getOperandList();
-								while (opLinkerIt) {
-									CConcept* opConcept = opLinkerIt->getData();
-									CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
-									if (succConSet) {
-										if (!succConSet->containsConcept(opConcept,false)) {
-											return true;
+							if (succIndi->getLocalizationTag() > mDetLocalizationTag && !succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)
+								|| succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+								return checkPropagatedConceptsMissing(concept, conNegation, succIndi, conOperator, compGraphCachedIndiNode);
+							}
+
+						}
+
+
+
+						if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENNEIGHBOURDPARTIALEXPANSION)) {
+
+							bool criticalMissingLink = false;
+							visitMergedIndividualsBackendSynchronisationData(individualNode, [&](CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* mergedDataIndiNode) -> bool {
+								CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* mergedBackendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)mergedDataIndiNode->getIndividualBackendCacheSynchronisationData(false);
+								if (mergedBackendSyncData) {
+									CBackendRepresentativeMemoryCacheIndividualAssociationData* mergedAssocData = mergedBackendSyncData->getAssocitaionData();
+									mBackendCacheHandler->visitNeighbourIndividualIdsForRole(mergedAssocData, conRole, [&](cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)->bool {
+
+
+										CIndividualProcessNode* neighbourIndiNode = mIndiProcNodeVec->getData(-neighbourIndividualId);
+										while (neighbourIndiNode && neighbourIndiNode->getMergedIntoIndividualNodeID() != neighbourIndiNode->getIndividualNodeID()) {
+											neighbourIndiNode = mIndiProcNodeVec->getData(neighbourIndiNode->getMergedIntoIndividualNodeID());
 										}
-									}
-									opLinkerIt = opLinkerIt->getNext();
+
+
+										if (!neighbourIndiNode || neighbourIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+
+											CIndividualProcessNode* neighbourCompCachedIndiNode = mCompGraphCachedProcNodeVec->getData(-neighbourIndividualId);
+											while (neighbourCompCachedIndiNode && neighbourCompCachedIndiNode->getMergedIntoIndividualNodeID() != neighbourCompCachedIndiNode->getIndividualNodeID()) {
+												neighbourCompCachedIndiNode = mCompGraphCachedProcNodeVec->getData(neighbourCompCachedIndiNode->getMergedIntoIndividualNodeID());
+											}
+
+											if (neighbourCompCachedIndiNode && compGraphCachedIndiNode->hasRoleSuccessorToIndividual(conRole, neighbourCompCachedIndiNode, false)) {
+
+												if (!neighbourIndiNode) {
+													criticalMissingLink = true;
+												} else if (!individualNode->hasRoleSuccessorToIndividual(conRole, neighbourIndiNode, false)) {
+													if (checkPropagatedConceptsMissing(concept, conNegation, neighbourIndiNode, conOperator, neighbourCompCachedIndiNode)) {
+														criticalMissingLink = true;
+													}
+												}
+
+
+											}
+										}
+
+										return !criticalMissingLink;
+									}, true, calcAlgContext);
 								}
+
+								return !criticalMissingLink;
+							}, calcAlgContext);
+
+
+							if (criticalMissingLink) {
+								return true;
 							}
 						}
 					}
 					return true;
 				}
 
+
+				bool CCompletionGraphCacheHandler::checkPropagatedConceptsMissing(CConcept* concept, bool conNegation, CIndividualProcessNode* succIndi, CConceptOperator* conOperator, CIndividualProcessNode* compGraphCachedIndiNode) {
+					CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList();
+					while (opConLinkerIt) {
+						bool opNegated = opConLinkerIt->isNegated() ^ conNegation;
+						CConcept* opCon = opConLinkerIt->getData();
+						CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
+						if (!succConSet || !succConSet->containsConcept(opCon, opNegated)) {
+							return true;
+						}
+						if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCF_PBINDAQALL | CConceptOperator::CCF_PBINDALL)) {
+							CConceptPropagationBindingSetHash* compGraphCachedPropBindSetHash = compGraphCachedIndiNode->getConceptPropagationBindingSetHash(false);
+							if (compGraphCachedPropBindSetHash) {
+								CPropagationBindingSet* compGraphCachedPropBindSet = compGraphCachedPropBindSetHash->getPropagationBindingSet(concept, false);
+								if (compGraphCachedPropBindSet) {
+									CPropagationBindingMap* compGraphCachedPropBindMap = compGraphCachedPropBindSet->getPropagationBindingMap();
+									if (!compGraphCachedPropBindMap->empty()) {
+										CConceptPropagationBindingSetHash* succPropBindSetHash = succIndi->getConceptPropagationBindingSetHash(false);
+										if (!succPropBindSetHash) {
+											return true;
+										}
+										CPropagationBindingSet* succPropBindSet = succPropBindSetHash->getPropagationBindingSet(opCon, false);
+										if (!succPropBindSet) {
+											return true;
+										}
+										CPropagationBindingMap* succPropBindMap = succPropBindSet->getPropagationBindingMap();
+
+										if (!compGraphCachedPropBindMap->isKeySubSetOf(succPropBindMap)) {
+											return true;
+										}
+									}
+								}
+							}
+						}
+						if (conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCF_VARBINDAQALL | CConceptOperator::CCF_VARBINDALL)) {
+							CConceptVariableBindingPathSetHash* compGraphCachedVarBindSetHash = compGraphCachedIndiNode->getConceptVariableBindingPathSetHash(false);
+							if (compGraphCachedVarBindSetHash) {
+								CVariableBindingPathSet* compGraphCachedVarBindSet = compGraphCachedVarBindSetHash->getVariableBindingPathSet(concept, false);
+								if (compGraphCachedVarBindSet) {
+									CVariableBindingPathMap* compGraphCachedVarBindMap = compGraphCachedVarBindSet->getVariableBindingPathMap();
+									if (!compGraphCachedVarBindMap->empty()) {
+										CConceptVariableBindingPathSetHash* succVarBindSetHash = succIndi->getConceptVariableBindingPathSetHash(false);
+										if (!succVarBindSetHash) {
+											return true;
+										}
+										CVariableBindingPathSet* succVarBindSet = succVarBindSetHash->getVariableBindingPathSet(opCon, false);
+										if (!succVarBindSet) {
+											return true;
+										}
+										CVariableBindingPathMap* succVarBindMap = succVarBindSet->getVariableBindingPathMap();
+
+										if (!compGraphCachedVarBindMap->isKeySubSetOf(succVarBindMap)) {
+											return true;
+										}
+									}
+								}
+							}
+							CConceptRepresentativePropagationSetHash* compGraphCachedVarRepBindSetHash = compGraphCachedIndiNode->getConceptRepresentativePropagationSetHash(false);
+							if (compGraphCachedVarRepBindSetHash) {
+								CRepresentativePropagationSet* compGraphCachedVarRepBindSet = compGraphCachedVarRepBindSetHash->getRepresentativePropagationSet(concept, false);
+								if (compGraphCachedVarRepBindSet) {
+									CRepresentativePropagationMap* compGraphCachedVarRepBindMap = compGraphCachedVarRepBindSet->getRepresentativePropagationMap();
+									if (!compGraphCachedVarRepBindMap->empty()) {
+										CConceptRepresentativePropagationSetHash* succVarRepBindSetHash = succIndi->getConceptRepresentativePropagationSetHash(false);
+										if (!succVarRepBindSetHash) {
+											return true;
+										}
+										CRepresentativePropagationSet* succVarRepBindSet = succVarRepBindSetHash->getRepresentativePropagationSet(opCon, false);
+										if (!succVarRepBindSet) {
+											return true;
+										}
+										CRepresentativePropagationMap* succVarRepBindMap = succVarRepBindSet->getRepresentativePropagationMap();
+
+										if (!compGraphCachedVarRepBindMap->isKeySubSetOf(succVarRepBindMap)) {
+											return true;
+										}
+									}
+								}
+							}
+						}
+						opConLinkerIt = opConLinkerIt->getNext();
+					}
+					return false;
+				}
 
 			}; // end namespace Algorithm
 

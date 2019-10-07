@@ -26,7 +26,6 @@
 
 // Namespace includes
 #include "RealizerSettings.h"
-#include "COntologyRealizingDynamicRequirmentProcessingData.h"
 
 // Other includes
 #include "Reasoner/Ontology/COntologyProcessingRequirement.h"
@@ -56,8 +55,8 @@ namespace Konclude {
 			class CRealizingTestingStep {
 				// public methods
 				public:
-					enum TESTINGSTEPTYPE { INITREALIZEPROCESSINGSTEP, REALIZECONCEPTPROCESSINGSTEP, REALIZEROLEPROCESSINGSTEP, REALIZESAMEINDIVIDUALSPROCESSINGSTEP };
-
+					enum TESTINGSTEPTYPE { INITREALIZEPROCESSINGSTEP = 0, REALIZECONCEPTPROCESSINGSTEP = 1, REALIZEROLEPROCESSINGSTEP = 2, REALIZESAMEINDIVIDUALSPROCESSINGSTEP = 3 };
+					static const cint64 TESTINGSTEPTYPECOUNT = 4;
 					//! Constructor
 					CRealizingTestingStep(TESTINGSTEPTYPE testingStepType, COntologyProcessingStepData* ontProcStepData, COntologyRealizingItem* preproItem);
 

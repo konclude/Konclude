@@ -95,6 +95,16 @@ namespace Konclude {
 				mIndividualSaturationCount = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize",1000);
 				mConfForceFullCompletionGraphConstruction = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Precomputation.ForceFullCompletionGraphConstruction",false);
 
+
+				mConfConditionalFullCompletionGraphConstruction = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Precomputation.ConditionalFullCompletionGraphConstruction", false);
+
+				mConfFullCGCExclusionConditionMaximumIndividualLimit = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.ExclusionCondition.MaximumIndividualLimit", 300000);
+				mConfFullCGCSuggestionConditionMaximumIndividualLimit = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.SuggestionCondition.MaximumIndividualLimit", 10000);
+				
+				mConfFullCGCExclusionConditionMaximumIndividualConceptRatio = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.ExclusionCondition.MaximumIndividualConceptRatio", 5000) / 100;
+				mConfFullCGCSuggestionConditionMaximumIndividualConceptRatio = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.SuggestionCondition.MaximumIndividualConceptRatio", 500) / 100;
+
+
 				return item;
 			}
 
@@ -134,13 +144,32 @@ namespace Konclude {
 									addRequiredSaturationIndividuals(totallyPreCompItem);
 
 									bool fullCompletionGraphConstruction = false;
+									bool forceCompletionGraphConstruction = false;
 									if (mConfForceFullCompletionGraphConstruction || !totallyPreCompItem->hasIndividualsSaturated()) {
-										fullCompletionGraphConstruction = true;
+										forceCompletionGraphConstruction = fullCompletionGraphConstruction = true;
 									}
 									if (!fullCompletionGraphConstruction) {
-										fullCompletionGraphConstruction |= totallyPreCompItem->getOntology()->getStructureSummary()->hasGroundingOccurrence();
+										forceCompletionGraphConstruction = fullCompletionGraphConstruction |= totallyPreCompItem->getOntology()->getStructureSummary()->hasGroundingOccurrence();
 									}
+
+									if (!mConfForceFullCompletionGraphConstruction && mConfConditionalFullCompletionGraphConstruction) {
+										cint64 indiCount = ontology->getABox()->getNextIndividualId();
+										cint64 conceptCount = ontology->getTBox()->getConceptCount();
+										double indiConRatio = (double)indiCount / (double)conceptCount;
+
+										// check whether no exclusion limit/condition is satisfied
+										if (indiCount < mConfFullCGCExclusionConditionMaximumIndividualLimit && indiConRatio < mConfFullCGCExclusionConditionMaximumIndividualConceptRatio) {
+											// check whether at least one suggestion condition is satisfied
+											if (indiCount < mConfFullCGCSuggestionConditionMaximumIndividualLimit || indiConRatio < mConfFullCGCSuggestionConditionMaximumIndividualConceptRatio) {
+												fullCompletionGraphConstruction = true;
+												LOG(INFO, getLogDomain(), logTr("Enabling full completion graph construction for %1 individuals with %2 individuals to concepts ratio.").arg(indiCount).arg(indiConRatio), this);
+											}
+										}
+
+									}
+
 									totallyPreCompItem->setFullCompletionGraphConstruction(fullCompletionGraphConstruction);
+									totallyPreCompItem->setForceCompletionGraphConstruction(forceCompletionGraphConstruction);
 
 								}
 
@@ -154,7 +183,7 @@ namespace Konclude {
 
 
 								if (totallyPreCompItem->hasRemainingRequiredSaturationIndividuals() && !totallyPreCompItem->hasClashedSaturationIndividuals() && (!totallyPreCompItem->isSaturationComputationRunning() || totallyPreCompItem->hasIndividualSaturationRunning())) {
-									if (!isAllAssertionIndividualSaturationSufficient(totallyPreCompItem) || totallyPreCompItem->isIndividualStepRequired() || totallyPreCompItem->isFullCompletionGraphConstruction()) {
+									if (!isAllAssertionIndividualSaturationSufficient(totallyPreCompItem) || totallyPreCompItem->isIndividualStepRequired() || totallyPreCompItem->isFullCompletionGraphConstruction() || totallyPreCompItem->isForceCompletionGraphConstruction()) {
 										if (saturateRemainingRequiredSaturationIndividuals(totallyPreCompItem)) {
 											totallyPreCompItem->incIndividualSaturationRunningCount();
 											totallyPreCompItem->setSaturationComputationRunning(true);
@@ -764,7 +793,7 @@ namespace Konclude {
 									CSatisfiableCalculationJobGenerator satCalcJobGen(onto);
 									satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(filteredIndiList);
 
-									CIndividualPrecomputationTestingItem* indiTestItem = new CIndividualPrecomputationTestingItem(totallyPreCompItem, currentIndiCompCoordHash, totallyPreCompItem);
+									CIndividualPrecomputationTestingItem* indiTestItem = new CIndividualPrecomputationTestingItem(totallyPreCompItem, currentIndiCompCoordHash, totallyPreCompItem, totallyPreCompItem->getIndividualPrecomputationClashedPointer());
 									if (currentIndiCompCoordHash) {
 										currentIndiCompCoordHash->incUsageCount();
 									}
@@ -815,10 +844,15 @@ namespace Konclude {
 				}
 
 
+				bool forceCompletionGraphConstruction = totallyPreCompItem->isForceCompletionGraphConstruction();
 				bool fullCompletionGraphConstruction = totallyPreCompItem->isFullCompletionGraphConstruction();
 				bool consistencyDetected = false;
 				bool detectedConsistency = true;
-				if (!fullCompletionGraphConstruction && isAllAssertionIndividualSaturationSufficient(totallyPreCompItem)) {
+				QSet<CIndividualReference>* procReqIndiSet = procReqIndiSet = totallyPreCompItem->getIncompletelyHandledIndividualSet();
+				if (!procReqIndiSet->isEmpty()) {
+					forceCompletionGraphConstruction = true;
+				}
+				if (!forceCompletionGraphConstruction && isAllAssertionIndividualSaturationSufficient(totallyPreCompItem)) {
 					consistencyDetected = true;
 					detectedConsistency = true;
 					LOG(INFO,getLogDomain(),logTr("Trivial consistency detected with merged individual."),getLogObject());
@@ -826,7 +860,7 @@ namespace Konclude {
 					consistencyDetected = true;
 					detectedConsistency = false;
 					LOG(INFO,getLogDomain(),logTr("Trivial inconsistency detected with individual saturation."),getLogObject());
-				} else if (!fullCompletionGraphConstruction && totallyPreCompItem->hasIndividualsSaturated() && !totallyPreCompItem->hasInsufficientSaturationIndividuals() && (indiCount > 0 || maxTriplesIndexedIndiId > 0)) {
+				} else if (!forceCompletionGraphConstruction && totallyPreCompItem->hasIndividualsSaturated() && !totallyPreCompItem->hasInsufficientSaturationIndividuals() && (indiCount > 0 || maxTriplesIndexedIndiId > 0)) {
 					consistencyDetected = true;
 					detectedConsistency = true;
 					LOG(INFO,getLogDomain(),logTr("Trivial consistency detected with individual saturation."),getLogObject());
@@ -843,7 +877,13 @@ namespace Konclude {
 					detectedConsistency = false;
 					LOG(INFO, getLogDomain(), logTr("Inconsistency detected with individual precomputation."), getLogObject());
 				} else {
-					QList<CIndividualReference> indiList = getIndividualComputationList(totallyPreCompItem);
+					QList<CIndividualReference> indiList;
+					if (!fullCompletionGraphConstruction && procReqIndiSet) {
+						indiList = procReqIndiSet->toList();
+						procReqIndiSet->clear();
+					} else {
+						indiList = getIndividualComputationList(totallyPreCompItem);
+					}
 					totallyPreCompItem->setAllIncompletelyHandledIndividualsRetrieved(true);
 					totallyPreCompItem->setFullCompletionGraphConstructed(true);
 
@@ -1310,7 +1350,7 @@ namespace Konclude {
 
 
 
-					if (createAllAssertionIndi && (!assConNegPairSet.isEmpty() && !assRoleSet.isEmpty())) {
+					if (createAllAssertionIndi && (!assConNegPairSet.isEmpty() || !assRoleSet.isEmpty())) {
 						CIndividual* tmpAllAssertionIndi = new CIndividual();
 						tmpAllAssertionIndi->initIndividual(totallyPreCompItem->getOntology()->getABox()->getNextIndividualId(false));
 						tmpAllAssertionIndi->setTemporaryFakeIndividual(true);
@@ -2106,6 +2146,20 @@ namespace Konclude {
 
 
 
+			bool CTotallyPrecomputationThread::determineMinimumNextConceptID(CConsistence* consistence, COntologyPrecomputationItem* ontPreCompItem) {
+				CConsistenceTaskData* consTaskData = (CConsistenceTaskData*)consistence->getConsistenceModelData();
+				if (consTaskData) {
+					CSatisfiableCalculationTask* detTask = consTaskData->getDeterministicSatisfiableTask();
+					CSatisfiableCalculationTask* nonDetTask = consTaskData->getCompletionGraphCachedSatisfiableTask();
+					CConceptVector* extendedConVec = nonDetTask->getProcessingDataBox()->getExtendedConceptVector(false);
+					if (extendedConVec) {
+						cint64 minNextId = extendedConVec->getItemCount();
+						ontPreCompItem->getOntology()->getTBox()->setMinimalNextConceptID(minNextId);
+						return true;
+					}
+				}
+				return false;
+			}
 
 
 			bool CTotallyPrecomputationThread::precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CPrecomputationCalculatedCallbackEvent* pcce) {
@@ -2124,6 +2178,7 @@ namespace Konclude {
 						CConsistence* consistence = totallyPreCompItem->getConsistence();
 						consistence->setConsistenceModelData(totallyPreCompItem->getConsistenceData());
 						consistence->setOntologyConsistent(pcce->getTestResultSatisfiable());
+						determineMinimumNextConceptID(consistence, ontPreCompItem);
 
 						if (consistence->isOntologyConsistent()) {
 							QSet<CIndividualReference> procReqIndiSet;
@@ -2165,14 +2220,17 @@ namespace Konclude {
 					}
 
 					if (pcce->hasCalculationError()) {
-						LOG(ERROR, getLogDomain(), logTr("Error in computation, individual precomputation for ontology '%1' failed.").arg(ontPreCompItem->getOntology()->getTerminologyName()), getLogObject());
-						totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
-						totallyPreCompItem->getIndividualPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
+						if (!totallyPreCompItem->hasIndividualPrecomputationClashed()) {
+							LOG(ERROR, getLogDomain(), logTr("Error in computation, individual precomputation for ontology '%1' failed.").arg(ontPreCompItem->getOntology()->getTerminologyName()), getLogObject());
+							totallyPreCompItem->getConsistencePrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
+							totallyPreCompItem->getIndividualPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED);
+						}
 					} else if (indiPreTestItem->getTaskPreyingAdapter()) {
 						CConsistence* consistence = totallyPreCompItem->getConsistence();
 						if (consistence) {
 							consistence->setConsistenceModelData(totallyPreCompItem->getConsistenceData());
-							consistence->setOntologyConsistent(pcce->getTestResultSatisfiable());
+							consistence->setOntologyConsistent(!totallyPreCompItem->hasIndividualPrecomputationClashed());
+							determineMinimumNextConceptID(consistence, ontPreCompItem);
 						}
 					}
 					return true;

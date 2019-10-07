@@ -46,6 +46,7 @@
 
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
 #include "Reasoner/Kernel/Task/CSaturationOccurrenceStatisticsCollectingAdapter.h"
+#include "Reasoner/Kernel/Task/CConsistenceTaskData.h"
 
 #include "Reasoner/Generator/CSatisfiableCalculationJobGenerator.h"
 #include "Reasoner/Generator/CApproximatedSaturationCalculationJobGenerator.h"
@@ -190,6 +191,7 @@ namespace Konclude {
 					bool createConsistencePrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					bool createConceptCyclePrecomputation(CConceptCycleData* conceptCycleData, CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
+					bool determineMinimumNextConceptID(CConsistence* consistence, COntologyPrecomputationItem* ontPreCompItem);
 
 
 					void createSaturationConstructionJob(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
@@ -237,7 +239,13 @@ namespace Konclude {
 
 					cint64 mIndividualSaturationCount;
 					bool mConfForceFullCompletionGraphConstruction;
+					bool mConfConditionalFullCompletionGraphConstruction;
 
+					cint64 mConfFullCGCExclusionConditionMaximumIndividualLimit;
+					cint64 mConfFullCGCSuggestionConditionMaximumIndividualLimit;
+
+					double mConfFullCGCExclusionConditionMaximumIndividualConceptRatio;
+					double mConfFullCGCSuggestionConditionMaximumIndividualConceptRatio;
 
 				// private methods
 				private:

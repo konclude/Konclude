@@ -35,6 +35,8 @@ namespace Konclude {
 				mIndividualNode = individualNode;
 				mCurrentRepresentativeIndividualAssertionsIndexData = nullptr;
 				mStoredRepresentativeIndividualAssertionsIndexData = nullptr;
+				mAnonymous = true;
+				mNonAnonymityStored = false;
 			}
 
 
@@ -66,6 +68,16 @@ namespace Konclude {
 
 			cint64 CRedlandStoredTriplesIndividualAssertionIndexCacheData::getIndividualId() {
 				return mIndividualId;
+			}
+
+
+			bool CRedlandStoredTriplesIndividualAssertionIndexCacheData::isAnonymous() {
+				return mAnonymous;
+			}
+
+			CRedlandStoredTriplesIndividualAssertionIndexCacheData* CRedlandStoredTriplesIndividualAssertionIndexCacheData::setAnonymous(bool anonymous) {
+				mAnonymous = anonymous;
+				return this;
 			}
 
 
@@ -114,6 +126,17 @@ namespace Konclude {
 				mIdStored = stored;
 				return this;
 			}
+
+
+			bool CRedlandStoredTriplesIndividualAssertionIndexCacheData::isIndividualNonAnonymityStored() {
+				return mNonAnonymityStored;
+			}
+
+			CRedlandStoredTriplesIndividualAssertionIndexCacheData* CRedlandStoredTriplesIndividualAssertionIndexCacheData::setIndividualNonAnonymityStored(bool stored) {
+				mNonAnonymityStored = stored;
+				return this;
+			}
+
 
 
 		}; // end namespace Triples

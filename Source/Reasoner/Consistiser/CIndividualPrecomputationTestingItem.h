@@ -60,7 +60,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem);
+					CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem, bool* unstatFlagPointer = nullptr);
 
 					virtual PRECOMPUTATIONTYPE getPrecomputationTestingType();
 

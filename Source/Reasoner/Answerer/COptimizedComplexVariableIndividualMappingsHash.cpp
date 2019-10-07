@@ -44,6 +44,8 @@ namespace Konclude {
 					hashedLinker = linker;
 					if (linker->getCurrentCardinalities()) {
 						linker->getCurrentCardinalities()->setCardinalityUpdateId(mCurrentUpdateId);
+						mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, linker->getCurrentCardinalities()->getSameIndividualsJointlyConsideredCardinality());
+						mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, linker->getCurrentCardinalities()->getSameIndividualsSeparatlyConsideredCardinality());
 					}
 					addLastAddedBindingsCardinalityLinker(linker);
 					mBindingCount = mMappingCardinalityHash.size();
@@ -53,12 +55,16 @@ namespace Konclude {
 					if (cardinalities) {
 						if (hashedLinker->getCurrentCardinalities() && hashedLinker->getCurrentCardinalities()->getCardinalityUpdateId() == mCurrentUpdateId) {
 							hashedLinker->getCurrentCardinalities()->addCardinalities(cardinalities);
+							mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsJointlyConsideredCardinality());
+							mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsSeparatlyConsideredCardinality());
 						} else {
 							linker->clearCardinalities();
 							COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalities = hashedLinker->getCurrentCardinalities();
 							if (prevCardinalities) {
 								cardinalities->addCardinalities(prevCardinalities);
 							}
+							mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, cardinalities->getSameIndividualsJointlyConsideredCardinality());
+							mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, cardinalities->getSameIndividualsSeparatlyConsideredCardinality());
 							hashedLinker->updateCardinality(cardinalities);
 							cardinalities->setCardinalityUpdateId(mCurrentUpdateId);
 							COptimizedComplexVariableIndividualUpdateCardinalityLinker* updateCardLinker = new COptimizedComplexVariableIndividualUpdateCardinalityLinker(hashedLinker, prevCardinalities);
@@ -77,11 +83,15 @@ namespace Konclude {
 				if (hashedLinker) {
 					if (hashedLinker->getCurrentCardinalities() && hashedLinker->getCurrentCardinalities()->getCardinalityUpdateId() == mCurrentUpdateId) {
 						hashedLinker->getCurrentCardinalities()->addCardinalities(addedCardinalites);
+						mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsJointlyConsideredCardinality());
+						mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, hashedLinker->getCurrentCardinalities()->getSameIndividualsSeparatlyConsideredCardinality());
 					} else {
 						COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalities = hashedLinker->getCurrentCardinalities();
 						if (prevCardinalities) {
 							addedCardinalites->addCardinalities(prevCardinalities);
 						}
+						mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, addedCardinalites->getSameIndividualsJointlyConsideredCardinality());
+						mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, addedCardinalites->getSameIndividualsSeparatlyConsideredCardinality());
 						hashedLinker->updateCardinality(addedCardinalites);
 						addedCardinalites->setCardinalityUpdateId(mCurrentUpdateId);
 						COptimizedComplexVariableIndividualUpdateCardinalityLinker* updateCardLinker = new COptimizedComplexVariableIndividualUpdateCardinalityLinker(hashedLinker, prevCardinalities);
@@ -102,6 +112,7 @@ namespace Konclude {
 				if (linker) {
 					mMappingCardinalityHash.remove(linker);
 					mBindingCount = mMappingCardinalityHash.size();
+					linker->clearNext();
 				}
 				return linker;
 			}

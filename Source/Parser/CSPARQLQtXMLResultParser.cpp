@@ -43,7 +43,7 @@ namespace Konclude {
 			while (!node.isNull() && !queryResult) {
 				QString docElemName = node.tagName();
 				if (docElemName == "results") {
-					queryResult = parseVariableBindings(&node);
+					queryResult = parseVariableBindingsSet(&node);
 				}
 
 			}
@@ -53,13 +53,24 @@ namespace Konclude {
 
 
 
-		CVariableBindingsAnswersSetResult* CSPARQLQtXMLResultParser::parseVariableBindings(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash, bool locallyRenameBlankNamesBindings) {
+		CVariableBindingsAnswersSetResult* CSPARQLQtXMLResultParser::parseVariableBindingsSet(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash, bool locallyRenameBlankNamesBindings) {
+			return (CVariableBindingsAnswersSetResult*)parseVariableBindings(node, variableNameIndexHash, locallyRenameBlankNamesBindings, true);
+		}
+
+		CVariableBindingsAnswersListResult* CSPARQLQtXMLResultParser::parseVariableBindingsList(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash, bool locallyRenameBlankNamesBindings) {
+			return (CVariableBindingsAnswersListResult*)parseVariableBindings(node, variableNameIndexHash, locallyRenameBlankNamesBindings, false);
+		}
+
+
+
+		CVariableBindingsAnswersResult* CSPARQLQtXMLResultParser::parseVariableBindings(QDomElement *node, QHash<QString, cint64>* variableNameIndexHash, bool locallyRenameBlankNamesBindings, bool parseAsSet) {
+
 			QStringList classNameList;
 			bool err = node->isNull();
 
 			QString tagName = node->tagName();
 
-			CVariableBindingsAnswersSetResult* bindingAnswersSetResult = nullptr;
+			CVariableBindingsAnswersResult* bindingAnswersResult = nullptr;
 
 			QStringList variableNameList;
 			cint64 nextVariableIndex = 0;
@@ -126,22 +137,33 @@ namespace Konclude {
 
 					if (bindingsVector.count() > 0) {
 						bindingResult->setResultVariableBindings(bindingsVector.toList());
-						if (!bindingAnswersSetResult) {
-							bindingAnswersSetResult = new CVariableBindingsAnswersSetResult(variableNameList);
+						if (!bindingAnswersResult) {
+							if (parseAsSet) {
+								bindingAnswersResult = new CVariableBindingsAnswersSetResult(variableNameList);
+							} else {
+								bindingAnswersResult = new CVariableBindingsAnswersListResult(variableNameList);
+							}
 						}
-						bindingAnswersSetResult->addResultVariableBindings(bindingResult);
+						bindingAnswersResult->addResultVariableBindings(bindingResult);
 					}
 
 				}
 				resultNode = resultNode.nextSiblingElement();
 			}
 
+			if (!bindingAnswersResult) {
+				if (parseAsSet) {
+					bindingAnswersResult = new CVariableBindingsAnswersSetResult(QStringList());
+				} else {
+					bindingAnswersResult = new CVariableBindingsAnswersListResult(QStringList());
+				}
+			}
 
 			if (deleteVariableNameIndexHash) {
 				delete deleteVariableNameIndexHash;
 			}
 
-			return bindingAnswersSetResult;
+			return bindingAnswersResult;
 		}
 
 

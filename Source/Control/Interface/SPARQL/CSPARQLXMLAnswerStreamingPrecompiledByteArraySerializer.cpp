@@ -53,6 +53,13 @@ namespace Konclude {
 					mLiteralDatatypeEnd = QString("\">").toUtf8();
 					mLiteralEnd = QString("</literal>").toUtf8();
 
+					mConfAvoidStringCopying = false;
+					mDoubleQuoteEscapeString = "&quot;";
+					mSingleQuoteEscapeString = "&apos;";
+					mSmallerEscapeString = "&lt;";
+					mLargerEscapeString = "&gt;";
+					mAndEscapeString = "&amp;";
+
 				}
 
 				CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer::~CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer() {
@@ -79,19 +86,57 @@ namespace Konclude {
 
 
 				CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer::writeUTF8String(const QString& string) {
-					mTemporaryBuffer.append(string.toUtf8());
-					//const QChar* data = string.constData();
-					//cint64 length = string.length();
-					//cint64 pos = 0;
-					//while (pos < length) {
-					//	QChar character = data[pos++];
-					//	mTemporaryBuffer.append(character.toLatin1());
-					//}
+					if (!mConfAvoidStringCopying) {
+						mTemporaryBuffer.append(string.toUtf8());
+					} else {
+						const QChar* data = string.constData();
+						cint64 length = string.length();
+						cint64 pos = 0;
+						while (pos < length) {
+							QChar character = data[pos];
+							if (character.row() == 0 && character.cell() <= 127) {
+								mTemporaryBuffer.append(character.toLatin1());
+							} else {
+								mTemporaryBuffer.append(string.midRef(pos).toUtf8());
+								break;
+							}
+							++pos;
+						}
+					}
 					return this;
 				}
 
 				CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer::writeUTF8StringEscaped(const QString& string) {
-					mTemporaryBuffer.append(string.toHtmlEscaped().toUtf8());
+					if (!mConfAvoidStringCopying) {
+						mTemporaryBuffer.append(string.toHtmlEscaped().toUtf8());
+					} else {
+						const QChar* data = string.constData();
+						cint64 length = string.length();
+						cint64 pos = 0;
+						while (pos < length) {
+							QChar character = data[pos];
+							if (character.row() == 0 && character.cell() <= 127) {
+								uchar uCharacter = character.toLatin1();
+								if (uCharacter == '\"') {
+									mTemporaryBuffer.append(mDoubleQuoteEscapeString);
+								} else if (uCharacter == '\'') {
+									mTemporaryBuffer.append(mSingleQuoteEscapeString);
+								} else if (uCharacter == '<') {
+									mTemporaryBuffer.append(mSmallerEscapeString);
+								} else if (uCharacter == '>') {
+									mTemporaryBuffer.append(mLargerEscapeString);
+								} else if (uCharacter == '>') {
+									mTemporaryBuffer.append(mAndEscapeString);
+								} else {
+									mTemporaryBuffer.append(character.toLatin1());
+								}
+							} else {
+								mTemporaryBuffer.append(string.midRef(pos).toUtf8());
+								break;
+							}
+							++pos;
+						}
+					}
 					return this;
 				}
 

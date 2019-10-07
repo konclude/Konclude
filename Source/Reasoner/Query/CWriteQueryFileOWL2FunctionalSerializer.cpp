@@ -133,18 +133,29 @@ namespace Konclude {
 			}	
 
 
-			void CWriteQueryFileOWL2FunctionalSerializer::writeIndividualType(const QString& individualName, const QString& className) {
+			void CWriteQueryFileOWL2FunctionalSerializer::writeNamedIndividualType(const QString& individualName, const QString& className) {
 				QString writeString = QString("ClassAssertion(<%1> <%2>)\n").arg(className,individualName);
 				mCurrentOutputFile->write(writeString.toUtf8());
 			}
 
 
+			void CWriteQueryFileOWL2FunctionalSerializer::writeAnonymousIndividualType(const QString& individualName, const QString& className) {
+				QString writeString = QString("ClassAssertion(<%1> %2)\n").arg(className, individualName);
+				mCurrentOutputFile->write(writeString.toUtf8());
+			}
 
-			void CWriteQueryFileOWL2FunctionalSerializer::writeIndividualDeclaration(const QString& className) {
+
+
+			void CWriteQueryFileOWL2FunctionalSerializer::writeNamedIndividualDeclaration(const QString& className) {
 				QString writeString = QString("Declaration(NamedIndividual(<%1>))\n").arg(className);
 				mCurrentOutputFile->write(writeString.toUtf8());
 			}
 
+
+			void CWriteQueryFileOWL2FunctionalSerializer::writeAnonymousIndividualDeclaration(const QString& className) {
+				QString writeString = QString("Declaration(AnonymousIndividual(%1))\n").arg(className);
+				mCurrentOutputFile->write(writeString.toUtf8());
+			}
 
 		}; // end namespace Query
 

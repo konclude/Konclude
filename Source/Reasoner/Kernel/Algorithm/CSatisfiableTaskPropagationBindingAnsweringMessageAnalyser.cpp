@@ -71,6 +71,14 @@ namespace Konclude {
 							variablesList->append(variable);
 						}
 					}
+
+					CProcessingDataBox* processingDataBox = statCalcTask->getProcessingDataBox();
+					CIndividualProcessNodeVector* indiNodeVec = processingDataBox->getIndividualProcessNodeVector();
+
+
+
+					CPROCESSINGLIST<CIndividualReference*>* nonDetMergedIndiBindingsVecList = nullptr;
+
 					CIndividualReference* indiBindingsVec = CObjectAllocator< CIndividualReference >::allocateAndConstructArray(mTempMemAllocMan, variablesList->count());
 					cint64 nextIndiBindingPos = 0;
 
@@ -79,26 +87,90 @@ namespace Konclude {
 						CVariableBinding* varBind = varBindDesIt->getVariableBinding();
 						CVariable* variable = varBind->getBindedVariable();
 						CIndividualProcessNode* bindedIndiNode = varBind->getBindedIndividual();
+						bool nondeterMerged = false;
+						bindedIndiNode = getCorrectedIndividualID(bindedIndiNode, indiNodeVec, &nondeterMerged);
+						if (nondeterMerged) {
+							varNonDeterministicallyDerived = true;
+						}
 						CIndividualReference indiRef = bindedIndiNode->getNominalIndividual();
 						if (bindedIndiNode->getNominalIndividual() && bindedIndiNode->getNominalIndividual()->isTemporaryIndividual()) {
 							indiRef = bindedIndiNode->getNominalIndividual()->getIndividualID();
 						}
-						indiBindingsVec[nextIndiBindingPos++] = indiRef;
+						if (nonDetMergedIndiBindingsVecList) {
+							for (CPROCESSINGLIST<CIndividualReference*>::const_iterator it = nonDetMergedIndiBindingsVecList->constBegin(), itEnd = nonDetMergedIndiBindingsVecList->constEnd(); it != itEnd; ++it) {
+								CIndividualReference* mergedIndiBindingsVec = (*it);
+								mergedIndiBindingsVec[nextIndiBindingPos] = indiRef;
+							}
+						} else {
+							indiBindingsVec[nextIndiBindingPos] = indiRef;
+						}
 						CDependencyTrackPoint* varDepTrackPoint = varBind->getDependencyTrackPoint();
 						if (varDepTrackPoint) {
 							if (varDepTrackPoint->getBranchingTag() > maxDetBranchTag) {
 								varNonDeterministicallyDerived = true;
 							}
+						} else {
+							varNonDeterministicallyDerived = true;
 						}
+
+						CIndividualMergingHash* indiMergHash = bindedIndiNode->getIndividualMergingHash(false);
+						if (indiMergHash) {
+							for (CIndividualMergingHash::const_iterator it = indiMergHash->constBegin(), itEnd = indiMergHash->constEnd(); it != itEnd; ++it) {
+								if (it.value().isMergedWithIndividual()) {
+									cint64 mergedIndiId = it.key();
+									CDependencyTrackPoint* mergeDepTrackPoint = it.value().getDependencyTrackPoint();
+									bool nondeterMerged = false;
+									if (!mergeDepTrackPoint || mergeDepTrackPoint->getBranchingTag() > maxDetBranchTag) {
+										nondeterMerged = true;
+									}
+									if (nondeterMerged) {
+										if (!nonDetMergedIndiBindingsVecList) {
+											nonDetMergedIndiBindingsVecList = CObjectParameterizingAllocator< CPROCESSINGLIST<CIndividualReference*>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
+											nonDetMergedIndiBindingsVecList->append(indiBindingsVec);
+										}
+
+										CPROCESSINGLIST<CIndividualReference*>::iterator it = nonDetMergedIndiBindingsVecList->begin();
+										for (cint64 i = nonDetMergedIndiBindingsVecList->count(); i > 0; --i) {
+											CIndividualReference* nextIndiBindingsVec = *it;
+											++it;
+											CIndividualReference* newIndiBindingsVec = CObjectAllocator< CIndividualReference >::allocateAndConstructArray(mTempMemAllocMan, variablesList->count());
+											for (cint64 i = 0; i < nextIndiBindingPos; ++i) {
+												newIndiBindingsVec[i] = nextIndiBindingsVec[i];
+											}
+											CIndividualProcessNode* mergedIndiNode = indiNodeVec->getData(-mergedIndiId);
+											CIndividualReference mergedIndiRef = mergedIndiNode->getNominalIndividual();
+											if (mergedIndiNode->getNominalIndividual() && mergedIndiNode->getNominalIndividual()->isTemporaryIndividual()) {
+												mergedIndiRef = mergedIndiNode->getNominalIndividual()->getIndividualID();
+											}
+											newIndiBindingsVec[nextIndiBindingPos] = mergedIndiRef;
+											nonDetMergedIndiBindingsVecList->append(newIndiBindingsVec);
+										}
+									}
+								}
+							}
+						}
+						nextIndiBindingPos++;
+
 					}
 
 					CAnsweringMessageDataVariableBindingPropagationsData* dataVariableBindingPropagationData = CObjectParameterizingAllocator< CAnsweringMessageDataVariableBindingPropagationsData, CContext* >::allocateAndConstruct(mTempMemAllocMan);
 					dataVariableBindingPropagationData->initBindingPropagationsData(varNonDeterministicallyDerived, indiBindingsVec);
-
 					if (!individualBindingList) {
 						individualBindingList = CObjectParameterizingAllocator< CVARIABLEBINDINGMESSAGELIST<CAnsweringMessageDataVariableBindingPropagationsData*>, CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan, mTmpContext);
 					}
 					individualBindingList->append(dataVariableBindingPropagationData);
+
+
+					if (nonDetMergedIndiBindingsVecList) {
+						CPROCESSINGLIST<CIndividualReference*>::const_iterator it = nonDetMergedIndiBindingsVecList->constBegin(), itEnd = nonDetMergedIndiBindingsVecList->constEnd();
+						for (++it; it != itEnd; ++it) {
+							CIndividualReference* mergedIndiBindingsVec = (*it);
+							CAnsweringMessageDataVariableBindingPropagationsData* mergedDataVariableBindingPropagationData = CObjectParameterizingAllocator< CAnsweringMessageDataVariableBindingPropagationsData, CContext* >::allocateAndConstruct(mTempMemAllocMan);
+							mergedDataVariableBindingPropagationData->initBindingPropagationsData(true, mergedIndiBindingsVec);
+							individualBindingList->append(mergedDataVariableBindingPropagationData);
+						}
+					}
+
 					return this;
 				}
 

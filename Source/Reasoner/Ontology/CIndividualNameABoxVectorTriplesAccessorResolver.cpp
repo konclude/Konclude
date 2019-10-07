@@ -57,6 +57,28 @@ namespace Konclude {
 			}
 
 
+			bool CIndividualNameABoxVectorTriplesAccessorResolver::isAnonymous(const CIndividualReference& indiRef) const {
+				CIndividual* indi = indiRef.getIndividual();
+				bool anonymousIndividual = false;
+				if (!indi) {
+					indi = mOntology->getABox()->getIndividualVector(false)->getData(indiRef.getIndividualID());
+				}
+				if (indi) {
+					anonymousIndividual = indi->isAnonymousIndividual();
+				} else {
+					COntologyTriplesAssertionsAccessor* accessor = mOntology->getOntologyTriplesData()->getTripleAssertionAccessor();
+					if (accessor) {
+						accessor->visitIndividualAnonymity(indiRef.getIndividualID(), [&](bool anonymous)->bool {
+							anonymousIndividual = anonymous;
+							return true;
+						});
+					}
+				}
+				return anonymousIndividual;
+			}
+
+
+
 		}; // end namespace Ontology
 
 	}; // end namespace Reasoner

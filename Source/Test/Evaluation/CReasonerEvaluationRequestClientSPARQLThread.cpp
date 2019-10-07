@@ -100,6 +100,10 @@ namespace Konclude {
 				} else if (sparqlQuery) {
 					responseError = true;
 					if (!errorMessage.isEmpty()) {
+						device->reset();
+						cint64 available = device->bytesAvailable();
+						QString responsePart = device->read(qMin((int)available, 10000));
+						((CReasonerEvaluationRequestResponseSPARQL*)mNextReqRes)->setResponseErrorString(QString("Parsing error (line %2, column %3) '%1' of response '%4...' .").arg(errorMessage).arg(errorLine).arg(errorColumn).arg(responsePart));
 						LOG(INFO, getLogDomain(), logTr("Parsing of response failed due to error (line %2, column %3): %1.").arg(errorMessage).arg(errorLine).arg(errorColumn), this);
 					}
 				}

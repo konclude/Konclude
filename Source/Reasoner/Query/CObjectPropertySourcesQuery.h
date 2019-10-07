@@ -96,6 +96,7 @@ namespace Konclude {
 					CIndividualSynsetsResult* mResult;
 
 					bool mUseAbbreviatedIRIs;
+					bool mAnonymousIndividuals;
 
 					bool mQueryConstructError;
 					bool mRealizationCalcError;

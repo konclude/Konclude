@@ -1070,6 +1070,7 @@ namespace Konclude {
 					}
 
 
+					CRole* topRole = calcAlgContext->getProcessingDataBox()->getOntology()->getRBox()->getTopObjectRole();
 					for (CPROCESSSET<cint64>::const_iterator it = connIndiSet->constBegin(), itEnd = connIndiSet->constEnd(); it != itEnd; ++it) {
 						cint64 connIndiId = *it;
 						CIndividualProcessNode* connIndiNode = indiProcNodeVec->getData(connIndiId);
@@ -1100,8 +1101,10 @@ namespace Konclude {
 									CIndividualLinkEdge* link = roleIt.next(true);
 									CRole* role = link->getLinkRole();
 
-									collectRoleSuccessorData(link, false, maxDetBranchTag, isNominalNeighbour, isDataNeighbour, combinedNeighbourDetRoleInstantiatedSet, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, combinedNeighbourNonDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet,
-										combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash);
+									if (role != topRole) {
+										collectRoleSuccessorData(link, false, maxDetBranchTag, isNominalNeighbour, isDataNeighbour, combinedNeighbourDetRoleInstantiatedSet, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, combinedNeighbourNonDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet,
+											combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash);
+									}
 								}
 
 								CSuccessorRoleIterator commRoleIt(connIndiNode->getSuccessorRoleIterator(extractionIndiNode));
@@ -1109,8 +1112,10 @@ namespace Konclude {
 									CIndividualLinkEdge* link = commRoleIt.next(true);
 									CRole* role = link->getLinkRole();
 
-									collectRoleSuccessorData(link, true, maxDetBranchTag, isNominalNeighbour, isDataNeighbour, combinedNeighbourDetRoleInstantiatedSet, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, combinedNeighbourNonDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet,
-										combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash);
+									if (role != topRole) {
+										collectRoleSuccessorData(link, true, maxDetBranchTag, isNominalNeighbour, isDataNeighbour, combinedNeighbourDetRoleInstantiatedSet, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, combinedNeighbourNonDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet,
+											combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash);
+									}
 								}
 
 

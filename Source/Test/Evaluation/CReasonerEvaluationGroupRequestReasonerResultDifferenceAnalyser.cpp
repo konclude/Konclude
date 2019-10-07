@@ -142,7 +142,7 @@ namespace Konclude {
 															// handle SPARQL binding results
 															QHash<QString, cint64> variableNameIndexHash;
 															if (!variableBindingsResult) {
-																variableBindingsResult = mSPARQLResultParser.parseVariableBindings(&resultElement, &variableNameIndexHash, true);
+																variableBindingsResult = mSPARQLResultParser.parseVariableBindingsSet(&resultElement, &variableNameIndexHash, true);
 															}
 
 															QString otherResponseFileString = otherResponseFileStringList.first();
@@ -302,7 +302,7 @@ namespace Konclude {
 								break;
 
 							} else if (currNodeNumber == nodeNumber && resultElement.nodeName() == "results") {
-								CVariableBindingsAnswersSetResult* otherVarBindingResult = mSPARQLResultParser.parseVariableBindings(&resultElement, variableNameIndexHash, true);
+								CVariableBindingsAnswersSetResult* otherVarBindingResult = mSPARQLResultParser.parseVariableBindingsSet(&resultElement, variableNameIndexHash, true);
 								if (otherVarBindingResult) {
 
 									if (!varBindingResult || !varBindingResult->isResultEquivalentTo(otherVarBindingResult)) {

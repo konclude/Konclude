@@ -137,6 +137,9 @@ namespace Konclude {
 					CDatatypeVector* getDatatypeVector(bool create = true);
 					CTBox* setDatatypeVector(CDatatypeVector* datatypeVector);
 
+					CTBox* setMinimalNextConceptID(cint64 nextId);
+					cint64 getMinimalNextConceptID();
+					cint64 getNextConceptID();
 
 				// protected methods
 				protected:
@@ -176,6 +179,9 @@ namespace Konclude {
 					cint64 mBottomConceptIndex;
 					cint64 mIndividualTriggerConceptIndex;
 					cint64 mTopDataRangeConceptIndex;
+
+
+					cint64 mMinimalNextConceptID;
 
 
 				// private methods

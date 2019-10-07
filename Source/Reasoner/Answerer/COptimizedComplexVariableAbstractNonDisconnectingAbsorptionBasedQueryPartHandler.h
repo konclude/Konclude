@@ -106,6 +106,7 @@ namespace Konclude {
 					QList<CExpressionVariable*> getOrderedVariableAbsorptionList(QList<CExpressionVariable*> varExpList);
 					virtual QList<CExpressionVariable*> getFilteredOrderedVariableAbsorptionList(QList<CExpressionVariable*> varExpList);
 
+					CConcept* createNewConcept();
 
 				// protected variables
 				protected:

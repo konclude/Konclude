@@ -102,9 +102,6 @@ namespace Konclude {
 					COptimizedRepresentativeKPSetOntologyRealizingItem* mRealizationItem;
 					COntologyProcessingIteratorRealizationRequirement* mIteratorRequirement;
 
-					CRealizationIndividualInstanceItemReferenceIterator* mIteratingIterator;
-					CRealizationIndividualInstanceItemReferenceIterator* mCheckingIterator;
-
 
 					cint64 mRoleInitializationCount;
 					cint64 mRoleRealizationCount;

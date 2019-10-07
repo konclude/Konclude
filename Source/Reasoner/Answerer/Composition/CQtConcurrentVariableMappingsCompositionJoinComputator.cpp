@@ -767,7 +767,15 @@ namespace Konclude {
 										statTotalProcessingTime += joiningHash->mProcessingTime;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 2 of concurrent join computation for item %1 had in average %2 (max %3) created joins and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(statTotalJoiningCount / statUsedCount).arg(statMaxJoiningCount).arg(statTotalProcessingTime / statUsedCount).arg(statMaxProcessingTime), this);
+								cint64 averageJoiningCount = 0;
+								if (statUsedCount > 0) {
+									averageJoiningCount = statTotalJoiningCount / statUsedCount;
+								}
+								cint64 averageProcessingTime = 0;
+								if (statUsedCount > 0) {
+									averageProcessingTime = statTotalProcessingTime / statUsedCount;
+								}
+								LOG(INFO, getLogDomain(), logTr("Insertion step 2 of concurrent join computation for item %1 had in average %2 (max %3) created joins and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageJoiningCount).arg(statMaxJoiningCount).arg(averageProcessingTime).arg(statMaxProcessingTime), this);
 							}
 
 
@@ -802,7 +810,15 @@ namespace Konclude {
 										statTotalProcessingTime += joinedVarMappingMultiHashPart->mStatsProcessingTime;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 3 of concurrent join computation for item %1 had in average %2 (max %3) bindings insertions and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(statTotalInsertionCount / statUsedCount).arg(statMaxInsertionCount).arg(statTotalProcessingTime / statUsedCount).arg(statMaxProcessingTime), this);
+								cint64 averageInsertionCount = 0;
+								if (statUsedCount > 0) {
+									averageInsertionCount = statTotalInsertionCount / statUsedCount;
+								}
+								cint64 averageProcessingTime = 0;
+								if (statUsedCount > 0) {
+									averageProcessingTime = statTotalProcessingTime / statUsedCount;
+								}
+								LOG(INFO, getLogDomain(), logTr("Insertion step 3 of concurrent join computation for item %1 had in average %2 (max %3) bindings insertions and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageInsertionCount).arg(statMaxInsertionCount).arg(averageProcessingTime).arg(statMaxProcessingTime), this);
 							}
 
 

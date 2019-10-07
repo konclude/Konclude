@@ -28,6 +28,7 @@
 #include "RealizerSettings.h"
 #include "COntologyRealizingDynamicRequirmentCallbackData.h"
 #include "COntologyRealizingDynamicRequirmentProcessingStatistics.h"
+#include "CRealizingTestingStep.h"
 
 // Other includes
 #include "Reasoner/Ontology/CConcreteOntology.h"
@@ -68,8 +69,8 @@ namespace Konclude {
 					//! Constructor
 					COntologyRealizingDynamicRequirmentProcessingData(COntologyProcessingRequirement* procReq = nullptr, COntologyRealizingDynamicRequirmentCallbackData* callback = nullptr);
 
-					COntologyRealizingDynamicRequirmentProcessingData* incProcessingItemCount(cint64 incCount = 1);
-					COntologyRealizingDynamicRequirmentProcessingData* decProcessingItemCount(cint64 decCount = 1);
+					COntologyRealizingDynamicRequirmentProcessingData* incProcessingItemCount(CRealizingTestingStep* realizingStep, cint64 incCount = 1);
+					COntologyRealizingDynamicRequirmentProcessingData* decProcessingItemCount(CRealizingTestingStep* realizingStep, cint64 decCount = 1);
 					
 					COntologyRealizingDynamicRequirmentProcessingData* setCallbackData(COntologyRealizingDynamicRequirmentCallbackData* callbackData);
 					COntologyRealizingDynamicRequirmentCallbackData* getCallbackData();
@@ -78,14 +79,17 @@ namespace Konclude {
 					bool hasCurrentProcessingItemCount();
 
 
-					CRealizingTestingStep* getAssociatedRelizationTestingStep();
+
+					bool hasAssociatedRelizationTestingStepProcessingItemCount(CRealizingTestingStep* realizingStep);
+					CRealizingTestingStep* getAssociatedRelizationTestingStep(CRealizingTestingStep::TESTINGSTEPTYPE type);
 					COntologyRealizingDynamicRequirmentProcessingData* setAssociatedRelizationTestingStep(CRealizingTestingStep* step);
+					COntologyRealizingDynamicRequirmentProcessingData* clearAssociatedRelizationTestingStep(CRealizingTestingStep::TESTINGSTEPTYPE type);
 
 					COntologyProcessingRequirement* getProcessingRequirement();
 					COntologyRealizingDynamicRequirmentProcessingData* setProcessingRequirement(COntologyProcessingRequirement* procReq);
 
-
 					COntologyRealizingDynamicRequirmentProcessingStatistics* getStatistics();
+
 
 				// protected methods
 				protected:
@@ -94,8 +98,10 @@ namespace Konclude {
 				protected:
 					COntologyRealizingDynamicRequirmentProcessingStatistics* mStatistics;
 					cint64 mProcessingItemCount;
+					cint64 mProcessingItemInitialCount = 0;
 					COntologyRealizingDynamicRequirmentCallbackData* mCallbackData;
-					CRealizingTestingStep* mAssRealStep;
+					cint64 mAssRealStepProcessingCount[CRealizingTestingStep::TESTINGSTEPTYPECOUNT];
+					CRealizingTestingStep* mAssRealStep[CRealizingTestingStep::TESTINGSTEPTYPECOUNT];
 					COntologyProcessingRequirement* mProcReq;
 
 				// private methods

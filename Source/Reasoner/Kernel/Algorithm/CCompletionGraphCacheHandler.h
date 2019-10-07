@@ -30,6 +30,7 @@
 #include "CClashDescriptorFactory.h"
 #include "CTrackedClashedDescriptor.h"
 #include "CCalculationAlgorithmContextBase.h"
+#include "CIndividualNodeBackendCacheHandler.h"
 
 // Other includes
 #include "Reasoner/Kernel/Process/CIndividualProcessNode.h"
@@ -73,12 +74,13 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CCompletionGraphCacheHandler();
+						CCompletionGraphCacheHandler(CIndividualNodeBackendCacheHandler* backendCacheHandler);
 
 						//! Destructor
 						virtual ~CCompletionGraphCacheHandler();
 
 						bool isIndividualNodeCompletionGraphConsistenceBlocked(CIndividualProcessNode* individualNode, bool& conceptSetExtended, CCalculationAlgorithmContext* calcAlgContext);
+						bool isIndividualNodeCompletionGraphConsistencePresentNonBlocked(CIndividualProcessNode* individualNode, CCalculationAlgorithmContext* calcAlgContext);
 
 						bool getReactivationIndividuals(CIndividualProcessNode* individualNode, CIndividualReactivationProcessingQueue* reactProcQueue, CCalculationAlgorithmContext* calcAlgContext);
 
@@ -95,9 +97,15 @@ namespace Konclude {
 						bool testBindingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 
 						bool testCriticalConcept(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConceptDescriptor* conDes, bool containedFlag, CCalculationAlgorithmContext* calcAlgContext);
-						bool testCriticalB2AutomateTransitionOperands(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConcept* concept, CCalculationAlgorithmContext* calcAlgContext);
+						bool testCriticalB2AutomateTransitionOperands(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConcept* concept, bool conNegation, CCalculationAlgorithmContext* calcAlgContext);
+
+						bool checkPropagatedConceptsMissing(CConcept* concept, bool conNegation, CIndividualProcessNode* succIndi, CConceptOperator* conOperator, CIndividualProcessNode* compGraphCachedIndiNode);
 
 						bool loadConsistenceModelData(CCalculationAlgorithmContext* calcAlgContext);
+
+
+						bool visitMergedIndividualsBackendSynchronisationData(CIndividualProcessNode* indiNode, function<bool(CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* mergedDataIndiNode)> visitFunc, CCalculationAlgorithmContext* calcAlgContext);
+
 
 					// protected variables
 					protected:
@@ -113,6 +121,11 @@ namespace Konclude {
 						cint64 mDetLocalizationTag;
 						bool mIncrementalExpansionCaching;
 						cint64 mCurrentIncrementalExpansionID;
+						CConfiguration* mLastConfig;
+
+
+						CIndividualNodeBackendCacheHandler* mBackendCacheHandler;
+
 
 					// private methods
 					private:

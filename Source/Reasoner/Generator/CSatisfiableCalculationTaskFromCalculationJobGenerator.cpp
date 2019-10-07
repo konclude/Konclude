@@ -86,7 +86,7 @@ namespace Konclude {
 						individualID = satCalcConsConstruct->getIndividualID();
 						nominalIndi = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan);
 						nominalIndi->initIndividual(individualID);
-						nominalIndi->setTemporaryFakeIndividual(true);
+						nominalIndi->setTemporaryIndividual(true);
 						indiVector->setLocalData(individualID, nominalIndi);
 
 						if (satIndiRefLink) {
@@ -176,6 +176,7 @@ namespace Konclude {
 
 			CSatisfiableCalculationTask* CSatisfiableCalculationTaskFromCalculationJobGenerator::createSatisfiableCalculationTask(CConcreteOntology *ontology, CCalculationJob* calculationJob, CCallbackData* additionalCalculatedCallback) {
 				CSatisfiableCalculationJob* satCalcJob = dynamic_cast<CSatisfiableCalculationJob*>(calculationJob);
+				cint64 firstPossibleNewIndividualID = 1;
 				if (satCalcJob) {
 					CSatisfiableCalculationTask* baseTask = nullptr;
 					bool lastConDesReapplication = false;
@@ -195,12 +196,17 @@ namespace Konclude {
 						}
 						if (consTaskData) {
 							baseTask = consTaskData->getDeterministicSatisfiableTask();
-							lastConDesReapplication = consTaskData->getDeterministicSatisfiableTask() != consTaskData->getCompletionGraphCachedSatisfiableTask();
-							clearIndiProcessingQueue = true;
+							if (satCalcJob->allowNonDeterministicSatisfiableCalculationContinuation()) {
+								baseTask = consTaskData->getCompletionGraphCachedSatisfiableTask();
+							} else {
+								clearIndiProcessingQueue = true;
+							}
+							firstPossibleNewIndividualID = consTaskData->getCompletionGraphCachedSatisfiableTask()->getProcessingDataBox()->getNextIndividualNodeID(false);
+							lastConDesReapplication = baseTask != consTaskData->getCompletionGraphCachedSatisfiableTask();
 						}
 					}
 
-					return createSatisfiableCalculationTaskExtension(ontology,calculationJob,baseTask,lastConDesReapplication,clearIndiProcessingQueue,additionalCalculatedCallback);
+					return createSatisfiableCalculationTaskExtension(ontology,calculationJob,baseTask,lastConDesReapplication,clearIndiProcessingQueue, firstPossibleNewIndividualID,additionalCalculatedCallback);
 				} 
 
 
@@ -218,19 +224,17 @@ namespace Konclude {
 			}
 
 
-			CSatisfiableCalculationTask* CSatisfiableCalculationTaskFromCalculationJobGenerator::createSatisfiableCalculationTaskExtension(CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, CCallbackData* additionalCalculatedCallback) {
-				return createSatisfiableCalculationTaskExtension(calculationJob->getOntology(),calculationJob,baseTask,lastConDesReapplication,clearIndiProcessingQueue,additionalCalculatedCallback);
+			CSatisfiableCalculationTask* CSatisfiableCalculationTaskFromCalculationJobGenerator::createSatisfiableCalculationTaskExtension(CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, cint64 firstPossibleNewIndividualID, CCallbackData* additionalCalculatedCallback) {
+				return createSatisfiableCalculationTaskExtension(calculationJob->getOntology(),calculationJob,baseTask,lastConDesReapplication,clearIndiProcessingQueue, firstPossibleNewIndividualID,additionalCalculatedCallback);
 			}
 
 
 
-			CSatisfiableCalculationTask* CSatisfiableCalculationTaskFromCalculationJobGenerator::createSatisfiableCalculationTaskExtension(CConcreteOntology *ontology, CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, CCallbackData* additionalCalculatedCallback) {
+			CSatisfiableCalculationTask* CSatisfiableCalculationTaskFromCalculationJobGenerator::createSatisfiableCalculationTaskExtension(CConcreteOntology *ontology, CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, cint64 firstPossibleNewIndividualID, CCallbackData* additionalCalculatedCallback) {
 
 				CSatisfiableCalculationJob* satCalcJob = dynamic_cast<CSatisfiableCalculationJob*>(calculationJob);
 
 				if (satCalcJob) {
-
-					cint64 firstPossibleNewIndividualID = 1;
 
 					bool requiresTaskCalc = false;
 
@@ -314,6 +318,9 @@ namespace Konclude {
 
 
 					CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();
+					if (baseTask) {
+						dataBox->setProcessingOntology(ontology);
+					}
 					dataBox->setConstructedIndividualNode(nullptr);
 					dataBox->setReapplicationLastConceptDesciptorOnLastIndividualNodeRequired(lastConDesReapplication);
 
@@ -384,7 +391,7 @@ namespace Konclude {
 							individualNodeID = -satCalcConstruct->getIndividualID();							
 							individual = CObjectAllocator<CIndividual>::allocateAndConstruct(memMan);
 							individual->initIndividual(-individualNodeID);
-							individual->setTemporaryFakeIndividual(true);
+							individual->setTemporaryIndividual(true);
 							baseIndiVec->setLocalData(-individualNodeID, individual);
 
 							nominalIndiTriplesAssertions = true;
@@ -432,7 +439,9 @@ namespace Konclude {
 
 								localIndi->setIndividualNodeID(individualNodeID);
 								if (individual) {
-									localIndi->setNominalIndividual(individual);
+									if (!localIndi->getNominalIndividual()) {
+										localIndi->setNominalIndividual(individual);
+									}
 									localIndi->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
 								}
 								if (!individual || baseTask) {

@@ -93,6 +93,7 @@ namespace Konclude {
 					CIndividualSynonymsResult* mResult;
 
 					bool mUseAbbreviatedIRIs;
+					bool mAnonymousIndividuals;
 
 					bool mQueryConstructError;
 					bool mRealizationCalcError;

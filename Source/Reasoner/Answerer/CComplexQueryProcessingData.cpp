@@ -40,6 +40,7 @@ namespace Konclude {
 				mFinishingHandler = nullptr;
 				mOffsetSkippedMappingCount = 0;
 				mQueryProcessingInitializedAnsweringStatistics = nullptr;
+				mComputationError = false;
 			}
 
 
@@ -89,6 +90,17 @@ namespace Konclude {
 				mUnsatisfiable = unsat;
 				return this;
 			}
+
+
+			bool CComplexQueryProcessingData::isComputationError() {
+				return mComputationError;
+			}
+
+			CComplexQueryProcessingData* CComplexQueryProcessingData::setComputationError(bool error) {
+				mComputationError = error;
+				return this;
+			}
+
 
 
 			bool CComplexQueryProcessingData::hasEntailmentComputation() {
@@ -159,11 +171,11 @@ namespace Konclude {
 				return mProcessingTime;
 			}
 
-			CComplexQueryFinishingHandler* CComplexQueryProcessingData::getFinishingHandler() {
+			CAbstractComplexQueryFinishingHandler* CComplexQueryProcessingData::getFinishingHandler() {
 				return mFinishingHandler;
 			}
 
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setFinishingHandler(CComplexQueryFinishingHandler* finishingHandler) {
+			CComplexQueryProcessingData* CComplexQueryProcessingData::setFinishingHandler(CAbstractComplexQueryFinishingHandler* finishingHandler) {
 				mFinishingHandler = finishingHandler;
 				return this;
 			}

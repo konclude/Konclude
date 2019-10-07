@@ -1354,14 +1354,14 @@ namespace Konclude {
 
 
 		CAnonymousIndividualExpression *CXMLOWL2StreamHandler::parseAnonymousIndividualNode(const QXmlStreamAttributes& attributes) {
-			if (mOntologyName.isEmpty()) {
-				mOntologyName = mOntoBuilder->getOntologyName();
+			if (mOntologyIdentifier.isEmpty()) {
+				mOntologyIdentifier = mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName());
 			}
 			QStringRef indiNameName = getNodeID(attributes);
 			CAnonymousIndividualExpression *exp = 0;
 			if (!indiNameName.isEmpty()) {
 				if (mOntoBuilder) {
-					exp = mOntoBuilder->getAnonymousIndividual(mOntologyName.leftRef(-1),indiNameName);
+					exp = mOntoBuilder->getAnonymousIndividual(QStringRef(&mOntologyIdentifier),indiNameName);
 				}
 			}
 			return exp;

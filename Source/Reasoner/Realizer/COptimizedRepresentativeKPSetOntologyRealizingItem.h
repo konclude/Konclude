@@ -348,6 +348,8 @@ namespace Konclude {
 
 					virtual CRealizationIndividualInstanceItemReference getSameInstanceItemReference(const CIndividualReference& indiRef);
 
+					virtual bool hasPotentiallySameIndividuals();
+					virtual COptimizedRepresentativeKPSetOntologyRealizingItem* setPotentiallySameIndividuals(bool potentiallySameIndividuals);
 
 
 					bool visitAllIndividuals(function<bool(const CRealizationIndividualInstanceItemReference& indiInstItemRef)> visitFunc, bool visitSameIndividualMerged);
@@ -634,6 +636,8 @@ namespace Konclude {
 					QList<COptimizedKPSetConceptInstancesItem*> mProcessingConceptInstancesItemList;
 					QList<COptimizedKPSetIndividualItem*> mProcessingPossibleConceptInstanceItemList;
 					QList<COptimizedKPSetIndividualItem*> mProcessingSameIndividualsItemList;
+					bool mPotentiallySameIndividuals;
+
 
 					cint64 mTestedPossibleConceptInstancesCount;
 					cint64 mOpenPossibleConceptInstancesCount;

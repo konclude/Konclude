@@ -211,7 +211,7 @@ namespace Konclude {
 				QString subjectString = triple.string[0];
 				CIndividualTermExpression* indiExpression = nullptr;
 				if (subjectString.startsWith("_:")) {
-					indiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyName(), subjectString.mid(2));
+					indiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName()), subjectString.mid(2));
 				} else {
 					indiExpression = mOntoBuilder->getNamedIndividual(subjectString);
 				}
@@ -227,7 +227,7 @@ namespace Konclude {
 					if (!isDataProperty(predicateString, objectString)) {
 						CIndividualTermExpression* otherIndiExpression = nullptr;
 						if (objectString.startsWith("_:")) {
-							otherIndiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyName(), objectString.mid(2));
+							otherIndiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName()), objectString.mid(2));
 						} else {
 							otherIndiExpression = mOntoBuilder->getNamedIndividual(objectString);
 						}

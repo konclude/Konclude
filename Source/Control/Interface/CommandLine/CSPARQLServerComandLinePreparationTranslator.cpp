@@ -34,6 +34,9 @@ namespace Konclude {
 					mInterfaceTypeString = QString("CLI");
 					mMinNecessaryArguments = true;
 					mFirstArgumentTranslation = false;
+					mReasonerConfList.append(QString("+=Konclude.Calculation.Querying.ComplexQueryingSupport=true"));
+					mReasonerConfList.append(QString("+=Konclude.Calculation.Optimization.RepresentativePropagation=false"));
+					mReasonerConfList.append(QString("+=Konclude.Calculation.Optimization.SignatureMirroringBlocking=false"));
 				}
 
 

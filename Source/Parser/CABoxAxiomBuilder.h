@@ -108,6 +108,9 @@ namespace Konclude {
 				virtual CDataPropertyAssertionExpression* getDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3) = 0;
 				virtual CNegativeDataPropertyAssertionExpression* getNegativeDataPropertyAssertion(CIndividualTermExpression* expression1, CDataLiteralTermExpression* expression2, CDataPropertyTermExpression* expression3) = 0;
 
+
+				virtual QString getOntologyAnonymousIdentifier(const QString& ontologyName);
+
 			// protected methods
 			protected:
 

@@ -59,17 +59,12 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CRedlandNodeHasher(librdf_node* node) {
-						mNode = node;
-						if (librdf_node_is_literal(mNode)) {
-							mHashValue = hash_c_string((const char*)librdf_node_get_literal_value(mNode));
-						} else if (!librdf_node_is_blank(node)) {
-							librdf_uri* uri = librdf_node_get_uri(mNode);
-							mHashValue = hash_c_string((const char*)librdf_uri_as_string(uri));
-						} else {
-							mHashValue = hash_c_string((const char*)librdf_node_get_blank_identifier(mNode));
-						}
-					}
+					CRedlandNodeHasher(librdf_node* node);
+					CRedlandNodeHasher(const CRedlandNodeHasher& hasher);
+
+					~CRedlandNodeHasher();
+
+					CRedlandNodeHasher& operator=(const CRedlandNodeHasher& hasher);
 
 					cint64 getNodeHashValue() const {
 						return mHashValue;

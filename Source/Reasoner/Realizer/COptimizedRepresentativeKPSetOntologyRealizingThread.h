@@ -257,8 +257,8 @@ namespace Konclude {
 
 
 					bool checkFinishSameIndividualProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetIndividualItem* instantiatedItem);
-					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinker);
-					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, COntologyRealizingDynamicRequirmentProcessingData* procData);
+					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinker);
+					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, COntologyRealizingDynamicRequirmentProcessingData* procData);
 					bool checkFinishConceptInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetConceptInstancesItem* conceptItem);
 
 					COptimizedKPSetIndividualItem* getMergingResolvedIndividualItem(COptimizedKPSetIndividualItem* indiItem);
@@ -292,6 +292,7 @@ namespace Konclude {
 					bool mConfPossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel;
 					cint64 mConfPossibleInstanceIndividualsAfterwardsMergingProvidingCount;
 					cint64 mConfPossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount;
+					bool mConfNonDeterministicSatisfiableCalculationContinuation;
 
 
 #ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS

@@ -65,6 +65,7 @@ namespace Konclude {
 
 					virtual bool visitIndividualName(cint64 individualId, COntologyTriplesIndividualNamesVisitor* visitor) = 0;
 					virtual bool visitIndividualName(cint64 individualId, function<bool(const QString& indiName)> visitFunc) = 0;
+					virtual bool visitIndividualAnonymity(cint64 individualId, function<bool(bool anonymous)> visitFunc) = 0;
 
 					virtual bool visitIndividualId(const QString& indiName, function<bool(cint64 indiId)> visitFunc) = 0;
 					virtual bool hasIndividualId(const QString& indiName) = 0;

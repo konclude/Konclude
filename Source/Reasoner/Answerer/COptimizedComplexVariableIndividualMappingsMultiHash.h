@@ -86,7 +86,7 @@ namespace Konclude {
 					cint64 mMultiHashPartsCount;
 					COptimizedComplexVariableIndividualMappingsMultiHashPart** mMultiHashPartArray;
 
-
+					cint64 mLastBindingCardinalityBatchLinkerUpdateId;
 
 				// private methods
 				private:

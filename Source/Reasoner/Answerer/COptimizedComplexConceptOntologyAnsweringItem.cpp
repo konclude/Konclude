@@ -79,6 +79,7 @@ namespace Konclude {
 					mTestingOntology = new CConcreteOntology(mOntology, mOntology->getConfiguration());
 					mTestingOntology->setOntologyID(mOntology->getOntologyID());
 					mTestingOntology->setConsistence(mOntology->getConsistence());
+					mTestingOntology->getTBox()->setMinimalNextConceptID(mOntology->getTBox()->getMinimalNextConceptID());
 					mTestingOntology->getDataBoxes()->setInitialBuild(false);
 					mTestingOntology->getDataBoxes()->setIterationBuild(true);
 				}
@@ -427,6 +428,11 @@ namespace Konclude {
 			QHash<QPair<QString, CDatatype*>, CDataLiteral*>* COptimizedComplexConceptOntologyAnsweringItem::getDataValueDatatypeSingleLiteralHash() {
 				return &mDataValueDatatypeSingleLiteralHash;
 			}
+
+			CContext* COptimizedComplexConceptOntologyAnsweringItem::getDataValueMemoryManagementContext() {
+				return &mDataValueMemoryManagementContext;
+			}
+
 
 		}; // end namespace Answerer
 

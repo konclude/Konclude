@@ -29,7 +29,10 @@ namespace Konclude {
 
 
 			COntologyRealizingDynamicRequirmentProcessingData::COntologyRealizingDynamicRequirmentProcessingData(COntologyProcessingRequirement* procReq, COntologyRealizingDynamicRequirmentCallbackData* callback) {
-				mAssRealStep = nullptr;
+				for (cint64 i = 0; i < CRealizingTestingStep::TESTINGSTEPTYPECOUNT; ++i) {
+					mAssRealStepProcessingCount[i] = 0;
+					mAssRealStep[i] = nullptr;
+				}
 				mCallbackData = callback;
 				mProcessingItemCount = 0;
 				mProcReq = procReq;
@@ -40,14 +43,21 @@ namespace Konclude {
 			}
 
 
-			COntologyRealizingDynamicRequirmentProcessingData* COntologyRealizingDynamicRequirmentProcessingData::incProcessingItemCount(cint64 incCount) {
+			COntologyRealizingDynamicRequirmentProcessingData* COntologyRealizingDynamicRequirmentProcessingData::incProcessingItemCount(CRealizingTestingStep* realizingStep, cint64 incCount) {
 				mProcessingItemCount += incCount;
+				mProcessingItemInitialCount += incCount;
+				if (realizingStep) {
+					mAssRealStepProcessingCount[(cint64)realizingStep->getRealizingTestingType()] += incCount;
+				}
 				return this;
 			}
 
 
-			COntologyRealizingDynamicRequirmentProcessingData* COntologyRealizingDynamicRequirmentProcessingData::decProcessingItemCount(cint64 decCount) {
+			COntologyRealizingDynamicRequirmentProcessingData* COntologyRealizingDynamicRequirmentProcessingData::decProcessingItemCount(CRealizingTestingStep* realizingStep, cint64 decCount) {
 				mProcessingItemCount -= decCount;
+				if (realizingStep) {
+					mAssRealStepProcessingCount[(cint64)realizingStep->getRealizingTestingType()] -= decCount;
+				}
 				return this;
 			}
 
@@ -64,12 +74,26 @@ namespace Konclude {
 				return mProcessingItemCount > 0;
 			}
 
-			CRealizingTestingStep* COntologyRealizingDynamicRequirmentProcessingData::getAssociatedRelizationTestingStep() {
-				return mAssRealStep;
+			bool COntologyRealizingDynamicRequirmentProcessingData::hasAssociatedRelizationTestingStepProcessingItemCount(CRealizingTestingStep* realizingStep) {
+				if (mAssRealStepProcessingCount[(cint64)realizingStep->getRealizingTestingType()] > 0) {
+					return true;
+				}
+				return false;
+			}
+
+			COntologyRealizingDynamicRequirmentProcessingData* COntologyRealizingDynamicRequirmentProcessingData::clearAssociatedRelizationTestingStep(CRealizingTestingStep::TESTINGSTEPTYPE type) {
+				mAssRealStep[(cint64)type] = nullptr;
+				return this;
+			}
+
+
+			CRealizingTestingStep* COntologyRealizingDynamicRequirmentProcessingData::getAssociatedRelizationTestingStep(CRealizingTestingStep::TESTINGSTEPTYPE type) {
+				CRealizingTestingStep* step = mAssRealStep[(cint64)type];
+				return step;
 			}
 
 			COntologyRealizingDynamicRequirmentProcessingData* COntologyRealizingDynamicRequirmentProcessingData::setAssociatedRelizationTestingStep(CRealizingTestingStep* step) {
-				mAssRealStep = step;
+				mAssRealStep[(cint64)step->getRealizingTestingType()] = step;
 				return this;
 			}
 

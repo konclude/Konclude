@@ -33,7 +33,8 @@ namespace Konclude {
 				mOntoAnsweringItem = ontoAnsweringItem;
 
 				mMemMan = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
-				mConceptVec = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox()->getConceptVector();
+				mTBox = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox();
+				mConceptVec = mTBox->getConceptVector();
 			}
 
 

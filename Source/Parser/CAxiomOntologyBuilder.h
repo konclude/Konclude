@@ -79,6 +79,7 @@ namespace Konclude {
 
 
 				virtual QString getOntologyName() = 0;
+				virtual QString getAnonymousOntologyIdentifier();
 
 				virtual cint64 getAxiomNumber() = 0;
 

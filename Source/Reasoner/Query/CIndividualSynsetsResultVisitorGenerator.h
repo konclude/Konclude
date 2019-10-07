@@ -59,7 +59,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CIndividualSynsetsResultVisitorGenerator(CIndividualSynsetsResult* classSynsetsResult, bool abbreviatedIRIs, CIndividualNameResolver* indiNameResolver);
+					CIndividualSynsetsResultVisitorGenerator(CIndividualSynsetsResult* classSynsetsResult, bool abbreviatedIRIs, bool integrateAnonymousIndividuals, CIndividualNameResolver* indiNameResolver);
 
 					virtual bool visitInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptRealization* conRealization);
 					virtual bool visitRoleInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleRealization* roleRealization);
@@ -74,6 +74,7 @@ namespace Konclude {
 					CIndividualNameResolver* mIndiNameResolver;
 					CIndividualSynsetsResult* mIndividualSynsetsResult;
 					bool mAbbreviatedIRIs;
+					bool mIntegrateAnonymousIndividuals;
 
 					CIndividualSynsetResult* mTmpIndividualSynsetResult;
 

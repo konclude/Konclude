@@ -81,6 +81,8 @@ namespace Konclude {
 					mConfPossibleInstanceIndividualsAfterwardsMergingProvidingCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingProvidingCount", -1);
 					mConfPossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount", 3);
 
+					mConfNonDeterministicSatisfiableCalculationContinuation = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.NonDeterministicCachedCompletionGraphContinuationPropagationTests", true);
+
 
 					bool configErrorFlag = false;
 					cint64 processorCount = 1;
@@ -115,6 +117,7 @@ namespace Konclude {
 					mConfPossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel = false;
 					mConfPossibleInstanceIndividualsAfterwardsMergingProvidingCount = -1;
 					mConfPossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount = 3;
+					mConfNonDeterministicSatisfiableCalculationContinuation = true;
 
 					mConfMaxTestParallelCount = 1;
 				}
@@ -564,6 +567,7 @@ namespace Konclude {
 				QList<CIndividualReference> knownSameIndividualIdList;
 				CBackendRepresentativeMemoryLabelCacheItem* knownSameIndilabelItem = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
 				if (knownSameIndilabelItem) {
+					reqConfPreCompItem->setPotentiallySameIndividuals(true);
 					reqConfPreCompItem->getBackendAssociationCacheReader()->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, knownSameIndilabelItem, [&](cint64 sameIndiId)->bool {
 						if (sameIndiId > indiId) {
 							CIndividual* sameIndividual = indiVec->getData(indiId);
@@ -578,6 +582,7 @@ namespace Konclude {
 				}
 				CBackendRepresentativeMemoryLabelCacheItem* possibleSameIndilabelItem = reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociatedCacheLabelItem(indiId, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
 				if (possibleSameIndilabelItem) {
+					reqConfPreCompItem->setPotentiallySameIndividuals(true);
 					reqConfPreCompItem->getBackendAssociationCacheReader()->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possibleSameIndilabelItem, [&](cint64 possibleSameIndiId)->bool {
 						if (possibleSameIndiId != indiId && !reqConfPreCompItem->getBackendAssociationCacheReader()->hasIndividualIdsInAssociatedIndividualSetLabel(nullptr, knownSameIndilabelItem, possibleSameIndiId)) {
 							CIndividual* possibleSameIndividual = indiVec->getData(possibleSameIndiId);
@@ -1144,6 +1149,7 @@ namespace Konclude {
 
 
 					reqConfPreCompItem->getBackendAssociationCacheReader()->visitLabelCacheEntries(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL, [&](CBackendRepresentativeMemoryLabelCacheItem* possSameIndiLabelCacheItem)->bool {
+						reqConfPreCompItem->setPotentiallySameIndividuals(true);
 
 						reqConfPreCompItem->getBackendAssociationCacheReader()->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, possSameIndiLabelCacheItem, [&](cint64 indiId)->bool {
 
@@ -2026,7 +2032,6 @@ namespace Konclude {
 						reqConfPreCompItem->incModelMergingsNonInstanceFoundCount();
 					}
 					interpretConceptInstantiationResult(reqConfPreCompItem, instancesItem, instantiatedItem, isInstanceByModelMerging);
-					//setDynamicRequirementProcessed(reqConfPreCompItem, procData);
 					return false;
 				}
 
@@ -2047,7 +2052,6 @@ namespace Konclude {
 					if (alreadySatisfiable) {
 						reqConfPreCompItem->incSucceddedPossibleInstancesMergingsCount();
 						interpretConceptInstantiationResult(reqConfPreCompItem, instancesItem, instantiatedItem, false);
-						//setDynamicRequirementProcessed(reqConfPreCompItem, procData);
 						return false;
 					}
 				}
@@ -2357,6 +2361,10 @@ namespace Konclude {
 					//if (individualItem->getIndividualDependenceTrackingCollector()) {
 					//	satCalcJob->setSatisfiableTaskIndividualDependenceTrackingAdapter(new CSatisfiableTaskIndividualDependenceTrackingAdapter(individualItem->getIndividualDependenceTrackingCollector()));
 					//}
+
+					if (mConfNonDeterministicSatisfiableCalculationContinuation) {
+						satCalcJob->setAllowNonDeterministicSatisfiableCalculationContinuation(true);
+					}
 
 					processCalculationJob(satCalcJob, reqConfPreCompItem, testItem);
 					workCreated = true;
@@ -2792,6 +2800,7 @@ namespace Konclude {
 					CSatisfiableCalculationJobGenerator satCalcJobGen(reqConfPreCompItem->getTemporaryRoleRealizationOntology());
 					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(roleInstancesItem->getTemporaryPropagationConcept(), false, item1Ref, satCalcJob);
 					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(roleInstancesItem->getTemporaryMarkerConcept(), true, item2Ref, satCalcJob);
+					satCalcJob->setCalculationConfiguration(reqConfPreCompItem->getCalculationConfiguration());
 
 					CIndividualRoleCandidateConfirmationTestingItem* testItem = new CIndividualRoleCandidateConfirmationTestingItem(reqConfPreCompItem, item1Ref, item2Ref, roleInstancesItem, procData);
 					processCalculationJob(satCalcJob, reqConfPreCompItem, testItem);
@@ -2991,7 +3000,7 @@ namespace Konclude {
 										indiItem1->getPossibleSameInstantiatedItemSet()->remove(indiItem2);
 										workTestCreated = createNextSameIndividualsTest(reqConfPreCompItem, indiItem1, indiItem2, procData);
 									} else if (procData) {
-										setDynamicRequirementProcessed(ontPreCompItem, procData);
+										setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeSameIndividualsProcessingStep(), procData);
 									}
 									delete sameInstTestItem;
 								}
@@ -3085,8 +3094,9 @@ namespace Konclude {
 										if (!indiItem->isItemSameIndividualMerged() && conceptItem->getPossibleInstancesMap()->contains(indiItem->getIndividualId())) {
 											conceptItem->getPossibleInstancesMap()->remove(indiItem->getIndividualId());
 											workTestCreated = createNextConceptInstantiationTest(reqConfPreCompItem, conceptItem, indiItem, procData);
-										} else if (procData) {
-											setDynamicRequirementProcessed(ontPreCompItem, procData);
+										} 
+										if (!workTestCreated && procData) {
+											setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeConceptProcessingStep(), procData);
 										}
 										delete conInstTestItem;
 									}
@@ -3351,7 +3361,7 @@ namespace Konclude {
 
 
 											if (!workTestCreated && procData) {
-												setDynamicRequirementProcessed(ontPreCompItem, procData);
+												setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), procData);
 											}
 										} else {
 											if (indiSourceItem) {
@@ -3367,7 +3377,7 @@ namespace Konclude {
 															COptimizedKPSetRoleInstancesData* instanceData = destIndiInstanceDat.mInstanceItemData;
 															if (instanceData && !instanceData->mKnownInstance && instanceData->mPossibleInstance && !instanceData->mTestedInstance) {
 																CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem* incRoleInstTestItem = new CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem(indiSourceItemRef, CRealizationIndividualInstanceItemReference(destIndiItem->getIndividualReference(), destIndiItem), roleItem, inversed, procData);
-																procData->incProcessingItemCount();
+																procData->incProcessingItemCount(reqConfPreCompItem->getRealizeRoleProcessingStep());
 																reqConfPreCompItem->addEntailmentIndividualsRoleInstanceTestingItem(incRoleInstTestItem);
 															}
 														}
@@ -3389,7 +3399,7 @@ namespace Konclude {
 														if (instanceData && !instanceData->mKnownInstance && instanceData->mPossibleInstance && !instanceData->mTestedInstance) {
 															CRealizationIndividualInstanceItemReference destIndiRef = reqConfPreCompItem->getInstanceItemReference(destIndiId, false);
 															CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem* incRoleInstTestItem = new CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem(indiSourceItemRef, destIndiRef, roleItem, inversed, procData);
-															procData->incProcessingItemCount();
+															procData->incProcessingItemCount(reqConfPreCompItem->getRealizeRoleProcessingStep());
 															reqConfPreCompItem->addEntailmentIndividualsRoleInstanceTestingItem(incRoleInstTestItem);
 														}
 													}
@@ -3399,7 +3409,7 @@ namespace Konclude {
 
 
 											if (procData) {
-												setDynamicRequirementProcessed(reqConfPreCompItem, procData);
+												setDynamicRequirementProcessed(reqConfPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), procData);
 											}
 
 
@@ -3573,6 +3583,7 @@ namespace Konclude {
 					tmpRoleRealOntology = new CConcreteOntology(ontology,ontology->getConfiguration());		
 					tmpRoleRealOntology->setOntologyID(ontology->getOntologyID());
 					tmpRoleRealOntology->setConsistence(ontology->getConsistence());
+					tmpRoleRealOntology->getTBox()->setMinimalNextConceptID(ontology->getTBox()->getMinimalNextConceptID());
 
 					QSet<CConcept*> compTransformConceptSet;
 					QHash<CConcept*,COptimizedKPSetRoleInstancesItem*>* markerConRolInsItemHash = item->getMarkerConceptInstancesItemHash();
@@ -3630,20 +3641,11 @@ namespace Konclude {
 
 
 			CConcept* COptimizedRepresentativeKPSetOntologyRealizingThread::createTemporaryConcept(COptimizedRepresentativeKPSetOntologyRealizingItem* item, CConcreteOntology* tmpRoleRealOntology) {
-				CConceptVector* conVec = tmpRoleRealOntology->getTBox()->getConceptVector();
+				CTBox* tBox = tmpRoleRealOntology->getTBox();
+				CConceptVector* conVec = tBox->getConceptVector();
 				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(tmpRoleRealOntology->getOntologyContext()->getMemoryAllocationManager());
 				concept->initConcept();
-				cint64 newConTag = conVec->getItemCount();
-				CConsistence* consistence = tmpRoleRealOntology->getConsistence();
-				if (consistence) {
-					CConsistenceData* consData = consistence->getConsistenceModelData();
-					if (consData) {
-						CConsistenceTaskData* consTaskData = dynamic_cast<CConsistenceTaskData*>(consData);
-						CSatisfiableCalculationTask* satConsTask = consTaskData->getCompletionGraphCachedSatisfiableTask();
-						newConTag = qMax(newConTag, satConsTask->getProcessingDataBox()->getExtendedConceptVector()->getItemCount());
-					}
-				}
-
+				cint64 newConTag = tBox->getNextConceptID();
 				concept->setConceptTag(newConTag);
 				conVec->setData(concept->getConceptTag(),concept);
 				return concept;
@@ -3900,6 +3902,11 @@ namespace Konclude {
 
 						delete indiRoleCandConfTestItem;
 						processed = true;
+
+						if (procData) {
+							setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), procData);
+						}
+
 					}
 				}
 
@@ -3936,6 +3943,10 @@ namespace Konclude {
 						delete adapter;
 						delete indiRoleCandTestItem;
 						processed = true;
+
+						if (procData) {
+							setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), procData);
+						}
 					}
 				}
 
@@ -3972,6 +3983,12 @@ namespace Konclude {
 
 						delete indiConInstTestItem;
 						processed = true;
+
+						if (procData) {
+							setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeConceptProcessingStep(), procData);
+						}
+
+
 					}
 				}
 
@@ -4015,6 +4032,11 @@ namespace Konclude {
 
 						delete indiPairRoleInstTestItem;
 						processed = true;
+
+						if (procData) {
+							setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), procData);
+						}
+
 					}
 				}
 
@@ -4051,6 +4073,11 @@ namespace Konclude {
 
 						delete indiSameTestItem;
 						processed = true;
+
+						if (procData) {
+							setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeSameIndividualsProcessingStep(), procData);
+						}
+
 					}
 				}
 				if (!processed) {
@@ -4060,18 +4087,16 @@ namespace Konclude {
 						reqConfPreCompItem->setExtraConsistencyTesting(false);
 					}
 				}
-				if (procData) {
-					setDynamicRequirementProcessed(ontPreCompItem, procData);
-				}
 				return processed;
 			}
 
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkFinishSameIndividualProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetIndividualItem* instantiatedItem) {
+				COptimizedRepresentativeKPSetOntologyRealizingItem* realItem = (COptimizedRepresentativeKPSetOntologyRealizingItem*)ontRealItem;
 				if (instantiatedItem) {
 					if (instantiatedItem->isItemSameIndividualMerged() || (!instantiatedItem->hasToProcessPossibleSameIndividualsFlag() && !instantiatedItem->hasPossibleSameIndividualsTesting() && !instantiatedItem->hasPossibleSameIndividuals())) {
-						setDynamicRequirementProcessed(ontRealItem, instantiatedItem->takeRequirmentProcessingDataLinkers());
+						setDynamicRequirementProcessed(ontRealItem, realItem->getRealizeSameIndividualsProcessingStep(), instantiatedItem->takeRequirmentProcessingDataLinkers());
 						return true;
 					}
 				}
@@ -4080,23 +4105,27 @@ namespace Konclude {
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkFinishConceptInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetConceptInstancesItem* conceptItem) {
+				COptimizedRepresentativeKPSetOntologyRealizingItem* realItem = (COptimizedRepresentativeKPSetOntologyRealizingItem*)ontRealItem;
 				if (conceptItem) {
 					if (!conceptItem->hasPossibleInstances() && !conceptItem->hasTestingPossibleInstances() && !conceptItem->hasPossibleInstances()) {
 						conceptItem->setConceptInstancesTestingFinished(true);
-						setDynamicRequirementProcessed(ontRealItem, conceptItem->takeRequirmentProcessingDataLinkers());
+						setDynamicRequirementProcessed(ontRealItem, realItem->getRealizeConceptProcessingStep(), conceptItem->takeRequirmentProcessingDataLinkers());
 						return true;
 					}
 				}
 				return false;
 			}
 
-			COptimizedRepresentativeKPSetOntologyRealizingThread* COptimizedRepresentativeKPSetOntologyRealizingThread::setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, COntologyRealizingDynamicRequirmentProcessingData* procData) {
-				procData->decProcessingItemCount();
-				if (!procData->hasCurrentProcessingItemCount()) {
-					CRealizingTestingStep* realStep = procData->getAssociatedRelizationTestingStep();
+			COptimizedRepresentativeKPSetOntologyRealizingThread* COptimizedRepresentativeKPSetOntologyRealizingThread::setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, COntologyRealizingDynamicRequirmentProcessingData* procData) {
+				procData->decProcessingItemCount(realizingStep);
+				if (!procData->hasAssociatedRelizationTestingStepProcessingItemCount(realizingStep)) {
+					CRealizingTestingStep* realStep = procData->getAssociatedRelizationTestingStep(realizingStep->getRealizingTestingType());
 					if (realStep) {
+						procData->clearAssociatedRelizationTestingStep(realizingStep->getRealizingTestingType());
 						realStep->removeRequirementProcessingData(procData);
 					}
+				}
+				if (!procData->hasCurrentProcessingItemCount()) {
 					COntologyProcessingRequirement* procReq = procData->getProcessingRequirement();
 					if (procReq) {
 						procReq->submitRequirementUpdate(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, COntologyProcessingStatus::PSSUCESSFULL);
@@ -4108,20 +4137,20 @@ namespace Konclude {
 							ontRealItem->logRequirementProcessingFinishStatistics(procData->getStatistics());
 							CCallbackData* callback = callbackData->getProcessingFinishedCallback();
 							callback->doCallback();
-							delete callbackData;
+							//delete callbackData;
 						}
 					}
-					delete procData;
+					//delete procData;
 				}
 				return this;
 			}
 
 
-			COptimizedRepresentativeKPSetOntologyRealizingThread* COptimizedRepresentativeKPSetOntologyRealizingThread::setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinker) {
+			COptimizedRepresentativeKPSetOntologyRealizingThread* COptimizedRepresentativeKPSetOntologyRealizingThread::setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinker) {
 				CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinkerIt = procDataLinker;
 				while (procDataLinkerIt) {
 					COntologyRealizingDynamicRequirmentProcessingData* procData = procDataLinkerIt->getData();
-					setDynamicRequirementProcessed(ontRealItem, procData);
+					setDynamicRequirementProcessed(ontRealItem, realizingStep, procData);
 					procDataLinkerIt = procDataLinkerIt->getNext();
 				}
 				if (procDataLinker) {

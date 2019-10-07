@@ -66,7 +66,7 @@ namespace Konclude {
 
 					mRoleVec = rbox->getRoleVector();
 					mConVec = tbox->getConceptVector();
-					mNextConceptTag = mConVec->getItemCount();
+					mNextConceptTag = tbox->getNextConceptID();
 
 					mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
 
@@ -106,7 +106,7 @@ namespace Konclude {
 
 			CConcreteOntology* CRoleChainAutomataTransformationPreProcess::continuePreprocessing() {
 				if (mOntology) {
-					mNextConceptTag = mConVec->getItemCount();
+					mNextConceptTag = mOntology->getTBox()->getNextConceptID();
 					transformVALUERestrictions();
 					transformFORALLPropagations();
 				}
@@ -158,7 +158,7 @@ namespace Konclude {
 
 				mRoleVec = rbox->getRoleVector();
 				mConVec = tbox->getConceptVector();
-				mNextConceptTag = mConVec->getItemCount();
+				mNextConceptTag = tbox->getNextConceptID();
 
 				mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
 

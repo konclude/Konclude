@@ -43,6 +43,14 @@ namespace Konclude {
 					mOriginPreSynchronizer = preSynchronizer;
 					mDataWritten = false;
 
+					cint64 writeBufferBlockingLimit = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.SPARQL.Server.WriteBufferBlockingLimit", 20);
+					if (writeBufferBlockingLimit > 0) {
+						mWriteLimitSemaphore = new QSemaphore(writeBufferBlockingLimit);
+					} else {
+						mWriteLimitSemaphore = nullptr;
+					}
+					mBlockingWarned = false;
+
 
 					mStreamSPARQLHeader = QString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\" xml:base=\"http://www.w3.org/2005/sparql-results#\" xmlns:owl=\"http://www.w3.org/2002/07/owl#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">").toLocal8Bit();
 					mStreamSPARQLFooter = QString("\r\n</sparql>").toLocal8Bit();
@@ -75,6 +83,10 @@ namespace Konclude {
 					mSocket->close();
 					delete mSocket;
 					delete mParser;
+
+					if (mWriteLimitSemaphore) {
+						delete mWriteLimitSemaphore;
+					}
 				}
 
 
@@ -182,9 +194,10 @@ namespace Konclude {
 							return true;
 						} else if (type == CResultStreamingWriteEvent::EVENTTYPE) {
 							CResultStreamingWriteEvent* rswe = (CResultStreamingWriteEvent*)event;
-							QByteArray* buffer = rswe->getBuffer();
+							QList<CSPARQLResultBufferWriteData>* bufferList = rswe->getBufferList();
 							bool last = rswe->isLast();
-							writeStreamDataToSocket(buffer, last);
+							writeStreamDataToSocket(bufferList, last);
+							mWriteLimitSemaphore->release(1);
 							mDataWritten = true;
 							return true;
 						}
@@ -208,19 +221,29 @@ namespace Konclude {
 				}
 
 
-				bool CSPARQLHttpConnectionHandlerProcessor::writeStreamData(QByteArray* buffer, bool last) {
-					postEvent(new CResultStreamingWriteEvent(buffer, last));
+				bool CSPARQLHttpConnectionHandlerProcessor::writeStreamData(const QList<CSPARQLResultBufferWriteData>& bufferList, bool last) {
+					if (mWriteLimitSemaphore) {
+						if (!mBlockingWarned && mWriteLimitSemaphore->available() <= 2) {
+							mBlockingWarned = true;
+							LOG(WARN, "::Konclude::Control::Interface::SPARQL::SPARQLHTTPConnectionProcessor", logTr("Result sending buffer limit almost reached, result generation may be blocked due to slow network connection."), this);
+						}
+						mWriteLimitSemaphore->acquire(1);
+					}
+					postEvent(new CResultStreamingWriteEvent(bufferList, last));
 					//writeStreamDataToSocket(buffer, last);
 					//mDataWritten = true;
 					return !mWritingFailed;
 				}
 
 
-				CSPARQLStreamingWriter* CSPARQLHttpConnectionHandlerProcessor::writeStreamDataToSocket(QByteArray* buffer, bool last) {
+				CSPARQLStreamingWriter* CSPARQLHttpConnectionHandlerProcessor::writeStreamDataToSocket(QList<CSPARQLResultBufferWriteData>* bufferList, bool last) {
 					if (mSocket->state() == QTcpSocket::ConnectedState) {
-						if (!mWritingStarted && last) {
-							sendData(*buffer);
-							delete buffer;
+						if (!mWritingStarted && last && bufferList->size() == 1) {
+							CSPARQLResultBufferWriteData bufferData = bufferList->first();
+							for (cint64 i = bufferData.getWriteCount(); i > 0; --i) {
+								sendData(*bufferData.getBuffer());
+							}
+							delete bufferData.getBuffer();
 						} else {
 							++mChunkPart;
 							// write with chunked encoding
@@ -242,17 +265,23 @@ namespace Konclude {
 								mSocket->flush();
 								firstChunk = true;
 							}
-							writeChunk(*buffer);
+							cint64 bufferSize = 0;
+							for (CSPARQLResultBufferWriteData bufferData : *bufferList) {
+								for (cint64 i = bufferData.getWriteCount(); i > 0; --i) {
+									writeChunk(*bufferData.getBuffer());
+									bufferSize += bufferData.getBuffer()->size();
+								}
+								delete bufferData.getBuffer();
+							}
 							mSocket->flush();
 							if (last) {
 								writeChunk(mStreamSPARQLFooter);
 								writeChunk(QByteArray());
 								mSocket->flush();
-								LOG(INFO, "::Konclude::Control::Interface::SPARQL::SPARQLHTTPConnectionProcessor", logTr("HTTP request successfully processed, last part of %1 with %2 bytes sent.").arg(mChunkPart).arg(buffer->size()), this);
+								LOG(INFO, "::Konclude::Control::Interface::SPARQL::SPARQLHTTPConnectionProcessor", logTr("HTTP request successfully processed, last part of %1 with %2 bytes sent.").arg(mChunkPart).arg(bufferSize), this);
 							} else {
-								LOG(INFO, "::Konclude::Control::Interface::SPARQL::SPARQLHTTPConnectionProcessor", logTr("Sending part %1 with %2 bytes of HTTP response via chunked encoding.").arg(mChunkPart).arg(buffer->size()), this);
+								LOG(INFO, "::Konclude::Control::Interface::SPARQL::SPARQLHTTPConnectionProcessor", logTr("Sending part %1 with %2 bytes of HTTP response via chunked encoding.").arg(mChunkPart).arg(bufferSize), this);
 							}
-							delete buffer;
 						}
 					} else {
 						mWritingFailed = true;

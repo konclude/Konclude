@@ -84,6 +84,7 @@ namespace Konclude {
 
 					CMemoryAllocationManager* mMemMan;
 					CConceptVector* mConceptVec;
+					CTBox* mTBox;
 
 
 				// private methods

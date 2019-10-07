@@ -85,8 +85,8 @@ namespace Konclude {
 					CSatisfiableCalculationTask* createSatisfiableCalculationTask(CConcreteOntology *ontology, CCalculationJob* calculationJob, CCallbackData* additionalCalculatedCallback = nullptr);
 
 
-					CSatisfiableCalculationTask* createSatisfiableCalculationTaskExtension(CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, CCallbackData* additionalCalculatedCallback = nullptr);
-					CSatisfiableCalculationTask* createSatisfiableCalculationTaskExtension(CConcreteOntology *ontology, CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, CCallbackData* additionalCalculatedCallback = nullptr);
+					CSatisfiableCalculationTask* createSatisfiableCalculationTaskExtension(CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, cint64 firstPossibleNewIndividualID = 1, CCallbackData* additionalCalculatedCallback = nullptr);
+					CSatisfiableCalculationTask* createSatisfiableCalculationTaskExtension(CConcreteOntology *ontology, CCalculationJob* calculationJob, CSatisfiableCalculationTask* baseTask, bool lastConDesReapplication, bool clearIndiProcessingQueue, cint64 firstPossibleNewIndividualID = 1, CCallbackData* additionalCalculatedCallback = nullptr);
 
 					CSatisfiableCalculationTask* createApproximatedSaturationCalculationTask(CConcreteOntology *ontology, CApproximatedSaturationCalculationJob* approxSaturCalcJob, CCallbackData* additionalCalculatedCallback);
 				// protected methods

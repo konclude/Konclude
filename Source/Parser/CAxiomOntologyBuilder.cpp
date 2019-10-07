@@ -43,6 +43,16 @@ namespace Konclude {
 		}
 
 
+		QString CAxiomOntologyBuilder::getAnonymousOntologyIdentifier() {
+			QString ontologyIdentifier = getOntologyName();
+			if (!ontologyIdentifier.startsWith("_:")) {
+				ontologyIdentifier = "_:" + ontologyIdentifier;
+			}
+			return ontologyIdentifier;
+		}
+
+
+
 	}; // end namespace Parser
 
 }; // end namespace Konclude

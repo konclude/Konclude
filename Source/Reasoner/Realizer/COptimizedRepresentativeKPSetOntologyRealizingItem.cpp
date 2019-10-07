@@ -112,6 +112,7 @@ namespace Konclude {
 				mExtraConsistencyTesting = false;
 				mExtraConsistencyTested = false;
 
+				mPotentiallySameIndividuals = false;
 				mIteratorNothingToDoWarning = false;
 
 				mIndiDepTrackReq = false;
@@ -761,13 +762,13 @@ namespace Konclude {
 									initializationCheckIteratorCopyList.append(iteratorCopy);
 								}
 								while (!iteratorCopy->atEnd() && (realReqInstCount < 0 || realReqInstCount > 1 && iteratorReqDataCallback->getFoundInstancesCount() + schedulingIndividualCount < realReqInstCount)) {
-									CRealizationIndividualInstanceItemReference currentPosIndiItemRef = iteratorCopy->currentIndividualInstanceItemReference();
-									if (currentPosIndiItemRef.getIndividualID() == -1 || iteratorCopy->requiresInitialization()) {
+									CRealizationIndividualInstanceItemReference currentCopyPosIndiItemRef = iteratorCopy->currentIndividualInstanceItemReference();
+									if (currentCopyPosIndiItemRef.getIndividualID() == -1 || iteratorCopy->requiresInitialization()) {
 										if (ensureIteratorPositionRealization(iteratorReqDataCallback, newReqProcDat, iteratorCopy, initializationCheckIteratorCopyList)) {
 											++schedulingIndividualCount;
 										}
 									}
-									if (currentPosIndiItemRef.getIndividualID() == -1) {
+									if (currentCopyPosIndiItemRef.getIndividualID() == -1) {
 										//iteratorCopy2->moveNext();
 										//CRealizationIndividualInstanceItemReference currentPosIndiItemRef2 = iteratorCopy2->currentIndividualInstanceItemReference();
 										break;
@@ -863,7 +864,7 @@ namespace Konclude {
 
 					COntologyRealizingDynamicIteratorRequirmentDataCallback* dynamicIteratorReapRealReq = dynamic_cast<COntologyRealizingDynamicIteratorRequirmentDataCallback*>(dynamicRealRequirment);
 					if (dynamicIteratorReapRealReq) {
-						procData->decProcessingItemCount();
+						procData->decProcessingItemCount(nullptr);
 						bool finishIteratorHandling = false;
 						if (!dynamicIteratorReapRealReq->hasRealizedAllInstances()) {
 							COntologyRealizingDynamicRequirmentCallbackData* reqCallbackData = new COntologyRealizingDynamicRequirmentCallbackData(dynamicIteratorReapRealReq);
@@ -872,7 +873,7 @@ namespace Konclude {
 
 
 							if (handleIteratorRequirement(dynamicIteratorReapRealReq, newReqProcDat, procData)) {
-								procData->incProcessingItemCount();
+								procData->incProcessingItemCount(nullptr);
 							} else {
 								finishIteratorHandling = true;
 								delete newReqProcDat;
@@ -907,7 +908,7 @@ namespace Konclude {
 							procData->getStatistics()->incIteratorPreparationStartingCount();
 						}
 						if (handleIteratorRequirement(iteratorReqDataCallback, newReqProcDat, procData)) {
-							procData->incProcessingItemCount();
+							procData->incProcessingItemCount(nullptr);
 						} else {
 							if (!mIteratorNothingToDoWarning) {
 								LOG(WARN, "::Konclude::Reasoner::Kernel::Realizer", logTr("Nothing to do for realization iterator."), this);
@@ -985,7 +986,7 @@ namespace Konclude {
 						supportRequirement = true;
 					}
 				}
-				if (procData && !procData->hasCurrentProcessingItemCount() && !procData->getAssociatedRelizationTestingStep()) {
+				if (procData && !procData->hasCurrentProcessingItemCount()) {
 					ontoRequirement->submitRequirementUpdate(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, COntologyProcessingStatus::PSSUCESSFULL);
 					if (procData->getCallbackData()) {
 						COntologyRealizingDynamicRequirmentCallbackData* callbackData = procData->getCallbackData();
@@ -1109,7 +1110,7 @@ namespace Konclude {
 						item->setToProcessPossibleInstancesFlag(true);
 						item->setToInitializeCandidatesFlag(true);
 						if (procData && (item->hasPossibleInstances() || item->hasComplexInstanceCandidates())) {
-							procData->incProcessingItemCount();
+							procData->incProcessingItemCount(mRealizeConceptProcessingStep);
 							item->addRequirementProcessingDataLinker(createRequirementProcessingDataLinker(procData));
 							roleItemQueued = true;
 						}
@@ -1164,7 +1165,7 @@ namespace Konclude {
 									conceptItem->getPossibleInstancesMap()->insert(indi.getIndividualID(), indiItem);
 								}
 								CRealizationEntailmentQueuedIndividualConceptInstanceTestingItem* incConInstTestItem = new CRealizationEntailmentQueuedIndividualConceptInstanceTestingItem(indiItem, conceptItem, procData);
-								procData->incProcessingItemCount();
+								procData->incProcessingItemCount(mRealizeConceptProcessingStep);
 								addEntailmentIndividualConceptInstanceTestingItem(incConInstTestItem);
 								conceptItemQueued = true;
 							}
@@ -1206,7 +1207,7 @@ namespace Konclude {
 					if (possSameIndiItemSet) {
 						if (possSameIndiItemSet->contains(indiItem2)) {
 							CRealizationEntailmentQueuedIndividualsSameInstanceTestingItem* incSameInstTestItem = new CRealizationEntailmentQueuedIndividualsSameInstanceTestingItem(indiItem1, indiItem2, procData);
-							procData->incProcessingItemCount();
+							procData->incProcessingItemCount(mRealizeSameIndividualsProcessingStep);
 							addEntailmentIndividualsSameInstanceTestingItem(incSameInstTestItem);
 						}
 					}
@@ -1270,7 +1271,7 @@ namespace Konclude {
 												COptimizedKPSetIndividualItem* destIndiItem = destIndiInstanceDat.mNeighbourIndividualItem;
 												CRealizationIndividualInstanceItemReference indiDestItemRef = CRealizationIndividualInstanceItemReference(destIndiItem->getIndividualReference(), destIndiItem);
 												CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem* incRoleInstTestItem = new CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem(indiSourceItemRef, indiDestItemRef, roleItem, inversed, procData);
-												procData->incProcessingItemCount();
+												procData->incProcessingItemCount(mRealizeRoleProcessingStep);
 												addEntailmentIndividualsRoleInstanceTestingItem(incRoleInstTestItem);
 												roleItemQueued = true;
 											}
@@ -1310,7 +1311,7 @@ namespace Konclude {
 											addRoleSuccessorInstanceIndividualItemPairToInitializeCandidates(indiSourceItemRef, roleItem);
 										}
 										CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem* incRoleInstTestItem = new CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem(indiSourceItemRef, CRealizationIndividualInstanceItemReference(), roleItem, inversed, procData);
-										procData->incProcessingItemCount();
+										procData->incProcessingItemCount(mRealizeRoleProcessingStep);
 										addEntailmentIndividualsRoleInstanceTestingItem(incRoleInstTestItem);
 										roleItemQueued = true;
 									} else {
@@ -1333,7 +1334,7 @@ namespace Konclude {
 											if (instanceData && !instanceData->mKnownInstance && instanceData->mPossibleInstance && !instanceData->mTestedInstance) {
 												CRealizationIndividualInstanceItemReference indiDestItemRef = getInstanceItemReference(itNeighInst.key(), false);
 												CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem* incRoleInstTestItem = new CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem(indiSourceItemRef, indiDestItemRef, roleItem, inversed, procData);
-												procData->incProcessingItemCount();
+												procData->incProcessingItemCount(mRealizeRoleProcessingStep);
 												addEntailmentIndividualsRoleInstanceTestingItem(incRoleInstTestItem);
 												roleItemQueued = true;
 											}
@@ -1448,7 +1449,7 @@ namespace Konclude {
 
 					if (!isInstance && isPossibleInstance) {
 						CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem* incRoleInstTestItem = new CRealizationEntailmentQueuedIndividualsRoleInstanceTestingItem(indiSourceItemRef, indiDestItemRef, roleItem, inversed, procData);
-						procData->incProcessingItemCount();
+						procData->incProcessingItemCount(mRealizeRoleProcessingStep);
 						addEntailmentIndividualsRoleInstanceTestingItem(incRoleInstTestItem);
 						roleItemQueued = true;
 					}
@@ -1495,7 +1496,7 @@ namespace Konclude {
 					if (!item->hasToProcessPossibleInstancesFlag()) {
 						item->setToProcessPossibleInstancesFlag(true);
 						if (procData && item->hasPossibleInstances()) {
-							procData->incProcessingItemCount();
+							procData->incProcessingItemCount(mRealizeConceptProcessingStep);
 							item->addRequirementProcessingDataLinker(createRequirementProcessingDataLinker(procData));
 							conceptItemQueued = true;
 						}
@@ -1531,7 +1532,7 @@ namespace Konclude {
 						if (!indiItem->hasToProcessPossibleSameIndividualsFlag()) {
 							indiItem->setToProcessPossibleSameIndividualsFlag(true);
 							if (indiItem->hasPossibleSameIndividuals()) {
-								procData->incProcessingItemCount();
+								procData->incProcessingItemCount(mRealizeConceptProcessingStep);
 								indiItem->addRequirementProcessingDataLinker(createRequirementProcessingDataLinker(procData));
 								itemQueued = true;
 							}
@@ -1546,7 +1547,7 @@ namespace Konclude {
 						if (!indiItem->hasToProcessPossibleSameIndividualsFlag()) {
 							indiItem->setToProcessPossibleSameIndividualsFlag(true);
 							if (procData && indiItem->hasPossibleSameIndividuals()) {
-								procData->incProcessingItemCount();
+								procData->incProcessingItemCount(mRealizeConceptProcessingStep);
 								indiItem->addRequirementProcessingDataLinker(createRequirementProcessingDataLinker(procData));
 								itemQueued = true;
 							}
@@ -2765,6 +2766,15 @@ namespace Konclude {
 
 
 
+			COptimizedRepresentativeKPSetOntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::setPotentiallySameIndividuals(bool potentiallySameIndividuals) {
+				mPotentiallySameIndividuals = potentiallySameIndividuals;
+				return this;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::hasPotentiallySameIndividuals() {
+				return mBackendAssocCacheReader->hasSameIndividualsMergings() || mPotentiallySameIndividuals;
+			}
 
 
 
@@ -2776,29 +2786,36 @@ namespace Konclude {
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitSameIndividuals(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CSameRealizationIndividualVisitor* visitor) {
-
-				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiRealItemRef.getRealizationInstanceItem();
-				if (individualItem) {
-					QSet<CIndividualReference>* individualSet = individualItem->getKnownSameIndividualSet();
-					for (QSet<CIndividualReference>::const_iterator it = individualSet->constBegin(), itEnd = individualSet->constEnd(); it != itEnd; ++it) {
-						CIndividualReference individual(*it);
-						visitor->visitIndividual(individual, this);
-					}
-					return true;
-				} else {
-
-					CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiRealItemRef.getIndividualID());
-					if (indiAssData) {
-						CBackendRepresentativeMemoryLabelCacheItem* sameIndiSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
-						if (sameIndiSetLabel) {
-							mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, sameIndiSetLabel, [&](cint64 indiId)->bool {
-								visitor->visitIndividual(indiId, this);
-								return true;
-							});
-						} else {
-							visitor->visitIndividual(indiRealItemRef, this);
+				cint64 indiId = indiRealItemRef.getIndividualID();
+				bool continueVisiting = visitor->visitIndividual(indiRealItemRef, this);
+				if (continueVisiting) {
+					COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiRealItemRef.getRealizationInstanceItem();
+					if (individualItem) {
+						QSet<CIndividualReference>* individualSet = individualItem->getKnownSameIndividualSet();
+						for (QSet<CIndividualReference>::const_iterator it = individualSet->constBegin(), itEnd = individualSet->constEnd(); continueVisiting && it != itEnd; ++it) {
+							CIndividualReference individual(*it);
+							if (individual.getIndividualID() != indiId) {
+								continueVisiting &= visitor->visitIndividual(individual, this);
+							}
 						}
 						return true;
+					} else {
+
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiRealItemRef.getIndividualID());
+						if (indiAssData) {
+							CBackendRepresentativeMemoryLabelCacheItem* sameIndiSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+							if (sameIndiSetLabel) {
+								mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, sameIndiSetLabel, [&](cint64 sameIndiId)->bool {
+									if (sameIndiId != indiId) {
+										if (!visitor->visitIndividual(sameIndiId, this)) {
+											return false;
+										}
+									}
+									return true;
+								});
+							}
+							return true;
+						}
 					}
 				}
 				return false;

@@ -41,7 +41,8 @@ namespace Konclude {
 				mUseAbbreviatedIRIs = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.AbbreviatedIRIs",false);
 				mWriteDeclarations = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.WriteDeclarations",false);
 				mWriteOnlyDirectTypes = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.WriteOnlyDirectTypes",false);
-				mWriteSubClassOfInconsistency = CConfigDataReader::readConfigBoolean(configuration,"Konclude.CLI.Output.WriteReducedInconsistency",false);
+				mWriteSubClassOfInconsistency = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Output.WriteReducedInconsistency", false);
+				mWriteAnonymousIndividuals = CConfigDataReader::readConfigBoolean(configuration, "Konclude.CLI.Output.WriteAnonymousIndividualResults", false);
 
 				mRealizationCalcError = false;
 				mQueryConstructError = false;
@@ -141,16 +142,22 @@ namespace Konclude {
 							QStringList incClassNameList;
 
 							visitIndividuals([&](const CIndividualReference& indiRef)->bool {
-								QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
-								writeIndividualType(individualName, bottomClassName);
+								bool anonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRef);
+								if (mWriteAnonymousIndividuals || !anonymous) {
+									QString individualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);									
+									if (mWriteDeclarations) {
+										writeIndividualDeclaration(individualName, anonymous);
+									}
+									writeIndividualType(individualName, anonymous, bottomClassName);
+								}
 								return true;
 							});
 
 						} else {
 							if (mWriteDeclarations) {
-								writeIndividualDeclaration(mIndividualNameString);
+								writeNamedIndividualDeclaration(mIndividualNameString);
 							}
-							writeIndividualType(mIndividualNameString,bottomClassName);
+							writeIndividualType(mIndividualNameString, false, bottomClassName);
 						}
 					}
 
@@ -178,7 +185,7 @@ namespace Konclude {
 						mDeclaratedConceptSet.insert(concept);
 						writeClassDeclaration(conceptString);
 					}
-					writeIndividualType(mCurrentIndividualName,conceptString);
+					writeIndividualType(mCurrentIndividualName, mCurrentIndividualAnonymous, conceptString);
 				}
 				return true;
 			}
@@ -211,11 +218,15 @@ namespace Konclude {
 
 
 					visitIndividuals([&](const CIndividualReference& indiRef)->bool {
-						mCurrentIndividualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
-						if (mWriteDeclarations) {
-							writeIndividualDeclaration(mCurrentIndividualName);
+						bool anonymous = mOntology->getIndividualNameResolver()->isAnonymous(indiRef);
+						if (mWriteAnonymousIndividuals || !anonymous) {
+							mCurrentIndividualName = mOntology->getIndividualNameResolver()->getIndividualName(indiRef, mUseAbbreviatedIRIs);
+							mCurrentIndividualAnonymous = anonymous;
+							if (mWriteDeclarations) {
+								writeIndividualDeclaration(mCurrentIndividualName, anonymous);
+							}
+							conRealization->visitTypes(indiRef, mWriteOnlyDirectTypes, this);
 						}
-						conRealization->visitTypes(indiRef, mWriteOnlyDirectTypes, this);
 						return true;
 					});
 

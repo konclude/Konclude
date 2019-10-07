@@ -108,6 +108,7 @@ namespace Konclude {
 					bool addRoleRangeConcept(CRole* role, CConcept* addedConcept, bool negated);
 					CConcept* createCandidateEquivalentConcept(CConcept* eqConcept);
 					CConcept* createImpliedConcept();
+					CConcept* createNewConcept();
 					CConcept* createImplicationConcept(CConcept* impliedConcept, bool negated);
 					CConcept* createImplicationTriggerConcept(CConcept* impConcept, bool negated);
 					bool addImplicationTrigger(CConcept* implConcept, CConcept* triggerConcept, bool negated);

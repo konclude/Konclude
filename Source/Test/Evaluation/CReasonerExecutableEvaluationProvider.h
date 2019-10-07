@@ -96,6 +96,7 @@ namespace Konclude {
 
 					cint64 mKillTimeout;
 					QString mKillScriptString;
+					QString mKillScriptArgumentsString;
 
 				// private methods
 				private:

@@ -28,34 +28,41 @@ namespace Konclude {
 		namespace Query {
 
 
-			CIndividualsResultVisitorGenerator::CIndividualsResultVisitorGenerator(CIndividualsResult* individualsResult, bool abbreviatedIRIs, CIndividualNameResolver* indiNameResolver) {
+			CIndividualsResultVisitorGenerator::CIndividualsResultVisitorGenerator(CIndividualsResult* individualsResult, bool abbreviatedIRIs, bool integrateAnonymousIndividuals, CIndividualNameResolver* indiNameResolver) {
 				mIndividualsResult = individualsResult;
 				mAbbreviatedIRIs = abbreviatedIRIs;
 				mIndiNameResolver = indiNameResolver;
+				mIntegrateAnonymousIndividuals = integrateAnonymousIndividuals;
 			}
 
 			bool CIndividualsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CConceptRealization* conRealization) {
-				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
-				if (!individualString.isEmpty()) {
-					mIndividualsResult->addIndividual(individualString);
+				if (mIntegrateAnonymousIndividuals || !mIndiNameResolver->isAnonymous(indiRef)) {
+					QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
+					if (!individualString.isEmpty()) {
+						mIndividualsResult->addIndividual(individualString);
+					}
 				}
 				return true;
 			}
 
 
 			bool CIndividualsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CRoleRealization* roleRealization) {
-				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
-				if (!individualString.isEmpty()) {
-					mIndividualsResult->addIndividual(individualString);
+				if (mIntegrateAnonymousIndividuals || !mIndiNameResolver->isAnonymous(indiRef)) {
+					QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
+					if (!individualString.isEmpty()) {
+						mIndividualsResult->addIndividual(individualString);
+					}
 				}
 				return true;
 			}
 
 
 			bool CIndividualsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
-				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
-				if (!individualString.isEmpty()) {
-					mIndividualsResult->addIndividual(individualString);
+				if (mIntegrateAnonymousIndividuals || !mIndiNameResolver->isAnonymous(indiRef)) {
+					QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
+					if (!individualString.isEmpty()) {
+						mIndividualsResult->addIndividual(individualString);
+					}
 				}
 				return true;
 			}

@@ -486,7 +486,7 @@ CBuildExpressionPtr anonymousIndividual():
 	QString x;
 }{
 	x = nodeId() {
-		return getBuilder()->getAnonymousIndividual(getBuilder()->getOntologyName(),x);
+		return getBuilder()->getAnonymousIndividual(getBuilder()->getAnonymousOntologyIdentifier(),x);
 	}
 }
 

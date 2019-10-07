@@ -134,6 +134,8 @@ namespace Konclude {
 					bool hasInsufficientSaturationIndividuals();
 
 
+					bool isForceCompletionGraphConstruction();
+					CTotallyOntologyPrecomputationItem* setForceCompletionGraphConstruction(bool forceCompletionGraphConstruction);
 					bool isFullCompletionGraphConstruction();
 					CTotallyOntologyPrecomputationItem* setFullCompletionGraphConstruction(bool fullCompletionGraphConstruction);
 					bool isFullCompletionGraphConstructed();
@@ -247,6 +249,7 @@ namespace Konclude {
 
 					CTotallyOntologyPrecomputationItem* setIndividualPrecomputationClashed(bool checked);
 					bool hasIndividualPrecomputationClashed();
+					bool* getIndividualPrecomputationClashedPointer();
 
 
 
@@ -422,6 +425,7 @@ namespace Konclude {
 					bool mSaturationOccurrenceStatisticsCollectingInitialized;
 
 
+					bool mForceCompletionGraphConstruction;
 					bool mFullCompletionGraphConstruction;
 					bool mFullCompletionGraphConstructed;
 

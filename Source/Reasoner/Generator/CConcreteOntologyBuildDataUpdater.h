@@ -345,6 +345,8 @@ namespace Konclude {
 					virtual CAnonymousIndividualExpression* getAnonymousIndividual(const QStringRef& ontologyName, const QStringRef& individualName);
 
 
+
+
 					virtual CIndividualVariableExpression* getIndividualVariable(const QStringRef &individualVariableName, bool anonymousVariable);
 					virtual CIndividualVariableExpression* getIndividualVariable(const QString &individualVariableName, bool anonymousVariable);
 

@@ -106,6 +106,7 @@ namespace Konclude {
 						QStringList mGeneralConfList;
 
 						QStringList mReasonerConfList;
+						QStringList mRemainingLoadList;
 
 					// private methods
 					private:

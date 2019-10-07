@@ -42,7 +42,7 @@ namespace Konclude {
 					CProcessContext* context = calcAlgContext->getUsedProcessContext();
 					mMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
 					CMBox* mBox = mDataBox->getOntology()->getDataBoxes()->getMBox();
-					CTBox* tBox = mDataBox->getOntology()->getDataBoxes()->getTBox();
+					mTBox = mDataBox->getOntology()->getDataBoxes()->getTBox();
 					mConceptVec = mDataBox->getExtendedConceptVector(false);
 					mReplaceHash = mDataBox->getConceptNominalSchemaGroundingHash(false);
 					CNominalSchemaTemplateVector* nomSchVec = mBox->getNominalSchemaTemplateVector(false);
@@ -360,7 +360,7 @@ namespace Konclude {
 					CProcessContext* context = calcAlgContext->getUsedProcessContext();
 					mMemMan = calcAlgContext->getUsedProcessTaskMemoryAllocationManager();
 					CMBox* mBox = mDataBox->getOntology()->getDataBoxes()->getMBox();
-					CTBox* tBox = mDataBox->getOntology()->getDataBoxes()->getTBox();
+					mTBox = mDataBox->getOntology()->getDataBoxes()->getTBox();
 					mConceptVec = mDataBox->getExtendedConceptVector(false);
 					mReplaceHash = mDataBox->getConceptNominalSchemaGroundingHash(false);
 					CNominalSchemaTemplateVector* nomSchVec = mBox->getNominalSchemaTemplateVector(false);

@@ -31,12 +31,14 @@
 // Namespace includes
 #include "CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer.h"
 #include "CSPARQLResultStreamingController.h"
+#include "CSPARQLResultBufferWriteData.h"
 
 // Other includes
 #include "Reasoner/Query/CVariableBindingsAnswersResult.h"
 #include "Reasoner/Query/CBooleanQueryResult.h"
 #include "Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringQuery.h"
 #include "Reasoner/Query/CVariableBindingsAnswersStreamingHandler.h"
+#include "Reasoner/Query/CVariableBindingsAnswersConcurrentStreamingHandler.h"
 #include "Reasoner/Query/CVariableBindingsAnswersStreamingResult.h"
 
 
@@ -63,6 +65,15 @@ namespace Konclude {
 
 			namespace SPARQL {
 
+
+
+				class CSPARQLResultConcurrentStreamingDataBufferReciever {
+				public:
+
+					virtual CSPARQLResultConcurrentStreamingDataBufferReciever* transferConcurrentBuffers(QList<CSPARQLResultBufferWriteData>& bufferList, cint64& bufferSize) = 0;
+
+				};
+
 				/*! 
 				 *
 				 *		\class		CSPARQLResultStreamingData
@@ -71,7 +82,7 @@ namespace Konclude {
 				 *		\brief		TODO
 				 *
 				 */
-				class CSPARQLResultStreamingData : public CQueryCommandProvider, public CVariableBindingsAnswersStreamingHandler {
+				class CSPARQLResultStreamingData : public CQueryCommandProvider, public CVariableBindingsAnswersStreamingHandler, public CSPARQLResultConcurrentStreamingDataBufferReciever {
 					// public methods
 					public:
 						//! Constructor
@@ -86,7 +97,7 @@ namespace Konclude {
 						virtual CCommand *getCommand();
 
 
-						virtual CVariableBindingsAnswersStreamingHandler* initResultStreaming(const QStringList& varNames);
+						virtual bool initResultStreaming(const QStringList& varNames);
 
 						virtual CVariableBindingsAnswersStreamingHandler* streamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1);
 
@@ -101,13 +112,122 @@ namespace Konclude {
 
 						CSPARQLResultStreamingData* finalize();
 
-						QList<QByteArray*> takeWriteableBuffers();
+						QList<CSPARQLResultBufferWriteData> takeWriteableBuffers();
 						cint64 getWriteableBufferSize();
 						cint64 getWriteableBufferCount();
 						cint64 getSequenceNumber();
 
+
+						virtual CVariableBindingsAnswersConcurrentStreamingHandler* getConcurrentStreamingHandler();
+						virtual CVariableBindingsAnswersStreamingHandler* releaseConcurrentStreamingHandler(CVariableBindingsAnswersConcurrentStreamingHandler* handler);
+
+						virtual CSPARQLResultConcurrentStreamingDataBufferReciever* transferConcurrentBuffers(QList<CSPARQLResultBufferWriteData>& bufferList, cint64& bufferSize);
+
+
 					// protected methods
 					protected:
+						class CSPARQLResultConcurrentStreamingData : public CVariableBindingsAnswersConcurrentStreamingHandler {
+						public:
+							CSPARQLResultConcurrentStreamingData(cint64 bufferSize, cint64 maxBufferSize, QStringList* varNames, bool* serialize, CSPARQLResultConcurrentStreamingDataBufferReciever* reciever) {
+								mBufferSize = bufferSize;
+								mMaxBufferSize = maxBufferSize;
+								mVarNames = varNames;
+								mSerializer = nullptr;
+
+								mUsedBufferSize = 0;
+								mSerialize = serialize;
+								mReciever = reciever;
+								mMaxBufferCollectingCount = 10;
+							}
+
+							~CSPARQLResultConcurrentStreamingData() {
+								if (mSerializer) {
+									delete mSerializer;
+								}
+							}
+
+
+							CVariableBindingsAnswersConcurrentStreamingHandler* concurrentlyStreamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality) {
+
+								if (*mSerialize) {
+									if (!mSerializer) {
+										QByteArray* bufferArray = new QByteArray();
+										bufferArray->reserve(mBufferSize + 10000);
+										mSerializer = new CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer(bufferArray, this);
+									}
+									mSerializer->addResultStreamingBindingToTemporaryBuffer(*mVarNames, varBindings);
+									bool onlyVarBindWritten = false;
+									cint64 onlyVarBindCount = 0;
+									if (mSerializer->getBufferWrittenSize() <= 0) {
+										onlyVarBindWritten = true;
+									}
+									while (cardinality > 0) {
+										mSerializer->addTemporaryBuffer();
+										++onlyVarBindCount;
+										--cardinality;
+										if (mSerializer->getBufferWrittenSize() > mBufferSize) {
+											mBufferSize *= 2;
+											if (mBufferSize > mMaxBufferSize) {
+												mBufferSize = mMaxBufferSize;
+											}
+											cint64 bufferWriteCount = 1;
+											if (onlyVarBindWritten) {
+												while (cardinality > onlyVarBindCount) {
+													cardinality -= onlyVarBindCount;
+													++bufferWriteCount;
+												}
+											}
+											QByteArray* bufferArray = new QByteArray();
+											bufferArray->reserve(mBufferSize + 10000);
+											QByteArray* usedBuffer = mSerializer->updateWriteBuffer(bufferArray);
+											mUsedBufferSize += usedBuffer->size();
+											mUsedBufferList.append(CSPARQLResultBufferWriteData(bufferWriteCount, usedBuffer));
+											onlyVarBindWritten = true;
+											onlyVarBindCount = 0;
+											if (mUsedBufferList.size() >= mMaxBufferCollectingCount) {
+												mReciever->transferConcurrentBuffers(mUsedBufferList, mUsedBufferSize);
+											}
+										}
+									}
+									mSerializer->clearTemporaryBuffer();
+								}
+
+								return this;
+							}
+
+
+							bool hasData() {
+								return mSerializer && (mSerializer->getBufferWrittenSize() > 0 || mUsedBufferSize > 0);
+							}
+
+							CSPARQLResultConcurrentStreamingData* addBuffers(QList<CSPARQLResultBufferWriteData>& bufferList, cint64& bufferSize) {
+								if (mSerializer && mSerializer->getBufferWrittenSize() > 0) {
+									QByteArray* usedBuffer = mSerializer->updateWriteBuffer(nullptr);
+									CSPARQLResultBufferWriteData usedBufferData(1, usedBuffer);
+									mUsedBufferSize += usedBuffer->size();
+									mUsedBufferList.append(usedBufferData);
+								}
+								bufferList.append(mUsedBufferList);
+								bufferSize += mUsedBufferSize;
+								return this;
+							}
+
+
+							CSPARQLXMLAnswerStreamingPrecompiledByteArraySerializer* mSerializer;
+
+							QList<CSPARQLResultBufferWriteData> mUsedBufferList;
+							cint64 mUsedBufferSize;
+							cint64 mBufferSize;
+							cint64 mMaxBufferSize;
+							QStringList* mVarNames;
+							bool* mSerialize = nullptr;
+
+							CSPARQLResultConcurrentStreamingDataBufferReciever* mReciever;
+							cint64 mMaxBufferCollectingCount;
+
+						};
+
+
 						CSPARQLResultStreamingData* init(cint64 sequenceNumber, cint64 bufferSize, CSPARQLResultStreamingController* streamingController);
 
 					// protected variables
@@ -121,6 +241,7 @@ namespace Konclude {
 						QStringList mVarNames;
 						cint64 mMaxBufferSize;
 						cint64 mBufferSize;
+						cint64 mInitialBufferSize;
 						bool mStreamingFinished;
 						bool mStreamingInitialized;
 						bool mFinalized;
@@ -128,10 +249,12 @@ namespace Konclude {
 
 						cint64 mFlushId;
 
-						QList<QByteArray*> mUsedBufferList;
+						QList<CSPARQLResultBufferWriteData> mUsedBufferList;
 						cint64 mUsedBufferSize;
+						bool mWritingScheduled;
+						cint64 mConcurrentFinishCount;
 
-						QMutex mBufferMutex;
+						QMutex* mBufferMutex;
 
 					// private methods
 					private:

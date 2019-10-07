@@ -94,7 +94,7 @@ namespace Konclude {
 					mBackendCacheHandler = backendCacheHandler;
 					mOccStatsCacheHandler = occStatsCacheHandler;
 
-					mCompGraphCacheHandler = new CCompletionGraphCacheHandler();
+					mCompGraphCacheHandler = new CCompletionGraphCacheHandler(mBackendCacheHandler);
 
 
 					mIndividualPriorityStrategy = mIndiAncDepthMasConProcPriStr;
@@ -225,6 +225,8 @@ namespace Konclude {
 
 					mConfOccurrenceStatisticsCollecting = true;
 					mOptCollectOccurrenceStatistics = false;
+
+					mConfIgnoreBlockingCompletionGraphCachedNonBlockingNodes = true;
 
 					mIndiAncDepthMasConProcPriStr->configureStrategy(mConfStrictIndiNodeProcessing,mConfIDIndiPriorization);
 
@@ -543,7 +545,7 @@ namespace Konclude {
 							mConfAllowBackendSuccessorExpansionBlocking = config->isAllowBackendSuccessorExpansionBlockingActivated();
 							mConfOccurrenceStatisticsCollecting = config->isOccurrenceStatisticsCollectionActivated();
 
-
+							mConfIgnoreBlockingCompletionGraphCachedNonBlockingNodes = config->isBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated();
 						} else {
 							mConfCompletionGraphCaching = true;
 							mConfDelayCompletionGraphCachingReactivation = false;
@@ -609,6 +611,7 @@ namespace Konclude {
 							mConfAllowBackendSuccessorExpansionBlocking = true;
 							mCurrentRecProcDepthLimit = 300;
 							mConfOccurrenceStatisticsCollecting = true;
+							mConfIgnoreBlockingCompletionGraphCachedNonBlockingNodes = true;
 
 						}
 						mLastConfig = config;
@@ -915,12 +918,7 @@ namespace Konclude {
 
 										bool indiStartProcessingDebug = false;
 										if (indiStartProcessingDebug) {
-											mEndTaskDebugIndiModelString = generateExtendedDebugIndiModelStringList(calcAlgContext);
-											QFile fileend(QString("./Debugging/CompletionTasks/indi-%1-start.txt").arg(indiProcNode->getIndividualNodeID()));
-											if (fileend.open(QIODevice::WriteOnly)) {
-												fileend.write(mEndTaskDebugIndiModelString.replace("<br>", "\r\n").toLocal8Bit());
-												fileend.close();
-											}
+											mEndTaskDebugIndiModelString = writeGeneratedExtendedDebugIndiModelStringList(QString("./Debugging/CompletionTasks/indi-%1-start.txt").arg(indiProcNode->getIndividualNodeID()), calcAlgContext);
 										}
 
 
@@ -954,6 +952,12 @@ namespace Konclude {
 
 											if (--mRemainProcessRuleToTaskProcessingVerification <= 0) {
 												mRemainProcessRuleToTaskProcessingVerification = mProcessRuleToTaskProcessingVerificationCount;
+
+												CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repCacheUpdAd = satCalcTask->getSatisfiableRepresentativeBackendCacheUpdatingAdapter();
+												if (repCacheUpdAd && repCacheUpdAd->hasUnsatisfiableComputed()) {
+													throw CCalculationErrorProcessingException(CCalculationErrorProcessingException::ECCANCELED);
+												}
+
 												if (!processorCommunicator->verifyContinueTaskProcessing(satCalcTask)) {
 													STATINC(TASKPROCESSPAUSECOUNT,mCalcAlgContext);
 													paused = true;
@@ -1105,7 +1109,9 @@ namespace Konclude {
 							if (calcErrorProcException.hasError()) {
 								error = true;
 								errorCode = (cint64)calcErrorProcException.getErrorCode();
-								LOG(ERROR,"::Konclude::Reasoner::Kernel::Algorithm::TableauCompletionAlgorihm",logTr("Error occured, computation stopped."),this);
+								if (errorCode != CCalculationErrorProcessingException::ECCANCELED) {
+									LOG(ERROR, "::Konclude::Reasoner::Kernel::Algorithm::TableauCompletionAlgorihm", logTr("Error occured, computation stopped."), this);
+								}
 							}
 						} catch (const CMemoryAllocationException& memAllocException) {
 							error = true;
@@ -1117,6 +1123,12 @@ namespace Konclude {
 
 						KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mEndTaskDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
 
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repCacheUpdAd = satCalcTask->getSatisfiableRepresentativeBackendCacheUpdatingAdapter();
+						if (!error && repCacheUpdAd && repCacheUpdAd->hasUnsatisfiableComputed()) {
+							error = true;
+							completed = false;
+							clashed = false;
+						}
 
 						bool xDebug = false;
 
@@ -1244,7 +1256,7 @@ namespace Konclude {
 								rebuildSignatureBlockingCandidateHash(mCalcAlgContext);
 							}
 
-							if (!canceled && (satCalcTask->getSatisfiableRepresentativeBackendCacheUpdatingAdapter() || satCalcTask->getConsistenceAdapter())) {
+							if (!canceled && (satCalcTask->getSatisfiableRepresentativeBackendCacheUpdatingAdapter() || (satCalcTask->getConsistenceAdapter() && satCalcTask->getConsistenceAdapter()->getConsitenceObserver()))) {
 								mBackendCacheHandler->tryAssociateNodesWithBackendCache(processingDataBox->getLastBackendCacheIntegratedIndividualNodeLinker(), satCalcTask->getSatisfiableRepresentativeBackendCacheUpdatingAdapter(), calcAlgContext);
 							}
 
@@ -1527,6 +1539,7 @@ namespace Konclude {
 						CIndividual* foundMergingIndi = nullptr;
 						CIndividualProcessNode* foundMergingIndiNode = nullptr;
 						bool ruleApplicationFreeMerging = false;
+						CDependencyTrackPoint* initContinueDepTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
 						bool hasNextMergingIndi = findNextPossibleInstanceMergingIndividual(processIndi, possInstanceMergingData, calcAlgContext, testConceptLabelSetHash, &foundMergingIndiNode, &foundMergingIndiId, &ruleApplicationFreeMerging);
 						if (hasNextMergingIndi) {
 							++mStatPossibleInstanceMergingCount;
@@ -1536,19 +1549,24 @@ namespace Konclude {
 
 							CSatisfiableCalculationTask* newTaskIt = newTaskList;
 
-							CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode* reuseDepNode = createMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode(processIndi, nullptr, foundMergingIndiNode, calcAlgContext);
+
+							CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode* reuseDepNode = createMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode(processIndi, initContinueDepTrackPoint, foundMergingIndiNode, calcAlgContext);
 
 
 							for (cint64 i = 0; i < taskCreationCount; ++i) {
 
 								CSatisfiableCalculationTask* newSatCalcTask = newTaskIt;
 
+								CProcessContext* newProcessContext = newSatCalcTask->getProcessContext(processorContext);
+								CCalculationAlgorithmContextBase* newCalcAlgContext = createCalculationAlgorithmContext(processorContext, newProcessContext, newSatCalcTask);
+								CMemoryAllocationManager* newAllocMemMan = newCalcAlgContext->getUsedProcessTaskMemoryAllocationManager();
+
 								bool mergingAlternative = i == 0;
 
 								if (mergingAlternative) {
 
 									CDependencyTrackPoint* mergeNonDetDepTrackPoint = nullptr;
-									mergeNonDetDepTrackPoint = createNonDeterministicDependencyTrackPointBranch(reuseDepNode, false, calcAlgContext);
+									mergeNonDetDepTrackPoint = createNonDeterministicDependencyTrackPointBranch(reuseDepNode, false, newCalcAlgContext);
 
 
 									CProcessingDataBox* newProcessingDataBox = newSatCalcTask->getProcessingDataBox();
@@ -1557,9 +1575,6 @@ namespace Konclude {
 									newProcessingDataBox->setPossibleInstanceIndividualMergedCount(processingDataBox->getPossibleInstanceIndividualMergedCount() + 1);
 									newProcessingDataBox->setPossibleInstanceIndividualCurrentMergingCount(1);
 
-									CProcessContext* newProcessContext = newSatCalcTask->getProcessContext(processorContext);
-									CCalculationAlgorithmContextBase* newCalcAlgContext = createCalculationAlgorithmContext(processorContext, newProcessContext, newSatCalcTask);
-									CMemoryAllocationManager* newAllocMemMan = newCalcAlgContext->getUsedProcessTaskMemoryAllocationManager();
 
 									CProcessTagger* newProcessTagger = newCalcAlgContext->getUsedProcessTagger();
 									// dirty trick, but probably works since for the other alternative there is no processing required, i.e., we can simply overwrite/modify the existing data
@@ -1580,7 +1595,7 @@ namespace Konclude {
 										if (furtherMergeCount > 1) {
 											// try to merge some additional individuals within the same task (to save some memory)
 
-											CXLinker<CXLinker<cint64>*>* currentMergedPossibleInstanceIndividualLinkersLinker = CObjectAllocator< CXLinker<CXLinker<cint64>*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+											CXLinker<CXLinker<cint64>*>* currentMergedPossibleInstanceIndividualLinkersLinker = CObjectAllocator< CXLinker<CXLinker<cint64>*> >::allocateAndConstruct(newCalcAlgContext->getUsedProcessTaskMemoryAllocationManager());
 											currentMergedPossibleInstanceIndividualLinkersLinker->initLinker(processingDataBox->getLastMergedPossibleInstanceIndividualLinker());
 
 
@@ -1598,7 +1613,7 @@ namespace Konclude {
 													locMergedIndiNode = getMergedIndividualNodes(locMergedIndiNode, newLocMergingIndiNode, mergeNonDetDepTrackPoint, newCalcAlgContext);
 
 
-													CXLinker<CXLinker<cint64>*>* nextMergedPossibleInstanceIndividualLinkersLinker = CObjectAllocator< CXLinker<CXLinker<cint64>*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+													CXLinker<CXLinker<cint64>*>* nextMergedPossibleInstanceIndividualLinkersLinker = CObjectAllocator< CXLinker<CXLinker<cint64>*> >::allocateAndConstruct(newCalcAlgContext->getUsedProcessTaskMemoryAllocationManager());
 													nextMergedPossibleInstanceIndividualLinkersLinker->initLinker(newProcessingDataBox->getLastMergedPossibleInstanceIndividualLinker());
 
 													currentMergedPossibleInstanceIndividualLinkersLinker = nextMergedPossibleInstanceIndividualLinkersLinker->append(currentMergedPossibleInstanceIndividualLinkersLinker);
@@ -1624,9 +1639,7 @@ namespace Konclude {
 
 								} else {
 
-									CProcessContext* newProcessContext = newSatCalcTask->getProcessContext(processorContext);
-									CCalculationAlgorithmContextBase* newCalcAlgContext = createCalculationAlgorithmContext(processorContext, newProcessContext, newSatCalcTask);
-									CMemoryAllocationManager* newAllocMemMan = newCalcAlgContext->getUsedProcessTaskMemoryAllocationManager();
+									createNonDeterministicDependencyTrackPointBranch(reuseDepNode, false, newCalcAlgContext);
 
 									// remove adapter such that no further merging tests are performed
 									CProcessingDataBox* newProcessingDataBox = newSatCalcTask->getProcessingDataBox();
@@ -3699,7 +3712,7 @@ namespace Konclude {
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::detectIndividualNodeBackendCacheSynchronized(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 					bool synchronized = false;
-					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKEND | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENNEIGHBOURDPARTIALEXPANSION | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDINDIRECTNOMINALEXPANSIONBLOCKED)) {
 
 						if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED)) {
 							individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED);
@@ -6533,6 +6546,8 @@ namespace Konclude {
 					CSatisfiableCalculationTask* nonDetAccTask = nonDetDependencyNode->getBranchNode()->getSatisfiableCalculationTask();
 					CSatisfiableCalculationTask* branchAccTask = nonDetDepTrackPoint->getBranchNode()->getSatisfiableCalculationTask();
 
+
+
 					cancellationTask(branchAccTask,calcAlgContext);
 
 					//cint64 branchDiff = calcAlgContext->getSatisfiableCalculationTask()->getProcessingDataBox()->getProcessContext()->getProcessTagger()->getCurrentBranchingTag() - branchAccTask->getProcessingDataBox()->getProcessContext()->getProcessTagger()->getCurrentBranchingTag();
@@ -6641,6 +6656,7 @@ namespace Konclude {
 						processorContext->getTaskProcessorCommunicator()->communicateTaskAdditionalAllocation(nonDetAccTask,memoryContainer.takeMemoryPools());
 					}
 
+
 					// test whether all branches has clash descriptors
 					bool otherOpenedTrackPoints = nonDetDependencyNode->hasOtherOpenedDependencyTrackingPoints(nonDetDepTrackPoint);
 					if (!otherOpenedTrackPoints) {
@@ -6671,6 +6687,7 @@ namespace Konclude {
 								mNonDetDependencyCollectedTrackedString = generateDebugTrackedClashedDescriptorString(collectedTrackedClashedDes,calcAlgContext);
 							}
 						)
+
 						
 						if (initializeTrackingLine(trackingLine,collectedTrackedClashedDes,calcAlgContext)) {
 							if (trackingLine->getBranchingLevel() == 0) {
@@ -8179,7 +8196,7 @@ namespace Konclude {
 						}
 
 						CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
-						if (!mConfExpandCreatedSuccessorsFromSaturation || !tryInitalizingFromSaturatedData(indiProcNode,initConceptLinker,depTrackPoint,allowPreprocess,calcAlgContext)) {
+						if (!mConfExpandCreatedSuccessorsFromSaturation || !tryInitalizingFromSaturatedData(indiProcNode,initConceptLinker,depTrackPoint,allowPreprocess,calcAlgContext) || initConceptLinker->hasNext()) {
 							addConceptsToIndividual(initConceptLinker,false,indiProcNode,depTrackPoint,allowPreprocess,true,nullptr,calcAlgContext);
 						}
 						indiProcNode->clearProcessInitializingConcepts();
@@ -13772,7 +13789,6 @@ namespace Konclude {
 					CDependencyTrackPoint* depTrackPoint = conProDes->getDependencyTrackPoint();
 
 
-
 					if (indi && !negate) {
 						// check whether there is already a suitable neighbour node in the cache
 						bool hasAppropriateNominalConnection = checkBackendCachedNominalConnection(processIndi, role, indi->getIndividualID(), calcAlgContext);
@@ -14519,6 +14535,10 @@ namespace Konclude {
 										CNonDeterministicDependencyTrackPoint* mergeNonDetDepTrackPoint = createNonDeterministicDependencyTrackPointBranch(mergeDependencyNode,true,calcAlgContext);
 										if ((!mConfMinimizeMerging && !createNewNodesAsNominals) || mergingIndiNode->isNominalIndividualNode()) {
 											distinctMergedSet->insert(mergingIndiNode->getIndividualNodeID());
+
+											if (createNewNodesAsNominals) {
+												branchingMergingProcRest->decRemainingNominalCreationCount();
+											}
 
 											branchingMergingProcRest->initMergingDependencyNode(mergeDependencyNode);
 											branchingMergingProcRest->initDependencyTracker(mergeNonDetDepTrackPoint);
@@ -18145,11 +18165,16 @@ namespace Konclude {
 
 					bool blocked = false;
 
-
+					bool blockingTesting = true;
+					if (!previousBlocked && mCompGraphCacheHandler && mConfIgnoreBlockingCompletionGraphCachedNonBlockingNodes) {
+						if (mCompGraphCacheHandler->isIndividualNodeCompletionGraphConsistencePresentNonBlocked(testIndi, calcAlgContext)) {
+							blockingTesting = false;
+						}
+					}
 
 
 					// test each modified ancestor
-					while (!blocked && ancTestIndi && ancTestIndi->isBlockableIndividual() && !ancTestIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCONCRETEDATAINDINODE) &&
+					while (blockingTesting && !blocked && ancTestIndi && ancTestIndi->isBlockableIndividual() && !ancTestIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCONCRETEDATAINDINODE) &&
 								ancTestIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFBLOCKINGRETESTDUEANCESTORMODIFIED | CIndividualProcessNode::PRFBLOCKINGRETESTDUEDIRECTMODIFIED | CIndividualProcessNode::PRFBLOCKINGRETESTDUEBLOCKERMODIFIED | CIndividualProcessNode::PRFBLOCKINGRETESTDUEINDIRECTBLOCKERLOSS) && 
 								!ancTestIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFINVALIDBLOCKINGORCACHING)) {
 						STATINC(DETECTANCINDINODEBLOCKINGSTATUSCOUNT,calcAlgContext);
@@ -18183,6 +18208,13 @@ namespace Konclude {
 							if (!blocked) {
 								locAncTestIndi->setBlockerIndividualNode(nullptr);
 								ancTestIndi = getAncestorIndividual(locAncTestIndi,calcAlgContext);
+
+								if (!previousBlocked && mCompGraphCacheHandler && mConfIgnoreBlockingCompletionGraphCachedNonBlockingNodes) {
+									if (mCompGraphCacheHandler->isIndividualNodeCompletionGraphConsistencePresentNonBlocked(locAncTestIndi, calcAlgContext)) {
+										blockingTesting = false;
+									}
+								}
+
 							}
 						} else {
 							STATINC(SUCCESSBLOCKINGSTATUSDETECTIONCOUNT,calcAlgContext);
@@ -20543,7 +20575,7 @@ namespace Konclude {
 					for (CAdditionalProcessRoleAssertionsLinker* additionalRoleAssLinkerIt = individual->getAdditionalRoleAssertionsLinker(); additionalRoleAssLinkerIt; additionalRoleAssLinkerIt = additionalRoleAssLinkerIt->getNext()) {
 						CAdditionalProcessRoleAssertionsLinker* additionalRoleAssLinker = CObjectAllocator< CAdditionalProcessRoleAssertionsLinker >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
 						CDependencyTrackPoint* newIndiDepTrackPoint = nullptr;
-						CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint, mergeIntoIndividualNode, mergeDepTrackPoint, additionalRoleAssLinker->getDependencyTrackPoint(), calcAlgContext);
+						CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint, mergeIntoIndividualNode, mergeDepTrackPoint, additionalRoleAssLinkerIt->getDependencyTrackPoint(), calcAlgContext);
 						additionalRoleAssLinker->initAdditionalProcessRoleAssertionsLinker(additionalRoleAssLinkerIt->getIndividual(),additionalRoleAssLinkerIt->getRoleAssertionLinker(),additionalRoleAssLinkerIt->getReverseRoleAssertionLinker(), newIndiDepTrackPoint);
 						mergeIntoIndividualNode->addAdditionalRoleAssertionsLinker(additionalRoleAssLinker);
 						newLinksAdded = true;
@@ -20560,7 +20592,7 @@ namespace Konclude {
 					for (CAdditionalProcessDataAssertionsLinker* additionalDataAssLinkerIt = individual->getAdditionalDataAssertionsLinker(); additionalDataAssLinkerIt; additionalDataAssLinkerIt = additionalDataAssLinkerIt->getNext()) {
 						CAdditionalProcessDataAssertionsLinker* additionalDataAssLinker = CObjectAllocator< CAdditionalProcessDataAssertionsLinker >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
 						CDependencyTrackPoint* newIndiDepTrackPoint = nullptr;
-						CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint, mergeIntoIndividualNode, mergeDepTrackPoint, additionalDataAssLinker->getDependencyTrackPoint(), calcAlgContext);
+						CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint, mergeIntoIndividualNode, mergeDepTrackPoint, additionalDataAssLinkerIt->getDependencyTrackPoint(), calcAlgContext);
 						additionalDataAssLinker->initAdditionalProcessDataAssertionsLinker(additionalDataAssLinkerIt->getIndividual(), additionalDataAssLinkerIt->getDataAssertionLinker(), newIndiDepTrackPoint);
 						mergeIntoIndividualNode->addAdditionalDataAssertionsLinker(additionalDataAssLinker);
 						newLinksAdded = true;
@@ -20570,7 +20602,7 @@ namespace Konclude {
 					for (CProcessAssertedDataLiteralLinker* assertedDataLiteralLinkerIt = individual->getAssertedDataLiteralLinker(); assertedDataLiteralLinkerIt; assertedDataLiteralLinkerIt = assertedDataLiteralLinkerIt->getNext()) {
 						CProcessAssertedDataLiteralLinker* additionalDataLitLinker = CObjectAllocator< CProcessAssertedDataLiteralLinker >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
 						CDependencyTrackPoint* newIndiDepTrackPoint = nullptr;
-						CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint, mergeIntoIndividualNode, mergeDepTrackPoint, additionalDataLitLinker->getDependencyTrackPoint(), calcAlgContext);
+						CMERGEDIndividualDependencyNode* mergedIndiDepNode = createMERGEDINDIVIDUALDependency(newIndiDepTrackPoint, mergeIntoIndividualNode, mergeDepTrackPoint, assertedDataLiteralLinkerIt->getDependencyTrackPoint(), calcAlgContext);
 						additionalDataLitLinker->initProcessDataLiteralLinker(assertedDataLiteralLinkerIt->getData(), newIndiDepTrackPoint);
 						mergeIntoIndividualNode->addAssertedDataLiteralLinker(additionalDataLitLinker);
 						newLinksAdded = true;
@@ -21579,6 +21611,7 @@ namespace Konclude {
 
 									localicedIndi->setAssertionRoleLinker(individual->getAssertionRoleLinker());
 									localicedIndi->setReverseAssertionRoleLinker(individual->getReverseAssertionRoleLinker());
+									localicedIndi->setAssertionDataLinker(individual->getAssertionDataLinker());
 									localicedIndi->setRoleAssertionCreationID(calcAlgContext->getUsedProcessingDataBox()->getNextRoleAssertionCreationID());
 									localicedIndi->setNominalIndividualTriplesAssertions(true);
 
@@ -22896,7 +22929,6 @@ namespace Konclude {
 						}
 						return true;
 					}, calcAlgContext);
-
 
 
 
@@ -24541,6 +24573,7 @@ namespace Konclude {
 					
 					CConceptProcessDescriptor* conProDes = CObjectAllocator<CConceptProcessDescriptor>::allocateAndConstruct(taskMemMan);
 					conProDes->init(conceptDescriptor,conProPriority,false,depTrackPoint);
+
 					if (allowPreprocessing && conProPriority.getPriority() >= mImmediatelyProcessPriority) {
 						STATINC(RULEAPPLICATIONCOUNT,calcAlgContext);
 						tableauRuleChoice(processIndi,conProDes,calcAlgContext);
@@ -24638,7 +24671,7 @@ namespace Konclude {
 					CProcessingDataBox* processingDataBox = calcAlgContext->getProcessingDataBox();
 					bool individualInserted = false;
 					CConceptProcessingQueue* conProQueue = individual->getConceptProcessingQueue(false);
-					if (!conProQueue) {
+					if (!conProQueue || individual->getLastAssertedDataLiteralLinker() != individual->getAssertedDataLiteralLinker() || individual->getAssertionDataLinker() != individual->getLastProcessedAssertionDataLinker() || individual->getAdditionalDataAssertionsLinker() != individual->getLastProcessedAdditionalDataAssertionLinker()) {
 						if (!mConfCurrentIndividualQueuing && calcAlgContext->getCurrentIndividualNode() == individual) {
 							individualInserted = true;
 						} else if (!individual->isImmediatelyProcessingQueued()) {

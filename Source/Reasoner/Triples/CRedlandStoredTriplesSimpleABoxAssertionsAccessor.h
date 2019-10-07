@@ -85,6 +85,9 @@ namespace Konclude {
 					virtual bool visitIndividualName(cint64 individualId, COntologyTriplesIndividualNamesVisitor* visitor);
 					virtual bool visitIndividualName(cint64 individualId, function<bool(const QString& indiName)> visitFunc);
 
+					virtual bool visitIndividualAnonymity(cint64 individualId, function<bool(bool anonymous)> visitFunc);
+
+
 
 					virtual bool visitIndividualId(const QString& indiName, function<bool(cint64 indiId)> visitFunc);
 					virtual bool hasIndividualId(const QString& indiName);
@@ -112,6 +115,8 @@ namespace Konclude {
 
 					bool initializeDatatypeMaps();
 
+					QString getAnonymousResolvedIndividualName(CRedlandStoredTriplesIndividualAssertionIndexCacheData* indiCacheData);
+
 				// protected variables
 				protected:
 					CConcreteOntology* mOntology;
@@ -126,6 +131,7 @@ namespace Konclude {
 					CDatatype* mDefaultDatatype;
 					librdf_uri* mDefaultDatatypeUri;
 
+					QString mAnonymousOntologyIdentifier;
 
 			};
 

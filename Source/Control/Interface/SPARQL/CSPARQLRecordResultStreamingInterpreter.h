@@ -92,6 +92,7 @@ namespace Konclude {
 
 
 						virtual bool notifyWriteRequest(cint64 sequenceNumber);
+						virtual bool canWrite();
 
 
 					// protected methods

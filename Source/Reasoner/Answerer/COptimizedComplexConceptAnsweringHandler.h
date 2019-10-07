@@ -89,6 +89,10 @@
 #include "Reasoner/Answerer/Composition/CSequentialVariableMappingsCompositionJoinComputator.h"
 #include "Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinComputator.h"
 
+#include "Reasoner/Answerer/Conclusion/CAbstractComplexQueryFinishingHandler.h"
+#include "Reasoner/Answerer/Conclusion/CSequentialStreamingComplexQueryFinishingHandler.h"
+#include "Reasoner/Answerer/Conclusion/CQtConcurrentStreamingComplexQueryFinishingHandler.h"
+
 
 #include "Context/CContextBase.h"
 
@@ -122,6 +126,7 @@
 #include "Reasoner/Query/CVariableBindingFilteringLiteralComparison.h"
 #include "Reasoner/Query/CQueryUnknownEntityReferenceError.h"
 #include "Reasoner/Query/CVariableBindingsAnswersStreamingResult.h"
+#include "Reasoner/Query/CQueryUnspecifiedStringError.h"
 
 #include "Reasoner/Preprocess/CPreProcessContextBase.h"
 #include "Reasoner/Preprocess/CRoleChainAutomataTransformationPreProcess.h"
@@ -137,6 +142,7 @@
 
 #include "Reasoner/Realizer/COptimizedKPSetIndividualItem.h"
 #include "Reasoner/Realizer/COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator.h"
+#include "Reasoner/Realizer/COptimizedRepresentativeKPSetIntersectionCombinationIterator.h"
 
 #include "Utilities/Memory/CTempMemoryPoolContainerAllocationManager.h"
 #include "Utilities/CVariantTrible.hpp"
@@ -177,6 +183,7 @@ namespace Konclude {
 		namespace Answerer {
 
 			using namespace Composition;
+			using namespace Conclusion;
 
 
 
@@ -325,6 +332,8 @@ namespace Konclude {
 
 					bool identifyNonInstantiation(const QList<CAxiomExpression *>& assExps, const QSet<CExpressionVariable *> &answerIndiVariableSet, CAnswererContext* answererContext);
 
+
+					bool checkNonTrivialAbsorptionPropagationExpression(CBuildExpression* expression);
 					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *> generateAbsorptionBasedQueryParts(const QSet<CExpressionVariable *> &anonymousIndiVariableSet, bool allAnonymousVariables, QSet<CExpressionVariable *> &reductionForbiddenVarSet, const QSet<CExpressionVariable *> &rolledVarExpSet,
 						const QSet<CExpressionVariable *>& initialAnonymousIndiVariableSet, const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& prepareIndiVarSet, const QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash, const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash);
 
@@ -369,6 +378,9 @@ namespace Konclude {
 					bool visitAllIndividuals(function<bool(const CIndividualReference& indiRef)> visitFunc);
 
 
+					bool continueCalculationJobFromNondeterministicCachedGraph(CSatisfiableCalculationJob* satCalcJob, CAnswererContext* answererContext);
+
+
 					bool createVariableBindingPropagationTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext);
 					bool createVariableBindingConfirmationTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableIndividualBindingsCardinalityLinker* testingVarIndiBindingCardLinker, CSameRealization* sameRealization, CAnswererContext* answererContext);
 					bool createAbsorbedQueryPartEntailmentTest(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart, CComplexQueryProcessingData* procData, CAnswererContext* answererContext);
@@ -383,7 +395,7 @@ namespace Konclude {
 					QList<CIndividualVariableExpression*> getSortedRemainingVariableExpressionList(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, QSet<CIndividualVariableExpression*>* remainVarExpSet);
 
 
-					bool processVariableBindingsPropagationItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* message, CAnswererContext* answererContext);
+					bool processVariableBindingsPropagationItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* message, bool computationError, CAnswererContext* answererContext);
 					bool processVariableBindingsConfirmationCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation* message, CAnswererContext* answererContext);
 					bool processVariableBindingsEntailmentCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* message, CAnswererContext* answererContext);
 					bool processSatisfiableCalculationCompleted(CAnsweringMessageDataCalculationCompletedSatisfiable* message, CAnswererContext* answererContext);
@@ -545,20 +557,6 @@ namespace Konclude {
 						}
 					};
 
-					class CInstanceBindingIndividualLambdaCallingVisitor : public CSameRealizationIndividualVisitor {
-					public:
-						function<bool(const CIndividualReference&)> mCallFunction;
-
-						CInstanceBindingIndividualLambdaCallingVisitor(function<bool(const CIndividualReference&)> callFunction) {
-							mCallFunction = callFunction;
-						}
-
-						bool visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
-							return mCallFunction(indiRef);
-						}
-					};
-
-
 
 					class CInstanceBindingIndividualCountingVisitor : public CSameRealizationIndividualVisitor {
 					public:
@@ -570,11 +568,13 @@ namespace Konclude {
 						}
 					};
 
+					bool mConfConcurrentAnswerGeneration;
 
 					bool mConfConcurrentJoining;
 					cint64 mConcurrentJoinComputationTaskCount = 50;
 					CAbstractVariableMappingsCompositionJoinComputator* mJoinComputer;
 
+					bool mConfInterpretQueriesAsDistinct;
 
 					bool mConfInterpretNonAnswerIndividualVariablesAsAnonymousVariables;
 					QString mConfNonAnswerIndividualVariablesAsAnonymousVariablesInterpretingPrefixString;
@@ -637,7 +637,7 @@ namespace Konclude {
 
 					bool mConfFullQueryMaterialization;
 
-
+					bool mConfNonDeterministicSatisfiableCalculationContinuation;
 
 					COntologyQueryExtendedConfigDependedPreProcesser* mTestingOntologyPreprocessor;
 					CConcreteOntologyRebuildingPreparationBuilder* mTestingOntologyBuilder;

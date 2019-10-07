@@ -53,6 +53,7 @@ namespace Konclude {
 				mIndividualTriggerConceptIndex = 2;
 				mTopDataRangeConceptIndex = 3;
 				mDatatypeVector = nullptr;
+				mMinimalNextConceptID = 4;
 			}
 
 
@@ -318,6 +319,7 @@ namespace Konclude {
 
 
 			CTBox *CTBox::referenceTBox(CTBox *tBox) {
+				mMinimalNextConceptID = tBox->mMinimalNextConceptID;
 				if (tBox->concepts) {
 					getConceptVector();
 					concepts->referenceVector(tBox->concepts);
@@ -588,6 +590,26 @@ namespace Konclude {
 				mUnivConnNomValueCon = valueCon;
 				return this;
 			}
+
+
+
+			CTBox* CTBox::setMinimalNextConceptID(cint64 nextId) {
+				mMinimalNextConceptID = nextId;
+				return this;
+			}
+
+			cint64 CTBox::getMinimalNextConceptID() {
+				return mMinimalNextConceptID;
+			}
+
+			cint64 CTBox::getNextConceptID() {
+				cint64 nextId = mMinimalNextConceptID;
+				if (concepts) {
+					nextId = qMax(nextId, concepts->getItemCount());
+				}
+				return nextId;
+			}
+
 
 
 		}; // end namespace Ontology

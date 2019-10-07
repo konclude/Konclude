@@ -391,7 +391,7 @@ namespace Konclude {
 
 			CConcept* CDataLiteralNormalizerPreProcess::createConcept() {
 				CConcept* concept = CObjectAllocator<CConcept>::allocateAndConstruct(mMemMan);
-				cint64 nextConTag = mConceptVector->getItemCount();
+				cint64 nextConTag = mTBox->getNextConceptID();
 				concept->initConcept();
 				concept->setTag(nextConTag);
 				mConceptVector->setData(nextConTag,concept);

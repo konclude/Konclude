@@ -91,10 +91,14 @@ namespace Konclude {
 					bool writeInconsistentIndividualTypes();
 					bool writeIndividualTypesResult(CRealization* realization);
 					
-					virtual void writeIndividualDeclaration(const QString& individualName) = 0;
+					virtual void writeIndividualDeclaration(const QString& individualName, bool anonymous) = 0;
+					virtual void writeNamedIndividualDeclaration(const QString& individualName) = 0;
+					virtual void writeAnonymousIndividualDeclaration(const QString& className) = 0;
 					virtual void writeClassDeclaration(const QString& className) = 0;
 					
-					virtual void writeIndividualType(const QString& individualName, const QString& className) = 0;
+					virtual void writeIndividualType(const QString& individualName, bool anonymous, const QString& className) = 0;
+					virtual void writeNamedIndividualType(const QString& individualName, const QString& className) = 0;
+					virtual void writeAnonymousIndividualType(const QString& individualName, const QString& className) = 0;
 					virtual void writeSubClassRelation(const QString& subClassName, const QString& superClassName) = 0;
 
 					virtual void writeOntologyStart() = 0;
@@ -128,12 +132,13 @@ namespace Konclude {
 
 					QSet<CConcept*> mDeclaratedConceptSet;
 					QString mCurrentIndividualName;
-
-
+					bool mCurrentIndividualAnonymous;
+					
 					bool mUseAbbreviatedIRIs;
 					bool mWriteDeclarations;
 					bool mWriteOnlyDirectTypes;
 					bool mWriteSubClassOfInconsistency;
+					bool mWriteAnonymousIndividuals;
 
 					bool mQueryAnswered;
 					bool mQueryConstructError;

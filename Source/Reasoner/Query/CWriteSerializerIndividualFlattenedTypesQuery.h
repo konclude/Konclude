@@ -64,10 +64,14 @@ namespace Konclude {
 				// protected methods
 				protected:
 					
-					virtual void writeIndividualDeclaration(const QString& individualName);
+					virtual void writeIndividualDeclaration(const QString& individualName, bool anonymous);
+					virtual void writeNamedIndividualDeclaration(const QString& individualName);
+					virtual void writeAnonymousIndividualDeclaration(const QString& individualName);
 					virtual void writeClassDeclaration(const QString& className);
 
-					virtual void writeIndividualType(const QString& individualName, const QString& className);
+					virtual void writeIndividualType(const QString& individualName, bool anonymous, const QString& className);
+					virtual void writeNamedIndividualType(const QString& individualName, const QString& className);
+					virtual void writeAnonymousIndividualType(const QString& individualName, const QString& className);
 					virtual void writeSubClassRelation(const QString& subClassName, const QString& superClassName);
 
 					virtual void writeOntologyStart();

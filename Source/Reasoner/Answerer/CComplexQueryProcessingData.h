@@ -27,7 +27,6 @@
 // Namespace includes
 #include "AnswererSettings.h"
 #include "CComplexConceptStepComputationProcess.h"
-#include "CComplexQueryFinishingHandler.h"
 #include "CAnsweringHandlingStatistics.h"
 
 
@@ -37,6 +36,7 @@
 
 #include "Concurrent/Callback/CCallbackData.h"
 
+#include "Reasoner/Answerer/Conclusion/CAbstractComplexQueryFinishingHandler.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -52,6 +52,7 @@ namespace Konclude {
 
 		namespace Answerer {
 
+			using namespace Conclusion;
 
 			/*! 
 			 *
@@ -92,6 +93,9 @@ namespace Konclude {
 					CComplexQueryProcessingData* setVariableBuildingItem(COptimizedComplexBuildingVariableCompositionsItem* variableBuildingItem);
 
 
+					bool isComputationError();
+					CComplexQueryProcessingData* setComputationError(bool error);
+
 
 
 					bool isUnsatisfiable();
@@ -115,8 +119,8 @@ namespace Konclude {
 					qint64 getProcessingTime();
 
 
-					CComplexQueryFinishingHandler* getFinishingHandler();
-					CComplexQueryProcessingData* setFinishingHandler(CComplexQueryFinishingHandler* finishingHandler);
+					CAbstractComplexQueryFinishingHandler* getFinishingHandler();
+					CComplexQueryProcessingData* setFinishingHandler(CAbstractComplexQueryFinishingHandler* finishingHandler);
 
 
 
@@ -144,6 +148,7 @@ namespace Konclude {
 
 					COptimizedComplexConceptItem* mConceptItem;
 					bool mUnsatisfiable;
+					bool mComputationError;
 
 					bool mProcessingStarted = false;
 					bool mProcessingFinished = false;
@@ -151,7 +156,7 @@ namespace Konclude {
 					QTime mProcessingTimer;
 
 
-					CComplexQueryFinishingHandler* mFinishingHandler;
+					CAbstractComplexQueryFinishingHandler* mFinishingHandler;
 
 					CAnsweringHandlingStatistics* mQueryProcessingInitializedAnsweringStatistics;
 

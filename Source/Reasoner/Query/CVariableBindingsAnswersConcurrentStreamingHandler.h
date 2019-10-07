@@ -18,15 +18,14 @@
  *
  */
 
-#ifndef KONCLUDE_REASONER_ANSWERER_CCOMPLEXQUERYFINISHINGHANDLER_H
-#define KONCLUDE_REASONER_ANSWERER_CCOMPLEXQUERYFINISHINGHANDLER_H
+#ifndef KONCLUDE_REASONER_QUERY_CVARIABLEBINDINGSANSWERSCONCURRENTSTREAMINGHANDLER_H
+#define KONCLUDE_REASONER_QUERY_CVARIABLEBINDINGSANSWERSCONCURRENTSTREAMINGHANDLER_H
 
 // Libraries includes
+#include "CVariableBindingsAnswersResult.h"
 
 
 // Namespace includes
-#include "AnswererSettings.h"
-
 
 // Other includes
 
@@ -35,39 +34,40 @@
 #include "Logger/CLogger.h"
 
 
+
 namespace Konclude {
 
 	namespace Reasoner {
 
-		namespace Answerer {
-
+		namespace Query {
 
 			/*! 
 			 *
-			 *		\class		CComplexQueryFinishingHandler
+			 *		\class		CVariableBindingsAnswersConcurrentStreamingHandler
 			 *		\author		Andreas Steigmiller
 			 *		\version	0.1
 			 *		\brief		TODO
 			 *
 			 */
-			class CComplexQueryFinishingHandler {
+			class CVariableBindingsAnswersConcurrentStreamingHandler {
 				// public methods
 				public:
 					//! Constructor
-					CComplexQueryFinishingHandler();
+					CVariableBindingsAnswersConcurrentStreamingHandler();
 
-					virtual ~CComplexQueryFinishingHandler();
+					//! Destructor
+					virtual ~CVariableBindingsAnswersConcurrentStreamingHandler();
 
-					virtual bool init() = 0;
-					virtual bool processQueryResults() = 0;
-					virtual bool finishQueryProcessing() = 0;
+
+
+					virtual CVariableBindingsAnswersConcurrentStreamingHandler* concurrentlyStreamResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1) = 0;
+
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
-
 
 				// private methods
 				private:
@@ -77,10 +77,10 @@ namespace Konclude {
 
 			};
 
-		}; // end namespace Answerer
+		}; // end namespace Query
 
 	}; // end namespace Reasoner
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_REASONER_ANSWERER_CCOMPLEXQUERYFINISHINGHANDLER_H
+#endif // KONCLUDE_REASONER_QUERY_CVARIABLEBINDINGSANSWERSCONCURRENTSTREAMINGHANDLER_H

@@ -307,7 +307,7 @@ namespace Konclude {
 
 				CCommandRecordRouter recordRouter;
 				COntologyBuilder* mOntoBuilder;
-				QString mOntologyName;
+				QString mOntologyIdentifier;
 				cint64 mAxiomNumber;
 
 				typedef void (CXMLOWL2Handler::*ParseFunction) (CParseStackObject*  parseStackObj);

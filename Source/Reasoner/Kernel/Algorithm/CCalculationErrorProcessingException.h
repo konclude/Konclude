@@ -53,7 +53,9 @@ namespace Konclude {
 				class CCalculationErrorProcessingException {
 					// public methods
 					public:
-						enum ERRORCODE { ECNOERROR = 0, ECNOMINALMISSING = 1 };
+						enum ERRORCODE {
+							ECNOERROR = 0, ECNOMINALMISSING = 1, ECCANCELED = 2
+						};
 
 
 						//! Constructor

@@ -75,8 +75,10 @@ namespace Konclude {
 					virtual void writeClassEquivalenceRelations(const QStringList& classNameList);
 
 
-					virtual void writeIndividualDeclaration(const QString& individualName);
-					virtual void writeIndividualType(const QString& individualName, const QString& className);
+					virtual void writeNamedIndividualDeclaration(const QString& individualName);
+					virtual void writeAnonymousIndividualDeclaration(const QString& individualName);
+					virtual void writeNamedIndividualType(const QString& individualName, const QString& className);
+					virtual void writeAnonymousIndividualType(const QString& individualName, const QString& className);
 
 					virtual void writeOntologyStart();
 					virtual void writeOntologyEnd();

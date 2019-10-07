@@ -40,6 +40,7 @@ namespace Konclude {
 			template<class T>
 			CRedlandStoredTriplesRepresentativeTagSet<T>::CRedlandStoredTriplesRepresentativeTagSet(cint64 representativeId) {
 				mRepresentativeId = representativeId;
+				mTagNode = nullptr;
 			}
 
 
@@ -214,9 +215,6 @@ namespace Konclude {
 					--mTotalCount;
 				}
 				--mActiveCount;
-				if (mActiveCount < 0 || mTotalCount < 0 || mActiveCount > mTotalCount) {
-					bool debug = true;
-				}
 				return this;
 			}
 
@@ -238,6 +236,10 @@ namespace Konclude {
 			}
 
 
+			template<class T>
+			librdf_node*& CRedlandStoredTriplesRepresentativeTagSet<T>::getRedlandTagNode() {
+				return mTagNode;
+			}
 
 		}; // end namespace Triples
 

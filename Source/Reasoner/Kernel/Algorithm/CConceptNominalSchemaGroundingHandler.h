@@ -92,6 +92,7 @@ namespace Konclude {
 					protected:
 						CMemoryAllocationManager* mMemMan;
 						CConceptVector* mConceptVec;
+						CTBox* mTBox;
 						CConceptNominalSchemaGroundingHash* mReplaceHash;
 						CProcessingDataBox* mDataBox;
 

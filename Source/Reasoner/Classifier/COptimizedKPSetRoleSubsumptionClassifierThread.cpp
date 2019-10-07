@@ -246,16 +246,7 @@ namespace Konclude {
 				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(tmpRoleRealOntology->getOntologyContext()->getMemoryAllocationManager());
 				concept->initConcept();
 
-				cint64 newConTag = conVec->getItemCount();
-				CConsistence* consistence = tmpRoleRealOntology->getConsistence();
-				if (consistence) {
-					CConsistenceData* consData = consistence->getConsistenceModelData();
-					if (consData) {
-						CConsistenceTaskData* consTaskData = dynamic_cast<CConsistenceTaskData*>(consData);
-						CSatisfiableCalculationTask* satConsTask = consTaskData->getCompletionGraphCachedSatisfiableTask();
-						newConTag = qMax(newConTag,satConsTask->getProcessingDataBox()->getExtendedConceptVector()->getItemCount());
-					}
-				}
+				cint64 newConTag = tmpRoleRealOntology->getTBox()->getNextConceptID();
 
 				concept->setConceptTag(newConTag);
 				conVec->setData(concept->getConceptTag(),concept);
@@ -278,6 +269,7 @@ namespace Konclude {
 					tmpRoleRealOntology = new CConcreteOntology(ontology,ontology->getConfiguration());		
 					tmpRoleRealOntology->setOntologyID(ontology->getOntologyID());
 					tmpRoleRealOntology->setConsistence(ontology->getConsistence());
+					tmpRoleRealOntology->getTBox()->setMinimalNextConceptID(ontology->getTBox()->getMinimalNextConceptID());
 
 					QSet<CConcept*> compTransformConceptSet;
 					QHash<CConcept*,COptimizedKPSetRoleTestingItem*>* markerConRolInsItemHash = item->getMarkerConceptInstancesItemHash();

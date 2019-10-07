@@ -34,6 +34,16 @@ namespace Konclude {
 		CABoxAxiomBuilder::~CABoxAxiomBuilder() {
 		}
 
+
+		QString CABoxAxiomBuilder::getOntologyAnonymousIdentifier(const QString& ontologyName) {
+			QString ontologyIdentifier = ontologyName;
+			if (!ontologyIdentifier.startsWith("_:")) {
+				ontologyIdentifier = "_:" + ontologyIdentifier;
+			}
+			return ontologyIdentifier;
+		}
+
+
 	}; // end namespace Parser
 
 }; // end namespace Konclude

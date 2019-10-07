@@ -166,6 +166,9 @@ namespace Konclude {
 					QSet<CObjectPropertyAssertionExpression*>* getPropertyAssertionSet();
 
 
+					bool hasNonTrivialAbsorptionPropagation();
+					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setNonTrivialAbsorptionPropagation(bool prop);
+
 				// protected methods
 				protected:
 
@@ -218,6 +221,7 @@ namespace Konclude {
 
 					bool mTopObjectPropertyUsed;
 
+					bool mNonTrivialAbsorptionPropagation;
 
 					QHash<QPair<CObjectPropertyTermExpression*, bool>, CConcept*> mInitialObjectPropertyPropagatedTriggerConceptHash;
 

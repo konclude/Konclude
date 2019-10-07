@@ -135,7 +135,7 @@ namespace Konclude {
 
 
 		bool COWL2QtXMLOntologyParser::parseOntologyNode(QDomElement* ontologyNode) {
-			mOntologyName = ontologyNode->attribute("ontologyIRI");
+			mOntologyIdentifier = ontologyNode->attribute("ontologyIRI");
 			QString addDelSring = ontologyNode->localName();
 			if (addDelSring.isEmpty()) {
 				addDelSring = ontologyNode->tagName();
@@ -1280,14 +1280,14 @@ namespace Konclude {
 
 		CAnonymousIndividualExpression *COWL2QtXMLOntologyParser::parseAnonymousIndividualNode(QDomElement *node) {
 			// parse <NamedIndividual> <...> </NamedIndividual>
-			if (mOntologyName.isEmpty()) {
-				mOntologyName = mOntoBuilder->getOntologyName();
+			if (mOntologyIdentifier.isEmpty()) {
+				mOntologyIdentifier = mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName());
 			}
 			QString indiNameName = node->attribute(QString("nodeID"));
 			CAnonymousIndividualExpression* exp = nullptr;
 			if (!indiNameName.isEmpty()) {
 				if (mOntoBuilder) {
-					exp = mOntoBuilder->getAnonymousIndividual(mOntologyName,indiNameName);
+					exp = mOntoBuilder->getAnonymousIndividual(mOntologyIdentifier,indiNameName);
 				}
 			}
 			return exp;

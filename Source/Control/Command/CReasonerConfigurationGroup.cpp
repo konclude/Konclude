@@ -460,6 +460,11 @@ namespace Konclude {
 						new CIntegerConfigType(1));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BlockingTestsIgnoringCompletionGraphCachedNonBlockedNodes",
+						"Determines whether blocking tests are performed for nodes that are present in the cached completion graph and are not blocked in it.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.AllowBackendNeighbourExpansionBlocking",
@@ -726,6 +731,38 @@ namespace Konclude {
 						new CBooleanConfigType(false));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.ConditionalFullCompletionGraphConstruction",
+						"Determines whether a full completion graph is constructed for the consistency check if certain conditions are satisfied (i.e., if one SuggestionCondition but no ExclusionCondition is satisfied).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.ExclusionCondition.MaximumIndividualLimit",
+						"Specifies the maximum number of individual for which a full completion graph can be constructed.",
+						new CIntegerConfigType(300000)),
+						new CIntegerConfigType(300000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.SuggestionCondition.MaximumIndividualLimit",
+						"Specifies the number of individual for which a full completion graph should be constructed.",
+						new CIntegerConfigType(10000)),
+						new CIntegerConfigType(10000));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.ExclusionCondition.MaximumIndividualConceptRatio",
+						"Specifies the maximum ratio (in percent) between individuals and concepts with which a full completion graph can be constructed.",
+						new CIntegerConfigType(5000)),
+						new CIntegerConfigType(5000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.FullCompletionGraphConstruction.SuggestionCondition.MaximumIndividualConceptRatio",
+						"Specifies the maximum ratio between individuals and concepts with which a full completion graph should be constructed.",
+						new CIntegerConfigType(500)),
+						new CIntegerConfigType(500));
+
+
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.CollectProcessStatistics",
 						"Determines whether calculation statistics for created tasks are collected.",
 						new CBooleanConfigType(false)),
@@ -879,48 +916,54 @@ namespace Konclude {
 
 
 
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MaximumParallelTestingCalculationCount",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.MaximumParallelTestingCalculationCount",
 						"Determines how many calculation jobs are maximally created per realizer at one time.",
 						new CIntegerConfigType(1)),
 						((CConfigData*)nullptr));
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount",
 						"Determines how many calculation jobs are created per realizer.",
 						new CIntegerConfigType(8)),
 						new CIntegerConfigType(8));
 
 
 
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceConceptsUpfrontMerging",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceConceptsUpfrontMerging",
 						"Determines whether a merging of possible instances with the to be checked concept should be tried upfront.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMerging",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMerging",
 						"Determines whether the reasoner should try to merge other possible instances into the checked concept instance.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel",
 						"Determines whether the reasoner should only provide individuals with same representative labels for the afterwards possible instance merging.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
 
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.AlternatePossibleConceptInstanceTestingItemsOnCalculations",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.AlternatePossibleConceptInstanceTestingItemsOnCalculations",
 						"Determines whether possible concept instance testing is alternated for the concepts.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
 
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingProvidingCount",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingProvidingCount",
 						"Determines how many individuals are provided for merging possible instances after instance checking (negative numbers are interpreted as infinite).",
 						new CIntegerConfigType(-1)),
 						new CIntegerConfigType(-1));
 
-				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount",
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount",
 						"Determines how often it can be tried to merge another possible instance individual into the result of the currently checked concept instance.",
 						new CIntegerConfigType(3)),
 						new CIntegerConfigType(3));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.NonDeterministicCachedCompletionGraphContinuationPropagationTests",
+						"Determines whether the non-deterministic derived completion graph that is cached from the consistency check is used for the propagation tests (e.g., for propagating marker concepts for role realization).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.RealizePrecomputation.SameIndividuals",
@@ -1198,6 +1241,23 @@ namespace Konclude {
 						new CStringConfigType("")),
 						new CStringConfigType(""));
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.InterpretQueriesAsDistinct",
+						"Determines whether all queries are interpreted with the distinct modifier.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentComputationThreadPoolSize",
+						"Determines the maximum number of threads for the concurrent query answer computations (0 stands for automatically using the number of computer cores/threads).",
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
+
+
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinComputation",
 						"Determines whether bindings are joined concurrently.",
@@ -1226,6 +1286,13 @@ namespace Konclude {
 						new CBooleanConfigType(false)), 
 						new CBooleanConfigType(false));
 
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentAnswerGeneration",
+						"Determines whether answers are concurrently generated from computed bindings (if possible).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Answering.MaximumParallelTestingCalculationCount",
 						"Determines how many calculation jobs are maximally created per answerer at one time.",
 						new CIntegerConfigType(1)),
@@ -1243,6 +1310,10 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Answering.NonDeterministicCachedCompletionGraphContinuationPropagationTests",
+						"Determines whether the non-deterministic derived completion graph that is cached from the consistency check is used for the propagation tests.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -2018,6 +2089,12 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
+				addConfigProperty(new CConfigDescription("Konclude.OWLlink.ResultAnonymousIndividualsIntegration",
+						"Determines whether the results for anonymous individuals are integrated.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.RequestFile",
 						"Filepath for OWLlink request file loader.",
 						new CStringConfigType("")),
@@ -2152,12 +2229,21 @@ namespace Konclude {
 					new CBooleanConfigType(false)),
 					new CBooleanConfigType(false));
 
-				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Server.ChunkEncodingSize",
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Serialization.ChunkEncodingSize",
 					"Determines whether at which size (in bytes) the results are chunked.",
-					new CIntegerConfigType(524288000)),
-					new CIntegerConfigType(524288000));
+					new CIntegerConfigType(104857600)),
+					new CIntegerConfigType(104857600));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Server.WriteBufferBlockingLimit",
+						"Determines the network write buffer limit up to which the result generation is not blocked.",
+						new CIntegerConfigType(20)),
+						new CIntegerConfigType(20));
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.File.WriteBufferBlockingLimit",
+						"Determines the file write buffer limit up to which the result generation is not blocked.",
+						new CIntegerConfigType(20)),
+						new CIntegerConfigType(20));
 
 
 				// CLI configurations
@@ -2440,6 +2526,11 @@ namespace Konclude {
 						new CStringConfigType("")),
 						new CStringConfigType(""));
 
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.TerminateAssistAdditionalArgument",
+						"Additional arguments for the termination program.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
 
 				addConfigProperty(new CConfigDescription("Konclude.CLI.Output.WriteDeclarations",
 						"Determines whether declarations are also written to the output file.",
@@ -2464,6 +2555,11 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 
+
+				addConfigProperty(new CConfigDescription("Konclude.CLI.Output.WriteAnonymousIndividualResults",
+						"Determines whether the results for anonymous individuals are written.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 
 

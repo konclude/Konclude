@@ -305,7 +305,7 @@ namespace Konclude {
 
 				CCommandRecordRouter recordRouter;
 				COntologyBuilder* mOntoBuilder;
-				QString mOntologyName;
+				QString mOntologyIdentifier;
 				cint64 mAxiomNumber;
 
 				typedef CBuildExpression* (COWL2QtXMLOntologyParser::*ParseFunction) (QDomElement* node);

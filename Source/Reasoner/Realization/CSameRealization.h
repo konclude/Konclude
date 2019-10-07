@@ -64,6 +64,8 @@ namespace Konclude {
 					virtual CRealizationIndividualInstanceItemReference getSameInstanceItemReference(const CIndividualReference& indiRef) = 0;
 
 
+					virtual bool hasPotentiallySameIndividuals() = 0;
+
 					// deprecated
 					virtual bool visitSameIndividuals(CSameInstanceItem* item, CSameRealizationIndividualVisitor* visitor) = 0;
 					virtual CSameInstanceItem* getSameInstanceItem(CIndividual* individual);

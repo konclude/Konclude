@@ -27,8 +27,36 @@ namespace Konclude {
 	namespace Reasoner {
 
 		namespace Triples {
+			
+
+			CRedlandNodeHasher::CRedlandNodeHasher(librdf_node* node) {
+				mNode = librdf_new_node_from_node(node);
+				if (librdf_node_is_literal(mNode)) {
+					mHashValue = hash_c_string((const char*)librdf_node_get_literal_value(mNode));
+				} else if (!librdf_node_is_blank(node)) {
+					librdf_uri* uri = librdf_node_get_uri(mNode);
+					mHashValue = hash_c_string((const char*)librdf_uri_as_string(uri));
+				} else {
+					mHashValue = hash_c_string((const char*)librdf_node_get_blank_identifier(mNode));
+				}
+			}
+
+			CRedlandNodeHasher::CRedlandNodeHasher(const CRedlandNodeHasher& hasher) {
+				mNode = librdf_new_node_from_node(hasher.mNode);
+				mHashValue = hasher.mHashValue;
+			}
 
 
+			CRedlandNodeHasher& CRedlandNodeHasher::operator=(const CRedlandNodeHasher& hasher) {
+				mNode = librdf_new_node_from_node(hasher.mNode);
+				mHashValue = hasher.mHashValue;
+				return *this;
+			}
+
+
+			CRedlandNodeHasher::~CRedlandNodeHasher() {
+				librdf_free_node(mNode);
+			}
 
 
 		}; // end namespace Triples

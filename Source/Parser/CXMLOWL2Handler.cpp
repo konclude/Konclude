@@ -1059,14 +1059,14 @@ namespace Konclude {
 
 
 		CAnonymousIndividualExpression *CXMLOWL2Handler::parseAnonymousIndividualNode(CParseStackObject* parseStackObj) {
-			if (mOntologyName.isEmpty()) {
-				mOntologyName = mOntoBuilder->getOntologyName();
+			if (mOntologyIdentifier.isEmpty()) {
+				mOntologyIdentifier = mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName());
 			}
 			const QString& indiNameName = getNodeID(parseStackObj);
 			CAnonymousIndividualExpression *exp = 0;
 			if (!indiNameName.isEmpty()) {
 				if (mOntoBuilder) {
-					exp = mOntoBuilder->getAnonymousIndividual(mOntologyName,indiNameName);
+					exp = mOntoBuilder->getAnonymousIndividual(mOntologyIdentifier,indiNameName);
 				}
 			}
 			return exp;

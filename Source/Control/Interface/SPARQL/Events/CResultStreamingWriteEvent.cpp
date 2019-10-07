@@ -32,10 +32,10 @@ namespace Konclude {
 				namespace Events {
 
 
-					CResultStreamingWriteEvent::CResultStreamingWriteEvent(QByteArray* buffer, bool last)
+					CResultStreamingWriteEvent::CResultStreamingWriteEvent(const QList<CSPARQLResultBufferWriteData>& bufferList, bool last)
 							: CCustomEvent(EVENTTYPE) {
 
-						mBuffer = buffer;
+						mBufferList = bufferList;
 						mLast = last;
 					}
 
@@ -43,8 +43,8 @@ namespace Konclude {
 					CResultStreamingWriteEvent::~CResultStreamingWriteEvent() {
 					}
 
-					QByteArray* CResultStreamingWriteEvent::getBuffer() {
-						return mBuffer;
+					QList<CSPARQLResultBufferWriteData>* CResultStreamingWriteEvent::getBufferList() {
+						return &mBufferList;
 					}
 
 					bool CResultStreamingWriteEvent::isLast() {

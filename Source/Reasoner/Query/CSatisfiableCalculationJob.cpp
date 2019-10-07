@@ -36,6 +36,7 @@ namespace Konclude {
 				mPreyingAdapter = nullptr;
 				mSatClassMessAdapter = nullptr;
 				mJobInstantiation = nullptr;
+				mAllowNonDeterministicSatisfiableCalculationContinuation = nullptr;
 				mRealMarkCandMessAdapter = nullptr;
 				mSatIncConsTestingAdapter = nullptr;
 				mSatIndDepTrackAdapter = nullptr;
@@ -130,6 +131,16 @@ namespace Konclude {
 
 			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setConsecutivelyCalculationJobInstantiation(CSatisfiableCalculationJobInstantiation* jobInstantiation) {
 				mJobInstantiation = jobInstantiation;
+				return this;
+			}
+
+
+			bool CSatisfiableCalculationJob::allowNonDeterministicSatisfiableCalculationContinuation() {
+				return mAllowNonDeterministicSatisfiableCalculationContinuation;
+			}
+
+			CSatisfiableCalculationJob* CSatisfiableCalculationJob::setAllowNonDeterministicSatisfiableCalculationContinuation(bool allow) {
+				mAllowNonDeterministicSatisfiableCalculationContinuation = allow;
 				return this;
 			}
 

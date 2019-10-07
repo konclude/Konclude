@@ -297,9 +297,7 @@ namespace Konclude {
 
 			CConcept* CNominalSchemaTemplateExtractionPreProcess::transformEquivalentConceptToGCI(CConcept* eqConcept) {
 				eqConcept->setOperatorCode(CCSUB);
-				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				concept->initConcept();
-				concept->setConceptTag(mConceptVec->getItemCount());
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCOR);
 				mConceptVec->setData(concept->getConceptTag(),concept);
 				addConceptOperand(eqConcept,concept,false);
@@ -313,11 +311,17 @@ namespace Konclude {
 				return concept;
 			}
 
-
-			CConcept* CNominalSchemaTemplateExtractionPreProcess::createNominalSchemaTemplateReferenceConcept(CNominalSchemaTemplate* nsTemplate) {
+			CConcept* CNominalSchemaTemplateExtractionPreProcess::createNewConcept() {
 				CConcept* concept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
 				concept->initConcept();
-				concept->setConceptTag(mConceptVec->getItemCount());
+				cint64 nextConTag = mTBox->getNextConceptID();
+				concept->initTag(nextConTag);
+				return concept;
+			}
+
+
+			CConcept* CNominalSchemaTemplateExtractionPreProcess::createNominalSchemaTemplateReferenceConcept(CNominalSchemaTemplate* nsTemplate) {
+				CConcept* concept = createNewConcept();
 				concept->setOperatorCode(CCNOMTEMPLREF);
 				concept->setParameter(nsTemplate->getNominalSchemaTemplateTag());
 				mConceptVec->setData(concept->getConceptTag(),concept);

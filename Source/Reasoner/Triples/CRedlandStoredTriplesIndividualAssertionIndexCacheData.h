@@ -72,6 +72,13 @@ namespace Konclude {
 					QString getIndividualName();
 					cint64 getIndividualId();
 
+					bool isAnonymous();
+					CRedlandStoredTriplesIndividualAssertionIndexCacheData* setAnonymous(bool anonymous);
+
+					bool isIndividualNonAnonymityStored();
+					CRedlandStoredTriplesIndividualAssertionIndexCacheData* setIndividualNonAnonymityStored(bool stored);
+
+
 					bool isIndividualIdStored();
 					CRedlandStoredTriplesIndividualAssertionIndexCacheData* setIndividualIdStored(bool stored);
 
@@ -98,6 +105,8 @@ namespace Konclude {
 					librdf_node* mIndividualNode;
 					cint64 mIndividualId = 0;
 					bool mIdStored = false;
+					bool mAnonymous = true;
+					bool mNonAnonymityStored = false;
 
 					CRedlandStoredTriplesRepresentativeIndividualAssertionsIndexData* mCurrentRepresentativeIndividualAssertionsIndexData;
 					CRedlandStoredTriplesRepresentativeIndividualAssertionsIndexData* mStoredRepresentativeIndividualAssertionsIndexData;

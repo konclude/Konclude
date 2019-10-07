@@ -60,6 +60,11 @@ namespace Konclude {
 				return this;
 			}
 
+			CReasonerEvaluationRequestResponse* CReasonerEvaluationRequestResponse::setResponseErrorString(const QString& errorString) {
+				mResponseErrorString = errorString;
+				return this;
+			}
+
 
 			cint64 CReasonerEvaluationRequestResponse::getResponseTime() {
 				return mResponseTime;
@@ -79,6 +84,10 @@ namespace Konclude {
 
 			QString CReasonerEvaluationRequestResponse::getEvaluationErrorString() {
 				return mEvaluationErrorString;
+			}
+
+			QString CReasonerEvaluationRequestResponse::getResponseErrorString() {
+				return mResponseErrorString;
 			}
 
 		}; // end namespace Evaluation

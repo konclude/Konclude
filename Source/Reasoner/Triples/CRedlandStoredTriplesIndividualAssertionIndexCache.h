@@ -126,11 +126,15 @@ namespace Konclude {
 
 					const char* mIndividualIdPredicateUri = "i:id";
 					const char* mRepresentativeIdObjectPredicateUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+					const char* mRepresentativeNonAnonymousPredicateUri = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+					const char* mRepresentativeNonAnonymousObjectUri = "n";
+					librdf_node* mRepresentativeNonAnonymousObjectNode = nullptr;
 
 					librdf_statement* mIndividualNodeRetrievalByIdStatement;
 					librdf_statement* mIndividualIdRetrievalByNodeStatement;
 					librdf_statement* mRepresentativeTypeFilteringStatement;
 					librdf_statement* mIndividualIdInsertionStatement;
+					librdf_statement* mIndividualNonAnonymityInsertionStatement;
 
 
 					QCache<CRedlandNodeHasher, CRedlandStoredTriplesIndividualAssertionIndexCacheData> mIndividualAssertionsIndexCache;

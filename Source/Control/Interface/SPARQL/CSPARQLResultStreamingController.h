@@ -61,6 +61,8 @@ namespace Konclude {
 						//! Constructor
 						CSPARQLResultStreamingController();
 
+						virtual bool canWrite() = 0;
+
 						virtual bool notifyWriteRequest(cint64 sequenceNumber) = 0;
 
 					// protected methods

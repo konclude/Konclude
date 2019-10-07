@@ -61,11 +61,9 @@ namespace Konclude {
 							if (otherReasonerStringListDataValue) {
 								const QStringList& otherResponseFileStringList = otherReasonerStringListDataValue->getValue();
 								if (!otherResponseFileStringList.isEmpty()) {
-									CReasonerEvaluationStringListValue* minVal = qMin(stringListDataValue,otherReasonerStringListDataValue);
-									CReasonerEvaluationStringListValue* maxVal = qMax(stringListDataValue,otherReasonerStringListDataValue);
 
-									if (mReasonerCompareResultSubsumptionCountHash.contains(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal))) {
-										reasonerResultSubsumptionCount += mReasonerCompareResultSubsumptionCountHash.value(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal));
+									if (mReasonerCompareResultSubsumptionCountHash.contains(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(stringListDataValue, otherReasonerStringListDataValue))) {
+										reasonerResultSubsumptionCount += mReasonerCompareResultSubsumptionCountHash.value(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(stringListDataValue, otherReasonerStringListDataValue));
 									} else {
 
 										if (!fileOpened) {
@@ -104,14 +102,14 @@ namespace Konclude {
 														compareDiffCountHash = new QHash<QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>,cint64>();
 													}
 
-													if (compareDiffCountHash->contains(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal))) {
-														subsumingCount += compareDiffCountHash->value(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal));
+													if (compareDiffCountHash->contains(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(stringListDataValue, otherReasonerStringListDataValue))) {
+														subsumingCount += compareDiffCountHash->value(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(stringListDataValue, otherReasonerStringListDataValue));
 													} else {
 														if (resultElement.nodeName() == "results") {
 															// handle SPARQL binding results
 															QHash<QString, cint64> variableNameIndexHash;
 															if (!variableBindingsResult) {
-																variableBindingsResult = mSPARQLResultParser.parseVariableBindings(&resultElement, &variableNameIndexHash, true);
+																variableBindingsResult = mSPARQLResultParser.parseVariableBindingsSet(&resultElement, &variableNameIndexHash, true);
 															}
 															QString otherResponseFileString = otherResponseFileStringList.first();															
 															LOG(INFO, "::Konclude::Test::Evaluation::ResultDifferenceAnalyser", logTr("Comparing variable binding results between '%1' and '%2'.").arg(responseFileString).arg(otherResponseFileString), this);
@@ -119,7 +117,7 @@ namespace Konclude {
 																subsumingCount = 1;
 															}
 														}
-														compareDiffCountHash->insert(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal),subsumingCount);
+														compareDiffCountHash->insert(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(stringListDataValue, otherReasonerStringListDataValue),subsumingCount);
 													}
 													reasonerResultSubsumptionCount += subsumingCount;
 													if (classHierResult) {
@@ -150,7 +148,7 @@ namespace Konclude {
 											}
 										}
 
-										mReasonerCompareResultSubsumptionCountHash.insert(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(minVal,maxVal),reasonerResultSubsumptionCount);
+										mReasonerCompareResultSubsumptionCountHash.insert(QPair<CReasonerEvaluationStringListValue*,CReasonerEvaluationStringListValue*>(stringListDataValue, otherReasonerStringListDataValue),reasonerResultSubsumptionCount);
 
 									}
 								}
@@ -187,7 +185,7 @@ namespace Konclude {
 								break;
 
 							} else if (currNodeNumber == nodeNumber && resultElement.nodeName() == "results") {
-								CVariableBindingsAnswersSetResult* otherVarBindingResult = mSPARQLResultParser.parseVariableBindings(&resultElement, variableNameIndexHash, true);
+								CVariableBindingsAnswersSetResult* otherVarBindingResult = mSPARQLResultParser.parseVariableBindingsSet(&resultElement, variableNameIndexHash, true);
 								if (otherVarBindingResult) {
 
 									if (varBindingResult && varBindingResult->isResultEquivalentTo(otherVarBindingResult)) {
@@ -196,10 +194,10 @@ namespace Konclude {
 									} else if (varBindingResult) {
 										resultSubsumption = true;
 										if (varBindingResult && otherVarBindingResult && resultSubsumption) {
-											CVariableBindingsAnswersResultIterator* it = varBindingResult->getVariableBindingsAnswersIterator();
+											CVariableBindingsAnswersResultIterator* it = otherVarBindingResult->getVariableBindingsAnswersIterator();
 											while (it->hasNext()) {
 												CVariableBindingsAnswerResult* answerResult = it->getNext();
-												if (!otherVarBindingResult->hasResultVariableBindings(answerResult)) {
+												if (!varBindingResult->hasResultVariableBindings(answerResult)) {
 													resultSubsumption = false;
 												}
 											}
@@ -334,7 +332,7 @@ namespace Konclude {
 								QString outputFile = plotFileString;
 								outputFile.remove(".csv");
 								QString title = getPrettyTitleFromOutputFile(outputFile);
-								context->getHighchartPlotter()->createReasonerDifferencePlot(plotFileString,context->getAdditionalTitleString()+title+"[# subsumptions]",reasonerList,outputFile,selector->getNameString()+" :: "+context->getAdditionalTitleString());
+								context->getHighchartPlotter()->createReasonerSubsumptionPlot(plotFileString,context->getAdditionalTitleString()+title+"[# subsumptions]",reasonerList,outputFile,selector->getNameString()+" :: "+context->getAdditionalTitleString());
 							}
 						}
 					}

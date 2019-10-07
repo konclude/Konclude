@@ -101,6 +101,9 @@ namespace Konclude {
 					CSatisfiableCalculationJobInstantiation* getConsecutivelyCalculationJobInstantiation();
 					CSatisfiableCalculationJob* setConsecutivelyCalculationJobInstantiation(CSatisfiableCalculationJobInstantiation* jobInstantiation);
 
+					bool allowNonDeterministicSatisfiableCalculationContinuation();
+					CSatisfiableCalculationJob* setAllowNonDeterministicSatisfiableCalculationContinuation(bool allow);
+
 
 					CSatisfiableCalculationJob* setSatisfiableTaskIncrementalConsistencyTestingAdapter(CSatisfiableTaskIncrementalConsistencyTestingAdapter* incConsTestAdaptor);
 					CSatisfiableTaskIncrementalConsistencyTestingAdapter* getSatisfiableTaskIncrementalConsistencyTestingAdapter();
@@ -157,6 +160,8 @@ namespace Konclude {
 					CCalculationStatisticsCollector* mCalclulationStatisticsCollector;
 					CTaskPreyingAdapter* mPreyingAdapter;
 					CSatisfiableCalculationJobInstantiation* mJobInstantiation;
+					bool mAllowNonDeterministicSatisfiableCalculationContinuation;
+
 					CSatisfiableTaskClassificationMessageAdapter* mSatClassMessAdapter;
 					CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter* mRealMarkCandMessAdapter;
 					CSatisfiableTaskIncrementalConsistencyTestingAdapter* mSatIncConsTestingAdapter;

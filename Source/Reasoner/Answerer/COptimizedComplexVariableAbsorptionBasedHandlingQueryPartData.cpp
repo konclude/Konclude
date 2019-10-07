@@ -39,6 +39,7 @@ namespace Konclude {
 				mBindingPropagationStartVariableExpression = nullptr;
 				mIndiVariables = false;
 				mTopObjectPropertyUsed = false;
+				mNonTrivialAbsorptionPropagation = false;
 			}
 
 
@@ -68,6 +69,17 @@ namespace Konclude {
 			QSet<CObjectPropertyAssertionExpression*>* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::getPropertyAssertionSet() {
 				return &mAxiomAssertionSet;
 			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::hasNonTrivialAbsorptionPropagation() {
+				return mNonTrivialAbsorptionPropagation;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::setNonTrivialAbsorptionPropagation(bool prop) {
+				mNonTrivialAbsorptionPropagation = prop;
+				return this;
+			}
+
 
 
 			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::addVariableNeighbouringPropertyAssertion(CObjectPropertyAssertionExpression* propertyAssertion) {

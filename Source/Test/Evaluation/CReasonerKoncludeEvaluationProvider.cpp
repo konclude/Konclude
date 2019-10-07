@@ -50,6 +50,7 @@ namespace Konclude {
 
 
 				mKillScriptString = CConfigDataReader::readConfigString(config,"Konclude.Evaluation.TerminateAssistProgram");
+				mKillScriptArgumentsString = CConfigDataReader::readConfigString(config, "Konclude.Evaluation.TerminateAssistAdditionalArgument");
 
 
 				QString argString = QString("%1").arg(mReasonerBinaryArguments);
@@ -113,7 +114,10 @@ namespace Konclude {
 					QProcess killProcess;
 					QStringList argumentList;
 					argumentList += QString::number((cint64)processID);
-					LOG(INFO,"::Konclude::Test::ReasonerEvaluationProvider",logTr("Executing '%1' to assist termination of process with id '%2'.").arg(mKillScriptString).arg((cint64)processID),this);
+					if (!mKillScriptArgumentsString.isEmpty()) {
+						argumentList += mKillScriptArgumentsString;
+					}
+					LOG(INFO, "::Konclude::Test::ReasonerEvaluationProvider", logTr("Executing '%1' to assist termination of process with id '%2'.").arg(mKillScriptString).arg((cint64)processID), this);
 					killProcess.start(mKillScriptString,argumentList);
 					if (!killProcess.waitForStarted()) {
 						return false;

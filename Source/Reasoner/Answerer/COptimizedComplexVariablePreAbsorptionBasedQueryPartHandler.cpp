@@ -72,13 +72,9 @@ namespace Konclude {
 
 
 			CConcept* COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::createPrepareConcept(CConcept* followingConcept, CVariable* variable) {
-				CConcept* prepConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				prepConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				prepConcept->initTag(nextConTag);
+				CConcept* prepConcept = createNewConcept();
 				prepConcept->setOperatorCode(CCVARBINDPREPARE);
 				prepConcept->setVariableLinker(CObjectAllocator< CSortedLinker<CVariable*> >::allocateAndConstruct(mMemMan)->init(variable));
-				mConceptVec->setLocalData(nextConTag, prepConcept);
 				addConceptOperand(prepConcept, followingConcept, false);
 				return prepConcept;
 			}
@@ -325,10 +321,7 @@ namespace Konclude {
 
 
 			CConcept* COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::createPropagationImplicationTriggeredConcept(const QList<CConcept*>& triggeredConceptList, CConcept* impliedConcept) {
-				CConcept* implicationConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				implicationConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				implicationConcept->initTag(nextConTag);
+				CConcept* implicationConcept = createNewConcept();
 				implicationConcept->setOperatorCode(CCIMPL);
 
 				cint64 linkerCount = 0;
@@ -343,28 +336,19 @@ namespace Konclude {
 				implicationConcept->setOperandList(newBaseOpCon2);
 				implicationConcept->incOperandCount(linkerCount + 1);
 
-				mConceptVec->setLocalData(nextConTag, implicationConcept);
 				return implicationConcept;
 			}
 
 
 			CConcept* COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::createPropagationTriggerConcept() {
-				CConcept* triggConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				triggConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				triggConcept->initTag(nextConTag);
+				CConcept* triggConcept = createNewConcept();
 				triggConcept->setOperatorCode(CCIMPLTRIG);
-				mConceptVec->setLocalData(nextConTag, triggConcept);
 				return triggConcept;
 			}
 
 			CConcept* COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::createTriggerConcept() {
-				CConcept* triggConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				triggConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				triggConcept->initTag(nextConTag);
+				CConcept* triggConcept = createNewConcept();
 				triggConcept->setOperatorCode(CCIMPLTRIG);
-				mConceptVec->setLocalData(nextConTag, triggConcept);
 				return triggConcept;
 			}
 
@@ -374,13 +358,9 @@ namespace Konclude {
 
 
 			CConcept* COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::createPropagationConcept(CConcept* followingTriggerConcept, CRole* role) {
-				CConcept* succPropConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				succPropConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				succPropConcept->initTag(nextConTag);
+				CConcept* succPropConcept = createNewConcept();
 				succPropConcept->setOperatorCode(CCIMPLALL);
 				succPropConcept->setRole(role);
-				mConceptVec->setLocalData(nextConTag, succPropConcept);
 				addConceptOperand(succPropConcept, followingTriggerConcept, false);
 				return succPropConcept;
 			}
@@ -398,14 +378,11 @@ namespace Konclude {
 
 
 			CConcept* COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::createOrConcept() {
-				CConcept* orConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
-				orConcept->initConcept();
-				cint64 nextConTag = mConceptVec->getItemCount();
-				orConcept->initTag(nextConTag);
+				CConcept* orConcept = createNewConcept();
 				orConcept->setOperatorCode(CCOR);
-				mConceptVec->setLocalData(nextConTag, orConcept);
 				return orConcept;
 			}
+
 
 
 

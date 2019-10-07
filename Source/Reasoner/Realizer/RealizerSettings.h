@@ -66,6 +66,7 @@ namespace Konclude {
 			class COptimizedRepresentativeKPSetSingleNeighbourRoleSetCacheLabelItemData;
 			class COptimizedRepresentativeKPSetCombinedNeighbourRoleSetCacheLabelItemData;
 			class COptimizedRepresentativeKPSetOntologyRealizingItem;
+			class COntologyRealizingDynamicRequirmentProcessingData;
 
 			typedef QPair<COptimizedKPSetRoleInstancesItem*,bool> TRoleItemInversionPair;
 

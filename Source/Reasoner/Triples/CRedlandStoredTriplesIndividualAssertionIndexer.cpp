@@ -38,7 +38,6 @@ namespace Konclude {
 
 			bool CRedlandStoredTriplesIndividualAssertionIndexer::indexABoxIndividuals(CConcreteOntology* updateConcreteOntology, COntologyTriplesData* ontologyTripleData) {
 				
-
 				bool newTriplesMapped = false;
 				for (CTriplesData* tripleData : *ontologyTripleData->getAllTriplesData()) {
 					CRedlandStoredTriplesData* redlandTriplesData = dynamic_cast<CRedlandStoredTriplesData*>(tripleData);
@@ -91,54 +90,67 @@ namespace Konclude {
 
 					mIndividualAssertionIndexCache->beginIndexing();
 
+					//for (cint64 loop = 0; true; loop++) {
+					//	bool debug = true;
 
-					for (CXLinker<librdf_statement*>* statementLinkerIt = redlandTriplesData->getRedlandStatementLinker(); statementLinkerIt; statementLinkerIt = statementLinkerIt->getNext()) {
+						for (CXLinker<librdf_statement*>* statementLinkerIt = redlandTriplesData->getRedlandStatementLinker(); statementLinkerIt; statementLinkerIt = statementLinkerIt->getNext()) {
 
-					//librdf_stream* stream = librdf_model_as_stream(redlandTriplesData->getRedlandIndexedModel());
-					//if (stream) {
-						CRedlandStoredTriplesIndividualAssertionIndexCacheData* lastIndiCacheData = nullptr;
-						librdf_node* lastSubjectNode = nullptr;
+						//librdf_stream* stream = librdf_model_as_stream(redlandTriplesData->getRedlandIndexedModel());
+						//if (stream) {
+							CRedlandStoredTriplesIndividualAssertionIndexCacheData* lastIndiCacheData = nullptr;
+							librdf_node* lastSubjectNode = nullptr;
 
-					//	while (!librdf_stream_end(stream)) {
+						//	while (!librdf_stream_end(stream)) {
 
-					//		librdf_statement* statement = librdf_stream_get_object(stream);
+						//		librdf_statement* statement = librdf_stream_get_object(stream);
 
-							librdf_statement* statement = statementLinkerIt->getData();
-							librdf_node* predicateNode = librdf_statement_get_predicate(statement);
-							librdf_node* objectNode = librdf_statement_get_object(statement);
-							librdf_node* subjectNode = librdf_statement_get_subject(statement);
+								librdf_statement* statement = statementLinkerIt->getData();
+								librdf_node* predicateNode = librdf_statement_get_predicate(statement);
+								librdf_node* objectNode = librdf_statement_get_object(statement);
+								librdf_node* subjectNode = librdf_statement_get_subject(statement);
 
-							if (librdf_node_equals(predicateNode, rdfTypePredicate)) {
-								if (librdf_node_equals(objectNode, namedIndividualObject)) {
-									lastIndiCacheData = getIndividualAssertionIndexcacheData(subjectNode, lastIndiCacheData, lastSubjectNode);
-								} else {
-									CConceptNodeData* conceptData = mConceptNodeDataHash.value(CRedlandNodeHasher(objectNode));
-									if (conceptData) {
+								if (librdf_node_equals(predicateNode, rdfTypePredicate)) {
+									if (librdf_node_equals(objectNode, namedIndividualObject)) {
 										lastIndiCacheData = getIndividualAssertionIndexcacheData(subjectNode, lastIndiCacheData, lastSubjectNode);
-										mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByTypeConcept(lastIndiCacheData, conceptData->mConcept);
-									}
-								}
-							} else {
-								CRoleNodeData* roleData = mRoleNodeDataHash.value(CRedlandNodeHasher(predicateNode));
-								if (roleData) {
-									lastIndiCacheData = getIndividualAssertionIndexcacheData(subjectNode, lastIndiCacheData, lastSubjectNode);
-									if (roleData->mDataRole) {
-										if (librdf_node_is_literal(objectNode)) {
-											mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByOutgoingDataRole(lastIndiCacheData, roleData->mRole);
-										}
+										lastIndiCacheData->setAnonymous(false);
 									} else {
-										if (!librdf_node_is_literal(objectNode)) {
-											mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByOutgoingObjectRole(lastIndiCacheData, roleData->mRole);
-											CRedlandStoredTriplesIndividualAssertionIndexCacheData* otherIndiCacheData = mIndividualAssertionIndexCache->getIndividualAssertionIndexCacheData(objectNode);
-											mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByIncomingObjectRole(otherIndiCacheData, roleData->mRole);
+										CConceptNodeData* conceptData = mConceptNodeDataHash.value(CRedlandNodeHasher(objectNode));
+										if (conceptData) {
+											lastIndiCacheData = getIndividualAssertionIndexcacheData(subjectNode, lastIndiCacheData, lastSubjectNode);
+											if (librdf_node_is_resource(subjectNode)) {
+												lastIndiCacheData->setAnonymous(false);
+											}
+											mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByTypeConcept(lastIndiCacheData, conceptData->mConcept);
+										}
+									}
+								} else {
+									CRoleNodeData* roleData = mRoleNodeDataHash.value(CRedlandNodeHasher(predicateNode));
+									if (roleData) {
+										lastIndiCacheData = getIndividualAssertionIndexcacheData(subjectNode, lastIndiCacheData, lastSubjectNode);
+										if (librdf_node_is_resource(subjectNode)) {
+											lastIndiCacheData->setAnonymous(false);
+										}
+										if (roleData->mDataRole) {
+											if (librdf_node_is_literal(objectNode)) {
+												mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByOutgoingDataRole(lastIndiCacheData, roleData->mRole);
+											}
+										} else {
+											if (!librdf_node_is_literal(objectNode)) {
+												mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByOutgoingObjectRole(lastIndiCacheData, roleData->mRole);
+												CRedlandStoredTriplesIndividualAssertionIndexCacheData* otherIndiCacheData = mIndividualAssertionIndexCache->getIndividualAssertionIndexCacheData(objectNode);
+												if (librdf_node_is_resource(objectNode)) {
+													otherIndiCacheData->setAnonymous(false);
+												}
+												mIndividualAssertionIndexCache->extendIndividualAssertionIndexCacheDataByIncomingObjectRole(otherIndiCacheData, roleData->mRole);
+											}
 										}
 									}
 								}
-							}
 
-							/*librdf_stream_next(stream);
-						}*/
-					}
+								/*librdf_stream_next(stream);
+							}*/
+						}
+					//}
 
 					mIndividualAssertionIndexCache->completeIndexing();
 

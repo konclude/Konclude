@@ -469,7 +469,7 @@ namespace Konclude {
 
 				CCommandRecordRouter recordRouter;
 				COntologyBuilder* mOntoBuilder;
-				QString mOntologyName;
+				QString mOntologyIdentifier;
 				cint64 mAxiomNumber;
 
 

@@ -40,6 +40,9 @@ namespace Konclude {
 
 
 			CSPARQLBatchFileLoader::~CSPARQLBatchFileLoader() {
+				if (mWriteLimitSemaphore) {
+					delete mWriteLimitSemaphore;
+				}
 			}
 
 
@@ -84,6 +87,16 @@ namespace Konclude {
 
 				reasonerCommander = CConfigManagerReader::readCommanderManagerConfig(config);
 
+
+				cint64 writeBufferBlockingLimit = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.SPARQL.File.WriteBufferBlockingLimit", 20);
+				if (writeBufferBlockingLimit > 0) {
+					mWriteLimitSemaphore = new QSemaphore(writeBufferBlockingLimit);
+				} else {
+					mWriteLimitSemaphore = nullptr;
+				}
+				mBlockingWarned = false;
+
+
 				return this;
 			}
 
@@ -119,9 +132,10 @@ namespace Konclude {
 					return true;
 				} else if (type == CResultStreamingWriteEvent::EVENTTYPE) {
 					CResultStreamingWriteEvent* rswe = (CResultStreamingWriteEvent*)event;
-					QByteArray* buffer = rswe->getBuffer();
+					QList<CSPARQLResultBufferWriteData>* bufferList = rswe->getBufferList();
 					bool last = rswe->isLast();
-					writeStreamDataToFile(buffer, last);
+					writeStreamDataToFile(bufferList, last);
+					mWriteLimitSemaphore->release(1);
 					return true;
 				}
 				return false;
@@ -136,7 +150,12 @@ namespace Konclude {
 					if (file.open(QIODevice::ReadOnly)) {
 						QString fileContentString = file.readAll();
 
-						mSPARQLInterpreter = new CSPARQLRecordResultStreamingInterpreter(this, preSynchronizer, mLoaderConfig);
+						if (!resFileString.isEmpty()) {
+							mSPARQLInterpreter = new CSPARQLRecordResultStreamingInterpreter(this, preSynchronizer, mLoaderConfig);
+						} else {
+							LOG(WARN, getLogDomain(), logTr("No output file given, requesting only answer counting."), this);
+							mSPARQLInterpreter = new CSPARQLRecordResultStreamingInterpreter(nullptr, preSynchronizer, mLoaderConfig);
+						}
 						defaultCommandDelegater = mSPARQLInterpreter;
 						preSynchronizer = new CPreconditionSynchronizer(mSPARQLInterpreter);
 
@@ -167,12 +186,19 @@ namespace Konclude {
 
 
 
-			bool CSPARQLBatchFileLoader::writeStreamData(QByteArray* buffer, bool last) {
-				postEvent(new CResultStreamingWriteEvent(buffer, last));
+			bool CSPARQLBatchFileLoader::writeStreamData(const QList<CSPARQLResultBufferWriteData>& bufferList, bool last) {
+				if (mWriteLimitSemaphore) {
+					if (!mBlockingWarned && mWriteLimitSemaphore->available() <= 2) {
+						mBlockingWarned = true;
+						LOG(WARN, getLogDomain(), logTr("Result writing buffer limit almost reached, result generation may be blocked due to slow file system write access."), this);
+					}
+					mWriteLimitSemaphore->acquire(1);
+				}
+				postEvent(new CResultStreamingWriteEvent(bufferList, last));
 				return !mWritingFailed;
 			}
 
-			CSPARQLStreamingWriter* CSPARQLBatchFileLoader::writeStreamDataToFile(QByteArray* buffer, bool last) {
+			CSPARQLStreamingWriter* CSPARQLBatchFileLoader::writeStreamDataToFile(QList<CSPARQLResultBufferWriteData>* bufferList, bool last) {
 				++mChunkPart;
 				// write with chunked encoding
 				bool firstChunk = false;
@@ -191,7 +217,11 @@ namespace Konclude {
 					firstChunk = true;
 				}
 				if (mResponseFile) {
-					mResponseFile->write(*buffer);
+					for (CSPARQLResultBufferWriteData bufferData : *bufferList) {
+						for (cint64 i = bufferData.getWriteCount(); i > 0; --i) {							
+							mResponseFile->write(*bufferData.getBuffer());
+						}
+					}
 				} else {
 					if (!mConfDirectConsoleOutput && !mConfDirectErrorOutput) {
 						// answers are not further used, no need to continue computation
@@ -199,24 +229,36 @@ namespace Konclude {
 					}
 				}
 				if (mConfDirectConsoleOutput) {
-					std::cout << buffer->data();
+					for (CSPARQLResultBufferWriteData bufferData : *bufferList) {
+						for (cint64 i = bufferData.getWriteCount(); i > 0; --i) {
+							std::cout << bufferData.getBuffer();
+						}
+					}
 				}
 				if (mConfDirectErrorOutput) {
-					std::cout << buffer->data();
+					for (CSPARQLResultBufferWriteData bufferData : *bufferList) {
+						for (cint64 i = bufferData.getWriteCount(); i > 0; --i) {
+							std::cout << bufferData.getBuffer();
+						}
+					}
+				}
+				cint64 bufferSize = 0;
+				for (CSPARQLResultBufferWriteData bufferData : *bufferList) {
+					bufferSize += bufferData.getBuffer()->size() * bufferData.getWriteCount();
+					delete bufferData.getBuffer();
 				}
 				if (last) {
 					if (mResponseFile) {
 						mResponseFile->write(mStreamSPARQLFooter);
-						LOG(INFO, getLogDomain(), logTr("Last part of %1 with %2 bytes written.").arg(mChunkPart).arg(buffer->size()), this);
+						LOG(INFO, getLogDomain(), logTr("Last part of %1 with %2 bytes written.").arg(mChunkPart).arg(bufferSize), this);
 						mResponseFile->close();
 					}
 				} else {
 					if (mResponseFile) {
-						LOG(INFO, getLogDomain(), logTr("Writing part %1 with %2 bytes to file.").arg(mChunkPart).arg(buffer->size()), this);
+						LOG(INFO, getLogDomain(), logTr("Writing part %1 with %2 bytes to file.").arg(mChunkPart).arg(bufferSize), this);
 						mResponseFile->flush();
 					}
 				}
-				delete buffer;
 				return this;
 			}
 

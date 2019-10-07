@@ -191,7 +191,7 @@ namespace Konclude {
 			}
 
 
-			void CWriteQueryFileOWL2XMLSerializer::writeIndividualType(const QString& individualName, const QString& className) {
+			void CWriteQueryFileOWL2XMLSerializer::writeNamedIndividualType(const QString& individualName, const QString& className) {
 				mCurrentOutputStreamWriter->writeStartElement("ClassAssertion");
 				mCurrentOutputStreamWriter->writeStartElement("Class");
 				mCurrentOutputStreamWriter->writeAttribute("IRI",className);
@@ -203,8 +203,18 @@ namespace Konclude {
 			}
 
 
+			void CWriteQueryFileOWL2XMLSerializer::writeAnonymousIndividualType(const QString& individualName, const QString& className) {
+				mCurrentOutputStreamWriter->writeStartElement("ClassAssertion");
+				mCurrentOutputStreamWriter->writeStartElement("Class");
+				mCurrentOutputStreamWriter->writeAttribute("IRI", className);
+				mCurrentOutputStreamWriter->writeEndElement();
+				mCurrentOutputStreamWriter->writeStartElement("AnonymousIndividual");
+				mCurrentOutputStreamWriter->writeAttribute("nodeID", individualName);
+				mCurrentOutputStreamWriter->writeEndElement();
+				mCurrentOutputStreamWriter->writeEndElement();
+			}
 
-			void CWriteQueryFileOWL2XMLSerializer::writeIndividualDeclaration(const QString& className) {
+			void CWriteQueryFileOWL2XMLSerializer::writeNamedIndividualDeclaration(const QString& className) {
 				mCurrentOutputStreamWriter->writeStartElement("Declaration");
 				mCurrentOutputStreamWriter->writeStartElement("NamedIndividual");
 				mCurrentOutputStreamWriter->writeAttribute("IRI",className);
@@ -212,6 +222,14 @@ namespace Konclude {
 				mCurrentOutputStreamWriter->writeEndElement();
 			}
 
+
+			void CWriteQueryFileOWL2XMLSerializer::writeAnonymousIndividualDeclaration(const QString& className) {
+				mCurrentOutputStreamWriter->writeStartElement("Declaration");
+				mCurrentOutputStreamWriter->writeStartElement("AnonymousIndividual");
+				mCurrentOutputStreamWriter->writeAttribute("nodeID", className);
+				mCurrentOutputStreamWriter->writeEndElement();
+				mCurrentOutputStreamWriter->writeEndElement();
+			}
 
 		}; // end namespace Query
 

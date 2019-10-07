@@ -110,7 +110,11 @@ namespace Konclude {
 						QDomElement errorElm = document.createElement("Error");
 						cint64 responseTime = response->getResponseTime();
 						errorElm.setAttribute("response-time",responseTime);
-						errorElm.setAttribute("error","unknown error");
+						if (!response->getResponseErrorString().isEmpty()) {
+							errorElm.setAttribute("error", response->getResponseErrorString());
+						} else {
+							errorElm.setAttribute("error", "unknown error");
+						}
 						errorElm.setAttribute("request-command", sparqlResponse->getOperationName());
 						responseNode.appendChild(errorElm);
 					} else if (response->hasEvaluationError()) {

@@ -64,12 +64,17 @@ namespace Konclude {
 				if (mRepresentativeStorage) {
 					mRepresentativeModel = librdf_new_model(world, mRepresentativeStorage, NULL);
 				}
+				
 
 				if (mRepresentativeModel) {
 					mIndividualNodeRetrievalByIdStatement = initPartialFilteringStatement(nullptr, mIndividualIdPredicateUri, nullptr);
 					mIndividualIdRetrievalByNodeStatement = initPartialFilteringStatement(nullptr, mIndividualIdPredicateUri, nullptr);
 					mIndividualIdInsertionStatement = initPartialFilteringStatement(nullptr, mIndividualIdPredicateUri, nullptr);
 					mRepresentativeTypeFilteringStatement = initPartialFilteringStatement(nullptr, mRepresentativeIdObjectPredicateUri, nullptr);
+
+					mRepresentativeNonAnonymousObjectNode = librdf_new_node_from_uri_string(mTripleData->getRedlandWorld(), (const unsigned char*)mRepresentativeNonAnonymousObjectUri);
+					mIndividualNonAnonymityInsertionStatement = initPartialFilteringStatement(nullptr, mRepresentativeNonAnonymousPredicateUri, nullptr);
+					librdf_statement_set_object(mIndividualNonAnonymityInsertionStatement, librdf_new_node_from_node(mRepresentativeNonAnonymousObjectNode));
 				}
 
 				return this;
@@ -114,21 +119,25 @@ namespace Konclude {
 
 					if (storedRepIndiAssIndData->getRepresentativeTypeConceptsSet() != currentRepIndiAssIndData->getRepresentativeTypeConceptsSet()) {
 						librdf_statement* representativeTypeStatement = librdf_new_statement_from_statement(mRepresentativeTypeFilteringStatement);
-						librdf_statement_set_subject(representativeTypeStatement, indiNode);
+						librdf_statement_set_subject(representativeTypeStatement, librdf_new_node_from_node(indiNode));
 
 						if (storedRepIndiAssIndData->getRepresentativeTypeConceptsSet() != mTagTypeConceptsSetHash.getBaseTagSet()) {
+							librdf_statement* representativeTypeObjectStatement = librdf_new_statement_from_statement(representativeTypeStatement);
 							QByteArray prevRepTypeIdCharData = QString("t:%1").arg(storedRepIndiAssIndData->getRepresentativeTypeConceptsSet()->getRepresentativeId()).toUtf8();
 							librdf_node* prevRepTypeNode = librdf_new_node_from_uri_string(mTripleData->getRedlandWorld(), (const unsigned char*)prevRepTypeIdCharData.constData());
-							librdf_statement_set_object(representativeTypeStatement, prevRepTypeNode);
-							librdf_model_remove_statement(mRepresentativeModel, representativeTypeStatement);
+							librdf_statement_set_object(representativeTypeObjectStatement, prevRepTypeNode);
+							librdf_model_remove_statement(mRepresentativeModel, representativeTypeObjectStatement);
+							librdf_free_statement(representativeTypeObjectStatement);
 						}
 
 						if (currentRepIndiAssIndData->getRepresentativeTypeConceptsSet() != mTagTypeConceptsSetHash.getBaseTagSet()) {
+							librdf_statement* representativeTypeObjectStatement = librdf_new_statement_from_statement(representativeTypeStatement);
 							QByteArray newRepTypeIdCharData = QString("t:%1").arg(currentRepIndiAssIndData->getRepresentativeTypeConceptsSet()->getRepresentativeId()).toUtf8();
 							librdf_node* newRepTypeNode = librdf_new_node_from_uri_string(mTripleData->getRedlandWorld(), (const unsigned char*)newRepTypeIdCharData.constData());
-							librdf_statement_set_object(representativeTypeStatement, newRepTypeNode);
-							librdf_model_add_statement(mRepresentativeModel, representativeTypeStatement);
+							librdf_statement_set_object(representativeTypeObjectStatement, newRepTypeNode);
+							librdf_model_add_statement(mRepresentativeModel, representativeTypeObjectStatement);
 							mIndividualDataWritenToStore = true;
+							librdf_free_statement(representativeTypeObjectStatement);
 						}
 
 						//librdf_free_statement(representativeTypeStatement);
@@ -145,9 +154,17 @@ namespace Konclude {
 					currentRepIndiAssIndData->getRepresentativeOutgoingDataRolesSet()->removeIndividualCacheData(cacheData, true);
 				}
 
+				if (!cacheData->isAnonymous() && !cacheData->isIndividualNonAnonymityStored()) {
+					librdf_statement* indiNonAnonStatement = librdf_new_statement_from_statement(mIndividualNonAnonymityInsertionStatement);
+					librdf_statement_set_subject(indiNonAnonStatement, librdf_new_node_from_node(indiNode));
+					librdf_model_add_statement(mRepresentativeModel, indiNonAnonStatement);
+					//librdf_free_statement(indiNonAnonStatement);
+					mIndividualDataWritenToStore = true;
+				}
+
 				if (!cacheData->isIndividualIdStored()) {
 					librdf_statement* indiIdStatement = librdf_new_statement_from_statement(mIndividualIdInsertionStatement);
-					librdf_statement_set_subject(indiIdStatement, indiNode);
+					librdf_statement_set_subject(indiIdStatement, librdf_new_node_from_node(indiNode));
 
 
 					QByteArray indiIdCharData = QString::number(cacheData->getIndividualId()).toUtf8();
@@ -171,21 +188,31 @@ namespace Konclude {
 				librdf_node* indiNode = cacheData->getIndividualNode();
 				if (newTagRoleSet != prevTagRoleSet) {
 					librdf_statement* representativeTypeStatement = librdf_new_statement_from_statement(mRepresentativeTypeFilteringStatement);
-					librdf_statement_set_subject(representativeTypeStatement, indiNode);
+					librdf_statement_set_subject(representativeTypeStatement, librdf_new_node_from_node(indiNode));
 
 					if (prevTagRoleSet != baseTagRoleSet) {
-						QByteArray prevRepTypeIdCharData = QString("%1:%2").arg(encodingChar).arg(prevTagRoleSet->getRepresentativeId()).toUtf8();
-						librdf_node* prevRepTypeNode = librdf_new_node_from_uri_string(mTripleData->getRedlandWorld(), (const unsigned char*)prevRepTypeIdCharData.constData());
-						librdf_statement_set_object(representativeTypeStatement, prevRepTypeNode);
-						librdf_model_remove_statement(mRepresentativeModel, representativeTypeStatement);
+						librdf_node*& prevRepTypeNode = prevTagRoleSet->getRedlandTagNode();
+						if (!prevRepTypeNode) {
+							QByteArray prevRepTypeIdCharData = QString("%1:%2").arg(encodingChar).arg(prevTagRoleSet->getRepresentativeId()).toUtf8();
+							prevRepTypeNode = librdf_new_node_from_uri_string(mTripleData->getRedlandWorld(), (const unsigned char*)prevRepTypeIdCharData.constData());
+						}
+						librdf_statement* representativeTypeObjectStatement = librdf_new_statement_from_statement(representativeTypeStatement);
+						librdf_statement_set_object(representativeTypeObjectStatement, librdf_new_node_from_node(prevRepTypeNode));
+						librdf_model_remove_statement(mRepresentativeModel, representativeTypeObjectStatement);
+						librdf_free_statement(representativeTypeObjectStatement);
 					}
 
 					if (newTagRoleSet != baseTagRoleSet) {
-						QByteArray newRepTypeIdCharData = QString("%1:%2").arg(encodingChar).arg(newTagRoleSet->getRepresentativeId()).toUtf8();
-						librdf_node* newRepTypeNode = librdf_new_node_from_uri_string(mTripleData->getRedlandWorld(), (const unsigned char*)newRepTypeIdCharData.constData());
-						librdf_statement_set_object(representativeTypeStatement, newRepTypeNode);
-						librdf_model_add_statement(mRepresentativeModel, representativeTypeStatement);
+						librdf_node*& newRepTypeNode = newTagRoleSet->getRedlandTagNode();
+						if (!newRepTypeNode) {
+							QByteArray newRepTypeIdCharData = QString("%1:%2").arg(encodingChar).arg(newTagRoleSet->getRepresentativeId()).toUtf8();
+							newRepTypeNode = librdf_new_node_from_uri_string(mTripleData->getRedlandWorld(), (const unsigned char*)newRepTypeIdCharData.constData());
+						}
+						librdf_statement* representativeTypeObjectStatement = librdf_new_statement_from_statement(representativeTypeStatement);
+						librdf_statement_set_object(representativeTypeObjectStatement, librdf_new_node_from_node(newRepTypeNode));
+						librdf_model_add_statement(mRepresentativeModel, representativeTypeObjectStatement);
 						mIndividualDataWritenToStore = true;
+						librdf_free_statement(representativeTypeObjectStatement);
 					}
 
 					//librdf_free_statement(representativeTypeStatement);
@@ -370,27 +397,28 @@ namespace Konclude {
 
 						while (!librdf_stream_end(stream)) {
 							librdf_node* repIdNode = librdf_statement_get_object(librdf_stream_get_object(stream));
-
-							librdf_uri* repIdUri = librdf_node_get_uri(repIdNode);
-							const char* repChar = (const char*)librdf_uri_as_string(repIdUri);
-							size_t repTypeCharLength = strlen(repChar);
-							if (repTypeCharLength > 2) {
-								if (repChar[0] == 't') {
-									// types representative id object					
-									cint64 repTypeId = QString::fromUtf8(repChar + 2).toLongLong();
-									repTypeSet = mTagTypeConceptsSetHash.getRepresentativeTagSet(repTypeId);
-								} 
-								else if (repChar[0] == 'o') {
-									cint64 repId = QString::fromUtf8(repChar + 2).toLongLong();
-									outObjRoleSet = mTagOutgoingObjectRolesSetHash.getRepresentativeTagSet(repId);
-								}
-								else if (repChar[0] == 'i') {
-									cint64 repId = QString::fromUtf8(repChar + 2).toLongLong();
-									incObjRoleSet = mTagIncomingObjectRolesSetHash.getRepresentativeTagSet(repId);
-								}
-								else if (repChar[0] == 'd') {
-									cint64 repId = QString::fromUtf8(repChar + 2).toLongLong();
-									outDatRoleSet = mTagOutgoingDataRolesSetHash.getRepresentativeTagSet(repId);
+							if (repIdNode == mRepresentativeNonAnonymousObjectNode || librdf_node_equals(mRepresentativeNonAnonymousObjectNode, repIdNode)) {
+								cacheData->setAnonymous(false);
+								cacheData->setIndividualNonAnonymityStored(true);
+							} else {
+								librdf_uri* repIdUri = librdf_node_get_uri(repIdNode);
+								const char* repChar = (const char*)librdf_uri_as_string(repIdUri);
+								size_t repTypeCharLength = strlen(repChar);
+								if (repTypeCharLength > 2) {
+									if (repChar[0] == 't') {
+										// types representative id object					
+										cint64 repTypeId = QString::fromUtf8(repChar + 2).toLongLong();
+										repTypeSet = mTagTypeConceptsSetHash.getRepresentativeTagSet(repTypeId);
+									} else if (repChar[0] == 'o') {
+										cint64 repId = QString::fromUtf8(repChar + 2).toLongLong();
+										outObjRoleSet = mTagOutgoingObjectRolesSetHash.getRepresentativeTagSet(repId);
+									} else if (repChar[0] == 'i') {
+										cint64 repId = QString::fromUtf8(repChar + 2).toLongLong();
+										incObjRoleSet = mTagIncomingObjectRolesSetHash.getRepresentativeTagSet(repId);
+									} else if (repChar[0] == 'd') {
+										cint64 repId = QString::fromUtf8(repChar + 2).toLongLong();
+										outDatRoleSet = mTagOutgoingDataRolesSetHash.getRepresentativeTagSet(repId);
+									}
 								}
 							}
 							librdf_stream_next(stream);

@@ -123,6 +123,15 @@ namespace Konclude {
 						QByteArray mLiteralDatatypeEnd;
 						QByteArray mLiteralEnd;
 
+						bool mConfAvoidStringCopying;
+
+
+						QString mDoubleQuoteEscapeString;
+						QString mSingleQuoteEscapeString;
+						QString mSmallerEscapeString;
+						QString mLargerEscapeString;
+						QString mAndEscapeString;
+
 					// private methods
 					private:
 

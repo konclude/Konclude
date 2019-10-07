@@ -28,40 +28,55 @@ namespace Konclude {
 		namespace Query {
 
 
-			CIndividualSynsetsResultVisitorGenerator::CIndividualSynsetsResultVisitorGenerator(CIndividualSynsetsResult* classSynsetsResult, bool abbreviatedIRIs, CIndividualNameResolver* indiNameResolver) {
+			CIndividualSynsetsResultVisitorGenerator::CIndividualSynsetsResultVisitorGenerator(CIndividualSynsetsResult* classSynsetsResult, bool abbreviatedIRIs, bool integrateAnonymousIndividuals, CIndividualNameResolver* indiNameResolver) {
 				mIndividualSynsetsResult = classSynsetsResult;
 				mAbbreviatedIRIs = abbreviatedIRIs;
 				mIndiNameResolver = indiNameResolver;
+				mIntegrateAnonymousIndividuals = integrateAnonymousIndividuals;
 			}
 
 			bool CIndividualSynsetsResultVisitorGenerator::visitRoleInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleRealization* roleRealization) {
-				mTmpIndividualSynsetResult = new CIndividualSynsetResult();
+				mTmpIndividualSynsetResult = nullptr;
 				roleRealization->visitIndividuals(indiRealItemRef,this);
-				mIndividualSynsetsResult->addIndividualSynset(mTmpIndividualSynsetResult);
+				if (mTmpIndividualSynsetResult) {
+					mIndividualSynsetsResult->addIndividualSynset(mTmpIndividualSynsetResult);
+				}
 				return true;
 			}
 
 
 			bool CIndividualSynsetsResultVisitorGenerator::visitInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptRealization* conRealization) {
-				mTmpIndividualSynsetResult = new CIndividualSynsetResult();
+				mTmpIndividualSynsetResult = nullptr;
 				conRealization->visitIndividuals(indiRealItemRef,this);
-				mIndividualSynsetsResult->addIndividualSynset(mTmpIndividualSynsetResult);
+				if (mTmpIndividualSynsetResult) {
+					mIndividualSynsetsResult->addIndividualSynset(mTmpIndividualSynsetResult);
+				}
 				return true;
 			}
 
 			bool CIndividualSynsetsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CConceptRealization* conRealization) {
-				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
-				if (!individualString.isEmpty()) {
-					mTmpIndividualSynsetResult->addEquivalentIndividualName(individualString);
+				if (mIntegrateAnonymousIndividuals || !mIndiNameResolver->isAnonymous(indiRef)) {
+					QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
+					if (!individualString.isEmpty()) {
+						if (!mTmpIndividualSynsetResult) {
+							mTmpIndividualSynsetResult = new CIndividualSynsetResult();
+						}
+						mTmpIndividualSynsetResult->addEquivalentIndividualName(individualString);
+					}
 				}
 				return true;
 			}
 
 
 			bool CIndividualSynsetsResultVisitorGenerator::visitIndividual(const CIndividualReference& indiRef, CRoleRealization* roleRealization) {
-				QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
-				if (!individualString.isEmpty()) {
-					mTmpIndividualSynsetResult->addEquivalentIndividualName(individualString);
+				if (mIntegrateAnonymousIndividuals || !mIndiNameResolver->isAnonymous(indiRef)) {
+					QString individualString = mIndiNameResolver->getIndividualName(indiRef, mAbbreviatedIRIs);
+					if (!individualString.isEmpty()) {
+						if (!mTmpIndividualSynsetResult) {
+							mTmpIndividualSynsetResult = new CIndividualSynsetResult();
+						}
+						mTmpIndividualSynsetResult->addEquivalentIndividualName(individualString);
+					}
 				}
 				return true;
 			}

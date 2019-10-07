@@ -109,7 +109,7 @@ namespace Konclude {
 							if (anonymousIndividualsAsVariables) {
 								indiExpression = mOntoBuilder->getIndividualVariable(subjectString.mid(2), true);
 							} else {
-								indiExpression = mOntoBuilder->getAnonymousIndividual(mOntology->getOntologyName(), subjectString.mid(2));
+								indiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName()), subjectString.mid(2));
 							}
 						} else {
 							indiExpression = mOntoBuilder->getNamedIndividual(subjectString);
@@ -132,7 +132,7 @@ namespace Konclude {
 									if (anonymousIndividualsAsVariables) {
 										otherIndiExpression = mOntoBuilder->getIndividualVariable(objectString.mid(2), true);
 									} else {
-										otherIndiExpression = mOntoBuilder->getAnonymousIndividual(mOntology->getOntologyName(), objectString.mid(2));
+										otherIndiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName()), objectString.mid(2));
 									}
 								} else {
 									otherIndiExpression = mOntoBuilder->getNamedIndividual(objectString);
@@ -189,7 +189,7 @@ namespace Konclude {
 					if (anonymousIndividualsAsVariables) {
 						indiExpression = mOntoBuilder->getIndividualVariable(subjectString.mid(2), true);
 					} else {
-						indiExpression = mOntoBuilder->getAnonymousIndividual(mOntology->getOntologyName(), subjectString.mid(2));
+						indiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName()), subjectString.mid(2));
 					}
 				} else {
 					indiExpression = mOntoBuilder->getNamedIndividual(subjectString);
@@ -215,7 +215,7 @@ namespace Konclude {
 							if (anonymousIndividualsAsVariables) {
 								otherIndiExpression = mOntoBuilder->getIndividualVariable(objectString.mid(2), true);
 							} else {
-								otherIndiExpression = mOntoBuilder->getAnonymousIndividual(mOntology->getOntologyName(), objectString.mid(2));
+								otherIndiExpression = mOntoBuilder->getAnonymousIndividual(mOntoBuilder->getOntologyAnonymousIdentifier(mOntoBuilder->getOntologyName()), objectString.mid(2));
 							}
 						} else {
 							otherIndiExpression = mOntoBuilder->getNamedIndividual(objectString);

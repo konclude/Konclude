@@ -50,7 +50,7 @@ namespace Konclude {
 					mStatGroundedTemplateCount = 0;
 					mStatInstantiatedAxiomsCount = 0;
 
-					CTBox *tBox = ontology->getDataBoxes()->getTBox();
+					mTBox = ontology->getDataBoxes()->getTBox();
 					CRBox *rBox = ontology->getDataBoxes()->getRBox();
 					CABox *aBox = ontology->getDataBoxes()->getABox();
 					mMBox = ontology->getDataBoxes()->getMBox();
@@ -60,14 +60,14 @@ namespace Konclude {
 					mConfFullyGroundNominalSchemaConcepts = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.FullNominalSchemaGrounding",false);
 					mConfGroundNominalSchemaAbsorbableConcepts |= mConfFullyGroundNominalSchemaConcepts;
 
-					mConceptVec = tBox->getConceptVector();
+					mConceptVec = mTBox->getConceptVector();
 					mConceptCount = mConceptVec->getItemCount();
 
 					mRolesVec = rBox->getRoleVector();
 					mRoleCount = mRolesVec->getItemCount();
 
-					mTopConcept = tBox->getTopConcept();
-					mBottomConcept = tBox->getBottomConcept();
+					mTopConcept = mTBox->getTopConcept();
+					mBottomConcept = mTBox->getBottomConcept();
 
 					mMemMan = ontology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
 					mOnto = ontology;
@@ -298,7 +298,7 @@ namespace Konclude {
 				CConcept* conceptCopy = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
 				conceptCopy->initConceptCopy(concept);
 				conceptCopy->setOperandCount(0);
-				conceptCopy->setConceptTag(mConceptVec->getItemCount());
+				conceptCopy->setConceptTag(mTBox->getNextConceptID());
 				mConceptVec->setData(conceptCopy->getConceptTag(),conceptCopy);
 				++mStatCreatedConceptCount;
 				return conceptCopy;
@@ -362,7 +362,7 @@ namespace Konclude {
 
 				CConcept* collConcept = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);
 				collConcept->initConcept();
-				collConcept->setConceptTag(mConceptVec->getItemCount());
+				collConcept->setConceptTag(mTBox->getNextConceptID());
 				collConcept->setOperatorCode(CCAND);
 				mConceptVec->setData(collConcept->getConceptTag(),collConcept);
 

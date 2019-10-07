@@ -1168,6 +1168,8 @@ namespace Konclude {
 						bool mConfSkipANDConcepts;
 
 						bool mConfCompletionGraphCaching;
+						bool mConfIgnoreBlockingCompletionGraphCachedNonBlockingNodes;
+
 						bool mConfDelayCompletionGraphCachingReactivation;
 						bool mConfIndividualsBackendCacheLoading;
 

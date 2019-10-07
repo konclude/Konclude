@@ -3883,7 +3883,7 @@ namespace Konclude {
 							if (operantsContainedPositive || !operantsContained) {
 
 								minCardinality = qMax(minCardinality,succCardinality);
-								if (!indiProcSatNode->getNominalIndividual() && succCardinality > allowedCardinality) {
+								if (operantsContained && operantsContainedPositive && !indiProcSatNode->getNominalIndividual() && succCardinality > allowedCardinality) {
 									updateDirectAddingIndividualStatusFlags(indiProcSatNode,CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,calcAlgContext);
 								}
 

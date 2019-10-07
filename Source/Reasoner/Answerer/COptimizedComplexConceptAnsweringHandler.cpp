@@ -55,6 +55,15 @@ namespace Konclude {
 				mConfConceptItemExpectedCountSamplingRetrievedPercentageLimit = 75.;
 
 
+				cint64 computationThreadCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentComputationThreadPoolSize", 0);
+				if (computationThreadCount != 0) {
+					QThreadPool::globalInstance()->setMaxThreadCount(computationThreadCount);
+				}
+
+
+				mConfInterpretQueriesAsDistinct = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.InterpretQueriesAsDistinct", false);
+
+
 				mConfInterpretNonAnswerIndividualVariablesAsAnonymousVariables = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables", false);
 				mConfNonAnswerIndividualVariablesAsAnonymousVariablesInterpretingPrefixString = CConfigDataReader::readConfigString(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.NonAnswerIndividualVariablesAsAnonymousVariablesInterpretingPrefixString", "");
 
@@ -134,12 +143,15 @@ namespace Konclude {
 				mConcurrentJoinComputationTaskCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinComputationTaskCount", 50);
 				mConfConcurrentJoining = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinComputation", true);
 
+				mConfNonDeterministicSatisfiableCalculationContinuation = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Calculation.Answering.NonDeterministicCachedCompletionGraphContinuationPropagationTests", true);
+
 				if (mConfConcurrentJoining) {
 					mJoinComputer = new CQtConcurrentVariableMappingsCompositionJoinComputator();
 				} else {
 					mJoinComputer = new CSequentialVariableMappingsCompositionJoinComputator();
 				}
 
+				mConfConcurrentAnswerGeneration = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentAnswerGeneration", true);
 
 
 
@@ -1046,7 +1058,6 @@ namespace Konclude {
 
 
 
-
 							bool nonInstantiatedTerm = false;
 							if (mConfUnsatisfiableNonInstanceStatisticsChecking) {
 								nonInstantiatedTerm = identifyNonInstantiation(assExps, answerIndiVariableSet, answererContext);
@@ -1058,6 +1069,9 @@ namespace Konclude {
 							} else {
 
 
+								if (mConfInterpretQueriesAsDistinct) {
+									compAssIndVarQuery->setDistinctRequired(true);
+								}
 
 
 
@@ -1881,8 +1895,42 @@ namespace Konclude {
 				return nonInstantiatedTerm;
 			}
 
+
+			bool COptimizedComplexConceptAnsweringHandler::checkNonTrivialAbsorptionPropagationExpression(CBuildExpression* expression) {
+				if (!expression) {
+					return false;
+				}
+				CClassTermExpression* classTermExp = dynamic_cast<CClassTermExpression*>(expression);
+				if (!classTermExp) {
+					return true;
+				}
+				CClassExpression* classExp = dynamic_cast<CClassExpression*>(expression);
+				if (classExp) {
+					CConcept* concept = mOntoAnsweringItem->getTestingOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getClassTermConceptMappingHash()->value((CClassTermExpression*)classExp);
+					if (concept->getOperatorCode() == CCEQ) {
+						return true;
+					}
+					return false;
+				}
+				CObjectIntersectionOfExpression* intOfExp = dynamic_cast<CObjectIntersectionOfExpression*>(expression);
+				if (intOfExp) {
+					for (CClassTermExpression* intClassTermExp : *intOfExp->getClassTermExpressionList()) {
+						if (checkNonTrivialAbsorptionPropagationExpression(intClassTermExp)) {
+							return true;
+						}
+					}
+					return false;
+				}
+				CObjectSomeValuesFromExpression* someValueOfExp = dynamic_cast<CObjectSomeValuesFromExpression*>(expression);
+				if (someValueOfExp) {
+					return checkNonTrivialAbsorptionPropagationExpression(someValueOfExp->getClassTermExpression());
+				}
+				return true;
+			}
+
+
 			QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *> COptimizedComplexConceptAnsweringHandler::generateAbsorptionBasedQueryParts(const QSet<CExpressionVariable *> &anonymousIndiVariableSet, bool allAnonymousVariables, QSet<CExpressionVariable *> &reductionForbiddenVarSet, const QSet<CExpressionVariable *> &rolledVarExpSet,
-					const QSet<CExpressionVariable *>& initialAnonymousIndiVariableSet, const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& prepareIndiVarSet, const QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash, const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash) {
+					const QSet<CExpressionVariable *>& initialAnonymousIndiVariableSet, const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& prepareIndiVarSet, const QHash<CExpressionVariable *, CBuildExpression *> &rebuiltVarClassTermExp, const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash) {
 
 				QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *> absorptionBasedHandlingQueryPartDatas;
 				QSet<CExpressionVariable*> anonymVarExpSubQueryIncludedSet;
@@ -1910,7 +1958,15 @@ namespace Konclude {
 						while (!anonymVarExpSubQueryProcessingList.isEmpty()) {
 
 							CExpressionVariable* processingVarExp = anonymVarExpSubQueryProcessingList.takeFirst();
-							QList<CBuildExpression*> varClassExpList(varRolledUpClassExpHash.values(processingVarExp));
+							QList<CBuildExpression*> varClassExpList(rebuiltVarClassTermExp.values(processingVarExp));
+
+
+							for (CBuildExpression* classExp: varClassExpList) {
+								if (checkNonTrivialAbsorptionPropagationExpression(classExp)) {
+									absorptionBasedQueryPartData->setNonTrivialAbsorptionPropagation(true);
+									break;
+								}
+							}
 
 							reductionForbiddenVarSet.insert(processingVarExp);
 							if (prepareIndiVarSet.contains(processingVarExp)) {
@@ -1922,7 +1978,6 @@ namespace Konclude {
 								QList<CAxiomExpression*> axiomList = varExpAxiomExpHash.values(processingVarExp);
 								for (CAxiomExpression* assExp : axiomList) {
 
-									CClassAssertionExpression* classAssExp = dynamic_cast<CClassAssertionExpression*>(assExp);
 									CObjectPropertyAssertionExpression* propAssExp = dynamic_cast<CObjectPropertyAssertionExpression*>(assExp);
 									if (propAssExp) {
 										CObjectPropertyTermExpression* propExp = propAssExp->getObjectPropertyTermExpression();
@@ -2363,7 +2418,8 @@ namespace Konclude {
 				} else {
 
 					CMemoryAllocationManager* memMan = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
-					CConceptVector* conceptVec = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox()->getConceptVector();
+					CTBox* tBox = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox();
+					CConceptVector* conceptVec = tBox->getConceptVector();
 
 					QList<TConceptNegPair> upgradedOpConList;
 					bool allExistingUpgrade = true;
@@ -2376,7 +2432,7 @@ namespace Konclude {
 						if (!individualTriggerSingleConceptUpgradeHash->contains(opConOriginalNegPair)) {
 							CConcept* upgradedOpConcept = CObjectAllocator< CConcept >::allocateAndConstruct(memMan);
 							upgradedOpConcept->initConcept();
-							cint64 nextConTag = conceptVec->getItemCount();
+							cint64 nextConTag = tBox->getNextConceptID();
 							upgradedOpConcept->initTag(nextConTag);
 							upgradedOpConcept->setOperatorCode(opConcept->getOperatorCode());
 							upgradedOpConcept->setRole(opConcept->getRole());
@@ -2414,7 +2470,7 @@ namespace Konclude {
 
 							CConcept* upgradedAndConcept = CObjectAllocator< CConcept >::allocateAndConstruct(memMan);
 							upgradedAndConcept->initConcept();
-							cint64 nextConTag = conceptVec->getItemCount();
+							cint64 nextConTag = tBox->getNextConceptID();
 							upgradedAndConcept->initTag(nextConTag);
 							upgradedAndConcept->setOperatorCode(concept->getOperatorCode());
 							upgradedAndConcept->setMappingNegation(conceptNegation);
@@ -2453,39 +2509,6 @@ namespace Konclude {
 
 
 
-
-
-			CVariableBindingResult* createVariableBindingResult(CComplexAssertionsIndividualVariablesAnsweringQuery* query, bool dataliteral) {
-				if (query->getResultOrderingLinker() || dataliteral) {
-					return new CVariableBindingStringDataResult();
-				}
-				else {
-					return new CVariableBindingStringResult();
-				}
-			}
-
-
-			CVariableBindingResult* createVariableBindingResult(CDataLiteral* dataLiteral, CComplexAssertionsIndividualVariablesAnsweringQuery* query) {
-				return createVariableBindingResult(query, true)->initVariableBinding(dataLiteral);
-			}
-
-
-
-			CVariableBindingResult* createVariableBindingResult(CIndividual* individual, CComplexAssertionsIndividualVariablesAnsweringQuery* query) {
-				return createVariableBindingResult(query, true)->initVariableBinding(individual);
-			}
-
-
-
-
-			CVariableBindingResult* createVariableBindingResult(const CIndividualReference& indiRef, CComplexAssertionsIndividualVariablesAnsweringQuery* query, CIndividualNameResolver* indiNameResolver) {
-				return createVariableBindingResult(query, false)->initVariableBinding(indiRef, indiNameResolver);
-			}
-
-
-			CVariableBindingResult* createVariableBindingResult(const CIndividualReference& indiRef, CComplexAssertionsIndividualVariablesAnsweringQuery* query, const QString& resolvedIndiName) {
-				return createVariableBindingResult(query, false)->initVariableBinding(indiRef, resolvedIndiName);
-			}
 
 
 
@@ -2631,68 +2654,6 @@ namespace Konclude {
 
 
 
-
-			CVariableBindingsAnswersResult* addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1) {
-				bool filtered = true;
-				for (CVariableBindingFiltering* filteringLinker = compAssIndVarQuery->getResultFilteringLinker(); filteringLinker && filtered; filteringLinker = filteringLinker->getNext()) {
-					if (!filteringLinker->isFiltered(filteringAnsweringMapping, bindAns)) {
-						filtered = false;
-					}
-				}
-				if (filtered) {
-					return bindsAnswersResult->addResultVariableBindings(bindAns, cardinality);
-				} else {
-					delete bindAns;
-					return bindsAnswersResult;
-				}
-			}
-
-
-
-			CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1) {
-				if (cardinality > 0) {
-					bool filtered = true;
-					for (CVariableBindingFiltering* filteringLinker = compAssIndVarQuery->getResultFilteringLinker(); filteringLinker && filtered; filteringLinker = filteringLinker->getNext()) {
-						if (!filteringLinker->isFiltered(filteringAnsweringMapping, bindAns)) {
-							filtered = false;
-						}
-					}
-					if (filtered) {
-						return bindsAnswersResult->addReusedResultVariableBindings(bindAns, cardinality);
-					} else {
-						return bindsAnswersResult;
-					}
-				}
-				return bindsAnswersResult;
-			}
-
-
-
-
-
-			CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryProcessingData* queryProcessingData, cint64 cardinality) {
-				cint64 writingCardinality = cardinality;
-
-				if (compAssIndVarQuery->getResultOffset() > 0) {
-					cint64 offsetSkippedMappingCount = queryProcessingData->getOffsetSkippedMappingCount();
-
-					cint64 remainingSkipMappingCard = compAssIndVarQuery->getResultOffset() - offsetSkippedMappingCount;
-
-					queryProcessingData->incOffsetSkippedMappingCount(qMin(writingCardinality, remainingSkipMappingCard));
-
-					writingCardinality -= remainingSkipMappingCard;
-				}
-				
-				if (writingCardinality > 0) {
-					if (compAssIndVarQuery->getResultLimitIncludingOffset() != -1) {
-						writingCardinality = qMin(writingCardinality, compAssIndVarQuery->getResultLimitIncludingOffset() - bindsAnswersResult->getResultCount());
-					}
-					if (writingCardinality > 0) {
-						return addReusedVariableBindingAnswerToResult(bindsAnswersResult, bindAns, filteringAnsweringMapping, compAssIndVarQuery, writingCardinality);
-					}
-				}
-				return bindsAnswersResult;
-			}
 
 
 
@@ -2888,685 +2849,17 @@ namespace Konclude {
 
 
 
+						
 
 
-
-
-						class CVariableBindingResultVector : public QVector<CVariableBindingResult*> {
-						public:
-							cint64 mValidBindingCount = 0;
-							cint64 mCurrentBindingIdx = 0;
-							CVariableBindingResultVector* mNextIteratingVector = nullptr;
-							cint64 mVectorPos = 0;
-						};
-
-
-						class CInstanceBindingAddingVisitor : public CSameRealizationIndividualVisitor, public CConceptRealizationInstanceToIndividualVisitor {
-						public:
-							CInstanceBindingAddingVisitor(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CIndividualNameResolver* indiNameResolver, CComplexQueryProcessingData* queryProcessingData) {
-								mCompAssIndVarQuery = compAssIndVarQuery;
-								mBindsAnswersResult = bindsAnswersResult;
-								mFilteringAnsweringMapping = filteringAnsweringMapping;
-								mIndiNameResolver = indiNameResolver;
-								mQueryProcessingData = queryProcessingData;
-							}
-
-							~CInstanceBindingAddingVisitor() {
-								if (mBinding) {
-									delete mBinding;
-									mBindResListAnswer->clearResultVariableBindings();
-									delete mBindResListAnswer;
-								}
-							}
-
-							virtual bool visitIndividual(const CIndividualReference& indiRef, CConceptRealization* conRealization) {
-								return visitIndividual(indiRef);
-							}
-
-							virtual bool visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealizatio) {
-								return visitIndividual(indiRef);
-							}
-
-
-							bool visitIndividual(const CIndividualReference& indiRef) {
-								if (!mBinding) {
-									mBinding = createVariableBindingResult(indiRef, mCompAssIndVarQuery, mIndiNameResolver);
-									mBindResListAnswer = new CVariableBindingsListAnswerResult();
-									mBindResListAnswer->addResultVariableBinding(mBinding);
-								} else {
-									QString indiName = mIndiNameResolver->getIndividualName(indiRef);
-									mBinding->initVariableBinding(indiRef, indiName);
-								}
-								addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mBindsAnswersResult, mBindResListAnswer, mFilteringAnsweringMapping, mCompAssIndVarQuery, mQueryProcessingData, 1);
-								return true;
-							}
-
-
-							CComplexAssertionsIndividualVariablesAnsweringQuery* mCompAssIndVarQuery;
-							CVariableBindingsAnswersResult* mBindsAnswersResult;
-							CVariableBindingFilteringAnswerMapping* mFilteringAnsweringMapping;
-							CIndividualNameResolver* mIndiNameResolver;
-							CVariableBindingResult* mBinding = nullptr;
-							CComplexQueryProcessingData* mQueryProcessingData;
-							CVariableBindingsListAnswerResult* mBindResListAnswer = new CVariableBindingsListAnswerResult();
-
-						};
-
-						class CIncrementalMappingsComplexQueryFinishingHandler : public CComplexQueryFinishingHandler {
-						public:
-							CComplexQueryProcessingData* mQueryProcessingData;
-							bool mAbbreviatedIRIs = false;
-							QStringList mVarList;
-							QHash<CExpressionVariable*, cint64> mDisVarIdHash;
-							CComplexAssertionsIndividualVariablesAnsweringQuery* mCompAssIndVarQuery;
-							COptimizedComplexBuildingVariableCompositionsItem* mVarBuildItem;
-							CVariableBindingFilteringAnswerMapping* mFilteringAnsweringMapping = nullptr;
-							COptimizedComplexConceptOntologyAnsweringItem* mOntoAnsweringItem;
-							CVariableBindingsAnswersResult* mBindsAnswersResult = nullptr;
-							bool mDistinct;
-							QList<cint64> mAnswerDistinguishedVariableMappingIndexList;
-							QList<cint64> mNonAnswerVariableMappingIndexList;
-							CSameRealization* mSameRealization;
-							CConceptRealization* mConceptRealization;
-							cint64 mAnswerVarCount;
-							CVariableBindingResultVector** mBindingResultVectorArray;
-							COptimizedComplexVariableCompositionItem* mLastVarItem = nullptr;
-							CIndividualNameResolver* mIndiNameResolver;
-							COptimizedComplexVariableIndividualMappings* mLastVarItemMapping = nullptr;
-							COptimizedComplexConceptItem* mConceptItem;
-							COptimizedComplexConceptInstanziatedIndividualItemHash* mInstanceItemSet = nullptr;
-							COptimizedComplexConceptInstanziatedIndividualItemLinker* mInstanceItemLastProcessingLinker = nullptr;
-							COptimizedComplexConceptInstanziatedIndividualItemLinker* mInstanceItemLastProcessedLinker = nullptr;
-							COptimizedComplexConceptInstanziatedIndividualItemLinker* mInstanceItemLastRetrievedLinker = nullptr;
-							cint64 mInstanceItemLinkerProcessedCount = 0;
-							bool mConfExtendedLogging;
-							COptimizedComplexVariableCompositionItemDependence* mLastVarItemProcessingDep = nullptr;
-
-							CVariableBindingsAnswersStreamingResult* mExistBindsAnswersStreamingResult = nullptr;
-							QString mLogDomain;
-
-							CVariableBindingsListAnswerResult* mBindResListAnswer;
-
-							bool mInitialized = false;
-
-
-
-							cint64 mExplicitMaximalCardinality = 0;
-							cint64 mExplicitTotalCardinality = 0;
-
-							cint64 mImplicitMaximalCardinality = 0;
-							cint64 mImplicitTotalCardinality = 0;
-
-							cint64 mAnswerNr = 0;
-
-							double mNextMappingRequestingCountLimit = 10;
-							double mNextMappingRequestingCountLimitIncreasingFactor = 10;
-
-							cint64 mComputationBatchNr = 0;
-
-
-							cint64 mConfMaximumBatchMappingsComputationSize = 100000000;
-							cint64 mConfFirstBatchMappingsComputationSize = 10;
-							double mConfBatchMappingsComputationSizeIncreasingFactor = 10.;
-							bool mConfContinueMappingsCompuationWhenResultsNotWriteable = false;
-							cint64 mConfMappingsComputationUnlimitedInterpretationSize = -1;
-
-							cint64 mLastItemAllBindingsCardinality = 0;
-
-
-							CInstanceBindingAddingVisitor* mResultGenerator = nullptr;
-
-
-							CIncrementalMappingsComplexQueryFinishingHandler(CComplexQueryProcessingData* queryProcessingData, COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, bool confExtendedLogging, const QString& logDomain, cint64 confMaximumBatchMappingsComputationSize, cint64 confFirstBatchMappingsComputationSize, double confBatchMappingsComputationSizeIncreasingFactor, bool confContinueMappingsCompuationWhenResultsNotWriteable, cint64 confMappingsComputationUnlimitedInterpretationSize) {
-								mQueryProcessingData = queryProcessingData;
-								mOntoAnsweringItem = ontoAnsweringItem;
-								mConfExtendedLogging = confExtendedLogging;
-								mLogDomain = logDomain;
-								mConfMaximumBatchMappingsComputationSize = confMaximumBatchMappingsComputationSize;
-
-								mConfFirstBatchMappingsComputationSize = confFirstBatchMappingsComputationSize;
-								mNextMappingRequestingCountLimit = mConfFirstBatchMappingsComputationSize;
-								mConfBatchMappingsComputationSizeIncreasingFactor = confBatchMappingsComputationSizeIncreasingFactor;
-								mNextMappingRequestingCountLimitIncreasingFactor = mConfBatchMappingsComputationSizeIncreasingFactor;
-								mConfContinueMappingsCompuationWhenResultsNotWriteable = confContinueMappingsCompuationWhenResultsNotWriteable;
-								mConfMappingsComputationUnlimitedInterpretationSize = confMappingsComputationUnlimitedInterpretationSize;
-							}
-
-							~CIncrementalMappingsComplexQueryFinishingHandler() {
-								if (mResultGenerator) {
-									delete mResultGenerator;
-								}
-							}
-
-
-							bool init() {
-								mVarBuildItem = mQueryProcessingData->getVariableBuildingItem();
-								mCompAssIndVarQuery = (CComplexAssertionsIndividualVariablesAnsweringQuery*)mQueryProcessingData->getQuery();
-								mConceptItem = mQueryProcessingData->getConceptItem();
-								cint64 nextId = 0;
-								for (CExpressionVariable* varExp : *mCompAssIndVarQuery->getDistinguishedVariableExpressions()) {
-									mDisVarIdHash.insert(varExp, nextId++);
-									mVarList.append(varExp->getName());
-								}
-
-								CVariableBindingFilteringAnswerMapping* lastFilteringAnsweringMapping = nullptr;
-								for (CVariableBindingFiltering* filteringLinker = mCompAssIndVarQuery->getResultFilteringLinker(); filteringLinker; filteringLinker = filteringLinker->getNext()) {
-									CVariableBindingFilteringAnswerMapping* tmpFilteringAnsweringMapping = filteringLinker->createFitleringAnswerMapping(mDisVarIdHash);
-									if (!mFilteringAnsweringMapping) {
-										lastFilteringAnsweringMapping = mFilteringAnsweringMapping = tmpFilteringAnsweringMapping;
-									} else {
-										lastFilteringAnsweringMapping->append(tmpFilteringAnsweringMapping);
-										lastFilteringAnsweringMapping = tmpFilteringAnsweringMapping;
-									}
-								}
-
-								cint64 variablesCount = 1;
-								if (mVarBuildItem) {
-									variablesCount = mVarBuildItem->getAllVariableSet()->count();
-								}
-								mDistinct = mCompAssIndVarQuery->isDistinctRequired();
-
-
-								mBindsAnswersResult = nullptr;
-								mExistBindsAnswersStreamingResult = dynamic_cast<CVariableBindingsAnswersStreamingResult*>(mCompAssIndVarQuery->getQueryResult());
-								if (mExistBindsAnswersStreamingResult) {
-									mExistBindsAnswersStreamingResult->initResult(mVarList);
-									mBindsAnswersResult = mExistBindsAnswersStreamingResult;
-								} else {
-									if (mCompAssIndVarQuery->getResultOrderingLinker()) {
-										cint64 orderingVarCount = mCompAssIndVarQuery->getResultOrderingLinker()->getCount();
-										bool mappingDistinct = mDistinct && mVarList.count() != variablesCount;
-										CVariableBindingsAnswerResultMapOrdering* ordering = new CVariableBindingsAnswerResultMapOrdering(orderingVarCount);
-										ordering->setDistinct(mappingDistinct);
-										cint64 orderingVarNum = 0;
-										for (CVariableBindingOrdering* orderingIt = mCompAssIndVarQuery->getResultOrderingLinker(); orderingIt; orderingIt = orderingIt->getNext()) {
-											CExpressionVariable* orderingVarExp = orderingIt->getOrderingVariableExpression();
-											CVariableBindingOrdering::ORDERING_TYPE orderingType = orderingIt->getOrderingType();
-											cint64 orderingVarId = mDisVarIdHash.value(orderingVarExp);
-											ordering->setAscending(orderingVarNum, orderingType == CVariableBindingOrdering::ASC);
-											ordering->setVariableIndex(orderingVarNum, orderingVarId);
-											++orderingVarNum;
-										}
-										mBindsAnswersResult = new CVariableBindingsAnswersOrderedMapResult(mVarList, ordering);
-									} else {
-										if (mDistinct) {
-											mBindsAnswersResult = new CVariableBindingsAnswersSetResult(mVarList);
-										} else {
-											mBindsAnswersResult = new CVariableBindingsAnswersListResult(mVarList);
-										}
-									}
-								}
-
-
-
-								if (!mQueryProcessingData->isUnsatisfiable()) {
-									if (mVarBuildItem && mVarBuildItem->isSatisfiable()) {
-										CExpressionVariable* lastVarExp = mVarBuildItem->getLastHandledVariableExpression();
-										if (!lastVarExp) {
-											CVariableBindingsListAnswerResult* bindAnsRes = new CVariableBindingsListAnswerResult();
-											for (CExpressionVariable* varExp : *mCompAssIndVarQuery->getDistinguishedVariableExpressions()) {
-												QString varName = varExp->getName();
-												QString anonymousBindingName = varName.replace("?", "").replace("$", "") + "_1";
-												CVariableBindingStringResult* bindingResult = new CVariableBindingStringResult(anonymousBindingName, CVariableBindingResult::VBTANONYMOUSINDIVIDUAL);
-												bindAnsRes->addResultVariableBinding(bindingResult);
-											}
-											addVariableBindingAnswerToResult(mBindsAnswersResult, bindAnsRes, mFilteringAnsweringMapping, mCompAssIndVarQuery);
-										} else {
-											mLastVarItem = mVarBuildItem->getVariableLastCompositionItem(lastVarExp);
-											COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping = mVarBuildItem->getVariableItemIndexMapping(lastVarExp).value(mLastVarItem);
-											QHash<CExpressionVariable*, cint64> varIdxHash;
-
-											QSet<CExpressionVariable*> distinguishedAnswerVariableSet(mCompAssIndVarQuery->getDistinguishedVariableExpressions()->toSet());
-											for (COptimizedComplexVariableCompositionItemVariableIndexMapping::const_iterator it = itemIndexMapping->constBegin(), itEnd = itemIndexMapping->constEnd(); it != itEnd; ++it) {
-												cint64 varIdx = it.key();
-												CExpressionVariable* varExp = it.value();
-												if (distinguishedAnswerVariableSet.contains(varExp)) {
-													varIdxHash.insert(varExp, varIdx);
-												} else {
-													mNonAnswerVariableMappingIndexList.append(varIdx);
-												}
-											}
-
-											for (CExpressionVariable* varExp : *mCompAssIndVarQuery->getDistinguishedVariableExpressions()) {
-												cint64 varIdx = varIdxHash.value(varExp, -1);
-												if (varIdx >= 0) {
-													mAnswerDistinguishedVariableMappingIndexList.append(varIdx);
-												}
-											}
-
-
-											mSameRealization = mOntoAnsweringItem->getOntology()->getRealization()->getSameRealization();
-
-											mAnswerVarCount = mAnswerDistinguishedVariableMappingIndexList.size();
-
-
-											mBindingResultVectorArray = new CVariableBindingResultVector*[mAnswerVarCount];
-											for (cint64 i = 0; i < mAnswerVarCount; ++i) {
-												mBindingResultVectorArray[i] = new CVariableBindingResultVector();
-												mBindingResultVectorArray[i]->mVectorPos = i;
-											}
-
-
-											mIndiNameResolver = mOntoAnsweringItem->getOntology()->getIndividualNameResolver();
-											mLastVarItemMapping = mLastVarItem->getVariableMapping();
-
-											mLastVarItemProcessingDep = new COptimizedComplexVariableCompositionItemDependence(mLastVarItem);
-
-											mBindResListAnswer = new CVariableBindingsListAnswerResult(mAnswerVarCount);
-
-										}
-									} else if (mConceptItem) {
-										mSameRealization = mOntoAnsweringItem->getOntology()->getRealization()->getSameRealization();
-										mConceptRealization = mOntoAnsweringItem->getOntology()->getRealization()->getConceptRealization();
-										mInstanceItemSet = mConceptItem->getKnownInstanceItems();
-
-									}
-								}
-
-
-								mInitialized = true;
-								return true;
-							}
-
-
-							bool finishQueryProcessing() {
-
-								if (mLastVarItemMapping) {
-									delete mBindResListAnswer;
-									delete[] mBindingResultVectorArray;
-
-
-									if (mConfExtendedLogging) {
-										//LOG(INFO, mLogDomain, logTr("Last item cardinality over all variable mappings: %1").arg(mLastItemAllBindingsCardinality), this);
-										cint64 mappingCount = mLastVarItemMapping->getBindingCount();
-										LOG(INFO, mLogDomain, logTr("%2 mappings extended to %1 answers with average cardinality of %3 (maximum %4) and, in average, %5 (maximum %6) replicated answers due to same individuals.")
-											.arg(mBindsAnswersResult->getResultCount()).arg(mappingCount)
-											.arg(QString::number(mImplicitTotalCardinality / (double)mappingCount)).arg(mImplicitMaximalCardinality)
-											.arg(QString::number(mExplicitTotalCardinality / (double)mappingCount)).arg(mExplicitMaximalCardinality)
-											, this);
-									}
-								}
-
-								LOG(INFO, mLogDomain, logTr("Determined %1 answers for complex ABox query with %2 answer variables (%3).").arg(mBindsAnswersResult->getResultCount()).arg(mBindsAnswersResult->getVariableNames().count()).arg(mBindsAnswersResult->getVariableNames().join(", ")), this);
-
-
-								if (!mExistBindsAnswersStreamingResult) {
-									mCompAssIndVarQuery->setQueryResult(mBindsAnswersResult);
-								}
-								for (CVariableBindingFilteringAnswerMapping* filteringAnsweringMappingIt = mFilteringAnsweringMapping; filteringAnsweringMappingIt; ) {
-									CVariableBindingFilteringAnswerMapping* tmpFilteringAnsweringMapping = filteringAnsweringMappingIt;
-									filteringAnsweringMappingIt = filteringAnsweringMappingIt->getNext();
-									delete tmpFilteringAnsweringMapping;
-								}
-								
-
-								return true;
-							}
-
-
-
-							virtual bool processQueryResults() {
-
-								if (!mQueryProcessingData->isUnsatisfiable()) {
-
-
-									function<cint64(cint64)> determineRemainingMappingsFunc = [&](cint64 processedMappings)->cint64 {
-										cint64 currentAnswerCount = mBindsAnswersResult->getResultCount() + mQueryProcessingData->getOffsetSkippedMappingCount();
-										cint64 requiredAnswerCount = mCompAssIndVarQuery->getResultLimitIncludingOffset();
-										cint64 remainingRequiredAnswerCount = requiredAnswerCount - currentAnswerCount;
-										cint64 processedMappingCount = processedMappings;
-										cint64 requiredMappingsCount = 0;
-										if (requiredAnswerCount == -1) {
-											requiredMappingsCount = -1;
-										} else {
-											double mappingAnswerFactor = (double)currentAnswerCount / (double)processedMappingCount;
-											requiredMappingsCount = (remainingRequiredAnswerCount / mappingAnswerFactor) + 1;
-											requiredMappingsCount += processedMappingCount;
-										}
-
-										if (requiredMappingsCount == -1) {
-											requiredMappingsCount = mNextMappingRequestingCountLimit;
-											if (mConfMappingsComputationUnlimitedInterpretationSize >= 0 && requiredMappingsCount > mConfMappingsComputationUnlimitedInterpretationSize) {
-												requiredMappingsCount = -1;
-											}
-										} else {
-											requiredMappingsCount = qMin((cint64)mNextMappingRequestingCountLimit, requiredMappingsCount);
-										}
-										mNextMappingRequestingCountLimit *= mNextMappingRequestingCountLimitIncreasingFactor;
-										if (mNextMappingRequestingCountLimit > mConfMaximumBatchMappingsComputationSize) {
-											mNextMappingRequestingCountLimit = mConfMaximumBatchMappingsComputationSize;
-										}
-										return requiredMappingsCount;
-									};
-
-									++mComputationBatchNr;
-
-									if (mVarBuildItem && mVarBuildItem->isSatisfiable()) {
-										if (mLastVarItemProcessingDep) {
-
-											function<void(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalities)> redHandlingFunc = [&](COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalities) {
-
-												mAnswerNr++;
-
-												for (cint64 i = 0; i < mAnswerVarCount; ++i) {
-													mBindingResultVectorArray[i]->mValidBindingCount = 0;
-													mBindingResultVectorArray[i]->mCurrentBindingIdx = 0;
-													mBindingResultVectorArray[i]->mNextIteratingVector = nullptr;
-												}
-
-												cint64 cardinality = 1;
-												if (!mDistinct) {
-													if (cardinalities) {
-														cardinality *= cardinalities->getSameIndividualsSeparatlyConsideredCardinality();
-													}
-													// determine additional cardinality of binding result due to same individuals bound to non-distinguished variables
-													for (cint64 varIdx : mNonAnswerVariableMappingIndexList) {
-														COptimizedComplexVariableIndividualMappings::VARIABLE_TYPE bindingType = mLastVarItemMapping->getBindingMapping(varIdx);
-														if (bindingType == COptimizedComplexVariableIndividualMappings::INDIVIDUAL_VARIABLE) {
-															CInstanceBindingIndividualCountingVisitor visitor;
-															mSameRealization->visitSameIndividuals(bindings->getBinding(varIdx).reference, &visitor);
-															if (visitor.individualCount > 1) {
-																cardinality *= visitor.individualCount;
-															}
-														}
-													}
-												}
-
-												if (!cardinalities) {
-													mLastItemAllBindingsCardinality += 1;
-												} else {
-													mLastItemAllBindingsCardinality += cardinalities->getSameIndividualsSeparatlyConsideredCardinality();
-												}
-
-												mImplicitMaximalCardinality = qMax(mImplicitMaximalCardinality, cardinality);
-												mImplicitTotalCardinality += cardinality;
-
-												cint64 vectorIdx = 0;
-												for (cint64 varIdx : mAnswerDistinguishedVariableMappingIndexList) {
-													COptimizedComplexVariableIndividualMappings::VARIABLE_TYPE bindingType = mLastVarItemMapping->getBindingMapping(varIdx);
-													if (bindingType == COptimizedComplexVariableIndividualMappings::INDIVIDUAL_VARIABLE) {
-
-														CInstanceBindingIndividualLambdaCallingVisitor visitor([&](const CIndividualReference& indiRef) -> bool {
-															QString indiName = mIndiNameResolver->getIndividualName(indiRef);
-															if (!indiName.isEmpty()) {
-																CVariableBindingResultVector* bindingResultVector = mBindingResultVectorArray[vectorIdx];
-																if (bindingResultVector->size() <= bindingResultVector->mValidBindingCount) {
-																	bindingResultVector->resize(bindingResultVector->mValidBindingCount + 5);
-																}
-																CVariableBindingResult*& binding = (*bindingResultVector)[bindingResultVector->mValidBindingCount++];
-																if (!binding) {
-																	binding = createVariableBindingResult(indiRef, mCompAssIndVarQuery, indiName);
-																} else {
-																	binding->initVariableBinding(indiRef, indiName);
-																}
-															}
-															return true;
-														});
-														mSameRealization->visitSameIndividuals(bindings->getBinding(varIdx).reference, &visitor);
-														vectorIdx++;
-
-													} else if (bindingType == COptimizedComplexVariableIndividualMappings::DATA_LITERAL_VARIABLE) {
-
-														TIndividualInstanceItemDataBinding& varBinding = bindings->getBinding(varIdx);
-														CDataLiteral* dataLiteral = (CDataLiteral*)varBinding.pointer;
-
-														CVariableBindingResultVector* bindingResultVector = mBindingResultVectorArray[vectorIdx];
-														if (bindingResultVector->size() <= bindingResultVector->mValidBindingCount) {
-															bindingResultVector->resize(bindingResultVector->mValidBindingCount + 5);
-														}
-														CVariableBindingResult*& binding = (*bindingResultVector)[bindingResultVector->mValidBindingCount++];
-														if (!binding) {
-															binding = createVariableBindingResult(dataLiteral, mCompAssIndVarQuery);
-														} else {
-															binding->initVariableBinding(dataLiteral);
-														}
-														vectorIdx++;
-
-													}
-												}
-
-
-												CVariableBindingResultVector* firstIteratingBindingVec = nullptr;
-												CVariableBindingResultVector* lastIteratingBindingVec = nullptr;
-												for (cint64 i = 0; i < mAnswerVarCount; ++i) {
-													CVariableBindingResultVector* bindingVec = mBindingResultVectorArray[i];
-													if (bindingVec->mValidBindingCount > 1) {
-														if (lastIteratingBindingVec) {
-															lastIteratingBindingVec->mNextIteratingVector = bindingVec;
-														}
-														if (firstIteratingBindingVec == nullptr) {
-															firstIteratingBindingVec = bindingVec;
-														}
-														lastIteratingBindingVec = bindingVec;
-													}
-													mBindResListAnswer->setResult(i, (*bindingVec)[bindingVec->mCurrentBindingIdx]);
-												}
-
-												addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mBindsAnswersResult, mBindResListAnswer, mFilteringAnsweringMapping, mCompAssIndVarQuery, mQueryProcessingData, cardinality);
-
-												cint64 explicitCardinality = 1;
-
-												bool isValidBindingCombination = true;
-												while ((mBindsAnswersResult->getResultCount() <= mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && isValidBindingCombination && firstIteratingBindingVec) {
-
-													firstIteratingBindingVec->mCurrentBindingIdx++;
-
-													if (firstIteratingBindingVec->mCurrentBindingIdx >= firstIteratingBindingVec->mValidBindingCount) {
-														firstIteratingBindingVec->mCurrentBindingIdx = 0;
-														CVariableBindingResultVector* overflowIteratingBindingVec = firstIteratingBindingVec->mNextIteratingVector;
-														if (!overflowIteratingBindingVec) {
-															isValidBindingCombination = false;
-														}
-														while (overflowIteratingBindingVec) {
-															overflowIteratingBindingVec->mCurrentBindingIdx++;
-															CVariableBindingResultVector* nextOverflowIteratingBindingVec = nullptr;
-															if (overflowIteratingBindingVec->mCurrentBindingIdx >= overflowIteratingBindingVec->mValidBindingCount) {
-																overflowIteratingBindingVec->mCurrentBindingIdx = 0;
-																nextOverflowIteratingBindingVec = overflowIteratingBindingVec->mNextIteratingVector;
-																if (!nextOverflowIteratingBindingVec) {
-																	isValidBindingCombination = false;
-																}
-															}
-															if (isValidBindingCombination) {
-																mBindResListAnswer->setResult(overflowIteratingBindingVec->mVectorPos, (*overflowIteratingBindingVec)[overflowIteratingBindingVec->mCurrentBindingIdx]);
-															}
-															overflowIteratingBindingVec = nextOverflowIteratingBindingVec;
-														}
-													}
-													if (isValidBindingCombination) {
-														mBindResListAnswer->setResult(firstIteratingBindingVec->mVectorPos, (*firstIteratingBindingVec)[firstIteratingBindingVec->mCurrentBindingIdx]);
-
-														addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mBindsAnswersResult, mBindResListAnswer, mFilteringAnsweringMapping, mCompAssIndVarQuery, mQueryProcessingData, cardinality);
-														explicitCardinality++;
-													}
-
-												}
-
-												mExplicitMaximalCardinality = qMax(mExplicitMaximalCardinality, explicitCardinality);
-												mExplicitTotalCardinality += explicitCardinality;
-
-											};
-
-
-
-											while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && (!mLastVarItemProcessingDep->isBatchProcessed() || mLastVarItemProcessingDep->loadNextBatch())) {
-
-												while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() <= mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && mLastVarItemProcessingDep->getBatchCurrentBindingsCardinalityLinker(false)) {
-													COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = mLastVarItemProcessingDep->getBatchCurrentBindingsCardinalityLinker(true);
-													COptimizedComplexVariableIndividualBindings* bindings = bindingLinker->getBindings();
-													COptimizedComplexVariableIndividualBindingsCardinality* cardinalites = bindingLinker->getInitialCardinalities();
-
-													redHandlingFunc(bindings, cardinalites);
-												}
-
-												while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && mLastVarItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
-													COptimizedComplexVariableIndividualUpdateCardinalityLinker* updatedCardinalityLinker = mLastVarItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(true);
-													if (!mDistinct) {
-														COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites = updatedCardinalityLinker->getPreviousCardinality();
-														COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = updatedCardinalityLinker->getUpdatedBindingsCardinalityLinker();
-														COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites = updatedCardinalityLinker->getNewCardinality();
-														COptimizedComplexVariableIndividualBindings* bindings = bindingLinker->getBindings();
-
-														COptimizedComplexVariableIndividualBindingsCardinality tmpDiffCardinalites = *newCardinalites;
-														tmpDiffCardinalites.substractCardinalities(prevCardinalites);
-
-														redHandlingFunc(bindings, &tmpDiffCardinalites);
-													}
-												}
-
-											}
-
-											bool moreComputationPossible = !mLastVarItem->isVariableMappingsComputed() && !mLastVarItemProcessingDep->isProcessingFinished() && (mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1);
-											bool resultsFurtherUsage = true;
-											if (mExistBindsAnswersStreamingResult && moreComputationPossible) {
-												resultsFurtherUsage = mExistBindsAnswersStreamingResult->flushResults();
-											}
-
-
-											bool dependentItemRescheduled = false;
-											if (moreComputationPossible) {
-
-												cint64 requiredMappingsCount = determineRemainingMappingsFunc(mLastVarItemProcessingDep->getTotalProcessedBindingsCardinalityLinkerCount());
-
-												//dependentItemRescheduled |= rescheduleVariableCompositionItemComputation(mVarBuildItem, nullptr, mLastVarItem, requiredMappingsCount);
-
-												bool continueComputation = true;
-												if (!resultsFurtherUsage && !mConfContinueMappingsCompuationWhenResultsNotWriteable) {
-													continueComputation = false;
-													LOG(WARN, mLogDomain, logTr("Processing batch %1 resulted in %2 answers from %3 mappings, but no further computation batch scheduled since answers seem no longer writeable/sendable and it has not been configured to continue.").arg(mComputationBatchNr).arg(mBindsAnswersResult->getResultCount()).arg(mLastVarItemMapping->getBindingCount()), this);
-												}
-
-
-												if (continueComputation) {
-													dependentItemRescheduled = true;
-													if (requiredMappingsCount != -1) {
-														mLastVarItem->setVariableMappingsComputationRequirement(qMax(mLastVarItem->getVariableMappingsComputationRequirement(), requiredMappingsCount));
-													} else {
-														mLastVarItem->setVariableMappingsComputationRequirement(requiredMappingsCount);
-													}
-
-													QString nextRequestingString = "all";
-													if (requiredMappingsCount != -1) {
-														nextRequestingString = QString("%1").arg(requiredMappingsCount);
-													}
-													LOG(INFO, mLogDomain, logTr("Processing batch %1 resulted in %2 answers from %3 mappings, scheduling next batch with %4 requested mappings.").arg(mComputationBatchNr).arg(mBindsAnswersResult->getResultCount()).arg(mLastVarItemMapping->getBindingCount()).arg(nextRequestingString), this);
-
-													if (!mLastVarItem->isComputationQueued()) {
-														mLastVarItem->setComputationQueued(true);
-														mVarBuildItem->addComputeVariableMappingItem(mLastVarItem);
-													}
-												}
-
-											}
-
-											return !dependentItemRescheduled;
-
-
-										}
-									} else if (mConceptItem) {
-
-										if (!mResultGenerator) {
-											mResultGenerator = new CInstanceBindingAddingVisitor(mBindsAnswersResult, mFilteringAnsweringMapping, mCompAssIndVarQuery, mOntoAnsweringItem->getOntology()->getIndividualNameResolver(), mQueryProcessingData);
-										}
-										if (mInstanceItemSet) {
-											while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && mInstanceItemLastProcessingLinker != mInstanceItemLastProcessedLinker || mInstanceItemLastRetrievedLinker != mInstanceItemSet->getAddedRealizationIndividualInstanceItemReferenceLinker()) {
-												while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && mInstanceItemLastProcessingLinker != mInstanceItemLastProcessedLinker) {
-													++mInstanceItemLinkerProcessedCount;
-													mSameRealization->visitSameIndividuals(mInstanceItemLastProcessingLinker->getRealizationIndividualInstanceItemReference(), mResultGenerator);
-													mInstanceItemLastProcessingLinker = mInstanceItemLastProcessingLinker->getNext();
-												}
-												if (mInstanceItemLastRetrievedLinker != mInstanceItemSet->getAddedRealizationIndividualInstanceItemReferenceLinker()) {
-													mInstanceItemLastProcessedLinker = mInstanceItemLastRetrievedLinker;
-													mInstanceItemLastRetrievedLinker = mInstanceItemLastProcessingLinker = mInstanceItemSet->getAddedRealizationIndividualInstanceItemReferenceLinker();
-												}
-											}
-
-
-											bool moreInstanceComputationScheduled = false;
-											// TODO: fix computed all check and scheduling
-											// TODO: eliminate duplicated code for determining remaining mappings
-											// TODO: request only one instance for concept item in the beginning
-
-
-											CComplexConceptStepInstanceComputationProcess* instanceCompStep = mConceptItem->getComputationProcess()->getInstancesComputationProcess(true);
-											bool moreComputationPossible = !instanceCompStep->hasAllInstancesComputed() && (mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1);
-											bool resultsFurtherUsage = true;
-											if (mExistBindsAnswersStreamingResult && moreComputationPossible) {
-												resultsFurtherUsage = mExistBindsAnswersStreamingResult->flushResults();
-											}
-
-
-											if (!instanceCompStep->hasAllInstancesComputed() && (mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1)) {
-
-												cint64 requiredMappingsCount = determineRemainingMappingsFunc(mInstanceItemLinkerProcessedCount);
-
-												bool continueComputation = true;
-												if (!resultsFurtherUsage && !mConfContinueMappingsCompuationWhenResultsNotWriteable) {
-													continueComputation = false;
-													LOG(WARN, mLogDomain, logTr("Processing batch %1 resulted in %2 answers from %3 instances, but no further computation batch scheduled since answers seem no longer writeable/sendable and it has not been configured to continue.").arg(mComputationBatchNr).arg(mBindsAnswersResult->getResultCount()).arg(mInstanceItemLinkerProcessedCount), this);
-												}
-
-
-												if (continueComputation) {
-
-													moreInstanceComputationScheduled = true;
-													CComputedItemDataNotificationLinker* notLinker = mOntoAnsweringItem->createComputedItemDataNotificationLinker();
-													notLinker->setQueryProcessingData(mQueryProcessingData);
-
-													if (requiredMappingsCount >= 0) {
-														instanceCompStep->addComputedInstancesCountRequirement(requiredMappingsCount, notLinker);
-													} else {
-														instanceCompStep->setAllInstanceComputationRequired(true);
-														instanceCompStep->addNotificationLinker(notLinker);
-													}
-
-													mQueryProcessingData->setComputationStepWaiting(instanceCompStep);
-
-													QString nextRequestingString = "all";
-													if (requiredMappingsCount != -1) {
-														nextRequestingString = QString("%1").arg(requiredMappingsCount);
-													}
-													LOG(INFO, mLogDomain, logTr("Processing batch %1 resulted in %2 answers from %3 instances, scheduling next batch with %4 requested instances.").arg(mComputationBatchNr).arg(mBindsAnswersResult->getResultCount()).arg(mInstanceItemLinkerProcessedCount).arg(nextRequestingString), this);
-
-													mConceptItem->setQueuedProcessStep(nullptr);
-													if (!mConceptItem->hasQueuedProcessStep() && !instanceCompStep->isComputationProcessQueued() && !instanceCompStep->isComputationProcessProcessing()) {
-														mConceptItem->setQueuedProcessStep(instanceCompStep);
-														instanceCompStep->setComputationProcessQueued(true);
-														COptimizedComplexConceptStepAnsweringItem* processingStep = mOntoAnsweringItem->getConceptProcessingStepItem(instanceCompStep->getComputationType());
-														processingStep->addQueuedConceptItem(mConceptItem);
-													}
-												}
-
-
-											}
-
-											return !moreInstanceComputationScheduled;
-
-
-											//for (COptimizedComplexConceptInstanziatedIndividualItemLinker* itemLinker = instanceItemSet->getAddedRealizationIndividualInstanceItemReferenceLinker(); itemLinker; itemLinker = itemLinker->getNext()) {
-											//	mSameRealization->visitSameIndividuals(itemLinker->getRealizationIndividualInstanceItemReference(), &resultGenerator);
-											//}
-										}
-										//for (auto node : *conceptItem->getDirectSubClassNodeSet()) {
-										//	conceptRealization->visitInstances(node->getOneEquivalentConcept(), false, &resultGenerator);
-										//}
-
-									}
-
-								}
-
-
-								return true;
-							}
-
-						};
-
-
-
-						CComplexQueryFinishingHandler* finishingHandler = queryProcessingData->getFinishingHandler();
+						CAbstractComplexQueryFinishingHandler* finishingHandler = queryProcessingData->getFinishingHandler();
 
 						if (!finishingHandler) {
-							finishingHandler = new CIncrementalMappingsComplexQueryFinishingHandler(queryProcessingData, mOntoAnsweringItem, mConfExtendedLogging, getDomain(), mConfMaximumBatchMappingsComputationSize, mConfFirstBatchMappingsComputationSize, mConfBatchMappingsComputationSizeIncreasingFactor, mConfContinueMappingsCompuationWhenResultsNotWriteable, mConfMappingsComputationUnlimitedInterpretationSize);
+							if (mConfConcurrentAnswerGeneration) {
+								finishingHandler = new CQtConcurrentStreamingComplexQueryFinishingHandler(queryProcessingData, mOntoAnsweringItem, mConfExtendedLogging, getDomain(), mConfMaximumBatchMappingsComputationSize, mConfFirstBatchMappingsComputationSize, mConfBatchMappingsComputationSizeIncreasingFactor, mConfContinueMappingsCompuationWhenResultsNotWriteable, mConfMappingsComputationUnlimitedInterpretationSize);
+							} else {
+								finishingHandler = new CSequentialStreamingComplexQueryFinishingHandler(queryProcessingData, mOntoAnsweringItem, mConfExtendedLogging, getDomain(), mConfMaximumBatchMappingsComputationSize, mConfFirstBatchMappingsComputationSize, mConfBatchMappingsComputationSizeIncreasingFactor, mConfContinueMappingsCompuationWhenResultsNotWriteable, mConfMappingsComputationUnlimitedInterpretationSize);
+							}
 							queryProcessingData->setFinishingHandler(finishingHandler);
 							finishingHandler->init();
 						}
@@ -3575,9 +2868,9 @@ namespace Konclude {
 
 #ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
 							if (mConfDebugWriteVariableCompositionItems) {
-								CIncrementalMappingsComplexQueryFinishingHandler* incFinishingHandler = dynamic_cast<CIncrementalMappingsComplexQueryFinishingHandler*>(finishingHandler);
-								if (incFinishingHandler && incFinishingHandler->mLastVarItem) {
-									debugWriteVariableMappingToFileWithHeader(incFinishingHandler->mVarBuildItem, incFinishingHandler->mLastVarItem, "last");
+								CAbstractStreamingComplexQueryFinishingHandler* incFinishingHandler = dynamic_cast<CAbstractStreamingComplexQueryFinishingHandler*>(finishingHandler);
+								if (incFinishingHandler && incFinishingHandler->getResultUsingLastVariableCompositionItem()) {
+									debugWriteVariableMappingToFileWithHeader(varBuildItem, incFinishingHandler->getResultUsingLastVariableCompositionItem(), "last");
 
 									//debugCheckVariableMappingFromFile(incFinishingHandler->mVarBuildItem, incFinishingHandler->mLastVarItem);
 
@@ -3807,7 +3100,7 @@ namespace Konclude {
 
 						if (flattened) {
 							CIndividualsResult* individualResult = new CIndividualsResult();
-							CIndividualsResultVisitorGenerator resultGenerator(individualResult, abbreviatedIRIs, mOntoAnsweringItem->getOntology()->getIndividualNameResolver());
+							CIndividualsResultVisitorGenerator resultGenerator(individualResult, abbreviatedIRIs, true, mOntoAnsweringItem->getOntology()->getIndividualNameResolver());
 							if (instanceItemsLinker) {
 								for (auto itemLinker = instanceItemsLinker; itemLinker; itemLinker = itemLinker->getNext()) {
 									sameRealization->visitSameIndividuals(itemLinker->getRealizationIndividualInstanceItemReference(), &resultGenerator);
@@ -3819,7 +3112,7 @@ namespace Konclude {
 							if (instanceItemsLinker) {
 								for (auto itemLinker = instanceItemsLinker; itemLinker; itemLinker = itemLinker->getNext()) {
 									CIndividualSynsetResult* individualSynsetResult = new CIndividualSynsetResult();
-									CIndividualSynsetResultVisitorGenerator resultGenerator(individualSynsetResult, abbreviatedIRIs, mOntoAnsweringItem->getOntology()->getIndividualNameResolver());
+									CIndividualSynsetResultVisitorGenerator resultGenerator(individualSynsetResult, abbreviatedIRIs, true, mOntoAnsweringItem->getOntology()->getIndividualNameResolver());
 									sameRealization->visitSameIndividuals(itemLinker->getRealizationIndividualInstanceItemReference(), &resultGenerator);
 									indiSynsResult->addIndividualSynset(individualSynsetResult);
 								}
@@ -4863,6 +4156,16 @@ namespace Konclude {
 
 										}
 
+										if (mConfDebugTestingOntologyWriting) {
+											COntologyTextFormater::writeOntologyToFile(mOntoAnsweringItem->getTestingOntology(), "Debugging/Answering/Absorbed-Query-Expressions.txt");
+										}
+
+										mTestingOntologyPreprocessor->preprocess(mOntoAnsweringItem->getTestingOntology(), mOntoAnsweringItem->getTestingOntology()->getConfiguration());
+
+										if (mConfDebugTestingOntologyWriting) {
+											COntologyTextFormater::writeOntologyToFile(mOntoAnsweringItem->getTestingOntology(), "Debugging/Answering/Absorbed-Preprocessed-Query-Expressions.txt");
+										}
+
 										for (COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data : entailmentCheckingAbsorptionBasedHandlingQueryPartDatas) {
 											createAbsorbedQueryPartEntailmentTest(data, queryProcessingData, answererContext);
 										}
@@ -4876,16 +4179,6 @@ namespace Konclude {
 							}
 
 
-
-
-							QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* absorbedQueryPartsItemExtensionList = buildingVarItem->getAbsorbedQueryPartItemExtensionHandlingList();
-							if (!processing && absorbedQueryPartsItemExtensionList && !absorbedQueryPartsItemExtensionList->isEmpty() && buildingVarItem->isSatisfiable() && (!buildingVarItem->isWaitingComputation() || continueProcessingBuildingVarItem)) {
-
-								COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absorbedQueryPartsItemExtensionList->takeFirst();
-
-								buildAbsorbedPartHandlingItem(buildingVarItem, absorptionHanldingQueryPart, varExpVarComItemHash, &processing);
-
-							}
 
 
 
@@ -4940,12 +4233,27 @@ namespace Konclude {
 									}
 								}
 
-
+								for (CExpressionVariable* indiVarExp : *indiVarSet) {
+									buildingVarItem->updateLastHandledVariableItemAssociation(indiVarExp, lastCompItem);
+								}
 								buildingVarItem->updateLastHandledVariableItemAssociation(initializerVariableExp, lastCompItem);
 								buildingVarItem->setLastHandledVariableExpression(initializerVariableExp);
 
 
 							}
+
+
+							QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* absorbedQueryPartsItemExtensionList = buildingVarItem->getAbsorbedQueryPartItemExtensionHandlingList();
+							if (!processing && absorbedQueryPartsItemExtensionList && !absorbedQueryPartsItemExtensionList->isEmpty() && buildingVarItem->isSatisfiable() && (!buildingVarItem->isWaitingComputation() || continueProcessingBuildingVarItem)) {
+
+								COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absorbedQueryPartsItemExtensionList->takeFirst();
+
+								buildAbsorbedPartHandlingItem(buildingVarItem, absorptionHanldingQueryPart, varExpVarComItemHash, &processing);
+
+							}
+
+
+
 
 
 						}
@@ -4979,7 +4287,9 @@ namespace Konclude {
 
 
 								if (!queryProcData->hasComputation()) {
-									if (!finishQueryProcessing(queryProcData)) {
+									if (queryProcData->isComputationError()) {
+										failQueryProcessing(queryProcData, new CQueryUnspecifiedStringError("Error in computation"));
+									} else if (!finishQueryProcessing(queryProcData)) {
 										queryProcData->incBuildingVariableItem();
 										if (!buildingVarItem->isProcessingQueued()) {
 											buildingVarItem->setProcessingQueued(true);
@@ -5453,6 +4763,13 @@ namespace Konclude {
 
 
 
+			bool COptimizedComplexConceptAnsweringHandler::continueCalculationJobFromNondeterministicCachedGraph(CSatisfiableCalculationJob* satCalcJob, CAnswererContext* answererContext) {
+				if (mConfNonDeterministicSatisfiableCalculationContinuation) {
+					satCalcJob->setAllowNonDeterministicSatisfiableCalculationContinuation(true);
+					return true;
+				}
+				return false;
+			}
 
 
 
@@ -5474,6 +4791,9 @@ namespace Konclude {
 				CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionExtensionItemController(absorptionPropagationExtension);
 				satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
 				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartVariableBindingPropagationCount();
+				if (!absorptionHanldingQueryPart->hasNonTrivialAbsorptionPropagation()) {
+					continueCalculationJobFromNondeterministicCachedGraph(satCalcJob, answererContext);
+				}
 				processCalculationJob(answererContext, satCalcJob, completedMessage);
 				return true;
 			}
@@ -5486,9 +4806,13 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processVariableBindingsPropagationItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexConceptAnsweringHandler::processVariableBindingsPropagationItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* message, bool computationError, CAnswererContext* answererContext) {
 				COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem = message->getAbsorptionPropagationItem();
 				COptimizedComplexBuildingVariableCompositionsItem* buildVarItem = message->getVariableBuildingItem();
+
+				if (computationError) {
+					buildVarItem->getQueryProcessingData()->setComputationError(computationError);
+				}
 
 				buildVarItem->decVariableBindingsPropagationCount();
 
@@ -5702,6 +5026,9 @@ namespace Konclude {
 				if (triplesAssertionAccessor) {
 					dataValueDatatypeSingleLiteralHash = mOntoAnsweringItem->getDataValueDatatypeSingleLiteralHash();
 				}
+				CDataLiteralNormalizerPreProcess dataLitNormalizer;
+				CPreProcessContextBase preprocessingContext(mOntoAnsweringItem->getTestingOntology(), mOntoAnsweringItem->getTestingOntology()->getConfiguration());
+				CContext* dataValueMemoryManagementContext = mOntoAnsweringItem->getDataValueMemoryManagementContext();
 
 				CIndividualProcessNodeVector* indiProcVector = nullptr;
 				CConsistence* consistence = mOntoAnsweringItem->getOntology()->getConsistence();
@@ -5805,12 +5132,24 @@ namespace Konclude {
 								if (!hashedValue) {
 									CDataLiteral* copiedDataLiteral = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(nullptr, nullptr);
 									copiedDataLiteral->initDataLiteral(dataLiteral->getLexicalDataLiteralValueString(), dataLiteral->getDatatype());
+
+									CDataLiteralValue* dataLiteralValue = copiedDataLiteral->getDataLiteralValue();
+									if (!dataLiteralValue) {
+										dataLitNormalizer.createPreprocessedDataLiteralValue(copiedDataLiteral, &preprocessingContext, dataValueMemoryManagementContext);
+									}
+
 									hashedValue = copiedDataLiteral;
 								}
 								dataLiteralSet->insert(hashedValue);
 							} else {
 								CDataLiteral* copiedDataLiteral = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(nullptr, nullptr);
 								copiedDataLiteral->initDataLiteral(dataLiteral->getLexicalDataLiteralValueString(), dataLiteral->getDatatype());
+
+								CDataLiteralValue* dataLiteralValue = copiedDataLiteral->getDataLiteralValue();
+								if (!dataLiteralValue) {
+									dataLitNormalizer.createPreprocessedDataLiteralValue(copiedDataLiteral, &preprocessingContext, dataValueMemoryManagementContext);
+								}
+
 								dataLiteralSet->insert(copiedDataLiteral);
 							}
 
@@ -6729,9 +6068,9 @@ namespace Konclude {
 				if (mConfVariablePreAbsorption) {
 					COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler preAbsorptionHandler(data, mOntoAnsweringItem, occStatsCacheReader);
 					preAbsorptionHandler.readConfig(mOntoAnsweringItem->getCalculationConfiguration());
-					cint64 prevConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getConceptCount();
+					cint64 prevConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getNextConceptID();
 					preAbsorptionHandler.absorbQueryPart();
-					cint64 newConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getConceptCount();
+					cint64 newConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getNextConceptID();
 					if (mConfExtendedLogging) {
 						LOG(INFO, getDomain(), logTr("Preabsorbed existential query part consiting of variables %1 with %2 concepts.").arg(varList.join(", ")).arg(newConCount - prevConCount), this);
 					}
@@ -6740,9 +6079,9 @@ namespace Konclude {
 
 				COptimizedComplexVariableBindingAbsorptionBasedQueryPartHandler absorptionHandler(data, mOntoAnsweringItem, occStatsCacheReader);
 				absorptionHandler.readConfig(mOntoAnsweringItem->getCalculationConfiguration());
-				cint64 prevConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getConceptCount();
+				cint64 prevConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getNextConceptID();
 				absorptionHandler.absorbQueryPart();
-				cint64 newConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getConceptCount();
+				cint64 newConCount = mOntoAnsweringItem->getTestingOntology()->getTBox()->getNextConceptID();
 				if (mConfExtendedLogging) {
 					LOG(INFO, getDomain(), logTr("Absorbed existential query part consisting of variables %1 with %2 concepts (%3 is initialization and %4 is first binding variable).").arg(varList.join(", ")).arg(newConCount - prevConCount).arg(data->getInitializerVariableExpression()->getName()).arg(data->getBindingPropagationStartVariableExpression()->getName()), this);
 				}
@@ -8508,11 +7847,12 @@ namespace Konclude {
 					} else {
 						// create reduced testing concept
 						CMemoryAllocationManager* memMan = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
-						CConceptVector* conceptVec = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox()->getConceptVector();
+						CTBox* tBox = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox();
+						CConceptVector* conceptVec = tBox->getConceptVector();
 
 						CConcept* reducedConcept = CObjectAllocator< CConcept >::allocateAndConstruct(memMan);
 						reducedConcept->initConcept();
-						cint64 nextConTag = conceptVec->getItemCount();
+						cint64 nextConTag = tBox->getNextConceptID();
 						reducedConcept->initTag(nextConTag);
 						reducedConcept->setOperatorCode(CCAND);
 						conceptVec->setLocalData(nextConTag, reducedConcept);
@@ -8963,6 +8303,7 @@ namespace Konclude {
 					tmpMatOntology = new CConcreteOntology(ontology, ontology->getConfiguration());
 					tmpMatOntology->setOntologyID(ontology->getOntologyID());
 					tmpMatOntology->setConsistence(ontology->getConsistence());
+					tmpMatOntology->getTBox()->setMinimalNextConceptID(ontology->getTBox()->getMinimalNextConceptID());
 					matData->setTemporaryMaterializationOntology(tmpMatOntology);
 
 					CABox* tempRoleRealAbox = tmpMatOntology->getABox();
@@ -8995,7 +8336,7 @@ namespace Konclude {
 
 							for (CConcept* concept : conceptList) {
 								CConceptAssertionLinker* nextConceptAssertionLinker = new CConceptAssertionLinker();
-								nextConceptAssertionLinker->initNegLinker(concept, false);
+								nextConceptAssertionLinker->initNegLinker(concept, concept->hasMappingNegation());
 
 								varIndi->addAssertionConceptLinker(nextConceptAssertionLinker);
 							}
@@ -9014,47 +8355,49 @@ namespace Konclude {
 										CIndividualTermExpression* secondIndiExp = propAssExp->getSecondIndividualTermExpression();
 										CIndividualVariableExpression* firstVarExp = dynamic_cast<CIndividualVariableExpression*>(firstIndiExp);
 										CIndividualVariableExpression* secondVarExp = dynamic_cast<CIndividualVariableExpression*>(secondIndiExp);
-										CIndividual* firstIndi = nullptr;
-										CIndividual* secondIndi = nullptr;
-										if (firstVarExp) {
-											firstIndi = matData->getVariableIndividual(firstVarExp);
-										} else {
-											firstIndi = mOntoAnsweringItem->getTestingOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash()->value(firstIndiExp);
-											if (!firstIndi) {
-												CNamedIndividualExpression* namedFirstIndiExp = dynamic_cast<CNamedIndividualExpression*>(firstIndiExp);
-												if (namedFirstIndiExp) {
-													firstIndi = mOntoAnsweringItem->getTestingOntology()->getStringMapping()->getIndividualFromName(namedFirstIndiExp->getName());
+										if ((!firstVarExp || !rolledVarExpSet.contains(firstVarExp)) && (!secondVarExp || !rolledVarExpSet.contains(secondVarExp))) {
+											CIndividual* firstIndi = nullptr;
+											CIndividual* secondIndi = nullptr;
+											if (firstVarExp) {
+												firstIndi = matData->getVariableIndividual(firstVarExp);
+											} else {
+												firstIndi = mOntoAnsweringItem->getTestingOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash()->value(firstIndiExp);
+												if (!firstIndi) {
+													CNamedIndividualExpression* namedFirstIndiExp = dynamic_cast<CNamedIndividualExpression*>(firstIndiExp);
+													if (namedFirstIndiExp) {
+														firstIndi = mOntoAnsweringItem->getTestingOntology()->getStringMapping()->getIndividualFromName(namedFirstIndiExp->getName());
+													}
+												}
+												if (firstIndi) {
+													firstIndi = CConceptRoleIndividualLocator::getLocatedIndividual(firstIndi, tmpMatOntology);
 												}
 											}
-											if (firstIndi) {
-												firstIndi = CConceptRoleIndividualLocator::getLocatedIndividual(firstIndi, tmpMatOntology);
-											}
-										}
-										if (secondVarExp) {
-											secondIndi = matData->getVariableIndividual(secondVarExp);
-										} else {
-											secondIndi = mOntoAnsweringItem->getTestingOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash()->value(secondIndiExp);
-											if (!secondIndi) {
-												CNamedIndividualExpression* namedSecondIndiExp = dynamic_cast<CNamedIndividualExpression*>(secondIndiExp);
-												if (namedSecondIndiExp) {
-													secondIndi = mOntoAnsweringItem->getTestingOntology()->getStringMapping()->getIndividualFromName(namedSecondIndiExp->getName());
+											if (secondVarExp) {
+												secondIndi = matData->getVariableIndividual(secondVarExp);
+											} else {
+												secondIndi = mOntoAnsweringItem->getTestingOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash()->value(secondIndiExp);
+												if (!secondIndi) {
+													CNamedIndividualExpression* namedSecondIndiExp = dynamic_cast<CNamedIndividualExpression*>(secondIndiExp);
+													if (namedSecondIndiExp) {
+														secondIndi = mOntoAnsweringItem->getTestingOntology()->getStringMapping()->getIndividualFromName(namedSecondIndiExp->getName());
+													}
+												}
+												if (secondIndi) {
+													secondIndi = CConceptRoleIndividualLocator::getLocatedIndividual(secondIndi, tmpMatOntology);
 												}
 											}
-											if (secondIndi) {
-												secondIndi = CConceptRoleIndividualLocator::getLocatedIndividual(secondIndi, tmpMatOntology);
+
+											if (firstIndi && secondIndi) {
+												CRoleAssertionLinker* nextRoleAssertionLinker = new CRoleAssertionLinker();
+												nextRoleAssertionLinker->initRoleAssertionLinker(role, secondIndi);
+												firstIndi->addAssertionRoleLinker(nextRoleAssertionLinker);
+
+												CReverseRoleAssertionLinker* nextReverseRoleAssertionLinker = new CReverseRoleAssertionLinker();
+												nextReverseRoleAssertionLinker->initReverseRoleAssertionLinker(nextRoleAssertionLinker, firstIndi);
+												secondIndi->addReverseAssertionRoleLinker(nextReverseRoleAssertionLinker);
 											}
+
 										}
-
-										if (firstIndi && secondIndi) {
-											CRoleAssertionLinker* nextRoleAssertionLinker = new CRoleAssertionLinker();
-											nextRoleAssertionLinker->initRoleAssertionLinker(role, secondIndi);
-											firstIndi->addAssertionRoleLinker(nextRoleAssertionLinker);
-
-											CReverseRoleAssertionLinker* nextReverseRoleAssertionLinker = new CReverseRoleAssertionLinker();
-											nextReverseRoleAssertionLinker->initReverseRoleAssertionLinker(nextRoleAssertionLinker, firstIndi);
-											secondIndi->addReverseAssertionRoleLinker(nextReverseRoleAssertionLinker);
-										}
-
 									}
 								}
 
@@ -9287,6 +8630,7 @@ namespace Konclude {
 
 				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incComplexConceptItemsCandidatePropagationCount();
 	
+				continueCalculationJobFromNondeterministicCachedGraph(satCalcJob, answererContext);
 				processCalculationJob(answererContext, satCalcJob, completedMessage);
 				return true;
 			}
@@ -9343,7 +8687,8 @@ namespace Konclude {
 					CConcept* topRolePropagationExistingIndividualCreationConcept = mOntoAnsweringItem->getTopRolePropagationExistingIndividualCreationConcept();
 					if (!topRolePropagationExistingIndividualCreationConcept) {
 						CMemoryAllocationManager* memMan = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
-						CConceptVector* conceptVec = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox()->getConceptVector();
+						CTBox* tBox = mOntoAnsweringItem->getTestingOntology(false)->getDataBoxes()->getTBox();
+						CConceptVector* conceptVec = tBox->getConceptVector();
 
 						topRolePropagationExistingIndividualCreationConcept = CObjectAllocator<CConcept>::allocateAndConstruct(memMan);
 
@@ -9354,7 +8699,7 @@ namespace Konclude {
 						indiVec->setData(univConnIndiID, universalConnIndi);
 
 						topRolePropagationExistingIndividualCreationConcept->initConcept();
-						cint64 nextConTag = conceptVec->getItemCount();
+						cint64 nextConTag = tBox->getNextConceptID();
 						topRolePropagationExistingIndividualCreationConcept->initTag(nextConTag);
 						topRolePropagationExistingIndividualCreationConcept->setOperatorCode(CCVALUE);
 						topRolePropagationExistingIndividualCreationConcept->setRole(mOntoAnsweringItem->getTestingOntology(false)->getRBox()->getTopObjectRole());
@@ -9422,6 +8767,13 @@ namespace Konclude {
 					CAnsweringMessageData::ANSWERINGMESSAGEDATA messageType = message->getAnsweringMessageDataType();
 					if (messageType == CAnsweringMessageData::CALCULATIONCOMPLETED) {
 						CAnsweringMessageDataCalculationCompleted* calcCompMessage = (CAnsweringMessageDataCalculationCompleted*)message;
+
+						bool errorOcurred = false;
+						if (calcCompMessage->hasCalculationError()) {
+							LOG(ERROR, getDomain(), logTr("Error in computation, answer computation for ontology '%1' failed.").arg(mOntoAnsweringItem->getOntology()->getTerminologyName()), this);
+							errorOcurred = true;
+						}
+
 						CAnsweringMessageDataCalculationCompleted::CALCULATIONTYPE calcType = calcCompMessage->getCalculationType();
 						if (calcType == CAnsweringMessageDataCalculationCompleted::SATISFIABLECALCULATION) {
 							CAnsweringMessageDataCalculationCompletedSatisfiable* satCalcCompMessage = (CAnsweringMessageDataCalculationCompletedSatisfiable*)calcCompMessage;
@@ -9443,7 +8795,7 @@ namespace Konclude {
 							processIndividualItemCalculationCompleted(instCalcCompMessage, answererContext);
 						} else if (calcType == CAnsweringMessageDataCalculationCompleted::VARIABLEBINDINGPPROPAGATIONCALCULATION) {
 							CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* varBindPropCompMessage = (CAnsweringMessageDataCalculationCompletedVariableBindingPropagations*)calcCompMessage;
-							processVariableBindingsPropagationItemCalculationCompleted(varBindPropCompMessage, answererContext);
+							processVariableBindingsPropagationItemCalculationCompleted(varBindPropCompMessage, errorOcurred, answererContext);
 						} else if (calcType == CAnsweringMessageDataCalculationCompleted::VARIABLEBINDINGCONFIRMATIONCALCULATION) {
 							CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation* varBindConfCompMessage = (CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation*)calcCompMessage;
 							processVariableBindingsConfirmationCalculationCompleted(varBindConfCompMessage, answererContext);
@@ -9969,17 +9321,21 @@ namespace Konclude {
 					double exprectedKnownInstances = (double)currentKnownInstances / (double)currentRetrievedInstances * (double)exprectedRetrievedInstances;
 
 
-					if (currentRetrievedInstances < mConfConceptItemExpectedCountSamplingRetrievedPercentageLimit * exprectedRetrievedInstances || conceptItem->getRealizationIteratorSamplingExpectedCount() >= 0) {
-						CRealizationIndividualInstanceItemReferenceIterator* realizationIterator = conceptItem->getRealizationIterator();
+					CRealizationIndividualInstanceItemReferenceIterator* realizationIterator = conceptItem->getRealizationIterator();
+					COptimizedRepresentativeKPSetIntersectionCombinationIterator* intRealizationIterator = dynamic_cast<COptimizedRepresentativeKPSetIntersectionCombinationIterator*>(conceptItem->getRealizationIterator());
+					if (intRealizationIterator && (currentRetrievedInstances < mConfConceptItemExpectedCountSamplingRetrievedPercentageLimit * exprectedRetrievedInstances || conceptItem->getRealizationIteratorSamplingExpectedCount() >= 0)) {
 						cint64 currentIndiId = realizationIterator->currentIndividualInstanceItemReference().getIndividualID();
 						cint64 nextIndiId = mOntoAnsweringItem->getOntology()->getABox()->getNextIndividualId(false);
 						if (currentRetrievedInstances < mConfConceptItemExpectedCountSamplingRetrievedPercentageLimit * exprectedRetrievedInstances && conceptItem->getRealizationIteratorSamplingExpectedCount() < 0) {
 
+							//QStringList sampleStringList;
+							//QString sampleString;
 
 							CRealizationIndividualInstanceItemReferenceIterator* samplingIterator = realizationIterator->getCopy();
 							cint64 samplingCount = 0;
 							cint64 availableSampleCount = 0;
 							double availableSampleIndiDiff = 0;
+							double nonAvailableSampleIndiDiff = 0;
 							cint64 availableSampleRequiredInitializationCount = 0;
 							double samplingRange = 0;
 							double samplingRangeExpectedCount = 0;
@@ -10001,22 +9357,56 @@ namespace Konclude {
 											}
 										}
 										if (sampleIndiId >= samplingIndiId && sampleIndiId < nextSamplingIndiId) {
-											double indiDiff = qMax(sampleIndiId - samplingIndiId, 1.);
-											availableSampleIndiDiff += indiDiff;
 											availableSampleCount++;
-											if (samplingIterator->requiresInitialization()) {
-												availableSampleRequiredInitializationCount++;
-												double newExpectedCount = ((nextSamplingIndiId - samplingIndiId) / indiDiff) * 0.5;
-												samplingRangeExpectedCount += newExpectedCount;
-											} else {
-												double newExpectedCount = ((nextSamplingIndiId - samplingIndiId) / indiDiff);
-												samplingRangeExpectedCount += newExpectedCount;
+
+											cint64 nextSampleIndiId = -1;
+											bool requiresInitialization = samplingIterator->requiresInitialization();
+											samplingIterator->moveNext();
+											if (!samplingIterator->atEnd()) {
+												nextSampleIndiId = samplingIterator->currentIndividualInstanceItemReference().getIndividualID();
 											}
+											if (nextSampleIndiId == -1 || nextSampleIndiId > nextSamplingIndiId) {
+												// only one individual in sampling range
+												double newExpectedCount = 1.;
+												if (requiresInitialization) {
+													availableSampleRequiredInitializationCount++;
+													newExpectedCount = 0.5;
+												}
+												availableSampleIndiDiff += (nextSamplingIndiId - samplingIndiId);
+												samplingRangeExpectedCount += newExpectedCount;
+												//sampleStringList.append(QString("Sample \t%1 between \t%2 and \t%3 is \t%4 with nothing else, adding \t%6 to expected \t(now %7)").arg(samplingNr).arg(samplingIndiId).arg(nextSamplingIndiId).arg(sampleIndiId).arg(newExpectedCount).arg(samplingRangeExpectedCount));
+												//sampleString = sampleStringList.join("\r\n");
+											} else {
+												double indiSampleDiff = nextSampleIndiId - sampleIndiId;
+												double indiStartDiff = qMax(sampleIndiId - samplingIndiId, 1.);
+												double indiDiff = indiSampleDiff / 5. * 4 + indiStartDiff / 5;
+
+												availableSampleIndiDiff += indiDiff;
+												if (requiresInitialization) {
+													availableSampleRequiredInitializationCount++;
+													double newExpectedCount = ((nextSamplingIndiId - samplingIndiId) / indiDiff) * 0.5;
+													samplingRangeExpectedCount += newExpectedCount;
+												} else {
+													double newExpectedCount = ((nextSamplingIndiId - samplingIndiId) / indiDiff);
+													samplingRangeExpectedCount += newExpectedCount;
+													//sampleStringList.append(QString("Sample \t%1 between \t%2 and \t%3 is \t%4 and %8 with diff \t%5, adding \t%6 to expected \t(now %7)").arg(samplingNr).arg(samplingIndiId).arg(nextSamplingIndiId).arg(sampleIndiId).arg(indiDiff).arg(newExpectedCount).arg(samplingRangeExpectedCount).arg(nextSampleIndiId));
+													//sampleString = sampleStringList.join("\r\n");
+												}
+
+											}
+
+
 										} else {
 											availableSampleIndiDiff += nextSamplingIndiId - samplingIndiId;
+											nonAvailableSampleIndiDiff += nextSamplingIndiId - samplingIndiId;
+											//sampleStringList.append(QString("Sample \t%1 between \t%2 and \t%3 does not exist, interpreting it as diff \t%4").arg(samplingNr).arg(samplingIndiId).arg(nextSamplingIndiId).arg(nextSamplingIndiId - samplingIndiId));
+											//sampleString = sampleStringList.join("\r\n");
 										}
 									} else {
 										availableSampleIndiDiff += nextSamplingIndiId - samplingIndiId;
+										nonAvailableSampleIndiDiff += nextSamplingIndiId - samplingIndiId;
+										//sampleStringList.append(QString("Sample \t%1 between \t%2 and \t%3 does not exist, interpreting it as diff \t%4").arg(samplingNr).arg(samplingIndiId).arg(nextSamplingIndiId).arg(nextSamplingIndiId - samplingIndiId));
+										//sampleString = sampleStringList.join("\r\n");
 									}
 
 
@@ -10025,11 +9415,17 @@ namespace Konclude {
 							delete samplingIterator;
 
 							if (samplingCount > 0) {
-								double samplesExpectedIndiCount = samplingRangeExpectedCount;
+								double diffBasedSamplingRangeExpectedCount = nextIndiId / availableSampleIndiDiff * availableSampleCount;
+								double samplesExpectedIndiCount = diffBasedSamplingRangeExpectedCount;
 								if (availableSampleIndiDiff <= 0) {
 									samplesExpectedIndiCount = 0;
 								}
 								conceptItem->setRealizationIteratorSamplingExpectedCount(samplesExpectedIndiCount);
+
+								if (mConfExtendedLogging) {
+									LOG(INFO, getDomain(), logTr("Took %2 samples to correct expected instance count from %3 to %4 for complex concept item %1.").arg(conceptItem->getConceptItemId()).arg(samplingCount).arg(exprectedKnownInstances).arg(samplesExpectedIndiCount), this);
+								}
+
 							}
 						}
 
@@ -10864,6 +10260,7 @@ namespace Konclude {
 					conceptBaseItem->setInstanceItemRetrievedLinker(instanceItemRetrievedLinker);
 
 				}
+				variableMapping->incCurrentUpdateId();
 
 
 
@@ -11496,6 +10893,7 @@ namespace Konclude {
 					}
 				}
 
+				variableMapping->incCurrentUpdateId();
 				finishVariableCompositionItemComputation(buildingVarItem, compVarItem, true);
 
 				if (mConfExtendedLogging) {
@@ -11515,9 +10913,9 @@ namespace Konclude {
 					for (QHash<CExpressionVariable*, COptimizedComplexVariableCompositionItem*>::const_iterator itVarItem = varCompItemHash->constBegin(), itVarItemEnd = varCompItemHash->constEnd(); itVarItem != itVarItemEnd; ++itVarItem) {
 						CExpressionVariable* indiVarExp = itVarItem.key();
 						COptimizedComplexVariableCompositionItem* varCompItem = itVarItem.value();
-						if (!varCompItem->isVariableMappingsComputed() && !scheduledItems.contains(compVarItem)) {
+						if (!varCompItem->isVariableMappingsComputed() && !scheduledItems.contains(varCompItem)) {
 							
-							scheduledItems.insert(compVarItem);
+							scheduledItems.insert(varCompItem);
 							bool dependentItemRescheduled = rescheduleVariableCompositionItemComputation(buildingVarItem, compVarItem, varCompItem, -1);
 
 							if (dependentItemRescheduled && mConfExtendedLogging) {
@@ -11539,6 +10937,7 @@ namespace Konclude {
 						QHash<CConcept*, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* propagationFinalizationConceptAbsorptionItemHash = mOntoAnsweringItem->getPropagationFinalizationConceptAbsorptionItemHash();
 						COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absBasedItem->getAbsorptionBasedHandlingData();
 						QHash<CExpressionVariable*, CVariable*>* variableExpressionVariableHash = absorptionHanldingQueryPart->getVariableExpressionVariableHash();
+						cint64 steeringVariableBindingsCount = 0;
 						for (QHash<CExpressionVariable*, COptimizedComplexVariableCompositionItem*>::const_iterator itVarItem = varCompItemHash->constBegin(), itVarItemEnd = varCompItemHash->constEnd(); itVarItem != itVarItemEnd; ++itVarItem) {
 							CExpressionVariable* indiVarExp = itVarItem.key();
 							COptimizedComplexVariableCompositionItem* varCompItem = itVarItem.value();
@@ -11577,6 +10976,7 @@ namespace Konclude {
 										variableSteeringIndividualBinding->insert(indiRef);
 									}
 								}
+								steeringVariableBindingsCount += variableSteeringIndividualBinding->count();
 							}
 
 
@@ -11586,7 +10986,7 @@ namespace Konclude {
 
 						if (absorptionHanldingQueryPart->hasIndividualVariables()) {
 							if (mConfExtendedLogging) {
-								LOG(INFO, getDomain(), logTr("Scheduling marker propagation for absorbed query part."), this);
+								LOG(INFO, getDomain(), logTr("Scheduling marker propagation for absorbed query part based on %1 bindings.").arg(steeringVariableBindingsCount), this);
 							}
 							processing = createVariableBindingPropagationTest(absBasedItem, buildingVarItem, answererContext);
 						} else {

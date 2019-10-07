@@ -30,6 +30,7 @@
 #include "COptimizedComplexVariableIndividualBindingsHasher.h"
 #include "COptimizedComplexVariableIndividualBindingsCardinalityLinker.h"
 #include "COptimizedComplexVariableIndividualUpdateCardinalityLinker.h"
+#include "COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker.h"
 
 
 // Other includes
@@ -104,12 +105,20 @@ namespace Konclude {
 
 
 
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* getLastAddedBindingsCardinalityBatchLinker();
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* getFirstAddedBindingsCardinalityBatchLinker();
+					COptimizedComplexVariableIndividualMappingsMultiHashPart* clearBindingsCardinalityBatchLinker();
+
+
+
 					cint64 mStatInsertionCount = 0;
 					cint64 mStatBindingsCopyCount = 0;
 					cint64 mStatCardinalitiesCopyCount = 0;
 
 					cint64 mStatsProcessingTime = 0;
 
+					cint64 getMaximumCardinalitySameIndividualsJointlyConsidered();
+					cint64 getMaximumCardinalitySameIndividualsSeparatelyConsidered();
 
 
 				// protected methods
@@ -125,6 +134,9 @@ namespace Konclude {
 
 					COptimizedComplexVariableIndividualBindings* getBindingsCopy(COptimizedComplexVariableIndividualBindings* bindings);
 					COptimizedComplexVariableIndividualMappingsMultiHashPart* releaseBindingsCopy(COptimizedComplexVariableIndividualBindings* bindings);
+
+
+					COptimizedComplexVariableIndividualMappingsMultiHashPart* extendAddedBindingsCardinalityBatchLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker);
 
 				// protected variables
 				protected:
@@ -147,6 +159,18 @@ namespace Konclude {
 					COptimizedComplexVariableIndividualUpdateCardinalityLinker* mLastUpdateCardinalityLinker;
 					COptimizedComplexVariableIndividualUpdateCardinalityLinker* mFirstUpdateCardinalityLinker;
 					cint64 mCurrentUpdateId;
+
+
+
+					cint64 mCurrentLinkerBatchingSize;
+					double mLinkerBatchingSizeIncreasingFactor;
+
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* mLastAddedBindingsCardinalityBatchLinker;
+					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* mFirstAddedBindingsCardinalityBatchLinker;
+					cint64 mLastAddedBindingsCardinalityBatchLinkerUpdateId;
+
+					cint64 mMaximumCardinalitySameIndividualsJointlyConsidered;
+					cint64 mMaximumCardinalitySameIndividualsSeparatelyConsidered;
 
 
 				// private methods

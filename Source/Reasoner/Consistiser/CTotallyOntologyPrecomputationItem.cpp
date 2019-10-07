@@ -102,6 +102,7 @@ namespace Konclude {
 
 				mFullCompletionGraphConstruction = false;
 				mFullCompletionGraphConstructed = false;
+				mForceCompletionGraphConstruction = false;
 
 				mSaturationOccurrenceStatisticsCollectingInitialized = false;
 				mSaturationOccurrenceStatisticsCollected = false;
@@ -747,6 +748,17 @@ namespace Konclude {
 			}
 
 
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setForceCompletionGraphConstruction(bool forceCompletionGraphConstruction) {
+				mForceCompletionGraphConstruction = forceCompletionGraphConstruction;
+				return this;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::isForceCompletionGraphConstruction() {
+				return mForceCompletionGraphConstruction;
+			}
+
+
 			bool CTotallyOntologyPrecomputationItem::isFullCompletionGraphConstruction() {
 				return mFullCompletionGraphConstruction;
 			}
@@ -925,6 +937,9 @@ namespace Konclude {
 				return mIndividualPrecomputationClashed;
 			}
 
+			bool* CTotallyOntologyPrecomputationItem::getIndividualPrecomputationClashedPointer() {
+				return &mIndividualPrecomputationClashed;
+			}
 
 			bool CTotallyOntologyPrecomputationItem::isIndividualStepFinished() {
 				return mIndividualPrecomputationStep->isStepFinished();

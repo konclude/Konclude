@@ -54,12 +54,17 @@ namespace Konclude {
 				public:
 					//! Constructor
 					CVariableBindingsAnswersStreamingResult(CVariableBindingsAnswersStreamingHandler* handler);
+					CVariableBindingsAnswersStreamingResult(CVariableBindingsAnswersConcurrentStreamingHandler* concurrentHandler);
 
 					//! Destructor
 					virtual ~CVariableBindingsAnswersStreamingResult();
 
 
-					CVariableBindingsAnswersStreamingResult* initResult(const QStringList& varNames);
+					bool initResult(const QStringList& varNames);
+
+
+					virtual CVariableBindingsAnswersStreamingResult* getConcurrentlyWriteableStreamingResults();
+					virtual CVariableBindingsAnswersStreamingResult* releaseConcurrentlyWriteableStreamingResults(CVariableBindingsAnswersStreamingResult* result);
 
 
 					virtual CVariableBindingsAnswersStreamingResult* addResultVariableBindings(CVariableBindingsAnswerResult* varBindings, cint64 cardinality = 1);
@@ -83,6 +88,7 @@ namespace Konclude {
 
 				// protected variables
 				protected:
+					CVariableBindingsAnswersConcurrentStreamingHandler* mConcurrentHandler;
 					CVariableBindingsAnswersStreamingHandler* mHandler;
 					QStringList mVariableNames;
 					cint64 mResultCount;

@@ -25,6 +25,7 @@
 #include <QBuffer>
 
 // Namespace includes
+#include "CSPARQLResultBufferWriteData.h"
 
 
 // Other includes
@@ -61,7 +62,7 @@ namespace Konclude {
 						//! Constructor
 						CSPARQLStreamingWriter();
 
-						virtual bool writeStreamData(QByteArray* buffer, bool last) = 0;
+						virtual bool writeStreamData(const QList<CSPARQLResultBufferWriteData>& bufferList, bool last) = 0;
 
 					// protected methods
 					protected:
