@@ -5,16 +5,16 @@
  *		For details and support, see <http://konclude.com/>.
  *
  *		Konclude is free software: you can redistribute it and/or modify
- *		it under the terms of version 3 of the GNU General Public License
- *		(LGPLv3) as published by the Free Software Foundation.
+ *		it under the terms of version 3 of the GNU Lesser General Public
+ *		License (LGPLv3) as published by the Free Software Foundation.
  *
  *		Konclude is distributed in the hope that it will be useful,
  *		but WITHOUT ANY WARRANTY; without even the implied warranty of
  *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- *		GNU General Public License for more details.
+ *		GNU (Lesser) General Public License for more details.
  *
- *		You should have received a copy of the GNU General Public License
- *		along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *		You should have received a copy of the GNU (Lesser) General Public
+ *		License along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -428,15 +428,15 @@ namespace Konclude {
 					//	}
 					//	mFoundCriticalConceptSet = false;
 					//}
-					//mCriticalConceptSetStringSet.insert("¬ := ¬ ( ALL  http://www.owllink.org/testsuite/galen#hasState. ¬~http://www.owllink.org/testsuite/galen#actuallyHollow)   ^");
-					//mCriticalConceptSetStringSet.insert(" :=  (~http://www.owllink.org/testsuite/galen#Topology AND ¬ ( ALL  http://www.owllink.org/testsuite/galen#hasState. ¬~http://www.owllink.org/testsuite/galen#actuallyHollow)  )   ^");
-					//mCriticalConceptSetStringSet.insert("¬ := ¬ ( ALL  http://www.owllink.org/testsuite/galen#hasState. ¬~http://www.owllink.org/testsuite/galen#trulyHollow)   ^");
+					//mCriticalConceptSetStringSet.insert("? := ? ( ALL  http://www.owllink.org/testsuite/galen#hasState. ?~http://www.owllink.org/testsuite/galen#actuallyHollow)   ^");
+					//mCriticalConceptSetStringSet.insert(" :=  (~http://www.owllink.org/testsuite/galen#Topology AND ? ( ALL  http://www.owllink.org/testsuite/galen#hasState. ?~http://www.owllink.org/testsuite/galen#actuallyHollow)  )   ^");
+					//mCriticalConceptSetStringSet.insert("? := ? ( ALL  http://www.owllink.org/testsuite/galen#hasState. ?~http://www.owllink.org/testsuite/galen#trulyHollow)   ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#Feature ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#StructuralFeature ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#Morphology ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#Appearance ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#Topology ^");
-					//mCriticalConceptSetStringSet.insert(" :=  (~http://www.owllink.org/testsuite/galen#Topology AND ¬ ( ALL  http://www.owllink.org/testsuite/galen#hasState. ¬~http://www.owllink.org/testsuite/galen#trulyHollow)  )   ^");
+					//mCriticalConceptSetStringSet.insert(" :=  (~http://www.owllink.org/testsuite/galen#Topology AND ? ( ALL  http://www.owllink.org/testsuite/galen#hasState. ?~http://www.owllink.org/testsuite/galen#trulyHollow)  )   ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#TopCategory ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#DomainCategory ^");
 					//mCriticalConceptSetStringSet.insert("~http://www.owllink.org/testsuite/galen#ModifierConcept ^");
@@ -17718,7 +17718,7 @@ namespace Konclude {
 						while (ancRoleIt2.hasNext() && blocked) {
 							CIndividualLinkEdge* link = ancRoleIt2.next();
 							CRole* role = link->getLinkRole();
-							// B§, (ATMOST n r. C) in w'
+							// B?, (ATMOST n r. C) in w'
 							CReapplyQueueIterator reapplyQuIt = wPredNode->getRoleReapplyIterator(role,false);
 							while (reapplyQuIt.hasNext() && blocked) {
 								CReapplyConceptDescriptor* reapplyConDes = reapplyQuIt.next();
