@@ -53,9 +53,16 @@ namespace Konclude {
 					if (!mAnswersWriteable && !mSameRealization->hasPotentiallySameIndividuals() && (mLastVarItemProcessingDep->getDependentItem()->getVariableMapping()->getMaximumCardinalitySameIndividualsSeparatelyConsidered() <= 1 || mDistinct)) {
 						//TODO: max cardinality must be 1
 						cint64 currentBindingCount = mLastVarItemProcessingDep->getDependentItem()->getVariableMapping()->getBindingCount();
-						cint64 writtenResultCount = mExistBindsAnswersStreamingResult->getResultCount();
+						cint64 writtenResultCount = mLastOnlyCountingWritten;
 						mResultWriter.addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mExistBindsAnswersStreamingResult, nullptr, mFilteringAnsweringMapping, mCompAssIndVarQuery, mQueryProcessingData, currentBindingCount - writtenResultCount);
+						mLastOnlyCountingWritten = currentBindingCount;
 					} else {
+
+						if (mLastOnlyCountingWritten > 0) {
+							// get back to 0 answers
+							mExistBindsAnswersStreamingResult->addResultVariableBindings(nullptr, -mLastOnlyCountingWritten);
+							mLastOnlyCountingWritten = 0;
+						}
 
 						while (!mLastVarItemProcessingDep->isBatchProcessed() || mLastVarItemProcessingDep->loadNextBatchProvidedBatch()) {
 

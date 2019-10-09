@@ -20,15 +20,15 @@ Konclude uses the following libraries:
 
 # USAGE
 
-The binaries of Konclude (and possibly some shared libraries) are located in the './Binaries ' directory. However, you can use the starter scripts in the main directory for directly invoking Konclude with "Konclude" (Windows) or "./Konclude" (Linux, Mac). The command line parameter '-h' shows the usage options for Konclude. Some examples are located in the './Tests' directory. See http://konclude.com/ for detailed usage instructions.
+The binaries of Konclude (and possibly some shared libraries) are located in the `Binaries` directory. However, you can use the starter scripts in the main directory for directly invoking Konclude with `Konclude` (Windows) or `./Konclude` (Linux, Mac). The command line parameter '-h' shows the usage options for Konclude. Some examples are located in the `Tests` directory. See http://konclude.com/ for detailed usage instructions.
 
 - COMMAND LINE:
 
-	Basic reasoning tasks such as classification, consistency, class satisfiability and	realisation can be directly invoked with the command line interface. For this, Konclude has to be called with the corresponding command ('classification', 'consistency', 'satisfiability', or 'realisation') and at least the input file has to be specified with '-i FILEPATH'. The output file is optional and can be set with the '-o FILEPATH' parameter. The	class satisfiability checking additionally requires the IRI of the class that has to be tested, which has to be specified with '-x IRI'.
+	Basic reasoning tasks such as classification, consistency, class satisfiability, and	realisation can be directly invoked with the command line interface. For this, Konclude has to be called with the corresponding command (`classification`, `consistency`, `satisfiability`, or `realisation`) and at least the input file has to be specified with `-i FILEPATH`. The output file is optional and can be set with the `-o FILEPATH` argument. The	class satisfiability checking additionally requires the IRI of the class that has to be tested, which has to be specified with `-x IRI`.
 	
-	Please note that Konclude natively only supports ontologies in the OWL 2 XML [1] or in the OWL 2 Functional Style format [2]. The optional integration of the Redland RDF Libraries allow for parsing RDF serialization formats, but the mapping to OWL constructs can be considered as experimental. Hence, you may use the protege editor [3] to convert ontologies in other syntaxes into a fully supported format.
+	Please note that Konclude natively only supports ontologies in the OWL 2 XML [1] or in the OWL 2 Functional Style format [2]. The optional integration of the Redland RDF Libraries allow for parsing RDF serialization formats, but the mapping to OWL constructs must be considered as experimental. Hence, you may use the protege editor [3] to convert ontologies in other syntaxes into a fully supported format.
 
-	Examples (on Windows you have to omit ./):
+	Examples (omit ./ on Windows):
     ```	
     ./Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
 	./Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
@@ -39,11 +39,11 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
 	Furthermore, Konclude processes OWLlink [4] requests with the XML binding [5]. 
 	Konclude is optimised to read/write the OWLlink requests/responses from/to files. 
-	For this, Konclude has to be called with the 'owllinkfile' command and at least 
-	with the parameter '-i FILEPATH', where FILEPATH specifies the OWLlink request/query 
-	file. The OWLlink response file can be specified with the '-o FILEPATH' parameter.
+	For this, Konclude has to be called with the `owllinkfile` command and at least 
+	with the parameter `-i FILEPATH`, where FILEPATH specifies the OWLlink request/query 
+	file. The OWLlink response file can be specified with the `-o FILEPATH` parameter.
 
-	Examples (on Windows you have to omit ./):
+	Examples (omit ./ on Windows):
 
     ```	
     ./Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
@@ -63,17 +63,17 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
 	Furthermore, all OWL 2 ontologies/axioms used in LoadOntologies/Tell 
 	commands should be in the OWL 2 XML [1] or in the OWL 2 Functional Style [2] 
-	format and Konclude does currently NOT process annotations. The protege 
+	format and Konclude does currently NOT process any annotations. The protege 
 	editor [2] can be used to convert OWL 2 ontologies between different 
 	formats.
 	
 
 	Konclude can also be used as an OWLlink server that answers OWLlink requests
 	sent over HTTP. For this, Konclude has to be called with the 'owllinkserver'
-	command. The listening port can optionally be specified by the parameter '-p', 
+	command. The listening port can optionally be specified by the parameter `-p`, 
 	otherwise the default port 8080 is used.
 
-	Examples (on Windows you have to omit ./):
+	Examples (omit ./ on Windows):
 
     ```
     ./Konclude owllinkserver -p 8080
@@ -88,20 +88,24 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
 - SPARQL:
 
-	A trivial SPARQL HTTP server is integrated that supports processing of some basic SPARQL Update commands and answering of some ABox related queries (only simple BGP, where variables are used for individuals). Note that the SPARQL requests/queries must be encoded as HTTP POST requests.
+    A trivial SPARQL HTTP server is integrated that supports processing of some basic SPARQL Update commands and answering of some ABox related queries (only simple Basic Graph Patterns, where variables are used for individuals). Note that the SPARQL requests/queries must be encoded as HTTP POST requests. Alternatively the SPARQL requests can also directly be loaded from files with the `sparqlfile` command. Note that the last loaded ontology is interpreted as the default graph, i.e., it is automatically used if no graph/knowledge base is specified in the query.
 
-	Examples (on Windows you have to omit ./):
+    Examples (omit ./ on Windows):
 
     ```
     ./Konclude sparqlserver -p 8080 -c Configs/querying-config.xml
-    ./Konclude spraqlfile -i Tests/sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+    ./Konclude sparqlfile -s Tests/sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+    ./Konclude sparqlfile -s Tests/sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
     ```
 
-	Currently, the following SPARQL commands/queries are (partially) supported:
-	- LOAD, SELECT, ASK
+    Currently, the following SPARQL commands/queries are (partially) supported:
+    - LOAD, SELECT, ASK
 
-	Note that the querying-config must be used for supporting complex queries in order to ensure that Konclude preprocesses the ontology appropriately.
+	DISTINCT, OFFSET, LIMIT are also supported, but filtering, sorting, and data value variables only to a very limited extent.
 
+    Note that the settings of the `Configs/querying-config.xml` file are automatically enabled if the `sparqlserver` or `sparqlfile` commands are used in order to deactivate some optimizations that are not yet compatible with the integrated query answering engine. However, the `Configs/querying-config.xml` file also contains some commented out settings that may be interesting for configuring some query answering aspects in more detail (e.g., concurrency, interpretation of anonymous variables, etc.).
+
+	Also note that, at the moment, all results are internally cached/stored and there is currently no memory releasing strategy implemented, i.e., Konclude will eventually run out of memory if it is used to continuously answer (new) queries.
 
 
 - CONFIGURATION:

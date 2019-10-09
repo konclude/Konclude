@@ -208,6 +208,7 @@ namespace Konclude {
 						COptimizedComplexBuildingVariableCompositionsItem* mVarBuildItem;
 						CVariableBindingFilteringAnswerMapping* mFilteringAnsweringMapping = nullptr;
 						bool mAnswersWriteable = true;
+						cint64 mLastOnlyCountingWritten = 0;
 						COptimizedComplexConceptOntologyAnsweringItem* mOntoAnsweringItem;
 						CVariableBindingsAnswersResult* mBindsAnswersResult = nullptr;
 						bool mDistinct;

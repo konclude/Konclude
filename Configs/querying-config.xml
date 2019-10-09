@@ -5,11 +5,8 @@
     xml:base="http://www.owllink.org/testsuite/1a#"
     xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
 	
-	<!--Configurations for the Konclude reasoner.-->	
-	
-	<Set key='Konclude.Calculation.Precomputation.ForceFullCompletionGraphConstruction'>
-		<Literal>true</Literal>
-	</Set>	
+	<!--The following configurations for the Konclude reasoner are automatically set if the sparqlfile or sparlqserver commands are used.
+		These optimizations are currently not compatible with the query answering techniques, i.e., you may not change/activate them even if they can make Konclude for other reasoning tasks a little bit slower.-->	
 		
 	<Set key='Konclude.Calculation.Querying.ComplexQueryingSupport'>
 		<Literal>true</Literal>
@@ -26,43 +23,38 @@
 	
 	
 	
-	<Set key='Konclude.Debugging.WriteDebuggingData'>
-		<Literal>false</Literal>
+	
+	
+	
+	
+	<!--Specifies how many mappings are initially computed in each step. If the value is set to -1, then all mappings are directly computed, i.e., the incremental/stream-based computation of answers is deactivated.-->
+	<Set key='Konclude.Answering.MinimalMappingsComputationSize'>
+		<Literal>1</Literal>
 	</Set>	
 	
-		
-
-	<Set key='Konclude.Debugging.WriteDebuggingDataSaturationTasks'>
-		<Literal>false</Literal>
-	</Set>	
 	
-
-	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksForAnsweringPropagationTests'>
-		<Literal>true</Literal>
-	</Set>			
-		
-
-	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasks'>
-		<Literal>true</Literal>
-	</Set>			
-
-	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksForConsistencyTests'>
-		<Literal>true</Literal>
-	</Set>	
-		
-
-	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksOnlyOnSatisfiability'>
+	
+	<!--Specifies whether joins are parallelized.-->
+	<Set key='Konclude.Answering.ConcurrentJoinComputation'>
 		<Literal>true</Literal>
 	</Set>		
 	
-		
-	<Set key='Konclude.Calculation.Answering.MultipliedUnitsParallelTestingCalculationCount'>
-		<Literal>1</Literal>
+	<!--Specifies whether the answer generation and serialization is parallelized.-->
+	<Set key='Konclude.Answering.ConcurrentAnswerGeneration'>
+		<Literal>true</Literal>
 	</Set>	
 
-	<Set key='Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount'>
-		<Literal>10</Literal>
-	</Set>				
+	<!--Specifies the number of threads for the concurrent join computation/answer generation. If the given number is negative, then threads for all available computer cores are created.-->
+	<Set key='Konclude.Answering.ConcurrentComputationThreadPoolSize'>
+		<Literal>-1</Literal>
+	</Set>	
+	
+	
+	
+	<!--Specifies whether non-selected SPARQL variables are interpreted as existential/anonymous variables.-->
+	<Set key='Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables'>
+		<Literal>false</Literal>
+	</Set>	
 	
 	
 </RequestMessage>

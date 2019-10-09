@@ -60,6 +60,7 @@ namespace Konclude {
 					librdf_node* namedIndividualObject = librdf_new_node_from_uri_string(world, (const unsigned char*)PREFIX_OWL_NAMED_INDIVIDUAL);
 
 
+					mRoleNodeDataHash.clear();
 					QSet<CRole*>* activeRoleSet = updateConcreteOntology->getRBox()->getActivePropertyRoleSet(false);
 					if (activeRoleSet) {
 						for (CRole* role : *activeRoleSet) {
@@ -70,6 +71,7 @@ namespace Konclude {
 					}
 
 
+					mConceptNodeDataHash.clear();
 					CConceptNodeData* topConceptData = nullptr;
 					QSet<CConcept*>* activeConceptSet = updateConcreteOntology->getTBox()->getActiveClassConceptSet(false);
 					if (activeConceptSet) {
@@ -85,6 +87,7 @@ namespace Konclude {
 					}
 
 
+					mIndividualNodeDataHash.clear();
 					QSet<CIndividual*>* activeIndiSet = updateConcreteOntology->getABox()->getActiveIndividualSet(false);
 					if (activeIndiSet && !activeIndiSet->isEmpty()) {
 						cint64 maxIndividualId = updateConcreteOntology->getABox()->getNextIndividualId(false);

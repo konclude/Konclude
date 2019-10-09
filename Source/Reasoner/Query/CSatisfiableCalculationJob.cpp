@@ -36,7 +36,7 @@ namespace Konclude {
 				mPreyingAdapter = nullptr;
 				mSatClassMessAdapter = nullptr;
 				mJobInstantiation = nullptr;
-				mAllowNonDeterministicSatisfiableCalculationContinuation = nullptr;
+				mAllowNonDeterministicSatisfiableCalculationContinuation = false;
 				mRealMarkCandMessAdapter = nullptr;
 				mSatIncConsTestingAdapter = nullptr;
 				mSatIndDepTrackAdapter = nullptr;

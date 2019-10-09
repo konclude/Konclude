@@ -244,12 +244,13 @@ HEADERS += \
    ./Source\Control\Interface\CommandLine\CCLIComandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\CCLIRealizationComandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\CCLIConsistencyComandLinePreparationTranslator.h \
-   ./Source\Control\Interface\CommandLine\CCommandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\CSPARQLFileComandLinePreparationTranslator.h \
-   ./Source\Control\Interface\CommandLine\CCommandLinePreparationTranslatorSelector.h \
    ./Source\Control\Interface\CommandLine\COWLLinkServerComandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\CCLIDataPropertyClassificationComandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\CSPARQLServerComandLinePreparationTranslator.h \
+   ./Source\Control\Interface\CommandLine\CCommandLinePreparationTranslator.h \
+   ./Source\Control\Interface\CommandLine\CHelpComandLinePreparationTranslator.h \
+   ./Source\Control\Interface\CommandLine\CCommandLinePreparationTranslatorSelector.h \
    ./Source\Control\Interface\JNI\com_konclude_jnibridge_AxiomExpressionBuildingBridge.h \
    ./Source\Control\Interface\JNI\CJNIOntologyRevisionData.h \
    ./Source\Control\Interface\JNI\CJNICommandProcessor.h \
@@ -350,8 +351,8 @@ HEADERS += \
    ./Source\Logger\Events\CConfigureLoggerEvent.h \
    ./Source\Logger\Events\CRequestLogMessagesEvent.h \
    ./Source\Logger\Record\CContextRecordData.h \
-   ./Source\Logger\Record\RecordSettings.h \
    ./Source\Logger\Record\CContextRecorder.h \
+   ./Source\Logger\Record\RecordSettings.h \
    ./Source\Network\NetworkSettings.h \
    ./Source\Network\CNetworkRequest.h \
    ./Source\Network\CNetworkResponse.h \
@@ -372,8 +373,8 @@ HEADERS += \
    ./Source\Network\HTTP\HttpSettings.h \
    ./Source\Network\HTTP\CHttpTransactionManager.h \
    ./Source\Network\HTTP\CQtHttpResponse.h \
-   ./Source\Network\HTTP\CQtHttpTransactionManager.h \
    ./Source\Network\HTTP\CQtHttpResponseHandler.h \
+   ./Source\Network\HTTP\CQtHttpTransactionManager.h \
    ./Source\Network\HTTP\Events\CHttpReplyFinishedEvent.h \
    ./Source\Network\HTTP\Events\CExtractResponseDataEvent.h \
    ./Source\Network\HTTP\Events\CHandleIncomingHttpConnectionEvent.h \
@@ -1535,7 +1536,6 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Process\Dependency\CALLDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CVARBINDPROPAGATEJOINDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CRepresentativeResolveDependencyNode.h \
-   ./Source\Reasoner\Kernel\Process\Dependency\DependencySettings.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CVARBINDPROPAGATEANDDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CNonDeterministicDependencyTrackPoint.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CSOMEDependencyNode.h \
@@ -1590,6 +1590,7 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Process\Dependency\CSAMEINDIVIDUALSMERGEDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CORONLYOPTIONDependencyNode.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\DependencySettings.h \
    ./Source\Reasoner\Kernel\Process\Marker\CMarker.h \
    ./Source\Reasoner\Kernel\Process\Marker\MarkerSettings.h \
    ./Source\Reasoner\Kernel\Strategy\CTaskProcessingPriorityStrategy.h \
@@ -1623,11 +1624,11 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererInstancePropagationMessageAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationPossibleInstancesMergingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.h \
-   ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSaturationOccurrenceStatisticsCollectingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableCalculationTask.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererQueryingMaterializationAdapter.h \
    ./Source\Reasoner\Kernel\Task\CCalculationConfigurationExtension.h \
+   ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h \
    ./Source\Reasoner\Ontology\CDatatypeValueSpaceTriggers.h \
    ./Source\Reasoner\Ontology\CExtendedConceptReferenceLinkingData.h \
    ./Source\Reasoner\Ontology\CDatatypeValueSpaceDateTimeType.h \
@@ -1729,6 +1730,7 @@ HEADERS += \
    ./Source\Reasoner\Ontology\CConcreteOntology.h \
    ./Source\Reasoner\Ontology\CRoleDependenceVector.h \
    ./Source\Reasoner\Ontology\CRoleChain.h \
+   ./Source\Reasoner\Ontology\CTBox.h \
    ./Source\Reasoner\Ontology\COntologyProcessingStatus.h \
    ./Source\Reasoner\Ontology\COntologyProcessingStatistics.h \
    ./Source\Reasoner\Ontology\CRoleData.h \
@@ -1787,7 +1789,6 @@ HEADERS += \
    ./Source\Reasoner\Ontology\COntologyBuildData.h \
    ./Source\Reasoner\Ontology\CConceptOfInterestActivationLinker.h \
    ./Source\Reasoner\Ontology\CConceptOfInterestActivationTriggeringData.h \
-   ./Source\Reasoner\Ontology\CTBox.h \
    ./Source\Reasoner\Ontology\COntologyTriplesDataStatus.h \
    ./Source\Reasoner\Ontology\COntologyTriplesData.h \
    ./Source\Reasoner\Ontology\CDataAssertionLinker.h \
@@ -1805,6 +1806,7 @@ HEADERS += \
    ./Source\Reasoner\Ontology\Memory\COntologyContextCollectionMemoryManagerSingletonProvider.h \
    ./Source\Reasoner\Ontology\Memory\COntologyContextSingleMemoryManagerSingletonProvider.h \
    ./Source\Reasoner\Preprocess\CPreProcess.h \
+   ./Source\Reasoner\Preprocess\CTriggeredImplicationGCIAbsorberPreProcess.h \
    ./Source\Reasoner\Preprocess\CRequirementConfigPreprocessingThread.h \
    ./Source\Reasoner\Preprocess\CDataLiteralNormalizerPreProcess.h \
    ./Source\Reasoner\Preprocess\CPreProcessContextProviding.h \
@@ -1827,16 +1829,15 @@ HEADERS += \
    ./Source\Reasoner\Preprocess\COntologyConfigDependedPreProcesser.h \
    ./Source\Reasoner\Preprocess\COntologyPreprocessingItem.h \
    ./Source\Reasoner\Preprocess\CNominalSchemaAbsorptionPathLinker.h \
-   ./Source\Reasoner\Preprocess\CTriggeredImplicationGCIAbsorberPreProcess.h \
    ./Source\Reasoner\Preprocess\CCoreOntologyCyclesExtractorPreProcess.h \
    ./Source\Reasoner\Preprocess\CPreprocessing.h \
    ./Source\Reasoner\Preprocess\CPreprocessingTestingItem.h \
    ./Source\Reasoner\Preprocess\CFullNominalSchemaGroundingPreProcess.h \
    ./Source\Reasoner\Preprocess\CConceptTriggerLinker.h \
    ./Source\Reasoner\Preprocess\CPreProcessContext.h \
+   ./Source\Reasoner\Preprocess\CNominalSchemaTemplateExtractionPreProcess.h \
    ./Source\Reasoner\Preprocess\COntologyStructureInspectionPreProcess.h \
    ./Source\Reasoner\Preprocess\PreprocessSettings.h \
-   ./Source\Reasoner\Preprocess\CNominalSchemaTemplateExtractionPreProcess.h \
    ./Source\Reasoner\Preprocess\CPreprocessingContext.h \
    ./Source\Reasoner\Preprocess\CMappingUpdaterPreProcess.h \
    ./Source\Reasoner\Preprocess\CPreProcessContextBase.h \
@@ -2139,7 +2140,6 @@ HEADERS += \
    ./Source\Reasoner\Taxonomy\CRolePropertiesParentChildPredecessorHierarchyNode.h \
    ./Source\Reasoner\Taxonomy\CHierarchyDepthTraversalIterator.h \
    ./Source\Reasoner\Taxonomy\CTaxonomy.h \
-   ./Source\Reasoner\Taxonomy\CPCPrSuIpIsDiHierarchyNode.h \
    ./Source\Reasoner\Taxonomy\CConceptClassesHierarchy.h \
    ./Source\Reasoner\Taxonomy\CConceptClassesParentChildPredecessorHierarchy.h \
    ./Source\Reasoner\Taxonomy\CRolePropertiesHierarchyNode.h \
@@ -2150,6 +2150,7 @@ HEADERS += \
    ./Source\Reasoner\Taxonomy\CAbstractHierarchy.h \
    ./Source\Reasoner\Taxonomy\CHierarchyNodeIterator.h \
    ./Source\Reasoner\Taxonomy\CHierarchyNodeData.h \
+   ./Source\Reasoner\Taxonomy\CPCPrSuIpIsDiHierarchyNode.h \
    ./Source\Reasoner\Triples\TriplesSettings.h \
    ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualAssertionIndexCache.h \
    ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualAssertionIndexCacheData.h \
@@ -2746,13 +2747,14 @@ SOURCES += \
    ./Source/Control/Interface/CommandLine/CCLIClassClassificationComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/COWLLinkServerComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CCLIComandLinePreparationTranslator.cpp \
-   ./Source/Control/Interface/CommandLine/CCommandLinePreparationTranslatorSelector.cpp \
    ./Source/Control/Interface/CommandLine/CCLIDataPropertyClassificationComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CCLISatisfiabilityComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CCLIRealizationComandLinePreparationTranslator.cpp \
-   ./Source/Control/Interface/CommandLine/CCommandLinePreparationTranslator.cpp \
-   ./Source/Control/Interface/CommandLine/CSPARQLFileComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CSPARQLServerComandLinePreparationTranslator.cpp \
+   ./Source/Control/Interface/CommandLine/CSPARQLFileComandLinePreparationTranslator.cpp \
+   ./Source/Control/Interface/CommandLine/CCommandLinePreparationTranslator.cpp \
+   ./Source/Control/Interface/CommandLine/CHelpComandLinePreparationTranslator.cpp \
+   ./Source/Control/Interface/CommandLine/CCommandLinePreparationTranslatorSelector.cpp \
    ./Source/Control/Interface/JNI/CJNIAxiomExpressionVisitingLoader.cpp \
    ./Source/Control/Interface/JNI/CJNIHandlingClassData.cpp \
    ./Source/Control/Interface/JNI/CJNIInstanceManagerConfigType.cpp \
@@ -2806,7 +2808,6 @@ SOURCES += \
    ./Source/Control/Loader/CDefaultReasonerLoader.cpp \
    ./Source/Control/Loader/CCLIConsistencyBatchProcessingLoader.cpp \
    ./Source/Control/Loader/CRecursionTestDataGeneratorLoader.cpp \
-   ./Source/Control/Loader/CCoutLogObserverLoader.cpp \
    ./Source/Control/Loader/CCLISatisfiabilityBatchProcessingLoader.cpp \
    ./Source/Control/Loader/CReasonerEvaluationProgramLoader.cpp \
    ./Source/Control/Loader/COWLFilesOWLlinkTestcaseGeneratorLoader.cpp \
@@ -2821,9 +2822,7 @@ SOURCES += \
    ./Source/Control/Loader/CCLIClassClassificationBatchProcessingLoader.cpp \
    ./Source/Control/Loader/CExperimentalReasonerLoader.cpp \
    ./Source/Control/Loader/COWLlinkHttpServerLoader.cpp \
-   ./Source/Control/Loader/CConfigurableCoutLogObserverLoader.cpp \
    ./Source/Control/Loader/CLargeJoinTestDataGeneratorLoader.cpp \
-   ./Source/Control/Loader/CCommandLineTranlatorHelpLoader.cpp \
    ./Source/Control/Loader/CLoggerConfigurationLoader.cpp \
    ./Source/Control/Loader/CTestOWLlinkAPIBatchFileLoader.cpp \
    ./Source/Control/Loader/CReasonerEvaluationClassificationTimesComparerLoader.cpp \
@@ -2831,6 +2830,9 @@ SOURCES += \
    ./Source/Control/Loader/CDefaultLoaderFactory.cpp \
    ./Source/Control/Loader/CSPARQLResultsComparisonLoader.cpp \
    ./Source/Control/Loader/CSPARQLBatchFileLoader.cpp \
+   ./Source/Control/Loader/CCoutLogObserverLoader.cpp \
+   ./Source/Control/Loader/CConfigurableCoutLogObserverLoader.cpp \
+   ./Source/Control/Loader/CCommandLineTranlatorHelpLoader.cpp \
    ./Source/Logger/CLogDomain.cpp \
    ./Source/Logger/CLogIdentifier.cpp \
    ./Source/Logger/CLogMessage.cpp \
@@ -2867,8 +2869,8 @@ SOURCES += \
    ./Source/Network/HTTP/CQtHttpRequest.cpp \
    ./Source/Network/HTTP/CQtHttpRequestBodyOnlyParser.cpp \
    ./Source/Network/HTTP/CQtHttpResponse.cpp \
-   ./Source/Network/HTTP/CQtHttpTransactionManager.cpp \
    ./Source/Network/HTTP/CQtHttpResponseHandler.cpp \
+   ./Source/Network/HTTP/CQtHttpTransactionManager.cpp \
    ./Source/Network/HTTP/Events/CHttpRequstEvent.cpp \
    ./Source/Network/HTTP/Events/CAddResponseFinishedCallbackEvent.cpp \
    ./Source/Network/HTTP/Events/CConnectionReadyReadEvent.cpp \
@@ -3288,7 +3290,6 @@ SOURCES += \
    ./Source/Reasoner/Classifier/CPropertyRoleClassifiedCallbackDataContext.cpp \
    ./Source/Reasoner/Classifier/CClassificationInitializePossibleClassSubsumptionMessageData.cpp \
    ./Source/Reasoner/Classifier/CClassifyingCallbackDataContext.cpp \
-   ./Source/Reasoner/Classifier/COptimizedSubClassSubsumptionClassifierThread.cpp \
    ./Source/Reasoner/Classifier/CClassificationUpdatePossiblePropertySubsumptionMessageData.cpp \
    ./Source/Reasoner/Classifier/CClassifierStatistics.cpp \
    ./Source/Reasoner/Classifier/CIncrementalKPSetClassSubsumptionClassifierThread.cpp \
@@ -3360,6 +3361,7 @@ SOURCES += \
    ./Source/Reasoner/Classifier/CConceptNegationOverRoleTuble.cpp \
    ./Source/Reasoner/Classifier/CSubsumptionClassifierThread.cpp \
    ./Source/Reasoner/Classifier/COptimizedKPSetRoleSubsumptionClassifierThread.cpp \
+   ./Source/Reasoner/Classifier/COptimizedSubClassSubsumptionClassifierThread.cpp \
    ./Source/Reasoner/Classifier/COptimizedKPSetClassSubsumptionClassifierThread.cpp \
    ./Source/Reasoner/Classifier/Events/COntologyTellClassificationMessageEvent.cpp \
    ./Source/Reasoner/Classifier/Events/CTestCalculatedCallbackEvent.cpp \
@@ -4093,12 +4095,12 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererInstancePropagationMessageAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRealizationPossibleInstancesMergingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.cpp \
-   ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRepresentativeBackendUpdatingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSaturationOccurrenceStatisticsCollectingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableCalculationTask.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererQueryingMaterializationAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableCalculationTaskStatusPropagator.cpp \
    ./Source/Reasoner/Kernel/Task/CCalculationConfigurationExtension.cpp \
+   ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRepresentativeBackendUpdatingAdapter.cpp \
    ./Source/Reasoner/Ontology/CDatatypeValueSpaceBooleanType.cpp \
    ./Source/Reasoner/Ontology/CConcept.cpp \
    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMap.cpp \
@@ -4154,6 +4156,7 @@ SOURCES += \
    ./Source/Reasoner/Ontology/COntologyCoreConceptCyclesData.cpp \
    ./Source/Reasoner/Ontology/COntologyProcessingStepDataVector.cpp \
    ./Source/Reasoner/Ontology/CIndividual.cpp \
+   ./Source/Reasoner/Ontology/CTagItem.cpp \
    ./Source/Reasoner/Ontology/CConceptAssertionLinker.cpp \
    ./Source/Reasoner/Ontology/CBranchingStatistics.cpp \
    ./Source/Reasoner/Ontology/CConceptTagComparer.cpp \
@@ -4165,7 +4168,6 @@ SOURCES += \
    ./Source/Reasoner/Ontology/CTerminology.cpp \
    ./Source/Reasoner/Ontology/CUnsatisfiableCachingTags.cpp \
    ./Source/Reasoner/Ontology/CDataLiteralStringValue.cpp \
-   ./Source/Reasoner/Ontology/CTagItem.cpp \
    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggeringMapData.cpp \
    ./Source/Reasoner/Ontology/CABox.cpp \
    ./Source/Reasoner/Ontology/CDatatypeValueSpaceConceptTriggerLinker.cpp \
@@ -4175,6 +4177,7 @@ SOURCES += \
    ./Source/Reasoner/Ontology/CDatatypeValueSpaceTriggers.cpp \
    ./Source/Reasoner/Ontology/CActiveEntityIterator.cpp \
    ./Source/Reasoner/Ontology/CDatatypeValueSpaceFloatType.cpp \
+   ./Source/Reasoner/Ontology/CTBox.cpp \
    ./Source/Reasoner/Ontology/CDataLiteralIRIValue.cpp \
    ./Source/Reasoner/Ontology/CDisjunctionBranchingStatistics.cpp \
    ./Source/Reasoner/Ontology/COntologyProcessingStatus.cpp \
@@ -4257,7 +4260,6 @@ SOURCES += \
    ./Source/Reasoner/Ontology/COntologyBuildData.cpp \
    ./Source/Reasoner/Ontology/CConceptOfInterestActivationLinker.cpp \
    ./Source/Reasoner/Ontology/CConceptOfInterestActivationTriggeringData.cpp \
-   ./Source/Reasoner/Ontology/CTBox.cpp \
    ./Source/Reasoner/Ontology/COntologyTriplesDataStatus.cpp \
    ./Source/Reasoner/Ontology/CDataAssertionLinker.cpp \
    ./Source/Reasoner/Ontology/CNamedItem.cpp \
@@ -4298,6 +4300,7 @@ SOURCES += \
    ./Source/Reasoner/Preprocess/CExtractRelevantConceptRolePreProcess.cpp \
    ./Source/Reasoner/Preprocess/CTriggeredImplicationGCIAbsorberPreProcess.cpp \
    ./Source/Reasoner/Preprocess/COntologyQueryExtendedConfigDependedPreProcesser.cpp \
+   ./Source/Reasoner/Preprocess/CRoleChainAutomataTransformationPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CConcreteOntologyPreProcess.cpp \
    ./Source/Reasoner/Preprocess/COntologyPreProcesser.cpp \
    ./Source/Reasoner/Preprocess/CPreprocessingTestingItem.cpp \
@@ -4307,9 +4310,9 @@ SOURCES += \
    ./Source/Reasoner/Preprocess/COntologyAssignmentTransformationPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CCoreBlockingConceptMarkerPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CPreprocessingTestingStep.cpp \
+   ./Source/Reasoner/Preprocess/CNominalSchemaTemplateExtractionPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CConsistenceCheckerPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CPreprocessor.cpp \
-   ./Source/Reasoner/Preprocess/CNominalSchemaTemplateExtractionPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CNominalSchemaAbsorptionBranchLinker.cpp \
    ./Source/Reasoner/Preprocess/COntologyStructureInspectionPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CConceptTriggerLinker.cpp \
@@ -4323,7 +4326,6 @@ SOURCES += \
    ./Source/Reasoner/Preprocess/CCommonDisjunctConceptExtractionPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CBranchTriggerPreProcess.cpp \
    ./Source/Reasoner/Preprocess/CBranchStatisticsExtenderPreProcess.cpp \
-   ./Source/Reasoner/Preprocess/CRoleChainAutomataTransformationPreProcess.cpp \
    ./Source/Reasoner/Preprocess/Events/CPreprocessOntologyEvent.cpp \
    ./Source/Reasoner/Preprocess/Events/CPreprocessingCalculatedCallbackEvent.cpp \
    ./Source/Reasoner/Preprocess/Events/CCallbackPreprocessedOntologyEvent.cpp \
@@ -4599,7 +4601,6 @@ SOURCES += \
    ./Source/Reasoner/Taxonomy/CAbstractHierarchyBuilder.cpp \
    ./Source/Reasoner/Taxonomy/CRolePropertiesParentChildPredecessorHierarchyNode.cpp \
    ./Source/Reasoner/Taxonomy/CTaxonomy.cpp \
-   ./Source/Reasoner/Taxonomy/CPCPrSuIpIsDiHierarchyNode.cpp \
    ./Source/Reasoner/Taxonomy/CConceptClassesHierarchy.cpp \
    ./Source/Reasoner/Taxonomy/CParentChildPredecessorHierarchy.cpp \
    ./Source/Reasoner/Taxonomy/CAbstractHierarchyNode.cpp \
@@ -4612,6 +4613,7 @@ SOURCES += \
    ./Source/Reasoner/Taxonomy/CRolePropertiesParentChildPredecessorHierarchy.cpp \
    ./Source/Reasoner/Taxonomy/CRolePropertiesHierarchyNode.cpp \
    ./Source/Reasoner/Taxonomy/CHierarchyNodeData.cpp \
+   ./Source/Reasoner/Taxonomy/CPCPrSuIpIsDiHierarchyNode.cpp \
    ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexCache.cpp \
    ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexCacheDataUpdateHandler.cpp \
    ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexCacheData.cpp \

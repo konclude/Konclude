@@ -44,7 +44,8 @@ namespace Konclude {
 			bool CConcreteOntologyRedlandTriplesDataExpressionMapper::mapTriples(CConcreteOntology* updateConcreteOntology, COntologyTriplesData* ontologyTripleData) {
 
 				bool newTriplesMapped = false;
-				for (CTriplesData* tripleData : *ontologyTripleData->getAllTriplesData()) {
+				CTriplesData* tripleData = ontologyTripleData->getLatestTriplesData(true);
+				if (tripleData) {
 					CRedlandStoredTriplesData* redlandTriplesData = dynamic_cast<CRedlandStoredTriplesData*>(tripleData);
 
 					librdf_model* model = redlandTriplesData->getRedlandIndexedModel();

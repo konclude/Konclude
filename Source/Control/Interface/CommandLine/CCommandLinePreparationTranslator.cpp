@@ -163,7 +163,7 @@ namespace Konclude {
 								argumentTranslated = true;
 								mLogConfList += QString("-CoutLogObserverLoader -LoggerConfigurationLoader");
 
-							} else if (modArgText.indexOf("h") == 0 || modArgText.indexOf("H") == 0) {
+							} else if (modArgText.indexOf("h") == 0 || modArgText.indexOf("H") == 0 || modArgText.indexOf("?") == 0) {
 								mHelpRequested = true;
 								argumentTranslated = true;
 

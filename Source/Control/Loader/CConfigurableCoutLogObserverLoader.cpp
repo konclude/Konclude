@@ -64,13 +64,15 @@ namespace Konclude {
 				infoDomainList << QString("::Konclude::Loader::SPARQLResultComparer");
 
 				consoleSingletonLogObserver = new CConsolePrintConfigurableLogObserver(infoDomainList,60.,true,false,true,true);
-				CLogger::getInstance()->addLogObserver(consoleSingletonLogObserver);				
+				CLogger::getInstance()->addLogObserver(consoleSingletonLogObserver);
+				CLogger::getInstance()->waitSynchronization();
 
 				return this;
 			}
 
 			CLoader *CConfigurableCoutLogObserverLoader::exit() {
-				CLogger::getInstance()->removeObserverFromAllDomains(consoleSingletonLogObserver);		
+				CLogger::getInstance()->waitSynchronization();
+				CLogger::getInstance()->removeObserverFromAllDomains(consoleSingletonLogObserver);
 				delete consoleSingletonLogObserver;
 				return this;
 			}

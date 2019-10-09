@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef KONCLUDE_CONTROL_INTERFACE_COMMANDLINE_CCOMMANDLINEPREPARATIONTRANSLATORSELECTOR_H
-#define KONCLUDE_CONTROL_INTERFACE_COMMANDLINE_CCOMMANDLINEPREPARATIONTRANSLATORSELECTOR_H
+#ifndef KONCLUDE_CONTROL_INTERFACE_COMMANDLINE_CHELPCOMANDLINEPREPARATIONTRANSLATOR_H
+#define KONCLUDE_CONTROL_INTERFACE_COMMANDLINE_CHELPCOMANDLINEPREPARATIONTRANSLATOR_H
 
 // Libraries includes
 #include <QString>
@@ -28,24 +28,12 @@
 
 // Namespace includes
 #include "CCommandLinePreparationTranslator.h"
-#include "COWLLinkServerComandLinePreparationTranslator.h"
-#include "COWLLinkFileComandLinePreparationTranslator.h"
-#include "CCLIClassClassificationComandLinePreparationTranslator.h"
-#include "CCLIConsistencyComandLinePreparationTranslator.h"
-#include "CCLISatisfiabilityComandLinePreparationTranslator.h"
-#include "CCLIRealizationComandLinePreparationTranslator.h"
-#include "CCLIObjectPropertyClassificationComandLinePreparationTranslator.h"
-#include "CCLIDataPropertyClassificationComandLinePreparationTranslator.h"
-#include "CSPARQLFileComandLinePreparationTranslator.h"
-#include "CSPARQLServerComandLinePreparationTranslator.h"
-#include "CHelpComandLinePreparationTranslator.h"
 
 // Other includes
 #include "Control/Loader/CLoaderFactory.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
-#include "Logger/CLogIdentifier.h"
 
 using namespace Konclude::Logger;
 
@@ -62,34 +50,35 @@ namespace Konclude {
 
 				/*! 
 				 *
-				 *		\class		CCommandLinePreparationTranslatorSelector
+				 *		\class		CHelpComandLinePreparationTranslator
 				 *		\author		Andreas Steigmiller
 				 *		\version	0.1
 				 *		\brief		TODO
 				 *
 				 */
-				class CCommandLinePreparationTranslatorSelector : public CLogIdentifier {
+				class CHelpComandLinePreparationTranslator : public CCommandLinePreparationTranslator {
 					// public methods
 					public:
 						//! Constructor
-						CCommandLinePreparationTranslatorSelector(CLoaderFactory *loaderFactory);
+						CHelpComandLinePreparationTranslator(CLoaderFactory *loaderFactory);
 
 						//! Destructor
-						virtual ~CCommandLinePreparationTranslatorSelector();
+						virtual ~CHelpComandLinePreparationTranslator();
 
 
-						virtual QStringList translateArguments(const QStringList& argList);
+						virtual QStringList combineTranslatedArguments();
 
-						virtual CCommandLinePreparationTranslator* getCommandLinePreparationTranslator(const QString& commandString);
-						
+						virtual bool canTranslate(const QString& string);
 
 					// protected methods
 					protected:
+						virtual bool translate(const QString& argumentText, QStringList& remainingArgList);
 
 					// protected variables
 					protected:
-						CLoaderFactory* mLoaderFactory;
-						QList<CCommandLinePreparationTranslator*> mTranslatorList;
+						bool mMinNecessaryArguments;
+						bool mFirstArgumentTranslation;
+						QStringList mParameterizingConfList;
 
 					// private methods
 					private:
@@ -107,4 +96,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_CONTROL_INTERFACE_COMMANDLINE_CCOMMANDLINEPREPARATIONTRANSLATORSELECTOR_H
+#endif // KONCLUDE_CONTROL_INTERFACE_COMMANDLINE_CHELPCOMANDLINEPREPARATIONTRANSLATOR_H

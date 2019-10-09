@@ -40,6 +40,7 @@ namespace Konclude {
 				if (tripleData) {
 					mPrevLatestTriplesData = tripleData->getLatestTriplesData();
 					mTriplesDataStatus.referenceTriplesDataStatus(tripleData->getTriplesDataStatus());
+					mAllTriplesDataList = tripleData->mAllTriplesDataList;
 				}
 				return this;
 			}

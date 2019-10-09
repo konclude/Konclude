@@ -59,6 +59,7 @@ namespace Konclude {
 
 
 		void CLogger::shutdownLogger() {
+			mInstance->waitSynchronization();
 			mInstanceCreationMutex->lock();
 			mInstance->stopThread();
 			// wait until the thread is stopped
