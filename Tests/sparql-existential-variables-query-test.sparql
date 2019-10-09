@@ -1,0 +1,10 @@
+
+# Existential variables via RDF blank nodes.
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX fam: <http://www.co-ode.org/roberts/family-tree.owl#>
+SELECT ?X ?Z
+WHERE
+{
+  ?X fam:hasParent _:y .
+  _:y fam:hasBrother ?Z .
+}

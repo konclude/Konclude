@@ -1,0 +1,23 @@
+# requires Konclude compliled with Redland RDF Libraries since the source is serialized as RDF/XML
+LOAD <file:Tests/lubm-univ-bench.owl.xml>
+LOAD <file:Tests/lubm-univ-bench-data-1.ttl>
+
+
+# remove the comment of the following command to ensure that Konclude preprocessed the ontology such that query processing can directly be started (otherwise Konclude will preprocess the ontology lazily for the first query)
+#PREPARE
+
+
+
+# LUBM Query9 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>
+SELECT ?X	
+WHERE
+{
+  ?X rdf:type ub:Student .
+  ?Y rdf:type ub:Faculty .
+  ?Z rdf:type ub:Course .
+  ?X ub:advisor ?Y .
+  ?Y ub:teacherOf ?Z .
+  ?X ub:takesCourse ?Z .
+}
