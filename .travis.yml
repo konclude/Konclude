@@ -1,13 +1,9 @@
+# adapted from https://travis-ci.com/Segs/Segs/jobs/206302884
 language: generic # prevent travis from overriding provided compilers.
 cache:
   ccache: true    # includes $HOME/.ccache and adds /usr/lib/ccache to $PATH
-# directories:
-#   - 3rd_party   # this is sometimes breaking subsequent Travis builds
 dist: xenial
 
-notifications:
-  email: false
-  webhooks: https://segs.io/travis/travis-ci.php
     
 env:
   global:
@@ -69,7 +65,8 @@ install:
 #    fi
   - |
     if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      sudo apt-get install -qq libgl1-mesa-dev qt512base qt512declarative qt512websockets qt512quickcontrols2; source /opt/qt512/bin/qt512-env.sh;
+      #qt512declarative qt512websockets qt512quickcontrols2
+      sudo apt-get install -qq libgl1-mesa-dev qt512base; source /opt/qt512/bin/qt512-env.sh;
       CMAKE_OPTS="";
     else
       brew install cppcheck qt;
@@ -79,10 +76,8 @@ install:
       CMAKE_OPTS="-DCMAKE_PREFIX_PATH=${QT5_CMAKE_PREFIX}";
     fi
     export CMAKE_OPTS;  
-
-
 script:
   - echo `gcc --version`
   - echo `qmake --version`
   - qmake KoncludeWithoutRedland.pro
-  - make -j
+  - make -j 3
