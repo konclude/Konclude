@@ -1,3 +1,5 @@
+https://travis-ci.com/konclude/Konclude.svg?branch=master
+
 # OVERVIEW
 
 Konclude is a tableau-based reasoner for the Description Logic SROIQV(D), i.e.,SROIQ(D) + Nominal Schemas, and covers almost all features of the Web Ontology Language (OWL) 2 DL. Konclude is still under active development and the current version probably contains some bugs and other errors. If you find an unexpected/strange behaviour you are cordially invited to report it. See http://konclude.com/feedback.html for details.
@@ -110,7 +112,7 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
 - CONFIGURATION:
 
-	Konclude can be configured with configuration files, which are also OWLlink request files where only the 'Set' command is used. 'Set' commands without the specification of a specific knowledge base configure the default settings in Konclude, which are used to instantiate the configurations of newly created knowledge bases. It is highly recommended to NOT change the default configuration of Konclude, because many available configurations are only for debugging, testing and experimenting. However, if Konclude requires too much main memory, then you can try to deactivate the satisfiability or unsatisfiability caching (see example configuration file in './Configs' directory). The parameter '-c FILEPATH' can be used to load a configuration file.
+	Konclude can be configured with configuration files, which are also OWLlink request files where only the 'Set' command is used. 'Set' commands without the specification of a specific knowledge base configure the default settings in Konclude, which are used to instantiate the configurations of newly created knowledge bases. It is highly recommended to NOT change the default configuration of Konclude, because many available configurations are only for debugging, testing and experimenting. However, if Konclude requires too much main memory, then you can try to deactivate the satisfiability or unsatisfiability caching (see example configuration file in `Configs` directory). The parameter `-c FILEPATH` can be used to load a configuration file.
 
 		
 
@@ -122,7 +124,7 @@ Konclude requires Qt 5.11 libraries or above [6]. If they are not included in th
 On Windows-based platforms it may further be necessary to install the .Net Framework [7] and the Microsoft Visual C++ Redistributable Package [8] for executing Konclude.
 
 
-Konclude can be built by running qmake (which is part of the Qt Framework) for 'Konclude.pro' or 'KoncludeWithoutRedland.pro', e.g., 
+Konclude can be built by running qmake (which is part of the Qt Framework) for `Konclude.pro` or `KoncludeWithoutRedland.pro`, e.g., 
 ```
 qmake -o Makefile Konclude.pro
 ```
@@ -130,16 +132,19 @@ and then by compiling the sources with the generated makefile, i.e., the command
 ```
 make
 ```
-has to be executed/called. Note that you may have to adapt the paths to the Redland libraries in the 'Konclude.pro' file. If you have docker installed, then you may simply use the provided docker images for building Konclude (which download/install all dependent libraries, compile Konclude and create a statically linked binary). For this, go into the KoncludeDocker' directory and run the following command:
+has to be executed/called. Note that you may have to adapt the paths to the Redland libraries in the `Konclude.pro` file. If you have docker installed, then you may simply use the provided docker images [9] for building Konclude (which download/install all dependent libraries, compile Konclude and create a statically linked binary). For this, go into the KoncludeDocker' directory and run the following command:
 ```
 ./build_release.sh
 ```
-For more details for building with docker, see also 'KoncludeDocker/README.md'.
+For more details for building with docker, see also `KoncludeDocker/README.md`.
 
 Setting up Konclude for building/compiling with Visual Studio 2015/2017:
 - Make sure that Qt is installed and the environment variable QTDIR is set to the QT directory
 - Install the QT VS Tools/Package extension for Visual Studio (enables more comfortable debugging)
 - Copy the QT DLLs (Qt5Networkd.dll, Qt5Network.dll, Qt5Xmld.dll, Qt5Xml.dll, Qt5Cored.dll, Qt5Core.dll) into the root directory of Konclude
+
+
+For MacOS, the Redland RDF Libraries are currently not integrated/tested, i.e., you may want to use/compile the `KoncludeWithoutRedland.pro` project. The executable can be found under `./release/Konclude.app/Contents/MacOS/Konclude`.
 	
 		
 
@@ -193,3 +198,5 @@ Setting up Konclude for building/compiling with Visual Studio 2015/2017:
 [7] http://www.microsoft.com/en-us/download/details.aspx?id=17718 
 
 [8] https://www.microsoft.com/en-us/download/details.aspx?id=48145
+
+[9] https://github.com/konclude/KoncludeDocker
