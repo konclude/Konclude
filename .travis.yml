@@ -2,13 +2,26 @@ language: cpp
 compiler:
   - clang
   - gcc
-  
+
+addons:
+  apt:
+    sources:
+    # add PPAs with more up-to-date toolchains
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-9
+    packages:
+    # install toolchains
+    - gcc-7
+    - g++-7
+    - clang-9
+
+
 before_install:
- - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
- - sudo apt-get update -qq
- - sudo apt-get install qtbase5-dev
- - sudo apt-get install qt5-default qttools5-dev-tools
+  - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
+  - sudo apt-get update -qq
+  - sudo apt-get install qtbase5-dev
+  - sudo apt-get install qt5-default qttools5-dev-tools
 
 script:
- - qmake KoncludeWithoutRedland.pro
- - make
+  - qmake KoncludeWithoutRedland.pro
+  - make
