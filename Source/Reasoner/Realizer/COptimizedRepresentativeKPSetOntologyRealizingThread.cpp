@@ -1413,7 +1413,7 @@ namespace Konclude {
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkTrivialInstanceConceptRepresentativeCacheBasedMerging(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, CConcept* concept, bool conceptNegation, CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, bool* mergableFlag, bool* unmergableFlag, cint64* mergingOperationLimit) {
-				if (mergingOperationLimit && mergingOperationLimit-- <= 0) {
+				if (mergingOperationLimit && *mergingOperationLimit-- <= 0) {
 					return false;
 				}
 
@@ -1526,7 +1526,7 @@ namespace Konclude {
 								++succCount;
 
 
-								if (mergingOperationLimit-- <= 0) {
+								if (mergingOperationLimit && *mergingOperationLimit-- <= 0) {
 									cancled = true;
 									return false;
 								}
@@ -1575,7 +1575,7 @@ namespace Konclude {
 							}
 
 
-							if (mergingOperationLimit-- <= 0) {
+							if (mergingOperationLimit && *mergingOperationLimit-- <= 0) {
 								cancled = true;
 								return false;
 							}
@@ -1618,7 +1618,7 @@ namespace Konclude {
 									}
 								}
 
-								if (mergingOperationLimit-- <= 0) {
+								if (mergingOperationLimit && *mergingOperationLimit-- <= 0) {
 									cancled = true;
 									return false;
 								}
@@ -1681,7 +1681,7 @@ namespace Konclude {
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkTrivialInstanceConceptCachedCompletionGraphBasedMerging(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, CConcept* concept, bool conceptNegation, CIndividualProcessNode* indiNode, CIndividualProcessNodeVector* indiProcVector, bool* mergableFlag, bool* unmergableFlag, cint64* mergingOperationLimit) {
-				if (mergingOperationLimit && mergingOperationLimit-- <= 0) {
+				if (mergingOperationLimit && *mergingOperationLimit-- <= 0) {
 					return false;
 				}
 
@@ -4095,7 +4095,10 @@ namespace Konclude {
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkFinishSameIndividualProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetIndividualItem* instantiatedItem) {
 				COptimizedRepresentativeKPSetOntologyRealizingItem* realItem = (COptimizedRepresentativeKPSetOntologyRealizingItem*)ontRealItem;
 				if (instantiatedItem) {
-					if (instantiatedItem->isItemSameIndividualMerged() || (!instantiatedItem->hasToProcessPossibleSameIndividualsFlag() && !instantiatedItem->hasPossibleSameIndividualsTesting() && !instantiatedItem->hasPossibleSameIndividuals())) {
+					if (instantiatedItem->isItemSameIndividualMerged()) {
+						instantiatedItem->getItemSameIndividualMerged()->addRequirementProcessingDataLinker(instantiatedItem->takeRequirmentProcessingDataLinkers());
+						return true;
+					} else if (!instantiatedItem->hasPossibleSameIndividualsTesting() && !instantiatedItem->hasPossibleSameIndividuals()) {
 						setDynamicRequirementProcessed(ontRealItem, realItem->getRealizeSameIndividualsProcessingStep(), instantiatedItem->takeRequirmentProcessingDataLinkers());
 						return true;
 					}
@@ -4137,10 +4140,10 @@ namespace Konclude {
 							ontRealItem->logRequirementProcessingFinishStatistics(procData->getStatistics());
 							CCallbackData* callback = callbackData->getProcessingFinishedCallback();
 							callback->doCallback();
-							//delete callbackData;
+							delete callbackData;
 						}
 					}
-					//delete procData;
+					delete procData;
 				}
 				return this;
 			}

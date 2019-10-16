@@ -3447,12 +3447,31 @@ namespace Konclude {
 				bool CCalculationTableauApproximationSaturationTaskHandleAlgorithm::isCriticalALLConceptDescriptorInsufficient(CConceptSaturationDescriptor* conDes, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 					STATINC(SATURATIONCRITICALALLCOUNT,calcAlgContext);
 					if (!indiProcSatNode->hasSubstituteIndividualNode()) {
+						CConcept* concept = conDes->getConcept();
+						bool conceptNegation = conDes->isNegated();
+						CRole* role = concept->getRole();
+
+						if (role->isDataRole() && indiProcSatNode->getIndividualExtensionData(false)) {
+							CLinkedDataValueAssertionSaturationData* linkedDataValueAssertionData = indiProcSatNode->getIndividualExtensionData(false)->getLinkedDataValueAssertionData(false);
+							if (linkedDataValueAssertionData) {
+								for (CXLinker<CRole*>* dataRoleLinkerIt = linkedDataValueAssertionData->getDataValueRoleAssertionLinker(); dataRoleLinkerIt; dataRoleLinkerIt = dataRoleLinkerIt->getNext()) {
+									CRole* assertedDataRole = dataRoleLinkerIt->getData();
+									for (CSortedNegLinker<CRole*>* superAssertedDataRoleIt = assertedDataRole->getIndirectSuperRoleList(); superAssertedDataRoleIt; superAssertedDataRoleIt = superAssertedDataRoleIt->getNext()) {
+										if (!superAssertedDataRoleIt->isNegated()) {
+											CRole* superAssertedDataRole = superAssertedDataRoleIt->getData();
+											if (role == superAssertedDataRole) {
+												return true;
+											}
+										}
+									}
+								}
+							}
+						}
+
+
 						collectLinkedSuccessorNodes(indiProcSatNode,calcAlgContext);
 						CLinkedRoleSaturationSuccessorHash* linkedSuccHash = indiProcSatNode->getLinkedRoleSuccessorHash(false);
 						if (linkedSuccHash) {
-							CConcept* concept = conDes->getConcept();
-							bool conceptNegation = conDes->isNegated();
-							CRole* role = concept->getRole();
 							CPROCESSHASH<CRole*,CLinkedRoleSaturationSuccessorData*>* succHash = linkedSuccHash->getLinkedRoleSuccessorHash();
 							CLinkedRoleSaturationSuccessorData* succData = succHash->value(role);
 							if (succData) {
@@ -3597,7 +3616,32 @@ namespace Konclude {
 					if (allowedCardinality < 0) {
 						return true;
 					}
+
+
+					cint64 foundCardinality = 0;
 					if (!indiProcSatNode->hasSubstituteIndividualNode()) {
+
+						if (role->isDataRole() && indiProcSatNode->getIndividualExtensionData(false)) {
+							CLinkedDataValueAssertionSaturationData* linkedDataValueAssertionData = indiProcSatNode->getIndividualExtensionData(false)->getLinkedDataValueAssertionData(false);
+							if (linkedDataValueAssertionData) {
+								for (CXLinker<CRole*>* dataRoleLinkerIt = linkedDataValueAssertionData->getDataValueRoleAssertionLinker(); dataRoleLinkerIt; dataRoleLinkerIt = dataRoleLinkerIt->getNext()) {
+									CRole* assertedDataRole = dataRoleLinkerIt->getData();
+									for (CSortedNegLinker<CRole*>* superAssertedDataRoleIt = assertedDataRole->getIndirectSuperRoleList(); superAssertedDataRoleIt; superAssertedDataRoleIt = superAssertedDataRoleIt->getNext()) {
+										if (!superAssertedDataRoleIt->isNegated()) {
+											CRole* superAssertedDataRole = superAssertedDataRoleIt->getData();
+											if (role == superAssertedDataRole) {
+												++foundCardinality;
+											}
+										}
+									}
+
+									if (foundCardinality > allowedCardinality) {
+										return true;
+									}
+								}
+							}
+						}
+
 
 						//if (getDebugIndividualConceptName(indiProcSatNode,calcAlgContext) == "http://www.projecthalo.com/aura#Hydrogenated-Margarine") {
 						//	bool debug = true;
@@ -3607,7 +3651,6 @@ namespace Konclude {
 						CLinkedRoleSaturationSuccessorHash* linkedSuccHash = indiProcSatNode->getLinkedRoleSuccessorHash(false);
 						if (linkedSuccHash) {
 
-							cint64 foundCardinality = 0;
 							cint64 minCardinality = 0;
 							CIndividualSaturationSuccessorLinkDataLinker* mergingSuccDataLinker = nullptr;
 
@@ -3619,7 +3662,7 @@ namespace Konclude {
 									CIndividualSaturationProcessNode* lastSuccessorNode = nullptr;
 									CXNegLinker<CRole*>* lastSuccessorCreationRoleLinker = nullptr;
 
-									foundCardinality = collectATMOSTConceptRelevantSuccessors(conDes,indiProcSatNode,succData,mergingSuccDataLinker,lastSuccessorNode,lastSuccessorCreationRoleLinker,minCardinality,calcAlgContext);
+									foundCardinality += collectATMOSTConceptRelevantSuccessors(conDes,indiProcSatNode,succData,mergingSuccDataLinker,lastSuccessorNode,lastSuccessorCreationRoleLinker,minCardinality,calcAlgContext);
 
 
 									cint64 mergeableCardinality = 0;
@@ -5185,7 +5228,7 @@ namespace Konclude {
 							if (!rangeIndiConSet) {
 								rangeIndiConSet = dataValueIndiNode->getReapplyConceptSaturationLabelSet(true);
 							}
-							addConceptFilteredToIndividual(rangeConcept, rangeConceptNegation, processIndi, rangeIndiConSet, false, mCalcAlgContext);
+							addConceptFilteredToIndividual(rangeConcept, rangeConceptNegation, dataValueIndiNode, rangeIndiConSet, false, mCalcAlgContext);
 						}
 
 						if (superRoleIt->isNegated()) {

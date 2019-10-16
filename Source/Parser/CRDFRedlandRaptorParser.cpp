@@ -166,7 +166,24 @@ namespace Konclude {
 			}
 			return 0;
 		}
+
+
+		void raptor_log_handler_error_notifier(void *user_data, raptor_log_message *message) {
+			QString** raptorParsingErrorString = (QString**)user_data;
+			if (message->level >= RAPTOR_LOG_LEVEL_ERROR && *raptorParsingErrorString == nullptr) {
+				*raptorParsingErrorString = new QString(QString("%1").arg(message->text));
+			}
+		}
 		
+
+		QString CRDFRedlandRaptorParser::getErrorString() {
+			return mErrorString;
+		}
+
+		bool CRDFRedlandRaptorParser::hasError() {
+			return mParsingError;
+		}
+
 
 		bool CRDFRedlandRaptorParser::parseTriples(QIODevice* ioDevice, const QString& baseUriString) {
 			raptor_iostream_handler qioDeviceIOStreamHandler;
@@ -181,6 +198,11 @@ namespace Konclude {
 
 			CRedlandStoredTriplesData* tripleData = getUpdatingTripleData();
 			raptor_world* raptor_world_ptr = librdf_world_get_raptor(tripleData->getRedlandWorld());
+
+
+			QString* raptorParsingErrorString = nullptr;
+			raptor_world_set_log_handler(raptor_world_ptr, &raptorParsingErrorString, &raptor_log_handler_error_notifier);
+
 			raptor_iostream* raptor_stream = raptor_new_iostream_from_handler(raptor_world_ptr, ioDevice, &qioDeviceIOStreamHandler);
 
 
@@ -192,6 +214,7 @@ namespace Konclude {
 			const char* parser_name = mRedlandParsingFormatByteArray.constData();
 			librdf_parser* parser = librdf_new_parser(tripleData->getRedlandWorld(), parser_name, NULL, NULL);
 			if (!parser) {
+				mErrorString = QString("Failed to create parser");
 				mParsingError = true;
 			}
 
@@ -204,6 +227,7 @@ namespace Konclude {
 			if (parser && raptor_stream) {
 				tripleStream = librdf_parser_parse_iostream_as_stream(parser, raptor_stream, baseUri);
 				if (!tripleStream) {
+					mErrorString = QString("Failed to load data stream");
 					mParsingError = true;
 				}
 
@@ -239,6 +263,13 @@ namespace Konclude {
 				}
 				librdf_free_node(critPredicate);
 				tripleData->setRedlandStatementLinker(statementLinker);
+			}
+
+			if (raptorParsingErrorString) {
+				mParsingError = true;
+				mErrorString = *raptorParsingErrorString;
+				delete raptorParsingErrorString;
+				raptorParsingErrorString = nullptr;
 			}
 
 

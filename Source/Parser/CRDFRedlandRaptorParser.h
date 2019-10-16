@@ -83,6 +83,12 @@ namespace Konclude {
 				virtual bool parseTriplesFile(const QString& filename);
 				virtual bool parseTriples(QIODevice* ioDevice, const QString& baseUri);
 
+
+				QString getErrorString();
+				bool hasError();
+
+
+
 			// protected methods
 			protected:
 				CRedlandStoredTriplesData* getUpdatingTripleData();
@@ -94,6 +100,9 @@ namespace Konclude {
 
 				COntologyBuilder* mOntologyBuilder;
 				bool mParsingError = false;
+				QString mErrorString;
+
+
 				QString mRedlandParsingFormat;
 
 				bool mConfLoadTriplesIntoStore;

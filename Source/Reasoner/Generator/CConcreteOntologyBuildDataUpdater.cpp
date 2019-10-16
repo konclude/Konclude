@@ -2970,7 +2970,7 @@ namespace Konclude {
 				if (individualName.startsWith("_:")) {
 					useIndividualName = individualName.mid(2);
 				}
-				QPair<CStringRefStringHasher,CStringRefStringHasher> namePair(ontologyName,individualName);
+				QPair<CStringRefStringHasher,CStringRefStringHasher> namePair(ontologyName, useIndividualName);
 				expression = mAnoIndividualBuildHash->value(namePair);
 				if (!expression) {
 					QString ontologyNameString(ontologyName.toString());

@@ -42,6 +42,8 @@ namespace Konclude {
 				}
 			}
 
+			COntologyRealizingDynamicRequirmentProcessingData::~COntologyRealizingDynamicRequirmentProcessingData() {
+			}
 
 			COntologyRealizingDynamicRequirmentProcessingData* COntologyRealizingDynamicRequirmentProcessingData::incProcessingItemCount(CRealizingTestingStep* realizingStep, cint64 incCount) {
 				mProcessingItemCount += incCount;

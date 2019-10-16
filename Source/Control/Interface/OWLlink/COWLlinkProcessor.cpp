@@ -169,7 +169,7 @@ namespace Konclude {
 							parsingSucceeded = true;
 							LOG(INFO, getLogDomain(), logTr("Finished %1 parsing of '%2' with Redland Raptor.").arg(formatName).arg(resolvedIRI), this);
 						} else {
-							parserErrorList.append(QString("Failed %1 parsing of '%2' with Redland Raptor '%3'.").arg(formatName).arg(resolvedIRI));
+							parserErrorList.append(QString("%1 parsing of '%2' with Redland Raptor failed due to error '%3'.").arg(formatName).arg(resolvedIRI).arg(owl2Parser->getErrorString()));
 						}
 						device->close();
 					} else {

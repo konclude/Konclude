@@ -69,6 +69,8 @@ namespace Konclude {
 					//! Constructor
 					COntologyRealizingDynamicRequirmentProcessingData(COntologyProcessingRequirement* procReq = nullptr, COntologyRealizingDynamicRequirmentCallbackData* callback = nullptr);
 
+					~COntologyRealizingDynamicRequirmentProcessingData();
+
 					COntologyRealizingDynamicRequirmentProcessingData* incProcessingItemCount(CRealizingTestingStep* realizingStep, cint64 incCount = 1);
 					COntologyRealizingDynamicRequirmentProcessingData* decProcessingItemCount(CRealizingTestingStep* realizingStep, cint64 decCount = 1);
 					

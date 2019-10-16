@@ -26,7 +26,6 @@ namespace Konclude {
 	namespace Parser {
 
 
-
 		COWL2QtXMLOntologyStableStreamParser::COWL2QtXMLOntologyStableStreamParser(COntologyBuilder* ontologyBuilder) : COWL2QtXMLOntologyStreamParser(ontologyBuilder) {
 			mReadBufferSize = 10000;
 			mReadBuffer = new char[mReadBufferSize];
@@ -41,13 +40,12 @@ namespace Konclude {
 
 		bool COWL2QtXMLOntologyStableStreamParser::addMoreDataToXMLReader(QXmlStreamReader* xmlReader, QIODevice* ioDevice) {
 			if (!ioDevice->atEnd()) {
-
 				cint64 remainTmpSize = 10;
 				cint64 readDataSize = ioDevice->read(mReadBuffer,mReadBufferSize-remainTmpSize);
 				mReadBuffer[readDataSize] = 0;
 				bool usesUnicodeChars = false;
 				if (readDataSize > 0) {
-					while (!ioDevice->atEnd() && mReadBuffer[readDataSize-1] > 127 && remainTmpSize > 0) {
+					while (!ioDevice->atEnd() && mReadBuffer[readDataSize-1] < 0 && remainTmpSize > 0) {
 						--remainTmpSize;
 						usesUnicodeChars = true;
 						cint64 newReadSize = ioDevice->read(&mReadBuffer[readDataSize],1);
@@ -58,7 +56,7 @@ namespace Konclude {
 
 				if (!usesUnicodeChars) {
 					for (cint64 i = 0; !usesUnicodeChars && i < readDataSize; ++i) {
-						if (mReadBuffer[readDataSize] > 127) {
+						if (mReadBuffer[i] < 0) {
 							usesUnicodeChars = true;
 						}
 					}
@@ -88,7 +86,7 @@ namespace Konclude {
 				} else if (token == QXmlStreamReader::StartElement) {
 					mOWLXMLStreamHandler->startElement(xmlReader.namespaceUri(),xmlReader.name(),xmlReader.qualifiedName(),xmlReader.attributes());
 				} else if (token == QXmlStreamReader::EndElement) {
-					mOWLXMLStreamHandler->endElement(xmlReader.namespaceUri(),xmlReader.name(),xmlReader.qualifiedName());
+					mOWLXMLStreamHandler->endElement(xmlReader.namespaceUri(), xmlReader.name(), xmlReader.qualifiedName());
 				} else if (token == QXmlStreamReader::Characters) {
 					mOWLXMLStreamHandler->readText(xmlReader.text());
 				} else if (token == QXmlStreamReader::StartDocument) {

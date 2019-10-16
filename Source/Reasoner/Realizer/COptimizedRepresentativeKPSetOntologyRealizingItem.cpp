@@ -1110,7 +1110,7 @@ namespace Konclude {
 						item->setToProcessPossibleInstancesFlag(true);
 						item->setToInitializeCandidatesFlag(true);
 						if (procData && (item->hasPossibleInstances() || item->hasComplexInstanceCandidates())) {
-							procData->incProcessingItemCount(mRealizeConceptProcessingStep);
+							procData->incProcessingItemCount(mRealizeRoleProcessingStep);
 							item->addRequirementProcessingDataLinker(createRequirementProcessingDataLinker(procData));
 							roleItemQueued = true;
 						}
@@ -1131,7 +1131,10 @@ namespace Konclude {
 				}
 
 				if (roleItemQueued || isAllRoleInstancesProcessing() && !getRealizeRoleProcessingStep()->isStepFinished()) {
-					procData->setAssociatedRelizationTestingStep(mRealizeConceptProcessingStep);
+					if (!roleItemQueued || isAllRoleInstancesProcessing()) {
+						procData->incProcessingItemCount(mRealizeRoleProcessingStep);
+					}
+					procData->setAssociatedRelizationTestingStep(mRealizeRoleProcessingStep);
 					getRealizeRoleProcessingStep()->addRequirementProcessingData(procData);
 				}
 
@@ -1516,6 +1519,9 @@ namespace Konclude {
 
 
 				if (conceptItemQueued || isAllConceptInstancesProcessing() && !getRealizeConceptProcessingStep()->isStepFinished()) {
+					if (!conceptItemQueued || isAllConceptInstancesProcessing()) {
+						procData->incProcessingItemCount(mRealizeConceptProcessingStep);
+					}
 					procData->setAssociatedRelizationTestingStep(mRealizeConceptProcessingStep);
 					getRealizeConceptProcessingStep()->addRequirementProcessingData(procData);
 				}
@@ -1532,7 +1538,7 @@ namespace Konclude {
 						if (!indiItem->hasToProcessPossibleSameIndividualsFlag()) {
 							indiItem->setToProcessPossibleSameIndividualsFlag(true);
 							if (indiItem->hasPossibleSameIndividuals()) {
-								procData->incProcessingItemCount(mRealizeConceptProcessingStep);
+								procData->incProcessingItemCount(mRealizeSameIndividualsProcessingStep);
 								indiItem->addRequirementProcessingDataLinker(createRequirementProcessingDataLinker(procData));
 								itemQueued = true;
 							}
@@ -1547,7 +1553,7 @@ namespace Konclude {
 						if (!indiItem->hasToProcessPossibleSameIndividualsFlag()) {
 							indiItem->setToProcessPossibleSameIndividualsFlag(true);
 							if (procData && indiItem->hasPossibleSameIndividuals()) {
-								procData->incProcessingItemCount(mRealizeConceptProcessingStep);
+								procData->incProcessingItemCount(mRealizeSameIndividualsProcessingStep);
 								indiItem->addRequirementProcessingDataLinker(createRequirementProcessingDataLinker(procData));
 								itemQueued = true;
 							}
@@ -1557,7 +1563,10 @@ namespace Konclude {
 				}
 
 				if (itemQueued || isAllSameIndividualsProcessing() && !getRealizeSameIndividualsProcessingStep()->isStepFinished()) {
-					procData->setAssociatedRelizationTestingStep(mRealizeConceptProcessingStep);
+					if (!itemQueued || isAllSameIndividualsProcessing()) {
+						procData->incProcessingItemCount(mRealizeSameIndividualsProcessingStep);
+					}
+					procData->setAssociatedRelizationTestingStep(mRealizeSameIndividualsProcessingStep);
 					getRealizeSameIndividualsProcessingStep()->addRequirementProcessingData(procData);
 				}
 

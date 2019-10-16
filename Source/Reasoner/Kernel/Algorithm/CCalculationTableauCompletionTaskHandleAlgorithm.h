@@ -1240,7 +1240,7 @@ namespace Konclude {
 						bool mConfDebuggingWriteDataForRepCacheIndiComputationTests;
 						bool mConfDebuggingWriteDataForAnsweringPropagationTests;
 						bool mConfDebuggingWriteDataForAllTests;
-						bool mDebug;
+						bool mDebug = false;
 						bool mBacktrackDebug;
 
 						bool mConfBranchingStatisticsAnalysing;

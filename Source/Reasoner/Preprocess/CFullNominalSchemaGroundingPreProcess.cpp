@@ -81,12 +81,14 @@ namespace Konclude {
 						// TODO: only active individuals
 						for (cint64 i = 0; i < mIndividualCount; ++i) {
 							CIndividual* individual = mIndividualVector->getData(i);
-							for (CConceptAssertionLinker* assConLinkerIt = individual->getAssertionConceptLinker(); assConLinkerIt; assConLinkerIt = assConLinkerIt->getNext()) {
-								CConcept* assCon = assConLinkerIt->getData();
-								bool assConNegation = assConLinkerIt->isNegated();
-								cint64 assConOpCode = assCon->getOperatorCode();
-								if (!assConNegation && assConOpCode == CCNOMINAL) {
-									mNominalConceptSet.insert(assCon);
+							if (individual) {
+								for (CConceptAssertionLinker* assConLinkerIt = individual->getAssertionConceptLinker(); assConLinkerIt; assConLinkerIt = assConLinkerIt->getNext()) {
+									CConcept* assCon = assConLinkerIt->getData();
+									bool assConNegation = assConLinkerIt->isNegated();
+									cint64 assConOpCode = assCon->getOperatorCode();
+									if (!assConNegation && assConOpCode == CCNOMINAL) {
+										mNominalConceptSet.insert(assCon);
+									}
 								}
 							}
 						}

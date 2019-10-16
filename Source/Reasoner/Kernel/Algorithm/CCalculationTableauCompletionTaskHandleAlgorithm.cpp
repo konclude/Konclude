@@ -454,7 +454,6 @@ namespace Konclude {
 					mBacktrackingStep = 0;
 
 					mFoundCriticalConceptSet = false;
-					mDebug = false;
 					mBacktrackDebug = true;
 
 					mNominalMerged = false;
@@ -1136,9 +1135,42 @@ namespace Konclude {
 						//	xDebug = true;
 						//}
 
+						bool sDebug = false;
+						//if (satCalcTask->getClassificationMessageAdapter()) {
+						//	CIndividualProcessNode* node = getUpToDateIndividual(calcAlgContext->getProcessingDataBox()->getConstructedIndividualNode(), calcAlgContext);
+						//	CIndividualMergingHash* mergingHash = node->getIndividualMergingHash(false);
+						//	if (mergingHash) {
+						//		bool slected = true;
+						//		for (CIndividualMergingHash::const_iterator it = mergingHash->constBegin(), itEnd = mergingHash->constEnd(); it != itEnd && slected; ++it) {
+						//			cint64 mergedIndi = it.key();
+						//			CIndividualProcessNode* mergedNode = getUpToDateIndividual(-mergedIndi, calcAlgContext);
+						//			if (mergedNode && mergedNode->getNominalIndividual()) {
+						//				QString mergedIndiName = CIRIName::getRecentIRIName(mergedNode->getNominalIndividual()->getNameLinker());
+						//				if (mergedIndiName != "http://www.semanticweb.org/ontologies/2010/9/Ontology1288387737869.owl#Ind350399375764604218" && mergedIndiName != "http://www.semanticweb.org/ontologies/2010/9/Ontology1288387737869.owl#Ind968776124155655128" && mergedIndiName != "http://www.semanticweb.org/ontologies/2010/9/Ontology1288387737869.owl#Swede") {
+						//					slected = false;
+						//				}
+						//			}
+						//		}
+						//		if (slected) {
+						//			bool otherNodesMerged = false;
+						//			for (cint64 i = 0; i < 130 && !otherNodesMerged; ++i) {
+						//				CIndividualProcessNode* checkNode = getUpToDateIndividual(i, calcAlgContext);
+						//				if (checkNode) {
+						//					if (node->getIndividualNodeID() != i && checkNode->getMergedIntoIndividualNodeID() == node->getIndividualNodeID()) {
+						//						otherNodesMerged = true;
+						//					}
+						//				}
+						//			}
+						//			if (!otherNodesMerged) {
+						//				sDebug = true;
+						//			}
+						//		}
+						//	}
+						//}
 
 
-						if (xDebug || mConfDebuggingWriteData && mConfDebuggingWriteDataComplationTasks) {
+
+						if (mDebug && sDebug || xDebug || mConfDebuggingWriteData && mConfDebuggingWriteDataComplationTasks) {
 
 							CSatisfiableTaskClassificationMessageAdapter* classificationAdapter = satCalcTask->getClassificationMessageAdapter();
 							CTaskPreyingAdapter* consistencyAdapter = satCalcTask->getConsistenceAdapter();
@@ -1146,7 +1178,7 @@ namespace Konclude {
 							QString writingFolder = "./Debugging/CompletionTasks/";
 							QString specializedWritingFileName;
 
-							bool writeDebuggingData = xDebug;
+							bool writeDebuggingData = xDebug || mDebug;
 							if (classificationAdapter && (mConfDebuggingWriteDataForClassificationTests || mConfDebuggingWriteDataForAllTests) && (!mConfDebuggingWriteDataOnlyOnSatisfiability || satisfiable)) {
 								writeDebuggingData = true;
 
@@ -13789,11 +13821,11 @@ namespace Konclude {
 					CDependencyTrackPoint* depTrackPoint = conProDes->getDependencyTrackPoint();
 
 
-					if (indi && !negate) {
+					if (indi) {
 						// check whether there is already a suitable neighbour node in the cache
 						bool hasAppropriateNominalConnection = checkBackendCachedNominalConnection(processIndi, role, indi->getIndividualID(), calcAlgContext);
 
-						if (hasAppropriateNominalConnection) {
+						if (hasAppropriateNominalConnection && !negate) {
 							markIndividualNodeBackendNonConceptSetRelatedProcessing(processIndi, calcAlgContext);
 							return;
 						}

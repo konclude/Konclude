@@ -1294,6 +1294,7 @@ namespace Konclude {
 					QSet<CIndividual*>* activeIndiSet = totallyPreCompItem->getOntology()->getABox()->getActiveIndividualSet(false);
 					QSet<TConceptNegPair> assConNegPairSet;
 					QSet<CRole*> assRoleSet;
+					QSet<CRole*> dataRoleSet;
 					bool createAllAssertionIndi = false;
 					if (indiVec) {
 						cint64 indiCount = indiVec->getItemCount();
@@ -1317,6 +1318,10 @@ namespace Konclude {
 									CRole* role = roleAssLinkIt->getRole();
 									assRoleSet.insert(role);
 								}
+								for (CDataAssertionLinker* dataAssLinkIt = indi->getAssertionDataLinker(); dataAssLinkIt; dataAssLinkIt = dataAssLinkIt->getNext()) {
+									CRole* role = dataAssLinkIt->getRole();		
+									dataRoleSet.insert(role);
+								}
 
 							}
 						}
@@ -1332,21 +1337,26 @@ namespace Konclude {
 							CTriplesAssertedRolesExtendingSetVisitor assertedRolesVisitor(&assRoleSet);
 							assertionAccessor->visitAllAssertedObjectRoles(&assertedRolesVisitor);
 
-							QSet<CRole*> dataRoleSet;
 							CTriplesAssertedRolesExtendingSetVisitor assertedDataRolesVisitor(&dataRoleSet);
 							assertionAccessor->visitAllAssertedDataRoles(&assertedDataRolesVisitor);
-							for (CRole* dataRole : dataRoleSet) {
-								for (CSortedNegLinker<CRole*>* superDataRoleIt = dataRole->getIndirectSuperRoleList(); superDataRoleIt; superDataRoleIt = superDataRoleIt->getNext()) {
-									CRole* superDataRole = superDataRoleIt->getData();
-									for (CSortedNegLinker<CConcept*>* domainConLinkerIt = superDataRole->getDomainRangeConceptList(superDataRoleIt->isNegated()); domainConLinkerIt; domainConLinkerIt = domainConLinkerIt->getNext()) {
-										CConcept* domainCon = domainConLinkerIt->getData();
-										bool domainConNegation = domainConLinkerIt->isNegated();
-										assConNegPairSet.insert(TConceptNegPair(domainCon, domainConNegation));
-									}
+						}
+					}
+
+					if (!dataRoleSet.isEmpty()) {
+						for (CRole* dataRole : dataRoleSet) {
+							for (CSortedNegLinker<CRole*>* superDataRoleIt = dataRole->getIndirectSuperRoleList(); superDataRoleIt; superDataRoleIt = superDataRoleIt->getNext()) {
+								CRole* superDataRole = superDataRoleIt->getData();
+								for (CSortedNegLinker<CConcept*>* domainConLinkerIt = superDataRole->getDomainRangeConceptList(superDataRoleIt->isNegated()); domainConLinkerIt; domainConLinkerIt = domainConLinkerIt->getNext()) {
+									CConcept* domainCon = domainConLinkerIt->getData();
+									bool domainConNegation = domainConLinkerIt->isNegated();
+									assConNegPairSet.insert(TConceptNegPair(domainCon, domainConNegation));
 								}
 							}
 						}
+						totallyPreCompItem->setAllAssertionIndividualSufficientSaturationChecked(true);
+						totallyPreCompItem->setAllAssertionIndividualSaturationSufficient(false);
 					}
+
 
 
 
