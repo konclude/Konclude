@@ -8,12 +8,10 @@ addons:
     sources:
     # add PPAs with more up-to-date toolchains
     - ubuntu-toolchain-r-test
-    - llvm-toolchain-precise-9
     packages:
     # install toolchains
     - gcc-7
     - g++-7
-    - clang-9
 
 
 before_install:
