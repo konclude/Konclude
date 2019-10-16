@@ -1,4 +1,5 @@
-https://travis-ci.com/konclude/Konclude.svg?branch=master
+[![Build Status](https://travis-ci.com/konclude/Konclude.svg?branch=master)](https://travis-ci.com/konclude/Konclude)
+
 
 # OVERVIEW
 
