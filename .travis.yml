@@ -14,6 +14,7 @@ matrix:
       env:
         - COMPILER=g++-7
         - COMP=gcc
+        - OS=linux
 
 
 before_install:
@@ -22,11 +23,11 @@ before_install:
   
 install:
   # C++17
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository -y ppa:beineri/opt-qt-5.12.3-xenial; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get -qy update; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq g++-7 gcc-7; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90; fi  
+  - if [[ "$OS" == "linux" ]]; then sudo add-apt-repository -y ppa:beineri/opt-qt-5.12.3-xenial; fi
+  - if [[ "$OS" == "linux" ]]; then sudo apt-get -qy update; fi
+  - if [[ "$OS" == "linux" ]]; then sudo apt-get install -qq g++-7 gcc-7; fi
+  - if [[ "$OS" == "linux" ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 90; fi
+  - if [[ "$OS" == "linux" ]]; then sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 90; fi  
 
 script:
   - echo `gcc --version`
