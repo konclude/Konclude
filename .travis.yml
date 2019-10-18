@@ -80,4 +80,4 @@ script:
   - echo `gcc --version`
   - echo `qmake --version`
   - qmake KoncludeWithoutRedland.pro
-  - make -j 3
+  - make -j 2
