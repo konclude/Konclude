@@ -228,6 +228,11 @@ namespace Konclude {
 					CSaturationNodeAssociatedExpansionCacheReader* mSatNodeExpCacheReader;
 
 
+					bool unsatComputed = false;
+					cint64 unsatCount = 0;
+					cint64 satCount = 0;
+
+
 				// private methods
 				private:
 

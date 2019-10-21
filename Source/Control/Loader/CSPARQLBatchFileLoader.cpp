@@ -178,6 +178,9 @@ namespace Konclude {
 
 					} else {
 						LOG(ERROR,getLogDomain(),logTr("SPARQL request file '%1' not found.").arg(reqFileString),this);
+						// seems to be required to preventing crashes
+						// TODO: fix 
+						this->usleep(200);
 						concludeOWLlinkContent();
 					}
 				}	

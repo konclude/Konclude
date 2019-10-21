@@ -55,16 +55,16 @@ namespace Konclude {
 					CClassificationProgress();
 
 					qint64 getClassificationCount();
-					qint64 getTestedClasses();
-					qint64 getTotalClasses();
+					qint64 getTestedSatisfiable();
+					qint64 getTotalSatisfiable();
 					qint64 getTestedSubsumptions();
 					qint64 getTotalSubsumptions();
 					double getRemainingMilliSeconds();
 					double getProgessPercent();
 
 					CClassificationProgress *setClassificationCount(qint64 classificationCount);
-					CClassificationProgress *setTestedClasses(qint64 testedClasses);
-					CClassificationProgress *setTotalClasses(qint64 totalClasses);
+					CClassificationProgress *setTestedSatisfiable(qint64 testedClasses);
+					CClassificationProgress *setTotalSatisfiable(qint64 totalClasses);
 					CClassificationProgress *setTestedSubsumptions(qint64 testedSubsumptions);
 					CClassificationProgress *setTotalSubsumptions(qint64 totalSubsumptions);
 					CClassificationProgress *setRemainingMilliSeconds(double remainingMilliSeconds);

@@ -278,7 +278,8 @@ namespace Konclude {
 
 
 
-				CRulePropertyAtomTermExpression* parseRuleObjectPropertyAtomNode(CStreamParseStackObject* parseStackObj);
+				CRuleAtomTermExpression* parseRuleObjectPropertyAtomNode(CStreamParseStackObject* parseStackObj);
+				CRuleAtomTermExpression* parseRuleDataPropertyAtomNode(CStreamParseStackObject* parseStackObj);
 				CRuleClassAtomTermExpression* parseRuleClassAtomNode(CStreamParseStackObject* parseStackObj);
 				CRuleAtomListBodyExpression* parseRuleAtomBodyNode(CStreamParseStackObject* parseStackObj);
 				CRuleAtomListHeadExpression* parseRuleAtomHeadNode(CStreamParseStackObject* parseStackObj);
@@ -316,7 +317,8 @@ namespace Konclude {
 				void jumpFunctionOntologyNode(CStreamParseStackObject* parseStackObj);
 
 				void jumpFunctionParseRuleNode(CStreamParseStackObject* parseStackObj);
-				void jumpFunctionParseRulePropertyAtomNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseRuleObjectPropertyAtomNode(CStreamParseStackObject* parseStackObj);
+				void jumpFunctionParseRuleDataPropertyAtomNode(CStreamParseStackObject* parseStackObj);
 				void jumpFunctionParseRuleClassAtomNode(CStreamParseStackObject* parseStackObj);
 				void jumpFunctionParseDifferentIndividualsAtomNode(CStreamParseStackObject* parseStackObj);
 			

@@ -74,12 +74,12 @@ namespace Konclude {
 
 			void COptimizedRepresentativeKPSetOntologyRealizingThread::readCalculationConfig(CConfigurationBase *config) {
 				if (config) {
-					mConfPossibleInstanceConceptsUpfrontMerging = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceConceptsUpfrontMerging", true);
-					mConfPossibleInstanceIndividualsAfterwardsMerging = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMerging", true);
-					mConfPossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel", false);
-					mAlternateShufflePossibleConceptInstanceTestingItemsOnCalculations = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.AlternatePossibleConceptInstanceTestingItemsOnCalculations", true);
-					mConfPossibleInstanceIndividualsAfterwardsMergingProvidingCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingProvidingCount", -1);
-					mConfPossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount", 3);
+					mConfPossibleInstanceConceptsUpfrontMerging = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceConceptsUpfrontMerging", true);
+					mConfPossibleInstanceIndividualsAfterwardsMerging = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMerging", true);
+					mConfPossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingOnlyWithSameRepresentativeLabel", false);
+					mAlternateShufflePossibleConceptInstanceTestingItemsOnCalculations = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.AlternatePossibleConceptInstanceTestingItemsOnCalculations", true);
+					mConfPossibleInstanceIndividualsAfterwardsMergingProvidingCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingProvidingCount", -1);
+					mConfPossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount", 3);
 
 					mConfNonDeterministicSatisfiableCalculationContinuation = CConfigDataReader::readConfigBoolean(config, "Konclude.Calculation.Realization.NonDeterministicCachedCompletionGraphContinuationPropagationTests", true);
 
@@ -99,10 +99,10 @@ namespace Konclude {
 					}
 
 					bool mulConfigErrorFlag = false;
-					cint64 multiplicator = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount",1,&mulConfigErrorFlag);
+					cint64 multiplicator = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount",1,&mulConfigErrorFlag);
 					mConfMaxTestParallelCount = processorCount*multiplicator;
 					bool maxConfigErrorFlag = false;
-					cint64 maxParallel = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Realization.COptimizedKPSetOntologyConceptRealizer.MaximumParallelTestingCalculationCount",1,&maxConfigErrorFlag);
+					cint64 maxParallel = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.MaximumParallelTestingCalculationCount",1,&maxConfigErrorFlag);
 					if (!maxConfigErrorFlag) {
 						if (!mulConfigErrorFlag) {
 							mConfMaxTestParallelCount = qMin(mConfMaxTestParallelCount,maxParallel);
@@ -1954,7 +1954,6 @@ namespace Konclude {
 							}
 						}
 
-
 						if (indiProcVector) {
 							CIndividualProcessNode* baseIndiProcNode = indiProcVector->getData(indiID);
 							CIndividualProcessNode* indiProcNode = baseIndiProcNode;
@@ -1976,7 +1975,7 @@ namespace Konclude {
 									if (mergeable) {
 										isInstance = false;
 									}
-									if (unmergeable) {
+									if (unmergeable && !nondeterministicallyMergedFlag) {
 										isInstance = true;
 									}
 									return true;
@@ -2346,6 +2345,8 @@ namespace Konclude {
 					CSatisfiableCalculationJobGenerator satCalcJobGen(reqConfPreCompItem->getTemporaryRoleRealizationOntology());
 					for (QList<CIndividualRoleCandidateTestingData>::const_iterator it = indiRoleCandTestDataList.constBegin(), itEnd = indiRoleCandTestDataList.constEnd(); it != itEnd; ++it) {
 						CIndividualRoleCandidateTestingData indiRoleCandTestData(*it);
+						COptimizedKPSetRoleInstancesItem* realItem = indiRoleCandTestData.getRoleInstancesItem();
+						realItem->incTestingInitializationPropagationCount();
 						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(indiRoleCandTestData.getPropagationConcept(), false, indiRef, satCalcJob);
 					}
 
@@ -2787,6 +2788,7 @@ namespace Konclude {
 				CRealizationIndividualInstanceItemReference item2Ref = candidatePair.second;
 
 				reqConfPreCompItem->incTestingRoleInstanceCandidatesCount();
+				roleInstancesItem->incTestingComplexCandidateInstancesCount();
 
 
 				COptimizedKPSetIndividualComplexRoleData* indiComplexData = roleInstancesItem->getIndividualIdComplexRoleData(item1Ref.getIndividualID(), true);
@@ -3200,6 +3202,7 @@ namespace Konclude {
 										if (!nextCandidateConfirmationRoleItem->hasComplexInstanceCandidates()) {
 											candidateConfirmationRoleInstancesItemList->removeFirst();
 										}
+										checkFinishRoleInstancesProcessing(reqConfPreCompItem, nextCandidateConfirmationRoleItem);
 									}
 								}
 
@@ -3234,6 +3237,7 @@ namespace Konclude {
 										if (nextInitializingItem->isCandidateSuccessorInitializationCompleted()) {
 											initializingInstancesItemList->removeFirst();
 										}
+										checkFinishRoleInstancesProcessing(reqConfPreCompItem, nextInitializingItem);
 									}
 								} 
 
@@ -3439,6 +3443,7 @@ namespace Konclude {
 											processingInstancesItemList->removeFirst();
 											nextProcessingItem->setPossibleInstancesProcessingQueuedFlag(false);
 										}
+										checkFinishRoleInstancesProcessing(reqConfPreCompItem, nextProcessingItem);
 									}
 
 								} 
@@ -3892,12 +3897,15 @@ namespace Konclude {
 
 						COptimizedKPSetRoleInstancesItem* roleInstancesItem = indiRoleCandConfTestItem->getRoleInstancesItem();
 						if (roleInstancesItem) {
+							roleInstancesItem->decTestingComplexCandidateInstancesCount();
 							COptimizedKPSetIndividualComplexRoleData* indiComplexData = roleInstancesItem->getIndividualIdComplexRoleData(sourceIndividualItemReference.getIndividualID(), true);
 							COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)indiComplexData;
 
 							COptimizedKPSetRoleInstancesData* instanceData = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstanceItemData(false, targetIndividualItemReference.getIndividualID(), true);
 							instanceData->mKnownInstance = isIndividualInstance;
 							instanceData->mTestedInstance = true;
+
+							checkFinishRoleInstancesProcessing(ontPreCompItem, roleInstancesItem);
 						}
 
 						delete indiRoleCandConfTestItem;
@@ -3933,6 +3941,10 @@ namespace Konclude {
 								indiExplicitIndirectLinkComplexRepresentationData->mRoleSuccessorInstancesInitialized = true;
 							}
 
+							COptimizedKPSetRoleInstancesItem* roleInstancesItem = indiRoleCandTestData.getRoleInstancesItem();
+							if (roleInstancesItem) {
+								checkFinishRoleInstancesProcessing(ontPreCompItem, roleInstancesItem);
+							}
 						}
 
 						if (individualItem) {
@@ -3984,6 +3996,10 @@ namespace Konclude {
 						delete indiConInstTestItem;
 						processed = true;
 
+
+						checkFinishConceptInstancesProcessing(ontPreCompItem, instancesItem);
+
+
 						if (procData) {
 							setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeConceptProcessingStep(), procData);
 						}
@@ -4032,6 +4048,8 @@ namespace Konclude {
 
 						delete indiPairRoleInstTestItem;
 						processed = true;
+
+						checkFinishRoleInstancesProcessing(ontPreCompItem, instancesItem);
 
 						if (procData) {
 							setDynamicRequirementProcessed(ontPreCompItem, reqConfPreCompItem->getRealizeRoleProcessingStep(), procData);
@@ -4097,6 +4115,7 @@ namespace Konclude {
 				if (instantiatedItem) {
 					if (instantiatedItem->isItemSameIndividualMerged()) {
 						instantiatedItem->getItemSameIndividualMerged()->addRequirementProcessingDataLinker(instantiatedItem->takeRequirmentProcessingDataLinkers());
+						checkFinishSameIndividualProcessing(ontRealItem, instantiatedItem->getItemSameIndividualMerged());
 						return true;
 					} else if (!instantiatedItem->hasPossibleSameIndividualsTesting() && !instantiatedItem->hasPossibleSameIndividuals()) {
 						setDynamicRequirementProcessed(ontRealItem, realItem->getRealizeSameIndividualsProcessingStep(), instantiatedItem->takeRequirmentProcessingDataLinkers());
@@ -4110,9 +4129,20 @@ namespace Konclude {
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkFinishConceptInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetConceptInstancesItem* conceptItem) {
 				COptimizedRepresentativeKPSetOntologyRealizingItem* realItem = (COptimizedRepresentativeKPSetOntologyRealizingItem*)ontRealItem;
 				if (conceptItem) {
-					if (!conceptItem->hasPossibleInstances() && !conceptItem->hasTestingPossibleInstances() && !conceptItem->hasPossibleInstances()) {
+					if (!conceptItem->hasPossibleInstances() && !conceptItem->hasTestingPossibleInstances()) {
 						conceptItem->setConceptInstancesTestingFinished(true);
 						setDynamicRequirementProcessed(ontRealItem, realItem->getRealizeConceptProcessingStep(), conceptItem->takeRequirmentProcessingDataLinkers());
+						return true;
+					}
+				}
+				return false;
+			}
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingThread::checkFinishRoleInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetRoleInstancesItem* roleItem) {
+				COptimizedRepresentativeKPSetOntologyRealizingItem* realItem = (COptimizedRepresentativeKPSetOntologyRealizingItem*)ontRealItem;
+				if (roleItem) {
+					if (!roleItem->hasPossibleInstances() && !roleItem->hasTestingPossibleInstances() && roleItem->isCandidateSuccessorInitializationCompleted() && !roleItem->hasComplexInstanceCandidates() && !roleItem->hasTestingComplexCandidateInstancesCount() && !roleItem->hasTestingInitializationPropagationCount()) {
+						setDynamicRequirementProcessed(ontRealItem, realItem->getRealizeRoleProcessingStep(), roleItem->takeRequirmentProcessingDataLinkers());
 						return true;
 					}
 				}

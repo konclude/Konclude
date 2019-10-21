@@ -416,15 +416,15 @@ namespace Konclude {
 					mClassifyProgess.setClassificationCount(classificCount);
 					mClassifyProgess.setProgessPercent(progessPercent);
 					mClassifyProgess.setRemainingMilliSeconds(remainingMilliSeconds);
-					mClassifyProgess.setTestedClasses(satTestedCount);
-					mClassifyProgess.setTotalClasses(totalToSatTestClassCount);
+					mClassifyProgess.setTestedSatisfiable(satTestedCount);
+					mClassifyProgess.setTotalSatisfiable(totalToSatTestClassCount);
 					mClassifyProgess.setTestedSubsumptions(subsumTestedCount);
 					mClassifyProgess.setTotalSubsumptions(totalToSubsumTestCount);
 				} else {
 					mClassifyProgess.setProgessPercent(0.);
 					mClassifyProgess.setRemainingMilliSeconds(0.);
-					mClassifyProgess.setTestedClasses(satTestedCount);
-					mClassifyProgess.setTotalClasses(totalToSatTestClassCount);
+					mClassifyProgess.setTestedSatisfiable(satTestedCount);
+					mClassifyProgess.setTotalSatisfiable(totalToSatTestClassCount);
 					mClassifyProgess.setTestedSubsumptions(subsumTestedCount);
 					mClassifyProgess.setTotalSubsumptions(totalToSubsumTestCount);
 				}
@@ -1742,7 +1742,7 @@ namespace Konclude {
 						hierarchy->updateNodeEquivalentElements(topHierNode);
 					}
 
-					LOG(INFO,getLogDomain(),logTr("Sorting classes for Ontology '%1'.").arg(ontology->getTerminologyName()),getLogObject());
+					LOG(INFO,getLogDomain(),logTr("Sorting roles for Ontology '%1'.").arg(ontology->getTerminologyName()),getLogObject());
 
 					for (QList<COptimizedKPSetRoleTestingItem*>::const_iterator it = satItemList->constBegin(), itEnd = satItemList->constEnd(); it != itEnd; ++it) {
 						COptimizedKPSetRoleTestingItem* item = *it;
@@ -1899,7 +1899,7 @@ namespace Konclude {
 					LOG(INFO,getLogDomain(),logTr("Roles of ontology '%1' classified.").arg(ontology->getTerminologyName()),getLogObject());
 					LOG(INFO,getLogDomain(),logTr("Used %1 satisfiable tests and %3 calculated subsumption tests.").arg(ontPropItem->getCalcedSatisfiableCount()).arg(ontPropItem->getClassifierStatistics()->getCalculatedTestedSubsumptionCount()),getLogObject());
 					LOG(INFO,getLogDomain(),logTr("Confirmed %1 of %2 possible subsumer roles.").arg(optKPSetClassificationItem->getTruePossibleSubsumerCount()).arg(optKPSetClassificationItem->getPossibleSubsumerCount()),getLogObject());
-					LOG(INFO,getLogDomain(),logTr("Confirmed %1 and invalidated %2 possible subsumer concepts with calculation.").arg(optKPSetClassificationItem->getCalculatedTruePossibleSubsumerCount()).arg(optKPSetClassificationItem->getFalsePossibleSubsumerCount()),getLogObject());
+					LOG(INFO,getLogDomain(),logTr("Confirmed %1 and invalidated %2 possible subsumer roles with calculation.").arg(optKPSetClassificationItem->getCalculatedTruePossibleSubsumerCount()).arg(optKPSetClassificationItem->getFalsePossibleSubsumerCount()),getLogObject());
 				}
 				ontPropItem->submitHierarchyConstructed();
 				ontPropItem->doClassifiedCallback();

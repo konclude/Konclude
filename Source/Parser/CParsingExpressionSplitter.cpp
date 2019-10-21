@@ -70,12 +70,24 @@ namespace Konclude {
 				if (individualExpression) {
 					mIndiList.append(individualExpression);
 				}
+				CDataPropertyTermExpression* dataPropertyExpression = dynamic_cast<CDataPropertyTermExpression*>(expression);
+				if (dataPropertyExpression) {
+					mDataPropertyList.append(dataPropertyExpression);
+				} 
+				CDataRangeTermExpression* dataRangeExpression = dynamic_cast<CDataRangeTermExpression*>(expression);
+				if (dataRangeExpression) {
+					mDataRangeList.append(dataRangeExpression);
+				}
+				CDataLiteralTermExpression* dataLitExpression = dynamic_cast<CDataLiteralTermExpression*>(expression);
+				if (dataRangeExpression) {
+					mDataLitList.append(dataLitExpression);
+				}
 			}
 			return true;
 		}
 
 
-		bool CParsingExpressionSplitter::proofExpressionComposition(cint64 requiredClassExpressions, cint64 requiredObjectPropertyExpressions, cint64 requiredIndividualExpressions, cint64 requiredVariableExpressions, cint64 requiredNotVariableExpressions) {
+		bool CParsingExpressionSplitter::proofExpressionComposition(cint64 requiredClassExpressions, cint64 requiredObjectPropertyExpressions, cint64 requiredIndividualExpressions, cint64 requiredVariableExpressions, cint64 requiredNotVariableExpressions, cint64 dataRangeExpressions, cint64 dataPropertyExpressions) {
 			if (mClassList.count() < requiredClassExpressions) {
 				LOG(ERROR,"::Konclude::Reasoner::Generator::ExpressionSplitter",logTr("Couldn't extract minimal required %1 Class-Expressions, extracted Class-Expressions %2.").arg(requiredClassExpressions).arg(mClassList.count()),this);
 				return false;
@@ -96,8 +108,31 @@ namespace Konclude {
 				LOG(ERROR,"::Konclude::Reasoner::Generator::ExpressionSplitter",logTr("Couldn't extract minimal required %1 Non-Variable-Expressions, extracted Non-Variable-Expressions %2.").arg(requiredNotVariableExpressions).arg(mNotObjIndiVarList.count()),this);
 				return false;
 			}
+			if (mDataRangeList.count() < dataRangeExpressions) {
+				LOG(ERROR, "::Konclude::Reasoner::Generator::ExpressionSplitter", logTr("Couldn't extract minimal required %1 DataRange-Expressions, extracted DataRange-Expressions %2.").arg(dataRangeExpressions).arg(mDataRangeList.count()), this);
+				return false;
+			}
+			if (mDataPropertyList.count() < dataPropertyExpressions) {
+				LOG(ERROR, "::Konclude::Reasoner::Generator::ExpressionSplitter", logTr("Couldn't extract minimal required %1 DataProperty-Expressions, extracted DataProperty-Expressions %2.").arg(dataPropertyExpressions).arg(mDataPropertyList.count()), this);
+				return false;
+			}
 			return true;
 		}
+
+
+		CEXPRESSIONLIST<CDataRangeTermExpression*>* CParsingExpressionSplitter::getDataRangeTermExpressionList() {
+			return &mDataRangeList;
+		}
+
+
+		CEXPRESSIONLIST<CDataLiteralTermExpression*>* CParsingExpressionSplitter::getDataLiteralTermExpressionList() {
+			return &mDataLitList;
+		}
+
+		CEXPRESSIONLIST<CDataPropertyTermExpression*>* CParsingExpressionSplitter::getDataPropertyTermExpressionList() {
+			return &mDataPropertyList;
+		}
+
 
 		CEXPRESSIONLIST<CClassTermExpression*>* CParsingExpressionSplitter::getClassTermExpressionList() {
 			return &mClassList;
@@ -161,6 +196,32 @@ namespace Konclude {
 		CIndividualTermExpression* CParsingExpressionSplitter::getSecondIndividualTermExpression() {
 			return mIndiList.at(1);
 		}
+
+		CDataPropertyTermExpression* CParsingExpressionSplitter::getFirstDataPropertyTermExpression() {
+			return mDataPropertyList.first();
+		}
+
+		CDataPropertyTermExpression* CParsingExpressionSplitter::getSecondDataPropertyTermExpression() {
+			return mDataPropertyList.at(1);
+		}
+
+
+		CDataRangeTermExpression* CParsingExpressionSplitter::getFirstDataRangeTermExpression() {
+			return mDataRangeList.first();
+		}
+
+		CDataRangeTermExpression* CParsingExpressionSplitter::getSecondDataRangeTermExpression() {
+			return mDataRangeList.at(1);
+		}
+
+		CDataLiteralTermExpression* CParsingExpressionSplitter::getFirstDataLiteralTermExpression() {
+			return mDataLitList.first();
+		}
+
+		CDataLiteralTermExpression* CParsingExpressionSplitter::getSecondDataLiteralTermExpression() {
+			return mDataLitList.at(1);
+		}
+
 
 	}; // end namespace Parser
 

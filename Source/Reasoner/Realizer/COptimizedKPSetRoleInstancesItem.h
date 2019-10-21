@@ -141,6 +141,25 @@ namespace Konclude {
 					COptimizedKPSetRoleInstancesItem* incTestingPossibleInstancesCount(cint64 incCount = 1);
 					COptimizedKPSetRoleInstancesItem* decTestingPossibleInstancesCount(cint64 decCount = 1);
 
+
+
+
+					cint64 getTestingComplexCandidateInstancesCount();
+					bool hasTestingComplexCandidateInstancesCount();
+					COptimizedKPSetRoleInstancesItem* setTestingComplexCandidateInstancesCount(cint64 testPossIntCount);
+					COptimizedKPSetRoleInstancesItem* incTestingComplexCandidateInstancesCount(cint64 incCount = 1);
+					COptimizedKPSetRoleInstancesItem* decTestingComplexCandidateInstancesCount(cint64 decCount = 1);
+
+
+
+					cint64 getTestingInitializationPropagationCount();
+					bool hasTestingInitializationPropagationCount();
+					COptimizedKPSetRoleInstancesItem* setTestingInitializationPropagationCount(cint64 testPossIntCount);
+					COptimizedKPSetRoleInstancesItem* incTestingInitializationPropagationCount(cint64 incCount = 1);
+					COptimizedKPSetRoleInstancesItem* decTestingInitializationPropagationCount(cint64 decCount = 1);
+
+
+
 					bool hasAllSuccessorProcessedFlag();
 					COptimizedKPSetRoleInstancesItem* setAllSuccessorProcessedFlag(bool allSuccProcessed);
 
@@ -314,6 +333,11 @@ namespace Konclude {
 					bool mPossibleProcessingQueuedFlag;
 					bool mComplexCandidateProcessingQueuedFlag;
 					bool mSelfSuccsCompletedFlag;
+
+
+					cint64 mTestingInitializationPropagationCount;
+					cint64 mTestingPossibleInstancesCount;
+
 
 
 					bool mRequiresCandidateInitializationFlag;

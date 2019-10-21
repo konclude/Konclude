@@ -77,7 +77,7 @@ namespace Konclude {
 
 
 				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData::addIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker) {
-					mCount = indiIdLinker->getCount();
+					mCount += indiIdLinker->getCount();
 					mIndiIdLinker = indiIdLinker->append(mIndiIdLinker);
 					return this;
 				}

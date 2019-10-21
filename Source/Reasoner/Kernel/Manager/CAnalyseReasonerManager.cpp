@@ -90,13 +90,13 @@ namespace Konclude {
 					if (classificationMan) {
 						CClassificationProgress* classifProgress = classificationMan->getClassificationProgress();
 						if (classifProgress) {
-							if (classifProgress->getTestedClasses() != classifProgress->getTotalClasses() || classifProgress->getTestedSubsumptions() != classifProgress->getTotalSubsumptions()) {
+							if (classifProgress->getTestedSatisfiable() != classifProgress->getTotalSatisfiable() || classifProgress->getTestedSubsumptions() != classifProgress->getTotalSubsumptions()) {
 								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Classification progress:"),this);
 
 								QString remainingTimeString = getLoggingCalculationStatisticsTimeSizeString(classifProgress->getRemainingMilliSeconds());
-								QString statString1 = QString("Satisfiable tested classes: %1, approximated remaining classes to test: %2")
-									.arg(classifProgress->getTestedClasses())
-									.arg(classifProgress->getTotalClasses()-classifProgress->getTestedClasses());
+								QString statString1 = QString("Finished satisfiable tests: %1, approximated remaining satisfiable tests: %2")
+									.arg(classifProgress->getTestedSatisfiable())
+									.arg(classifProgress->getTotalSatisfiable()-classifProgress->getTestedSatisfiable());
 								LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",statString1,this);
 
 								if (classifProgress->getTotalSubsumptions() >= 0) {

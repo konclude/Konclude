@@ -37,11 +37,11 @@ namespace Konclude {
 				return mClassificationCount;
 			}
 
-			qint64 CClassificationProgress::getTestedClasses() {
+			qint64 CClassificationProgress::getTestedSatisfiable() {
 				return mTestedClasses;
 			}
 
-			qint64 CClassificationProgress::getTotalClasses() {
+			qint64 CClassificationProgress::getTotalSatisfiable() {
 				return mTotalClasses;
 			}
 
@@ -67,12 +67,12 @@ namespace Konclude {
 				return this;
 			}
 
-			CClassificationProgress *CClassificationProgress::setTestedClasses(qint64 testedClasses) {
+			CClassificationProgress *CClassificationProgress::setTestedSatisfiable(qint64 testedClasses) {
 				mTestedClasses = testedClasses;
 				return this;
 			}
 
-			CClassificationProgress *CClassificationProgress::setTotalClasses(qint64 totalClasses) {
+			CClassificationProgress *CClassificationProgress::setTotalSatisfiable(qint64 totalClasses) {
 				mTotalClasses = totalClasses;
 				return this;
 			}

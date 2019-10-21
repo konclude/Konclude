@@ -47,7 +47,8 @@ namespace Konclude {
 
 			CLoader *CCommandLineTranlatorHelpLoader::load() {
 				
-				LOG(INFO,"::Konclude::Loader::OWLlinkTranslationHelpLoader",logTr(						
+				CLogger::getInstance()->waitSynchronization();
+				LOG(INFO, "::Konclude::Loader::OWLlinkTranslationHelpLoader", logTr(
 						"Usage: 'Konclude' <command> [parameters]\n"
 						"\n"
 						"Available commands:\n"

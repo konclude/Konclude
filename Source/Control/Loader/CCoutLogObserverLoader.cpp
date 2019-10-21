@@ -53,8 +53,6 @@ namespace Konclude {
 					CLogger::getInstance()->removeObserverFromAllDomains(consoleSingletonLogObserver);
 					CLogger::getInstance()->addLogObserver(consoleSingletonLogObserver);				
 
-					CLogger::getInstance()->waitSynchronization();
-
 				}
 				return this;
 			}

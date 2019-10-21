@@ -584,6 +584,25 @@ namespace Konclude {
 						if (lastLanguageSep > -1) {
 							stringValueString = valueString.mid(0,lastLanguageSep);
 							languageValueString = valueString.mid(lastLanguageSep+1);
+							bool validLanguageTag = true;
+							bool firstBindOccurred = false;
+							for (cint64 i = 0; i < languageValueString.length() && validLanguageTag; ++i) {
+								QChar ch = languageValueString.at(i);
+								if (!firstBindOccurred && i > 3) {
+									validLanguageTag = false;
+								}
+								if (ch == QChar('-')) {
+									firstBindOccurred = true;
+								}
+								if (!ch.isLetterOrNumber() && ch != QChar('-')) {
+									validLanguageTag = false;
+								}
+							}
+
+							if (!validLanguageTag || true) {
+								stringValueString = valueString;
+								languageValueString = "";
+							}
 						}
 					}
 

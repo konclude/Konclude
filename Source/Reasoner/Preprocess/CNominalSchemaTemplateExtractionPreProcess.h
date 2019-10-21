@@ -86,7 +86,6 @@ namespace Konclude {
 					bool removeSingleAbsorbableNominalSchemaConcepts(CConcept* concept, bool negation);
 
 					bool hasNominalSchemaConcept(CConcept* concept);
-					bool hasNominalSchemaConcept(CConcept* concept, QSet<CConcept*>* testedConceptSet);
 
 					bool hasNominalSchemaConceptFillHash(CConcept* concept, CBOXHASH<CConcept*,CConcept*>* conceptNominalSchemaConceptHash, CConcept* nominalSchemaConcept, QSet<CConcept*>* testedConceptSet);
 					bool hasNominalSchemaAbsorbableConceptFillHash(CConcept* concept, bool negation, CBOXHASH<CConcept*,CConcept*>* absorbableConceptNominalSchemaConceptHash, CConcept* nominalSchemaConcept, QSet<CConcept*>* testedConceptSet);

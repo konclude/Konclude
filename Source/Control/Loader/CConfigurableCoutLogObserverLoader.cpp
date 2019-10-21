@@ -65,13 +65,11 @@ namespace Konclude {
 
 				consoleSingletonLogObserver = new CConsolePrintConfigurableLogObserver(infoDomainList,60.,true,false,true,true);
 				CLogger::getInstance()->addLogObserver(consoleSingletonLogObserver);
-				CLogger::getInstance()->waitSynchronization();
 
 				return this;
 			}
 
 			CLoader *CConfigurableCoutLogObserverLoader::exit() {
-				CLogger::getInstance()->waitSynchronization();
 				CLogger::getInstance()->removeObserverFromAllDomains(consoleSingletonLogObserver);
 				delete consoleSingletonLogObserver;
 				return this;

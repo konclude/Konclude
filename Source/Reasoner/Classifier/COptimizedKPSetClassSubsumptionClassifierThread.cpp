@@ -623,15 +623,15 @@ namespace Konclude {
 					mClassifyProgess.setClassificationCount(classificCount);
 					mClassifyProgess.setProgessPercent(progessPercent);
 					mClassifyProgess.setRemainingMilliSeconds(remainingMilliSeconds);
-					mClassifyProgess.setTestedClasses(satTestedCount);
-					mClassifyProgess.setTotalClasses(totalToSatTestClassCount);
+					mClassifyProgess.setTestedSatisfiable(satTestedCount);
+					mClassifyProgess.setTotalSatisfiable(totalToSatTestClassCount);
 					mClassifyProgess.setTestedSubsumptions(subsumTestedCount);
 					mClassifyProgess.setTotalSubsumptions(totalToSubsumTestCount);
 				} else {
 					mClassifyProgess.setProgessPercent(0.);
 					mClassifyProgess.setRemainingMilliSeconds(0.);
-					mClassifyProgess.setTestedClasses(satTestedCount);
-					mClassifyProgess.setTotalClasses(totalToSatTestClassCount);
+					mClassifyProgess.setTestedSatisfiable(satTestedCount);
+					mClassifyProgess.setTotalSatisfiable(totalToSatTestClassCount);
 					mClassifyProgess.setTestedSubsumptions(subsumTestedCount);
 					mClassifyProgess.setTotalSubsumptions(totalToSubsumTestCount);
 				}
@@ -1231,7 +1231,7 @@ namespace Konclude {
 				cout<<QString("Calculating whether '%1' is satisfiable").arg(iriClassNameString).toLocal8Bit().data()<<endl<<endl;
 #endif
 
-				//if (iriClassNameString == "http://www.owllink.org/testsuite/particle-D#Neutrino") {
+				//if (iriClassNameString == "http://www.semanticweb.org/ontologies/2010/9/Ontology1288387737869.owl#middle-man") {
 				//	bool bug = true;
 				//}
 
@@ -1324,7 +1324,7 @@ namespace Konclude {
 #endif
 
 
-				//if (iriClassNameString1 == "http://oiled.man.example.net/facts#All+Friends+Happy+or+All+Friends+Students" && iriClassNameString2 == "http://oiled.man.example.net/facts#All+Friends+Happy+or+Students" ) {
+				//if (iriClassNameString1 == "http://krono.act.uji.es/people/Ernesto/qimage-ontology/OntologyQimage.owl#Image_type" && iriClassNameString2 == "http://krono.act.uji.es/people/Ernesto/qimage-ontology/QimageUJIDescriptions.owl#Image_with_uji_office_door" ) {
 				//	bool bug = true;
 				//}
 
@@ -2100,10 +2100,12 @@ namespace Konclude {
 
 				//QString iriClassNameString1 = CIRIName::getRecentIRIName(subsumedConcept->getClassNameLinker());
 				//QString iriClassNameString2 = CIRIName::getRecentIRIName(subsumerConcept->getClassNameLinker());
-				//if (iriClassNameString1.endsWith("Wine") && iriClassNameString2.endsWith("Wine") && isSubsumption) {
-				//	bool bug = true;
-				//	calculateSubsumption(optKPSetClassificationItem,subsumedItem,subsumerItem,nullptr);
-				//	return false;
+				//if (iriClassNameString1 == "http://krono.act.uji.es/people/Ernesto/qimage-ontology/OntologyQimage.owl#Image_type" && iriClassNameString2 == "http://krono.act.uji.es/people/Ernesto/qimage-ontology/QimageUJIDescriptions.owl#Image_with_uji_office_door") {
+				//	bool bug = false;
+				//	if (bug) {
+				//		calculateSubsumption(optKPSetClassificationItem, subsumedItem, subsumerItem, nullptr);
+				//		return false;
+				//	}
 				//}
 
 				//if (iriClassNameString1 == "http://www.bootstrep.eu/ontology/GRO#BindingOfProteinToProteinBindingSiteOfDNA" && iriClassNameString2 == "http://www.bootstrep.eu/ontology/GRO#DNAProteinInteraction") {
@@ -2343,8 +2345,16 @@ namespace Konclude {
 				optKPSetClassificationItem->decRunningSatisfiableTestsCount();
 
 				COptimizedKPSetClassTestingItem* satTestedItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(satisfiableConcept);
-				//if (CIRIName::getRecentIRIName(satisfiableConcept->getClassNameLinker()) == "http://www.w3.org/TR/2003/CR-owl-guide-20030818/wine#WineFlavor" && !isSatis) {
+				//if (CIRIName::getRecentIRIName(satisfiableConcept->getClassNameLinker()) == "http://www.w3.org/TR/2003/CR-owl-guide-20030818/wine#WineFlavor" && !isSatis || unsatComputed) {
 				//	bool bug = true;
+				//	unsatComputed = true;
+
+				//	if (!isSatis) {
+				//		unsatCount++;
+				//	} else {
+				//		satCount++;
+				//	}
+
 				//	calculateSatisfiable(optKPSetClassificationItem,satTestedItem);
 				//	return false;
 				//}

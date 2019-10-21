@@ -343,9 +343,6 @@ namespace Konclude {
 
 
 				} else if (datatypeIRI == PREFIX_OWL_TOP_DATATYPE) {
-					if (mTopDataRangeConcept) {
-						addConceptOperand(datatypeConcept,mTopDataRangeConcept,false);
-					}
 
 				} else if (datatypeIRI == PREFIX_OWL_BOTTOM_DATATYPE) {
 					if (mTopDataRangeConcept) {

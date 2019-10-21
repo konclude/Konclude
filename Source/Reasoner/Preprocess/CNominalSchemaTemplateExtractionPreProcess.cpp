@@ -438,11 +438,6 @@ namespace Konclude {
 
 
 			bool CNominalSchemaTemplateExtractionPreProcess::hasNominalSchemaConcept(CConcept* concept) {
-				QSet<CConcept*> testedConceptSet;
-				return hasNominalSchemaConcept(concept,&testedConceptSet);
-			}
-
-			bool CNominalSchemaTemplateExtractionPreProcess::hasNominalSchemaConcept(CConcept* concept, QSet<CConcept*>* testedConceptSet) {
 				cint64 conOpCode = concept->getOperatorCode();
 				if ((conOpCode == CCSUB || conOpCode == CCEQ || conOpCode == CCTOP || conOpCode == CCBOTTOM)) {
 					return false;

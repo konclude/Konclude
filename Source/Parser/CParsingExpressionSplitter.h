@@ -36,6 +36,9 @@
 #include "Parser/Expressions/CObjectPropertyTermExpression.h"
 #include "Parser/Expressions/CIndividualTermExpression.h"
 #include "Parser/Expressions/CObjectIndividualVariableExpression.h"
+#include "Parser/Expressions/CDataPropertyTermExpression.h"
+#include "Parser/Expressions/CDataRangeTermExpression.h"
+#include "Parser/Expressions/CDataLiteralTermExpression.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -69,11 +72,14 @@ namespace Konclude {
 				//! Destructor
 				virtual ~CParsingExpressionSplitter();
 
-				bool proofExpressionComposition(cint64 requiredClassExpressions, cint64 requiredObjectPropertyExpressions = 0, cint64 requiredIndividualExpressions = 0, cint64 requiredVariableExpressions = 0, cint64 requiredNotVariableExpressions = 0);
+				bool proofExpressionComposition(cint64 requiredClassExpressions, cint64 requiredObjectPropertyExpressions = 0, cint64 requiredIndividualExpressions = 0, cint64 requiredVariableExpressions = 0, cint64 requiredNotVariableExpressions = 0, cint64 dataRangeExpressions = 0, cint64 dataPropertyExpressions = 0);
 
 				CEXPRESSIONLIST<CClassTermExpression*>* getClassTermExpressionList();
 				CEXPRESSIONLIST<CObjectPropertyTermExpression*>* getObjectPropertyTermExpressionList();
 				CEXPRESSIONLIST<CIndividualTermExpression*>* getIndividualTermExpressionList();
+				CEXPRESSIONLIST<CDataPropertyTermExpression*>* getDataPropertyTermExpressionList();
+				CEXPRESSIONLIST<CDataRangeTermExpression*>* getDataRangeTermExpressionList();
+				CEXPRESSIONLIST<CDataLiteralTermExpression*>* getDataLiteralTermExpressionList();
 
 				CEXPRESSIONLIST<CObjectIndividualVariableExpression*>* getClassVariableTermExpressionList();
 				CEXPRESSIONLIST<CClassTermExpression*>* getClassNotVariableTermExpressionList();
@@ -91,6 +97,17 @@ namespace Konclude {
 				CObjectIndividualVariableExpression* getFirstClassVariableTermExpression();
 				CObjectIndividualVariableExpression* getSecondClassVariableTermExpression();
 
+
+				CDataPropertyTermExpression* getFirstDataPropertyTermExpression();
+				CDataPropertyTermExpression* getSecondDataPropertyTermExpression();
+
+
+				CDataRangeTermExpression* getFirstDataRangeTermExpression();
+				CDataRangeTermExpression* getSecondDataRangeTermExpression();
+
+				CDataLiteralTermExpression* getFirstDataLiteralTermExpression();
+				CDataLiteralTermExpression* getSecondDataLiteralTermExpression();
+
 			// protected methods
 			protected:
 				bool splitExpressions();
@@ -101,6 +118,9 @@ namespace Konclude {
 				CEXPRESSIONLIST<CClassTermExpression*> mClassList;
 				CEXPRESSIONLIST<CObjectPropertyTermExpression*> mObjectPropertyList;
 				CEXPRESSIONLIST<CIndividualTermExpression*> mIndiList;
+				CEXPRESSIONLIST<CDataPropertyTermExpression*> mDataPropertyList;
+				CEXPRESSIONLIST<CDataRangeTermExpression*> mDataRangeList;
+				CEXPRESSIONLIST<CDataLiteralTermExpression*> mDataLitList;
 
 				CEXPRESSIONLIST<CObjectIndividualVariableExpression*> mObjIndiVarList;
 				CEXPRESSIONLIST<CClassTermExpression*> mNotObjIndiVarList;

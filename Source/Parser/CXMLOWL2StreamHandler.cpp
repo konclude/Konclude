@@ -586,7 +586,8 @@ namespace Konclude {
 
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Head"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseRuleAtomHeadNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("Body"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseRuleAtomBodyNode));
-			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectPropertyAtom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseRulePropertyAtomNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ObjectPropertyAtom"), CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseRuleObjectPropertyAtomNode));
+			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DataPropertyAtom"), CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseRuleDataPropertyAtomNode));
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("ClassAtom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseRuleClassAtomNode));
 			
 			mBaseParseFunctionJumpHash.insert(CStringRefStringHasher("DifferentIndividualsAtom"),CStreamParseFunctionData(&CXMLOWL2StreamHandler::jumpFunctionParseDifferentIndividualsAtomNode));
@@ -627,16 +628,46 @@ namespace Konclude {
 		}
 
 
-		CRulePropertyAtomTermExpression* CXMLOWL2StreamHandler::parseRuleObjectPropertyAtomNode(CStreamParseStackObject* parseStackObj) {
-			CRulePropertyAtomTermExpression* rulePropertyAtomExp = nullptr;
+		CRuleAtomTermExpression* CXMLOWL2StreamHandler::parseRuleObjectPropertyAtomNode(CStreamParseStackObject* parseStackObj) {
+			CRuleAtomTermExpression* ruleAtomExp = nullptr;
 			if (parseStackObj->hasExpressions()) {
 				CParsingExpressionSplitter mParsingExpSpl(parseStackObj->getExpressions());
-				if (mParsingExpSpl.proofExpressionComposition(0,1,0,2,0)) {
-					rulePropertyAtomExp = new CRulePropertyAtomTermExpression(mParsingExpSpl.getFirstClassVariableTermExpression(),mParsingExpSpl.getSecondClassVariableTermExpression(),mParsingExpSpl.getFirstObjectPropertyTermExpression());
-					mRuleExpContainer.append(rulePropertyAtomExp);
+				if (mParsingExpSpl.proofExpressionComposition(0,1,0,1,0)) {
+					if (mParsingExpSpl.getClassVariableTermExpressionList()->size() >= 2) {
+						ruleAtomExp = new CRulePropertyAtomTermExpression(mParsingExpSpl.getFirstClassVariableTermExpression(), mParsingExpSpl.getSecondClassVariableTermExpression(), mParsingExpSpl.getFirstObjectPropertyTermExpression());
+					} else if (!mParsingExpSpl.getIndividualTermExpressionList()->isEmpty())  {
+						ruleAtomExp = new CRuleClassAtomTermExpression(mOntoBuilder->getObjectHasValue(mParsingExpSpl.getFirstObjectPropertyTermExpression(), mParsingExpSpl.getFirstIndividualTermExpression()), mParsingExpSpl.getFirstClassVariableTermExpression());
+					} else {
+						LOG(ERROR, getLogDomain(), logTr("Parsing of possibly unsupported ObjectPropertyAtom failed."), this);
+					}
+					if (ruleAtomExp) {
+						mRuleExpContainer.append(ruleAtomExp);
+					}
 				}
 			}
-			return rulePropertyAtomExp;
+			return ruleAtomExp;
+		}
+
+
+
+		CRuleAtomTermExpression* CXMLOWL2StreamHandler::parseRuleDataPropertyAtomNode(CStreamParseStackObject* parseStackObj) {
+			CRuleClassAtomTermExpression* ruleClassAtomExp = nullptr;
+			if (parseStackObj->hasExpressions()) {
+				CParsingExpressionSplitter mParsingExpSpl(parseStackObj->getExpressions());
+				if (mParsingExpSpl.proofExpressionComposition(0, 0, 0, 1, 0, 1)) {
+					if (!mParsingExpSpl.getDataRangeTermExpressionList()->isEmpty()) {
+						ruleClassAtomExp = new CRuleClassAtomTermExpression(mOntoBuilder->getDataSomeValuesFrom(mParsingExpSpl.getFirstDataPropertyTermExpression(), mParsingExpSpl.getFirstDataRangeTermExpression()), mParsingExpSpl.getFirstClassVariableTermExpression());
+					} else if (!mParsingExpSpl.getDataLiteralTermExpressionList()->isEmpty()) {
+						ruleClassAtomExp = new CRuleClassAtomTermExpression(mOntoBuilder->getDataHasValue(mParsingExpSpl.getFirstDataPropertyTermExpression(), mParsingExpSpl.getFirstDataLiteralTermExpression()), mParsingExpSpl.getFirstClassVariableTermExpression());
+					} else {
+						LOG(ERROR, getLogDomain(), logTr("Parsing of possibly unsupported DataPropertyAtom failed."), this);
+					}
+					if (ruleClassAtomExp) {
+						mRuleExpContainer.append(ruleClassAtomExp);
+					}
+				}
+			}
+			return ruleClassAtomExp;
 		}
 
 		CRuleClassAtomTermExpression* CXMLOWL2StreamHandler::parseRuleClassAtomNode(CStreamParseStackObject* parseStackObj) {
@@ -1631,8 +1662,12 @@ namespace Konclude {
 			parseRuleNode(parseStackObj);
 		}
 
-		void CXMLOWL2StreamHandler::jumpFunctionParseRulePropertyAtomNode(CStreamParseStackObject* parseStackObj) {
+		void CXMLOWL2StreamHandler::jumpFunctionParseRuleObjectPropertyAtomNode(CStreamParseStackObject* parseStackObj) {
 			addTemporaryBuildExpression(parseRuleObjectPropertyAtomNode(parseStackObj));
+		}
+
+		void CXMLOWL2StreamHandler::jumpFunctionParseRuleDataPropertyAtomNode(CStreamParseStackObject* parseStackObj) {
+			addTemporaryBuildExpression(parseRuleDataPropertyAtomNode(parseStackObj));
 		}
 
 		void CXMLOWL2StreamHandler::jumpFunctionParseRuleClassAtomNode(CStreamParseStackObject* parseStackObj) {

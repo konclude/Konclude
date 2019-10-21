@@ -102,9 +102,9 @@ namespace Konclude {
 				foreach (CSubsumptionClassifier *classifier, mOntoClassifierSet) {
 					CClassificationProgress* classificationProgress = classifier->getClassificationProgress();
 					if (classificationProgress) {
-						newClassProg.setTotalClasses(newClassProg.getTotalClasses()+classificationProgress->getTotalClasses());
+						newClassProg.setTotalSatisfiable(newClassProg.getTotalSatisfiable()+classificationProgress->getTotalSatisfiable());
 						newClassProg.setClassificationCount(newClassProg.getClassificationCount()+classificationProgress->getClassificationCount());
-						newClassProg.setTestedClasses(newClassProg.getTestedClasses()+classificationProgress->getTestedClasses());
+						newClassProg.setTestedSatisfiable(newClassProg.getTestedSatisfiable()+classificationProgress->getTestedSatisfiable());
 						newClassProg.setTestedSubsumptions(newClassProg.getTestedSubsumptions()+classificationProgress->getTestedSubsumptions());
 						newClassProg.setTotalSubsumptions(newClassProg.getTotalSubsumptions()+classificationProgress->getTotalSubsumptions());
 						newClassProg.setRemainingMilliSeconds(qMax(newClassProg.getRemainingMilliSeconds(),classificationProgress->getRemainingMilliSeconds()));

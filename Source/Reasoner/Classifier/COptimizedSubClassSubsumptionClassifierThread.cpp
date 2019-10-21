@@ -474,13 +474,13 @@ namespace Konclude {
 					mClassifyProgess.setClassificationCount(classificCount);
 					mClassifyProgess.setProgessPercent(progessPercent);
 					mClassifyProgess.setRemainingMilliSeconds(remainingMilliSeconds);
-					mClassifyProgess.setTestedClasses(testedClasses);
-					mClassifyProgess.setTotalClasses(totalClasses);
+					mClassifyProgess.setTestedSatisfiable(testedClasses);
+					mClassifyProgess.setTotalSatisfiable(totalClasses);
 				} else {
 					mClassifyProgess.setProgessPercent(0.);
 					mClassifyProgess.setRemainingMilliSeconds(0.);
-					mClassifyProgess.setTestedClasses(satTestedCount);
-					mClassifyProgess.setTotalClasses(totalToTestCount);
+					mClassifyProgess.setTestedSatisfiable(satTestedCount);
+					mClassifyProgess.setTotalSatisfiable(totalToTestCount);
 				}
 				return &mClassifyProgess;
 			}

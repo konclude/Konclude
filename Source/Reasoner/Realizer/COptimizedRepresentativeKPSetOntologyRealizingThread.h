@@ -260,6 +260,7 @@ namespace Konclude {
 					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinker);
 					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, COntologyRealizingDynamicRequirmentProcessingData* procData);
 					bool checkFinishConceptInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetConceptInstancesItem* conceptItem);
+					bool checkFinishRoleInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetRoleInstancesItem* roleItem);
 
 					COptimizedKPSetIndividualItem* getMergingResolvedIndividualItem(COptimizedKPSetIndividualItem* indiItem);
 

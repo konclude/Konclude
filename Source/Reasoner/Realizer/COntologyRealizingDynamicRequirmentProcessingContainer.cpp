@@ -34,7 +34,9 @@ namespace Konclude {
 
 
 			COntologyRealizingDynamicRequirmentProcessingContainer* COntologyRealizingDynamicRequirmentProcessingContainer::addRequirementProcessingDataLinker(CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinker) {
-				mProcDataLinker = procDataLinker->append(mProcDataLinker);
+				if (procDataLinker) {
+					mProcDataLinker = procDataLinker->append(mProcDataLinker);
+				}
 				return this;
 			}
 

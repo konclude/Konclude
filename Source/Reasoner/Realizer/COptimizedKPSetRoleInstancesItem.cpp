@@ -35,6 +35,8 @@ namespace Konclude {
 				mRole = role;
 				mUnprocessedSuccItemCount = 0;
 				mTestingPossInstanceCount = 0;
+				mTestingPossibleInstancesCount = 0;
+				mTestingInitializationPropagationCount = 0;
 				mAllSuccProcessedFlag = false;
 				mToProcessFlag = false;
 				mPossibleProcessingQueuedFlag = false;
@@ -187,6 +189,8 @@ namespace Konclude {
 				return this;
 			}
 
+
+
 			cint64 COptimizedKPSetRoleInstancesItem::getTestingPossibleInstancesCount() {
 				return mTestingPossInstanceCount;
 			}
@@ -209,6 +213,68 @@ namespace Konclude {
 				mTestingPossInstanceCount -= decCount;
 				return this;
 			}
+
+
+
+
+
+
+			cint64 COptimizedKPSetRoleInstancesItem::getTestingComplexCandidateInstancesCount() {
+				return mTestingPossibleInstancesCount;
+			}
+
+			bool COptimizedKPSetRoleInstancesItem::hasTestingComplexCandidateInstancesCount() {
+				return mTestingPossibleInstancesCount > 0;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setTestingComplexCandidateInstancesCount(cint64 testPossIntCount) {
+				mTestingPossibleInstancesCount = testPossIntCount;
+				return this;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::incTestingComplexCandidateInstancesCount(cint64 incCount) {
+				mTestingPossibleInstancesCount += incCount;
+				return this;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::decTestingComplexCandidateInstancesCount(cint64 decCount) {
+				mTestingPossibleInstancesCount -= decCount;
+				return this;
+			}
+
+
+
+
+
+
+
+			cint64 COptimizedKPSetRoleInstancesItem::getTestingInitializationPropagationCount() {
+				return mTestingInitializationPropagationCount;
+			}
+
+			bool COptimizedKPSetRoleInstancesItem::hasTestingInitializationPropagationCount() {
+				return mTestingInitializationPropagationCount > 0;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::setTestingInitializationPropagationCount(cint64 testPossIntCount) {
+				mTestingInitializationPropagationCount = testPossIntCount;
+				return this;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::incTestingInitializationPropagationCount(cint64 incCount) {
+				mTestingInitializationPropagationCount += incCount;
+				return this;
+			}
+
+			COptimizedKPSetRoleInstancesItem* COptimizedKPSetRoleInstancesItem::decTestingInitializationPropagationCount(cint64 decCount) {
+				mTestingInitializationPropagationCount -= decCount;
+				return this;
+			}
+
+
+
+
+
 
 			bool COptimizedKPSetRoleInstancesItem::hasAllSuccessorProcessedFlag() {
 				return mAllSuccProcessedFlag;

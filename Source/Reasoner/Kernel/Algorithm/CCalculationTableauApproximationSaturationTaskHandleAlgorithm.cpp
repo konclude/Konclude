@@ -6168,8 +6168,8 @@ namespace Konclude {
 					}
 
 					CConceptProcessData* conProData = (CConceptProcessData*)concept->getConceptData();
-					if (conProData) {
-						if (conProData->hasPropagationIntoCreationDirection()) {
+					if (role->isDataRole() || conProData) {
+						if (role->isDataRole() || conProData->hasPropagationIntoCreationDirection()) {
 							addALLConceptExtensionProcessingRole(role, backPropHashData, processIndi, mCalcAlgContext);
 							updateDirectAddingIndividualStatusFlags(processIndi, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCRITICAL, mCalcAlgContext);
 							addCriticalConceptDescriptor(conDes, CCriticalSaturationConceptTypeQueues::CCT_FORALL, processIndi, mCalcAlgContext);
