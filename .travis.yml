@@ -42,7 +42,7 @@ matrix:
       env: BUILD='Debug' CC=gcc-7 CXX=g++-7
       addons: *gcc7
     - os: osx
-      osx_image: xcode9.2
+      osx_image: xcode11.2
       compiler: clang
       env: BUILD='Debug'
 
