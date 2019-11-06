@@ -42,7 +42,7 @@ matrix:
       env: BUILD='Release' CC=gcc-7 CXX=g++-7
       addons: *gcc7
     - os: osx
-      osx_image: xcode9.2
+      osx_image: xcode11.2
       compiler: clang
       env: BUILD='Release'
 
@@ -80,4 +80,4 @@ script:
   - echo `gcc --version`
   - echo `qmake --version`
   - qmake KoncludeWithoutRedland.pro
-  - make -j 3
+  - make -j 2
