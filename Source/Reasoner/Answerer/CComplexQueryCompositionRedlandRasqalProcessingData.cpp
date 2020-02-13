@@ -17,6 +17,7 @@
  *		License along with Konclude. If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#ifdef KONCLUDE_REDLAND_INTEGRATION
 
 #include "CComplexQueryCompositionRedlandRasqalProcessingData.h"
 
@@ -149,3 +150,5 @@ namespace Konclude {
 	}; // end namespace Reasoner
 
 }; // end namespace Konclude
+
+#endif // KONCLUDE_REDLAND_INTEGRATION

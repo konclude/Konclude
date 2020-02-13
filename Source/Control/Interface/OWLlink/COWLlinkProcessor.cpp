@@ -1143,6 +1143,7 @@ namespace Konclude {
 
 										QList<CQuery*> queryList = gQDKBRUC->getQueryList();
 										for (CQuery* query : queryList) {
+#ifdef KONCLUDE_REDLAND_INTEGRATION
 											CRedlandRasqalBGPsCompositionQuery* rrcq = dynamic_cast<CRedlandRasqalBGPsCompositionQuery*>(query);
 											if (rrcq) {
 												QList<CKnowledgeBaseRevisionCommandProvider*> kbProviderList;
@@ -1155,6 +1156,7 @@ namespace Konclude {
 												CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand* insKBRUC = new CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand(kbProviderList, query, gQDKBRUC);
 												preSynchronizer->delegateCommand(insKBRUC);
 											}
+#endif // KONCLUDE_REDLAND_INTEGRATION
 										}
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -1166,6 +1168,7 @@ namespace Konclude {
 										CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand *iQDKBRUC = (CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand*)command;
 
 										CQuery* query = iQDKBRUC->getQuery();
+#ifdef KONCLUDE_REDLAND_INTEGRATION
 										CRedlandRasqalBGPsCompositionQuery* rrcq = dynamic_cast<CRedlandRasqalBGPsCompositionQuery*>(query);
 										if (rrcq) {
 											QList<CKnowledgeBaseRevisionCommandProvider*>* kbRCPList = iQDKBRUC->getDependentKnowledgeBasesProviderCommandList();
@@ -1178,6 +1181,7 @@ namespace Konclude {
 												}
 											}
 										}
+#endif // KONCLUDE_REDLAND_INTEGRATION
 
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);

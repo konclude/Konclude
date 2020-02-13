@@ -93,6 +93,7 @@ namespace Konclude {
 							}
 						}
 
+#ifdef KONCLUDE_REDLAND_INTEGRATION
 						CRedlandRasqalBGPsCompositionQuery* redRasqQuery = dynamic_cast<CRedlandRasqalBGPsCompositionQuery*>(mQuery);
 						if (redRasqQuery) {
 							const QString& queryText = redRasqQuery->getQueryText();
@@ -104,6 +105,7 @@ namespace Konclude {
 								redRasqQuery->setQueryResult(mStreamingResult);
 							}
 						}
+#endif // KONCLUDE_REDLAND_INTEGRATION
 
 					}
 					return mQuery;

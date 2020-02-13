@@ -85,7 +85,7 @@ namespace Konclude {
 				TDependentOntologyPair depOntPair = mDependentKnowledgeBaseRevisionHash.value(kbName);
 				return depOntPair.second;
 			}
-
+			
 
 		}; // end namespace Query
 

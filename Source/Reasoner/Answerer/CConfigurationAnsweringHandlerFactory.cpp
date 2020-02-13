@@ -52,7 +52,7 @@ namespace Konclude {
 #ifdef KONCLUDE_REDLAND_INTEGRATION
 					answeringHandler = new COptimizedComplexCompositionRedlandRasqalAnsweringHandler(ontoAnsweringItem);
 #else
-					answeringHandler = new COptimizedComplexCompositionAnsweringHandler(ontoAnsweringItem);
+					answeringHandler = nullptr;
 #endif // KONCLUDE_REDLAND_INTEGRATION
 				}
 				return answeringHandler;

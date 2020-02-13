@@ -150,7 +150,7 @@ For MacOS, the Redland RDF Libraries are currently not integrated/tested, i.e., 
 # CHANGELOG
 
 
-- Konclude v0.6.2-964 (pre-release):
+- Konclude v0.6.2-965 (pre-release):
     - Support of more SPARQL features (e.g., OPTIONAL, UNION, FILTER, aggregates, etc.) via Redland Rasqal.
     - Several bug fixes.
 
