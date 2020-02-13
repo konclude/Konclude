@@ -247,7 +247,9 @@ namespace Konclude {
 									if (conceptReplaceHash->contains(assertionConLinker->getData())) {
 										QPair<bool,CConcept *> negRepConcept(conceptReplaceHash->value(assertionConLinker->getData()));
 										assertionConLinker->setData(negRepConcept.second);
-										assertionConLinker->setNegation(negRepConcept.first);
+										if (negRepConcept.first) {
+											assertionConLinker->setNegation(!assertionConLinker->getNegation());
+										}
 									}
 									assertionConLinker = assertionConLinker->getNext();
 								}

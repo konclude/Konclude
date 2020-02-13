@@ -136,6 +136,9 @@ namespace Konclude {
 				return mReductionItemHash[varIdx];
 			}
 
+			COptimizedComplexVariableExtractionItem*& COptimizedComplexVariableCompositionItem::getExtractionItem(cint64 varIdx) {
+				return mExtractionItemHash[varIdx];
+			}
 
 			QList<COptimizedComplexVariableCompositionItem*>* COptimizedComplexVariableCompositionItem::getComputationDependentItemList() {
 				return &mComputationDependentItemList;

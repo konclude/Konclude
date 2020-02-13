@@ -952,8 +952,16 @@ namespace Konclude {
 											if (--mRemainProcessRuleToTaskProcessingVerification <= 0) {
 												mRemainProcessRuleToTaskProcessingVerification = mProcessRuleToTaskProcessingVerificationCount;
 
+												CSatisfiableTaskCancellationAdapter* cancellationAdapter = satCalcTask->getCancellationAdapter();
+												if (cancellationAdapter && cancellationAdapter->canCancelTaskCalculation()) {
+													canceled = true;
+													throw CCalculationErrorProcessingException(CCalculationErrorProcessingException::ECCANCELED);
+												}
+
+
 												CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repCacheUpdAd = satCalcTask->getSatisfiableRepresentativeBackendCacheUpdatingAdapter();
 												if (repCacheUpdAd && repCacheUpdAd->hasUnsatisfiableComputed()) {
+													canceled = true;
 													throw CCalculationErrorProcessingException(CCalculationErrorProcessingException::ECCANCELED);
 												}
 

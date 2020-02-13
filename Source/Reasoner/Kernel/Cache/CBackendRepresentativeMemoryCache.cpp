@@ -855,8 +855,13 @@ namespace Konclude {
 
 							locAssociationData->setRepresentativeSameIndividualId(qMax(tempAssWriteDataLinkerIt->getRepresentativeSameIndividualId(), locAssociationData->getRepresentativeSameIndividualId()));
 
+
+							bool sameIndiMergedChanged = false;
 							if (locAssociationData->getRepresentativeSameIndividualId() != locAssociationData->getAssociatedIndividualId()) {
 								ontologyData->setSameIndividualsMergings(true);
+							}
+							if (!associationData || locAssociationData->hasRepresentativeSameIndividualMerging() != associationData->hasRepresentativeSameIndividualMerging()) {
+								sameIndiMergedChanged = true;
 							}
 
 
@@ -879,7 +884,7 @@ namespace Konclude {
 										prevLabelItem = associationData->getLabelCacheEntry(i);
 									}
 
-									if (prevLabelItem != newLabelItem) {
+									if (prevLabelItem != newLabelItem || sameIndiMergedChanged) {
 										if (prevLabelItem) {
 											prevLabelItem->decIndividualAssociationCount();
 											if (exactIndiAssocTracking) {
@@ -903,6 +908,16 @@ namespace Konclude {
 									CBackendRepresentativeMemoryLabelCacheItem* indConnNomLabelItem = associationData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL);
 									if (indConnNomLabelItem) {
 										mTmpIndiIndirectlyConnNomLabelItemHash.insert(individualID, indConnNomLabelItem);
+									}
+								}
+							} else if (sameIndiMergedChanged) {
+								for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT; ++i) {
+									bool exactIndiAssocTracking = requiresIndividualAssociations(i);
+									if (exactIndiAssocTracking) {
+										CBackendRepresentativeMemoryLabelCacheItem* labelItem = locAssociationData->getLabelCacheEntry(i);
+										CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* indiAssoExtData = getIndividualAssociationsExtensionData(labelItem, ontologyData);
+										indiAssoExtData->removeIndividualIdAssociation(locAssociationData);
+										indiAssoExtData->addIndividualIdAssociation(locAssociationData);
 									}
 								}
 							}

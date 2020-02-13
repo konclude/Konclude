@@ -31,7 +31,7 @@ namespace Konclude {
 				CAbstractVariableMappingsCompositionComputator::CAbstractVariableMappingsCompositionComputator() {
 				}
 
-				CAbstractVariableMappingsCompositionComputator* CAbstractVariableMappingsCompositionComputator::configureComputator(COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
+				CAbstractVariableMappingsCompositionComputator* CAbstractVariableMappingsCompositionComputator::configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
 					mOntoAnsweringItem = ontoAnsweringItem;
 
 					mConfMappingsRepeatedlyInsufficientDependencyComputationIncreasingFactor = 1.3;

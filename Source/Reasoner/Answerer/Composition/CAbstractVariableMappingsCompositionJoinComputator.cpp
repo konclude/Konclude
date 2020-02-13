@@ -33,7 +33,7 @@ namespace Konclude {
 
 
 
-				CAbstractVariableMappingsCompositionComputator* CAbstractVariableMappingsCompositionJoinComputator::configureComputator(COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
+				CAbstractVariableMappingsCompositionComputator* CAbstractVariableMappingsCompositionJoinComputator::configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
 					CAbstractVariableMappingsCompositionComputator::configureComputator(ontoAnsweringItem, answererContext);
 
 					mConfExtendedLogging = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ExtendedLogging", false);
@@ -79,7 +79,7 @@ namespace Konclude {
 
 					COptimizedComplexVariableCompositionItemDependence* leftItemDep = joiningItem->getLeftItemDependence();
 					COptimizedComplexVariableCompositionItemDependence* rightItemDep = joiningItem->getRightItemDependence();
-
+					
 
 					// compute expected variable mappings from join
 					cint64 joinedMappingsCount = joiningItem->getVariableMappingsCurrentCount();

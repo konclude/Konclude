@@ -69,7 +69,7 @@ namespace Konclude {
 						CAbstractVariableMappingsCompositionJoinComputator();
 
 
-						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
+						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
 						virtual CAbstractVariableMappingsCompositionJoinComputator* computeVariableMappingsComposition(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing);
 
 

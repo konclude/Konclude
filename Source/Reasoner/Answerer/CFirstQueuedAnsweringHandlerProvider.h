@@ -33,6 +33,7 @@
 
 // Other includes
 #include "Reasoner/Query/CComplexAnsweringQuery.h"
+#include "Reasoner/Query/CComplexAnsweringCompositionQuery.h"
 
 
 
@@ -73,7 +74,7 @@ namespace Konclude {
 					virtual ~CFirstQueuedAnsweringHandlerProvider();
 
 					virtual CAnsweringHandler* getAnsweringHandler(CComplexAnsweringQuery* complexAnsweringQuery);
-					virtual CAnsweringHandler* getAnsweringHandler(CConcreteOntology* ontology);
+					virtual CAnsweringHandler* getAnsweringHandler(CConcreteOntology* ontology, bool composedQuery);
 
 
 					virtual CAnsweringHandlerProvider* releaseAnsweringHandler(CAnsweringHandler* answeringHandler);

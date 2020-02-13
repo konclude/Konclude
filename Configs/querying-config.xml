@@ -56,5 +56,19 @@
 		<Literal>false</Literal>
 	</Set>	
 	
+
+
+
+
+
+
+
+	
+	
+	<!--Specifies whether Redland Rasqal is used for processing SPARQL queries. If enabled, BGPs of the query are precomputed by Konclude's query answering engine and their results are then appropriately incorporated.
+		If disabled (or if the Redland libraries are not integrated), only simple SPARQL queries with just one BGP are supported.-->
+	<Set key='Konclude.Answering.RedlandRasqalSPARQLQueryProcessing'>
+		<Literal>true</Literal>
+	</Set>	
 	
 </RequestMessage>

@@ -59,6 +59,7 @@ namespace Konclude {
 
 					CDatatypeValueSpaceConceptTriggeringData* initConceptTriggeringData(CDatatypeValueSpaceConceptTriggeringData* data);
 
+					bool hasConceptTriggers();
 
 					bool hasPartialConceptTriggers();
 
@@ -66,6 +67,11 @@ namespace Konclude {
 					CDatatypeValueSpaceConceptTriggeringData* setPartialConceptTriggerLinker(CDatatypeValueSpaceConceptTriggerLinker* conceptTiggerLinker);
 					CDatatypeValueSpaceConceptTriggeringData* appendPartialConceptTriggers(CDatatypeValueSpaceConceptTriggerLinker* conceptTiggerLinker);
 
+					bool hasCompleteConceptTriggers();
+
+					CDatatypeValueSpaceConceptTriggerLinker* getCompleteConceptTriggerLinker();
+					CDatatypeValueSpaceConceptTriggeringData* setCompleteConceptTriggerLinker(CDatatypeValueSpaceConceptTriggerLinker* conceptTiggerLinker);
+					CDatatypeValueSpaceConceptTriggeringData* appendCompleteConceptTriggers(CDatatypeValueSpaceConceptTriggerLinker* conceptTiggerLinker);
 
 				// protected methods
 				protected:
@@ -73,6 +79,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CDatatypeValueSpaceConceptTriggerLinker* mPartialTriggerLinker;
+					CDatatypeValueSpaceConceptTriggerLinker* mCompleteTriggerLinker;
 
 
 				// private methods

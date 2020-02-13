@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, COccurrenceStatisticsCacheReader* occStatsCacheReader) : COptimizedComplexVariableAbstractNonDisconnectingAbsorptionBasedQueryPartHandler(queryPart, ontoAnsweringItem, occStatsCacheReader) {
+			COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler::COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, COccurrenceStatisticsCacheReader* occStatsCacheReader) : COptimizedComplexVariableAbstractNonDisconnectingAbsorptionBasedQueryPartHandler(queryPart, ontoAnsweringItem, occStatsCacheReader) {
 				mConfCreateAlwaysBindingConcepts = true;
 				mConfPreabsorptionCount = 1;
 				mConfPrioritizePrepareVariables = true;

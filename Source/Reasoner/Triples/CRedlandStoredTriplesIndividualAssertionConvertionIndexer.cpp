@@ -109,87 +109,31 @@ namespace Konclude {
 					cint64 objectPropertyAssertionCount = 0;
 					cint64 dataPropertyAssertionCount = 0;
 
+					CIndividualNodeData* lastIndiData = nullptr;
+					librdf_node* lastSubjectNode = nullptr;
+
 					CXLinker<librdf_statement*>* statementLinker = redlandTriplesData->getRedlandStatementLinker();
 					if (statementLinker) {
 
-
-					//librdf_stream* stream = librdf_model_as_stream(redlandTriplesData->getRedlandIndexedModel());
-					//if (stream) {
-						CIndividualNodeData* lastIndiData = nullptr;
-						librdf_node* lastSubjectNode = nullptr;
-
-						//while (!librdf_stream_end(stream)) {
-
 						while (statementLinker) {
 
-							//librdf_statement* statement = librdf_stream_get_object(stream);
 							librdf_statement* statement = statementLinker->getData();
-							librdf_node* predicateNode = librdf_statement_get_predicate(statement);
-							librdf_node* objectNode = librdf_statement_get_object(statement);
-							librdf_node* subjectNode = librdf_statement_get_subject(statement);
+							identifyIndividuals(statement, rdfTypePredicate, namedIndividualObject, lastIndiData, lastSubjectNode, updateConcreteOntology, conceptAssertionCount, redlandTriplesData, dataPropertyAssertionCount, objectPropertyAssertionCount);
 
-							if (librdf_node_equals(predicateNode, rdfTypePredicate)) {
-								if (librdf_node_equals(objectNode, namedIndividualObject)) {
-									lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
-									lastIndiData->mIndividual->setAnonymousIndividual(false);
-								} else {
-									CConceptNodeData* conceptData = mConceptNodeDataHash.value(CRedlandNodeHasher(objectNode));
-									if (conceptData) {
-										lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
-										CConceptAssertionLinker* conceptAssertionLinker = CObjectAllocator<CConceptAssertionLinker>::allocateAndConstruct(mMemMan);
-										conceptAssertionLinker->initNegLinker(conceptData->mConcept, false);
-										lastIndiData->mIndividual->addAssertionConceptLinker(conceptAssertionLinker);
-										conceptAssertionCount++;
-									}
-									if (lastIndiData && librdf_node_is_resource(subjectNode)) {
-										lastIndiData->mIndividual->setAnonymousIndividual(false);
-									}
-								}
-							} else {
-								CRoleNodeData* roleData = mRoleNodeDataHash.value(CRedlandNodeHasher(predicateNode));
-								if (roleData) {
-									lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
-									if (librdf_node_is_resource(subjectNode)) {
-										lastIndiData->mIndividual->setAnonymousIndividual(false);
-									}
-									if (roleData->mDataRole) {
-										if (librdf_node_is_literal(objectNode)) {
-											const char* literalValue = (const char*)librdf_node_get_literal_value(objectNode);
-											librdf_uri* datatypeUri = librdf_node_get_literal_value_datatype_uri(objectNode);
-											CDatatype* datatype = getDatatypeFromDatatypeUri(datatypeUri, updateConcreteOntology, redlandTriplesData);
 
-											CDataLiteral* dataLiteral = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemMan, updateConcreteOntology->getDataBoxes()->getBoxContext());
-											dataLiteral->initDataLiteral(QString::fromUtf8(literalValue), datatype);
-
-											createDataLiteralValue(dataLiteral, updateConcreteOntology);
-
-											CDataAssertionLinker* dataAssertionLinker = CObjectAllocator<CDataAssertionLinker>::allocateAndConstruct(mMemMan);
-											dataAssertionLinker->initDataAssertionLinker(roleData->mRole, dataLiteral);
-
-											lastIndiData->mIndividual->addAssertionDataLinker(dataAssertionLinker);
-											dataPropertyAssertionCount++;
-										}
-									} else {
-										if (!librdf_node_is_literal(objectNode)) {
-											CIndividualNodeData* targetIndiNode = getIndividualData(objectNode, updateConcreteOntology);
-											if (librdf_node_is_resource(objectNode)) {
-												targetIndiNode->mIndividual->setAnonymousIndividual(false);
-											}
-											CRoleAssertionLinker* roleAssertionLinker = CObjectAllocator<CRoleAssertionLinker>::allocateAndConstruct(mMemMan);
-											roleAssertionLinker->initRoleAssertionLinker(roleData->mRole, targetIndiNode->mIndividual);
-											lastIndiData->mIndividual->addAssertionRoleLinker(roleAssertionLinker);
-											CReverseRoleAssertionLinker* reverseRoleAssertionLinker = CObjectAllocator<CReverseRoleAssertionLinker>::allocateAndConstruct(mMemMan);
-											reverseRoleAssertionLinker->initReverseRoleAssertionLinker(roleAssertionLinker, lastIndiData->mIndividual);
-											targetIndiNode->mIndividual->addReverseAssertionRoleLinker(reverseRoleAssertionLinker);
-											objectPropertyAssertionCount++;
-										}
-									}
-								}
-							}
-
-							//librdf_stream_next(stream);
 							statementLinker = statementLinker->getNext();
 						}
+					}  else {
+						librdf_stream* stream = librdf_model_as_stream(redlandTriplesData->getRedlandIndexedModel());
+						if (stream) {
+							while (!librdf_stream_end(stream)) {
+								librdf_statement* statement = librdf_stream_get_object(stream);
+								identifyIndividuals(statement, rdfTypePredicate, namedIndividualObject, lastIndiData, lastSubjectNode, updateConcreteOntology, conceptAssertionCount, redlandTriplesData, dataPropertyAssertionCount, objectPropertyAssertionCount);
+								librdf_stream_next(stream);
+							}
+							librdf_free_stream(stream);
+						}
+
 					}
 
 
@@ -306,6 +250,70 @@ namespace Konclude {
 				return datatype;
 			}
 
+			void CRedlandStoredTriplesIndividualAssertionConvertionIndexer::identifyIndividuals(librdf_statement* statement, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CIndividualNodeData* &lastIndiData, librdf_node* lastSubjectNode, CConcreteOntology* updateConcreteOntology, cint64 &conceptAssertionCount, CRedlandStoredTriplesData* redlandTriplesData, cint64 &dataPropertyAssertionCount, cint64 &objectPropertyAssertionCount) {
+				librdf_node* predicateNode = librdf_statement_get_predicate(statement);
+				librdf_node* objectNode = librdf_statement_get_object(statement);
+				librdf_node* subjectNode = librdf_statement_get_subject(statement);
+
+				if (librdf_node_equals(predicateNode, rdfTypePredicate)) {
+					if (librdf_node_equals(objectNode, namedIndividualObject)) {
+						lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
+						lastIndiData->mIndividual->setAnonymousIndividual(false);
+					} else {
+						CConceptNodeData* conceptData = mConceptNodeDataHash.value(CRedlandNodeHasher(objectNode));
+						if (conceptData) {
+							lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
+							CConceptAssertionLinker* conceptAssertionLinker = CObjectAllocator<CConceptAssertionLinker>::allocateAndConstruct(mMemMan);
+							conceptAssertionLinker->initNegLinker(conceptData->mConcept, false);
+							lastIndiData->mIndividual->addAssertionConceptLinker(conceptAssertionLinker);
+							conceptAssertionCount++;
+						}
+						if (lastIndiData && librdf_node_is_resource(subjectNode)) {
+							lastIndiData->mIndividual->setAnonymousIndividual(false);
+						}
+					}
+				} else {
+					CRoleNodeData* roleData = mRoleNodeDataHash.value(CRedlandNodeHasher(predicateNode));
+					if (roleData) {
+						lastIndiData = getIndividualData(subjectNode, lastIndiData, lastSubjectNode, updateConcreteOntology);
+						if (librdf_node_is_resource(subjectNode)) {
+							lastIndiData->mIndividual->setAnonymousIndividual(false);
+						}
+						if (roleData->mDataRole) {
+							if (librdf_node_is_literal(objectNode)) {
+								const char* literalValue = (const char*)librdf_node_get_literal_value(objectNode);
+								librdf_uri* datatypeUri = librdf_node_get_literal_value_datatype_uri(objectNode);
+								CDatatype* datatype = getDatatypeFromDatatypeUri(datatypeUri, updateConcreteOntology, redlandTriplesData);
+
+								CDataLiteral* dataLiteral = CObjectParameterizingAllocator<CDataLiteral, CContext*>::allocateAndConstructAndParameterize(mMemMan, updateConcreteOntology->getDataBoxes()->getBoxContext());
+								dataLiteral->initDataLiteral(QString::fromUtf8(literalValue), datatype);
+
+								createDataLiteralValue(dataLiteral, updateConcreteOntology);
+
+								CDataAssertionLinker* dataAssertionLinker = CObjectAllocator<CDataAssertionLinker>::allocateAndConstruct(mMemMan);
+								dataAssertionLinker->initDataAssertionLinker(roleData->mRole, dataLiteral);
+
+								lastIndiData->mIndividual->addAssertionDataLinker(dataAssertionLinker);
+								dataPropertyAssertionCount++;
+							}
+						} else {
+							if (!librdf_node_is_literal(objectNode)) {
+								CIndividualNodeData* targetIndiNode = getIndividualData(objectNode, updateConcreteOntology);
+								if (librdf_node_is_resource(objectNode)) {
+									targetIndiNode->mIndividual->setAnonymousIndividual(false);
+								}
+								CRoleAssertionLinker* roleAssertionLinker = CObjectAllocator<CRoleAssertionLinker>::allocateAndConstruct(mMemMan);
+								roleAssertionLinker->initRoleAssertionLinker(roleData->mRole, targetIndiNode->mIndividual);
+								lastIndiData->mIndividual->addAssertionRoleLinker(roleAssertionLinker);
+								CReverseRoleAssertionLinker* reverseRoleAssertionLinker = CObjectAllocator<CReverseRoleAssertionLinker>::allocateAndConstruct(mMemMan);
+								reverseRoleAssertionLinker->initReverseRoleAssertionLinker(roleAssertionLinker, lastIndiData->mIndividual);
+								targetIndiNode->mIndividual->addReverseAssertionRoleLinker(reverseRoleAssertionLinker);
+								objectPropertyAssertionCount++;
+							}
+						}
+					}
+				}
+			}
 
 		}; // end namespace Triples
 

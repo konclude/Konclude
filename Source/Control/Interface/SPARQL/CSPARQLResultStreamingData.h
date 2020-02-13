@@ -40,6 +40,7 @@
 #include "Reasoner/Query/CVariableBindingsAnswersStreamingHandler.h"
 #include "Reasoner/Query/CVariableBindingsAnswersConcurrentStreamingHandler.h"
 #include "Reasoner/Query/CVariableBindingsAnswersStreamingResult.h"
+#include "Reasoner/Query/CRedlandRasqalBGPsCompositionQuery.h"
 
 
 #include "Control/Command/Instructions/CQueryCommandProvider.h"

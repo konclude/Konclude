@@ -73,6 +73,9 @@ namespace Konclude {
 
 					virtual cint64 getResultCount();
 
+					virtual CVariableBindingsAnswersListResult* clear();
+
+
 
 				// protected methods
 				protected:

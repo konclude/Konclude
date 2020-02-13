@@ -71,7 +71,8 @@ namespace Konclude {
 					CDatatypeValueSpaceConceptTriggeringData* getMaxValueConceptTriggeringData(CDataLiteralCompareValue* value, bool inclusive, bool createOrLocalize = true);
 
 
-					CDatatypeValueSpaceCompareTriggers* addValueConceptTrigger(CDataLiteralCompareValue* value, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger);
+					CDatatypeValueSpaceCompareTriggers* addCompleteValueConceptTrigger(CDataLiteralCompareValue* value, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger);
+					CDatatypeValueSpaceCompareTriggers* addPartialValueConceptTrigger(CDataLiteralCompareValue* value, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger);
 					CDatatypeValueSpaceCompareTriggers* addMinValueConceptTrigger(CDataLiteralCompareValue* value, bool inclusive, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger);
 					CDatatypeValueSpaceCompareTriggers* addMaxValueConceptTrigger(CDataLiteralCompareValue* value, bool inclusive, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger);
 

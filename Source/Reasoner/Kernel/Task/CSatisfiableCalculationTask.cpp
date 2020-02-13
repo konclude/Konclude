@@ -84,6 +84,7 @@ namespace Konclude {
 					depSatCalcTask->mRepresentativeBackendUpdatingAdapter = mRepresentativeBackendUpdatingAdapter;
 					depSatCalcTask->mAnswererBindingPropagationAdapter = mAnswererBindingPropagationAdapter;
 					depSatCalcTask->mSatisfiablePossibleInstancesMergingAdapter = mSatisfiablePossibleInstancesMergingAdapter;
+					depSatCalcTask->mCancellationAdapter = mCancellationAdapter;
 					depSatCalcTask->mAnswererMaterializationAdapter = mAnswererMaterializationAdapter;
 					return this;
 				}
@@ -103,6 +104,7 @@ namespace Konclude {
 					mRepresentativeBackendUpdatingAdapter = nullptr;
 					mAnswererBindingPropagationAdapter = nullptr;
 					mSatisfiablePossibleInstancesMergingAdapter = nullptr;
+					mCancellationAdapter = nullptr;
 					mAnswererMaterializationAdapter = nullptr;
 					mSatIncConsTestingAdapter = nullptr;
 					getProcessContext(context);
@@ -125,6 +127,7 @@ namespace Konclude {
 					mRepresentativeBackendUpdatingAdapter = nullptr;
 					mAnswererBindingPropagationAdapter = nullptr;
 					mSatisfiablePossibleInstancesMergingAdapter = nullptr;
+					mCancellationAdapter = nullptr;
 					mSatIncConsTestingAdapter = nullptr;
 					mAnswererMaterializationAdapter = nullptr;
 					mSatIndDepTrackAdapter = nullptr;
@@ -151,6 +154,7 @@ namespace Konclude {
 					mRepresentativeBackendUpdatingAdapter = nullptr;
 					mAnswererMaterializationAdapter = nullptr;
 					mSatisfiablePossibleInstancesMergingAdapter = nullptr;
+					mCancellationAdapter = nullptr;
 					mCalcStatColl = calcStatCollector;
 					mCalculationConfig = calculationConfig;
 					mProcessingDataBox->initProcessingDataBox(baseTask->mProcessingDataBox);
@@ -362,6 +366,18 @@ namespace Konclude {
 				CSatisfiableTaskAnswererQueryingMaterializationAdapter* CSatisfiableCalculationTask::getSatisfiableAnswererMaterializationAdapter() {
 					return mAnswererMaterializationAdapter;
 				}
+
+
+
+				CSatisfiableCalculationTask* CSatisfiableCalculationTask::setCancellationAdapter(CSatisfiableTaskCancellationAdapter* cancelAdapter) {
+					mCancellationAdapter = cancelAdapter;
+					return this;
+				}
+
+				CSatisfiableTaskCancellationAdapter* CSatisfiableCalculationTask::getCancellationAdapter() {
+					return mCancellationAdapter;
+				}
+
 
 
 			}; // end namespace Task

@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexVariableAbstractAbsorptionBasedQueryPartHandler::COptimizedComplexVariableAbstractAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem) {
+			COptimizedComplexVariableAbstractAbsorptionBasedQueryPartHandler::COptimizedComplexVariableAbstractAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem) {
 				mQueryPart = queryPart;
 				mOntoAnsweringItem = ontoAnsweringItem;
 

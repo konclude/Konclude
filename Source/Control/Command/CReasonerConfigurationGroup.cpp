@@ -492,6 +492,33 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching",
+						"Determines whether the indexing data is stored in an external database.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching.DSNConfig",
+						"The DSN config for the external triples database for caching ABox individuals indexing data.",
+						new CStringConfigType("")),
+						new CStringConfigType("dsn='VirtuosoTest',user='dba',password='dba'"));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching.TriplesDatabaseName",
+						"The name of the external triples database for caching ABox individuals indexing data.",
+						new CStringConfigType("http://Konclude.com/ReasoningData/$PercentEncodedKnowledgeBaseName/ABoxIndexingCache")),
+						new CStringConfigType("http://Konclude.com/ReasoningData/$PercentEncodedKnowledgeBaseName/ABoxIndexingCache"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching.CacheSize",
+						"Specifies the size of the cache for indexing data of ABox individuals.",
+						new CIntegerConfigType(1500000)),
+						new CIntegerConfigType(1500000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching.ClearAtInit",
+						"Determines whether the external database is cleared on initializing the ABox individuals indexing cache, i.e., all present triples are rmoved.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.ForceInverseRoleCreation",
 						"Determines whether the creation of inverse roles is forced.",
@@ -1394,6 +1421,82 @@ namespace Konclude {
 						new CIntegerConfigType(75));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.MaxVariableMappingsPropagationsInitializationIndividualCount",
+						"Determines the maximum number of initialization individuals for variable mapping propagations tests.",
+						new CIntegerConfigType(50000)),
+						new CIntegerConfigType(50000));
+
+
+
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalSPARQLQueryProcessing",
+					"Determines whether SPARQL queries are processed with Redland Rasqal.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalReasoningSubBGPQueryAnswerVariableReduction",
+					"Determines whether the answer variables for extracted sub-queries of BGPs from SPARQL queries processed with Redland Rasqal are reduced by checking whether they have other occurrences in the query.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalMinimizeBGPSubQueryTriples",
+					"Determines whether the triples of BGPs are reduced/minimized if bindings can be transferred with less triples.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalReasoningSubBGPQueryDistinctPropagation",
+					"Determines whether the DISTINCT modifier is used for suitable BGP sub-queries of SPARQL queries processed with Redland Rasqal (if there are no aggregates, etc.).",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalSingleSubBGPQueryAllowsDirectResultStreaming",
+					"Determines whether the results of the only BGP sub-query of a SPARQL query are directly streamed (if supported) instead of processing the query with Redland Rasqal.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.LogCompositionQueriesProcessingProgressStatistics",
+					"Determines whether the processing progress statistics are logged for complex composition queries.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.LogCompositionQueriesProcessingFinishedStatistics",
+					"Determines whether the processing statistics are logged for complex composition queries if the processing is finished.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteRedlandRasqalQueryStructure",
+					"Determines whether the parsed Redland Rasqal query structure/patterns are written to file.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalReasoningSubBGPQueryForceDistinct",
+					"Determines whether the extracted sub-queries of BGPs from SPARQL queries are always considered distinct.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalSubQueriesDependencyIdentification",
+					"Determines whether dependencies between extracted sub-queries of BGPs from SPARQL queries are identified such that results from dependent sub-queries can be used to restrict bindings.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.RedlandRasqalSubQueriesFollowingRestrictionsIntegration",
+					"Determines whether (triple pattern) restrictions of following BGPs from SPARQL queries are integrated in extracted sub-queries (without influencing cardinality of answers) such that less results may be determined.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
 				// Testing/Debugging configurations
 
 
@@ -2023,7 +2126,7 @@ namespace Konclude {
 						new CBooleanConfigType(true));
 
 				addConfigProperty(new CConfigDescription("Konclude.Parser.RedlandRaptor.LoadTriplesIntoStore",
-						"Determines whether triples are loaded into the redland triple store such that the non-trivial OWL 2 axiom can be retrieved.",
+						"Determines whether triples are loaded into the redland triple store such that non-trivial OWL 2 axioms can be retrieved.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
@@ -2051,7 +2154,7 @@ namespace Konclude {
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.CloseAfterProcessedRequest",
-						"Close program after the OWLlink response has processed.",
+						"Close program after the OWLlink response is processed.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
 				addConfigProperty(new CConfigDescription("Konclude.OWLlink.BlockUntilProcessedRequest",

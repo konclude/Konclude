@@ -88,6 +88,7 @@ namespace Konclude {
 
 
 
+
 				// protected functions
 				protected:
 
@@ -108,6 +109,7 @@ namespace Konclude {
 					CDatatype* getDatatypeFromDatatypeUri(librdf_uri* uri, CConcreteOntology* ontology, CRedlandStoredTriplesData* ontologyTripleData);
 					CDataLiteralValue* createDataLiteralValue(CDataLiteral* dataLiteral, CConcreteOntology* ontology);
 
+					void identifyIndividuals(librdf_statement* statement, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CIndividualNodeData* &lastIndiData, librdf_node* lastSubjectNode, CConcreteOntology* updateConcreteOntology, cint64 &conceptAssertionCount, CRedlandStoredTriplesData* redlandTriplesData, cint64 &dataPropertyAssertionCount, cint64 &objectPropertyAssertionCount);
 
 				// protected variables
 				protected:

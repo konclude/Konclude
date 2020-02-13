@@ -41,6 +41,8 @@ namespace Konclude {
 			mKeywordSet.insert("CREATE");
 			mKeywordSet.insert("DROP");
 			mKeywordSet.insert("PREPARE");
+			mKeywordSet.insert("CONNECT");
+			mSubKeywordSet.insert("SELECT");
 
 			mPrefixHash.insert("rdf", "http://www.w3.org/1999/02/22-rdf-syntax-ns#");
 
@@ -64,12 +66,19 @@ namespace Konclude {
 				while (!file.atEnd()) {
 					QString line(file.readLine());
 					cint64 linePos = 0;
+					cint64 bracketDepth = 0;
 					while (linePos != line.length()) {
 						QString partString = getNextPart(line, linePos);
 						if (!partString.isEmpty()) {
-							if (isKeyword(partString) && !partStringList.isEmpty()) {
+							if (partString == "{") {
+								bracketDepth++;
+							} else if (partString == "}") {
+								bracketDepth--;
+							}
+							if (isKeyword(partString) && (bracketDepth == 0 || !isSubKeyword(partString)) && !partStringList.isEmpty()) {
 								processParts(partStringList);
 								partStringList.clear();
+								bracketDepth = 0;
 							}
 							partStringList.append(partString);
 						}
@@ -94,12 +103,19 @@ namespace Konclude {
 			QStringList partStringList;
 			QString line(filetext);
 			cint64 linePos = 0;
+			cint64 bracketDepth = 0;
 			while (linePos != line.length()) {
 				QString partString = getNextPart(line, linePos);
 				if (!partString.isEmpty()) {
-					if (isKeyword(partString) && !partStringList.isEmpty()) {
+					if (partString == "{") {
+						bracketDepth++;
+					} else if (partString == "}") {
+						bracketDepth--;
+					}
+					if (isKeyword(partString) && (bracketDepth == 0 || !isSubKeyword(partString)) && !partStringList.isEmpty()) {
 						processParts(partStringList);
 						partStringList.clear();
+						bracketDepth = 0;
 					}
 					partStringList.append(partString);
 				}
@@ -116,6 +132,9 @@ namespace Konclude {
 			return mKeywordSet.contains(part.toUpper());
 		}
 
+		bool CSPARQLKnowledgeBaseSplittingOperationParser::isSubKeyword(const QString& part) {
+			return mSubKeywordSet.contains(part.toUpper());
+		}
 
 
 		bool CSPARQLKnowledgeBaseSplittingOperationParser::processParts(QStringList& parsedParts) {
@@ -158,7 +177,9 @@ namespace Konclude {
 						partString = partString.toUpper();
 
 						fromIRIString = getGraphName(partString, parsedParts, queryStringList, false);
-
+						if (!fromIRIString.isEmpty()) {
+							fromClauseFound = true;
+						}
 
 						if (partString == "{") {
 							whereClauseStarted = true;
@@ -190,7 +211,7 @@ namespace Konclude {
 
 						partString = partString.toUpper();
 
-						graphIRIString = getGraphName(partString, parsedParts, updateStringList, false);
+						graphIRIString = getGraphName(partString, parsedParts, updateStringList, true);
 						if (!graphIRIString.isEmpty()) {
 							fromClauseFound = true;
 						}
@@ -209,7 +230,7 @@ namespace Konclude {
 
 
 					if (!whereClauseFinished) {
-						QStringList whereClauseStringList = getBracketContent(parsedParts, '{', '}', whereClauseStarted, true);
+						QStringList whereClauseStringList = getBracketContent(parsedParts, '{', '}', whereClauseStarted, false);
 						updateStringList += whereClauseStringList;
 					}
 					if (!mKnowledgeBaseQueryStringListHash.contains(graphIRIString)) {
@@ -275,6 +296,28 @@ namespace Konclude {
 						QString upperPartString = partString.toUpper();
 						if (upperPartString != "QUERYING") {
 							graphIRIString = getGraphName(partString, parsedParts, manageStringList, false);
+						}
+					}
+
+					if (!mKnowledgeBaseQueryStringListHash.contains(graphIRIString)) {
+						mKnowledgeBaseList.append(graphIRIString);
+					}
+					addKnowledgeBaseOperation(new CSPARQLKnowledgeBaseSplittingOperationData(CSPARQLKnowledgeBaseSplittingOperationData::SPARQL_UPDATE_MANAGE, graphIRIString, manageStringList));
+
+				} else if (keyword == "CONNECT") {
+					QStringList manageStringList;
+					manageStringList += mCommonPartStringList;
+					manageStringList.append(keyword);
+					QString graphIRIString;
+					while (!parsedParts.isEmpty() && graphIRIString.isEmpty()) {
+						QString partString = parsedParts.takeFirst();
+						manageStringList.append(partString);
+
+						QString upperPartString = partString.toUpper();
+						if (upperPartString != "WITH") {
+							graphIRIString = getGraphName(partString, parsedParts, manageStringList, false);
+						} else if (!parsedParts.isEmpty()) {
+							manageStringList.append(parsedParts.takeFirst());
 						}
 					}
 

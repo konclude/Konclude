@@ -422,6 +422,8 @@ namespace Konclude {
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
 						}
 
+						//reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
+						//reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
 						reqList = mRequirementExpander->getUnsatisfiedRequirementsExpanded(reqList, ontology);
 						foreach(COntologyProcessingRequirement* ontReq, reqList) {
 							ontReqList.append(COntologyRequirementPair(ontology, ontReq));

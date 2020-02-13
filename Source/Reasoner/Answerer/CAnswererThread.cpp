@@ -151,6 +151,7 @@ namespace Konclude {
 					continueCalculationCreation();
 					return true;
 				} else if (type == CAnsweringRequirementCompletedEvent::EVENTTYPE) {
+					//sleep(6);
 					--mCurrRunningRequirementParallelCount;
 					CAnsweringRequirementCompletedEvent* ame = (CAnsweringRequirementCompletedEvent *)event;
 					CAnsweringHandler* answeringHandler = ame->getAnsweringHandler();
@@ -250,7 +251,15 @@ namespace Konclude {
 				return this;
 			}
 
-
+			CAnsweringCalculationHandler* CAnswererThread::answerSubQuery(CAnsweringHandler* handler, CQuery* query, CAnsweringMessageData* finishedMessage) {
+				++mStatRequirmentSubmitted;
+				++mCurrRunningRequirementParallelCount;
+				CAnsweringHandlerData* handlerData = mHandlerHandlerDataHash.value(handler);
+				handlerData->mRequirmentProcessingCount++;
+				CAnsweringRequirementCompletedEvent* callbackEvent = new CAnsweringRequirementCompletedEvent(this, handler, finishedMessage);
+				mReasonerManager->reasoningQuery(query, callbackEvent);
+				return this;
+			}
 
 			CAnsweringCalculationHandler* CAnswererThread::postCalculation(CAnsweringHandler* handler, CSatisfiableCalculationJob* satCalcJob, CAnsweringMessageData* finishedMessage, CCallbackDataContext* callbackContext) {
 				++mStatCalculationJobsSubmitted;

@@ -34,7 +34,7 @@ namespace Konclude {
 				mVariableCompositionItem = nullptr;
 			}
 
-			CComplexQueryProcessingData* CComputedItemDataNotificationLinker::getQueryProcessingData() {
+			CComplexQueryExpressionProcessingData* CComputedItemDataNotificationLinker::getQueryProcessingData() {
 				return getData();
 			}
 
@@ -48,7 +48,7 @@ namespace Konclude {
 
 
 
-			CComputedItemDataNotificationLinker* CComputedItemDataNotificationLinker::setQueryProcessingData(CComplexQueryProcessingData* data) {
+			CComputedItemDataNotificationLinker* CComputedItemDataNotificationLinker::setQueryProcessingData(CComplexQueryExpressionProcessingData* data) {
 				setData(data);
 				return this;
 			}

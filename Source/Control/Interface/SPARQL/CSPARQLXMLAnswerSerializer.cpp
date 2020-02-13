@@ -270,9 +270,9 @@ namespace Konclude {
 								++varListIt;
 
 								CVariableBindingResult* varBin = varBindIt->getNext();
+								QDomElement bindingEl = document.createElement("binding");
+								bindingEl.setAttribute("name", varString);
 								if (varBin) {
-									QDomElement bindingEl = document.createElement("binding");
-									bindingEl.setAttribute("name", varString);
 									if (varBin->isNamedIndividualBindingType()) {
 										QDomElement uriEl = document.createElement("uri");
 										uriEl.appendChild(document.createTextNode(varBin->getQueryResultString()));
@@ -289,8 +289,11 @@ namespace Konclude {
 										uriEl.appendChild(document.createTextNode(varBin->getLiteralDatavalueBindingString()));
 										bindingEl.appendChild(uriEl);
 									}
-									resultEl.appendChild(bindingEl);
+								} else {
+									QDomElement unboundEl = document.createElement("unbound");
+									bindingEl.appendChild(unboundEl);
 								}
+								resultEl.appendChild(bindingEl);
 							}
 							resultsElement.appendChild(resultEl);
 						}

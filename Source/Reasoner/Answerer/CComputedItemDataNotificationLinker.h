@@ -58,18 +58,18 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CComputedItemDataNotificationLinker : public CLinkerBase<CComplexQueryProcessingData*, CComputedItemDataNotificationLinker> {
+			class CComputedItemDataNotificationLinker : public CLinkerBase<CComplexQueryExpressionProcessingData*, CComputedItemDataNotificationLinker> {
 				// public methods
 				public:
 					//! Constructor
 					CComputedItemDataNotificationLinker();
 
-					CComplexQueryProcessingData* getQueryProcessingData();
+					CComplexQueryExpressionProcessingData* getQueryProcessingData();
 					COptimizedComplexBuildingVariableCompositionsItem* getBuildingVariableItemProcessingItem();
 					COptimizedComplexVariableCompositionItem* getVariableCompositionItem();
 
 
-					CComputedItemDataNotificationLinker* setQueryProcessingData(CComplexQueryProcessingData* data);
+					CComputedItemDataNotificationLinker* setQueryProcessingData(CComplexQueryExpressionProcessingData* data);
 					CComputedItemDataNotificationLinker* setBuildingVariableItemProcessingItem(COptimizedComplexBuildingVariableCompositionsItem* item);
 					CComputedItemDataNotificationLinker* setVariableCompositionItem(COptimizedComplexVariableCompositionItem* item);
 

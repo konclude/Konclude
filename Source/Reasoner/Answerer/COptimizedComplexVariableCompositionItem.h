@@ -69,7 +69,7 @@ namespace Konclude {
 					virtual ~COptimizedComplexVariableCompositionItem();
 
 					enum COMPOSITION_TYPE {
-						CONCEPT_BASE, ROLE_PROPAGATION, JOINING, DATA_LITERAL_BASE, DATA_LITERAL_EXTENSION, ABSOROPTION_BASED_EXTENSION, BINDING_REDUCTION, ROLE_PROPAGATION_JOIN, ROLE_PROPAGATION_REPLACEMENT
+						CONCEPT_BASE, ROLE_PROPAGATION, JOINING, DATA_LITERAL_BASE, DATA_LITERAL_EXTENSION, ABSOROPTION_BASED_EXTENSION, BINDING_REDUCTION, ROLE_PROPAGATION_JOIN, ROLE_PROPAGATION_REPLACEMENT, BINDING_EXTRACTION
 					};
 
 
@@ -118,6 +118,7 @@ namespace Konclude {
 
 					COptimizedComplexVariableDataLiteralExtensionItem*& getDataLiteralExtensionItem(CRole* dataRole, cint64 varIdx);
 					COptimizedComplexVariableReductionItem*& getReductionItem(cint64 varIdx);
+					COptimizedComplexVariableExtractionItem*& getExtractionItem(cint64 varIdx);
 
 
 					QList<COptimizedComplexVariableCompositionItem*>* getComputationDependentItemList();
@@ -184,6 +185,7 @@ namespace Konclude {
 					QHash< QPair<CRole*, cint64>, COptimizedComplexVariableDataLiteralExtensionItem* > mDataLiteralExtensionItemHash;
 
 					QHash< cint64, COptimizedComplexVariableReductionItem* > mReductionItemHash;
+					QHash< cint64, COptimizedComplexVariableExtractionItem* > mExtractionItemHash;
 
 
 					QList<COptimizedComplexVariableCompositionItem*> mComputationDependentItemList;

@@ -230,6 +230,7 @@ namespace Konclude {
 
 								if (totallyPreCompItem->hasConsistenceCheched()) {
 									LOG(INFO,getLogDomain(),logTr("Consistency computation completed."),this);
+									totallyPreCompItem->setSaturationStepRunning(false);
 									totallyPreCompItem->getConsistencePrecomputationStep()->setStepFinished(true);
 
 									COntologyProcessingStatistics* ontProcStats = totallyPreCompItem->getConsistencePrecomputationStep()->getProcessingStepData()->getProcessingStatistics(true);
@@ -321,13 +322,14 @@ namespace Konclude {
 
 
 
-					if (!workTestCreated && totallyPreCompItem->isSaturationStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->hasIndividualSaturationRunning() && !totallyPreCompItem->isIndividualStepRunning()) {
+					if (!workTestCreated && totallyPreCompItem->isSaturationStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->hasIndividualSaturationRunning() && !totallyPreCompItem->isIndividualStepRunning() && !totallyPreCompItem->isSaturationComputationRunning()) {
 						if (!totallyPreCompItem->isSaturationStepFinished()) {
 							if (totallyPreCompItem->areSaturationStepProcessingRequirementSatisfied()) {
 
 
 								if (totallyPreCompItem->hasRemainingRequiredSaturationConcepts() && !totallyPreCompItem->isSaturationComputationRunning()) {
 									if (saturateRemainingRequiredItems(totallyPreCompItem)) {
+										totallyPreCompItem->setSaturationStepRunning(true);
 										totallyPreCompItem->setSaturationComputationRunning(true);
 										workTestCreated = true;
 									}
@@ -366,7 +368,6 @@ namespace Konclude {
 								}
 
 							} else {
-								totallyPreCompItem->setSaturationStepRunning(false);
 								totallyPreCompItem->getSaturationPrecomputationStep()->setStepFinished(true);
 								totallyPreCompItem->getSaturationPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
 							}
@@ -380,7 +381,7 @@ namespace Konclude {
 
 
 
-					if (!workTestCreated && totallyPreCompItem->isOccurrenceStatisticsStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->isSaturationStepRunning() && !totallyPreCompItem->isIndividualComputationRunning()) {
+					if (!workTestCreated && totallyPreCompItem->isOccurrenceStatisticsStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->isSaturationStepRunning() && !totallyPreCompItem->isIndividualComputationRunning() && !totallyPreCompItem->isSaturationComputationRunning()) {
 						if (!totallyPreCompItem->isOccurrenceStatisticsStepFinished()) {
 							if (totallyPreCompItem->areOccurrenceStatisticsStepProcessingRequirementSatisfied()) {
 
@@ -416,7 +417,7 @@ namespace Konclude {
 
 
 
-					if (!workTestCreated && totallyPreCompItem->isCycleStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->isSaturationStepRunning() && !totallyPreCompItem->isIndividualComputationRunning()) {
+					if (!workTestCreated && totallyPreCompItem->isCycleStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->isSaturationStepRunning() && !totallyPreCompItem->isIndividualComputationRunning() && !totallyPreCompItem->isSaturationComputationRunning()) {
 						if (!totallyPreCompItem->isCycleStepFinished()) {
 							if (totallyPreCompItem->areCycleStepProcessingRequirementSatisfied()) {
 								if (!totallyPreCompItem->hasConceptCyclePrecomputationChecked()) {

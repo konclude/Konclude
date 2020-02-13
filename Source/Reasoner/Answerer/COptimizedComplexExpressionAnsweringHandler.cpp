@@ -18,7 +18,7 @@
  *
  */
 
-#include "COptimizedComplexConceptAnsweringHandler.h"
+#include "COptimizedComplexExpressionAnsweringHandler.h"
 
 namespace Konclude {
 
@@ -30,7 +30,7 @@ namespace Konclude {
 
 
 
-			COptimizedComplexConceptAnsweringHandler::COptimizedComplexConceptAnsweringHandler(COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem) : CAnsweringHandler(), CLogDomain("::Konclude::Reasoner::Kernel::Answerer") {
+			COptimizedComplexExpressionAnsweringHandler::COptimizedComplexExpressionAnsweringHandler(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem) : CAnsweringHandler(), CLogDomain("::Konclude::Reasoner::Kernel::ComplexExpressionQueryAnswerer") {
 				mOntoAnsweringItem = ontoAnsweringItem;
 				mConfDebugTestingOntologyWriting = false;
 				mConfInterpretNonAnswerIndividualVariablesAsAnonymousVariables = false;
@@ -47,7 +47,7 @@ namespace Konclude {
 				mConfDebugWriteVariableCompositionItems = false;
 				mConfSamplingBasedJoinMappingSize = 1000;
 				mConfBindingReducingForNonDistinctAnswerQueries = true;
-				mConfDetailedMissingEntityReporting = false;
+				mConfDetailedMissingEntityReporting = true;
 
 				mConfDistinctUnecessaryVariablesReduction = true;
 				mConfAlwaysUnecessaryVariablesReduction = false;
@@ -130,6 +130,8 @@ namespace Konclude {
 				mConfAlwaysUnecessaryVariablesReduction = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.AlwaysUnecessaryVariablesReductionBeforeAnswerGeneration", false);
 
 
+				mConfMaxVariableBindingPropagationsInitializationIndividualCount = 50000;
+				mConfMaxVariableBindingPropagationsInitializationIndividualCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.MaxVariableMappingsPropagationsInitializationIndividualCount", 50000);
 
 				mAnsweringStartTime.start();
 				mTestingOntologyPreprocessor = new COntologyQueryExtendedConfigDependedPreProcesser();
@@ -159,27 +161,36 @@ namespace Konclude {
 			}
 
 
-			COptimizedComplexConceptAnsweringHandler::~COptimizedComplexConceptAnsweringHandler() {
+			COptimizedComplexExpressionAnsweringHandler::~COptimizedComplexExpressionAnsweringHandler() {
 				delete mOntoAnsweringItem;
 				delete mTestingOntologyPreprocessor;
 				delete mTestingOntologyBuilder;
 			}
 
+			bool COptimizedComplexExpressionAnsweringHandler::canAnsweringComplexQuery(bool composedQuery) {
+				return !composedQuery;
+			}
 
+			bool COptimizedComplexExpressionAnsweringHandler::canAnsweringComplexQuery(CComplexAnsweringQuery* complexAnsweringQuery) {
+				if (dynamic_cast<CComplexAnsweringExpressionQuery*>(complexAnsweringQuery)) {
+					return true;
+				}
+				return false;
+			}
 
-			bool COptimizedComplexConceptAnsweringHandler::addAnsweringComplexQuery(CComplexAnsweringQuery* complexAnsweringQuery, CCallbackData* callback) {
-				mPendingQueryProcessingList.append(new CComplexQueryProcessingData(complexAnsweringQuery, callback));
+			bool COptimizedComplexExpressionAnsweringHandler::addAnsweringComplexQuery(CComplexAnsweringQuery* complexAnsweringQuery, CCallbackData* callback) {
+				mPendingQueryProcessingList.append(new CComplexQueryExpressionProcessingData((CComplexAnsweringExpressionQuery*)complexAnsweringQuery, callback));
 				return true;
 			}
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::initializeProcessing(CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::initializeProcessing(CAnswererContext* answererContext) {
 				if (!mOntoAnsweringItem->isOntologyBuildingAndPreprocessingPrepared()) {
 					prepareProcessing(answererContext);
 				}
 				while (!mPendingQueryProcessingList.isEmpty()) {
-					CComplexQueryProcessingData* queryData = mPendingQueryProcessingList.takeFirst();
+					CComplexQueryExpressionProcessingData* queryData = mPendingQueryProcessingList.takeFirst();
 
 					CAnsweringHandlingStatistics* stats = mOntoAnsweringItem->getAnsweringHandlingStatistics();
 					if (stats) {
@@ -195,7 +206,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::prepareProcessing(CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::prepareProcessing(CAnswererContext* answererContext) {
 				if (!mOntoAnsweringItem->isOntologyBuildingAndPreprocessingPrepared()) {
 					LOG(INFO, getDomain(), logTr("Preparing query answering handler."), this);
 					mTestingOntologyBuilder->prepareRebuildingUpdates();
@@ -220,7 +231,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::initializeComplexConceptQueryProcessing(CComplexQueryProcessingData* queryProcessingData, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CClassTermExpression* classTermExpOfInt, bool satisfiableComputationRequired, bool superClassNodesComputationRequired, bool subClassNodesComputationRequired, bool equivalentClassNodesComputationRequired, bool subClassRealizationRequired, cint64 instanceComputationRequiredCount, COptimizedComplexConceptItem** assocConceptItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::initializeComplexConceptQueryProcessing(CComplexQueryExpressionProcessingData* queryProcessingData, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CClassTermExpression* classTermExpOfInt, bool satisfiableComputationRequired, bool superClassNodesComputationRequired, bool subClassNodesComputationRequired, bool equivalentClassNodesComputationRequired, bool subClassRealizationRequired, cint64 instanceComputationRequiredCount, COptimizedComplexConceptItem** assocConceptItem) {
 				CConcept* testingConcept = mOntoAnsweringItem->getTestingOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getClassTermConceptMappingHash()->value(classTermExpOfInt);
 				bool testingNegation = testingConcept->hasMappingNegation();
 				return initializeComplexConceptQueryProcessing(queryProcessingData, buildingVarItem, testingConcept, testingNegation, satisfiableComputationRequired, superClassNodesComputationRequired, subClassNodesComputationRequired, equivalentClassNodesComputationRequired, subClassRealizationRequired, instanceComputationRequiredCount, assocConceptItem);
@@ -228,7 +239,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::initializeComplexConceptQueryProcessing(CComplexQueryProcessingData* queryProcessingData, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CConcept* testingConcept, bool testingNegation, bool satisfiableComputationRequired, bool superClassNodesComputationRequired, bool subClassNodesComputationRequired, bool equivalentClassNodesComputationRequired, bool subClassRealizationRequired, cint64 instanceComputationRequiredCount, COptimizedComplexConceptItem** assocConceptItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::initializeComplexConceptQueryProcessing(CComplexQueryExpressionProcessingData* queryProcessingData, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CConcept* testingConcept, bool testingNegation, bool satisfiableComputationRequired, bool superClassNodesComputationRequired, bool subClassNodesComputationRequired, bool equivalentClassNodesComputationRequired, bool subClassRealizationRequired, cint64 instanceComputationRequiredCount, COptimizedComplexConceptItem** assocConceptItem) {
 				bool created = false;
 				COptimizedComplexConceptItem* conceptItem = mOntoAnsweringItem->getComplexConceptItem(testingConcept, testingNegation, true, &created);
 				if (assocConceptItem) {
@@ -317,7 +328,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::initializeQueryProcessingStep(CComplexConceptStepComputationProcess* compStep, COptimizedComplexConceptItem* conceptItem, CComplexQueryProcessingData* queryProcessingData, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::initializeQueryProcessingStep(CComplexConceptStepComputationProcess* compStep, COptimizedComplexConceptItem* conceptItem, CComplexQueryExpressionProcessingData* queryProcessingData, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				if (compStep->isComputationProcessFinished()) {
 					return false;
 				} else {
@@ -348,7 +359,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::checkHasNewTopRolePropagation(CConcept* concept, bool conceptNegation) {
+			bool COptimizedComplexExpressionAnsweringHandler::checkHasNewTopRolePropagation(CConcept* concept, bool conceptNegation) {
 				CRole* topRole = mOntoAnsweringItem->getTestingOntology()->getRBox()->getTopObjectRole();
 				QList<CConcept*> testingList;
 				QSet<CConcept*> testedSet;
@@ -381,7 +392,7 @@ namespace Konclude {
 			}
 
 
-			COptimizedComplexConceptAnsweringHandler* COptimizedComplexConceptAnsweringHandler::readConfig() {
+			COptimizedComplexExpressionAnsweringHandler* COptimizedComplexExpressionAnsweringHandler::readConfig() {
 				CCalculationConfigurationExtension* config = mOntoAnsweringItem->getCalculationConfiguration();
 				mConfDebugTestingOntologyWriting = config->isDebuggingWriteDataActivated();
 
@@ -391,10 +402,19 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::checkUsesQueryOnlyKnownEntities(CConcreteOntology* expressionOntology) {
+			bool COptimizedComplexExpressionAnsweringHandler::checkUsesQueryOnlyKnownEntities(CConcreteOntology* expressionOntology) {
 				COntologyBuildData* expressionOntologyBuildData = expressionOntology->getBuildData();
 				COntologyBuildData* baseOntologyBuildData = mOntoAnsweringItem->getOntology()->getBuildData();
 				if (baseOntologyBuildData->getClassEntityBuildHash()->size() != expressionOntologyBuildData->getClassEntityBuildHash()->size()) {
+					if (mConfDetailedMissingEntityReporting) {
+						for (CBUILDHASH<CStringRefStringHasher, CClassExpression*>::const_iterator it = expressionOntologyBuildData->getClassEntityBuildHash()->constBegin(), itEnd = expressionOntologyBuildData->getClassEntityBuildHash()->constEnd(); it != itEnd; ++it) {
+							CClassExpression* classEx = it.value();
+							if (!baseOntologyBuildData->getClassEntityBuildHash()->contains(classEx->getName())) {
+								LOG(WARN, getDomain(), logTr("Class %1 not used in queried ontology.").arg(classEx->getName()), this);
+								return false;
+							}
+						}
+					}
 					return false;
 				}
 				if (baseOntologyBuildData->getDataPropertyEntityBuildHash()->size() != expressionOntologyBuildData->getDataPropertyEntityBuildHash()->size()) {
@@ -469,7 +489,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::tryEmbedVariableRestrictions(CExpressionVariable* varTesting, CExpressionVariable* varEmbedding, QHash<CExpressionVariable*, CExpressionVariable*>& varExpEmbeddingHash, 
+			bool COptimizedComplexExpressionAnsweringHandler::tryEmbedVariableRestrictions(CExpressionVariable* varTesting, CExpressionVariable* varEmbedding, QHash<CExpressionVariable*, CExpressionVariable*>& varExpEmbeddingHash, 
 					const QHash<CExpressionVariable*, CAxiomExpression*>& varExpAxiomExpHash, const QSet<CExpressionVariable*>& anonymousIndiVariableSet, const QSet<CExpressionVariable*>& answerIndiVariableSet, CAnswererContext* answererContext) {
 
 				if (varExpEmbeddingHash.value(varTesting) == varEmbedding) {
@@ -701,7 +721,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::tryEmbedVariablesObjectPropertyAssertionList(CExpressionVariable* varTesting, CExpressionVariable* varEmbedding, const QList<CObjectPropertyAssertionExpression*>& remainingEmbedObjPropList, const QHash<CRolePropertiesHierarchyNode*, CObjectPropertyAssertionExpression*>& embeddingHierNodeObjectPropAssHash, const QHash<CRolePropertiesHierarchyNode*, CObjectPropertyAssertionExpression*>& embeddingHierNodeInvObjectPropAssHash,
+			bool COptimizedComplexExpressionAnsweringHandler::tryEmbedVariablesObjectPropertyAssertionList(CExpressionVariable* varTesting, CExpressionVariable* varEmbedding, const QList<CObjectPropertyAssertionExpression*>& remainingEmbedObjPropList, const QHash<CRolePropertiesHierarchyNode*, CObjectPropertyAssertionExpression*>& embeddingHierNodeObjectPropAssHash, const QHash<CRolePropertiesHierarchyNode*, CObjectPropertyAssertionExpression*>& embeddingHierNodeInvObjectPropAssHash,
 					QHash<CExpressionVariable*, CExpressionVariable*>& varExpEmbeddingHash, const QHash<CExpressionVariable*, CAxiomExpression*>& varExpAxiomExpHash, const QSet<CExpressionVariable*>& anonymousIndiVariableSet, const QSet<CExpressionVariable*>& answerIndiVariableSet, CAnswererContext* answererContext) {
 
 				if (!remainingEmbedObjPropList.isEmpty()) {
@@ -780,7 +800,7 @@ namespace Konclude {
 
 
 
-			QList<CExpressionVariable*> COptimizedComplexConceptAnsweringHandler::getRedundantlyEmbeddedVariables(QHash<CExpressionVariable*, CAxiomExpression*>& varExpAxiomExpHash, const QSet<CExpressionVariable*>& anonymousIndiVariableSet, const QSet<CExpressionVariable*>& answerIndiVariableSet, CComplexQueryProcessingData* queryProcessingData, CAnswererContext* answererContext) {
+			QList<CExpressionVariable*> COptimizedComplexExpressionAnsweringHandler::getRedundantlyEmbeddedVariables(QHash<CExpressionVariable*, CAxiomExpression*>& varExpAxiomExpHash, const QSet<CExpressionVariable*>& anonymousIndiVariableSet, const QSet<CExpressionVariable*>& answerIndiVariableSet, CComplexQueryExpressionProcessingData* queryProcessingData, CAnswererContext* answererContext) {
 
 				CRolePropertiesHierarchy* rolePropertyHierarchy = mOntoAnsweringItem->getOntology()->getClassification()->getObjectPropertyRoleClassification()->getRolePropertiesHierarchy();
 				QHash<CExpressionVariable*, CExpressionVariable*> varExpEmbeddingHash;
@@ -889,7 +909,7 @@ namespace Konclude {
 
 
 
-			QList<CAxiomExpression*> COptimizedComplexConceptAnsweringHandler::eliminateRedundantQueryTerms(const QList<CAxiomExpression*>& assExps, CComplexQueryProcessingData* queryProcessingData, CAnswererContext* answererContext) {
+			QList<CAxiomExpression*> COptimizedComplexExpressionAnsweringHandler::eliminateRedundantQueryTerms(const QList<CAxiomExpression*>& assExps, CComplexQueryExpressionProcessingData* queryProcessingData, CAnswererContext* answererContext) {
 				QList<CAxiomExpression*> redElimAssExpList;
 				typedef QPair<CHierarchyNode*, CIndividualTermExpression*> TConceptIndiTermPair;
 				typedef QPair<CRole*, QPair<CIndividualTermExpression*, CIndividualTermExpression* > > TRoleIndiTermsPair;
@@ -996,8 +1016,8 @@ namespace Konclude {
 
 
 
-			COptimizedComplexConceptAnsweringHandler* COptimizedComplexConceptAnsweringHandler::initializeQueryProcessing(CComplexQueryProcessingData* queryProcessingData, CAnswererContext* answererContext) {
-				CComplexAnsweringQuery* query = queryProcessingData->getQuery();
+			COptimizedComplexExpressionAnsweringHandler* COptimizedComplexExpressionAnsweringHandler::initializeQueryProcessing(CComplexQueryExpressionProcessingData* queryProcessingData, CAnswererContext* answererContext) {
+				CComplexAnsweringExpressionQuery* query = queryProcessingData->getQuery();
 				CConcreteOntology* expOnto = query->getExrpessionOntology();
 				CConcreteOntology* baseOnto = query->getBaseOntology();
 				
@@ -1011,7 +1031,7 @@ namespace Konclude {
 					queryProcessingData->setProcessingStarted();
 				}
 
-				CComplexAnsweringQuery* complAnsQuery = dynamic_cast<CComplexAnsweringQuery*>(query);
+				CComplexAnsweringExpressionQuery* complAnsQuery = dynamic_cast<CComplexAnsweringExpressionQuery*>(query);
 				if (!checkUsesQueryOnlyKnownEntities(complAnsQuery->getExrpessionOntology())) {
 					if (mConfFailOnUnknownEntity) {
 						failQueryProcessing(queryProcessingData, new CQueryUnknownEntityReferenceError(baseOnto));
@@ -1517,9 +1537,24 @@ namespace Konclude {
 									if (allAnonymousVariables || distinct || mConfBindingReducingForNonDistinctAnswerQueries) {
 										varBuildItem->setBindingsReducible(true);
 									}
-
-
 									*varBuildItem->getVariableSingleCardinalitySet() = convertedVariableSet;
+									varBuildItem->getVariableSingleCardinalitySet()->unite(compAssIndVarQuery->getIgnoreCardinalityVariableExpressions().toSet());
+
+
+									CComplexAssertionsIndividualVariablesAnsweringExtendibleQuery* extCompAssIndVarQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringExtendibleQuery*>(compAssIndVarQuery);
+									if (extCompAssIndVarQuery) {
+										CComplexQueryExtendibleData* extendibleData = extCompAssIndVarQuery->getExtendibleData();
+										queryProcessingData->setQueryExtendibleData(extendibleData);
+
+										if (!extendibleData->getExtendingQueryList()->isEmpty()) {
+											QList<CExpressionVariable*>* extendibleQueryTransferringExtractionVariableList = varBuildItem->getExtendibleQueryTransferringExtractionVariableList();
+											for (CExpressionVariable* expVar : *extCompAssIndVarQuery->getDistinguishedVariableExpressions()) {
+												extendibleQueryTransferringExtractionVariableList->append(expVar);
+											}
+										}
+									}
+
+
 
 
 
@@ -1576,7 +1611,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::tryAnonymousToIndividualVariablesConversion(QSet<CExpressionVariable *> &anonymousIndiVariableSet, QSet<CExpressionVariable *> &varExpSet, bool distinct, CAnswererContext* answererContext, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, bool& allAnonymousVariables, QSet<CExpressionVariable*>& convertedVariableSet) {
+			bool COptimizedComplexExpressionAnsweringHandler::tryAnonymousToIndividualVariablesConversion(QSet<CExpressionVariable *> &anonymousIndiVariableSet, QSet<CExpressionVariable *> &varExpSet, bool distinct, CAnswererContext* answererContext, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, bool& allAnonymousVariables, QSet<CExpressionVariable*>& convertedVariableSet) {
 				bool updateIndiVarAssPropLists = false;
 				QSet<CExpressionVariable*> backupAnonymousIndiVariableSet(anonymousIndiVariableSet);
 				cint64 originalAnonymousVariableCount = anonymousIndiVariableSet.size();
@@ -1706,12 +1741,12 @@ namespace Konclude {
 				return updateIndiVarAssPropLists;
 			}
 
-			bool COptimizedComplexConceptAnsweringHandler::finishConceptAndAbsorptionItemsGeneration(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& rolledVarExpSet, const QSet<CExpressionVariable *>& anonymousIndiVariableSet, const QHash<CExpressionVariable *, CBuildExpression *>& rebuiltVarClassTermExp, const QHash<CExpressionVariable *, CAxiomExpression *>& varExpAxiomExpHash,
+			bool COptimizedComplexExpressionAnsweringHandler::finishConceptAndAbsorptionItemsGeneration(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& rolledVarExpSet, const QSet<CExpressionVariable *>& anonymousIndiVariableSet, const QHash<CExpressionVariable *, CBuildExpression *>& rebuiltVarClassTermExp, const QHash<CExpressionVariable *, CAxiomExpression *>& varExpAxiomExpHash,
 					bool allAnonymousVariables, const QSet<CExpressionVariable *>& initialAnonymousIndiVariableSet, const QList<CDataPropertyAssertionExpression *>& bothVarDataPropAssPropagationList, const QList<CObjectPropertyAssertionExpression *>& bothVarPropAssPropagationList, const QList<CDataPropertyAssertionExpression *>& onlyDataVarDataPropAssList, COptimizedComplexBuildingVariableCompositionsItem* varBuildItem, CAnswererContext* answererContext) {
 
 				bool queryProcessing = false;
 				CConcreteOntology* testingOnto = mOntoAnsweringItem->getTestingOntology(true);
-				CComplexQueryProcessingData* queryProcessingData = varBuildItem->getQueryProcessingData();
+				CComplexQueryExpressionProcessingData* queryProcessingData = varBuildItem->getQueryProcessingData();
 				CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery = (CComplexAssertionsIndividualVariablesAnsweringQuery*)queryProcessingData->getQuery();
 
 				// building complex concept expressions for concept items
@@ -1787,7 +1822,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::schedulingConceptItemsProcessingForBuildItem(const QList<QPair<CIndividualVariableExpression *, TConceptNegPair>> &varConNegInstTestExpList, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, COptimizedComplexBuildingVariableCompositionsItem* varBuildItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::schedulingConceptItemsProcessingForBuildItem(const QList<QPair<CIndividualVariableExpression *, TConceptNegPair>> &varConNegInstTestExpList, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, COptimizedComplexBuildingVariableCompositionsItem* varBuildItem) {
 				bool queryProcessing = false;
 				for (QPair<CIndividualVariableExpression*, TConceptNegPair> varConNegPair : varConNegInstTestExpList) {
 					TConceptNegPair conNegPair = varConNegPair.second;
@@ -1818,7 +1853,7 @@ namespace Konclude {
 				return queryProcessing;
 			}
 
-			QList<QPair<CIndividualVariableExpression*, TConceptNegPair>> COptimizedComplexConceptAnsweringHandler::upgradeExistTopToIndividualTriggers(QList<QPair<CIndividualVariableExpression *, CClassTermExpression *>> varClassInstTestExpList, QHash<CExpressionVariable *, CBuildExpression *> individualTriggerUpdatableHash, CAnswererContext* answererContext) {
+			QList<QPair<CIndividualVariableExpression*, TConceptNegPair>> COptimizedComplexExpressionAnsweringHandler::upgradeExistTopToIndividualTriggers(QList<QPair<CIndividualVariableExpression *, CClassTermExpression *>> varClassInstTestExpList, QHash<CExpressionVariable *, CBuildExpression *> individualTriggerUpdatableHash, CAnswererContext* answererContext) {
 				QList<QPair<CIndividualVariableExpression*, TConceptNegPair>> varConNegInstTestExpList;
 				// upgrade \exits r.\top concepts to use individual trigger if possible
 				for (QPair<CIndividualVariableExpression*, CClassTermExpression*> varClassPair : varClassInstTestExpList) {
@@ -1832,7 +1867,7 @@ namespace Konclude {
 				return varConNegInstTestExpList;
 			}
 
-			bool COptimizedComplexConceptAnsweringHandler::identifyNonInstantiation(const QList<CAxiomExpression *>& assExps, const QSet<CExpressionVariable *> &answerIndiVariableSet, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::identifyNonInstantiation(const QList<CAxiomExpression *>& assExps, const QSet<CExpressionVariable *> &answerIndiVariableSet, CAnswererContext* answererContext) {
 				// identify those anonymous variables for which the related concept and role terms only occur on individual nodes
 				bool nonInstantiatedTerm = false;
 				COccurrenceStatisticsCacheReader* occStatsCacheReader = answererContext->getAnsweringCalculationHandler()->getOccurrenceStatisticsCacheReader();
@@ -1896,7 +1931,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::checkNonTrivialAbsorptionPropagationExpression(CBuildExpression* expression) {
+			bool COptimizedComplexExpressionAnsweringHandler::checkNonTrivialAbsorptionPropagationExpression(CBuildExpression* expression) {
 				if (!expression) {
 					return false;
 				}
@@ -1929,7 +1964,7 @@ namespace Konclude {
 			}
 
 
-			QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *> COptimizedComplexConceptAnsweringHandler::generateAbsorptionBasedQueryParts(const QSet<CExpressionVariable *> &anonymousIndiVariableSet, bool allAnonymousVariables, QSet<CExpressionVariable *> &reductionForbiddenVarSet, const QSet<CExpressionVariable *> &rolledVarExpSet,
+			QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *> COptimizedComplexExpressionAnsweringHandler::generateAbsorptionBasedQueryParts(const QSet<CExpressionVariable *> &anonymousIndiVariableSet, bool allAnonymousVariables, QSet<CExpressionVariable *> &reductionForbiddenVarSet, const QSet<CExpressionVariable *> &rolledVarExpSet,
 					const QSet<CExpressionVariable *>& initialAnonymousIndiVariableSet, const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *>& prepareIndiVarSet, const QHash<CExpressionVariable *, CBuildExpression *> &rebuiltVarClassTermExp, const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash) {
 
 				QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *> absorptionBasedHandlingQueryPartDatas;
@@ -2037,7 +2072,7 @@ namespace Konclude {
 
 
 
-			QHash<CExpressionVariable*, CBuildExpression*> COptimizedComplexConceptAnsweringHandler::rebuildVariablesClassTermExpressions(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *> &rolledVarExpSet, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash) {
+			QHash<CExpressionVariable*, CBuildExpression*> COptimizedComplexExpressionAnsweringHandler::rebuildVariablesClassTermExpressions(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *> &rolledVarExpSet, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash) {
 
 				QHash<CExpressionVariable*, CBuildExpression*> rebuildVarExpClassTermExpHash;
 				for (CExpressionVariable* varExp : varExpSet) {
@@ -2080,8 +2115,8 @@ namespace Konclude {
 
 
 
-			QList<QPair<CIndividualVariableExpression *, CClassTermExpression *>> COptimizedComplexConceptAnsweringHandler::generateConceptItemExpressions(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *> &rolledVarExpSet, const QSet<CExpressionVariable *> &anonymousIndiVariableSet, const QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash,
-					const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, QHash<CExpressionVariable *, CBuildExpression *> &individualTriggerUpdatableHash, QSet<CExpressionVariable *> &prepareIndiVarSet, CComplexQueryProcessingData* queryProcessingData) {
+			QList<QPair<CIndividualVariableExpression *, CClassTermExpression *>> COptimizedComplexExpressionAnsweringHandler::generateConceptItemExpressions(const QSet<CExpressionVariable *>& varExpSet, const QSet<CExpressionVariable *> &rolledVarExpSet, const QSet<CExpressionVariable *> &anonymousIndiVariableSet, const QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash,
+					const QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, QHash<CExpressionVariable *, CBuildExpression *> &individualTriggerUpdatableHash, QSet<CExpressionVariable *> &prepareIndiVarSet, CComplexQueryExpressionProcessingData* queryProcessingData) {
 
 				CConcreteOntology* testingOnto = mOntoAnsweringItem->getTestingOntology();
 				CClassTermExpression* topClassTermExp = testingOnto->getBuildData()->getTopClassExpression();
@@ -2216,12 +2251,12 @@ namespace Konclude {
 
 				}
 				if (!varClassInstTestExpList.isEmpty()) {
-					LOG(INFO, getDomain(), logTr("Built %1 class term expressions for computing upper/lower bounds based on complex concepts.").arg(varClassInstTestExpList.size()), this);
+					LOG(INFO, getDomain(), logTr("Building %1 class term expressions for computation of upper/lower bounds based on complex concepts.").arg(varClassInstTestExpList.size()), this);
 				}
 				return varClassInstTestExpList;
 			}
 
-			void COptimizedComplexConceptAnsweringHandler::expressionsRollingUp(QSet<CExpressionVariable *> &anonymousIndiVariableSet, QSet<CExpressionVariable *> &rolledVarExpSet, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, CConcreteOntology* testingOnto, QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash) {
+			void COptimizedComplexExpressionAnsweringHandler::expressionsRollingUp(QSet<CExpressionVariable *> &anonymousIndiVariableSet, QSet<CExpressionVariable *> &rolledVarExpSet, QHash<CExpressionVariable *, CAxiomExpression *> &varExpAxiomExpHash, CConcreteOntology* testingOnto, QHash<CExpressionVariable *, CBuildExpression *> &varRolledUpClassExpHash) {
 				QList<CExpressionVariable*> anonymousIndiVariableProcessingList = anonymousIndiVariableSet.toList();
 				QSet<CExpressionVariable*> anonymousIndiVariableProcessingSet;
 				CClassTermExpression* topClassTermExp = testingOnto->getBuildData()->getTopClassExpression();
@@ -2342,7 +2377,7 @@ namespace Konclude {
 				}
 			}
 
-			TConceptNegPair COptimizedComplexConceptAnsweringHandler::upgradeExistTopToIndividualTrigger(CClassTermExpression* classTermExp, CExpressionVariable* varTermExp, QHash<CExpressionVariable*, CBuildExpression*>* individualTriggerUpdatableHash, CAnswererContext* answererContext) {
+			TConceptNegPair COptimizedComplexExpressionAnsweringHandler::upgradeExistTopToIndividualTrigger(CClassTermExpression* classTermExp, CExpressionVariable* varTermExp, QHash<CExpressionVariable*, CBuildExpression*>* individualTriggerUpdatableHash, CAnswererContext* answererContext) {
 
 
 				QSet<TConceptNegPair> upgradableConNegSet;
@@ -2513,7 +2548,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::ensureRoleTargetsRealization(CRole* role, bool inversed, const QSet<CIndividualReference>& individualSourceSet, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::ensureRoleTargetsRealization(CRole* role, bool inversed, const QSet<CIndividualReference>& individualSourceSet, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext) {
 				QList<COntologyProcessingRequirement*> reqList;
 				QList<CIndividualReference> reqIndiList;
 				bool targetsRealizationMissing = false;
@@ -2547,7 +2582,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::checkEntailmentRoleAssertion(CRole* role, CIndividual* individualSource, CIndividual* individualDest, CComplexQueryProcessingData* procData, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::checkEntailmentRoleAssertion(CRole* role, CIndividual* individualSource, CIndividual* individualDest, CComplexQueryExpressionProcessingData* procData, CAnswererContext* answererContext) {
 				CEntailmentRoleAssertionHasher enHasher(role, individualSource, individualDest);
 				CEntailmentQueryProcessingData*& queryProcData = mRoleAssEntProcDataHash[enHasher];
 				if (!queryProcData) {
@@ -2569,7 +2604,7 @@ namespace Konclude {
 						reqList.append(roleRealReq);
 						processRequirements(answererContext, mOntoAnsweringItem->getOntology(), reqList, reqCompMess);
 					}
-					CXLinker<CComplexQueryProcessingData*>* procDataLinker = mOntoAnsweringItem->createQueryProcessingLinker();
+					CXLinker<CComplexQueryExpressionProcessingData*>* procDataLinker = mOntoAnsweringItem->createQueryProcessingLinker();
 					procDataLinker->setData(procData);
 					queryProcData->mProcDataLinker = procDataLinker->append(queryProcData->mProcDataLinker);
 					return true;
@@ -2579,7 +2614,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::checkEntailmentConceptAssertion(CConcept* concept, bool negation, CIndividual* individual, CComplexQueryProcessingData* procData, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::checkEntailmentConceptAssertion(CConcept* concept, bool negation, CIndividual* individual, CComplexQueryExpressionProcessingData* procData, CAnswererContext* answererContext) {
 				CEntailmentConceptAssertionHasher enHasher(concept, negation, individual);
 				CEntailmentQueryProcessingData*& queryProcData = mConAssEntProcDataHash[enHasher];
 				if (!queryProcData) {
@@ -2602,7 +2637,7 @@ namespace Konclude {
 							reqList.append(conRealReq);
 							processRequirements(answererContext, mOntoAnsweringItem->getOntology(), reqList, reqCompMess);
 						} 
-						CXLinker<CComplexQueryProcessingData*>* procDataLinker = mOntoAnsweringItem->createQueryProcessingLinker();
+						CXLinker<CComplexQueryExpressionProcessingData*>* procDataLinker = mOntoAnsweringItem->createQueryProcessingLinker();
 						procDataLinker->setData(procData);
 						queryProcData->mProcDataLinker = procDataLinker->append(queryProcData->mProcDataLinker);
 						return true;
@@ -2627,7 +2662,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::queueConceptItemProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep) {
+			bool COptimizedComplexExpressionAnsweringHandler::queueConceptItemProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep) {
 				if (!conceptItem->hasQueuedProcessStep() && !compStep->isComputationProcessQueued() && !compStep->isComputationProcessProcessing()) {
 					conceptItem->setQueuedProcessStep(compStep);
 					compStep->setComputationProcessQueued(true);
@@ -2639,7 +2674,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::requeueConceptItemNextProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep) {
+			bool COptimizedComplexExpressionAnsweringHandler::requeueConceptItemNextProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep) {
 				conceptItem->setQueuedProcessStep(nullptr);
 				CComplexConceptStepComputationProcess* nextCompStep = conceptItem->getComputationProcess()->getNextConceptStepComputationProcess(compStep, true);
 				if (nextCompStep && !conceptItem->hasQueuedProcessStep() && !nextCompStep->isComputationProcessQueued() && !nextCompStep->isComputationProcessProcessing()) {
@@ -2668,13 +2703,13 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::failQueryProcessing(CComplexQueryProcessingData* queryProcessingData, CQueryError* queryError) {
+			bool COptimizedComplexExpressionAnsweringHandler::failQueryProcessing(CComplexQueryExpressionProcessingData* queryProcessingData, CQueryError* queryError) {
 				CQuery* query = queryProcessingData->getQuery();
 				QString errorString = queryError->getErrorString();
 				query->addQueryError(queryError);
 
 				queryProcessingData->setProcessingFinished();
-				cint64 processingTime = queryProcessingData->getProcessingTime();
+				cint64 processingTime = queryProcessingData->getTotalProcessingTime();
 				LOG(WARN, getDomain(), logTr("Complex query processing failed after %1 ms due to error '%2'.").arg(processingTime).arg(errorString), this);
 
 				CCallbackData* callback = queryProcessingData->getCallback();
@@ -2686,14 +2721,14 @@ namespace Konclude {
 				return true;
 			}
 
+			
 
 
-
-			bool COptimizedComplexConceptAnsweringHandler::finishQueryProcessingAsUnsatisfaible(CComplexQueryProcessingData* queryProcessingData) {
-				CComplexAnsweringQuery* query = queryProcessingData->getQuery();
+			bool COptimizedComplexExpressionAnsweringHandler::finishQueryProcessingAsUnsatisfaible(CComplexQueryExpressionProcessingData* queryProcessingData) {
+				CComplexAnsweringExpressionQuery* query = queryProcessingData->getQuery();
 
 				queryProcessingData->setProcessingFinished();
-				cint64 processingTime = queryProcessingData->getProcessingTime();
+				cint64 processingTime = queryProcessingData->getTotalProcessingTime();
 				LOG(INFO, getDomain(), logTr("Finished unsatisfiable query processing in %1 ms.").arg(processingTime), this);
 
 				CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(query);
@@ -2768,14 +2803,14 @@ namespace Konclude {
 
 			
 
-			bool COptimizedComplexConceptAnsweringHandler::finishQueryProcessing(CComplexQueryProcessingData* queryProcessingData) {
-				CComplexAnsweringQuery* query = queryProcessingData->getQuery();
+			bool COptimizedComplexExpressionAnsweringHandler::finishQueryProcessing(CComplexQueryExpressionProcessingData* queryProcessingData) {
+				CComplexAnsweringExpressionQuery* query = queryProcessingData->getQuery();
 				COptimizedComplexConceptItem* conceptItem = queryProcessingData->getConceptItem();
 				COptimizedComplexBuildingVariableCompositionsItem* varBuildItem = queryProcessingData->getVariableBuildingItem();
 
 				if (!queryProcessingData->isProcessingFinished()) {
 					queryProcessingData->setProcessingFinished();
-					cint64 firstProcessingTime = queryProcessingData->getProcessingTime();
+					cint64 firstProcessingTime = queryProcessingData->getTotalProcessingTime();
 					LOG(INFO, getDomain(), logTr("Computed first complex query result in %1 ms.").arg(firstProcessingTime), this);
 				}
 
@@ -3132,7 +3167,7 @@ namespace Konclude {
 				}
 
 				queryProcessingData->setProcessingFinished();
-				cint64 processingTime = queryProcessingData->getProcessingTime();
+				cint64 processingTime = queryProcessingData->getTotalProcessingTime();
 
 				QString realReqString;
 				CAnsweringHandlingStatistics* stats = mOntoAnsweringItem->getAnsweringHandlingStatistics();
@@ -3147,13 +3182,18 @@ namespace Konclude {
 				}
 
 
-				LOG(INFO, getDomain(), logTr("Finished complex query processing in %1 ms%2.").arg(processingTime).arg(realReqString), this);
+				LOG(INFO, getDomain(), logTr("Finished processing of complex query '%3' in %1 ms%2.").arg(processingTime).arg(realReqString).arg(query->getQueryName()), this);
 
 				CCallbackData* callback = queryProcessingData->getCallback();
 				if (callback) {
 					callback->doCallback();
 				}
-				delete queryProcessingData;
+				CComplexQueryExtendibleData* extendibleData = queryProcessingData->getQueryExtendibleData();
+				if (extendibleData) {
+					installQueryExtendible(extendibleData, queryProcessingData);
+				} else {
+					delete queryProcessingData;
+				}
 				mOntoAnsweringItem->decCurrentlyAnsweringQueryCount();
 				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incTotalAnsweredQueriesCount();
 				return true;
@@ -3181,6 +3221,13 @@ namespace Konclude {
 
 
 
+			bool COptimizedComplexExpressionAnsweringHandler::installQueryExtendible(CComplexQueryExtendibleData* extendibleData, CComplexQueryExpressionProcessingData* queryProcessingData) {
+				QHash<cint64, CComplexQueryExpressionProcessingData*>* queryExtensionProcessingDataHash = mOntoAnsweringItem->getQueryExtensionProcessingDataHash();
+				cint64 nextQueryExtensionId = mOntoAnsweringItem->getNextQueryExtensionId(true);
+				extendibleData->setExtendibleId(nextQueryExtensionId);
+				queryExtensionProcessingDataHash->insert(nextQueryExtensionId, queryProcessingData);
+				return true;
+			}
 
 
 
@@ -3199,7 +3246,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::continueCalculationCreation(CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::continueCalculationCreation(CAnswererContext* answererContext) {
 				bool processing = false;
 				COptimizedComplexConceptStepAnsweringItem* conSatProcStepItem = mOntoAnsweringItem->getConceptSatisfiabilityProcessingStepItem();
 				COptimizedComplexConceptStepAnsweringItem* conSuperProcStepItem = mOntoAnsweringItem->getConceptSuperClassesProcessingStepItem();
@@ -3690,6 +3737,18 @@ namespace Konclude {
 
 
 
+						QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* absorptionHanldingQueryExtensionPropagationList = buildingVarItem->getAbsorptionBasedHandlingExtensionItemPropagationList();
+						if (!processing && absorptionHanldingQueryExtensionPropagationList && !absorptionHanldingQueryExtensionPropagationList->isEmpty() && buildingVarItem->isSatisfiable()) {
+							COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem = absorptionHanldingQueryExtensionPropagationList->takeFirst();
+							COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absorptionPropagationItem->getAbsorptionBasedHandlingData();
+
+							if (absorptionHanldingQueryPart->hasIndividualVariables()) {
+								processing = createVariableBindingPropagationTest(absorptionPropagationItem, buildingVarItem, answererContext, continueProcessingBuildingVarItem);
+							} else {
+								processing = createAbsorbedQueryPartEntailmentTest(absorptionPropagationItem, buildingVarItem, answererContext, continueProcessingBuildingVarItem);
+							}
+
+						}
 
 
 
@@ -3704,6 +3763,9 @@ namespace Konclude {
 							} else if (compVarItem->getCompositionType() == COptimizedComplexVariableCompositionItem::BINDING_REDUCTION) {
 								computeVariableCompositionItemReduction(compVarItem, buildingVarItem);
 
+
+							} else if (compVarItem->getCompositionType() == COptimizedComplexVariableCompositionItem::BINDING_EXTRACTION) {
+								computeVariableCompositionItemExtraction(compVarItem, buildingVarItem);
 
 
 							} else if (compVarItem->getCompositionType() == COptimizedComplexVariableCompositionItem::JOINING) {
@@ -3840,8 +3902,6 @@ namespace Konclude {
 
 
 
-
-
 									while (!reuseVarExpComputationsCheckSet->isEmpty()) {
 
 										QSet<CIndividualVariableExpression*>::iterator it = reuseVarExpComputationsCheckSet->begin();
@@ -3892,6 +3952,67 @@ namespace Konclude {
 
 
 
+
+
+
+							// initialize items extracted from extendible query
+							if (!processing && compositionVarItemList->isEmpty()) {
+								QHash<cint64, CComplexQueryExpressionProcessingData*>* queryExtensionProcessingDataHash = mOntoAnsweringItem->getQueryExtensionProcessingDataHash();
+								QList<CExpressionVariable*>* extendibleQueryTransferringExtractionVariableList = buildingVarItem->getExtendibleQueryTransferringExtractionVariableList();
+								while (!extendibleQueryTransferringExtractionVariableList->isEmpty()) {
+									CExpressionVariable* expVar = extendibleQueryTransferringExtractionVariableList->takeFirst();
+									CComplexQueryExpressionProcessingData* queryProcessingData = buildingVarItem->getQueryProcessingData();
+									CComplexQueryExtendibleData* queryExtendibleData = queryProcessingData->getQueryExtendibleData();
+									QList<CQuery*>* dependingQueries = queryExtendibleData->getExtendingQueryList();
+									for (CQuery* dependingQuery : *dependingQueries) {
+										CComplexAssertionsIndividualVariablesAnsweringExtendibleQuery* depExtCompAssIndVarQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringExtendibleQuery*>(dependingQuery);
+										if (depExtCompAssIndVarQuery) {
+											CComplexQueryExtendibleData* depQueryExtendibleData = depExtCompAssIndVarQuery->getExtendibleData();
+											cint64 depExtId = depQueryExtendibleData->getExtendibleId();
+											CComplexQueryExpressionProcessingData* depQueryProcessingData = queryExtensionProcessingDataHash->value(depExtId);
+											if (depExtId > 0 && depQueryProcessingData) {
+												QList<CExpressionVariable*>* depQueryVarList = depExtCompAssIndVarQuery->getDistinguishedVariableExpressions();
+												cint64 varInd = 0;
+												CExpressionVariable* depFoundVariable = nullptr;
+												for (CExpressionVariable* depQueryVar : *depQueryVarList) {
+													if (depQueryVar->getName() == expVar->getName() || depQueryVar == expVar) {
+														depFoundVariable = depQueryVar;
+														break;
+													}
+												}
+												if (depFoundVariable) {
+													COptimizedComplexBuildingVariableCompositionsItem* depVarBuildItem = depQueryProcessingData->getVariableBuildingItem();
+
+
+													CExpressionVariable* depLastVarExp = depVarBuildItem->getLastHandledVariableExpression();
+													if (depLastVarExp) {
+														COptimizedComplexVariableCompositionItem* depLastVarItem = depVarBuildItem->getVariableLastCompositionItem(depLastVarExp);
+														COptimizedComplexVariableCompositionItemVariableIndexMapping* depItemIndexMapping = depVarBuildItem->getVariableItemIndexMapping(depLastVarExp).value(depLastVarItem);
+
+
+														//COptimizedComplexVariableCompositionItem* depLastVarItem = depVarBuildItem->getVariableLastCompositionItem(depFoundVariable);
+														//COptimizedComplexVariableCompositionItemVariableIndexMapping* depItemIndexMapping = depVarBuildItem->getVariableItemIndexMapping(depFoundVariable).value(depLastVarItem);
+
+														//cint64 depVarIdx = -1;
+														//for (COptimizedComplexVariableCompositionItemVariableIndexMapping::const_iterator it = depItemIndexMapping->constBegin(), itEnd = depItemIndexMapping->constEnd(); it != itEnd; ++it) {
+														//	cint64 varIdx = it.key();
+														//	CExpressionVariable* varExp = it.value();
+														//	if (depFoundVariable == varExp) {
+														//		depVarIdx = varIdx;
+														//		break;
+														//	}
+														//}
+
+														buildQueryTransferringVariableExtractionItem(depVarBuildItem, depFoundVariable, depLastVarItem, depItemIndexMapping, buildingVarItem, expVar, &processing);
+														break;
+
+													}
+												}
+											}
+										}
+									}
+								}
+							}
 
 
 
@@ -4123,7 +4244,7 @@ namespace Konclude {
 								// -- build corresponding concept items and add property and class assertion to variable building item
 								// -- reschedule absorption handling part such that absorption-based item is created if no answer is found
 
-								CComplexQueryProcessingData* queryProcessingData = buildingVarItem->getQueryProcessingData();
+								CComplexQueryExpressionProcessingData* queryProcessingData = buildingVarItem->getQueryProcessingData();
 								if (mConfBooleanQueryExistentialPartOrdinaryEvaluation && !buildingVarItem->hasAbsorptionBasedQueryPartsOrdinaryEvaluated()) {
 									buildingVarItem->setAbsorptionBasedQueryPartsOrdinaryEvaluated(true);
 
@@ -4183,7 +4304,8 @@ namespace Konclude {
 
 
 
-							QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* absorptionHanldingQueryExtensionJoiningList = buildingVarItem->getAbsorptionBasedHandlingExtensionItemList();
+
+							QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* absorptionHanldingQueryExtensionJoiningList = buildingVarItem->getAbsorptionBasedHandlingExtensionItemJoiningList();
 							if (!processing && absorptionHanldingQueryExtensionJoiningList && !absorptionHanldingQueryExtensionJoiningList->isEmpty() && buildingVarItem->isSatisfiable() && (!buildingVarItem->isWaitingComputation() || continueProcessingBuildingVarItem)) {
 
 								COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem = absorptionHanldingQueryExtensionJoiningList->takeFirst();
@@ -4267,7 +4389,7 @@ namespace Konclude {
 
 						if (!processing) {
 							if (!buildingVarItem->isWaitingComputation() && (!buildingVarItem->isSatisfiable() || buildingVarItem->getComputeVariableMappingItemList()->isEmpty())) {
-								CComplexQueryProcessingData* queryProcData = buildingVarItem->getQueryProcessingData();
+								CComplexQueryExpressionProcessingData* queryProcData = buildingVarItem->getQueryProcessingData();
 								queryProcData->decBuildingVariableItem();
 
 								buildingVarItemList->removeFirst();
@@ -4313,7 +4435,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::generateOrdinaryVariableBuiltItemEvaluationFromAbsorptionBasedPart(CComplexQueryProcessingData* queryProcessingData, CAnswererContext* answererContext, QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *>* absorbingQueryPartsList, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool processing) {
+			bool COptimizedComplexExpressionAnsweringHandler::generateOrdinaryVariableBuiltItemEvaluationFromAbsorptionBasedPart(CComplexQueryExpressionProcessingData* queryProcessingData, CAnswererContext* answererContext, QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData *>* absorbingQueryPartsList, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool processing) {
 				CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(queryProcessingData->getQuery());
 				if (compAssIndVarQuery->isBooleanEntailmentResultRequired()) {
 
@@ -4518,7 +4640,7 @@ namespace Konclude {
 
 
 
-			QList<CIndividualVariableExpression*> COptimizedComplexConceptAnsweringHandler::getSortedRemainingVariableExpressionList(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, QSet<CIndividualVariableExpression*>* remainVarExpSet) {
+			QList<CIndividualVariableExpression*> COptimizedComplexExpressionAnsweringHandler::getSortedRemainingVariableExpressionList(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, QSet<CIndividualVariableExpression*>* remainVarExpSet) {
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				QList<TRemainingVariableMappingCountSortingItem> remainVarExpSortList;
 
@@ -4571,7 +4693,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processExtractedInstanceCandidatePossiblePropagations(CAnsweringMessageDataInstancePossiblePropagationsData* instanceCandidatePropagationMessage, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processExtractedInstanceCandidatePossiblePropagations(CAnsweringMessageDataInstancePossiblePropagationsData* instanceCandidatePropagationMessage, CAnswererContext* answererContext) {
 				CConcept* concept = instanceCandidatePropagationMessage->getTestingConcept();
 				bool negation = instanceCandidatePropagationMessage->getTestingConceptNegation();
 				COptimizedComplexConceptItem* conceptItem = mOntoAnsweringItem->getComplexConceptItem(concept, negation);
@@ -4604,7 +4726,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processExtractedInstanceCertainPropagations(CAnsweringMessageDataInstanceCertainPropagationsData* instanceCandidatePropagationMessage, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processExtractedInstanceCertainPropagations(CAnsweringMessageDataInstanceCertainPropagationsData* instanceCandidatePropagationMessage, CAnswererContext* answererContext) {
 
 				CConcreteOntology* testingOnto = mOntoAnsweringItem->getTestingOntology(false);
 				CConcept* concept = instanceCandidatePropagationMessage->getTestingConcept();
@@ -4635,7 +4757,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::visitAllIndividuals(function<bool(const CIndividualReference& indiRef)> visitFunc) {
+			bool COptimizedComplexExpressionAnsweringHandler::visitAllIndividuals(function<bool(const CIndividualReference& indiRef)> visitFunc) {
 
 				CConcreteOntology* ontology = mOntoAnsweringItem->getOntology();
 
@@ -4677,24 +4799,66 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createAbsorbedQueryPartEntailmentTest(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart, CComplexQueryProcessingData* procData, CAnswererContext* answererContext) {
-				procData->incEntailmentComputation();
+			bool COptimizedComplexExpressionAnsweringHandler::createAbsorbedQueryPartEntailmentTest(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart, CComplexQueryExpressionProcessingData* procData, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CExpressionVariable* initializerVariable = absorptionHanldingQueryPart->getInitializerVariableExpression();
-				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 				CVariable* variable = absorptionHanldingQueryPart->getVariableExpressionVariableHash()->value(initializerVariable);
-				satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, absorptionHanldingQueryPart->isTopObjectPropertyUsed(), answererContext);
+				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 
-				visitAllIndividuals([&](const CIndividualReference& indiRef)->bool {
-					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(absorptionHanldingQueryPart->getInitializerConcept(), false, indiRef, satCalcJob);
-					return true;
-				});
+				bool splitting = !absorptionHanldingQueryPart->isTopObjectPropertyUsed() && mConfMaxVariableBindingPropagationsInitializationIndividualCount > 0;
 
-				CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(satCalcJob, absorptionHanldingQueryPart, procData);
-				CAnsweringPropagationSteeringAbsorptionEntailmentController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionEntailmentController();
-				satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
-				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartEntailmentTestingCount();
-				processCalculationJob(answererContext, satCalcJob, completedMessage);
+				if (!splitting) {
+					satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, absorptionHanldingQueryPart->isTopObjectPropertyUsed(), answererContext);
+
+					procData->incEntailmentComputation();
+					visitAllIndividuals([&](const CIndividualReference& indiRef)->bool {
+						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(absorptionHanldingQueryPart->getInitializerConcept(), false, indiRef, satCalcJob);
+						return true;
+					});
+
+					CAnsweringPropagationSteeringAbsorptionEntailmentController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionEntailmentController();
+					CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(satCalcJob, nullptr, absorptionHanldingQueryPart, procData, nullptr, nullptr);
+					satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
+					mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartEntailmentTestingCount();
+					processCalculationJob(answererContext, satCalcJob, completedMessage);
+				} else {
+
+					CAnsweringSplitEntailmentTestingCancellationAdapter* cancelAdapter = new CAnsweringSplitEntailmentTestingCancellationAdapter();
+					cint64 currentCount = 0;
+					cint64 totalCount = 0;
+					visitAllIndividuals([&](const CIndividualReference& indiRef)->bool {
+						satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(absorptionHanldingQueryPart->getInitializerConcept(), false, indiRef, satCalcJob);
+						totalCount++;
+						if (++currentCount > mConfMaxVariableBindingPropagationsInitializationIndividualCount) {
+							currentCount = 0;
+							procData->incEntailmentComputation();
+							CAnsweringPropagationSteeringAbsorptionEntailmentController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionEntailmentController();
+							CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(satCalcJob, nullptr, absorptionHanldingQueryPart, procData, nullptr, cancelAdapter);
+							satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
+							satCalcJob->setCancellationAdapter(cancelAdapter->incCurrentEntailmentTestingCount());
+							mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartEntailmentTestingCount();
+							processCalculationJob(answererContext, satCalcJob, completedMessage);
+
+						}
+						return true;
+					});
+
+					if (satCalcJob) {
+						procData->incEntailmentComputation();
+						CAnsweringPropagationSteeringAbsorptionEntailmentController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionEntailmentController();
+						CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(satCalcJob, nullptr, absorptionHanldingQueryPart, procData, nullptr, cancelAdapter);
+						satCalcJob->setCancellationAdapter(cancelAdapter->incCurrentEntailmentTestingCount());
+						satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
+						mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartEntailmentTestingCount();
+						processCalculationJob(answererContext, satCalcJob, completedMessage);
+					}
+
+					if (mConfExtendedLogging) {
+						LOG(INFO, getDomain(), logTr("Scheduled %1 entailment tests for absorbed query part with %2 initialization individuals in average.").arg(cancelAdapter->getCurrentEntailmentTestingCount()).arg(totalCount / cancelAdapter->getCurrentEntailmentTestingCount()), this);
+					}
+
+
+				}
 				return true;
 			}
 
@@ -4702,39 +4866,9 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createAbsorbedQueryPartEntailmentTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext) {
-				buildingVarItem->getQueryProcessingData()->incEntailmentComputation();
-				buildingVarItem->getQueryProcessingData()->decBuildingVariableItem();
-				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absorptionPropagationExtension->getAbsorptionBasedHandlingData();
-				CSatisfiableCalculationJob* satCalcJob = nullptr;
-				buildingVarItem->incVariableBindingsPropagationCount();
-				CExpressionVariable* initializerVariable = absorptionHanldingQueryPart->getInitializerVariableExpression();
-				if (!absorptionHanldingQueryPart->getPrepareVariableSet()->contains(initializerVariable)) {
-					initializerVariable = *absorptionHanldingQueryPart->getPrepareVariableSet()->begin();
-				}
-				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
-				CVariable* variable = absorptionHanldingQueryPart->getVariableExpressionVariableHash()->value(initializerVariable);
-				satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, absorptionHanldingQueryPart->isTopObjectPropertyUsed(), answererContext);
-				QSet<CIndividualReference>* indiSet = absorptionPropagationExtension->getVariableSteeringIndividualBindingSet(variable);
-				for (QSet<CIndividualReference>::const_iterator it = indiSet->constBegin(), itEnd = indiSet->constEnd(); it != itEnd; ++it) {
-					CIndividualReference individual(*it);
-					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(absorptionHanldingQueryPart->getInitializerConcept(), false, individual, satCalcJob);
-				}
-
-				CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(satCalcJob, absorptionHanldingQueryPart, buildingVarItem->getQueryProcessingData());
-				CAnsweringPropagationSteeringAbsorptionExtensionItemEntailmentController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionExtensionItemEntailmentController(absorptionPropagationExtension);
-				satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
-				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartEntailmentTestingCount();
-				processCalculationJob(answererContext, satCalcJob, completedMessage);
-				return true;
-			}
 
 
-
-
-
-
-			bool COptimizedComplexConceptAnsweringHandler::createVariableBindingConfirmationTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableIndividualBindingsCardinalityLinker* testingVarIndiBindingCardLinker, CSameRealization* sameRealization, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createVariableBindingConfirmationTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableIndividualBindingsCardinalityLinker* testingVarIndiBindingCardLinker, CSameRealization* sameRealization, CAnswererContext* answererContext) {
 				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absorptionPropagationExtension->getAbsorptionBasedHandlingData();
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				buildingVarItem->incVariableBindingsConfirmationCount();
@@ -4763,7 +4897,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::continueCalculationJobFromNondeterministicCachedGraph(CSatisfiableCalculationJob* satCalcJob, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::continueCalculationJobFromNondeterministicCachedGraph(CSatisfiableCalculationJob* satCalcJob, CAnswererContext* answererContext) {
 				if (mConfNonDeterministicSatisfiableCalculationContinuation) {
 					satCalcJob->setAllowNonDeterministicSatisfiableCalculationContinuation(true);
 					return true;
@@ -4773,7 +4907,140 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createVariableBindingPropagationTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createAbsorbedQueryPartEntailmentTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool &continueProcessingBuildingVarItem) {
+
+				CComplexQueryExpressionProcessingData* queryProcData = buildingVarItem->getQueryProcessingData();
+				if (absorptionPropagationExtension->isEntailmentFound()) {
+					queryProcData->decBuildingVariableItem();
+					absorptionPropagationExtension->setPropagationInitializationIndividualsSplittedTestsRemaining(false);
+					if (!queryProcData->hasComputation() && !absorptionPropagationExtension->hasRemainingPropagationInitializationIndividualsSplittedTests()) {
+						finishQueryProcessing(queryProcData);
+					}
+					return false;
+				}
+
+
+				buildingVarItem->getQueryProcessingData()->incEntailmentComputation();
+				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absorptionPropagationExtension->getAbsorptionBasedHandlingData();
+				CSatisfiableCalculationJob* satCalcJob = nullptr;
+
+
+
+				buildingVarItem->incVariableBindingsPropagationCount();
+				CExpressionVariable* initializerVariable = absorptionHanldingQueryPart->getInitializerVariableExpression();
+				if (!absorptionHanldingQueryPart->getPrepareVariableSet()->contains(initializerVariable)) {
+					initializerVariable = *absorptionHanldingQueryPart->getPrepareVariableSet()->begin();
+				}
+				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
+				CVariable* variable = absorptionHanldingQueryPart->getVariableExpressionVariableHash()->value(initializerVariable);
+				satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, absorptionHanldingQueryPart->isTopObjectPropertyUsed(), answererContext);
+				QSet<CIndividualReference>* indiSet = absorptionPropagationExtension->getVariableSteeringIndividualBindingSet(variable);
+
+				QSet<CIndividualReference>* splitIndiSet = nullptr;
+				if (!absorptionHanldingQueryPart->isTopObjectPropertyUsed() && (absorptionPropagationExtension->isPropagationInitializationIndividualsSplitted() || indiSet->size() > mConfMaxVariableBindingPropagationsInitializationIndividualCount && mConfMaxVariableBindingPropagationsInitializationIndividualCount > 0)) {
+					splitIndiSet = new QSet<CIndividualReference>();
+					absorptionPropagationExtension->setPropagationInitializationIndividualsSplitted(true);
+				}
+				for (QSet<CIndividualReference>::iterator it = indiSet->begin(); it != indiSet->end() && (mConfMaxVariableBindingPropagationsInitializationIndividualCount < 0 || !splitIndiSet || splitIndiSet->size() < mConfMaxVariableBindingPropagationsInitializationIndividualCount); ) {
+					CIndividualReference individual(*it);
+					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(absorptionHanldingQueryPart->getInitializerConcept(), false, individual, satCalcJob);
+					if (splitIndiSet) {
+						splitIndiSet->insert(individual);
+						it = indiSet->erase(it);
+					} else {
+						++it;
+					}
+				}
+				if (splitIndiSet) {
+					if (mConfExtendedLogging) {
+						LOG(INFO, getDomain(), logTr("%1. entailment test for absorbed query part based on %2 bindings scheduled.").arg(absorptionPropagationExtension->getNextPropagationInitializationIndividualsSplittedTestId()).arg(splitIndiSet->size()), this);
+					}
+					if (!indiSet->isEmpty()) {
+						// TODO: but into queue such that remaining propagation tests are scheduled at some point
+						buildingVarItem->addAbsorptionBasedHandlingExtensionPropagationItem(absorptionPropagationExtension);
+						absorptionPropagationExtension->setPropagationInitializationIndividualsSplittedTestsRemaining(true);
+						continueProcessingBuildingVarItem = true;
+					} else {
+						queryProcData->decBuildingVariableItem();
+						absorptionPropagationExtension->setPropagationInitializationIndividualsSplittedTestsRemaining(false);
+					}
+				}
+
+
+
+				CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionExtensionItemController(absorptionPropagationExtension, variable, splitIndiSet);
+				CAnsweringSplitEntailmentTestingCancellationAdapter* cancelAdapter = nullptr;
+				if (splitIndiSet) {
+					cancelAdapter = absorptionPropagationExtension->getEntailmentTestingCancellationAdapter();
+					cancelAdapter->incCurrentEntailmentTestingCount();
+					satCalcJob->setCancellationAdapter(cancelAdapter);
+				}
+				absorptionPropagationExtension->addPropagationSteeringController(propagationSteeringController);
+				CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(satCalcJob, propagationSteeringController, absorptionHanldingQueryPart, buildingVarItem->getQueryProcessingData(), absorptionPropagationExtension, cancelAdapter);
+				satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
+				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartEntailmentTestingCount();
+				if (!absorptionHanldingQueryPart->hasNonTrivialAbsorptionPropagation()) {
+					continueCalculationJobFromNondeterministicCachedGraph(satCalcJob, answererContext);
+				}
+				processCalculationJob(answererContext, satCalcJob, completedMessage);
+				return true;
+			}
+
+
+
+
+			bool COptimizedComplexExpressionAnsweringHandler::processVariableBindingsEntailmentCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* message, CAnswererContext* answererContext) {
+				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorbedQueryPartData = message->getAbsorbedQueryPartData();
+				CComplexQueryExpressionProcessingData* queryProcData = message->getQueryProcessingData();
+				COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension = message->getAbsorptionPropagationExtension();
+				CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController = message->getPropagationSteeringController();
+				CAnsweringSplitEntailmentTestingCancellationAdapter* cancelAdapter = message->getCancellationAdapter();
+
+				if (cancelAdapter) {
+					cancelAdapter->decCurrentEntailmentTestingCount();
+				}
+				if (cancelAdapter && !message->isSatisfiable()) {
+					cancelAdapter->setEntailmentFound();
+				}
+
+				if (!absorptionPropagationExtension && message->isSatisfiable()) {
+					queryProcData->setUnsatisfiable(true);
+				}
+				if (absorptionPropagationExtension && !message->isSatisfiable()) {
+					absorptionPropagationExtension->setEntailmentFound(true);
+				}
+				if (absorptionPropagationExtension) {
+					absorptionPropagationExtension->removePropagationSteeringController(propagationSteeringController);
+				}
+				if (propagationSteeringController) {
+					delete propagationSteeringController;
+				}
+
+				queryProcData->decEntailmentComputation();
+				if (!absorptionPropagationExtension && !cancelAdapter || absorptionPropagationExtension && !absorptionPropagationExtension->hasRemainingPropagationInitializationIndividualsSplittedTests() || cancelAdapter->getCurrentEntailmentTestingCount() == 0) {
+					if (!queryProcData->hasComputation()) {
+						if (absorptionPropagationExtension && !absorptionPropagationExtension->isEntailmentFound()) {
+							queryProcData->setUnsatisfiable(true);
+						}
+						if (cancelAdapter && !cancelAdapter->hasEntailmentFound()) {
+							queryProcData->setUnsatisfiable(true);
+						}
+						finishQueryProcessing(queryProcData);
+					}
+				}
+				return true;
+			}
+
+
+
+
+
+
+
+
+
+
+			bool COptimizedComplexExpressionAnsweringHandler::createVariableBindingPropagationTest(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool &continueProcessingBuildingVarItem) {
 				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart = absorptionPropagationExtension->getAbsorptionBasedHandlingData();
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				buildingVarItem->incVariableBindingsPropagationCount();
@@ -4782,13 +5049,39 @@ namespace Konclude {
 				CVariable* variable = absorptionHanldingQueryPart->getVariableExpressionVariableHash()->value(initializerVariable);
 				satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, absorptionHanldingQueryPart->isTopObjectPropertyUsed(), answererContext);
 				QSet<CIndividualReference>* indiSet = absorptionPropagationExtension->getVariableSteeringIndividualBindingSet(variable);
-				for (QSet<CIndividualReference>::const_iterator it = indiSet->constBegin(), itEnd = indiSet->constEnd(); it != itEnd; ++it) {
+
+				QSet<CIndividualReference>* splitIndiSet = nullptr; 
+				if (!absorptionHanldingQueryPart->isTopObjectPropertyUsed() && absorptionPropagationExtension->isPropagationInitializationIndividualsSplitted() || indiSet->size() > mConfMaxVariableBindingPropagationsInitializationIndividualCount && mConfMaxVariableBindingPropagationsInitializationIndividualCount > 0) {
+					splitIndiSet = new QSet<CIndividualReference>();
+					absorptionPropagationExtension->setPropagationInitializationIndividualsSplitted(true);
+				}
+				for (QSet<CIndividualReference>::iterator it = indiSet->begin(); it != indiSet->end() && (mConfMaxVariableBindingPropagationsInitializationIndividualCount < 0 || !splitIndiSet || splitIndiSet->size() < mConfMaxVariableBindingPropagationsInitializationIndividualCount); ) {
 					CIndividualReference individual(*it);
 					satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(absorptionHanldingQueryPart->getInitializerConcept(), false, individual, satCalcJob);
+					if (splitIndiSet) {
+						splitIndiSet->insert(individual);
+						it = indiSet->erase(it);
+					} else {
+						++it;
+					}
+				}
+				if (splitIndiSet) {
+					if (mConfExtendedLogging) {
+						LOG(INFO, getDomain(), logTr("%1. marker propagation test for absorbed query part based on %2 bindings scheduled.").arg(absorptionPropagationExtension->getNextPropagationInitializationIndividualsSplittedTestId()).arg(splitIndiSet->size()), this);
+					}
+					if (!indiSet->isEmpty()) {
+						// TODO: but into queue such that remaining propagation tests are scheduled at some point
+						buildingVarItem->addAbsorptionBasedHandlingExtensionPropagationItem(absorptionPropagationExtension);
+						absorptionPropagationExtension->setPropagationInitializationIndividualsSplittedTestsRemaining(true);
+						continueProcessingBuildingVarItem = true;
+					} else {
+						absorptionPropagationExtension->setPropagationInitializationIndividualsSplittedTestsRemaining(false);
+					}
 				}
 
-				CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(satCalcJob, absorptionPropagationExtension, buildingVarItem);
-				CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionExtensionItemController(absorptionPropagationExtension);
+				CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController = new CAnsweringPropagationSteeringAbsorptionExtensionItemController(absorptionPropagationExtension, variable, splitIndiSet);
+				absorptionPropagationExtension->addPropagationSteeringController(propagationSteeringController);
+				CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* completedMessage = new CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(satCalcJob, propagationSteeringController, absorptionPropagationExtension, buildingVarItem);
 				satCalcJob->setSatisfiableAnswererBindingPropagationAdapter(new CSatisfiableTaskAnswererBindingPropagationAdapter(absorptionHanldingQueryPart->getInitializerConcept(), absorptionHanldingQueryPart->getPropagationFinalizationConcept(), this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), propagationSteeringController));
 				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incExistentialQueryPartVariableBindingPropagationCount();
 				if (!absorptionHanldingQueryPart->hasNonTrivialAbsorptionPropagation()) {
@@ -4806,9 +5099,12 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processVariableBindingsPropagationItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* message, bool computationError, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processVariableBindingsPropagationItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingPropagations* message, bool computationError, CAnswererContext* answererContext) {
 				COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem = message->getAbsorptionPropagationItem();
 				COptimizedComplexBuildingVariableCompositionsItem* buildVarItem = message->getVariableBuildingItem();
+				CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController = message->getPropagationSteeringController();
+				absorptionPropagationItem->removePropagationSteeringController(propagationSteeringController);
+				delete propagationSteeringController;
 
 				if (computationError) {
 					buildVarItem->getQueryProcessingData()->setComputationError(computationError);
@@ -4816,12 +5112,14 @@ namespace Konclude {
 
 				buildVarItem->decVariableBindingsPropagationCount();
 
-				if (!absorptionPropagationItem->isVariableMappingsComputed()) {
-					// schedule item processing
-					queueVariableItemComputation(buildVarItem, absorptionPropagationItem);
+				if (!absorptionPropagationItem->hasRemainingPropagationInitializationIndividualsSplittedTests()) {
+					if (!absorptionPropagationItem->isVariableMappingsComputed()) {
+						// schedule item processing
+						queueVariableItemComputation(buildVarItem, absorptionPropagationItem);
+					}
+					buildVarItem->setProcessingQueued(true);
+					mOntoAnsweringItem->addProcessingVariableBuildingItem(buildVarItem);
 				}
-				buildVarItem->setProcessingQueued(true);
-				mOntoAnsweringItem->addProcessingVariableBuildingItem(buildVarItem);
 
 				return true;
 			}
@@ -4831,7 +5129,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processVariableBindingsConfirmationCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processVariableBindingsConfirmationCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation* message, CAnswererContext* answererContext) {
 				COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem = message->getAbsorptionPropagationItem();
 				COptimizedComplexBuildingVariableCompositionsItem* buildVarItem = message->getVariableBuildingItem();
 
@@ -4860,24 +5158,10 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processVariableBindingsEntailmentCalculationCompleted(CAnsweringMessageDataCalculationCompletedVariableBindingEntailment* message, CAnswererContext* answererContext) {
-				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorbedQueryPartData = message->getAbsorbedQueryPartData();
-				CComplexQueryProcessingData* queryProcData = message->getQueryProcessingData();
-
-				if (message->isSatisfiable()) {
-					queryProcData->setUnsatisfiable(true);
-				}
-				queryProcData->decEntailmentComputation();
-				if (!queryProcData->hasComputation()) {
-					finishQueryProcessing(queryProcData);
-				}
-				return true;
-			}
 
 
 
-
-			bool COptimizedComplexConceptAnsweringHandler::processExtractedVariableBindingPropagations(CAnsweringMessageDataVariableBindingPropagations* variableBindingsPropagationMessage, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processExtractedVariableBindingPropagations(CAnsweringMessageDataVariableBindingPropagations* variableBindingsPropagationMessage, CAnswererContext* answererContext) {
 
 
 				CVARIABLEBINDINGMESSAGELIST<CAnsweringMessageDataVariableBindingPropagationsData*>* individualBindingList = variableBindingsPropagationMessage->getIndividualBindingList();
@@ -4972,7 +5256,7 @@ namespace Konclude {
 						possMappingCount = possibleVariableMapping->getBindingCount();
 					}
 					cint64 certMappingCount = variableMapping->getBindingCount();
-					LOG(INFO, getDomain(), logTr("Extracted %1 certain and %2 possible mappings from propagated marker for absorbed query part.").arg(certMappingCount).arg(possMappingCount), this);
+					LOG(INFO, getDomain(), logTr("Obtained %1 certain and %2 possible mappings from propagated marker for absorbed query part.").arg(certMappingCount).arg(possMappingCount), this);
 				}
 
 
@@ -4985,7 +5269,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::canRetrieveInstantiatingDataValueIndividuals(CRole* dataRole, CDataLiteral* dataLiteral) {
+			bool COptimizedComplexExpressionAnsweringHandler::canRetrieveInstantiatingDataValueIndividuals(CRole* dataRole, CDataLiteral* dataLiteral) {
 				COntologyTriplesAssertionsAccessor* triplesAssertionAccessor = mOntoAnsweringItem->getOntology()->getOntologyTriplesData()->getTripleAssertionAccessor();
 				if (triplesAssertionAccessor && dataRole->hasPropertyName()) {
 					CDatatype* datatype = dataLiteral->getDatatype();
@@ -4999,7 +5283,7 @@ namespace Konclude {
 			}
 
 
-			QMap<cint64, IndividualIdCandidateData>* COptimizedComplexConceptAnsweringHandler::getInstantiatingDataValueIndividualIdMap(CRole* dataRole, CDataLiteral* dataLiteral, QMap<cint64, IndividualIdCandidateData>* instantiatingDataValueIndividualIdMap, CAnswererContext* answererContext) {
+			QMap<cint64, IndividualIdCandidateData>* COptimizedComplexExpressionAnsweringHandler::getInstantiatingDataValueIndividualIdMap(CRole* dataRole, CDataLiteral* dataLiteral, QMap<cint64, IndividualIdCandidateData>* instantiatingDataValueIndividualIdMap, CAnswererContext* answererContext) {
 				if (!instantiatingDataValueIndividualIdMap) {
 					instantiatingDataValueIndividualIdMap = new QMap<cint64, IndividualIdCandidateData>();
 				}
@@ -5016,7 +5300,7 @@ namespace Konclude {
 
 
 
-			QSet<CDataLiteral*>* COptimizedComplexConceptAnsweringHandler::getInstantiatedDataLiterals(const CIndividualReference& indiRef, CRole* dataRole, QSet<CDataLiteral*>* dataLiteralSet, CAnswererContext* answererContext) {
+			QSet<CDataLiteral*>* COptimizedComplexExpressionAnsweringHandler::getInstantiatedDataLiterals(const CIndividualReference& indiRef, CRole* dataRole, QSet<CDataLiteral*>* dataLiteralSet, CAnswererContext* answererContext) {
 
 				if (!dataLiteralSet) {
 					dataLiteralSet = new QSet<CDataLiteral*>();
@@ -5194,7 +5478,7 @@ namespace Konclude {
 
 
 
-			CIndividualProcessNode* COptimizedComplexConceptAnsweringHandler::getMergeCorrectedIndividualProcessNode(CIndividualProcessNode* indiProcNode, CIndividualProcessNodeVector* indiProcVector, bool* nonDeterministicallyMergedFlag, CAnswererContext* answererContext) {
+			CIndividualProcessNode* COptimizedComplexExpressionAnsweringHandler::getMergeCorrectedIndividualProcessNode(CIndividualProcessNode* indiProcNode, CIndividualProcessNodeVector* indiProcVector, bool* nonDeterministicallyMergedFlag, CAnswererContext* answererContext) {
 				bool nonDeterministicMerged = false;
 				while (indiProcNode && indiProcNode->getMergedIntoIndividualNodeID() != indiProcNode->getIndividualNodeID()) {
 					cint64 mergeID = indiProcNode->getMergedIntoIndividualNodeID();
@@ -5213,7 +5497,7 @@ namespace Konclude {
 
 
 
-			CIndividualProcessNode* COptimizedComplexConceptAnsweringHandler::getNominalIndividualProcessNode(const CIndividualReference& indiRef, CIndividualProcessNodeVector* indiProcVector, bool* nondeterministicNodeFlag, CAnswererContext* answererContext) {
+			CIndividualProcessNode* COptimizedComplexExpressionAnsweringHandler::getNominalIndividualProcessNode(const CIndividualReference& indiRef, CIndividualProcessNodeVector* indiProcVector, bool* nondeterministicNodeFlag, CAnswererContext* answererContext) {
 
 				cint64 indiID = -indiRef.getIndividualID();
 
@@ -5237,7 +5521,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::queueVariableItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::queueVariableItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
 				if (!varCompItem->isComputationQueued()) {
 					varCompItem->setComputationQueued(true);
 					buildingVarItem->addComputeVariableMappingItem(varCompItem);
@@ -5249,7 +5533,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::debugCheckVariableMappingContainsSolution(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::debugCheckVariableMappingContainsSolution(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
 				QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*>* varConItemHash = buildingVarItem->getVariableConceptItemHash();
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 
@@ -5270,7 +5554,7 @@ namespace Konclude {
 
 
 
-			QString COptimizedComplexConceptAnsweringHandler::debugGetVariableMappingsHeaderString(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, cint64** sortArray) {
+			QString COptimizedComplexExpressionAnsweringHandler::debugGetVariableMappingsHeaderString(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, cint64** sortArray) {
 				QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*>* varConItemHash = buildingVarItem->getVariableConceptItemHash();
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 
@@ -5317,7 +5601,7 @@ namespace Konclude {
 
 
 
-			QSet<QString> COptimizedComplexConceptAnsweringHandler::debugGetVariableMappingStringSet(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, cint64** sortArray) {
+			QSet<QString> COptimizedComplexExpressionAnsweringHandler::debugGetVariableMappingStringSet(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, cint64** sortArray) {
 				QSet<QString> bindingStringSet;
 				COptimizedComplexVariableIndividualMappings* varMapping = varCompItem->getVariableMapping();
 
@@ -5378,7 +5662,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::debugWriteVariableMappingToFileWithHeader(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, const QString& suffix) {
+			bool COptimizedComplexExpressionAnsweringHandler::debugWriteVariableMappingToFileWithHeader(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, const QString& suffix) {
 				COptimizedComplexVariableIndividualMappings* varMapping = varCompItem->getVariableMapping();				 
 				QString nextFileName = QString("Debugging/Answering/item-bindings-%1-%2.tsv").arg(varCompItem->getComputationStepId()).arg(nextBindingsFileId++);
 				if (!suffix.isEmpty()) {
@@ -5420,7 +5704,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::debugWriteVariableMappingToFile(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::debugWriteVariableMappingToFile(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
 				COptimizedComplexVariableIndividualMappings* varMapping = varCompItem->getVariableMapping();
 				QFile bindingsFile("Debugging/Answering/item-bindings.tsv");
 				QString bindingsString;
@@ -5448,7 +5732,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::debugCheckVariableMappingFromFile(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::debugCheckVariableMappingFromFile(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
 				COptimizedComplexVariableIndividualMappings* varMapping = varCompItem->getVariableMapping();
 				QFile bindingsFile("Debugging/Answering/item-bindings.tsv");
 
@@ -5557,7 +5841,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::debugCheckVariableMappingContainsSolution(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, COptimizedComplexVariableCompositionItem* varCompItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::debugCheckVariableMappingContainsSolution(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, COptimizedComplexVariableCompositionItem* varCompItem) {
 				QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*>* varConItemHash = buildingVarItem->getVariableConceptItemHash();
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				COptimizedComplexVariableCompositionItemVariableExpressionMapping& varItemIndexMapping = buildingVarItem->getVariableItemIndexMapping(varExp);
@@ -5642,7 +5926,7 @@ namespace Konclude {
 
 
 
-			QStringList COptimizedComplexConceptAnsweringHandler::debugGetItemVariableNames(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, COptimizedComplexVariableCompositionItem* varCompItem) {
+			QStringList COptimizedComplexExpressionAnsweringHandler::debugGetItemVariableNames(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, COptimizedComplexVariableCompositionItem* varCompItem) {
 				QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*>* varConItemHash = buildingVarItem->getVariableConceptItemHash();
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				COptimizedComplexVariableCompositionItemVariableIndexMapping* itemMapping = nullptr;
@@ -5679,7 +5963,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::tryReuseVariableRolePropagationItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CIndividualVariableExpression* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CObjectPropertyAssertionExpression* propAss) {
+			bool COptimizedComplexExpressionAnsweringHandler::tryReuseVariableRolePropagationItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CIndividualVariableExpression* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CObjectPropertyAssertionExpression* propAss) {
 
 				QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*>* varConItemHash = buildingVarItem->getVariableConceptItemHash();
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
@@ -5757,7 +6041,7 @@ namespace Konclude {
 
 
 
-			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexConceptAnsweringHandler::buildVariableRolePropagationItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CIndividualVariableExpression* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CDataLiteralVariableExpression* dataVariable, CDataPropertyTermExpression* dataPropTerm, bool* processing, CAnswererContext* answererContext) {
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildVariableRolePropagationItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CIndividualVariableExpression* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CDataLiteralVariableExpression* dataVariable, CDataPropertyTermExpression* dataPropTerm, bool* processing, CAnswererContext* answererContext) {
 				QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*>* varConItemHash = buildingVarItem->getVariableConceptItemHash();
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				COptimizedComplexVariableCompositionItemVariableExpressionMapping& varItemIndexMapping = buildingVarItem->getVariableItemIndexMapping(varExp);
@@ -5857,7 +6141,7 @@ namespace Konclude {
 
 
 
-			QHash<CExpressionVariable*, cint64> COptimizedComplexConceptAnsweringHandler::getPropagationReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CObjectPropertyAssertionExpression* propAss) {
+			QHash<CExpressionVariable*, cint64> COptimizedComplexExpressionAnsweringHandler::getPropagationReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, CObjectPropertyAssertionExpression* propAss) {
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				COptimizedComplexVariableCompositionItemVariableExpressionMapping& varItemIndexMapping = buildingVarItem->getVariableItemIndexMapping(propVarExp);
 
@@ -5975,7 +6259,7 @@ namespace Konclude {
 
 
 
-			QHash<CExpressionVariable*, cint64> COptimizedComplexConceptAnsweringHandler::getReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping) {
+			QHash<CExpressionVariable*, cint64> COptimizedComplexExpressionAnsweringHandler::getReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping) {
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				COptimizedComplexVariableCompositionItemVariableExpressionMapping& varItemIndexMapping = buildingVarItem->getVariableItemIndexMapping(propVarExp);
 
@@ -6056,7 +6340,7 @@ namespace Konclude {
 
 
 
-			void COptimizedComplexConceptAnsweringHandler::absorbExistentialQueryPart(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data, CAnswererContext* answererContext) {
+			void COptimizedComplexExpressionAnsweringHandler::absorbExistentialQueryPart(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data, CAnswererContext* answererContext) {
 				QHash<CConcept*, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* propagationFinalizationConceptAbsorptionDataHash = mOntoAnsweringItem->getPropagationFinalizationConceptAbsorptionDataHash();
 				QStringList varList;
 				if (mConfExtendedLogging) {
@@ -6095,7 +6379,7 @@ namespace Konclude {
 
 
 
-			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexConceptAnsweringHandler::buildAbsorbedPartHandlingItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart, QHash<CExpressionVariable *, QSet<COptimizedComplexVariableCompositionItem *> *>* varExpVarComItemHash, bool* processing) {
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildAbsorbedPartHandlingItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionHanldingQueryPart, QHash<CExpressionVariable *, QSet<COptimizedComplexVariableCompositionItem *> *>* varExpVarComItemHash, bool* processing) {
 				COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem = new COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem(absorptionHanldingQueryPart);
 				absorptionPropagationItem->setComputationStepId(mOntoAnsweringItem->getNextComputationStepId());
 				QList<COptimizedComplexVariableCompositionItem*> computationDependentItemList;
@@ -6215,8 +6499,88 @@ namespace Konclude {
 
 
 
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildQueryTransferringVariableExtractionItem(COptimizedComplexBuildingVariableCompositionsItem* extractionBuildingVarItem, CExpressionVariable* extractionVarExp, COptimizedComplexVariableCompositionItem* extractionVarCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* extractionItemIndexMapping, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool* processing) {
+				COptimizedComplexVariableCompositionItemVariableExpressionMapping& extractionVarItemIndexMapping = extractionBuildingVarItem->getVariableItemIndexMapping(extractionVarExp);
 
-			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexConceptAnsweringHandler::buildVariableReductionItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, bool allopReductionForVar, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, QHash<CExpressionVariable*, cint64>& reductionVarExpIndHash, bool* processing) {
+				if (!extractionItemIndexMapping) {
+					extractionItemIndexMapping = extractionVarItemIndexMapping.value(extractionVarCompItem);
+				}
+
+				cint64 extractionVarId = 0;
+				for (COptimizedComplexVariableCompositionItemVariableIndexMapping::const_iterator it = extractionItemIndexMapping->constBegin(), itEnd = extractionItemIndexMapping->constEnd(); it != itEnd; ++it) {
+					cint64 varInd = it.key();
+					CExpressionVariable* varExp = it.value();
+					if (varExp == extractionVarExp) {
+						extractionVarId = varInd;
+						break;
+					}
+				}
+
+
+				COptimizedComplexVariableExtractionItem*& varRedItem = extractionVarCompItem->getExtractionItem(extractionVarId);
+				bool created = false;
+				if (!varRedItem) {
+					varRedItem = new COptimizedComplexVariableExtractionItem(extractionVarCompItem, extractionVarId);
+					created = true;
+					varRedItem->setVariableMappingsComputationRequirement(mConfMinimalMappingsComputationSize);
+					varRedItem->setComputationStepId(mOntoAnsweringItem->getNextComputationStepId());
+				}
+				buildingVarItem->addUsedComplexVariableCompositionItem(varRedItem);
+
+				COptimizedComplexVariableCompositionItemVariableIndexMapping* redItemIndexMapping = new COptimizedComplexVariableCompositionItemVariableIndexMapping();
+				COptimizedComplexVariableCompositionItemVariableExpressionMapping& varItemIndexMapping = buildingVarItem->getVariableItemIndexMapping(varExp);
+				redItemIndexMapping->insert(0, varExp);
+				varItemIndexMapping.insertMulti(varRedItem, redItemIndexMapping);
+#ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
+				varRedItem->debugVarItemIndexMapping = redItemIndexMapping;
+#endif
+
+				COptimizedComplexVariableIndividualMappings* redVarMapping = nullptr;
+				if (created) {
+					redVarMapping = new COptimizedComplexVariableIndividualMappingsHash(1);
+					COptimizedComplexVariableIndividualMappings* varMapping = extractionVarCompItem->getVariableMapping();
+					redVarMapping->setBindingMapping(0, varMapping->getBindingMapping(extractionVarId));
+				}
+
+
+
+				if (!varRedItem->isVariableMappingsInitialized()) {
+					varRedItem->setVariableMappingsInitialized(true);
+					// schedule item processing
+					queueVariableItemComputation(buildingVarItem, varRedItem);
+					if (processing) {
+						*processing = true;
+					}
+				}
+
+				if (created) {
+					varRedItem->setVariableMapping(redVarMapping);
+				}
+
+				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
+				varExpVarComItemHash->value(varExp)->insert(varRedItem);
+
+
+#ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
+				QStringList debugVariableNamePrevItemStringList = debugGetItemVariableNames(extractionBuildingVarItem, extractionVarExp, extractionVarCompItem);
+				QStringList debugVariableNameRedItemStringList = debugGetItemVariableNames(buildingVarItem, varExp, varRedItem);
+				varRedItem->debugVariableNameStringList = debugVariableNameRedItemStringList;
+				varRedItem->debugCreationString = "Computation step " + QString::number(varRedItem->getComputationStepId()) + " with [" + debugVariableNameRedItemStringList.join(", ") + "] obtained by extracting " + extractionVarExp->getName() + " from [" + debugVariableNamePrevItemStringList.join(", ") + "] of step " + QString::number(extractionVarCompItem->getComputationStepId());
+				debugCreationStringList += varRedItem->debugCreationString;
+				debugCreationString = debugCreationStringList.join("\r\n");
+#endif
+
+
+				buildingVarItem->updateLastHandledVariableItemAssociation(varExp, varRedItem);
+
+				return QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*>(varRedItem, redItemIndexMapping);
+			}
+
+
+
+
+
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildVariableReductionItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* propVarExp, bool allopReductionForVar, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, QHash<CExpressionVariable*, cint64>& reductionVarExpIndHash, bool* processing) {
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				COptimizedComplexVariableCompositionItemVariableExpressionMapping& varItemIndexMapping = buildingVarItem->getVariableItemIndexMapping(propVarExp);
 
@@ -6338,7 +6702,7 @@ namespace Konclude {
 
 
 
-			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexConceptAnsweringHandler::buildVariableRolePropagationItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CIndividualVariableExpression* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, QHash<CExpressionVariable*, cint64>& reductionVarExpIndHash, CObjectPropertyAssertionExpression* propAss, bool* processing, CAnswererContext* answererContext) {
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildVariableRolePropagationItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CIndividualVariableExpression* varExp, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping, QHash<CExpressionVariable*, cint64>& reductionVarExpIndHash, CObjectPropertyAssertionExpression* propAss, bool* processing, CAnswererContext* answererContext) {
 
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 				COptimizedComplexVariableCompositionItemVariableExpressionMapping& varItemIndexMapping = buildingVarItem->getVariableItemIndexMapping(varExp);
@@ -6543,7 +6907,7 @@ namespace Konclude {
 
 
 
-			QList<QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*>> COptimizedComplexConceptAnsweringHandler::reuseJoinedVariableCompositionItems(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp) {
+			QList<QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*>> COptimizedComplexExpressionAnsweringHandler::reuseJoinedVariableCompositionItems(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp) {
 
 
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
@@ -6599,7 +6963,7 @@ namespace Konclude {
 
 
 
-			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexConceptAnsweringHandler::buildJoinedVariableJoiningItems(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool* processing) {
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildJoinedVariableJoiningItems(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool* processing) {
 
 				cint64 joinCount = 0;
 				cint64 reductionCount = 0;
@@ -6695,7 +7059,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::hasVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool itemSameVarReduction, COptimizedComplexVariableCompositionItem* joiningItem1, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2) {
+			bool COptimizedComplexExpressionAnsweringHandler::hasVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool itemSameVarReduction, COptimizedComplexVariableCompositionItem* joiningItem1, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2) {
 
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 
@@ -6726,13 +7090,13 @@ namespace Konclude {
 
 
 
-			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexConceptAnsweringHandler::buildVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool itemSameVarReduction, COptimizedComplexVariableCompositionItem* joiningItem1, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2, bool* processing) {
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* varExp, bool itemSameVarReduction, COptimizedComplexVariableCompositionItem* joiningItem1, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2, bool* processing) {
 				return buildVariableJoiningItem(buildingVarItem, varExp, itemSameVarReduction, varExp, joiningItem1, varExp, joiningItem2, itemIndexMapping1, itemIndexMapping2, processing);
 			}
 
 
 
-			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexConceptAnsweringHandler::buildVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* destVarExp, bool itemSameVarReduction, CExpressionVariable* varExp1, COptimizedComplexVariableCompositionItem* joiningItem1, CExpressionVariable* varExp2, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2, bool* processing) {
+			QPair<COptimizedComplexVariableCompositionItem*, COptimizedComplexVariableCompositionItemVariableIndexMapping*> COptimizedComplexExpressionAnsweringHandler::buildVariableJoiningItem(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CExpressionVariable* destVarExp, bool itemSameVarReduction, CExpressionVariable* varExp1, COptimizedComplexVariableCompositionItem* joiningItem1, CExpressionVariable* varExp2, COptimizedComplexVariableCompositionItem* joiningItem2, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping1, COptimizedComplexVariableCompositionItemVariableIndexMapping* itemIndexMapping2, bool* processing) {
 
 
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
@@ -6906,7 +7270,7 @@ namespace Konclude {
 
 
 
-			QSet<CExpressionVariable*> COptimizedComplexConceptAnsweringHandler::getJoinReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* minLeftItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* minLeftItemIndexMapping, COptimizedComplexVariableCompositionItem* maxRightItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* maxRightItemIndexMapping, bool itemSameVarReduction) {
+			QSet<CExpressionVariable*> COptimizedComplexExpressionAnsweringHandler::getJoinReducableVariables(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* minLeftItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* minLeftItemIndexMapping, COptimizedComplexVariableCompositionItem* maxRightItem, COptimizedComplexVariableCompositionItemVariableIndexMapping* maxRightItemIndexMapping, bool itemSameVarReduction) {
 
 				QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* varExpVarComItemHash = buildingVarItem->getVariableExpressionVariableCompositionItemHash();
 
@@ -7034,7 +7398,7 @@ namespace Konclude {
 
 
 
-			cint64 COptimizedComplexConceptAnsweringHandler::fillJoiningBindingPositionMapping(COptimizedComplexVariableCompositionItemVariableIndexMapping* minLeftItemIndexMapping, COptimizedComplexVariableJoiningBindingPositionMapping &joiningBindingPositionMapping, COptimizedComplexVariableCompositionItemVariableIndexMapping* maxRightItemIndexMapping, bool itemSameVarReduction, QSet<CExpressionVariable *> &reductionVarExpSet) {
+			cint64 COptimizedComplexExpressionAnsweringHandler::fillJoiningBindingPositionMapping(COptimizedComplexVariableCompositionItemVariableIndexMapping* minLeftItemIndexMapping, COptimizedComplexVariableJoiningBindingPositionMapping &joiningBindingPositionMapping, COptimizedComplexVariableCompositionItemVariableIndexMapping* maxRightItemIndexMapping, bool itemSameVarReduction, QSet<CExpressionVariable *> &reductionVarExpSet) {
 				cint64 nextVarIdx = 0;
 				QHash<cint64, cint64> minLeftVarIdsCorrectionHash;
 				QSet<CExpressionVariable*> sameItemVarExpMergedSet;
@@ -7226,7 +7590,7 @@ namespace Konclude {
 				return nextVarIdx;
 			}
 
-			bool COptimizedComplexConceptAnsweringHandler::finishSubClassCalculationStepProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::finishSubClassCalculationStepProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext) {
 				delete conceptItem->getPossibleSubClassNodeTestingList();
 				conceptItem->setPossibleSubClassNodeTestingList(nullptr);
 				delete conceptItem->getPossibleSubClassTestingNodeSet();
@@ -7240,7 +7604,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::initializeRealization(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::initializeRealization(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
 				CConceptRealization* conceptRealization = mOntoAnsweringItem->getOntology()->getRealization()->getConceptRealization();
 				CRoleRealization* roleRealization = mOntoAnsweringItem->getOntology()->getRealization()->getRoleRealization();
 				if (!conceptRealization || !roleRealization) {
@@ -7257,7 +7621,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::initializeRealizationInstancesIterators(COptimizedComplexConceptItem* conceptItem, cint64 requiredInstancesCount, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::initializeRealizationInstancesIterators(COptimizedComplexConceptItem* conceptItem, cint64 requiredInstancesCount, CAnswererContext* answererContext) {
 				QSet<CHierarchyNode*>* superHierNodeSet = conceptItem->getDirectSuperClassNodeSet();
 				QSet<CHierarchyNode*>* subHierNodeSet = conceptItem->getDirectSubClassNodeSet();
 				CHierarchyNode* topHierNode = mOntoAnsweringItem->getOntology()->getClassification()->getClassConceptClassification()->getClassConceptTaxonomy()->getTopHierarchyNode();
@@ -7530,7 +7894,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::initializeKnownPossibleInstances(COptimizedComplexConceptItem* conceptItem, cint64 requiredInstancesCount, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::initializeKnownPossibleInstances(COptimizedComplexConceptItem* conceptItem, cint64 requiredInstancesCount, CAnswererContext* answererContext) {
 
 				COptimizedComplexConceptInstanziatedIndividualItemHash* directInstanceItems = conceptItem->getKnownInstanceItems();
 				if (!directInstanceItems) {
@@ -7610,7 +7974,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::schedulePossibleInstancesNeighourRealization(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::schedulePossibleInstancesNeighourRealization(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
 				QSet<CRealizationIndividualInstanceItemReference>* possibleDirectInstanceItemSet = conceptItem->getPossibleInstanceItemSet();
 				CConcept* indiTriggerConcept = mOntoAnsweringItem->getOntology()->getTBox()->getIndividualTriggerConcept();
 
@@ -7710,7 +8074,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::checkConceptInstancesCompletelyResolveable(COptimizedComplexConceptItem* conceptItem, QSet<TConceptNegPair>* remainingConNegPair) {
+			bool COptimizedComplexExpressionAnsweringHandler::checkConceptInstancesCompletelyResolveable(COptimizedComplexConceptItem* conceptItem, QSet<TConceptNegPair>* remainingConNegPair) {
 
 
 				CRoleRealization* roleRealization = mOntoAnsweringItem->getOntology()->getRealization()->getRoleRealization();
@@ -7822,7 +8186,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::checkPossibleInstancesCompletelyHandled(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::checkPossibleInstancesCompletelyHandled(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
 
 				if (!conceptItem->getCompletelyHandledReducedInstanceTestingConcept()) {
 
@@ -7891,7 +8255,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::neighboursPrunePossibleInstances(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::neighboursPrunePossibleInstances(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
 				CSameRealization* sameRealization = mOntoAnsweringItem->getOntology()->getRealization()->getSameRealization();
 				CRoleRealization* roleRealization = mOntoAnsweringItem->getOntology()->getRealization()->getRoleRealization();
 				QSet<CRealizationIndividualInstanceItemReference>* possibleDirectInstanceItemSet = conceptItem->getPossibleInstanceItemSet();
@@ -7997,7 +8361,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::searchKnownPossibleInstances(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::searchKnownPossibleInstances(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
 				CConceptRealization* conceptRealization = mOntoAnsweringItem->getOntology()->getRealization()->getConceptRealization();
 				CRoleRealization* roleRealization = mOntoAnsweringItem->getOntology()->getRealization()->getRoleRealization();
 				QSet<CRealizationIndividualInstanceItemReference>* possibleDirectInstanceItemSet = new QSet<CRealizationIndividualInstanceItemReference>();
@@ -8222,7 +8586,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createSuperClassSubsumptionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createSuperClassSubsumptionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 				CConcept* superClassConcept = testingNode->getOneEquivalentConcept();
@@ -8236,7 +8600,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createSubClassSubsumptionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createSubClassSubsumptionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 				CConcept* subClassConcept = testingNode->getOneEquivalentConcept();
@@ -8250,7 +8614,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createInvidiualInstanceTest(COptimizedComplexConceptItem* conceptItem, const CIndividualReference& testingIndiRef, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createInvidiualInstanceTest(COptimizedComplexConceptItem* conceptItem, const CIndividualReference& testingIndiRef, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 				satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, conceptItem->isTopObjectPropertyUsed(), answererContext);
@@ -8272,7 +8636,7 @@ namespace Konclude {
 
 
 
-			CConcreteOntology* COptimizedComplexConceptAnsweringHandler::createQueryMaterializationData(QSet<CExpressionVariable *> varExpSet, QSet<CExpressionVariable *> rolledVarExpSet, QSet<CExpressionVariable *> anonymousIndiVariableSet, QHash<CExpressionVariable *, CBuildExpression *> rebuiltVarClassTermExp, QHash<CExpressionVariable *, CAxiomExpression *> varExpAxiomExpHash,
+			CConcreteOntology* COptimizedComplexExpressionAnsweringHandler::createQueryMaterializationData(QSet<CExpressionVariable *> varExpSet, QSet<CExpressionVariable *> rolledVarExpSet, QSet<CExpressionVariable *> anonymousIndiVariableSet, QHash<CExpressionVariable *, CBuildExpression *> rebuiltVarClassTermExp, QHash<CExpressionVariable *, CAxiomExpression *> varExpAxiomExpHash,
 					bool allAnonymousVariables, QSet<CExpressionVariable *> initialAnonymousIndiVariableSet, QList<CDataPropertyAssertionExpression *> bothVarDataPropAssPropagationList, QList<CObjectPropertyAssertionExpression *> bothVarPropAssPropagationList, QList<CDataPropertyAssertionExpression *> onlyDataVarDataPropAssList, COptimizedComplexBuildingVariableCompositionsItem* varBuildItem, CAnswererContext* answererContext) {
 
 
@@ -8439,7 +8803,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createQueryMaterializationTest(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createQueryMaterializationTest(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 
 				CComplexQueryMaterializationData* matData = buildingVarItem->getMaterializationData();
@@ -8467,11 +8831,11 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processQueryMaterializationCalculationCompleted(CAnsweringMessageDataCalculationCompletedQueryMaterialization* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processQueryMaterializationCalculationCompleted(CAnsweringMessageDataCalculationCompletedQueryMaterialization* message, CAnswererContext* answererContext) {
 
 				COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem = message->getBuildingVariableCompositionItem();
 				CComplexQueryMaterializationData* matData = message->getMaterializationData();
-				CComplexQueryProcessingData* queryProcessingData = buildingVarItem->getQueryProcessingData();
+				CComplexQueryExpressionProcessingData* queryProcessingData = buildingVarItem->getQueryProcessingData();
 
 				if (!message->isSatisfiable()) {
 					buildingVarItem->setSatisfiability(false);
@@ -8577,7 +8941,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processExtractedMaterializationConcept(CAnsweringMessageDataCalculationMaterializedConcepts* matConceptsMessage, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processExtractedMaterializationConcept(CAnsweringMessageDataCalculationMaterializedConcepts* matConceptsMessage, CAnswererContext* answererContext) {
 				CComplexQueryMaterializationData* matData = (CComplexQueryMaterializationData*)matConceptsMessage->getMaterializationDataIdentifier();
 				CIndividual* varIndi = matConceptsMessage->getVariableIndividual();
 
@@ -8597,7 +8961,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createCandidatePropagationInstanceTest(COptimizedComplexConceptItem* conceptItem, CConceptOfInterestActivationTriggeringData activationTriggeringData, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createCandidatePropagationInstanceTest(COptimizedComplexConceptItem* conceptItem, CConceptOfInterestActivationTriggeringData activationTriggeringData, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 
@@ -8638,7 +9002,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createInvidiualItemInstanceTest(COptimizedComplexConceptItem* conceptItem, const CRealizationIndividualInstanceItemReference& testingItemRef, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createInvidiualItemInstanceTest(COptimizedComplexConceptItem* conceptItem, const CRealizationIndividualInstanceItemReference& testingItemRef, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 
@@ -8669,7 +9033,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::createSatisfiabilityTest(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createSatisfiabilityTest(COptimizedComplexConceptItem* conceptItem, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 				satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, conceptItem->isTopObjectPropertyUsed(), answererContext);
@@ -8682,7 +9046,7 @@ namespace Konclude {
 			}
 
 
-			CSatisfiableCalculationJob* COptimizedComplexConceptAnsweringHandler::extendProcessingByTopPropagation(CSatisfiableCalculationJobGenerator& satCalcJobGen, CSatisfiableCalculationJob* satCalcJob, bool hasTopObjectPropertyPropagation, CAnswererContext* answererContext) {
+			CSatisfiableCalculationJob* COptimizedComplexExpressionAnsweringHandler::extendProcessingByTopPropagation(CSatisfiableCalculationJobGenerator& satCalcJobGen, CSatisfiableCalculationJob* satCalcJob, bool hasTopObjectPropertyPropagation, CAnswererContext* answererContext) {
 				if (hasTopObjectPropertyPropagation) {
 					CConcept* topRolePropagationExistingIndividualCreationConcept = mOntoAnsweringItem->getTopRolePropagationExistingIndividualCreationConcept();
 					if (!topRolePropagationExistingIndividualCreationConcept) {
@@ -8727,7 +9091,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processRequirements(CAnswererContext* answererContext, CConcreteOntology* ontology, const QList<COntologyProcessingRequirement*>& reqList, CAnsweringMessageDataRequirementCompleted* completedMessage) {
+			bool COptimizedComplexExpressionAnsweringHandler::processRequirements(CAnswererContext* answererContext, CConcreteOntology* ontology, const QList<COntologyProcessingRequirement*>& reqList, CAnsweringMessageDataRequirementCompleted* completedMessage) {
 				if (!mOntoAnsweringItem->hasRequirementProcessingSchedulingReported()) {
 					LOG(INFO, getDomain(), logTr("Scheduling processing of (realization) requirements."), this);
 					mOntoAnsweringItem->setRequirementProcessingSchedulingReported(true);
@@ -8741,7 +9105,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processCalculationJob(CAnswererContext* answererContext, CSatisfiableCalculationJob* satCalcJob, CAnsweringMessageDataCalculationCompleted* completedMessage) {
+			bool COptimizedComplexExpressionAnsweringHandler::processCalculationJob(CAnswererContext* answererContext, CSatisfiableCalculationJob* satCalcJob, CAnsweringMessageDataCalculationCompleted* completedMessage) {
 				satCalcJob->setCalculationConfiguration(mOntoAnsweringItem->getCalculationConfiguration());
 
 				CAnsweringCalculationStatisticsCollection* statColl = nullptr;
@@ -8762,7 +9126,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processCalculationMessage(CAnsweringMessageData* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processCalculationMessage(CAnsweringMessageData* message, CAnswererContext* answererContext) {
 				while (message) {
 					CAnsweringMessageData::ANSWERINGMESSAGEDATA messageType = message->getAnsweringMessageDataType();
 					if (messageType == CAnsweringMessageData::CALCULATIONCOMPLETED) {
@@ -8845,7 +9209,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processRequirementMessage(CAnsweringMessageData* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processRequirementMessage(CAnsweringMessageData* message, CAnswererContext* answererContext) {
 				while (message) {
 					CAnsweringMessageData::ANSWERINGMESSAGEDATA messageType = message->getAnsweringMessageDataType();
 					if (messageType == CAnsweringMessageData::REQUIREMENTCOMPLETED) {
@@ -8892,8 +9256,8 @@ namespace Konclude {
 							CIndividual* individual = entReqMes->getIndividual();
 							CConceptRealization* conReal = mOntoAnsweringItem->getOntology()->getRealization()->getConceptRealization();
 							procData->mEntailed = conReal->isConceptInstance(individual,concept);
-							for (CXLinker<CComplexQueryProcessingData*>* procDataLinkerIt = procData->mProcDataLinker; procDataLinkerIt; procDataLinkerIt = procDataLinkerIt->getNext()) {
-								CComplexQueryProcessingData* queryProcData = procDataLinkerIt->getData();
+							for (CXLinker<CComplexQueryExpressionProcessingData*>* procDataLinkerIt = procData->mProcDataLinker; procDataLinkerIt; procDataLinkerIt = procDataLinkerIt->getNext()) {
+								CComplexQueryExpressionProcessingData* queryProcData = procDataLinkerIt->getData();
 								queryProcData->decEntailmentComputation();
 								if (!queryProcData->hasComputation()) {
 									finishQueryProcessing(queryProcData);
@@ -8911,8 +9275,8 @@ namespace Konclude {
 							CIndividual* individualDest = entReqMes->getIndividualDestination();
 							CRoleRealization* roleReal = mOntoAnsweringItem->getOntology()->getRealization()->getRoleRealization();
 							procData->mEntailed = roleReal->isRoleInstance(role,individualSource,individualDest);
-							for (CXLinker<CComplexQueryProcessingData*>* procDataLinkerIt = procData->mProcDataLinker; procDataLinkerIt; procDataLinkerIt = procDataLinkerIt->getNext()) {
-								CComplexQueryProcessingData* queryProcData = procDataLinkerIt->getData();
+							for (CXLinker<CComplexQueryExpressionProcessingData*>* procDataLinkerIt = procData->mProcDataLinker; procDataLinkerIt; procDataLinkerIt = procDataLinkerIt->getNext()) {
+								CComplexQueryExpressionProcessingData* queryProcData = procDataLinkerIt->getData();
 								queryProcData->decEntailmentComputation();
 								if (!queryProcData->hasComputation()) {
 									finishQueryProcessing(queryProcData);
@@ -8956,7 +9320,7 @@ namespace Konclude {
 
 
 
-			QSet<CHierarchyNode*>* COptimizedComplexConceptAnsweringHandler::getDirectReducedSuperNodeSet(const QSet<CHierarchyNode*>& superClassesSet) {
+			QSet<CHierarchyNode*>* COptimizedComplexExpressionAnsweringHandler::getDirectReducedSuperNodeSet(const QSet<CHierarchyNode*>& superClassesSet) {
 				QSet<CHierarchyNode*>* directSuperClassesSet = new QSet<CHierarchyNode*>();
 				QList<CHierarchyNode*> predCountSortedSuperClassNodeList;
 				for (QSet<CHierarchyNode*>::const_iterator it = superClassesSet.constBegin(), itEnd = superClassesSet.constEnd(); it != itEnd; ++it) {
@@ -8989,7 +9353,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processExtractedClassSubsumers(CAnsweringMessageDataCalculationClassSubsumers* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processExtractedClassSubsumers(CAnsweringMessageDataCalculationClassSubsumers* message, CAnswererContext* answererContext) {
 				CConcept* concept = message->getSubsumedConcept();
 				bool negation = message->getSubsumedConceptNegation();
 				COptimizedComplexConceptItem* conceptItem = mOntoAnsweringItem->getComplexConceptItem(concept,negation);
@@ -9020,7 +9384,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processExtractedPossibleClassSubsumers(CAnsweringMessageDataCalculationPossibleClassSubsumers* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processExtractedPossibleClassSubsumers(CAnsweringMessageDataCalculationPossibleClassSubsumers* message, CAnswererContext* answererContext) {
 				CConcept* concept = message->getSubsumedConcept();
 				bool negation = message->getSubsumedConceptNegation();
 				COptimizedComplexConceptItem* conceptItem = mOntoAnsweringItem->getComplexConceptItem(concept, negation);
@@ -9064,7 +9428,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processSatisfiableCalculationCompleted(CAnsweringMessageDataCalculationCompletedSatisfiable* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processSatisfiableCalculationCompleted(CAnsweringMessageDataCalculationCompletedSatisfiable* message, CAnswererContext* answererContext) {
 				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
 				if (conceptItem->isSuperClassComputationInitializing()) {
 					conceptItem->setSuperClassComputationInitializing(false);
@@ -9086,7 +9450,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processSuperClassSubsumptionCalculationCompleted(CAnsweringMessageDataCalculationCompletedSubsumptionSuperClass* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processSuperClassSubsumptionCalculationCompleted(CAnsweringMessageDataCalculationCompletedSubsumptionSuperClass* message, CAnswererContext* answererContext) {
 				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
 				bool satisfiable = message->getCalculationCallbackContextData()->isSatisfiable();
 				CHierarchyNode* superClassNode = message->getSuperClassNode();
@@ -9115,7 +9479,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processSubClassSubsumptionCalculationCompleted(CAnsweringMessageDataCalculationCompletedSubsumptionSubClass* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processSubClassSubsumptionCalculationCompleted(CAnsweringMessageDataCalculationCompletedSubsumptionSubClass* message, CAnswererContext* answererContext) {
 				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
 				bool satisfiable = message->getCalculationCallbackContextData()->isSatisfiable();
 				CHierarchyNode* subClassNode = message->getSubClassNode();
@@ -9154,7 +9518,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processIndividualCandidatePropagationCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processIndividualCandidatePropagationCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem* message, CAnswererContext* answererContext) {
 				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
 				conceptItem->decCandidatePropagationProcessingCount();
 				CComplexConceptStepComputationProcess* compStep = conceptItem->getComputationProcess()->getInstancesComputationProcess(true);
@@ -9181,7 +9545,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processIndividualItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceItem* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processIndividualItemCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceItem* message, CAnswererContext* answererContext) {
 				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
 				bool satisfiable = message->getCalculationCallbackContextData()->isSatisfiable();
 				CRealizationIndividualInstanceItemReference testingItemRef = message->getInstanceItemReference();
@@ -9207,7 +9571,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processIndividualInstanceCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceIndividual* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processIndividualInstanceCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceIndividual* message, CAnswererContext* answererContext) {
 				bool satisfiable = message->getCalculationCallbackContextData()->isSatisfiable();
 				CIndividualReference testingIndiRef = message->getIndividualReference();
 				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
@@ -9238,15 +9602,15 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::processInstanceEntailmentCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceEntailment* message, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::processInstanceEntailmentCalculationCompleted(CAnsweringMessageDataCalculationCompletedInstanceEntailment* message, CAnswererContext* answererContext) {
 				bool satisfiable = message->getCalculationCallbackContextData()->isSatisfiable();
 				CIndividualReference testingIndiRef = message->getIndividualReference();
 				CConcept* concept = message->getConcept();
 				bool negation = message->getNegation();
 				CEntailmentQueryProcessingData* entailmentData = message->getEntailmentData();
 				entailmentData->mEntailed = !satisfiable;
-				for (CXLinker<CComplexQueryProcessingData*>* procDataLinkerIt = entailmentData->mProcDataLinker; procDataLinkerIt; procDataLinkerIt = procDataLinkerIt->getNext()) {
-					CComplexQueryProcessingData* queryProcData = procDataLinkerIt->getData();
+				for (CXLinker<CComplexQueryExpressionProcessingData*>* procDataLinkerIt = entailmentData->mProcDataLinker; procDataLinkerIt; procDataLinkerIt = procDataLinkerIt->getNext()) {
+					CComplexQueryExpressionProcessingData* queryProcData = procDataLinkerIt->getData();
 					queryProcData->decEntailmentComputation();
 					if (!queryProcData->hasComputation()) {
 						finishQueryProcessing(queryProcData);
@@ -9261,7 +9625,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::notifyWaitingItemData(CComputedItemDataNotificationLinker* notLinker, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::notifyWaitingItemData(CComputedItemDataNotificationLinker* notLinker, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext) {
 				if (notLinker) {
 					for (CComputedItemDataNotificationLinker* notLinkerIt = notLinker; notLinkerIt; notLinkerIt = notLinkerIt->getNext()) {
 						COptimizedComplexVariableCompositionItem* varCompItem = notLinkerIt->getVariableCompositionItem();
@@ -9276,7 +9640,7 @@ namespace Konclude {
 								mOntoAnsweringItem->addProcessingVariableBuildingItem(buildVarItem);
 							}
 						}
-						CComplexQueryProcessingData* queryProcData = notLinkerIt->getQueryProcessingData();
+						CComplexQueryExpressionProcessingData* queryProcData = notLinkerIt->getQueryProcessingData();
 						if (queryProcData) {
 							queryProcData->setComputationStepFinished(compStep);
 							if (!queryProcData->hasComputation()) {
@@ -9292,7 +9656,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::finishCalculationStepProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::finishCalculationStepProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext) {
 				compStep->setComputationProcessFinished(true);
 
 				notifyWaitingItemData(compStep->takeNotificationLinker(), compStep, answererContext);
@@ -9304,7 +9668,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::updateComputedInstancesCount(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepInstanceComputationProcess* compStep, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::updateComputedInstancesCount(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepInstanceComputationProcess* compStep, CAnswererContext* answererContext) {
 				compStep->updateComputedInstancesCount(conceptItem->getKnownInstanceItems()->size(), [&](CComputedItemDataNotificationLinker* notLinker) {
 					notifyWaitingItemData(notLinker, compStep, answererContext);
 				});
@@ -9446,7 +9810,7 @@ namespace Konclude {
 				return true;
 			}
 
-			QSet<COptimizedComplexConceptItem*>* COptimizedComplexConceptAnsweringHandler::collectComplexConceptItemPredecessors(COptimizedComplexConceptItem* conceptItem, QSet<COptimizedComplexConceptItem*>* predItemSet) {
+			QSet<COptimizedComplexConceptItem*>* COptimizedComplexExpressionAnsweringHandler::collectComplexConceptItemPredecessors(COptimizedComplexConceptItem* conceptItem, QSet<COptimizedComplexConceptItem*>* predItemSet) {
 				if (!predItemSet) {
 					predItemSet = new QSet<COptimizedComplexConceptItem *>();
 				}
@@ -9466,7 +9830,7 @@ namespace Konclude {
 
 
 
-			QSet<COptimizedComplexConceptItem*>* COptimizedComplexConceptAnsweringHandler::collectComplexConceptItemSucessors(COptimizedComplexConceptItem* conceptItem, QSet<COptimizedComplexConceptItem*>* succItemSet) {
+			QSet<COptimizedComplexConceptItem*>* COptimizedComplexExpressionAnsweringHandler::collectComplexConceptItemSucessors(COptimizedComplexConceptItem* conceptItem, QSet<COptimizedComplexConceptItem*>* succItemSet) {
 				if (!succItemSet) {
 					succItemSet = new QSet<COptimizedComplexConceptItem *>();
 				}
@@ -9486,7 +9850,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::reorderConceptItemParentAddition(COptimizedComplexConceptItem* conceptItem, COptimizedComplexConceptItem* newParentConceptItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::reorderConceptItemParentAddition(COptimizedComplexConceptItem* conceptItem, COptimizedComplexConceptItem* newParentConceptItem) {
 				QSet<COptimizedComplexConceptItem*>* newParentPredItemSet = collectComplexConceptItemPredecessors(newParentConceptItem);
 				QSet<COptimizedComplexConceptItem*>* conceptItemSuccItemSet = collectComplexConceptItemSucessors(conceptItem);
 				QList<COptimizedComplexConceptItem*> removeParentItemList;
@@ -9519,7 +9883,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::reorderConceptClassItems() {
+			bool COptimizedComplexExpressionAnsweringHandler::reorderConceptClassItems() {
 				QList<COptimizedComplexConceptItem*>* classItemReorderingList = mOntoAnsweringItem->getConceptClassItemReorderingList();
 				CClassConceptClassification* classClassification = mOntoAnsweringItem->getOntology()->getClassification()->getClassConceptClassification();
 				if (classClassification) {
@@ -9559,7 +9923,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::extractAtomicSubsumerExpressions(COptimizedComplexConceptItem* conceptItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::extractAtomicSubsumerExpressions(COptimizedComplexConceptItem* conceptItem) {
 				CConcept* concept = conceptItem->getConcept();
 				bool conceptNegation = conceptItem->getConceptNegation();
 				QList<TConceptNegPair> testingList;
@@ -9584,7 +9948,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::isTriviallySubsumedConceptItem(COptimizedComplexConceptItem* subsumedConceptItem, COptimizedComplexConceptItem* subsumerConceptItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::isTriviallySubsumedConceptItem(COptimizedComplexConceptItem* subsumedConceptItem, COptimizedComplexConceptItem* subsumerConceptItem) {
 				if (subsumedConceptItem->getAtomicConcpetSet()->contains(subsumerConceptItem->getConceptNegationPair())) {
 					return true;
 				}
@@ -9598,7 +9962,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::searchSuperSubSuperClassesResult(COptimizedComplexConceptItem* startConceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::searchSuperSubSuperClassesResult(COptimizedComplexConceptItem* startConceptItem, CAnswererContext* answererContext) {
 				class CSuperSubsumptionOptimizedComplexConceptItemVisitor : public COptimizedComplexConceptItemVisitor {
 				public:
 					QSet<CHierarchyNode*>* mFoundKnwonSuperClassNodeSet = nullptr;
@@ -9691,7 +10055,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::searchSuperSubSubClassesResult(COptimizedComplexConceptItem* startConceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::searchSuperSubSubClassesResult(COptimizedComplexConceptItem* startConceptItem, CAnswererContext* answererContext) {
 				class CSuperSubsumptionOptimizedComplexConceptItemVisitor : public COptimizedComplexConceptItemVisitor {
 				public:
 					QSet<CHierarchyNode*>* mFoundMinimumSubClassNodeSet = nullptr;
@@ -9800,7 +10164,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::searchSuperSubSatisfiabilityResult(COptimizedComplexConceptItem* startConceptItem, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::searchSuperSubSatisfiabilityResult(COptimizedComplexConceptItem* startConceptItem, CAnswererContext* answererContext) {
 				class CSatisfiabilityOptimizedComplexConceptItemVisitor : public COptimizedComplexConceptItemVisitor {
 				public: 
 					bool mSatisfiabilityResult = false;
@@ -9838,7 +10202,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::visitSuperSubConceptItems(COptimizedComplexConceptItem* startConceptItem, bool visitSubItems, bool visitSuperItems, COptimizedComplexConceptItemVisitor* visitor) {
+			bool COptimizedComplexExpressionAnsweringHandler::visitSuperSubConceptItems(COptimizedComplexConceptItem* startConceptItem, bool visitSubItems, bool visitSuperItems, COptimizedComplexConceptItemVisitor* visitor) {
 				reorderConceptClassItems();
 				if (visitSuperItems) {
 					QList<COptimizedComplexConceptItem*> superVisitingList;
@@ -9889,7 +10253,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::searchTrivialSuperSubConceptItems(COptimizedComplexConceptItem* conceptItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::searchTrivialSuperSubConceptItems(COptimizedComplexConceptItem* conceptItem) {
 				QSet<TConceptNegPair>* atomicConceptSet = conceptItem->getAtomicConcpetSet();
 				QList<COptimizedComplexConceptItem*> testingConceptItemList;
 				for (TConceptNegPair atomicConNegPair : *atomicConceptSet) {
@@ -9901,8 +10265,10 @@ namespace Konclude {
 					COptimizedComplexConceptItem* atomicConceptItem = mOntoAnsweringItem->getComplexConceptItem(atomicConNegPair.first, atomicConNegPair.second, atomicConceptClass, &created);
 					if (created) {
 						COptimizedComplexConceptItem* topConceptItem = mOntoAnsweringItem->getTopConceptItem();
-						topConceptItem->getSubComplexConceptItemSet()->insert(atomicConceptItem);
-						atomicConceptItem->getSuperComplexConceptItemSet()->insert(topConceptItem);
+						if (atomicConceptItem != topConceptItem) {
+							topConceptItem->getSubComplexConceptItemSet()->insert(atomicConceptItem);
+							atomicConceptItem->getSuperComplexConceptItemSet()->insert(topConceptItem);
+						}
 					}
 					if (atomicConceptItem && atomicConceptItem != conceptItem) {
 						testingConceptItemList.append(atomicConceptItem);
@@ -9996,7 +10362,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::isAnsweringFinished(CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::isAnsweringFinished(CAnswererContext* answererContext) {
 				return !mOntoAnsweringItem->hasCurrentlyAnsweringQueries();
 			}
 
@@ -10004,7 +10370,7 @@ namespace Konclude {
 
 
 
-			CAnsweringProgress* COptimizedComplexConceptAnsweringHandler::getAnsweringProgress() {
+			CAnsweringProgress* COptimizedComplexExpressionAnsweringHandler::getAnsweringProgress() {
 
 
 				if (mTotalPossibleInstancesCount != mTestedPossibleInstancesCount) {
@@ -10038,7 +10404,7 @@ namespace Konclude {
 
 
 
-			CAnsweringHandler* COptimizedComplexConceptAnsweringHandler::storeAnsweringStatistics() {
+			CAnsweringHandler* COptimizedComplexExpressionAnsweringHandler::storeAnsweringStatistics() {
 				CAnsweringStatisticsCollectionStrings* stats = new CAnsweringStatisticsCollectionStrings();
 				addAnsweringStatistics(stats, false);
 				mOntoAnsweringItem->setDifferenceStoredAnsweringStatisticsCollectionStrings(stats);
@@ -10046,7 +10412,7 @@ namespace Konclude {
 			}
 
 
-			CAnsweringHandler* COptimizedComplexConceptAnsweringHandler::addAnsweringStatistics(CAnsweringStatistics* stats, bool lastStoredDiff) {
+			CAnsweringHandler* COptimizedComplexExpressionAnsweringHandler::addAnsweringStatistics(CAnsweringStatistics* stats, bool lastStoredDiff) {
 				CAnsweringCalculationStatisticsCollectionStrings* calcStatsColl = mOntoAnsweringItem->getAnsweringStatisticsCollectionStrings();
 				CAnsweringStatisticsCollectionStrings* diffStats = mOntoAnsweringItem->getDifferenceStoredAnsweringStatisticsCollectionStrings();
 				if (calcStatsColl) {
@@ -10114,7 +10480,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::finishVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, bool allMappingsComputed) {
+			bool COptimizedComplexExpressionAnsweringHandler::finishVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, bool allMappingsComputed) {
 				if (allMappingsComputed) {
 					varCompItem->setVariableMappingsComputed(true);
 				}
@@ -10142,7 +10508,7 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexConceptAnsweringHandler::rescheduleVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItem* depSchedulingCompItem, cint64 additionalRequiredMappingCount) {
+			bool COptimizedComplexExpressionAnsweringHandler::rescheduleVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItem* depSchedulingCompItem, cint64 additionalRequiredMappingCount) {
 				if (!depSchedulingCompItem->isVariableMappingsComputed()) {
 					if (additionalRequiredMappingCount != -1) {
 						depSchedulingCompItem->setVariableMappingsComputationRequirement(qMax(depSchedulingCompItem->getVariableMappingsComputationRequirement(), additionalRequiredMappingCount));
@@ -10158,7 +10524,7 @@ namespace Konclude {
 			}
 
 
-			bool COptimizedComplexConceptAnsweringHandler::expectedUpdatedReschedulingDependentItemComputation(COptimizedComplexVariableCompositionItemDependence* baseItemDep, COptimizedComplexVariableIndividualMappings* reducedVarMapping, COptimizedComplexVariableCompositionItem* reductionItem, COptimizedComplexVariableCompositionItem* baseItem, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			bool COptimizedComplexExpressionAnsweringHandler::expectedUpdatedReschedulingDependentItemComputation(COptimizedComplexVariableCompositionItemDependence* baseItemDep, COptimizedComplexVariableIndividualMappings* reducedVarMapping, COptimizedComplexVariableCompositionItem* reductionItem, COptimizedComplexVariableCompositionItem* baseItem, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				bool dependentItemRescheduled = false;
 				cint64 totalProcessedMappingsCount = baseItemDep->getTotalProcessedBindingsCardinalityLinkerCount();
 				cint64 resultingMappingsCount = reducedVarMapping->getBindingCount();
@@ -10192,19 +10558,19 @@ namespace Konclude {
 			}
 
 
-			COptimizedComplexVariableIndividualBindings* COptimizedComplexConceptAnsweringHandler::createBindingsForVariableCompositionItems(cint64 bindingSize, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			COptimizedComplexVariableIndividualBindings* COptimizedComplexExpressionAnsweringHandler::createBindingsForVariableCompositionItems(cint64 bindingSize, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				return new COptimizedComplexVariableIndividualBindings(bindingSize);
 			}
 
 
 
-			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexConceptAnsweringHandler::createBindingsCardinalitesForVariableCompositionItems(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			COptimizedComplexVariableIndividualBindingsCardinality* COptimizedComplexExpressionAnsweringHandler::createBindingsCardinalitesForVariableCompositionItems(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				return new COptimizedComplexVariableIndividualBindingsCardinality();
 			}
 
 
 
-			COptimizedComplexVariableIndividualBindingsCardinalityLinker* COptimizedComplexConceptAnsweringHandler::createBindingsLinkerForVariableCompositionItems(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinality, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			COptimizedComplexVariableIndividualBindingsCardinalityLinker* COptimizedComplexExpressionAnsweringHandler::createBindingsLinkerForVariableCompositionItems(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinality, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				return new COptimizedComplexVariableIndividualBindingsCardinalityLinker(bindings, cardinality);
 			}
 
@@ -10212,7 +10578,7 @@ namespace Konclude {
 
 
 
-			void COptimizedComplexConceptAnsweringHandler::computeVariableCompositionItemFromConceptItemBase(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool& processing) {
+			void COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemFromConceptItemBase(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool& processing) {
 				COptimizedComplexVariableConceptBaseItem* conceptBaseItem = (COptimizedComplexVariableConceptBaseItem*)compVarItem;
 				COptimizedComplexConceptItem* conItem = conceptBaseItem->getConceptItem();
 				COptimizedComplexVariableIndividualMappings* variableMapping = conceptBaseItem->getVariableMapping();
@@ -10319,7 +10685,7 @@ namespace Konclude {
 				//debugCheckVariableMappingContainsSolution(buildingVarItem, compVarItem);
 			}
 
-			void COptimizedComplexConceptAnsweringHandler::computeVariableCompositionItemReduction(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			void COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemReduction(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				COptimizedComplexVariableReductionItem* reductionItem = (COptimizedComplexVariableReductionItem*)compVarItem;
 				cint64 redIdx = reductionItem->getReductionVariableIndex();
 				COptimizedComplexVariableIndividualMappings* reducedVarMapping = reductionItem->getVariableMapping();
@@ -10351,6 +10717,7 @@ namespace Konclude {
 					return;
 				}
 
+				COptimizedComplexVariableIndividualMappings::VARIABLE_TYPE redVarMapType = baseVarMapping->getBindingMapping(redIdx);
 
 				function<void(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalites)> redHandlingFunc = [&](COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalites) {
 					if (!reducedBindings) {
@@ -10368,11 +10735,13 @@ namespace Konclude {
 						reducedCardinalites->setCardinalityUpdateId(-1);
 					}
 
-					TIndividualInstanceItemDataBinding& reducedBinding = bindings->getBinding(redIdx);
-					CInstanceBindingIndividualCountingVisitor visitor;
-					sameRealization->visitSameIndividuals(reducedBinding.reference, &visitor);
-					if (visitor.individualCount > 1) {
-						reducedCardinalites->setSameIndividualsSeparatlyConsideredCardinality(visitor.individualCount * reducedCardinalites->getSameIndividualsSeparatlyConsideredCardinality());
+					if (redVarMapType == COptimizedComplexVariableIndividualMappings::INDIVIDUAL_VARIABLE) {
+						TIndividualInstanceItemDataBinding& reducedBinding = bindings->getBinding(redIdx);
+						CInstanceBindingIndividualCountingVisitor visitor;
+						sameRealization->visitSameIndividuals(reducedBinding.reference, &visitor);
+						if (visitor.individualCount > 1) {
+							reducedCardinalites->setSameIndividualsSeparatlyConsideredCardinality(visitor.individualCount * reducedCardinalites->getSameIndividualsSeparatlyConsideredCardinality());
+						}
 					}
 
 					cint64 nextIdx = 0;
@@ -10463,7 +10832,103 @@ namespace Konclude {
 
 			}
 
-			COptimizedComplexConceptAnsweringHandler* COptimizedComplexConceptAnsweringHandler::computeVariableCompositionItemJoin(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool& processing) {
+
+
+
+
+
+
+			void COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemExtraction(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+				COptimizedComplexVariableExtractionItem* extractionItem = (COptimizedComplexVariableExtractionItem*)compVarItem;
+				cint64 extIdx = extractionItem->getExtractionVariableIndex();
+				COptimizedComplexVariableIndividualMappings* reducedVarMapping = extractionItem->getVariableMapping();
+
+
+				// determine how many mappings must be calculated
+				// process currently processing mappings linker of dependent item
+				//     count processed mappings
+				// process currently processing cardinality update linker of dependent item
+				// update linkers to last one from dependent item and repeat processing
+				// calculate estimation of how many mappings of dependent item are required to fulfill the requirements for the processing item
+				// reschedule computation of dependent item
+				// or trigger computation for dependent items
+
+
+				COptimizedComplexVariableCompositionItem* baseItem = extractionItem->getBaseItem();
+				COptimizedComplexVariableCompositionItemDependence* baseItemDep = extractionItem->getBaseItemDependence();
+				COptimizedComplexVariableIndividualMappings* baseVarMapping = baseItem->getVariableMapping();
+				COptimizedComplexVariableIndividualBindings* extractedBindings = nullptr;
+				COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker = nullptr;
+
+
+				if (baseVarMapping->getBindingCount() <= 0) {
+					rescheduleVariableCompositionItemComputation(buildingVarItem, compVarItem, baseItem, 1);
+					return;
+				}
+
+
+				function<void(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalites)> redHandlingFunc = [&](COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinalites) {
+					if (!extractedBindings) {
+						extractedBindings = createBindingsForVariableCompositionItems(1, compVarItem, buildingVarItem);
+					}
+
+					TIndividualInstanceItemDataBinding& reducedBinding = bindings->getBinding(extIdx);
+					extractedBindings->setBinding(0, reducedBinding);
+
+					if (!linker) {
+						linker = createBindingsLinkerForVariableCompositionItems(extractedBindings, nullptr, compVarItem, buildingVarItem);
+					} else {
+						linker->setInitialCardinality(nullptr);
+					}
+					if (reducedVarMapping->addInsertingBindingsCardinalityLinker(linker, true)) {
+						extractedBindings = nullptr;
+						linker = nullptr;
+					}
+				};
+
+				bool mappingProcessed = false;
+				while (extractionItem->requiresMoreVariableMappingsComputation() && (!baseItemDep->isBatchProcessed() || baseItemDep->loadNextBatch())) {
+
+					while (extractionItem->requiresMoreVariableMappingsComputation() && baseItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+						mappingProcessed = true;
+						COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = baseItemDep->getBatchCurrentBindingsCardinalityLinker(true);
+						COptimizedComplexVariableIndividualBindings* bindings = bindingLinker->getBindings();
+						COptimizedComplexVariableIndividualBindingsCardinality* cardinalites = bindingLinker->getInitialCardinalities();
+
+						redHandlingFunc(bindings, cardinalites);
+					}
+
+
+					while (extractionItem->requiresMoreVariableMappingsComputation() && baseItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+						mappingProcessed = true;
+						baseItemDep->getBatchCurrentUpdatedCardinalityLinker(true);
+					}
+
+				}
+
+				reducedVarMapping->incCurrentUpdateId();
+
+				bool dependentItemRescheduled = false;
+				dependentItemRescheduled = expectedUpdatedReschedulingDependentItemComputation(baseItemDep, reducedVarMapping, extractionItem, baseItem, compVarItem, buildingVarItem);
+
+				if (!dependentItemRescheduled && compVarItem->getDependencyUpdatingCount() <= 0) {
+					finishVariableCompositionItemComputation(buildingVarItem, compVarItem, baseItemDep->isProcessingFinished());
+					if (mConfExtendedLogging) {
+						LOG(INFO, getDomain(), logTr("Computation step %3 (attempt %4): Extraction computation from %1 mappings of step %5 resulted in %2 mappings.").arg(baseVarMapping->getBindingCount()).arg(compVarItem->getVariableMapping()->getBindingCount()).arg(compVarItem->getComputationStepId()).arg(compVarItem->getComputationAttempt()).arg(baseItem->getComputationStepId()), this);
+					}
+				}
+
+				configureDependentComputationIncreaseFactor(dependentItemRescheduled, mappingProcessed, compVarItem);
+
+
+
+			}
+
+
+
+
+
+			COptimizedComplexExpressionAnsweringHandler* COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemJoin(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, bool& processing) {
 				COptimizedComplexVariableJoiningItem* joiningItem = (COptimizedComplexVariableJoiningItem*)compVarItem;
 
 				mJoinComputer->computeVariableMappingsComposition(joiningItem, buildingVarItem, mAnswererContext, processing);
@@ -10474,7 +10939,7 @@ namespace Konclude {
 
 
 
-			COptimizedComplexConceptAnsweringHandler* COptimizedComplexConceptAnsweringHandler::computeVariableCompositionItemPropagation(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing) {
+			COptimizedComplexExpressionAnsweringHandler* COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemPropagation(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing) {
 				COptimizedComplexVariableRolePropagationAbstractItem* rolePropItem = (COptimizedComplexVariableRolePropagationAbstractItem*)compVarItem;
 				COptimizedComplexVariableCompositionItem* baseVarItem = rolePropItem->getBaseItem();
 				CRole* role = rolePropItem->getRole();
@@ -10863,7 +11328,7 @@ namespace Konclude {
 				return this;
 			}
 
-			void COptimizedComplexConceptAnsweringHandler::computeVariableCompositionItemFromDataLiteralBase(COptimizedComplexVariableCompositionItem* compVarItem, CAnswererContext* answererContext, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			void COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemFromDataLiteralBase(COptimizedComplexVariableCompositionItem* compVarItem, CAnswererContext* answererContext, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				COptimizedComplexVariableDataLiteralBaseItem* dataBaseItem = (COptimizedComplexVariableDataLiteralBaseItem*)compVarItem;
 				CRole* dataRole = dataBaseItem->getDataRole();
 				CIndividualReference indiRef = dataBaseItem->getIndividualReference();
@@ -10902,7 +11367,7 @@ namespace Konclude {
 				}
 			}
 
-			void COptimizedComplexConceptAnsweringHandler::computeVariableCompositionItemAbsorptionBasedExtension(COptimizedComplexVariableCompositionItem* compVarItem, bool &processing, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool &continueProcessingBuildingVarItem) {
+			void COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemAbsorptionBasedExtension(COptimizedComplexVariableCompositionItem* compVarItem, bool &processing, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool &continueProcessingBuildingVarItem) {
 				COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedItem = (COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*)compVarItem;
 				bool oneDependentItemRescheduled = false;
 
@@ -10988,12 +11453,12 @@ namespace Konclude {
 							if (mConfExtendedLogging) {
 								LOG(INFO, getDomain(), logTr("Scheduling marker propagation for absorbed query part based on %1 bindings.").arg(steeringVariableBindingsCount), this);
 							}
-							processing = createVariableBindingPropagationTest(absBasedItem, buildingVarItem, answererContext);
+							processing = createVariableBindingPropagationTest(absBasedItem, buildingVarItem, answererContext, continueProcessingBuildingVarItem);
 						} else {
 							if (mConfExtendedLogging) {
 								LOG(INFO, getDomain(), logTr("Testing entailment with prepared upper bounds for absorbed query part."), this);
 							}
-							processing = createAbsorbedQueryPartEntailmentTest(absBasedItem, buildingVarItem, answererContext);
+							processing = createAbsorbedQueryPartEntailmentTest(absBasedItem, buildingVarItem, answererContext, continueProcessingBuildingVarItem);
 						}
 					
 
@@ -11020,7 +11485,7 @@ namespace Konclude {
 						} else if (!buildingVarItem->isWaitingVariableBindingsConfirmation()) {
 							finishVariableCompositionItemComputation(buildingVarItem, compVarItem, true);
 							if (compVarItem->getVariableMapping()->getBindingCount() > 0) {
-								QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* absorptionHanldingQueryExtensionJoiningList = buildingVarItem->getAbsorptionBasedHandlingExtensionItemList();
+								QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* absorptionHanldingQueryExtensionJoiningList = buildingVarItem->getAbsorptionBasedHandlingExtensionItemJoiningList();
 								absorptionHanldingQueryExtensionJoiningList->append(absBasedItem);
 							}
 
@@ -11034,7 +11499,7 @@ namespace Konclude {
 				}
 			}
 
-			void COptimizedComplexConceptAnsweringHandler::computeVariableCompositionItemDataLiteralExtension(COptimizedComplexVariableCompositionItem* compVarItem, CAnswererContext* answererContext, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
+			void COptimizedComplexExpressionAnsweringHandler::computeVariableCompositionItemDataLiteralExtension(COptimizedComplexVariableCompositionItem* compVarItem, CAnswererContext* answererContext, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) {
 				COptimizedComplexVariableDataLiteralExtensionItem* dataExtItem = (COptimizedComplexVariableDataLiteralExtensionItem*)compVarItem;
 				COptimizedComplexVariableCompositionItem* baseVarItem = dataExtItem->getBaseItem();
 				COptimizedComplexVariableCompositionItemDependence* baseItemDep = dataExtItem->getBaseItemDependence();
@@ -11163,7 +11628,7 @@ namespace Konclude {
 				//debugCheckVariableMappingContainsSolution(buildingVarItem, compVarItem);
 			}
 
-			void COptimizedComplexConceptAnsweringHandler::configureDependentComputationIncreaseFactor(bool dependentItemRescheduled, bool mappingProcessed, COptimizedComplexVariableCompositionItem* compVarItem) {
+			void COptimizedComplexExpressionAnsweringHandler::configureDependentComputationIncreaseFactor(bool dependentItemRescheduled, bool mappingProcessed, COptimizedComplexVariableCompositionItem* compVarItem) {
 				if (dependentItemRescheduled && mappingProcessed && compVarItem->requiresMoreVariableMappingsComputation() && !compVarItem->isVariableMappingsComputed()) {
 					compVarItem->increaseRepeatedRequirementInsufficientDependencyComputationIncreaseFactor(mConfMappingsRepeatedlyInsufficientDependencyComputationIncreasingFactor);
 				} else if (!compVarItem->requiresMoreVariableMappingsComputation()) {

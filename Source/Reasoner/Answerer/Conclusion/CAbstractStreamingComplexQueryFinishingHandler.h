@@ -31,8 +31,8 @@
 
 
 // Other includes
-#include "Reasoner/Answerer/CComplexQueryProcessingData.h"
-#include "Reasoner/Answerer/COptimizedComplexConceptOntologyAnsweringItem.h"
+#include "Reasoner/Answerer/CComplexQueryExpressionProcessingData.h"
+#include "Reasoner/Answerer/COptimizedComplexExpressionOntologyAnsweringItem.h"
 #include "Reasoner/Answerer/COptimizedComplexVariableCompositionItemDependence.h"
 #include "Reasoner/Answerer/COptimizedComplexVariableCompositionItem.h"
 
@@ -82,7 +82,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CAbstractStreamingComplexQueryFinishingHandler(CComplexQueryProcessingData* queryProcessingData, COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, bool confExtendedLogging, const QString& logDomain, cint64 confMaximumBatchMappingsComputationSize, cint64 confFirstBatchMappingsComputationSize, double confBatchMappingsComputationSizeIncreasingFactor, bool confContinueMappingsCompuationWhenResultsNotWriteable, cint64 confMappingsComputationUnlimitedInterpretationSize);
+						CAbstractStreamingComplexQueryFinishingHandler(CComplexQueryExpressionProcessingData* queryProcessingData, COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, bool confExtendedLogging, const QString& logDomain, cint64 confMaximumBatchMappingsComputationSize, cint64 confFirstBatchMappingsComputationSize, double confBatchMappingsComputationSizeIncreasingFactor, bool confContinueMappingsCompuationWhenResultsNotWriteable, cint64 confMappingsComputationUnlimitedInterpretationSize);
 
 						virtual ~CAbstractStreamingComplexQueryFinishingHandler();
 
@@ -121,7 +121,7 @@ namespace Konclude {
 
 						class CInstanceBindingAddingVisitor : public CSameRealizationIndividualVisitor, public CConceptRealizationInstanceToIndividualVisitor {
 						public:
-							CInstanceBindingAddingVisitor(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CIndividualNameResolver* indiNameResolver, CComplexQueryProcessingData* queryProcessingData, CVariableBindingsQueryResultWriter* resultWriter) {
+							CInstanceBindingAddingVisitor(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CIndividualNameResolver* indiNameResolver, CComplexQueryExpressionProcessingData* queryProcessingData, CVariableBindingsQueryResultWriter* resultWriter) {
 								mCompAssIndVarQuery = compAssIndVarQuery;
 								mBindsAnswersResult = bindsAnswersResult;
 								mFilteringAnsweringMapping = filteringAnsweringMapping;
@@ -166,7 +166,7 @@ namespace Konclude {
 							CVariableBindingFilteringAnswerMapping* mFilteringAnsweringMapping;
 							CIndividualNameResolver* mIndiNameResolver;
 							CVariableBindingResult* mBinding = nullptr;
-							CComplexQueryProcessingData* mQueryProcessingData;
+							CComplexQueryExpressionProcessingData* mQueryProcessingData;
 							CVariableBindingsListAnswerResult* mBindResListAnswer = new CVariableBindingsListAnswerResult();
 
 						};
@@ -200,7 +200,7 @@ namespace Konclude {
 
 
 						CVariableBindingsQueryResultWriter mResultWriter;
-						CComplexQueryProcessingData* mQueryProcessingData;
+						CComplexQueryExpressionProcessingData* mQueryProcessingData;
 						bool mAbbreviatedIRIs = false;
 						QStringList mVarList;
 						QHash<CExpressionVariable*, cint64> mDisVarIdHash;
@@ -209,7 +209,7 @@ namespace Konclude {
 						CVariableBindingFilteringAnswerMapping* mFilteringAnsweringMapping = nullptr;
 						bool mAnswersWriteable = true;
 						cint64 mLastOnlyCountingWritten = 0;
-						COptimizedComplexConceptOntologyAnsweringItem* mOntoAnsweringItem;
+						COptimizedComplexExpressionOntologyAnsweringItem* mOntoAnsweringItem;
 						CVariableBindingsAnswersResult* mBindsAnswersResult = nullptr;
 						bool mDistinct;
 						QList<cint64> mAnswerDistinguishedVariableMappingIndexList;

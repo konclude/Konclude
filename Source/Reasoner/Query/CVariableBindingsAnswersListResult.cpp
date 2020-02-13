@@ -152,6 +152,13 @@ namespace Konclude {
 				return mBindingsList.count();
 			}
 
+			CVariableBindingsAnswersListResult* CVariableBindingsAnswersListResult::clear() {
+				mBindingsList.clear();
+				mBindingsContainer.clear();
+				return this;
+			}
+
+
 
 		}; // end namespace Query
 

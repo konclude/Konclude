@@ -73,7 +73,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedComplexBuildingVariableCompositionsItem(CComplexQueryProcessingData* queryProcessingData);
+					COptimizedComplexBuildingVariableCompositionsItem(CComplexQueryExpressionProcessingData* queryProcessingData);
 					~COptimizedComplexBuildingVariableCompositionsItem();
 
 
@@ -116,7 +116,7 @@ namespace Konclude {
 					COptimizedComplexBuildingVariableCompositionsItem* setComputationStepFinished(CComplexConceptStepComputationProcess* computationStep);
 					COptimizedComplexBuildingVariableCompositionsItem* setComputationStepWaiting(CComplexConceptStepComputationProcess* computationStep);
 
-					CComplexQueryProcessingData* getQueryProcessingData();
+					CComplexQueryExpressionProcessingData* getQueryProcessingData();
 
 
 					bool isInitializedBaseConceptVariableItems();
@@ -277,8 +277,14 @@ namespace Konclude {
 					COptimizedComplexBuildingVariableCompositionsItem* clearLastHandledVariableItemAssociation(CExpressionVariable* lastHandledVarExp);
 
 
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* getAbsorptionBasedHandlingExtensionItemList();
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorptionBasedHandlingExtensionItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem);
+
+					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* getAbsorptionBasedHandlingExtensionItemPropagationList();
+					COptimizedComplexBuildingVariableCompositionsItem* addAbsorptionBasedHandlingExtensionPropagationItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem);
+
+
+
+					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* getAbsorptionBasedHandlingExtensionItemJoiningList();
+					COptimizedComplexBuildingVariableCompositionsItem* addAbsorptionBasedHandlingExtensionJoiningItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem);
 
 
 					bool isSatisfiable();
@@ -297,6 +303,7 @@ namespace Konclude {
 					QList<COptimizedComplexVariableCompositionItem*>* getUsedComplexVariableCompositionItemList();
 					COptimizedComplexBuildingVariableCompositionsItem* addUsedComplexVariableCompositionItem(COptimizedComplexVariableCompositionItem* item);
 
+					QList<CExpressionVariable*>* getExtendibleQueryTransferringExtractionVariableList();
 
 				// protected methods
 				protected:
@@ -339,7 +346,7 @@ namespace Konclude {
 					cint64 mWaitingVariableBindingsPropagationCount;
 					cint64 mWaitingVariableBindingsConfirmationCount;
 
-					CComplexQueryProcessingData* mQueryProcessingData;
+					CComplexQueryExpressionProcessingData* mQueryProcessingData;
 
 					bool mProcessingQueued;
 
@@ -377,7 +384,8 @@ namespace Konclude {
 					QHash<CExpressionVariable*, CExpressionVariable*> mVarLastItemAssociatedVariableHash;
 
 
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*> mAbsorptionBasedHandlingExtensionItemList;
+					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*> mAbsorptionBasedHandlingExtensionItemPropagationList;
+					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*> mAbsorptionBasedHandlingExtensionItemJoiningList;
 
 					bool mSatisfiable;
 					bool mBindingsReducible;
@@ -393,6 +401,7 @@ namespace Konclude {
 
 					CComplexQueryFinishingBuildingVariableCompositionsItemData* mBuildingFinishingData;
 
+					QList<CExpressionVariable*> mExtendibleQueryTransferringExtractionVariableList;
 
 				// private methods
 				private:

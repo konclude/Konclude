@@ -76,6 +76,7 @@ namespace Konclude {
 			// protected methods
 			protected:
 				bool isKeyword(const QString& part);
+				bool isSubKeyword(const QString& part);
 				bool processParts(QStringList& parsedParts);
 
 
@@ -89,6 +90,7 @@ namespace Konclude {
 				QList<QString> mCommonPartStringList;
 
 				QSet<QString> mKeywordSet;
+				QSet<QString> mSubKeywordSet;
 
 				QStringList mKnowledgeBaseList;
 				QList<CSPARQLKnowledgeBaseSplittingOperationData*> mDataContainer;

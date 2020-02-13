@@ -65,7 +65,7 @@ namespace Konclude {
 						CDatatypeValueSpaceStringTriggers* stringValueSpaceTriggers = (CDatatypeValueSpaceStringTriggers*)valueSpacesTriggers->getValueSpaceTriggers(mRealValueSpaceType);
 						CDatatypeValueSpaceConceptTriggerLinker* conceptTriggerLinker = CObjectAllocator< CDatatypeValueSpaceConceptTriggerLinker >::allocateAndConstruct(taskMemMan);
 						conceptTriggerLinker->initConceptTrigger(triggerConcept);
-						stringValueSpaceTriggers->addValueConceptTrigger(dataLitStringValue, conceptTriggerLinker);
+						stringValueSpaceTriggers->addPartialValueConceptTrigger(dataLitStringValue, conceptTriggerLinker);
 						realValueSpaceData->setValueSpaceTriggeringRequired(true);
 						realValueSpaceData->setValueSpaceTriggeringStarted(false);
 						realValueSpaceData->setValueSpaceTriggeringCompleted(false);
@@ -740,21 +740,50 @@ namespace Konclude {
 										}
 
 
-										CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
-										while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && valueDirectionTriggerIt.hasNext()) {
 
+
+										if (minValue->isEqualTo(maxValue) && remainingRequiredValuesCount == 1 && !valueCounter.hasValueAchieved(remainingRequiredValuesCount) && triggerIt.hasNext()) {
+
+											CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
 											CDatatypeValueSpaceTriggeringData* triggeringData = valueDirectionTriggerIt.next();
 											CDataLiteralCompareValue* currentValue = triggeringData->getValue();
 											CDataLiteralRealValue* currentRealValue = dynamic_cast<CDataLiteralRealValue*>(currentValue);
 
-											if (triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
-												realValueSpaceMap->addValueExclusionDependencies(currentRealValue,depCollection);
-												if (!realValueSpaceMap->isValueExcluded(currentRealValue,nullptr)) {
-													realValueSpaceMap->countValueValues(currentRealValue,&valueCounter);
+											if (triggeringData->getDirectValueTriggeringData()->hasCompleteConceptTriggers() || triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+												realValueSpaceMap->addValueExclusionDependencies(currentRealValue, depCollection);
+
+												if (!realValueSpaceMap->isValueExcluded(currentRealValue, nullptr)) {
+													realValueSpaceMap->countValueValues(currentRealValue, &valueCounter);
 
 													CDatatypeValueSpaceConceptTriggeringData* directValueTriggeringConceptData = triggeringData->getDirectValueTriggeringData();
+													if (directValueTriggeringConceptData->hasCompleteConceptTriggers()) {
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode, conceptTriggerLinker, directValueTriggeringConceptData->getCompleteConceptTriggerLinker(), depCollection, calcAlgContext);
+													}
 													if (directValueTriggeringConceptData->hasPartialConceptTriggers()) {
-														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,directValueTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode, conceptTriggerLinker, directValueTriggeringConceptData->getPartialConceptTriggerLinker(), depCollection, calcAlgContext);
+													}
+
+												}
+											}
+
+										} else {
+
+											CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
+											while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && valueDirectionTriggerIt.hasNext()) {
+
+												CDatatypeValueSpaceTriggeringData* triggeringData = valueDirectionTriggerIt.next();
+												CDataLiteralCompareValue* currentValue = triggeringData->getValue();
+												CDataLiteralRealValue* currentRealValue = dynamic_cast<CDataLiteralRealValue*>(currentValue);
+
+												if (triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+													realValueSpaceMap->addValueExclusionDependencies(currentRealValue, depCollection);
+													if (!realValueSpaceMap->isValueExcluded(currentRealValue, nullptr)) {
+														realValueSpaceMap->countValueValues(currentRealValue, &valueCounter);
+
+														CDatatypeValueSpaceConceptTriggeringData* directValueTriggeringConceptData = triggeringData->getDirectValueTriggeringData();
+														if (directValueTriggeringConceptData->hasPartialConceptTriggers()) {
+															conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode, conceptTriggerLinker, directValueTriggeringConceptData->getPartialConceptTriggerLinker(), depCollection, calcAlgContext);
+														}
 													}
 												}
 											}

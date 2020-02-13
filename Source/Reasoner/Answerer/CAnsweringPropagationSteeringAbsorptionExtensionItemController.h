@@ -71,7 +71,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringPropagationSteeringAbsorptionExtensionItemController(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem);
+					CAnsweringPropagationSteeringAbsorptionExtensionItemController(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem, CVariable* splitVar = nullptr, QSet<CIndividualReference>* splitIndiSet = nullptr);
 
 					//! Destructor
 					virtual ~CAnsweringPropagationSteeringAbsorptionExtensionItemController();
@@ -92,6 +92,8 @@ namespace Konclude {
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* mAbsorptionPropagationItem;
 					COptimizedComplexBuildingVariableCompositionsItem* mVarBuildingItem;
 
+					CVariable* mSplitVar;
+					QSet<CIndividualReference>* mSplitIndiSet;
 
 				// private methods
 				private:

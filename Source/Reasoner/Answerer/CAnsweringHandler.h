@@ -74,6 +74,9 @@ namespace Konclude {
 
 					virtual bool addAnsweringComplexQuery(CComplexAnsweringQuery* complexAnsweringQuery, CCallbackData* callback = nullptr) = 0;
 
+					virtual bool canAnsweringComplexQuery(CComplexAnsweringQuery* complexAnsweringQuery) = 0;
+					virtual bool canAnsweringComplexQuery(bool composedQuery) = 0;
+
 
 					virtual bool initializeProcessing(CAnswererContext* answererContext) = 0;
 					virtual bool prepareProcessing(CAnswererContext* answererContext) = 0;

@@ -26,7 +26,6 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "CComplexConceptStepComputationProcess.h"
 #include "CAnsweringHandlingStatistics.h"
 
 
@@ -35,8 +34,6 @@
 #include "Reasoner/Query/CComplexAnsweringQuery.h"
 
 #include "Concurrent/Callback/CCallbackData.h"
-
-#include "Reasoner/Answerer/Conclusion/CAbstractComplexQueryFinishingHandler.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -52,7 +49,6 @@ namespace Konclude {
 
 		namespace Answerer {
 
-			using namespace Conclusion;
 
 			/*! 
 			 *
@@ -71,44 +67,15 @@ namespace Konclude {
 					~CComplexQueryProcessingData();
 
 					
-					CComplexAnsweringQuery* getQuery();
+					CComplexAnsweringQuery* getComplexAnsweringQuery();
 					CCallbackData* getCallback();
-
-
-					bool isWaitingComputationStep();
-					CComplexQueryProcessingData* setComputationStepFinished(CComplexConceptStepComputationProcess* computationStep);
-					CComplexQueryProcessingData* setComputationStepWaiting(CComplexConceptStepComputationProcess* computationStep);
-
-					COptimizedComplexConceptItem* getConceptItem();
-					CComplexQueryProcessingData* setConceptItem(COptimizedComplexConceptItem* conceptItem);
-
-
-
-
-					bool isBuildingVariableItem();
-					CComplexQueryProcessingData* incBuildingVariableItem(cint64 count = 1);
-					CComplexQueryProcessingData* decBuildingVariableItem(cint64 count = 1);
-
-					COptimizedComplexBuildingVariableCompositionsItem* getVariableBuildingItem();
-					CComplexQueryProcessingData* setVariableBuildingItem(COptimizedComplexBuildingVariableCompositionsItem* variableBuildingItem);
-
-
-					bool isComputationError();
-					CComplexQueryProcessingData* setComputationError(bool error);
-
+					
 
 
 					bool isUnsatisfiable();
 					CComplexQueryProcessingData* setUnsatisfiable(bool unsat);
 
 
-					bool hasComputation();
-
-
-
-					bool hasEntailmentComputation();
-					CComplexQueryProcessingData* incEntailmentComputation(cint64 count = 1);
-					CComplexQueryProcessingData* decEntailmentComputation(cint64 count = 1);
 
 					bool isProcessingStarted();
 					CComplexQueryProcessingData* setProcessingStarted(bool started = true);
@@ -116,17 +83,14 @@ namespace Konclude {
 					bool isProcessingFinished();
 					CComplexQueryProcessingData* setProcessingFinished(bool finished = true);
 
-					qint64 getProcessingTime();
+					bool isSubQueryProcessingFinished();
+					CComplexQueryProcessingData* setSubQueryProcessingFinished(bool finished = true);
+
+					qint64 getTotalProcessingTime();
+					qint64 getSubQueryProcessingTime();
 
 
-					CAbstractComplexQueryFinishingHandler* getFinishingHandler();
-					CComplexQueryProcessingData* setFinishingHandler(CAbstractComplexQueryFinishingHandler* finishingHandler);
 
-
-
-					cint64 getOffsetSkippedMappingCount();
-					CComplexQueryProcessingData* setOffsetSkippedMappingCount(cint64 skippedMappingCount);
-					CComplexQueryProcessingData* incOffsetSkippedMappingCount(cint64 incSkippedMappingCount);
 
 					CAnsweringHandlingStatistics* getQueryProcessingInitializedAnsweringStatistics();
 					CComplexQueryProcessingData* setQueryProcessingInitializedAnsweringStatistics(CAnsweringHandlingStatistics* stats);
@@ -136,31 +100,23 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					CComplexAnsweringQuery* mQuery;
+					CComplexAnsweringQuery* mComplexAnsweringQuery;
 					CCallbackData* mCallback;
 
-					cint64 mWaitingComputationStepsCount;
-					cint64 mWaitingEntailmentComputationsCount;
 
-
-					cint64 mBuildingVariableItemCount;
-					COptimizedComplexBuildingVariableCompositionsItem* mVariableBuildingItem;
-
-					COptimizedComplexConceptItem* mConceptItem;
 					bool mUnsatisfiable;
-					bool mComputationError;
 
 					bool mProcessingStarted = false;
 					bool mProcessingFinished = false;
+					bool mSubQueryProcessingFinished = false;
 					qint64 mProcessingTime = 0;
+					qint64 mSubQueryProcessingTime = 0;
 					QTime mProcessingTimer;
 
 
-					CAbstractComplexQueryFinishingHandler* mFinishingHandler;
-
 					CAnsweringHandlingStatistics* mQueryProcessingInitializedAnsweringStatistics;
 
-					cint64 mOffsetSkippedMappingCount;
+
 
 
 				// private methods

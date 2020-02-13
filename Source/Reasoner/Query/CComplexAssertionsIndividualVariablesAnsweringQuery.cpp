@@ -27,7 +27,7 @@ namespace Konclude {
 
 		namespace Query {
 
-			CComplexAssertionsIndividualVariablesAnsweringQuery::CComplexAssertionsIndividualVariablesAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) : CComplexAnsweringQuery(baseOntology,expressionOntology,configuration,queryName) {
+			CComplexAssertionsIndividualVariablesAnsweringQuery::CComplexAssertionsIndividualVariablesAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) : CComplexAnsweringExpressionQuery(baseOntology,expressionOntology,configuration,queryName) {
 				mAxiomExpressions = axiomExpressions;
 				mDisVariables = disVariables;
 				mDistinct = false;
@@ -90,6 +90,16 @@ namespace Konclude {
 					return mResultLimit;
 				}
 				return mResultOffset + mResultLimit;
+			}
+
+
+			QList<CExpressionVariable*> CComplexAssertionsIndividualVariablesAnsweringQuery::getIgnoreCardinalityVariableExpressions() {
+				return mIgnoreCardVariables;
+			}
+
+			CComplexAssertionsIndividualVariablesAnsweringQuery* CComplexAssertionsIndividualVariablesAnsweringQuery::setIgnoreCardinalityVariableExpressions(const QList<CExpressionVariable*>& varExpList) {
+				mIgnoreCardVariables = varExpList;
+				return this;
 			}
 
 

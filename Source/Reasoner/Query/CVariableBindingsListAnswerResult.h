@@ -64,6 +64,7 @@ namespace Konclude {
 					virtual CVariableBindingsListAnswerResult* addResultVariableBinding(CVariableBindingResult* varBinding);
 					virtual CVariableBindingsListAnswerResult* setResultVariableBindings(const QList<CVariableBindingResult*>& bindingsList);
 					virtual QList<CVariableBindingResult*>* getResult();
+					cint64 getResultCount();
 					CVariableBindingResult* getResult(cint64 index);
 					CVariableBindingsListAnswerResult* setResult(cint64 index, CVariableBindingResult* varBinding);
 

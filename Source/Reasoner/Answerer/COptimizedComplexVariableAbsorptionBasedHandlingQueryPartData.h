@@ -87,6 +87,8 @@ namespace Konclude {
 					QSet<CExpressionVariable*>* getAbsorptionVariableSet();
 					QSet<CExpressionVariable*>* getIndividualVariableSet();
 					QSet<CExpressionVariable*>* getAnonymousVariableSet();
+
+					// preparation variables differ from individual variables in the form that they have not been used in the absorption for generating a binder concept
 					QSet<CExpressionVariable*>* getPrepareVariableSet();
 					QSet<CExpressionVariable*>* getBindingsVariableSet();
 					QSet<CExpressionVariable*>* getIndividualBindingsVariableSet();

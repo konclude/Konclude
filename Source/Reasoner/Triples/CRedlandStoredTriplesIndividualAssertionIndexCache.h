@@ -25,6 +25,7 @@
 // Libraries includes
 #include <QCache>
 #include <QHash>
+#include <QUrl>
 
 #include <Redland.h>
 
@@ -43,6 +44,8 @@
 // Other includes
 #include "Utilities/Container/CLinker.h"
 
+#include "Config/CConfigurationBase.h"
+#include "Config/CConfigDataReader.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -51,6 +54,7 @@
 namespace Konclude {
 
 	using namespace Utilities::Container;
+	using namespace Config;
 
 	namespace Reasoner {
 
@@ -69,7 +73,9 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CRedlandStoredTriplesIndividualAssertionIndexCache(CRedlandStoredTriplesData* tripleData);
+					CRedlandStoredTriplesIndividualAssertionIndexCache(const QString& kbName, CRedlandStoredTriplesData* tripleData, CConfigurationBase* config);
+
+					~CRedlandStoredTriplesIndividualAssertionIndexCache();
 
 
 					CRedlandStoredTriplesIndividualAssertionIndexCache* beginIndexing();
@@ -137,8 +143,8 @@ namespace Konclude {
 					librdf_statement* mIndividualNonAnonymityInsertionStatement;
 
 
-					QCache<CRedlandNodeHasher, CRedlandStoredTriplesIndividualAssertionIndexCacheData> mIndividualAssertionsIndexCache;
-					QHash<cint64, CRedlandStoredTriplesIndividualAssertionIndexCacheData*> mIndividualIdAssertionsIndexDataHash;
+					QCache<CRedlandNodeHasher, CRedlandStoredTriplesIndividualAssertionIndexCacheData>* mIndividualAssertionsIndexCache;
+					QHash<cint64, CRedlandStoredTriplesIndividualAssertionIndexCacheData*>* mIndividualIdAssertionsIndexDataHash;
 
 
 					CRedlandStoredTriplesRepresentativeTagSetHash<CConcept*, CRedlandStoredTriplesRepresentativeTagTypeConceptsSet> mTagTypeConceptsSetHash;
@@ -151,7 +157,10 @@ namespace Konclude {
 
 					bool mIndividualDataWritenToStore = false;
 
-					
+					bool mExternalTripleDataStroing = false;
+
+					QString mKBName;
+					CConfigurationBase* mConfig;
 
 				// private methods
 				private:

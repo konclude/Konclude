@@ -46,7 +46,7 @@ namespace Konclude {
 					cint64 leftSize = leftVarMapping->getBindingSize();
 					cint64 rightSize = rightVarMapping->getBindingSize();
 					cint64 joinSize = joinedVarMapping->getBindingSize();
-
+					
 
 					COptimizedComplexVariableJoiningBindingPositionMapping* variablePositionMapping = joiningItem->getPositionMapping();
 

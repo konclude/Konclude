@@ -256,7 +256,7 @@ namespace Konclude {
 					return false;
 				}
 				clearInstanceIndividualAssociationsIteratorData(iteratorData);
-				if (iteratorData->mPossibleInstances) {
+				if (iteratorData->mPossibleInstances || !mConsiderSameMergedIndis) {
 					bool foundNext = false;
 					while (!iteratorData->mIterator.atEnd() && !foundNext) {
 

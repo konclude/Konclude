@@ -36,7 +36,7 @@
 #include "Reasoner/Query/CVariableBindingsAnswersResult.h"
 #include "Reasoner/Query/CVariableBindingsListAnswerResult.h"
 
-#include "Reasoner/Answerer/CComplexQueryProcessingData.h"
+#include "Reasoner/Answerer/CComplexQueryExpressionProcessingData.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -77,7 +77,11 @@ namespace Konclude {
 
 						CVariableBindingsAnswersResult* addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1);
 						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1);
-						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryProcessingData* queryProcessingData, cint64 cardinality);
+						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryExpressionProcessingData* queryProcessingData, cint64 cardinality);
+
+
+						CVariableBindingsAnswersResult* addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, cint64 cardinality = 1);
+						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, cint64 cardinality = 1);
 
 					// protected methods
 					protected:

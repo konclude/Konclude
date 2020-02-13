@@ -62,6 +62,7 @@ namespace Konclude {
 						//! Constructor
 						CCreateKnowledgeBaseRevisionUpdateCommand(const QString &knowledgeBaseNameString, CCommand *parentSuperCommand = 0);
 						CCreateKnowledgeBaseRevisionUpdateCommand(const QString &knowledgeBaseNameString, bool createIfNotExist, CCommand *parentSuperCommand = 0);
+						CCreateKnowledgeBaseRevisionUpdateCommand(const QString &knowledgeBaseNameString, bool createIfNotExist, bool reportErrorIfNotExists, CCommand *parentSuperCommand = 0);
 
 						//! Destructor
 						virtual ~CCreateKnowledgeBaseRevisionUpdateCommand();
@@ -75,6 +76,7 @@ namespace Konclude {
 						virtual CCommand *getCommand();
 
 						bool requireCreateIfNotExist();
+						bool reportErrorCreateIfNotExist();
 
 					// protected methods
 					protected:
@@ -82,6 +84,7 @@ namespace Konclude {
 					// protected variables
 					protected:
 						bool mCreateIfNotExist;
+						bool mReportErrorIfNotExists;
 						QString kbString;
 						COntologyRevision *onRev;
 

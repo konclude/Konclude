@@ -28,7 +28,7 @@
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingNeighbouringData.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData.h"
-#include "COptimizedComplexConceptOntologyAnsweringItem.h"
+#include "COptimizedComplexExpressionOntologyAnsweringItem.h"
 #include "COptimizedComplexVariableAbstractNonDisconnectingAbsorptionBasedQueryPartHandler.h"
 
 
@@ -62,7 +62,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, COccurrenceStatisticsCacheReader* occStatsCacheReader);
+					COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, COccurrenceStatisticsCacheReader* occStatsCacheReader);
 
 					COptimizedComplexVariablePreAbsorptionBasedQueryPartHandler* absorbQueryPart();
 

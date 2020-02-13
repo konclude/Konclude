@@ -80,6 +80,7 @@ namespace Konclude {
 					virtual CAnsweringCalculationHandler* postCalculation(CAnsweringHandler* handler, CSatisfiableCalculationJob* satCalcJob, CAnsweringMessageData* finishedMessage, CCallbackDataContext* callbackContext) = 0;
 
 					virtual CAnsweringCalculationHandler* ensureRequirements(CAnsweringHandler* handler, CConcreteOntology* ontology, const QList<COntologyProcessingRequirement*>& requirementList, CAnsweringMessageData* finishedMessage) = 0;
+					virtual CAnsweringCalculationHandler* answerSubQuery(CAnsweringHandler* handler, CQuery* query, CAnsweringMessageData* finishedMessage) = 0;
 
 					virtual COccurrenceStatisticsCacheReader* getOccurrenceStatisticsCacheReader() = 0;
 

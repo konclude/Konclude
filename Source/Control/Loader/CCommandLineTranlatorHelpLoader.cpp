@@ -82,8 +82,8 @@ namespace Konclude {
 						"\tKonclude satisfiability -i Tests/galen.owl.xml -x http://ex.test/galen#ExternalIliacVein\n"
 						"\tKonclude classification -w AUTO -i Tests/roberts-family-full-D.owl.xml -o Tests/roberts-family-full-D-class.owl.xml\n"
 						"\tKonclude realization -w AUTO -i Tests/roberts-family-full-D.owl.xml -o Tests/roberts-family-full-D-real.owl.xml\n"
-						"\tKonclude sparqlfile -s Tests/sparql-load-and-query-test.sparql -o Tests/query-answers.xml\n"
-						"\tKonclude sparqlfile -s Tests/sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml\n"
+						"\tKonclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml\n"
+						"\tKonclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml\n"
 						"\tKonclude sparqlserver -p 8080 -c Configs/querying-config.xml\n"
 						"\n"
 						),this);

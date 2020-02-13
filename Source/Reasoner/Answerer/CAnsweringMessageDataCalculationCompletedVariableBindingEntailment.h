@@ -28,6 +28,7 @@
 #include "AnswererSettings.h"
 #include "CAnsweringMessageDataCalculationCompleted.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData.h"
+#include "CAnsweringSplitEntailmentTestingCancellationAdapter.h"
 
 
 // Other includes
@@ -56,12 +57,18 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(CSatisfiableCalculationJob* calcJob, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionPropagationData, CComplexQueryProcessingData* procData);
+					CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(CSatisfiableCalculationJob* calcJob, CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionPropagationData, CComplexQueryExpressionProcessingData* procData, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension = nullptr, CAnsweringSplitEntailmentTestingCancellationAdapter* cancellationAdapter = nullptr);
 
 
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* getAbsorbedQueryPartData();
 
-					CComplexQueryProcessingData* getQueryProcessingData();
+					CComplexQueryExpressionProcessingData* getQueryProcessingData();
+
+					CAnsweringPropagationSteeringAbsorptionExtensionItemController* getPropagationSteeringController();
+
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* getAbsorptionPropagationExtension();
+
+					CAnsweringSplitEntailmentTestingCancellationAdapter* getCancellationAdapter();
 
 				// protected methods
 				protected:
@@ -69,7 +76,10 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* mAbsorptionHanldingQueryPart;
-					CComplexQueryProcessingData* mQueryProcData;
+					CComplexQueryExpressionProcessingData* mQueryProcData;
+					CAnsweringPropagationSteeringAbsorptionExtensionItemController* mPropagationSteeringController;
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* mAbsorptionPropagationExtension;
+					CAnsweringSplitEntailmentTestingCancellationAdapter* mCancellationAdapter;
 
 
 				// private methods

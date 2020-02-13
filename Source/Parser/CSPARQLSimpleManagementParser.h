@@ -42,6 +42,7 @@
 #include "Control/Command/Instructions/CClassifyQueryCommand.h"
 #include "Control/Command/Instructions/CPrepareKnowledgeBaseCommand.h"
 #include "Control/Command/Instructions/CGetCurrentKnowledgeBaseRevisionCommand.h"
+#include "Control/Command/Instructions/CConnectKnowledgeBaseExternalTriplesDSNCommand.h"
 
 // Logger includes
 #include "Logger/CLogger.h"

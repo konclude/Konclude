@@ -56,17 +56,20 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(CSatisfiableCalculationJob* calcJob, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
+					CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(CSatisfiableCalculationJob* calcJob, CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
 
 
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* getAbsorptionPropagationItem();
 					COptimizedComplexBuildingVariableCompositionsItem* getVariableBuildingItem();
+
+					CAnsweringPropagationSteeringAbsorptionExtensionItemController* getPropagationSteeringController();
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					CAnsweringPropagationSteeringAbsorptionExtensionItemController* mPropagationSteeringController;
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* mAbsorptionPropagationExtension;
 					COptimizedComplexBuildingVariableCompositionsItem* mBuildingVarItem;
 

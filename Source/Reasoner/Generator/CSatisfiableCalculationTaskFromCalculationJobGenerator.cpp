@@ -63,7 +63,10 @@ namespace Konclude {
 				CProcessContext* procContext = satCalcTask->getProcessContext(mGenTaskHandleContext);
 
 
-				CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();
+				CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();				
+				if (approxSaturCalcJob->getOccurrenceStatisticsCollectingAdapter()) {
+					dataBox->setNominalDelayedIndividualSaturationProcessNodeLinker(nullptr);
+				}
 
 				CIndividualSaturationProcessNodeVector* indiNodeVec = dataBox->getIndividualSaturationProcessNodeVector();
 
@@ -315,6 +318,7 @@ namespace Konclude {
 					satCalcTask->setSatisfiablePossibleInstancesMergingAdapter(satCalcJob->getSatisfiablePossibleInstancesMergingAdapter());
 					satCalcTask->setSatisfiableRepresentativeBackendCacheUpdatingAdapter(satCalcJob->getSatisfiableRepresentativeBackendCacheUpdatingAdapter());
 					satCalcTask->setSatisfiableAnswererMaterializationAdapter(satCalcJob->getSatisfiableAnswererMaterializationAdapter());
+					satCalcTask->setCancellationAdapter(satCalcJob->getCancellationAdapter());
 
 
 					CProcessingDataBox* dataBox = satCalcTask->getProcessingDataBox();

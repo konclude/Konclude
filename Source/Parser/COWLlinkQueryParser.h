@@ -63,7 +63,7 @@ namespace Konclude {
 				//! Destructor
 				virtual ~COWLlinkQueryParser();
 
-				virtual bool parseQueryFile(QString filename);
+				virtual bool parseQueryFile(const QString& filename);
 				virtual CQueryExpression *parseQueryNode(QDomElement *queryNode);
 
 			// protected methods

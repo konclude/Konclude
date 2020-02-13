@@ -45,13 +45,20 @@ namespace Konclude {
 
 
 
-			CDatatypeValueSpaceCompareTriggers* CDatatypeValueSpaceCompareTriggers::addValueConceptTrigger(CDataLiteralCompareValue* value, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger) {
+			CDatatypeValueSpaceCompareTriggers* CDatatypeValueSpaceCompareTriggers::addCompleteValueConceptTrigger(CDataLiteralCompareValue* value, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger) {
+				incConceptTriggerCount(conceptTrigger->getCount());
+				CDatatypeValueSpaceConceptTriggeringData* valueConceptTriggerData = getValueConceptTriggeringData(value);
+				valueConceptTriggerData->appendCompleteConceptTriggers(conceptTrigger);
+				return this;
+			}
+
+
+			CDatatypeValueSpaceCompareTriggers* CDatatypeValueSpaceCompareTriggers::addPartialValueConceptTrigger(CDataLiteralCompareValue* value, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger) {
 				incConceptTriggerCount(conceptTrigger->getCount());
 				CDatatypeValueSpaceConceptTriggeringData* valueConceptTriggerData = getValueConceptTriggeringData(value);
 				valueConceptTriggerData->appendPartialConceptTriggers(conceptTrigger);
 				return this;
 			}
-
 
 			CDatatypeValueSpaceCompareTriggers* CDatatypeValueSpaceCompareTriggers::addMinValueConceptTrigger(CDataLiteralCompareValue* value, bool inclusive, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger) {
 				incConceptTriggerCount(conceptTrigger->getCount());

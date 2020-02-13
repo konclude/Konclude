@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXCONCEPTONTOLOGYANSWERINGITEM_H
-#define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXCONCEPTONTOLOGYANSWERINGITEM_H
+#ifndef KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXEXPRESSIONONTOLOGYANSWERINGITEM_H
+#define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXEXPRESSIONONTOLOGYANSWERINGITEM_H
 
 // Libraries includes
 
@@ -72,39 +72,39 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexConceptOntologyAnsweringItem : public COntologyAnsweringItem {
+			class COptimizedComplexExpressionOntologyAnsweringItem : public COntologyAnsweringItem {
 				// public methods
 			public:
 				//! Constructor
-				COptimizedComplexConceptOntologyAnsweringItem(CConcreteOntology* ontology, CConfigurationBase* configuration);
+				COptimizedComplexExpressionOntologyAnsweringItem(CConcreteOntology* ontology, CConfigurationBase* configuration);
 
 				//! Destructor
-				virtual ~COptimizedComplexConceptOntologyAnsweringItem();
+				virtual ~COptimizedComplexExpressionOntologyAnsweringItem();
 
 
 				bool isOntologyBuildingAndPreprocessingPrepared();
-				COptimizedComplexConceptOntologyAnsweringItem* setOntologyBuildingAndPreprocessingPrepared(bool prepared);
+				COptimizedComplexExpressionOntologyAnsweringItem* setOntologyBuildingAndPreprocessingPrepared(bool prepared);
 
 
 				CConcreteOntology* getTestingOntology(bool create = true);
-				COptimizedComplexConceptOntologyAnsweringItem* takeTestingOntology(CConcreteOntology* ontology);
+				COptimizedComplexExpressionOntologyAnsweringItem* takeTestingOntology(CConcreteOntology* ontology);
 
 
 				COptimizedComplexConceptItem* getComplexConceptItem(CConcept* concept, bool negation, bool create = true, bool* created = nullptr);
 				QHash< TConceptNegPair, COptimizedComplexConceptItem* >* getComplexConceptNegationItemHash();
 
 				CComputedItemDataNotificationLinker* createComputedItemDataNotificationLinker();
-				COptimizedComplexConceptOntologyAnsweringItem* releaseComputedItemDataNotificationLinker(CComputedItemDataNotificationLinker* itemLinker);
+				COptimizedComplexExpressionOntologyAnsweringItem* releaseComputedItemDataNotificationLinker(CComputedItemDataNotificationLinker* itemLinker);
 
-				CXLinker<CComplexQueryProcessingData*>* createQueryProcessingLinker();
-				COptimizedComplexConceptOntologyAnsweringItem* releaseQueryProcessingLinker(CXLinker<CComplexQueryProcessingData*>* queryLinker);
+				CXLinker<CComplexQueryExpressionProcessingData*>* createQueryProcessingLinker();
+				COptimizedComplexExpressionOntologyAnsweringItem* releaseQueryProcessingLinker(CXLinker<CComplexQueryExpressionProcessingData*>* queryLinker);
 
 				CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* createBuildingVariableItemProcessingLinker();
-				COptimizedComplexConceptOntologyAnsweringItem* releaseBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* varBuildItemLinker);
+				COptimizedComplexExpressionOntologyAnsweringItem* releaseBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* varBuildItemLinker);
 
 
 				CIndividual* takeTemporaryTestingIndividual();
-				COptimizedComplexConceptOntologyAnsweringItem* releaseTemporaryTestingIndividual(CIndividual* indi);
+				COptimizedComplexExpressionOntologyAnsweringItem* releaseTemporaryTestingIndividual(CIndividual* indi);
 
 
 
@@ -118,8 +118,8 @@ namespace Konclude {
 				COptimizedComplexConceptStepAnsweringItem* getConceptEquivalentClassesProcessingStepItem();
 				COptimizedComplexConceptStepAnsweringItem* getConceptInstancesProcessingStepItem();
 
-				COptimizedComplexConceptOntologyAnsweringItem* incCurrentlyAnsweringQueryCount(cint64 incCount = 1);
-				COptimizedComplexConceptOntologyAnsweringItem* decCurrentlyAnsweringQueryCount(cint64 decCount = 1);
+				COptimizedComplexExpressionOntologyAnsweringItem* incCurrentlyAnsweringQueryCount(cint64 incCount = 1);
+				COptimizedComplexExpressionOntologyAnsweringItem* decCurrentlyAnsweringQueryCount(cint64 decCount = 1);
 
 				bool hasCurrentlyAnsweringQueries();
 				cint64 getCurrentlyAnsweringQueryCount();
@@ -134,12 +134,12 @@ namespace Konclude {
 
 				QList<COptimizedComplexVariableCompositionItem*>* getVariableCompositionItemProcessingList();
 				COptimizedComplexVariableCompositionItem* takeNextProcessingVariableCompositionItem();
-				COptimizedComplexConceptOntologyAnsweringItem* addProcessingVariableCompositionItem(COptimizedComplexVariableCompositionItem* varCompItem);
+				COptimizedComplexExpressionOntologyAnsweringItem* addProcessingVariableCompositionItem(COptimizedComplexVariableCompositionItem* varCompItem);
 
 
 				QList<COptimizedComplexBuildingVariableCompositionsItem*>* getVariableBuildingItemProcessingList();
 				COptimizedComplexBuildingVariableCompositionsItem* takeNextProcessingVariableBuildingItem();
-				COptimizedComplexConceptOntologyAnsweringItem* addProcessingVariableBuildingItem(COptimizedComplexBuildingVariableCompositionsItem* varBuildItem);
+				COptimizedComplexExpressionOntologyAnsweringItem* addProcessingVariableBuildingItem(COptimizedComplexBuildingVariableCompositionsItem* varBuildItem);
 
 
 				cint64 getNextVariableId();
@@ -152,10 +152,10 @@ namespace Konclude {
 
 
 				CConcept* getTopRolePropagationExistingIndividualCreationConcept();
-				COptimizedComplexConceptOntologyAnsweringItem* setTopRolePropagationExistingIndividualCreationConcept(CConcept* concept);
+				COptimizedComplexExpressionOntologyAnsweringItem* setTopRolePropagationExistingIndividualCreationConcept(CConcept* concept);
 
 				CIndividual* getTopRolePropagationExistingIndividual();
-				COptimizedComplexConceptOntologyAnsweringItem* setTopRolePropagationExistingIndividual(CIndividual* indi);
+				COptimizedComplexExpressionOntologyAnsweringItem* setTopRolePropagationExistingIndividual(CIndividual* indi);
 
 				cint64 getNextComplexConceptItemId(bool moveNext = true);
 
@@ -164,12 +164,12 @@ namespace Konclude {
 
 				CAnsweringCalculationStatisticsCollectionStrings* getAnsweringStatisticsCollectionStrings();
 				CAnsweringStatisticsCollectionStrings* getDifferenceStoredAnsweringStatisticsCollectionStrings();
-				COptimizedComplexConceptOntologyAnsweringItem* setDifferenceStoredAnsweringStatisticsCollectionStrings(CAnsweringStatisticsCollectionStrings* stats);
+				COptimizedComplexExpressionOntologyAnsweringItem* setDifferenceStoredAnsweringStatisticsCollectionStrings(CAnsweringStatisticsCollectionStrings* stats);
 
 
 				CAnsweringCalculationStatisticsCollection* getCalculationStatisticsCollection();
 
-				COptimizedComplexConceptOntologyAnsweringItem* reuseCalculationStatisticsCollection(CAnsweringCalculationStatisticsCollection* statColl);
+				COptimizedComplexExpressionOntologyAnsweringItem* reuseCalculationStatisticsCollection(CAnsweringCalculationStatisticsCollection* statColl);
 
 				bool isProcessStatisticsCollectionConfigured();
 
@@ -180,12 +180,17 @@ namespace Konclude {
 
 
 				bool hasRequirementProcessingSchedulingReported();
-				COptimizedComplexConceptOntologyAnsweringItem* setRequirementProcessingSchedulingReported(bool reported);
+				COptimizedComplexExpressionOntologyAnsweringItem* setRequirementProcessingSchedulingReported(bool reported);
 
 
 				QHash<QPair<QString, CDatatype*>, CDataLiteral*>* getDataValueDatatypeSingleLiteralHash();
 
 				CContext* getDataValueMemoryManagementContext();
+
+
+				QHash<cint64, CComplexQueryExpressionProcessingData*>* getQueryExtensionProcessingDataHash();
+				cint64 getNextQueryExtensionId(bool moveNext = true);
+
 
 				// protected methods
 			protected:
@@ -197,7 +202,7 @@ namespace Konclude {
 				cint64 mNextComputationStepId;
 
 				CComputedItemDataNotificationLinker* mItemNotificationLinker;
-				CXLinker<CComplexQueryProcessingData*>* mQueryProcessingLinker;
+				CXLinker<CComplexQueryExpressionProcessingData*>* mQueryProcessingLinker;
 				CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* mBuildingVarItemProcessingLinker;
 
 				QHash< TConceptNegPair, COptimizedComplexConceptItem* > mConceptNegItemHash;
@@ -246,6 +251,8 @@ namespace Konclude {
 				QHash<QPair<QString, CDatatype*>, CDataLiteral*> mDataValueDatatypeSingleLiteralHash;
 
 				CMemoryPoolNewAllocationIncreasingContext mDataValueMemoryManagementContext;
+				QHash<cint64, CComplexQueryExpressionProcessingData*> mQueryExtensionProcessingDataHash;
+				cint64 mNextQueryExtensionId;
 
 				// private methods
 				private:
@@ -261,4 +268,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXCONCEPTONTOLOGYANSWERINGITEM_H
+#endif // KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXEXPRESSIONONTOLOGYANSWERINGITEM_H

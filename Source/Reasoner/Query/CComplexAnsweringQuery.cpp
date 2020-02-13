@@ -29,13 +29,11 @@ namespace Konclude {
 
 			CComplexAnsweringQuery::CComplexAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, CConfigurationBase* configuration, const QString& queryName) {
 				mOntology = baseOntology;
+				mExpressionsOntology = expressionOntology;
 				mConfig = configuration;
 				mQueryStats = nullptr;
-				mExpressionsOntology = expressionOntology;
 				mQueryResult = nullptr;
 				mQueryName = queryName;
-				mResultOrdering = nullptr;
-				mResultFiltering = nullptr;
 			}
 
 			CComplexAnsweringQuery::~CComplexAnsweringQuery() {
@@ -45,16 +43,6 @@ namespace Konclude {
 			CComplexAnsweringQuery* CComplexAnsweringQuery::setQueryResult(CQueryResult* queryResult) {
 				if (mQueryResult) {
 					delete mQueryResult;
-				}
-				while (mResultOrdering) {
-					CVariableBindingOrdering* tmpOrdering = mResultOrdering;
-					mResultOrdering = mResultOrdering->getNext();
-					delete tmpOrdering;
-				}
-				while (mResultFiltering) {
-					CVariableBindingFiltering* tmpOrdering = mResultFiltering;
-					mResultFiltering = mResultFiltering->getNext();
-					delete tmpOrdering;
 				}
 				mQueryResult = queryResult;
 				return this;
@@ -85,6 +73,10 @@ namespace Konclude {
 				return mOntology;
 			}
 
+			CConcreteOntology* CComplexAnsweringQuery::getExrpessionOntology() {
+				return mExpressionsOntology;
+			}
+
 			CConfigurationBase* CComplexAnsweringQuery::getConfiguration() {
 				return mConfig;
 			}
@@ -98,58 +90,6 @@ namespace Konclude {
 				return mQueryStats;
 			}
 
-			
-			CConcreteOntology* CComplexAnsweringQuery::getExrpessionOntology() {
-				return mExpressionsOntology;
-			}
-
-
-			CVariableBindingOrdering* CComplexAnsweringQuery::getResultOrderingLinker() {
-				return mResultOrdering;
-			}
-
-			CComplexAnsweringQuery* CComplexAnsweringQuery::setResultOrderingLinker(CVariableBindingOrdering* odering) {
-				while (mResultOrdering) {
-					CVariableBindingOrdering* tmpOrdering = mResultOrdering;
-					mResultOrdering = mResultOrdering->getNext();
-					delete tmpOrdering;
-				}
-				mResultOrdering = odering;
-				return this;
-			}
-
-			CComplexAnsweringQuery* CComplexAnsweringQuery::addResultOrdering(CVariableBindingOrdering* odering) {
-				if (mResultOrdering) {
-					mResultOrdering->append(odering);
-				} else {
-					mResultOrdering = odering;
-				}
-				return this;
-			}
-
-
-			CVariableBindingFiltering* CComplexAnsweringQuery::getResultFilteringLinker() {
-				return mResultFiltering;
-			}
-
-			CComplexAnsweringQuery* CComplexAnsweringQuery::setResultFilteringLinker(CVariableBindingFiltering* filtering) {
-				while (mResultFiltering) {
-					CVariableBindingFiltering* tmpOrdering = mResultFiltering;
-					mResultFiltering = mResultFiltering->getNext();
-					delete tmpOrdering;
-				}
-				mResultFiltering = filtering;
-				return this;
-			}
-
-			CComplexAnsweringQuery* CComplexAnsweringQuery::addResultFiltering(CVariableBindingFiltering* filtering) {
-				if (mResultFiltering) {
-					mResultFiltering->append(filtering);
-				} else {
-					mResultFiltering = filtering;
-				}
-				return this;
-			}
 
 		}; // end namespace Query
 

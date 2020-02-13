@@ -31,6 +31,7 @@
 
 
 // Other includes
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheReader.h"
 
 
 // Logger includes
@@ -62,8 +63,8 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, COptimizedKPSetConceptInstancesItem* conceptInstancesItem, bool onlyMostSpecificInstances, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true);
-					COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>& possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, const QSet<TConceptInstancesItemMostSpecificFlagPair>& onceptInstancesItemOnlyMostSpecificFlagPairSet, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true);
+					COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, COptimizedKPSetConceptInstancesItem* conceptInstancesItem, bool onlyMostSpecificInstances, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader = nullptr);
+					COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>& possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, const QSet<TConceptInstancesItemMostSpecificFlagPair>& onceptInstancesItemOnlyMostSpecificFlagPairSet, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader = nullptr);
 
 
 
@@ -96,7 +97,7 @@ namespace Konclude {
 				protected:
 					QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>> mPossibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash;
 					QSet<TConceptInstancesItemMostSpecificFlagPair> mConceptInstancesItemOnlyMostSpecificFlagPairSet;
-
+					CBackendRepresentativeMemoryCacheReader* mBackendAssocCacheReader;
 				// private methods
 				private:
 

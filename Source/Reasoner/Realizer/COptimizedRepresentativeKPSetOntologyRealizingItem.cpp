@@ -2173,7 +2173,7 @@ namespace Konclude {
 					knownCacheItemList = *conceptItem->getKnownMostSpecificInstancesLabelCacheItemList();
 					possibleCacheItemList = *conceptItem->getPossibleMostSpecificInstancesLabelCacheItemList();
 				}
-				COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(knownCacheItemList, possibleCacheItemList, &mIndividualInstantiatedItemHash, indiVector, conceptItem, onlyDirect, sorting, indiInstItemRefCursor, moveOverCursor);
+				COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(knownCacheItemList, possibleCacheItemList, &mIndividualInstantiatedItemHash, indiVector, conceptItem, onlyDirect, sorting, indiInstItemRefCursor, moveOverCursor, mBackendAssocCacheReader);
 				return cacheLabelInstancesIterator;
 
 			}
@@ -2515,7 +2515,7 @@ namespace Konclude {
 						qDeleteAll(conceptSetCacheLabelIteratorList);
 						conceptSetCacheLabelIteratorList.clear();
 						if (!validKnownLabelSet.isEmpty() || !validPossibleLabelSet.isEmpty()) {
-							COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, conceptInstancesItemOnlyMostSpecificFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor);
+							COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, conceptInstancesItemOnlyMostSpecificFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor, mBackendAssocCacheReader);
 							unmergeableIteratorList.append(cacheLabelInstancesIterator);
 						} else {
 							unsatisfiable = true;

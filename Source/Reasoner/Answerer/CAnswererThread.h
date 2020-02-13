@@ -95,6 +95,7 @@ namespace Konclude {
 
 					CAnsweringCalculationHandler* postCalculation(CAnsweringHandler* handler, CSatisfiableCalculationJob* satCalcJob, CAnsweringMessageData* finishedMessage, CCallbackDataContext* callbackContext);
 					CAnsweringCalculationHandler* ensureRequirements(CAnsweringHandler* handler, CConcreteOntology* ontology, const QList<COntologyProcessingRequirement*>& requirementList, CAnsweringMessageData* finishedMessage);
+					CAnsweringCalculationHandler* answerSubQuery(CAnsweringHandler* handler, CQuery* query, CAnsweringMessageData* finishedMessage);
 
 					virtual CAnsweringMessageDataObserver* sendMessage(CAnsweringHandler* answeringHandler, CAnsweringMessageData* messageData, CMemoryPool* memoryPool);
 

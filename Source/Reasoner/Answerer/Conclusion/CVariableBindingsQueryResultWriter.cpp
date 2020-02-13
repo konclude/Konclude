@@ -108,7 +108,7 @@ namespace Konclude {
 
 
 
-				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryProcessingData* queryProcessingData, cint64 cardinality) {
+				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryExpressionProcessingData* queryProcessingData, cint64 cardinality) {
 					cint64 writingCardinality = cardinality;
 
 					if (compAssIndVarQuery->getResultOffset() > 0) {
@@ -131,6 +131,19 @@ namespace Konclude {
 					}
 					return bindsAnswersResult;
 				}
+
+
+				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, cint64 cardinality) {
+					return bindsAnswersResult->addResultVariableBindings(bindAns, cardinality);
+				}
+
+				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, cint64 cardinality) {
+					if (cardinality > 0) {
+						return bindsAnswersResult->addReusedResultVariableBindings(bindAns, cardinality);
+					}
+					return bindsAnswersResult;
+				}
+
 
 			}; // end namespace Conclusion
 

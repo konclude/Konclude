@@ -29,9 +29,17 @@ namespace Konclude {
 		namespace Triples {
 
 
-			CRedlandStoredTriplesIndividualAssertionIndexCache::CRedlandStoredTriplesIndividualAssertionIndexCache(CRedlandStoredTriplesData* tripleData) : mIndividualAssertionsIndexCache(1500000) {
+			CRedlandStoredTriplesIndividualAssertionIndexCache::CRedlandStoredTriplesIndividualAssertionIndexCache(const QString& kbName, CRedlandStoredTriplesData* tripleData, CConfigurationBase* config) {
 				mTripleData = tripleData;
+				mConfig = config;
+				mKBName = kbName;
 				initRepresentativeStore();
+			}
+
+
+			CRedlandStoredTriplesIndividualAssertionIndexCache::~CRedlandStoredTriplesIndividualAssertionIndexCache() {
+				delete mIndividualAssertionsIndexCache;
+				delete mIndividualIdAssertionsIndexDataHash;
 			}
 
 
@@ -40,7 +48,7 @@ namespace Konclude {
 			}
 
 			CRedlandStoredTriplesIndividualAssertionIndexCache* CRedlandStoredTriplesIndividualAssertionIndexCache::completeIndexing() {
-				for (QHash<cint64, CRedlandStoredTriplesIndividualAssertionIndexCacheData*>::const_iterator it = mIndividualIdAssertionsIndexDataHash.constBegin(), itEnd = mIndividualIdAssertionsIndexDataHash.constEnd(); it != itEnd; ++it) {
+				for (QHash<cint64, CRedlandStoredTriplesIndividualAssertionIndexCacheData*>::const_iterator it = mIndividualIdAssertionsIndexDataHash->constBegin(), itEnd = mIndividualIdAssertionsIndexDataHash->constEnd(); it != itEnd; ++it) {
 					CRedlandStoredTriplesIndividualAssertionIndexCacheData* cacheData = it.value();
 					if (cacheData->getExtensionData(false)) {
 						updateCacheData(cacheData);
@@ -53,16 +61,78 @@ namespace Konclude {
 
 			CRedlandStoredTriplesIndividualAssertionIndexCache* CRedlandStoredTriplesIndividualAssertionIndexCache::initRepresentativeStore() {
 
+				cint64 cacheSize = CConfigDataReader::readConfigInteger(mConfig, "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.CacheSize", 1500000);
+				mIndividualAssertionsIndexCache = new QCache<CRedlandNodeHasher, CRedlandStoredTriplesIndividualAssertionIndexCacheData>(cacheSize);
+				mIndividualIdAssertionsIndexDataHash = new QHash<cint64, CRedlandStoredTriplesIndividualAssertionIndexCacheData*>();
+
+				bool externalTriplesDBCaching = CConfigDataReader::readConfigBoolean(mConfig, "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching", false);
 
 				librdf_world* world = mTripleData->getRedlandWorld();
 
 				librdf_storage* storage = mTripleData->getRedlandIndexedStorage();
 				if (world) {
-					mRepresentativeStorage = librdf_new_storage(world, "hashes", NULL, "hash-type='memory'");
+					if (externalTriplesDBCaching) {
+						QString dsnConfigString = CConfigDataReader::readConfigString(mConfig, "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching.DSNConfig");
+						QString dbNameString = CConfigDataReader::readConfigString(mConfig, "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching.TriplesDatabaseName");
+
+						if (dbNameString.contains("$KnowledgeBaseName")) {
+							dbNameString = dbNameString.replace("$KnowledgeBaseName", mKBName);
+						}
+						if (dbNameString.contains("$PercentEncodedKnowledgeBaseName")) {
+							dbNameString = dbNameString.replace("$PercentEncodedKnowledgeBaseName", QUrl::toPercentEncoding(mKBName));
+						}
+						QByteArray dbNameData = dbNameString.toUtf8();
+						QByteArray dsnConfigData = dsnConfigString.toUtf8();
+						mRepresentativeStorage = librdf_new_storage(world, "virtuoso", dbNameData.constData(), dsnConfigData.constData());
+
+						if (mRepresentativeStorage) {
+							mExternalTripleDataStroing = true;
+						}
+						
+					}
+					if (!mRepresentativeStorage) {
+						mRepresentativeStorage = librdf_new_storage(world, "hashes", NULL, "hash-type='memory'");
+					}
 				}
 
 				if (mRepresentativeStorage) {
 					mRepresentativeModel = librdf_new_model(world, mRepresentativeStorage, NULL);
+
+					bool clearAtInit = CConfigDataReader::readConfigBoolean(mConfig, "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching.ClearAtInit");
+					if (mRepresentativeModel && clearAtInit && mExternalTripleDataStroing) {
+
+						//librdf_stream* stream = librdf_model_as_stream(mRepresentativeModel);
+						//if (stream) {
+						//	while (!librdf_stream_end(stream)) {
+						//		librdf_statement* statement = librdf_stream_get_object(stream);
+						//		librdf_model_remove_statement(mRepresentativeModel, statement);
+						//		librdf_free_stream(stream);
+						//		librdf_storage_sync(mRepresentativeStorage);
+						//		stream = librdf_model_as_stream(mRepresentativeModel);
+						//	}
+						//	librdf_free_stream(stream);
+						//}
+						//CXLinker<librdf_statement*>* statementLinker = nullptr;
+						librdf_stream* stream = librdf_model_as_stream(mRepresentativeModel);
+						if (stream) {
+							while (!librdf_stream_end(stream)) {
+								librdf_statement* statement = librdf_stream_get_object(stream);
+								librdf_model_remove_statement(mRepresentativeModel, statement);
+								//CXLinker<librdf_statement*>* tmpStatementLinker = new CXLinker<librdf_statement*>(librdf_new_statement_from_statement(statement));
+								//statementLinker = tmpStatementLinker->append(statementLinker);
+								librdf_stream_next(stream);
+							}
+							librdf_free_stream(stream);
+						}
+						//for (CXLinker<librdf_statement*>* statementLinkerIt = statementLinker; statementLinkerIt; statementLinkerIt = statementLinkerIt->getNext()) {
+						//	librdf_statement* statement = statementLinkerIt->getData();
+						//	librdf_model_remove_statement(mRepresentativeModel, statement);
+						//}
+
+
+
+					}
+
 				}
 				
 
@@ -174,7 +244,7 @@ namespace Konclude {
 					//librdf_free_statement(indiIdStatement);
 					mIndividualDataWritenToStore = true;
 				}
-				mIndividualIdAssertionsIndexDataHash.remove(cacheData->getIndividualId());
+				mIndividualIdAssertionsIndexDataHash->remove(cacheData->getIndividualId());
 				librdf_free_node(indiNode);
 
 				return this;
@@ -267,7 +337,7 @@ namespace Konclude {
 
 
 			CRedlandStoredTriplesIndividualAssertionIndexCacheData* CRedlandStoredTriplesIndividualAssertionIndexCache::getIndividualAssertionIndexCacheData(cint64 individualId) {
-				CRedlandStoredTriplesIndividualAssertionIndexCacheData*& cacheData = mIndividualIdAssertionsIndexDataHash[individualId];
+				CRedlandStoredTriplesIndividualAssertionIndexCacheData*& cacheData = (*mIndividualIdAssertionsIndexDataHash)[individualId];
 				if (!cacheData && mIndividualDataWritenToStore) {
 					librdf_node* individualNode = nullptr;
 
@@ -334,7 +404,7 @@ namespace Konclude {
 
 
 			CRedlandStoredTriplesIndividualAssertionIndexCacheData* CRedlandStoredTriplesIndividualAssertionIndexCache::getIndividualAssertionIndexCacheData(librdf_node* node, bool createIfNotExists) {
-				CRedlandStoredTriplesIndividualAssertionIndexCacheData* cacheData = mIndividualAssertionsIndexCache.object(CRedlandNodeHasher(node));
+				CRedlandStoredTriplesIndividualAssertionIndexCacheData* cacheData = mIndividualAssertionsIndexCache->object(CRedlandNodeHasher(node));
 				if (!cacheData) {
 
 					if (mIndividualDataWritenToStore) {
@@ -364,7 +434,7 @@ namespace Konclude {
 
 
 			CRedlandStoredTriplesIndividualAssertionIndexCacheData* CRedlandStoredTriplesIndividualAssertionIndexCache::createWithRetrievalIndividualAssertionIndexCacheData(librdf_node* node, cint64* individualIdPointer, bool idStored) {
-				CRedlandStoredTriplesIndividualAssertionIndexCacheData* cacheData = mIndividualAssertionsIndexCache.object(CRedlandNodeHasher(node));
+				CRedlandStoredTriplesIndividualAssertionIndexCacheData* cacheData = mIndividualAssertionsIndexCache->object(CRedlandNodeHasher(node));
 				if (!cacheData) {
 					cint64 individualId = 0;
 					if (individualIdPointer) {
@@ -437,8 +507,8 @@ namespace Konclude {
 					outDatRoleSet->addIndividualCacheData(cacheData, idStored);
 
 
-					mIndividualIdAssertionsIndexDataHash[individualId] = cacheData;
-					mIndividualAssertionsIndexCache.insert(CRedlandNodeHasher(individualNode), cacheData, 1);
+					(*mIndividualIdAssertionsIndexDataHash)[individualId] = cacheData;
+					mIndividualAssertionsIndexCache->insert(CRedlandNodeHasher(individualNode), cacheData, 1);
 				}
 				return cacheData;
 			}
@@ -498,7 +568,7 @@ namespace Konclude {
 			}
 
 			QString CRedlandStoredTriplesIndividualAssertionIndexCache::getRepresentativeCacheModelString() {
-				mIndividualAssertionsIndexCache.clear();
+				mIndividualAssertionsIndexCache->clear();
 				librdf_uri* uri = librdf_new_uri(mTripleData->getRedlandWorld(), (const unsigned char*)"http://konclude.com/reprasentative-cache/model");
 				unsigned char *string = librdf_model_to_string(mRepresentativeModel, uri, "turtle", NULL, NULL);
 				librdf_free_uri(uri);

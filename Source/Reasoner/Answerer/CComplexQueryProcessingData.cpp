@@ -29,18 +29,10 @@ namespace Konclude {
 
 
 			CComplexQueryProcessingData::CComplexQueryProcessingData(CComplexAnsweringQuery* query, CCallbackData* callback) {
-				mQuery = query;
+				mComplexAnsweringQuery = query;
 				mCallback = callback;
-				mWaitingComputationStepsCount = 0;
-				mConceptItem = nullptr;
 				mUnsatisfiable = false;
-				mWaitingEntailmentComputationsCount = 0;
-				mBuildingVariableItemCount = 0;
-				mVariableBuildingItem = nullptr;
-				mFinishingHandler = nullptr;
-				mOffsetSkippedMappingCount = 0;
 				mQueryProcessingInitializedAnsweringStatistics = nullptr;
-				mComputationError = false;
 			}
 
 
@@ -50,8 +42,8 @@ namespace Konclude {
 				}
 			}
 
-			CComplexAnsweringQuery* CComplexQueryProcessingData::getQuery() {
-				return mQuery;
+			CComplexAnsweringQuery* CComplexQueryProcessingData::getComplexAnsweringQuery() {
+				return mComplexAnsweringQuery;
 			}
 
 			CCallbackData* CComplexQueryProcessingData::getCallback() {
@@ -59,28 +51,6 @@ namespace Konclude {
 			}
 
 
-			bool CComplexQueryProcessingData::isWaitingComputationStep() {
-				return mWaitingComputationStepsCount > 0;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setComputationStepFinished(CComplexConceptStepComputationProcess* computationStep) {
-				mWaitingComputationStepsCount--;
-				return this;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setComputationStepWaiting(CComplexConceptStepComputationProcess* computationStep) {
-				mWaitingComputationStepsCount++;
-				return this;
-			}
-
-			COptimizedComplexConceptItem* CComplexQueryProcessingData::getConceptItem() {
-				return mConceptItem;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setConceptItem(COptimizedComplexConceptItem* conceptItem) {
-				mConceptItem = conceptItem;
-				return this;
-			}
 
 			bool CComplexQueryProcessingData::isUnsatisfiable() {
 				return mUnsatisfiable;
@@ -92,58 +62,6 @@ namespace Konclude {
 			}
 
 
-			bool CComplexQueryProcessingData::isComputationError() {
-				return mComputationError;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setComputationError(bool error) {
-				mComputationError = error;
-				return this;
-			}
-
-
-
-			bool CComplexQueryProcessingData::hasEntailmentComputation() {
-				return mWaitingEntailmentComputationsCount > 0;
-			}
-
-			bool CComplexQueryProcessingData::hasComputation() {
-				return hasEntailmentComputation() || isWaitingComputationStep() || isBuildingVariableItem();
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::incEntailmentComputation(cint64 count) {
-				mWaitingEntailmentComputationsCount += count;
-				return this;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::decEntailmentComputation(cint64 count) {
-				mWaitingEntailmentComputationsCount -= count;
-				return this;
-			}
-
-
-			bool CComplexQueryProcessingData::isBuildingVariableItem() {
-				return mBuildingVariableItemCount > 0;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::incBuildingVariableItem(cint64 count) {
-				mBuildingVariableItemCount += count;
-				return this;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::decBuildingVariableItem(cint64 count) {
-				mBuildingVariableItemCount -= count;
-				return this;
-			}
-
-			COptimizedComplexBuildingVariableCompositionsItem* CComplexQueryProcessingData::getVariableBuildingItem() {
-				return mVariableBuildingItem;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setVariableBuildingItem(COptimizedComplexBuildingVariableCompositionsItem* variableBuildingItem) {
-				mVariableBuildingItem = variableBuildingItem;
-				return this;
-			}
 
 
 			bool CComplexQueryProcessingData::isProcessingStarted() {
@@ -167,33 +85,27 @@ namespace Konclude {
 				return this;
 			}
 
-			qint64 CComplexQueryProcessingData::getProcessingTime() {
+
+			CComplexQueryProcessingData* CComplexQueryProcessingData::setSubQueryProcessingFinished(bool finished) {
+				mSubQueryProcessingTime = mProcessingTimer.elapsed();
+				mSubQueryProcessingFinished = true;
+				return this;
+			}
+
+			bool CComplexQueryProcessingData::isSubQueryProcessingFinished() {
+				return mSubQueryProcessingFinished;
+			}
+
+
+			qint64 CComplexQueryProcessingData::getTotalProcessingTime() {
 				return mProcessingTime;
 			}
 
-			CAbstractComplexQueryFinishingHandler* CComplexQueryProcessingData::getFinishingHandler() {
-				return mFinishingHandler;
+
+			qint64 CComplexQueryProcessingData::getSubQueryProcessingTime() {
+				return mSubQueryProcessingTime;
 			}
 
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setFinishingHandler(CAbstractComplexQueryFinishingHandler* finishingHandler) {
-				mFinishingHandler = finishingHandler;
-				return this;
-			}
-
-
-			cint64 CComplexQueryProcessingData::getOffsetSkippedMappingCount() {
-				return mOffsetSkippedMappingCount;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::setOffsetSkippedMappingCount(cint64 skippedMappingCount) {
-				mOffsetSkippedMappingCount = skippedMappingCount;
-				return this;
-			}
-
-			CComplexQueryProcessingData* CComplexQueryProcessingData::incOffsetSkippedMappingCount(cint64 incSkippedMappingCount) {
-				mOffsetSkippedMappingCount += incSkippedMappingCount;
-				return this;
-			}
 
 			CAnsweringHandlingStatistics* CComplexQueryProcessingData::getQueryProcessingInitializedAnsweringStatistics() {
 				return mQueryProcessingInitializedAnsweringStatistics;

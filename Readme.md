@@ -18,7 +18,7 @@ Konclude is distributed in the hope that it will be useful, but WITHOUT ANY WARR
 Konclude uses the following libraries:
 - Qt 5.11 or above (https://www.qt.io/download), released under LGPLv3 (https://www.gnu.org/licenses/lgpl-3.0.en.html). Note that Konclude uses slightly modified versions of Qt containers (QMap, QHash, QList, see Source/Utilities/Container/CQtManagedRestrictedModification* files) for an integrated memory management, which were released under LGPLv2.1 and, hence, are available under the GPLv3 in oder to ensure compatiblity with LGPLv3 (cf. https://www.gnu.org/licenses/gpl-faq.html#AllCompatibility).
   
-- Redland RDF Libraries (http://librdf.org/), released under the LGPL 2.1 (or newer), GPL 2, and Apache 2 licenses. Note that the Redland RDF Libraries are optional and only required if RDF triples have to be parsed and mapped to OWL objects.
+- Redland RDF Libraries (http://librdf.org/), released under the LGPL 2.1 (or newer), GPL 2, and Apache 2 licenses. Note that the Redland RDF Libraries are optional and only required if RDF triples have to be parsed and mapped to OWL axioms or if more complex SPARQL queries have to be answered. For the latter, it is recommended to use the forked version of the Redland Rasqal query library on Konclude's Github page (https://github.com/konclude/rasqal) since it contains a few fixes and performance improvements.
 
 
 # USAGE
@@ -27,7 +27,7 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
 - COMMAND LINE:
 
-	Basic reasoning tasks such as classification, consistency, class satisfiability, and	realisation can be directly invoked with the command line interface. For this, Konclude has to be called with the corresponding command (`classification`, `consistency`, `satisfiability`, or `realisation`) and at least the input file has to be specified with `-i FILEPATH`. The output file is optional and can be set with the `-o FILEPATH` argument. The	class satisfiability checking additionally requires the IRI of the class that has to be tested, which has to be specified with `-x IRI`.
+	Basic reasoning tasks such as classification, consistency, class satisfiability, and realisation can be directly invoked with the command line interface. For this, Konclude has to be called with the corresponding command (`classification`, `consistency`, `satisfiability`, or `realisation`) and at least the input file has to be specified with `-i FILEPATH`. The output file is optional and can be set with the `-o FILEPATH` argument. The	class satisfiability checking additionally requires the IRI of the class that has to be tested, which has to be specified with `-x IRI`.
 	
 	Please note that Konclude natively only supports ontologies in the OWL 2 XML [1] or in the OWL 2 Functional Style format [2]. The optional integration of the Redland RDF Libraries allow for parsing RDF serialization formats, but the mapping to OWL constructs must be considered as experimental. Hence, you may use the protege editor [3] to convert ontologies in other syntaxes into a fully supported format.
 
@@ -91,20 +91,18 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
 - SPARQL:
 
-    A trivial SPARQL HTTP server is integrated that supports processing of some basic SPARQL Update commands and answering of some ABox related queries (only simple Basic Graph Patterns, where variables are used for individuals). Note that the SPARQL requests/queries must be encoded as HTTP POST requests. Alternatively the SPARQL requests can also directly be loaded from files with the `sparqlfile` command. Note that the last loaded ontology is interpreted as the default graph, i.e., it is automatically used if no graph/knowledge base is specified in the query.
+    A trivial SPARQL HTTP server is integrated that supports processing of some basic SPARQL Update commands and answering of some ABox related queries. Note that Konclude by itself can only process queries with simple Basic Graph Patterns, where variables are used for individuals. More complex SPARQL queries (e.g., with UNION, OPTIONAL, FILTER, MINUS, etc.) are supported via the Redland RASQAL integration, which is however not fully optimized. Note that the SPARQL requests/queries must be encoded as HTTP POST requests. Alternatively the SPARQL requests can also directly be loaded from files with the `sparqlfile` command. Note that the last loaded ontology is interpreted as the default graph, i.e., it is automatically used if no graph/knowledge base is specified in the query.
 
     Examples (omit ./ on Windows):
 
     ```
     ./Konclude sparqlserver -p 8080 -c Configs/querying-config.xml
-    ./Konclude sparqlfile -s Tests/sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
-    ./Konclude sparqlfile -s Tests/sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+    ./Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+    ./Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
     ```
 
     Currently, the following SPARQL commands/queries are (partially) supported:
     - LOAD, SELECT, ASK
-
-	DISTINCT, OFFSET, LIMIT are also supported, but filtering, sorting, and data value variables only to a very limited extent.
 
     Note that the settings of the `Configs/querying-config.xml` file are automatically enabled if the `sparqlserver` or `sparqlfile` commands are used in order to deactivate some optimizations that are not yet compatible with the integrated query answering engine. However, the `Configs/querying-config.xml` file also contains some commented out settings that may be interesting for configuring some query answering aspects in more detail (e.g., concurrency, interpretation of anonymous variables, etc.).
 
@@ -152,7 +150,11 @@ For MacOS, the Redland RDF Libraries are currently not integrated/tested, i.e., 
 # CHANGELOG
 
 
-- Konclude v0.6.2-842 (no official release, not production ready):
+- Konclude v0.6.2-964 (pre-release):
+    - Support of more SPARQL features (e.g., OPTIONAL, UNION, FILTER, aggregates, etc.) via Redland Rasqal.
+    - Several bug fixes.
+
+- Konclude v0.6.2-842 (pre-release):
 	- Experimental conjunctive query answering engine based on absorption.
 	- Simple SPARQL HTTP server.
 	- Experimental support of RDF serializations of ontologies via the Redland RDF libraries.

@@ -70,7 +70,7 @@ namespace Konclude {
 						//! Constructor
 						CQtConcurrentVariableMappingsCompositionJoinComputator();
 
-						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
+						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
 
 
 

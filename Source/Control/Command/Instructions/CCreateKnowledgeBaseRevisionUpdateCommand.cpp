@@ -34,14 +34,22 @@ namespace Konclude {
 					kbString = knowledgeBaseNameString;
 					onRev = nullptr;
 					mCreateIfNotExist = false;
+					mReportErrorIfNotExists = true;
 				}
 
 				CCreateKnowledgeBaseRevisionUpdateCommand::CCreateKnowledgeBaseRevisionUpdateCommand(const QString &knowledgeBaseNameString, bool createIfNotExist, CCommand *parentSuperCommand) : CKnowledgeBaseCommand(parentSuperCommand) {
 					kbString = knowledgeBaseNameString;
 					onRev = nullptr;
 					mCreateIfNotExist = createIfNotExist;
+					mReportErrorIfNotExists = true;
 				}
 
+				CCreateKnowledgeBaseRevisionUpdateCommand::CCreateKnowledgeBaseRevisionUpdateCommand(const QString &knowledgeBaseNameString, bool createIfNotExist, bool reportErrorIfNotExists, CCommand *parentSuperCommand) : CKnowledgeBaseCommand(parentSuperCommand) {
+					kbString = knowledgeBaseNameString;
+					onRev = nullptr;
+					mCreateIfNotExist = createIfNotExist;
+					mReportErrorIfNotExists = reportErrorIfNotExists;
+				}
 
 				CCreateKnowledgeBaseRevisionUpdateCommand::~CCreateKnowledgeBaseRevisionUpdateCommand() {
 				}
@@ -79,6 +87,9 @@ namespace Konclude {
 					return mCreateIfNotExist;
 				}
 
+				bool CCreateKnowledgeBaseRevisionUpdateCommand::reportErrorCreateIfNotExist() {
+					return mReportErrorIfNotExists;
+				}
 
 
 			}; // end namespace Instructions

@@ -67,7 +67,7 @@ namespace Konclude {
 			protected:
 				QList<CAxiomExpression*> getTripleOWLAxioms(QHash<QString,CRDFHahsedSubjectData>* subjectTripleHash, bool anonymousIndividualsAsVariables = false);
 
-				QList<CAxiomExpression*> getTripleOWLAxioms(QList<CRDFStringTriple>* tripleStringList, bool anonymousIndividualsAsVariables = false);
+				QList<CAxiomExpression*> getTripleOWLAxioms(QList<CRDFStringTriple>* tripleStringList, bool anonymousIndividualsAsVariables = false, QSet<CExpressionVariable*>* varExpSet = nullptr);
 
 				bool isDataProperty(const QString& propertyName);
 

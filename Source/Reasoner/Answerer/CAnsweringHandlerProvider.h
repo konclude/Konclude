@@ -69,7 +69,7 @@ namespace Konclude {
 					virtual ~CAnsweringHandlerProvider();
 
 					virtual CAnsweringHandler* getAnsweringHandler(CComplexAnsweringQuery* complexAnsweringQuery) = 0;
-					virtual CAnsweringHandler* getAnsweringHandler(CConcreteOntology* ontology) = 0;
+					virtual CAnsweringHandler* getAnsweringHandler(CConcreteOntology* ontology, bool composedQuery) = 0;
 
 
 					virtual CAnsweringHandlerProvider* releaseAnsweringHandler(CAnsweringHandler* answeringHandler) = 0;

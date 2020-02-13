@@ -57,7 +57,7 @@ namespace Konclude {
 
 			// forward declarations
 
-			class CComplexQueryProcessingData;
+			class CComplexQueryExpressionProcessingData;
 			class COptimizedComplexConceptItem;
 			class CAnsweringHandler;
 			class CAnswererThread;
@@ -72,10 +72,17 @@ namespace Konclude {
 			class COptimizedComplexVariableRolePropagationJoiningItem;
 			class COptimizedComplexVariableRolePropagationReplacementItem;
 			class COptimizedComplexVariableConceptBaseItem;
+			class CRedlandRasqalSubQueryBoundNodeResolvingHash;
 			class COptimizedComplexVariableJoiningItem;
 			class COptimizedComplexVariableDataLiteralExtensionItem;
 			class COptimizedComplexVariableReductionItem;
+			class COptimizedComplexVariableExtractionItem;
 			class COptimizedComplexVariableCompositionItemVariableIndexMapping;
+			class CRedlandRasqalSubQueryTripleResolvingData;
+			class CRedlandRasqalSubQueryProcessingData;
+			class CRedlandRasqalSubQueryBindingPositionResolvingHash;
+			class CAnsweringPropagationSteeringAbsorptionExtensionItemController;
+			class COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem;
 
 
 			// Custom Events >= 2000

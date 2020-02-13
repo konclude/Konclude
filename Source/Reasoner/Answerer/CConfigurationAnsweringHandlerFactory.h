@@ -28,7 +28,9 @@
 #include "AnswererSettings.h"
 #include "CAnsweringHandler.h"
 #include "CAnsweringHandlerFactory.h"
-#include "COptimizedComplexConceptAnsweringHandler.h"
+#include "COptimizedComplexExpressionAnsweringHandler.h"
+#include "COptimizedComplexCompositionOntologyAnsweringItem.h"
+#include "COptimizedComplexCompositionRedlandRasqalAnsweringHandler.h"
 
 
 // Other includes
@@ -76,7 +78,7 @@ namespace Konclude {
 					virtual ~CConfigurationAnsweringHandlerFactory();
 
 
-					virtual CAnsweringHandler* createAnsweringHandler(CConcreteOntology* ontology);
+					virtual CAnsweringHandler* createAnsweringHandler(CConcreteOntology* ontology, bool composedQuery);
 
 
 

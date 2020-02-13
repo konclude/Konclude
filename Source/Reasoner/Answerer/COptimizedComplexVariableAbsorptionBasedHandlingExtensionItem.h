@@ -28,6 +28,7 @@
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableCompositionItem.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData.h"
+#include "CAnsweringSplitEntailmentTestingCancellationAdapter.h"
 
 
 
@@ -99,6 +100,21 @@ namespace Konclude {
 					bool isDependentMappingsComputationSchedluled();
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setDependentMappingsComputationSchedluled(bool scheduled);
 
+					bool isPropagationInitializationIndividualsSplitted();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setPropagationInitializationIndividualsSplitted(bool splitted);
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* addPropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController);
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* removePropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController);
+
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setPropagationInitializationIndividualsSplittedTestsRemaining(bool remainingTests);
+					bool hasRemainingPropagationInitializationIndividualsSplittedTests();
+					cint64 getNextPropagationInitializationIndividualsSplittedTestId(cint64 incCount = 1);
+
+
+					bool isEntailmentFound();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setEntailmentFound(bool entailmentFound);
+
+
+					CAnsweringSplitEntailmentTestingCancellationAdapter* getEntailmentTestingCancellationAdapter();
 
 				// protected methods
 				protected:
@@ -124,6 +140,15 @@ namespace Konclude {
 
 					bool mPropatationTestCreated;
 					bool mDependentMappingsComputationScheduled;
+					bool mPropagationInitializationIndividualsSplitted;
+					bool mPropagationInitializationIndividualsSplittedTestsRemaining;
+					QSet<CAnsweringPropagationSteeringAbsorptionExtensionItemController*> mPropagationSteeringControllerSet;
+
+					cint64 mNextPropagationInitializationIndividualsSplittedTestId;
+
+					bool mEntailmentFound;
+
+					CAnsweringSplitEntailmentTestingCancellationAdapter* mCancellationAdapter;
 
 				// private methods
 				private:

@@ -27,12 +27,17 @@ namespace Konclude {
 		namespace Answerer {
 
 			
-			CAnsweringPropagationSteeringAbsorptionExtensionItemController::CAnsweringPropagationSteeringAbsorptionExtensionItemController(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem) {
+			CAnsweringPropagationSteeringAbsorptionExtensionItemController::CAnsweringPropagationSteeringAbsorptionExtensionItemController(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationItem, CVariable* splitVar, QSet<CIndividualReference>* splitIndiSet) {
 				mAbsorptionPropagationItem = absorptionPropagationItem;
+				mSplitVar = splitVar;
+				mSplitIndiSet = splitIndiSet;
 			}
 
 
 			CAnsweringPropagationSteeringAbsorptionExtensionItemController::~CAnsweringPropagationSteeringAbsorptionExtensionItemController() {
+				if (mSplitIndiSet) {
+					delete mSplitIndiSet;
+				}
 			}
 			
 
@@ -47,6 +52,9 @@ namespace Konclude {
 			}
 
 			bool CAnsweringPropagationSteeringAbsorptionExtensionItemController::isPreparationBindingNominalIndividual(CVariable* variable, CIndividual* indi) {
+				if (mSplitIndiSet && mSplitVar == variable) {
+					return mSplitIndiSet->contains(indi);
+				}
 				QSet<CIndividualReference>* individualBindingSet = mAbsorptionPropagationItem->getVariableSteeringIndividualBindingSet(variable);
 				if (individualBindingSet) {
 					return individualBindingSet->contains(indi);

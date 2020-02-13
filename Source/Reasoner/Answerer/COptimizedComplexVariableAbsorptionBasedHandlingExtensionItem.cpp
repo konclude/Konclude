@@ -34,6 +34,11 @@ namespace Konclude {
 				mTestingVariableMapping = nullptr;
 				mPropatationTestCreated = false;
 				mDependentMappingsComputationScheduled = false;
+				mPropagationInitializationIndividualsSplitted = false;
+				mPropagationInitializationIndividualsSplittedTestsRemaining = false;
+				mNextPropagationInitializationIndividualsSplittedTestId = 1;
+				mEntailmentFound = false;
+				mCancellationAdapter = nullptr;
 			}
 
 
@@ -126,6 +131,59 @@ namespace Konclude {
 				return this;
 			}
 
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::isPropagationInitializationIndividualsSplitted() {
+				return mPropagationInitializationIndividualsSplitted;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setPropagationInitializationIndividualsSplitted(bool splitted) {
+				mPropagationInitializationIndividualsSplitted = splitted;
+				return this;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::addPropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController) {
+				mPropagationSteeringControllerSet.insert(propagationSteeringController);
+				return this;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::removePropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController) {
+				mPropagationSteeringControllerSet.remove(propagationSteeringController);
+				return this;
+			}
+
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setPropagationInitializationIndividualsSplittedTestsRemaining(bool remainingTests) {
+				mPropagationInitializationIndividualsSplittedTestsRemaining = remainingTests;
+				return this;
+			}
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::hasRemainingPropagationInitializationIndividualsSplittedTests() {
+				return mPropagationInitializationIndividualsSplittedTestsRemaining || !mPropagationSteeringControllerSet.isEmpty();
+			}
+
+
+			cint64 COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getNextPropagationInitializationIndividualsSplittedTestId(cint64 incCount) {
+				cint64 tmp = mNextPropagationInitializationIndividualsSplittedTestId;
+				mNextPropagationInitializationIndividualsSplittedTestId += incCount;
+				return tmp;
+			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::isEntailmentFound() {
+				return mEntailmentFound;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setEntailmentFound(bool entailmentFound) {
+				mEntailmentFound = entailmentFound;
+				return this;
+			}
+
+
+			CAnsweringSplitEntailmentTestingCancellationAdapter* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getEntailmentTestingCancellationAdapter() {
+				if (!mCancellationAdapter) {
+					mCancellationAdapter = new CAnsweringSplitEntailmentTestingCancellationAdapter();
+				}
+				return mCancellationAdapter;
+			}
 
 
 		}; // end namespace Answerer

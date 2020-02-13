@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexBuildingVariableCompositionsItem::COptimizedComplexBuildingVariableCompositionsItem(CComplexQueryProcessingData* queryProcessingData) {
+			COptimizedComplexBuildingVariableCompositionsItem::COptimizedComplexBuildingVariableCompositionsItem(CComplexQueryExpressionProcessingData* queryProcessingData) {
 				mQueryProcessingData = queryProcessingData;
 				mWaitingComputationStepsCount = 0;
 				mInitializedBaseConceptVariableItems = false;
@@ -198,7 +198,7 @@ namespace Konclude {
 				return this;
 			}
 
-			CComplexQueryProcessingData* COptimizedComplexBuildingVariableCompositionsItem::getQueryProcessingData() {
+			CComplexQueryExpressionProcessingData* COptimizedComplexBuildingVariableCompositionsItem::getQueryProcessingData() {
 				return mQueryProcessingData;
 			}
 
@@ -790,14 +790,28 @@ namespace Konclude {
 				return this;
 			}
 
-			QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* COptimizedComplexBuildingVariableCompositionsItem::getAbsorptionBasedHandlingExtensionItemList() {
-				return &mAbsorptionBasedHandlingExtensionItemList;
+
+
+			QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* COptimizedComplexBuildingVariableCompositionsItem::getAbsorptionBasedHandlingExtensionItemPropagationList() {
+				return &mAbsorptionBasedHandlingExtensionItemPropagationList;
 			}
 
-			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addAbsorptionBasedHandlingExtensionItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem) {
-				mAbsorptionBasedHandlingExtensionItemList.append(absBasedExtItem);
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addAbsorptionBasedHandlingExtensionPropagationItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem) {
+				mAbsorptionBasedHandlingExtensionItemPropagationList.append(absBasedExtItem);
 				return this;
 			}
+
+
+
+			QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* COptimizedComplexBuildingVariableCompositionsItem::getAbsorptionBasedHandlingExtensionItemJoiningList() {
+				return &mAbsorptionBasedHandlingExtensionItemJoiningList;
+			}
+
+			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addAbsorptionBasedHandlingExtensionJoiningItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem) {
+				mAbsorptionBasedHandlingExtensionItemJoiningList.append(absBasedExtItem);
+				return this;
+			}
+
 
 
 			bool COptimizedComplexBuildingVariableCompositionsItem::isBindingsReducible() {
@@ -816,6 +830,10 @@ namespace Konclude {
 			COptimizedComplexBuildingVariableCompositionsItem* COptimizedComplexBuildingVariableCompositionsItem::addUsedComplexVariableCompositionItem(COptimizedComplexVariableCompositionItem* item) {
 				mUsedComplexVariableCompositionItemList.append(item);
 				return this;
+			}
+
+			QList<CExpressionVariable*>* COptimizedComplexBuildingVariableCompositionsItem::getExtendibleQueryTransferringExtractionVariableList() {
+				return &mExtendibleQueryTransferringExtractionVariableList;
 			}
 
 

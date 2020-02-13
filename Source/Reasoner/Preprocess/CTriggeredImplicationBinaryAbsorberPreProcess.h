@@ -168,7 +168,9 @@ namespace Konclude {
 					bool isDisjunctionConceptPartialTriggeredImplicationAbsorbable(CConcept* orConcept, bool negated);
 
 					bool isConceptPartialImplicationTriggerable(CConcept* concept, bool negated, QSet<CConcept*>* conceptEqConAbsorbed);
-					
+					bool isConceptAssuringImplicationTriggerable(CConcept* concept, bool negated, QSet<CConcept*>* conceptEqConAbsorbed);
+					CConceptTriggerLinker* getAssuringTriggersForConcept(CConcept* concept, bool negated);
+
 
 					
 
@@ -186,6 +188,8 @@ namespace Konclude {
 
 					bool absorbPartialGCIConceptsToTriggeredImplications(CConcept* orConcept, bool negated);
 					void createGCIPartialAbsorbedTriggeredImplication(CConcept* orConcept, bool negated, const QList<TConceptNegationPair>& absorbList);
+					void createGCIAssuringAbsorbedTriggeredImplication(CConcept* orConcept, bool negated, const QList<TConceptNegationPair>& absorbList, const QList<TConceptNegationPair>& disjList);
+					CConceptTriggerLinker* createAssuringExtendedAbsorbedImpliedTrigger(const QList<TConceptNegationPair>& absorbList);
 
 					CConceptRoleBranchingTrigger* createDisjunctionPartialAbsorbedBranchTriggers(CConcept* orConcept, bool negated);
 					CConceptRoleBranchingTrigger* createDisjunctionPartialAbsorbedBranchTriggers(CConcept* orConcept, bool negated, const QList<TConceptNegationPair>& absorbList);
@@ -211,6 +215,7 @@ namespace Konclude {
 					bool addAbsorbableDisjunctCandidates(CConcept* orConcept, bool negated, QList<TConceptNegationPair>& list);
 					QList<TConceptNegationPair> splitAbsorbableDisjuncts(QList<TConceptNegationPair>& list);
 					QList<TConceptNegationPair> getPartialAbsorbableDisjuncts(QList<TConceptNegationPair>& list);
+					QList<TConceptNegationPair> getAssuringAbsorbableDisjuncts(QList<TConceptNegationPair>& list);
 
 
 					QString generateDebugGCIConceptString(CConcept* concept, bool conceptNegation);
@@ -300,7 +305,8 @@ namespace Konclude {
 					CTBox* mTBox;
 
 					QHash<TConceptPair,CConceptTriggerLinker*> mConceptImplicationImpliedHash;
-					QHash<TConceptNegationPair,CConceptTriggerLinker*> mConceptTriggerLinkerHash;
+					QHash<TConceptNegationPair, CConceptTriggerLinker*> mConceptTriggerLinkerHash;
+					QHash<TConceptNegationPair, CConceptTriggerLinker*> mAssuringConceptTriggerLinkerHash;
 					CConceptTriggerLinker* mTmpTriggerLinker;
 
 					QHash<TConceptNegationPair, CConcept*> mBackPropActivationConHash;
@@ -324,7 +330,8 @@ namespace Konclude {
 					CBOXHASH<CConcept*,CConcept*>* mTriggerImplHash;
 
 					QHash<TConceptNegationPair,bool> mConceptTotalAbsorbableHash;
-					QHash<TConceptNegationPair,bool> mConceptPartialAbsorbableHash;
+					QHash<TConceptNegationPair, bool> mConceptPartialAbsorbableHash;
+					QHash<TConceptNegationPair, bool> mConceptAssuringAbsorbableHash;
 					QSet<CConcept*> mEQNotConceptPartialAbsorbableSet;
 					QHash<TConceptNegationPair, bool> mConceptPropagationAbsorbableHash;
 
@@ -411,6 +418,7 @@ namespace Konclude {
 					cint64 mStatGCINormalAbsorbed;
 					cint64 mStatGCIPartialAbsorbed;
 					cint64 mStatGCIAbsorptionPartialExtended;
+					cint64 mStatGCIAbsorptionAssuring;
 					cint64 mStatGCITotal;
 					cint64 mStatEqAbsorbed;
 					cint64 mStatEqTotal;

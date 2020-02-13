@@ -90,7 +90,7 @@ namespace Konclude {
 				QList<CRDFStringTriple>* getRDFStringTriples(QStringList& partList);
 				QHash<QString, CRDFHahsedSubjectData>* getRDFSubjectHash(QStringList& partList);
 
-				QStringList getBracketContent(QStringList& partList, QChar openingBracket, QChar closingBracket, bool bracketOpened = false, bool exculdeOthers = false);
+				QStringList getBracketContent(QStringList& partList, QChar openingBracket, QChar closingBracket, bool bracketOpened = false, bool includeOthers = false);
 
 				bool getNextRDFStringTriple(QStringList& partList, CRDFStringTriple& lastNextTriple, QList<CRDFStringTriple>& nextTripleList, int startingSopPos = 0);
 

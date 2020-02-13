@@ -75,6 +75,8 @@ namespace Konclude {
 
 
 					CConcreteOntology* getBaseOntology();
+					CConcreteOntology* getExrpessionOntology();
+
 					CComplexAnsweringQuery* setQueryResult(CQueryResult* queryResult);
 					CQueryResult* getQueryResult();
 
@@ -83,24 +85,14 @@ namespace Konclude {
 					CComplexAnsweringQuery* setQueryStatistics(CQueryStatistics* stats);
 					CQueryStatistics* getQueryStatistics();
 
-
-					CConcreteOntology* getExrpessionOntology();
-
-					CVariableBindingOrdering* getResultOrderingLinker();
-					CComplexAnsweringQuery* setResultOrderingLinker(CVariableBindingOrdering* odering);
-					CComplexAnsweringQuery* addResultOrdering(CVariableBindingOrdering* odering);
-
-					CVariableBindingFiltering* getResultFilteringLinker();
-					CComplexAnsweringQuery* setResultFilteringLinker(CVariableBindingFiltering* filtering);
-					CComplexAnsweringQuery* addResultFiltering(CVariableBindingFiltering* filtering);
-
-
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
 					CConcreteOntology* mOntology;
+					CConcreteOntology* mExpressionsOntology;
+
 					CConfigurationBase* mConfig;
 					CQueryStatistics* mQueryStats;
 
@@ -108,10 +100,6 @@ namespace Konclude {
 
 					CQueryResult* mQueryResult;
 
-					CConcreteOntology* mExpressionsOntology;
-
-					CVariableBindingOrdering* mResultOrdering;
-					CVariableBindingFiltering* mResultFiltering;
 
 
 				// private methods

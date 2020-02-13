@@ -32,7 +32,7 @@ namespace Konclude {
 				}
 
 
-				CAbstractVariableMappingsCompositionComputator* CQtConcurrentVariableMappingsCompositionJoinComputator::configureComputator(COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
+				CAbstractVariableMappingsCompositionComputator* CQtConcurrentVariableMappingsCompositionJoinComputator::configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
 					CAbstractVariableMappingsCompositionJoinComputator::configureComputator(ontoAnsweringItem, answererContext);
 					mConcurrentJoinComputationTaskCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinComputationTaskCount", 211);
 					mConfPartitionizedMemoryManagement = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinPartitionizedMemoryManagement", false);
@@ -44,7 +44,7 @@ namespace Konclude {
 					mConfBatchSizeCount = mConcurrentJoinComputationTaskCount;
 					return this;
 				}
-
+				
 
 				bool CQtConcurrentVariableMappingsCompositionJoinComputator::computeVariableMappingsJoinComposition(COptimizedComplexVariableJoiningItem* joiningItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing) {
 

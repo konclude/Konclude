@@ -71,7 +71,7 @@ namespace Konclude {
 		}
 
 
-		QStringList CRDFSimpleTurtleParser::getBracketContent(QStringList& partList, QChar openingBracket, QChar closingBracket, bool bracketOpened, bool exculdeOthers) {
+		QStringList CRDFSimpleTurtleParser::getBracketContent(QStringList& partList, QChar openingBracket, QChar closingBracket, bool bracketOpened, bool includeOthers) {
 			int bracketOpen = 0;
 			if (bracketOpened) {
 				bracketOpen++;
@@ -99,7 +99,7 @@ namespace Konclude {
 					isBracket = true;
 				}
 
-				if (exculdeOthers || !isBracket && bracketOpened) {
+				if (includeOthers || !isBracket && bracketOpened) {
 					splittedPartList.append(partString);
 				}
 
@@ -108,7 +108,7 @@ namespace Konclude {
 					return splittedPartList;
 				}
 			}
-			if (exculdeOthers) {
+			if (includeOthers) {
 				return splittedPartList;
 			} else {
 				return QStringList();

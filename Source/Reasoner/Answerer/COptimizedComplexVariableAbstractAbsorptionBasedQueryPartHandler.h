@@ -28,7 +28,7 @@
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingNeighbouringData.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData.h"
-#include "COptimizedComplexConceptOntologyAnsweringItem.h"
+#include "COptimizedComplexExpressionOntologyAnsweringItem.h"
 
 
 // Other includes
@@ -61,7 +61,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedComplexVariableAbstractAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem);
+					COptimizedComplexVariableAbstractAbsorptionBasedQueryPartHandler(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* queryPart, COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem);
 
 					virtual COptimizedComplexVariableAbstractAbsorptionBasedQueryPartHandler* readConfig(CCalculationConfigurationExtension* config);
 
@@ -80,7 +80,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* mQueryPart;
-					COptimizedComplexConceptOntologyAnsweringItem* mOntoAnsweringItem;
+					COptimizedComplexExpressionOntologyAnsweringItem* mOntoAnsweringItem;
 
 					CMemoryAllocationManager* mMemMan;
 					CConceptVector* mConceptVec;

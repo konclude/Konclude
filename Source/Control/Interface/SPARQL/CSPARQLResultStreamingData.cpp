@@ -92,6 +92,19 @@ namespace Konclude {
 								}
 							}
 						}
+
+						CRedlandRasqalBGPsCompositionQuery* redRasqQuery = dynamic_cast<CRedlandRasqalBGPsCompositionQuery*>(mQuery);
+						if (redRasqQuery) {
+							const QString& queryText = redRasqQuery->getQueryText();
+							cint64 firstSELECTPos = queryText.toUpper().indexOf("SELECT");
+							cint64 firstBracketPos = queryText.indexOf("{");
+							if (firstSELECTPos != -1 && firstSELECTPos < firstBracketPos) {
+								LOG(NOTICE, "::Konclude::Control::Interface::SPARQL::SPARQLResultStreamer", logTr("Enabling results streaming for Redland Rasqal query '%1'.").arg(mQuery->getQueryName()), this);
+								mStreamingResult = new CVariableBindingsAnswersStreamingResult(this);
+								redRasqQuery->setQueryResult(mStreamingResult);
+							}
+						}
+
 					}
 					return mQuery;
 				}
@@ -178,15 +191,15 @@ namespace Konclude {
 					finishResultStreaming();
 					if (mStreamingResult != queryResult) {
 
-						CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(query);
+						CComplexAnsweringQuery* compAssIndVarQuery = dynamic_cast<CComplexAnsweringQuery*>(query);
 						if (compAssIndVarQuery) {
 							if (dynamic_cast<CBooleanQueryResult*>(queryResult)) {
 								mSerializer->addResultSerialization((CBooleanQueryResult*)queryResult);
 							} else if (dynamic_cast<CVariableBindingsAnswersResult*>(queryResult)) {
 								CVariableBindingsAnswersResult* varBindAnsRes = (CVariableBindingsAnswersResult*)queryResult;
 								QStringList varList;
-								for (auto varExp : *compAssIndVarQuery->getDistinguishedVariableExpressions()) {
-									varList.append(varExp->getName());
+								for (auto varExp : varBindAnsRes->getVariableNames()) {
+									varList.append(varExp);
 								}
 								mSerializer->addResultSerialization(varList, varBindAnsRes);
 							}

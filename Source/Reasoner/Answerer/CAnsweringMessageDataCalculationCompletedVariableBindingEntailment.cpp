@@ -28,10 +28,13 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			CAnsweringMessageDataCalculationCompletedVariableBindingEntailment::CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(CSatisfiableCalculationJob* calcJob, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionPropagationData, CComplexQueryProcessingData* procData)
+			CAnsweringMessageDataCalculationCompletedVariableBindingEntailment::CAnsweringMessageDataCalculationCompletedVariableBindingEntailment(CSatisfiableCalculationJob* calcJob, CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController, COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionPropagationData, CComplexQueryExpressionProcessingData* procData, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, CAnsweringSplitEntailmentTestingCancellationAdapter* cancellationAdapter)
 					: CAnsweringMessageDataCalculationCompleted(calcJob, VARIABLEBINDINGENTAILMENTCALCULATION) {
 				mAbsorptionHanldingQueryPart = absorptionPropagationData;
 				mQueryProcData = procData;
+				mPropagationSteeringController = propagationSteeringController;
+				mAbsorptionPropagationExtension = absorptionPropagationExtension;
+				mCancellationAdapter = cancellationAdapter;
 			}
 
 
@@ -39,9 +42,25 @@ namespace Konclude {
 				return mAbsorptionHanldingQueryPart;
 			}
 
-			CComplexQueryProcessingData* CAnsweringMessageDataCalculationCompletedVariableBindingEntailment::getQueryProcessingData() {
+			CComplexQueryExpressionProcessingData* CAnsweringMessageDataCalculationCompletedVariableBindingEntailment::getQueryProcessingData() {
 				return mQueryProcData;
 			}
+
+
+			CAnsweringPropagationSteeringAbsorptionExtensionItemController* CAnsweringMessageDataCalculationCompletedVariableBindingEntailment::getPropagationSteeringController() {
+				return mPropagationSteeringController;
+			}
+
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* CAnsweringMessageDataCalculationCompletedVariableBindingEntailment::getAbsorptionPropagationExtension() {
+				return mAbsorptionPropagationExtension;
+			}
+
+
+			CAnsweringSplitEntailmentTestingCancellationAdapter* CAnsweringMessageDataCalculationCompletedVariableBindingEntailment::getCancellationAdapter() {
+				return mCancellationAdapter;
+			}
+
 
 		}; // end namespace Answerer
 

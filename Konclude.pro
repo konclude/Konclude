@@ -32,7 +32,7 @@ unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/librdf.a
 unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/libraptor2.a
 unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/librasqal.a
 unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/libxml2.a
-unix:!macx: LIBS += -lz -lltdl -lgmp
+unix:!macx: LIBS += -lz -lltdl -lgmp -ldl
 
 INCLUDEPATH += $$PWD/External/librdf/Linux/x64/include
 DEPENDPATH += $$PWD/External/librdf/Linux/x64/include

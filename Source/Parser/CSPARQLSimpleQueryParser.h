@@ -30,6 +30,7 @@
 #include "CSPARQLQueryBuilder.h"
 #include "COntologyBuilder.h"
 #include "CSPARQLSimpleBuildingParser.h"
+#include "CSPARQLQueryParser.h"
 
 
 // Other includes
@@ -59,7 +60,7 @@ namespace Konclude {
 		 *		\brief		TODO
 		 *
 		 */
-		class CSPARQLSimpleQueryParser : public CSPARQLSimpleBuildingParser {
+		class CSPARQLSimpleQueryParser : public CSPARQLSimpleBuildingParser, public CSPARQLQueryParser {
 			// public methods
 			public:
 				//! Constructor

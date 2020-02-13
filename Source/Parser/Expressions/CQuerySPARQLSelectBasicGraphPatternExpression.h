@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef KONCLUDE_PARSER_EXPRESSION_CQuerySPARQLSelectBasicGraphPatternExpression_H
-#define KONCLUDE_PARSER_EXPRESSION_CQuerySPARQLSelectBasicGraphPatternExpression_H
+#ifndef KONCLUDE_PARSER_EXPRESSION_CQUERYSPARQLSELECTBASICGRAPHPATTERNEXPRESSION_H
+#define KONCLUDE_PARSER_EXPRESSION_CQUERYSPARQLSELECTBASICGRAPHPATTERNEXPRESSION_H
 
 
 // Libraries includes
@@ -62,6 +62,7 @@ namespace Konclude {
 				public:
 					//! Constructor
 					CQuerySPARQLSelectBasicGraphPatternExpression(const QString& name, const QList<CAxiomExpression*>& axiomExpressionList, const QList<CExpressionVariable*>& answerVariables, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinct, cint64 limit = -1, cint64 offset = 0);
+					CQuerySPARQLSelectBasicGraphPatternExpression(const QString& name, const QList<CAxiomExpression*>& axiomExpressionList, const QList<CExpressionVariable*>& answerVariables, const QList<CExpressionVariable*>& ignoreCardVariables, bool distinct, cint64 limit = -1, cint64 offset = 0);
 
 					//! Destructor
 					virtual ~CQuerySPARQLSelectBasicGraphPatternExpression();
@@ -76,6 +77,7 @@ namespace Konclude {
 					cint64 getLimit();
 					cint64 getOffset();
 
+					QList<CExpressionVariable*>* getIgnoreCardinalityVariableList();
 
 					virtual bool visitSubExpressions(CSubExpressionVisitor* subExpressionVisitor);
 
@@ -88,6 +90,8 @@ namespace Konclude {
 					bool mDistinct;
 					cint64 mLimit;
 					cint64 mOffset;
+
+					CListVariableAssociator mIgnoreCardVarList;
 
 				// private methods
 				private:
@@ -103,4 +107,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_PARSER_EXPRESSION_CQuerySPARQLSelectBasicGraphPatternExpression_H
+#endif // KONCLUDE_PARSER_EXPRESSION_CQUERYSPARQLSELECTBASICGRAPHPATTERNEXPRESSION_H

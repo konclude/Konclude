@@ -29,7 +29,7 @@ namespace Konclude {
 			
 			CAnsweringManagerThread::CAnsweringManagerThread(CReasonerManager* reasonerManager, CConfiguration* config) : CThread("Answerer-Manager-Thread"), mHandlerProvider(new CConfigurationAnsweringHandlerFactory(config)) {
 				mConfig = config;
-				mConfMaxThreadCount = 1;
+				mConfMaxThreadCount = 2;
 				mCurrentThreadCount = 0;
 				mReasonerManager = reasonerManager;
 
@@ -95,9 +95,12 @@ namespace Konclude {
 				mHandlerProvider.releaseAnsweringHandler(answeringHandler);
 				if (queryData) {
 					mProcessingQuerySet.remove(queryData);
-					CAnswererThread* thread = queryData->getThread();
-					mProcessingThreadSet.remove(thread);
-					mQueuedThreadList.append(thread);
+					CAnswererThread* thread1 = queryData->getThread();
+					mProcessingThreadSet.remove(thread1);
+					mQueuedThreadList.append(thread1);
+					CAnswererThread* thread2 = queryData->getThread();
+					mProcessingThreadSet.remove(thread2);
+					mQueuedThreadList.append(thread2);
 					CCallbackData* callback = queryData->getCallback();
 					if (callback) {
 						callback->doCallback();
@@ -164,11 +167,11 @@ namespace Konclude {
 					}
 					if (!mQueuedThreadList.isEmpty()) {
 						CConcreteOntology* ontology = ape->getOntology();
-						CAnsweringHandler* handler = mHandlerProvider.getAnsweringHandler(ontology);
-						CAnswererThread* thread = mQueuedThreadList.takeFirst();
-						CAnsweringPreparedEvent* preparedEventCallback = new CAnsweringPreparedEvent(thread, handler, this, ape->getCallbackData());
-						thread->prepareAnswering(handler, preparedEventCallback);
-						mProcessingThreadSet.insert(thread);
+						CAnsweringHandler* expressionHandler = mHandlerProvider.getAnsweringHandler(ontology, false);
+						CAnswererThread* thread1 = mQueuedThreadList.takeFirst();
+						CAnsweringPreparedEvent* preparedEventCallback = new CAnsweringPreparedEvent(thread1, expressionHandler, this, ape->getCallbackData());
+						thread1->prepareAnswering(expressionHandler, preparedEventCallback);
+						mProcessingThreadSet.insert(thread1);
 					} else {
 						ape->getCallbackData()->doCallback();
 					}

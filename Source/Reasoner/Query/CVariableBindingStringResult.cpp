@@ -40,6 +40,11 @@ namespace Konclude {
 				mType = type;
 			}
 
+			CVariableBindingResult* CVariableBindingStringResult::initVariableBinding(const QString& bindingString, VariableBindingType type) {
+				mBindingString = bindingString;
+				mType = type;
+				return this;
+			}
 
 			CVariableBindingResult* CVariableBindingStringResult::initVariableBinding(const CIndividualReference& indiRef, CIndividualNameResolver* indiNameResolver) {
 				mBindingString = indiNameResolver->getIndividualName(indiRef, false);

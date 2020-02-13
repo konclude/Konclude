@@ -38,19 +38,26 @@ namespace Konclude {
 
 			CAnsweringHandler* CFirstQueuedAnsweringHandlerProvider::getAnsweringHandler(CComplexAnsweringQuery* complexAnsweringQuery) {
 				CConcreteOntology* ontology = complexAnsweringQuery->getBaseOntology();
-				return getAnsweringHandler(ontology);
+				return getAnsweringHandler(ontology, dynamic_cast<CComplexAnsweringCompositionQuery*>(complexAnsweringQuery) != nullptr);
 			}
 
-			CAnsweringHandler* CFirstQueuedAnsweringHandlerProvider::getAnsweringHandler(CConcreteOntology* ontology) {
+			CAnsweringHandler* CFirstQueuedAnsweringHandlerProvider::getAnsweringHandler(CConcreteOntology* ontology, bool composedQuery) {
 				CAnsweringHandler* answeringHandler = nullptr;
 				CAnsweringHandlerData*& handlerData = mOntoloyHandlerDataHash[ontology];
 				if (!handlerData) {
 					handlerData = new CAnsweringHandlerData();
 				}
 				if (!handlerData->mQueuedHandlerList.isEmpty()) {
-					answeringHandler = handlerData->mQueuedHandlerList.takeFirst();
-				} else {
-					answeringHandler = mAnsweringHandlerFactory->createAnsweringHandler(ontology);
+					for (QList<CAnsweringHandler*>::iterator it = handlerData->mQueuedHandlerList.begin(), itEnd = handlerData->mQueuedHandlerList.end(); it != itEnd && !answeringHandler; ++it) {
+						CAnsweringHandler* testAnsweringHandler = *it;
+						if (testAnsweringHandler->canAnsweringComplexQuery(composedQuery)) {
+							answeringHandler = testAnsweringHandler;
+							it = handlerData->mQueuedHandlerList.erase(it);
+						}
+					}
+				} 
+				if (!answeringHandler) {
+					answeringHandler = mAnsweringHandlerFactory->createAnsweringHandler(ontology, composedQuery);
 					mHandlerHandlerDataHash.insert(answeringHandler, handlerData);
 				}
 				if (handlerData->mStatisticsCollection) {

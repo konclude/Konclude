@@ -66,7 +66,7 @@ namespace Konclude {
 				//! Destructor
 				virtual ~CQueryParser();
 
-				virtual bool parseQueryFile(QString filename) = 0;
+				virtual bool parseQueryFile(const QString& filename) = 0;
 
 			// protected methods
 			protected:

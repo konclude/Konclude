@@ -27,7 +27,7 @@ namespace Konclude {
 
 		namespace Query {
 
-			CComplexConceptAnsweringQuery::CComplexConceptAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, CConfigurationBase* configuration, const QString& queryName) : CComplexAnsweringQuery(baseOntology,expressionOntology,configuration,queryName) {
+			CComplexConceptAnsweringQuery::CComplexConceptAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, CConfigurationBase* configuration, const QString& queryName) : CComplexAnsweringExpressionQuery(baseOntology,expressionOntology,configuration,queryName) {
 				mExpressionOfInterest = nullptr;
 				mSuperClassNodesRequired = false;
 				mSubClassNodesRequired = false;

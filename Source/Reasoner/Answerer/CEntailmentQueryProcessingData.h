@@ -18,15 +18,15 @@
  *
  */
 
-#ifndef KONCLUDE_REASONER_ANSWERER_CEntailmentQueryProcessingData_H
-#define KONCLUDE_REASONER_ANSWERER_CEntailmentQueryProcessingData_H
+#ifndef KONCLUDE_REASONER_ANSWERER_CENTAILMENTQUERYPROCESSINGDATA_H
+#define KONCLUDE_REASONER_ANSWERER_CENTAILMENTQUERYPROCESSINGDATA_H
 
 // Libraries includes
 
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "CComplexQueryProcessingData.h"
+#include "CComplexQueryExpressionProcessingData.h"
 
 
 
@@ -59,7 +59,7 @@ namespace Konclude {
 					CEntailmentQueryProcessingData();
 
 
-					CXLinker<CComplexQueryProcessingData*>* mProcDataLinker;
+					CXLinker<CComplexQueryExpressionProcessingData*>* mProcDataLinker;
 					bool mEntailed;
 					bool mHasResult;
 					bool mHasRequested;
@@ -84,4 +84,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_REASONER_ANSWERER_CEntailmentQueryProcessingData_H
+#endif // KONCLUDE_REASONER_ANSWERER_CENTAILMENTQUERYPROCESSINGDATA_H

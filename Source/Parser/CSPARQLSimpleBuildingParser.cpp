@@ -173,7 +173,7 @@ namespace Konclude {
 		}
 
 
-		QList<CAxiomExpression*> CSPARQLSimpleBuildingParser::getTripleOWLAxioms(QList<CRDFStringTriple>* tripleStringList, bool anonymousIndividualsAsVariables) {
+		QList<CAxiomExpression*> CSPARQLSimpleBuildingParser::getTripleOWLAxioms(QList<CRDFStringTriple>* tripleStringList, bool anonymousIndividualsAsVariables, QSet<CExpressionVariable*>* varExpSet) {
 			QList<CAxiomExpression*> axiomList;
 			for (auto triple : *tripleStringList) {
 
@@ -194,6 +194,9 @@ namespace Konclude {
 				} else {
 					indiExpression = mOntoBuilder->getNamedIndividual(subjectString);
 				}
+				if (varExpSet && dynamic_cast<CIndividualVariableExpression*>(indiExpression)) {
+					varExpSet->insert((CIndividualVariableExpression*)indiExpression);
+				}
 
 				QString predicateString = triple.string[1];
 				QString objectString = triple.string[2];
@@ -210,7 +213,7 @@ namespace Konclude {
 							CIndividualVariableExpression* varIndiExpression = mOntoBuilder->getIndividualVariable(variableName, false);
 							mVarExpSet.insert(varIndiExpression);
 							mNameVarHash.insert(variableName, varIndiExpression);
-							indiExpression = varIndiExpression;
+							otherIndiExpression = varIndiExpression;
 						} else if (objectString.startsWith("_:")) {
 							if (anonymousIndividualsAsVariables) {
 								otherIndiExpression = mOntoBuilder->getIndividualVariable(objectString.mid(2), true);
@@ -219,6 +222,9 @@ namespace Konclude {
 							}
 						} else {
 							otherIndiExpression = mOntoBuilder->getNamedIndividual(objectString);
+						}
+						if (varExpSet && dynamic_cast<CIndividualVariableExpression*>(otherIndiExpression)) {
+							varExpSet->insert((CIndividualVariableExpression*)otherIndiExpression);
 						}
 						CObjectPropertyExpression* propExp = mOntoBuilder->getObjectProberty(predicateString);
 						CObjectPropertyAssertionExpression* propAss = mOntoBuilder->getObjectPropertyAssertion(indiExpression, propExp, otherIndiExpression);
@@ -236,6 +242,9 @@ namespace Konclude {
 							CDataLexicalValueExpression* literalValueExp = mOntoBuilder->getDataLexicalValue(literalDatatypeStringPair.first);
 							CDatatypeExpression* datatypeExp = mOntoBuilder->getDatatype(literalDatatypeStringPair.second);
 							dataRangeExpr = mOntoBuilder->getDataLiteral(literalValueExp,datatypeExp);
+						}
+						if (varExpSet && dynamic_cast<CDataLiteralVariableExpression*>(dataRangeExpr)) {
+							varExpSet->insert((CDataLiteralVariableExpression*)dataRangeExpr);
 						}
 						CDataPropertyExpression* propExp = mOntoBuilder->getDataProberty(predicateString);
 						CDataPropertyAssertionExpression* propAss = mOntoBuilder->getDataPropertyAssertion(indiExpression, propExp, dataRangeExpr);

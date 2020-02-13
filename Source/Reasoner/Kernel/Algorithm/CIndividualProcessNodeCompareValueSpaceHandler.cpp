@@ -57,7 +57,7 @@ namespace Konclude {
 						CDatatypeValueSpaceCompareTriggers* compareValueSpaceTriggers = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(mCompareValueSpaceType);
 						CDatatypeValueSpaceConceptTriggerLinker* conceptTriggerLinker = CObjectAllocator< CDatatypeValueSpaceConceptTriggerLinker >::allocateAndConstruct(taskMemMan);
 						conceptTriggerLinker->initConceptTrigger(triggerConcept);
-						compareValueSpaceTriggers->addValueConceptTrigger(dataLitCompareValue, conceptTriggerLinker);
+						compareValueSpaceTriggers->addPartialValueConceptTrigger(dataLitCompareValue, conceptTriggerLinker);
 						compareValueSpaceData->setValueSpaceTriggeringRequired(true);
 						compareValueSpaceData->setValueSpaceTriggeringStarted(false);
 						compareValueSpaceData->setValueSpaceTriggeringCompleted(false);
@@ -642,20 +642,49 @@ namespace Konclude {
 									}
 
 
-									CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
-									while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && valueDirectionTriggerIt.hasNext()) {
 
+									if (minValue->isEqualTo(maxValue) && remainingRequiredValuesCount == 1 && !valueCounter.hasValueAchieved(remainingRequiredValuesCount) && triggerIt.hasNext()) {
+
+										CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
 										CDatatypeValueSpaceTriggeringData* triggeringData = valueDirectionTriggerIt.next();
 										CDataLiteralCompareValue* currentValue = triggeringData->getValue();
 
-										if (triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
-											compareValueSpaceMap->addValueExclusionDependencies(currentValue,depCollection);
+										if (triggeringData->getDirectValueTriggeringData()->hasCompleteConceptTriggers() || triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+											compareValueSpaceMap->addValueExclusionDependencies(currentValue, depCollection);
+
 											if (!compareValueSpaceMap->isValueExcluded(currentValue)) {
-												compareValueSpaceMap->countValueValues(currentValue,&valueCounter);
+												compareValueSpaceMap->countValueValues(currentValue, &valueCounter);
 
 												CDatatypeValueSpaceConceptTriggeringData* directValueTriggeringConceptData = triggeringData->getDirectValueTriggeringData();
+												if (directValueTriggeringConceptData->hasCompleteConceptTriggers()) {
+													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode, conceptTriggerLinker, directValueTriggeringConceptData->getCompleteConceptTriggerLinker(), depCollection, calcAlgContext);
+												}
 												if (directValueTriggeringConceptData->hasPartialConceptTriggers()) {
-													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,directValueTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+													conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode, conceptTriggerLinker, directValueTriggeringConceptData->getPartialConceptTriggerLinker(), depCollection, calcAlgContext);
+												}
+
+											}
+										}
+
+									} else {
+
+
+
+										CDatatypeValueSpaceTriggeringIterator valueDirectionTriggerIt = triggerIt;
+										while (!valueCounter.hasValueAchieved(remainingRequiredValuesCount) && valueDirectionTriggerIt.hasNext()) {
+
+											CDatatypeValueSpaceTriggeringData* triggeringData = valueDirectionTriggerIt.next();
+											CDataLiteralCompareValue* currentValue = triggeringData->getValue();
+
+											if (triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+												compareValueSpaceMap->addValueExclusionDependencies(currentValue,depCollection);
+												if (!compareValueSpaceMap->isValueExcluded(currentValue)) {
+													compareValueSpaceMap->countValueValues(currentValue,&valueCounter);
+
+													CDatatypeValueSpaceConceptTriggeringData* directValueTriggeringConceptData = triggeringData->getDirectValueTriggeringData();
+													if (directValueTriggeringConceptData->hasPartialConceptTriggers()) {
+														conceptTriggerLinker = addConceptLinkerCollectionDependency(indiProcNode,conceptTriggerLinker,directValueTriggeringConceptData->getPartialConceptTriggerLinker(),depCollection,calcAlgContext);
+													}
 												}
 											}
 										}

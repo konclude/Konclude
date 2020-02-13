@@ -127,6 +127,10 @@
 #include "Control/Command/Instructions/CCalculateQueriesCommand.h"
 #include "Control/Command/Instructions/CParseProcessSPARQLUpdateTextCommand.h"
 #include "Control/Command/Instructions/CParseProcessSPARQLManageTextCommand.h"
+#include "Control/Command/Instructions/CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand.h"
+#include "Control/Command/Instructions/CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand.h"
+#include "Control/Command/Instructions/CConnectKnowledgeBaseExternalTriplesDSNCommand.h"
+#include "Control/Command/Instructions/CParseInstallKnowledgeBaseExternalTriplesDSNConnectionCommand.h"
 
 
 #include "Reasoner/Query/CWriteOREFunctionalClassSubsumptionsHierarchyQuery.h"
@@ -155,6 +159,8 @@
 #include "Parser/CSPARQLSimpleManagementParser.h"
 #include "Parser/COWL2RDFTurtleAssertionsSimpleParser.h"
 #include "Parser/CRDFRedlandRaptorParser.h"
+#include "Parser/CSPARQLRedlandRasqalQueryParser.h"
+#include "Parser/CRDFRedlandExternalTriplesDSNConnectingParser.h"
 
 #include "Parser/FunctionalJAVACC/COWL2FunctionalJAVACCOntologyStreamParser.h"
 

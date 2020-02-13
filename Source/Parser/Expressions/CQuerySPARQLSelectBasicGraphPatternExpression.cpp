@@ -36,6 +36,12 @@ namespace Konclude {
 			}
 
 
+			CQuerySPARQLSelectBasicGraphPatternExpression::CQuerySPARQLSelectBasicGraphPatternExpression(const QString& name, const QList<CAxiomExpression*>& axiomExpressionList, const QList<CExpressionVariable*>& answerVariables, const QList<CExpressionVariable*>& ignoreCardVariables, bool distinct, cint64 limit, cint64 offset)
+					: CQuerySPARQLBasicGraphPatternExpression(name, axiomExpressionList, CEXPRESSIONLIST<CFilteringTermExpression*>()), COrderedListVariableAssociator(answerVariables), COrderedListOrderingTermExpressionAssociator(CEXPRESSIONLIST<COrderingTermExpression*>()), mIgnoreCardVarList(ignoreCardVariables) {
+				mDistinct = distinct;
+				mLimit = limit;
+				mOffset = offset;				
+			}
 
 
 			CQuerySPARQLSelectBasicGraphPatternExpression::~CQuerySPARQLSelectBasicGraphPatternExpression() {
@@ -57,7 +63,7 @@ namespace Konclude {
 				if (!compExpCast) {
 					return false;
 				} 
-				return CQuerySPARQLBasicGraphPatternExpression::compareStructuralEquivalence(compExpCast) && COrderedListVariableAssociator::compareStructuralEquivalence(*(COrderedListVariableAssociator*)compExpCast) && COrderedListOrderingTermExpressionAssociator::compareStructuralEquivalence(*(COrderedListOrderingTermExpressionAssociator*)compExpCast);
+				return CQuerySPARQLBasicGraphPatternExpression::compareStructuralEquivalence(compExpCast) && COrderedListVariableAssociator::compareStructuralEquivalence(*(COrderedListVariableAssociator*)compExpCast) && COrderedListOrderingTermExpressionAssociator::compareStructuralEquivalence(*(COrderedListOrderingTermExpressionAssociator*)compExpCast) && mIgnoreCardVarList.compareStructuralEquivalence(compExpCast->mIgnoreCardVarList);
 			}
 
 			bool CQuerySPARQLSelectBasicGraphPatternExpression::isDistinct() {
@@ -70,6 +76,10 @@ namespace Konclude {
 
 			cint64 CQuerySPARQLSelectBasicGraphPatternExpression::getOffset() {
 				return mOffset;
+			}
+
+			QList<CExpressionVariable*>* CQuerySPARQLSelectBasicGraphPatternExpression::getIgnoreCardinalityVariableList() {
+				return mIgnoreCardVarList.getVariableList();
 			}
 
 

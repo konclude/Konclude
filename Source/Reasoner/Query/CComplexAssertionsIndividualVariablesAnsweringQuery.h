@@ -25,7 +25,7 @@
 
 
 // Namespace includes
-#include "CComplexAnsweringQuery.h"
+#include "CComplexAnsweringExpressionQuery.h"
 
 
 // Other includes
@@ -56,7 +56,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CComplexAssertionsIndividualVariablesAnsweringQuery : public CComplexAnsweringQuery {
+			class CComplexAssertionsIndividualVariablesAnsweringQuery : public CComplexAnsweringExpressionQuery {
 				// public methods
 				public:
 					//! Constructor
@@ -83,6 +83,8 @@ namespace Konclude {
 
 					cint64 getResultLimitIncludingOffset();
 
+					QList<CExpressionVariable*> getIgnoreCardinalityVariableExpressions();
+					CComplexAssertionsIndividualVariablesAnsweringQuery* setIgnoreCardinalityVariableExpressions(const QList<CExpressionVariable*>& varExpList);
 
 
 				// protected methods
@@ -92,6 +94,7 @@ namespace Konclude {
 				protected:
 					QList<CAxiomExpression*> mAxiomExpressions;
 					QList<CExpressionVariable*> mDisVariables;
+					QList<CExpressionVariable*> mIgnoreCardVariables;
 
 					bool mDistinct;
 					bool mBooleanEntailmentResult;

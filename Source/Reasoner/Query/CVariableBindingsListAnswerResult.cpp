@@ -72,6 +72,10 @@ namespace Konclude {
 				return mBindingsList.at(index);
 			}
 
+			cint64 CVariableBindingsListAnswerResult::getResultCount() {
+				return mBindingsList.count();
+			}
+
 
 			CVariableBindingsListAnswerResult* CVariableBindingsListAnswerResult::setResult(cint64 index, CVariableBindingResult* varBinding) {
 				mBindingsList[index] = varBinding;

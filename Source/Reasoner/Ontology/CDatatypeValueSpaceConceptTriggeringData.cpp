@@ -30,14 +30,17 @@ namespace Konclude {
 
 			CDatatypeValueSpaceConceptTriggeringData::CDatatypeValueSpaceConceptTriggeringData() {
 				mPartialTriggerLinker = nullptr;
+				mCompleteTriggerLinker = nullptr;
 			}
 
 
 			CDatatypeValueSpaceConceptTriggeringData* CDatatypeValueSpaceConceptTriggeringData::initConceptTriggeringData(CDatatypeValueSpaceConceptTriggeringData* data) {
 				if (data) {
 					mPartialTriggerLinker = data->mPartialTriggerLinker;
+					mCompleteTriggerLinker = data->mCompleteTriggerLinker;
 				} else {
 					mPartialTriggerLinker = nullptr;
+					mCompleteTriggerLinker = nullptr;
 				}
 				return this;
 			}
@@ -64,6 +67,44 @@ namespace Konclude {
 				return this;
 			}
 
+
+
+
+
+
+
+
+
+
+
+
+
+			bool CDatatypeValueSpaceConceptTriggeringData::hasCompleteConceptTriggers() {
+				return mCompleteTriggerLinker != nullptr;
+			}
+
+
+			CDatatypeValueSpaceConceptTriggerLinker* CDatatypeValueSpaceConceptTriggeringData::getCompleteConceptTriggerLinker() {
+				return mCompleteTriggerLinker;
+			}
+
+			CDatatypeValueSpaceConceptTriggeringData* CDatatypeValueSpaceConceptTriggeringData::setCompleteConceptTriggerLinker(CDatatypeValueSpaceConceptTriggerLinker* conceptTiggerLinker) {
+				mCompleteTriggerLinker = conceptTiggerLinker;
+				return this;
+			}
+
+			CDatatypeValueSpaceConceptTriggeringData* CDatatypeValueSpaceConceptTriggeringData::appendCompleteConceptTriggers(CDatatypeValueSpaceConceptTriggerLinker* conceptTiggerLinker) {
+				if (conceptTiggerLinker) {
+					mCompleteTriggerLinker = conceptTiggerLinker->append(mCompleteTriggerLinker);
+				}
+				return this;
+			}
+
+
+
+			bool CDatatypeValueSpaceConceptTriggeringData::hasConceptTriggers() {
+				return hasPartialConceptTriggers() || hasCompleteConceptTriggers();
+			}
 
 		}; // end namespace Ontology
 

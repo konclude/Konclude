@@ -46,6 +46,7 @@
 #include "Reasoner/Kernel/Task/CSatisfiableTaskAnswererInstancePropagationMessageAdapter.h"
 #include "Reasoner/Kernel/Task/CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h"
 #include "Reasoner/Kernel/Task/CSatisfiableTaskAnswererQueryingMaterializationAdapter.h"
+#include "Reasoner/Kernel/Task/CSatisfiableTaskCancellationAdapter.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -145,6 +146,8 @@ namespace Konclude {
 					CSatisfiableCalculationJob* setSatisfiableAnswererMaterializationAdapter(CSatisfiableTaskAnswererQueryingMaterializationAdapter* collAdapter);
 					CSatisfiableTaskAnswererQueryingMaterializationAdapter* getSatisfiableAnswererMaterializationAdapter();
 
+					CSatisfiableCalculationJob* setCancellationAdapter(CSatisfiableTaskCancellationAdapter* cancelAdapter);
+					CSatisfiableTaskCancellationAdapter* getCancellationAdapter();
 
 					cint64 getNextRelativeNodeID(bool moveNext = true);
 
@@ -174,6 +177,7 @@ namespace Konclude {
 					CSatisfiableTaskAnswererInstancePropagationMessageAdapter* mAnswererInstancePropagationMessageAdapter;
 					CSatisfiableTaskRepresentativeBackendUpdatingAdapter* mRepresentativeBackendUpdatingAdapter;
 					CSatisfiableTaskAnswererQueryingMaterializationAdapter* mAnswererMaterializationAdapter;
+					CSatisfiableTaskCancellationAdapter* mCancellationAdapter;
 
 				// private methods
 				private:

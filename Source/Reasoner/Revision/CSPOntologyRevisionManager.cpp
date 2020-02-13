@@ -171,8 +171,9 @@ namespace Konclude {
 
 					QString kbName = cKBRevUpC->getKnowledgeBaseName();
 					bool forceCreation = cKBRevUpC->requireCreateIfNotExist();
+					bool reportError = cKBRevUpC->reportErrorCreateIfNotExist();
 
-					COntologyRevision* nextOntologyRev = createNewOntologyRevision(kbName, forceCreation, commandRecordRouter);
+					COntologyRevision* nextOntologyRev = createNewOntologyRevision(kbName, forceCreation, reportError, commandRecordRouter);
 					cKBRevUpC->setOntologyRevision(nextOntologyRev);
 
 					CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -424,7 +425,7 @@ namespace Konclude {
 
 
 
-			COntologyRevision* CSPOntologyRevisionManager::createNewOntologyRevision(const QString& ontologyName, bool forceCreation, CCommandRecordRouter& commandRecordRouter) {
+			COntologyRevision* CSPOntologyRevisionManager::createNewOntologyRevision(const QString& ontologyName, bool forceCreation, bool reportError, CCommandRecordRouter& commandRecordRouter) {
 				QString kbName = ontologyName;
 
 				bool kbExist = nameIDHash.contains(kbName);
@@ -437,7 +438,9 @@ namespace Konclude {
 				}
 
 				if (!kbExist && !forceCreation) {
-					CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' does not exist.").arg(kbName), &commandRecordRouter);
+					if (reportError) {
+						CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' does not exist.").arg(kbName), &commandRecordRouter);
+					}
 				} else {
 
 					if (!kbExist) {

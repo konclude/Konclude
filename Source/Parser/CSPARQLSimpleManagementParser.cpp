@@ -32,6 +32,7 @@ namespace Konclude {
 			mKeywordSet.insert("CREATE");
 			mKeywordSet.insert("DROP");
 			mKeywordSet.insert("PREPARE");
+			mKeywordSet.insert("CONNECT");
 
 			mCommandDelegater = commandDelegater;
 			mCommand = command;
@@ -215,8 +216,7 @@ namespace Konclude {
 						QString upperPartString = partString.toUpper();
 						if (upperPartString == "QUERYING") {
 							querying = true;
-						}
-						else {
+						} else {
 							graphIRIString = getGraphName(partString, parsedParts, false);
 						}
 					}
@@ -241,6 +241,55 @@ namespace Konclude {
 
 					mCommandDelegater->delegateCommand(getCurrentKBOntComm);
 					mCommandDelegater->delegateCommand(prepKBC);
+
+				} else if (keyword == "CONNECT") {
+
+					bool silent = false;
+					QString graphIRIString;
+					QString triplesDBString;
+					QString dsnConfigString;
+
+					if (!parsedParts.isEmpty()) {
+						triplesDBString = getGraphName(parsedParts.takeFirst(), parsedParts, true);
+					}
+
+
+					while (!parsedParts.isEmpty() && (dsnConfigString.isEmpty())) {
+						QString partString = parsedParts.takeFirst();
+						QString upperPartString = partString.toUpper();
+
+						if (upperPartString == "WITH") {
+							if (!partString.isEmpty()) {
+								dsnConfigString = parsedParts.takeFirst();
+							}
+						} else {
+							graphIRIString = getGraphName(partString, parsedParts, false);
+						}
+
+						if (!parsedParts.isEmpty()) {
+							dsnConfigString = parsedParts.takeFirst();
+						}
+					}
+
+
+					if (dsnConfigString.startsWith("\"")) {
+						dsnConfigString = dsnConfigString.mid(1);
+						if (dsnConfigString.endsWith("\"")) {
+							dsnConfigString = dsnConfigString.mid(0, dsnConfigString.length() - 1);
+						}
+					}
+
+					if (graphIRIString.isEmpty()) {
+						graphIRIString = mKBName;
+					}
+					if (!dsnConfigString.isEmpty() && !triplesDBString.isEmpty()) {
+						CConnectKnowledgeBaseExternalTriplesDSNCommand* connectExTrDSNComm = new CConnectKnowledgeBaseExternalTriplesDSNCommand(graphIRIString, triplesDBString, dsnConfigString);
+						if (mCommand) {
+							mCommand->makeToSubCommand(connectExTrDSNComm);
+						}
+						mCommandDelegater->delegateCommand(connectExTrDSNComm);
+
+					}
 
 				}
 			}

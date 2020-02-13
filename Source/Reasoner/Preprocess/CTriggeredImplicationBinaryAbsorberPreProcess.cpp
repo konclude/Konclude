@@ -140,6 +140,7 @@ namespace Konclude {
 				mStatEqTotal = 0;
 				mStatImplConceptsGenerated = 0;
 				mStatGCIAbsorptionPartialExtended = 0;
+				mStatGCIAbsorptionAssuring = 0;
 				mStatGCIPartialAbsorbed = 0;
 				mStatReusedImplications = 0;
 				mStatOptimizedRemovedTriggers = 0;
@@ -1651,12 +1652,63 @@ namespace Konclude {
 							QList<TConceptNegationPair> absorbList(getPartialAbsorbableDisjuncts(candList));
 							if (!absorbList.isEmpty()) {
 								createGCIPartialAbsorbedTriggeredImplication(orConcept,negated,absorbList);
+
+								if (absorbList.count() + 1 == candList.count()) {
+									QList<TConceptNegationPair> assurList(getAssuringAbsorbableDisjuncts(absorbList));
+									if (assurList.count() == absorbList.count()) {
+										createGCIAssuringAbsorbedTriggeredImplication(orConcept, negated, assurList, candList);
+									}
+								}
+
 								return true;
 							}
 						}
 					}
 				}
 				return false;
+			}
+
+
+
+
+
+
+
+			void CTriggeredImplicationBinaryAbsorberPreProcess::createGCIAssuringAbsorbedTriggeredImplication(CConcept* orConcept, bool negated, const QList<TConceptNegationPair>& absorbList, const QList<TConceptNegationPair>& disjList) {
+
+
+				CConcept* remainingDisConcept = nullptr;
+				bool remainingDisConNegation = false;
+
+				QSet<TConceptNegationPair> absorbDisjSet = absorbList.toSet();
+				for (TConceptNegationPair disConNegPair : disjList) {
+					if (!absorbDisjSet.contains(disConNegPair)) {
+						remainingDisConcept = disConNegPair.first;
+						remainingDisConNegation = disConNegPair.second;
+						break;
+					}
+				}
+
+				CConceptTriggerLinker* partialImpliedTrigger = createAssuringExtendedAbsorbedImpliedTrigger(absorbList);
+				CConcept* partialImpliedTriggerConcept = partialImpliedTrigger->getTriggerConcept();
+				addUnfoldingConceptForConcept(partialImpliedTriggerConcept, remainingDisConcept, remainingDisConNegation);
+
+			}
+
+
+
+
+			CConceptTriggerLinker* CTriggeredImplicationBinaryAbsorberPreProcess::createAssuringExtendedAbsorbedImpliedTrigger(const QList<TConceptNegationPair>& absorbList) {
+				CConceptTriggerLinker* triggers = nullptr;
+				for (QList<TConceptNegationPair>::const_iterator it = absorbList.constBegin(), itEnd = absorbList.constEnd(); it != itEnd; ++it) {
+					TConceptNegationPair conNegPair(*it);
+					CConcept* concept = conNegPair.first;
+					bool negated = conNegPair.second;
+					CConceptTriggerLinker* tmpTriggers = copyTriggerLinkers(getAssuringTriggersForConcept(concept, !negated));
+					triggers = tmpTriggers->append(triggers);
+				}
+				CConceptTriggerLinker* impliedConceptTrigger = getImplicationTriggeredConceptForTriggers(triggers, nullptr);
+				return impliedConceptTrigger;
 			}
 
 
@@ -4115,8 +4167,8 @@ namespace Konclude {
 				}
 
 				CConcept* partialImpliedTriggerConcept = nullptr;
+				QList<TConceptNegationPair> partialAbsorbableList;
 				if (candList.count() > 1) {
-					QList<TConceptNegationPair> partialAbsorbableList;
 					if (mConfPartialGCIAbsorption) {
 						partialAbsorbableList = getPartialAbsorbableDisjuncts(candList);
 						if (!partialAbsorbableList.isEmpty()) {
@@ -4130,6 +4182,8 @@ namespace Konclude {
 				CConceptTriggerLinker* impliedConceptTrigger = getImplicationTriggeredConceptForTriggers(triggers,nullptr);
 				impliedConcept = impliedConceptTrigger->getTriggerConcept();
 				if (candList.count() > 1) {
+
+
 					CConcept* orImpliedConcept = createImpliedConcept();
 					for (QList<TConceptNegationPair>::const_iterator it = candList.constBegin(), itEnd = candList.constEnd(); it != itEnd; ++it) {
 						TConceptNegationPair conNegPair(*it);
@@ -4144,6 +4198,17 @@ namespace Konclude {
 						CConceptRoleBranchingTrigger* branchTriggers = getSimpleBranchTriggersForConcept(partialImpliedTriggerConcept,true);
 						mBranchTriggVec->setData(impliedConcept->getConceptTag(),branchTriggers);
 						++mStatGCIAbsorptionPartialExtended;
+						
+						if (partialAbsorbableList.count() + 1 == candList.count()) {
+							QList<TConceptNegationPair> allList(candList);
+							allList.append(absorbList);
+							QList<TConceptNegationPair> assurList(getAssuringAbsorbableDisjuncts(allList));
+							if (assurList.count() + 1 == allList.count()) {
+								++mStatGCIAbsorptionAssuring;
+								createGCIAssuringAbsorbedTriggeredImplication(orConcept, negated, assurList, candList);
+							}
+						}
+
 					}
 				} else {
 					TConceptNegationPair conNegPair(candList.first());
@@ -4503,7 +4568,7 @@ namespace Konclude {
 													CDatatypeValueSpacesTriggers* valueSpacesTriggers = mMBox->getValueSpacesTriggers(true);
 													CDatatypeValueSpaceCompareTriggers* compareValueSpaceConceptTrigger = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(valueSpaceType);
 													if (compareValueSpaceConceptTrigger) {
-														compareValueSpaceConceptTrigger->addValueConceptTrigger(compareDataLitValue, valueSpaceConceptTriggerLinker);
+														compareValueSpaceConceptTrigger->addPartialValueConceptTrigger(compareDataLitValue, valueSpaceConceptTriggerLinker);
 													}
 												}
 											}
@@ -4730,6 +4795,264 @@ namespace Konclude {
 				}
 				return absorbableList;
 			}
+
+
+
+
+			QList<CTriggeredImplicationBinaryAbsorberPreProcess::TConceptNegationPair> CTriggeredImplicationBinaryAbsorberPreProcess::getAssuringAbsorbableDisjuncts(QList<TConceptNegationPair>& list) {
+				QList<TConceptNegationPair> absorbableList;
+				cint64 count = list.count();
+				QSet<CConcept*> conceptEqConAbsorbed;
+				for (QList<TConceptNegationPair>::const_iterator it = list.constBegin(), itEnd = list.constEnd(); it != itEnd; ++it) {
+					TConceptNegationPair conNegPair(*it);
+					CConcept* concept = conNegPair.first;
+					bool negated = conNegPair.second;
+					if (isConceptAssuringImplicationTriggerable(concept, !negated, &conceptEqConAbsorbed)) {
+						absorbableList.append(conNegPair);
+					}
+				}
+				return absorbableList;
+			}
+
+
+
+
+
+			bool CTriggeredImplicationBinaryAbsorberPreProcess::isConceptAssuringImplicationTriggerable(CConcept* concept, bool negated, QSet<CConcept*>* conceptEqConAbsorbed) {
+				TConceptNegationPair conNegPair(concept, negated);
+				if (mConceptAssuringAbsorbableHash.contains(conNegPair)) {
+					return mConceptAssuringAbsorbableHash.value(conNegPair);
+				}
+				cint64 opCode = concept->getOperatorCode();
+				cint64 parm = concept->getParameter();
+				cint64 opCount = concept->getOperandCount();
+				CSortedNegLinker<CConcept*>* opConLinker = concept->getOperandList();
+
+				bool absorbable = false;
+
+				QHash<CConcept*, TOccuredAbsorbablePair> compConceptEqConAbsorbed;
+				if (isConceptImplicationTriggerable(concept, negated, &compConceptEqConAbsorbed)) {
+					absorbable = true;
+				} else {
+
+
+					if (!negated && (opCode == CCSOME || opCode == CCAQSOME) || negated && (opCode == CCALL)) {
+						absorbable = true;
+						CSortedNegLinker<CConcept*>* opConLinkerIt = opConLinker;
+						while (opConLinkerIt && absorbable) {
+							CConcept* opConcept = opConLinkerIt->getData();
+							bool opNegated = opConLinkerIt->isNegated() ^ negated;
+							if (!isConceptAssuringImplicationTriggerable(opConcept, opNegated, conceptEqConAbsorbed)) {
+								absorbable = false;
+							}
+							opConLinkerIt = opConLinkerIt->getNext();
+						}
+					} else  if (!negated && (opCode == CCAND) || negated && opCode == CCOR) {
+						// AND, at least one operand has to be triggerable
+						if (opCount >= 1) {
+							CSortedNegLinker<CConcept*>* opConLinkerIt = opConLinker;
+							absorbable = true;
+							while (opConLinkerIt && absorbable) {
+								CConcept* opConcept = opConLinkerIt->getData();
+								bool opNegated = opConLinkerIt->isNegated() ^ negated;
+								if (!isConceptAssuringImplicationTriggerable(opConcept, opNegated, conceptEqConAbsorbed)) {
+									absorbable = false;
+								}
+								opConLinkerIt = opConLinkerIt->getNext();
+							}
+						}
+					} else if (!negated && (opCode == CCDATALITERAL)) {
+						if (mConfDatatypeAbsorption) {
+							CDataLiteral* dataLiteral = concept->getDataLiteral();
+							if (dataLiteral) {
+								CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
+								if (dataLitValue) {
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_REAL) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_STRING) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_BOOLEAN) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_DOUBLE) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_FLOAT) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_IRI) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_XML) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_HEXBINARY) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_BASE64BINARY) {
+										absorbable = true;
+									}
+									if (dataLitValue->getDataValueType() == CDataLiteralValue::DLVT_DATETIME) {
+										absorbable = true;
+									}
+								}
+							}
+						}
+
+
+					} else {
+						absorbable = false;
+					}
+				}
+				mConceptAssuringAbsorbableHash.insert(conNegPair, absorbable);
+				return absorbable;
+			}
+
+
+
+
+
+
+			CConceptTriggerLinker* CTriggeredImplicationBinaryAbsorberPreProcess::getAssuringTriggersForConcept(CConcept* concept, bool negated) {
+				CConceptTriggerLinker* triggers = nullptr;
+
+				bool branchTiggerCreation = false;
+				TConceptNegationPair conNegPair(concept, negated);
+				triggers = mAssuringConceptTriggerLinkerHash.value(conNegPair);
+				if (!triggers) {
+
+					cint64 opCode = concept->getOperatorCode();
+					cint64 parm = concept->getParameter();
+					cint64 opCount = concept->getOperandCount();
+					CRole* role = concept->getRole();
+					CSortedNegLinker<CConcept*>* opConLinker = concept->getOperandList();
+
+
+					QHash<CConcept*, TOccuredAbsorbablePair> compConceptEqConAbsorbed;
+					if (isConceptImplicationTriggerable(concept, negated, &compConceptEqConAbsorbed)) {
+
+						triggers = copyTriggerLinkers(getTriggersForConcept(concept, negated));
+
+
+					} else if (!negated && (opCode == CCATOM || opCode == CCSUB || opCode == CCTOP || opCode == CCIMPLTRIG)) {
+						CConceptTriggerLinker* newTrigger = createTriggerLinker();
+						newTrigger->initConceptTriggerLinker(concept, 1);
+						triggers = newTrigger->append(triggers);
+
+					} else if (!negated && (opCode == CCSOME) || negated && (opCode == CCALL)) {
+						CConcept* propagatedTriggerConcept = nullptr;
+						cint64 triggerComplexity = 1;
+						bool negateOperands = negated && (opCode == CCSOME || opCode == CCSELF || opCode == CCALL);
+						CConceptTriggerLinker* allTriggers = nullptr;
+						for (CSortedNegLinker<CConcept*>* opConLinkerIt = opConLinker; opConLinkerIt; opConLinkerIt = opConLinkerIt->getNext()) {
+							CConcept* opConcept = opConLinkerIt->getData();
+							bool opNegated = opConLinkerIt->isNegated() ^ negateOperands;
+							CConceptTriggerLinker* newTrigger = copyTriggerLinkers(getAssuringTriggersForConcept(opConcept, opNegated));
+							allTriggers = newTrigger->append(allTriggers);
+						}
+						if (allTriggers) {
+							propagatedTriggerConcept = createTriggerConcept(branchTiggerCreation);
+							CConcept* nextLevelTriggerConcept = createTriggerPropagationConcept(propagatedTriggerConcept, role, branchTiggerCreation);
+							if (allTriggers->hasNext()) {
+								// requires a generation of an implication concept
+								CConceptTriggerLinker* implTriggeredConcept = getImplicationTriggeredConceptForTriggers(allTriggers, nullptr);
+								triggerComplexity += implTriggeredConcept->getTriggerComplexity();
+								addUnfoldingConceptForConcept(implTriggeredConcept->getTriggerConcept(), nextLevelTriggerConcept, false);
+							} else {
+								triggerComplexity += allTriggers->getTriggerComplexity();
+								addUnfoldingConceptForConcept(allTriggers->getTriggerConcept(), nextLevelTriggerConcept, false);
+								releaseTriggerLinkers(allTriggers);
+							}
+						} else {
+							CRole* locatedRole = CConceptRoleIndividualLocator::getLocatedRole(role, mOnto);
+							propagatedTriggerConcept = getRoleDomainTriggerConcept(locatedRole);
+						}
+						CConceptTriggerLinker* newTrigger = createTriggerLinker();
+						newTrigger->initConceptTriggerLinker(propagatedTriggerConcept, triggerComplexity);
+						triggers = newTrigger->append(triggers);
+
+
+					} else if (negated && (opCode == CCOR) || !negated && (opCode == CCAND || opCode == CCEQ)) {
+						// AND, collect triggers from operands
+						CConceptTriggerLinker* andTriggers = nullptr;
+						for (CSortedNegLinker<CConcept*>* opConLinkerIt = opConLinker; opConLinkerIt; opConLinkerIt = opConLinkerIt->getNext()) {
+							CConcept* opConcept = opConLinkerIt->getData();
+							bool opNegated = opConLinkerIt->isNegated() ^ negated;
+
+							CConceptTriggerLinker* newTriggers = copyTriggerLinkers(getAssuringTriggersForConcept(opConcept, opNegated));
+							andTriggers = newTriggers->append(andTriggers);
+						}
+						triggers = andTriggers->append(triggers);
+
+					} else if (!negated && (opCode == CCDATALITERAL)) {
+						if (mConfDatatypeAbsorption) {
+							CDataLiteral* dataLiteral = concept->getDataLiteral();
+							if (dataLiteral) {
+								CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
+								if (dataLitValue) {
+
+									cint64 triggerComplexity = 2;
+									CConcept* valueTriggerConcept = createTriggerConcept(branchTiggerCreation);
+									CConceptTriggerLinker* valueTrigger = createTriggerLinker();
+									valueTrigger->initConceptTriggerLinker(valueTriggerConcept, triggerComplexity);
+									CDatatypeValueSpaceConceptTriggerLinker* valueSpaceConceptTriggerLinker = createValueSpaceConceptTriggerLinker();
+									valueSpaceConceptTriggerLinker->initConceptTrigger(valueTriggerConcept);
+
+
+									CDatatypeValueSpaceTriggers* valueSpaceTrigger = nullptr;
+									CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
+									if (dataLitValue) {
+										CDataLiteralCompareValue* compareDataLitValue = dynamic_cast<CDataLiteralCompareValue*>(dataLitValue);
+										if (compareDataLitValue) {
+											CDatatypeValueSpaceType* valueSpaceType = nullptr;
+											CDataLiteralValue::DATA_LITERAL_VALUE_TYPE dataLiteralValueType = compareDataLitValue->getDataValueType();
+											CDatatypeValueSpaceTypes* valueSpaceTypes = CDatatypeValueSpaceTypes::getValueSpaceTypes();
+											if (dataLiteralValueType == CDataLiteralValue::DLVT_REAL) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceRealType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_STRING) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceStringType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BOOLEAN) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceBooleanType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DOUBLE) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceDoubleType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_FLOAT) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceFloatType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_IRI) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceIRIType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_XML) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceXMLType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_HEXBINARY) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceBinaryHexDataType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BASE64BINARY) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceBinaryBase64DataType();
+											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DATETIME) {
+												valueSpaceType = valueSpaceTypes->getValueSpaceDateTimeType();
+											}
+
+											if (valueSpaceType) {
+												CDatatypeValueSpacesTriggers* valueSpacesTriggers = mMBox->getValueSpacesTriggers(true);
+												CDatatypeValueSpaceCompareTriggers* compareValueSpaceConceptTrigger = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(valueSpaceType);
+												if (compareValueSpaceConceptTrigger) {
+													compareValueSpaceConceptTrigger->addCompleteValueConceptTrigger(compareDataLitValue, valueSpaceConceptTriggerLinker);
+												}
+											}
+										}
+									}
+									
+									triggers = valueTrigger->append(triggers);
+
+								}
+							}
+						}
+					}
+
+					mAssuringConceptTriggerLinkerHash.insert(conNegPair, triggers);
+				}
+				return triggers;
+			}
+
 
 		}; // end namespace Preprocess
 

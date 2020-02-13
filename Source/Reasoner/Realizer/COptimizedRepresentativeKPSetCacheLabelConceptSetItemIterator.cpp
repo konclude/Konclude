@@ -29,7 +29,7 @@ namespace Konclude {
 
 
 			COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator::COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, 
-					QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, COptimizedKPSetConceptInstancesItem* conceptInstancesItem, bool onlyMostSpecificInstances, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor)
+					QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, COptimizedKPSetConceptInstancesItem* conceptInstancesItem, bool onlyMostSpecificInstances, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader)
 
 				: COptimizedRepresentativeKPSetCacheLabelItemIterator(labelCacheItemKnownInstancesList, labelCacheItemPossibleInstancesList, individualInstantiatedItemHash, individualVector, sorting, indiInstItemRefCursor, moveOverCursor) {
 
@@ -40,6 +40,7 @@ namespace Konclude {
 					mPossibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash.insert(labelItem, conItemMostSpecFlagPairSet);
 				}
 				mConceptInstancesItemOnlyMostSpecificFlagPairSet.insert(conItemMostSpecFlagPair);
+				mBackendAssocCacheReader = backendAssocCacheReader;
 
 				init();
 			}
@@ -47,10 +48,11 @@ namespace Konclude {
 
 
 			COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator::COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList,
-				QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>& possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, const QSet<TConceptInstancesItemMostSpecificFlagPair>& onceptInstancesItemOnlyMostSpecificFlagPairSet, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor)
+				QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TConceptInstancesItemMostSpecificFlagPair>>& possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, const QSet<TConceptInstancesItemMostSpecificFlagPair>& onceptInstancesItemOnlyMostSpecificFlagPairSet, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader)
 
 				: mPossibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash(possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash), mConceptInstancesItemOnlyMostSpecificFlagPairSet(onceptInstancesItemOnlyMostSpecificFlagPairSet), COptimizedRepresentativeKPSetCacheLabelItemIterator(labelCacheItemKnownInstancesList, labelCacheItemPossibleInstancesList, individualInstantiatedItemHash, individualVector, sorting, indiInstItemRefCursor, moveOverCursor) {
 
+				mBackendAssocCacheReader = backendAssocCacheReader;
 				init();
 			}
 
@@ -84,46 +86,58 @@ namespace Konclude {
 
 
 			bool COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator::isValidIteratorPosition(CAssociationMapIteratorData* iteratorData, cint64 indiId) {
+				CAssociationMapIteratorDataWithConceptInstancesItems* conceptInstanceItemsIteratorData = (CAssociationMapIteratorDataWithConceptInstancesItems*)iteratorData;
 				++mAssociatedIndiPossibleVisistedCount;
+
 				if (!iteratorData->mCurrentIndiRealizationItem) {
-					++mAssociatedIndiPossibleConfirmedCount;
+					if (conceptInstanceItemsIteratorData->mConceptInstancesItemOnlyMostSpecificFlagPairSet.isEmpty()) {
+						--mAssociatedIndiPossibleVisistedCount;
+					} else {
+						++mAssociatedIndiPossibleConfirmedCount;
+					}
 					return true;
 				}
 				if (mConsiderSameMergedIndis || (!iteratorData->mCurrentIndiRealizationItem->isItemSameIndividualMerged() && indiId == iteratorData->mCurrentIndiRealizationItem->getIndividualId())) {
 
-					bool validAsPossibleInstanceOnly = false;
-					bool validAsKnownInstance = false;
-					bool validInstance = true;
-					CAssociationMapIteratorDataWithConceptInstancesItems* conceptInstanceItemsIteratorData = (CAssociationMapIteratorDataWithConceptInstancesItems*)iteratorData;
-					for (TConceptInstancesItemMostSpecificFlagPair conceptInstancesItemMostSpecificPair : conceptInstanceItemsIteratorData->mConceptInstancesItemOnlyMostSpecificFlagPairSet) {
-						COptimizedKPSetConceptInstancesItem* conceptInstancesItem = conceptInstancesItemMostSpecificPair.first;
-						bool onlyMostSpecificInstances = conceptInstancesItemMostSpecificPair.second;
 
-						COptimizedKPSetConceptInstancesData* conceptInstanceData = iteratorData->mCurrentIndiRealizationItem->getKnownPossibleInstancesHash()->getInstanceItemData(conceptInstancesItem);
-						if (conceptInstanceData->mKnownInstance && (!onlyMostSpecificInstances || conceptInstanceData->mMostSpecific)) {
-							validAsKnownInstance = true;
-						} else if (mAllowPossibleInstances) {
-							validAsPossibleInstanceOnly = true;
-						} else if (conceptInstanceData->mPossibleInstance && !conceptInstanceData->mTestedInstance && !conceptInstanceData->mDerived) {
-							--mAssociatedIndiPossibleVisistedCount;
-							iteratorData->mInitializationRequired = true;
-							validInstance = false;
-							return false;
-						} else {
-							validInstance = false;
+
+					if (conceptInstanceItemsIteratorData->mConceptInstancesItemOnlyMostSpecificFlagPairSet.isEmpty()) {
+						--mAssociatedIndiPossibleVisistedCount;
+						return true;
+					} else {
+						bool validAsPossibleInstanceOnly = false;
+						bool validAsKnownInstance = false;
+						bool validInstance = true;
+						for (TConceptInstancesItemMostSpecificFlagPair conceptInstancesItemMostSpecificPair : conceptInstanceItemsIteratorData->mConceptInstancesItemOnlyMostSpecificFlagPairSet) {
+							COptimizedKPSetConceptInstancesItem* conceptInstancesItem = conceptInstancesItemMostSpecificPair.first;
+							bool onlyMostSpecificInstances = conceptInstancesItemMostSpecificPair.second;
+
+							COptimizedKPSetConceptInstancesData* conceptInstanceData = iteratorData->mCurrentIndiRealizationItem->getKnownPossibleInstancesHash()->getInstanceItemData(conceptInstancesItem);
+							if (conceptInstanceData->mKnownInstance && (!onlyMostSpecificInstances || conceptInstanceData->mMostSpecific)) {
+								validAsKnownInstance = true;
+							} else if (mAllowPossibleInstances) {
+								validAsPossibleInstanceOnly = true;
+							} else if (conceptInstanceData->mPossibleInstance && !conceptInstanceData->mTestedInstance && !conceptInstanceData->mDerived) {
+								--mAssociatedIndiPossibleVisistedCount;
+								iteratorData->mInitializationRequired = true;
+								validInstance = false;
+								return false;
+							} else {
+								validInstance = false;
+							}
+
 						}
 
-					}
 
-
-					if (validInstance) {
-						if (validAsPossibleInstanceOnly) {
-							++mAssociatedIndiPossibleConfirmedCount;
-							iteratorData->mCurrentInstanceOnlyPossible = true;
-							return true;
-						} else if (validAsKnownInstance) {
-							++mAssociatedIndiPossibleConfirmedCount;
-							return true;
+						if (validInstance) {
+							if (validAsPossibleInstanceOnly) {
+								++mAssociatedIndiPossibleConfirmedCount;
+								iteratorData->mCurrentInstanceOnlyPossible = true;
+								return true;
+							} else if (validAsKnownInstance) {
+								++mAssociatedIndiPossibleConfirmedCount;
+								return true;
+							}
 						}
 					}
 
@@ -134,7 +148,7 @@ namespace Konclude {
 
 
 			CRealizationIndividualInstanceItemReferenceIterator* COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator::getCopy() {
-				COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* iteratorCopy = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(QList<CBackendRepresentativeMemoryLabelCacheItem*>(), QList<CBackendRepresentativeMemoryLabelCacheItem*>(), mIndividualInstantiatedItemHash, mIndividualVector, mPossibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, mConceptInstancesItemOnlyMostSpecificFlagPairSet, mSorting, mIndiInstItemRefCursor, mMoveOverCursor);
+				COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* iteratorCopy = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(QList<CBackendRepresentativeMemoryLabelCacheItem*>(), QList<CBackendRepresentativeMemoryLabelCacheItem*>(), mIndividualInstantiatedItemHash, mIndividualVector, mPossibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, mConceptInstancesItemOnlyMostSpecificFlagPairSet, mSorting, mIndiInstItemRefCursor, mMoveOverCursor, mBackendAssocCacheReader);
 				this->initCopy(iteratorCopy);
 				return iteratorCopy;
 			}

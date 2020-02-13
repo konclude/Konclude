@@ -1,0 +1,38 @@
+# requires Konclude compliled with Redland RDF Libraries since these files are serialized with RDF Turtle and the query uses complex constructs which have to be processed with Redland RASQAL
+LOAD <file:Tests/lubm-univ-bench.owl.xml>
+LOAD <file:Tests/lubm-univ-bench-data-1.ttl>
+
+
+# remove the comment of the following line to ensure that Konclude preprocessed the ontology such that query processing can directly be started (otherwise Konclude will preprocess the ontology lazily for the first query)
+#PREPARE
+
+
+
+# modified LUBM Query9
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX ub: <http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl#>
+SELECT DISTINCT ?X ?name ?courseCount
+WHERE
+{
+	{
+		?X rdf:type ub:GraduateStudent .
+	} UNION {
+		?X rdf:type ub:UndergraduateStudent .
+	}
+
+
+	{
+		?X ub:advisor 	?Y .
+						?Y rdf:type ub:Faculty .
+						?Y ub:teacherOf ?Z .
+										?Z rdf:type ub:Course .
+		?X 		ub:takesCourse 			?Z .
+	} OPTIONAL {
+		?X ub:name ?name .
+	} OPTIONAL {
+		SELECT ?X (COUNT(?c) as ?courseCount) {
+			?X 		ub:takesCourse 		?c .
+		} GROUP BY ?X
+	}
+					
+} LIMIT 10

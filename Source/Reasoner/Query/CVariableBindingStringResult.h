@@ -61,6 +61,7 @@ namespace Konclude {
 					//! Destructor
 					virtual ~CVariableBindingStringResult();
 
+					CVariableBindingResult* initVariableBinding(const QString& bindingString, VariableBindingType type);
 					virtual CVariableBindingResult* initVariableBinding(const CIndividualReference& indiRef, CIndividualNameResolver* indiNameResolver);
 					virtual CVariableBindingResult* initVariableBinding(const CIndividualReference& indiRef, const QString& resolvedIndiName);
 					virtual CVariableBindingResult* initVariableBinding(CIndividual* individual);

@@ -79,6 +79,8 @@ namespace Konclude {
 
 					bool indexABoxIndividuals(CConcreteOntology* updateConcreteOntology, COntologyTriplesData* ontologyTripleData);
 
+					CRedlandStoredTriplesIndividualAssertionIndexCacheData* handleStatement(librdf_statement* statement, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CRedlandStoredTriplesIndividualAssertionIndexCacheData* lastIndiCacheData, librdf_node* lastSubjectNode);
+
 
 
 				// protected functions

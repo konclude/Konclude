@@ -38,7 +38,7 @@ namespace Konclude {
 
 
 
-		bool COWLlinkQueryParser::parseQueryFile(QString filename) {
+		bool COWLlinkQueryParser::parseQueryFile(const QString& filename) {
 			bool successfullParsed = true;
 
 			// parse file

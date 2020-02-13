@@ -24,6 +24,7 @@
 
 // Libraries includes
 #include <Redland.h>
+#include <rasqal.h>
 #include <stdio.h>
 #include <ios>
 #include <QIODevice>

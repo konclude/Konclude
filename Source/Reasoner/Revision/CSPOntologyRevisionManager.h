@@ -118,7 +118,7 @@ namespace Konclude {
 
 					COntologyRevision* createNewOntologyRevisionFromBasementOntology(const QString& ontologyName, CCommandRecordRouter& commandRecordRouter);
 
-					COntologyRevision* createNewOntologyRevision(const QString& ontologyName, bool forceCreation, CCommandRecordRouter& commandRecordRouter);
+					COntologyRevision* createNewOntologyRevision(const QString& ontologyName, bool forceCreation, bool reportError, CCommandRecordRouter& commandRecordRouter);
 					QString createNewOntology(const QString& ontologyName, QList<CNamePrefix*>* prefixList, CCommandRecordRouter& commandRecordRouter);
 
 

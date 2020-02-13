@@ -37,13 +37,23 @@ namespace Konclude {
 			
 
 
-			CAnsweringHandler* CConfigurationAnsweringHandlerFactory::createAnsweringHandler(CConcreteOntology* ontology) {
+			CAnsweringHandler* CConfigurationAnsweringHandlerFactory::createAnsweringHandler(CConcreteOntology* ontology, bool composedQuery) {
 				CAnsweringHandler* answeringHandler = nullptr;
-				QString answererString = CConfigDataReader::readConfigString(mConfig, "Konclude.Answering.DefaultComplexConceptAnswerer", "Konclude.Answering.OptimizedComplexConceptAnswerer");
-				if (answererString == "Konclude.Answering.OptimizedComplexConceptAnswerer") {
+				if (!composedQuery) {
+					QString answererString = CConfigDataReader::readConfigString(mConfig, "Konclude.Answering.DefaultComplexConceptAnswerer", "Konclude.Answering.OptimizedComplexConceptAnswerer");
+					if (answererString == "Konclude.Answering.OptimizedComplexConceptAnswerer") {
+						CConfigurationBase* config = ontology->getConfiguration();
+						COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem = new COptimizedComplexExpressionOntologyAnsweringItem(ontology, config);
+						answeringHandler = new COptimizedComplexExpressionAnsweringHandler(ontoAnsweringItem);
+					}
+				} else {
 					CConfigurationBase* config = ontology->getConfiguration();
-					COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem = new COptimizedComplexConceptOntologyAnsweringItem(ontology, config);
-					answeringHandler = new COptimizedComplexConceptAnsweringHandler(ontoAnsweringItem);
+					COptimizedComplexCompositionOntologyAnsweringItem* ontoAnsweringItem = new COptimizedComplexCompositionOntologyAnsweringItem(ontology, config);
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+					answeringHandler = new COptimizedComplexCompositionRedlandRasqalAnsweringHandler(ontoAnsweringItem);
+#else
+					answeringHandler = new COptimizedComplexCompositionAnsweringHandler(ontoAnsweringItem);
+#endif // KONCLUDE_REDLAND_INTEGRATION
 				}
 				return answeringHandler;
 			}

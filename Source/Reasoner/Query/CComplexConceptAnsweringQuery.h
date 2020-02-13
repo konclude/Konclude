@@ -25,7 +25,7 @@
 
 
 // Namespace includes
-#include "CComplexAnsweringQuery.h"
+#include "CComplexAnsweringExpressionQuery.h"
 
 
 // Other includes
@@ -56,7 +56,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CComplexConceptAnsweringQuery : public CComplexAnsweringQuery {
+			class CComplexConceptAnsweringQuery : public CComplexAnsweringExpressionQuery {
 				// public methods
 				public:
 					//! Constructor
@@ -64,8 +64,6 @@ namespace Konclude {
 
 					//! Destructor
 					virtual ~CComplexConceptAnsweringQuery();
-
-
 
 
 

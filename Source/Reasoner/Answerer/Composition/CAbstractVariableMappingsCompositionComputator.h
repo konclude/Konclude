@@ -33,7 +33,7 @@
 #include "Reasoner/Answerer/COptimizedComplexVariableIndividualMappings.h"
 #include "Reasoner/Answerer/COptimizedComplexVariableJoiningItem.h"
 #include "Reasoner/Answerer/COptimizedComplexBuildingVariableCompositionsItem.h"
-#include "Reasoner/Answerer/COptimizedComplexConceptOntologyAnsweringItem.h"
+#include "Reasoner/Answerer/COptimizedComplexExpressionOntologyAnsweringItem.h"
 
 
 
@@ -68,7 +68,7 @@ namespace Konclude {
 						//! Constructor
 						CAbstractVariableMappingsCompositionComputator();
 
-						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexConceptOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
+						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
 
 						virtual CAbstractVariableMappingsCompositionComputator* computeVariableMappingsComposition(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing);
 
@@ -89,7 +89,7 @@ namespace Konclude {
 
 					// protected variables
 					protected:
-						COptimizedComplexConceptOntologyAnsweringItem* mOntoAnsweringItem;
+						COptimizedComplexExpressionOntologyAnsweringItem* mOntoAnsweringItem;
 
 						class CInstanceBindingIndividualCountingVisitor : public CSameRealizationIndividualVisitor {
 						public:

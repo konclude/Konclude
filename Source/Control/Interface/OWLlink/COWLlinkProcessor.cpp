@@ -175,7 +175,6 @@ namespace Konclude {
 					} else {
 						CUnspecifiedMessageErrorRecord::makeRecord(QString("Data from '%1' cannot be read.").arg(resolvedIRI), &commandRecordRouter);
 					}
-
 					delete owl2Parser;
 					return parsingSucceeded;
 				}
@@ -544,6 +543,78 @@ namespace Konclude {
 										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
+
+
+
+
+									} else if (dynamic_cast<CConnectKnowledgeBaseExternalTriplesDSNCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(), getLogDomain(), command);
+										CConnectKnowledgeBaseExternalTriplesDSNCommand *cKBETDSNC = (CConnectKnowledgeBaseExternalTriplesDSNCommand *)command;
+
+										CCreateKnowledgeBaseRevisionUpdateCommand *crKBRevUpC = new CCreateKnowledgeBaseRevisionUpdateCommand(cKBETDSNC->getKnowledgeBaseName());
+										cKBETDSNC->makeToSubCommand(crKBRevUpC);
+										preSynchronizer->delegateCommand(crKBRevUpC);
+
+
+										CParseInstallKnowledgeBaseExternalTriplesDSNConnectionCommand* paInKBExTrDSNCoComm = new CParseInstallKnowledgeBaseExternalTriplesDSNConnectionCommand(cKBETDSNC->getKnowledgeBaseName(), cKBETDSNC->getTriplesDBName(), cKBETDSNC->getConfigDSNString(), crKBRevUpC);
+										cKBETDSNC->makeToSubCommand(paInKBExTrDSNCoComm);
+										preSynchronizer->delegateCommand(paInKBExTrDSNCoComm);
+
+										CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(paInKBExTrDSNCoComm->getKnowledgeBaseName(), crKBRevUpC);
+										inKBRevUpC->addCommandPrecondition(new CCommandProcessedPrecondition(paInKBExTrDSNCoComm));
+										cKBETDSNC->makeToSubCommand(inKBRevUpC);
+										preSynchronizer->delegateCommand(inKBRevUpC);
+
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+
+
+									} else if (dynamic_cast<CParseInstallKnowledgeBaseExternalTriplesDSNConnectionCommand *>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(command->getRecorder(), getLogDomain(), command);
+
+										CParseInstallKnowledgeBaseExternalTriplesDSNConnectionCommand* pIKBETDSNCComm = (CParseInstallKnowledgeBaseExternalTriplesDSNConnectionCommand *)command;
+
+										CConfigData* data = nullptr;
+										COntologyRevision* ontoRev = pIKBETDSNCComm->getOntologyRevision();
+										if (ontoRev) {
+											COntologyConfigurationExtension* ontoConfExt = ontoRev->getOntologyConfiguration();
+
+											CConcreteOntology* ont = ontoRev->getOntology();
+
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+											CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(ont);
+											builder->initializeBuilding();
+
+											CRDFRedlandExternalTriplesDSNConnectingParser* parser = new CRDFRedlandExternalTriplesDSNConnectingParser(builder, ontoConfExt);
+											bool connectionSuccessfullyEstablished = parser->connectExternalTriples(pIKBETDSNCComm->getTriplesDBName(), pIKBETDSNCComm->getConfigDSNString());
+											if (!connectionSuccessfullyEstablished) {
+												CUnspecifiedMessageErrorRecord::makeRecord(QString("Failed to establish DSN connection to external triples for knowledge base '%1'.").arg(pIKBETDSNCComm->getKnowledgeBaseName()), &commandRecordRouter);
+											}
+
+											CConcreteOntologyRedlandTriplesDataExpressionMapper* triplesMapper = new CConcreteOntologyRedlandTriplesDataExpressionMapper(builder);
+											triplesMapper->mapTriples(ont, ont->getOntologyTriplesData());
+											if (connectionSuccessfullyEstablished) {
+												builder->completeBuilding();
+											}
+
+											delete parser;
+
+
+#else
+											CUnspecifiedMessageErrorRecord::makeRecord(QString("Cannot establish DSN connection for knowledge base '%1' without Redland libraries.").arg(pIKBETDSNCComm->getKnowledgeBaseName()), &commandRecordRouter);
+
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+
+										} else {
+											CUnspecifiedMessageErrorRecord::makeRecord("Ontology revision not available.", &commandRecordRouter);
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 
 
@@ -1016,22 +1087,41 @@ namespace Konclude {
 
 											COntologyConfigurationExtension *ontConfig = ontRev->getOntologyConfiguration();
 
-											CConcreteOntologyUpdateSeparateHashingCollectorBuilder *builder = new CConcreteOntologyUpdateSeparateHashingCollectorBuilder(onto);
-											CConcreteOntologyQueryExtendedBuilder* queryBuilderGen = new CConcreteOntologyQueryExtendedBuilder(baseOnt, onto, ontConfig, builder);
-											CSPARQLSimpleQueryParser* sparqlQueryParser = new CSPARQLSimpleQueryParser(queryBuilderGen, builder, onto);
+											bool confRedlandRasqalSPARQLQueryProcessing = CConfigDataReader::readConfigBoolean(ontConfig, "Konclude.Answering.RedlandRasqalSPARQLQueryProcessing", true);
 
-                                            QStringList queryStringList = pSPARQLQueryC->getSPARQLQueryTextList();
-											builder->initializeBuilding();
-											sparqlQueryParser->parseQueryTextList(queryStringList);
-											builder->completeBuilding();
-											QList<CQuery*> queryList = queryBuilderGen->generateQuerys();
+											QStringList queryStringList = pSPARQLQueryC->getSPARQLQueryTextList();
+											QList<CQuery*> queryList;
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+											if (confRedlandRasqalSPARQLQueryProcessing) {
+												CSPARQLRedlandRasqalQueryParser* sparqlQueryParser = new CSPARQLRedlandRasqalQueryParser(baseOnt, onto, ontConfig);
+												sparqlQueryParser->parseQueryTextList(queryStringList);
+												CQuery* query = sparqlQueryParser->getQuery();
+												if (query) {
+													queryList.append(query);
+												}
+												delete sparqlQueryParser;
+											} else {
+#endif
+												CConcreteOntologyUpdateSeparateHashingCollectorBuilder *builder = new CConcreteOntologyUpdateSeparateHashingCollectorBuilder(onto);
+												CConcreteOntologyQueryExtendedBuilder* queryBuilderGen = new CConcreteOntologyQueryExtendedBuilder(baseOnt, onto, ontConfig, builder);
+												CSPARQLQueryParser* sparqlQueryParser = sparqlQueryParser = new CSPARQLSimpleQueryParser(queryBuilderGen, builder, onto);
+
+
+												builder->initializeBuilding();
+												sparqlQueryParser->parseQueryTextList(queryStringList);
+												builder->completeBuilding();
+												queryList = queryBuilderGen->generateQuerys();
+
+												delete builder;
+												delete queryBuilderGen;
+												delete sparqlQueryParser;
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+											}
+#endif
 											if (queryList.isEmpty()) {
-												LOG(WARN, getLogDomain(), logTr("No SPARQL query found in request."), this);
+												LOG(WARN, getLogDomain(), logTr("SPARQL query not found or not parsable from request."), this);
 											}
 											pSPARQLQueryC->setQueryList(queryList);
-											delete builder;
-											delete queryBuilderGen;
-											delete sparqlQueryParser;
 
 											if (mConfLogProcessingTimes) {
 												cint64 parsingMilliSeconds = parsingTime.elapsed();
@@ -1046,6 +1136,51 @@ namespace Konclude {
 
 
 
+									} else if (dynamic_cast<CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand*>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand *gQDKBRUC = (CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand*)command;
+
+										QList<CQuery*> queryList = gQDKBRUC->getQueryList();
+										for (CQuery* query : queryList) {
+											CRedlandRasqalBGPsCompositionQuery* rrcq = dynamic_cast<CRedlandRasqalBGPsCompositionQuery*>(query);
+											if (rrcq) {
+												QList<CKnowledgeBaseRevisionCommandProvider*> kbProviderList;
+												for (QString kbName : *rrcq->getDependentKnowledgeBaseNames()) {
+													CCreateKnowledgeBaseRevisionUpdateCommand* revUpC = new CCreateKnowledgeBaseRevisionUpdateCommand(kbName, false, false, gQDKBRUC);
+													kbProviderList.append(revUpC);
+													preSynchronizer->delegateCommand(revUpC);
+													rrcq->setDependentKnowledgeBaseRevision(kbName, nullptr, nullptr);
+												}
+												CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand* insKBRUC = new CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand(kbProviderList, query, gQDKBRUC);
+												preSynchronizer->delegateCommand(insKBRUC);
+											}
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
+
+									} else if (dynamic_cast<CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand*>(command)) {
+										CCommandRecordRouter commandRecordRouter(command, this);
+										CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand *iQDKBRUC = (CInstallQueryDependentKnowledgeBaseRevisionUpdatesCommand*)command;
+
+										CQuery* query = iQDKBRUC->getQuery();
+										CRedlandRasqalBGPsCompositionQuery* rrcq = dynamic_cast<CRedlandRasqalBGPsCompositionQuery*>(query);
+										if (rrcq) {
+											QList<CKnowledgeBaseRevisionCommandProvider*>* kbRCPList = iQDKBRUC->getDependentKnowledgeBasesProviderCommandList();
+											for (CKnowledgeBaseRevisionCommandProvider* kbRCP : *kbRCPList) {
+												COntologyRevision* ontRev = kbRCP->getOntologyRevision();
+												if (ontRev) {
+													CConcreteOntology* onto = ontRev->getOntology();
+													CConcreteOntology* baseOnt = ontRev->getPreviousOntologyRevision()->getOntology();
+													rrcq->setDependentKnowledgeBaseRevision(ontRev->getOntology()->getOntologyName(), baseOnt, onto);
+												}
+											}
+										}
+
+										CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
+										CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 									} else if (dynamic_cast<CParseProcessSPARQLUpdateTextCommand *>(command)) {
 										CCommandRecordRouter commandRecordRouter(command, this);
@@ -1165,7 +1300,9 @@ namespace Konclude {
 													if (!lastSparqlQC) {
 														lastSparqlQC = new CParseSPARQLQueryCommand(textList, lastGetCurrKBRevC, pSPARQLQueryC);
 														commandList.append(lastSparqlQC);
-														CCalculateQueriesCommand* calcQueriesC = new CCalculateQueriesCommand(lastSparqlQC, pSPARQLQueryC);
+														CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand* getDepKBRevUpdateC = new CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand(lastSparqlQC, pSPARQLQueryC);
+														commandList.append(getDepKBRevUpdateC);
+														CCalculateQueriesCommand* calcQueriesC = new CCalculateQueriesCommand(getDepKBRevUpdateC, pSPARQLQueryC);
 														commandList.append(calcQueriesC);
 													} else {
 														lastSparqlQC->addQueryText(textList);
