@@ -1184,12 +1184,11 @@ namespace Konclude {
 				//fputc('\n', stderr);
 #endif
 
-				if (rtmc->origin)
-					rtmc->stream = librdf_model_find_statements_in_context(rtsc->model,
-						rtmc->qstatement,
-						rtmc->origin);
-				else
-					rtmc->stream = librdf_model_find_statements(rtsc->model, rtmc->qstatement);
+				if (rtmc->origin) {
+					rtmc->stream = ((librdf_model_factory_s*)((librdf_model_s*)rtsc->model)->factory)->find_statements_in_context(rtsc->model, rtmc->qstatement, rtmc->origin);
+				} else {
+					rtmc->stream = ((librdf_model_factory_s*)((librdf_model_s*)rtsc->model)->factory)->find_statements(rtsc->model, rtmc->qstatement);
+				}
 
 				if (!rtmc->stream)
 					return 1;
