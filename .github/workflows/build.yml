@@ -46,12 +46,9 @@ jobs:
           qmake KoncludeWithoutRedland.pro
           make -j 2                 
 
-      - name: Add msbuild to PATH        
-        if: startsWith(matrix.config.os, 'windows')        
-        uses: microsoft/setup-msbuild@v1.0.2
-          
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
         run: |
           qmake KoncludeWithoutRedland.pro
           nmake -j 2
