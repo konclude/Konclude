@@ -71,8 +71,8 @@ jobs:
           qmake KoncludeWithoutRedland.pro
           nmake
 
-      - name: Run Examples
-        if: startsWith(matrix.config.os, 'ubuntu') || startsWith(matrix.config.os, 'macos')
+      - name: Run Examples Ubuntu
+        if: startsWith(matrix.config.os, 'ubuntu')
         run: | 
           Release/Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
           Release/Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
@@ -83,7 +83,7 @@ jobs:
           Release/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
 
 
-      - name: Run Examples
+      - name: Run Examples Windows
         if: startsWith(matrix.config.os, 'windows')  
         run: | 
           Release\Konclude.exe classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
@@ -93,4 +93,16 @@ jobs:
           Release\Konclude.exe owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
           Release\Konclude.exe sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
           Release\Konclude.exe sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+
+
+      - name: Run Examples MacOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: | 
+          Release/Konclude.app/Contents/MacOS/Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          Release/Konclude.app/Contents/MacOS/Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
 
