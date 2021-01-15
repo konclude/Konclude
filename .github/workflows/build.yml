@@ -42,13 +42,13 @@ jobs:
           echo `gcc --version`
           echo `qmake --version`
           qmake KoncludeWithoutRedland.pro
-          nmake -j 2                 
+          make -j 2                 
           
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
           qmake KoncludeWithoutRedland.pro
-          make -j 2
+          nmake -j 2
 
       - name: Run Examples
         run: | 
