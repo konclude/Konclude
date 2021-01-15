@@ -28,6 +28,13 @@ jobs:
             environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
             generators: "Visual Studio 16 2019"
           }
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            build_type: "Release",
+            cc: "clang",
+            cxx: "clang++",
+          }          
 
 
     steps:
@@ -39,12 +46,20 @@ jobs:
         uses: jurplel/install-qt-action@v2
           
       - name: Compile Ubuntu
-        if: startsWith(matrix.config.os, 'ubuntu')   
+        if: startsWith(matrix.config.os, 'ubuntu')
         run: | 
           echo `gcc --version`
           echo `qmake --version`
           qmake KoncludeWithoutRedland.pro
-          make -j 2                 
+          make -j 2        
+          
+      - name: Compile macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: | 
+          echo `clang --version`
+          echo `qmake --version`
+          qmake KoncludeWithoutRedland.pro
+          make -j 2            
 
       - name: Prepare Visual Studio
         if: startsWith(matrix.config.os, 'windows')
@@ -57,7 +72,7 @@ jobs:
           nmake
 
       - name: Run Examples
-        if: startsWith(matrix.config.os, 'ubuntu')  
+        if: startsWith(matrix.config.os, 'ubuntu') || startsWith(matrix.config.os, 'macos')
         run: | 
           Release/Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
           Release/Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
@@ -71,11 +86,11 @@ jobs:
       - name: Run Examples
         if: startsWith(matrix.config.os, 'windows')  
         run: | 
-          x64\Release\VS2015\Konclude.exe classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
-          x64\Release\VS2015\Konclude.exe satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
-          x64\Release\VS2015\Konclude.exe owllinkfile -i Tests/galen-classify-request.xml -o response.xml
-          x64\Release\VS2015\Konclude.exe owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
-          x64\Release\VS2015\Konclude.exe owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
-          x64\Release\VS2015\Konclude.exe sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
-          x64\Release\VS2015\Konclude.exe sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+          Release\Konclude.exe classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          Release\Konclude.exe satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          Release\Konclude.exe owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          Release\Konclude.exe owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          Release\Konclude.exe owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          Release\Konclude.exe sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          Release\Konclude.exe sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
 
