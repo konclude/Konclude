@@ -14,7 +14,7 @@ jobs:
         config:        
         - {
             name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
-            os: ubuntu-latest,
+            os: ubuntu-16.04,
             build_type: "Release", cc: "gcc", cxx: "g++"
           }
 
