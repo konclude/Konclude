@@ -52,12 +52,12 @@ jobs:
 
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1
         run: |
           qmake KoncludeWithoutRedland.pro
           nmake -j 2
 
       - name: Run Examples
+        if: startsWith(matrix.config.os, 'ubuntu')  
         run: | 
           Release/Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
           Release/Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
@@ -66,4 +66,16 @@ jobs:
           Release/Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
           Release/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
           Release/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+
+
+      - name: Run Examples
+        if: startsWith(matrix.config.os, 'windows')  
+        run: | 
+          x64\Release\VS2015\Konclude.exe classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          x64\Release\VS2015\Konclude.exe satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          x64\Release\VS2015\Konclude.exe owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          x64\Release\VS2015\Konclude.exe owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          x64\Release\VS2015\Konclude.exe owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          x64\Release\VS2015\Konclude.exe sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          x64\Release\VS2015\Konclude.exe sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
 
