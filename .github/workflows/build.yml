@@ -24,18 +24,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         
-      - name: Prepare
-        run: |
-          sudo add-apt-repository ppa:beineri/opt-qt-5.12.2-xenial -y
-          sudo apt-get update -qq;
-          
-      - name: Install
-        run: |
-          sudo apt-get  -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f install -qq libgl1-mesa-dev qt512base
-          echo "installation finished"
-          source /opt/qt512/bin/qt512-env.sh
-          CMAKE_OPTS="";       
-          export CMAKE_OPTS;
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
           
       - name: Compile
         run: | 
