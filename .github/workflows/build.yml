@@ -19,7 +19,7 @@ jobs:
             cc: "gcc", 
             cxx: "g++"
           }
-          - {
+        - {
             name: "Windows Latest MSVC",
             os: windows-latest,
             build_type: "Release",
