@@ -31,7 +31,7 @@ jobs:
           
       - name: Install
         run: |
-          sudo apt-get install -qq libgl1-mesa-dev qt512base; source /opt/qt512/bin/qt512-env.sh;
+          sudo apt-get  -o Debug::pkgProblemResolver=true -o Debug::Acquire::http=true -f install -qq libgl1-mesa-dev qt512base
           echo "installation finished"
           CMAKE_OPTS="";       
           export CMAKE_OPTS;
