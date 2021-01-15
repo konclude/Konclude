@@ -46,6 +46,10 @@ jobs:
           qmake KoncludeWithoutRedland.pro
           make -j 2                 
 
+      - name: Prepare Visual Studio
+        if: startsWith(matrix.config.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1
