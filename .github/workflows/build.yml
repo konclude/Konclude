@@ -33,3 +33,14 @@ jobs:
           echo `qmake --version`
           qmake KoncludeWithoutRedland.pro
           make -j 2          
+
+      - name: Run Examples
+        run: | 
+          Release/Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          Release/Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          Release/Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          Release/Konclude owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          Release/Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          Release/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          Release/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+
