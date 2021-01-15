@@ -11,9 +11,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:        
+        config:
         - {
-            name: "Ubuntu 16.04 GCC", artifact: "Linux.tar.xz",
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++"
+          }
+        - {
+            name: "Ubuntu 16.04 GCC",
             os: ubuntu-16.04,
             build_type: "Release", 
             cc: "gcc", 
@@ -24,9 +31,7 @@ jobs:
             os: windows-latest,
             build_type: "Release",
             cc: "cl",
-            cxx: "cl",
-            environment_script: "C:/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/VC/Auxiliary/Build/vcvars64.bat",
-            generators: "Visual Studio 16 2019"
+            cxx: "cl"
           }
         - {
             name: "macOS Latest Clang",
