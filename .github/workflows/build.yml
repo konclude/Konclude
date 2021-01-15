@@ -15,7 +15,16 @@ jobs:
         - {
             name: "Ubuntu 16.04 GCC", artifact: "Linux.tar.xz",
             os: ubuntu-16.04,
-            build_type: "Release", cc: "gcc", cxx: "g++"
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++"
+          }
+          - {
+            name: "Windows Latest MSVC",
+            os: windows-latest,
+            build_type: "Release",
+            cc: "cl",
+            cxx: "cl"
           }
 
 
@@ -27,12 +36,19 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
           
-      - name: Compile
+      - name: Compile Ubuntu
+        if: startsWith(matrix.config.os, 'ubuntu')   
         run: | 
           echo `gcc --version`
           echo `qmake --version`
           qmake KoncludeWithoutRedland.pro
-          make -j 2          
+          nmake -j 2                 
+          
+      - name: Compile Windows
+        if: startsWith(matrix.config.os, 'windows')
+        run: |
+          qmake KoncludeWithoutRedland.pro
+          make -j 2
 
       - name: Run Examples
         run: | 
