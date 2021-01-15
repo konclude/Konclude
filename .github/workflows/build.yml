@@ -1,0 +1,44 @@
+name: Build
+
+# Run this workflow every time a new commit pushed to your repository
+on: [push]
+
+jobs:
+
+  build:
+    name: ${ { matrix.config.name } }
+    runs-on: ${ { matrix.config.os } }
+    strategy:
+      fail-fast: false
+      matrix:
+        config:        
+        - {
+            name: "Ubuntu Latest GCC", artifact: "Linux.tar.xz",
+            os: ubuntu-latest,
+            build_type: "Release", cc: "gcc", cxx: "g++"
+          }
+
+
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Prepare
+        run: |
+          sudo add-apt-repository ppa:beineri/opt-qt-5.12.2-xenial -y; fi
+          sudo apt-get update -qq;
+          
+      - name: Install
+        run: |
+          #qt512declarative qt512websockets qt512quickcontrols2
+          sudo apt-get install -qq libgl1-mesa-dev qt512base; source /opt/qt512/bin/qt512-env.sh;
+          CMAKE_OPTS="";       
+          export CMAKE_OPTS;
+          
+      - name: Compile
+        run: | 
+          echo `gcc --version`
+          echo `qmake --version`
+          qmake KoncludeWithoutRedland.pro
+          make -j 2          
