@@ -28,18 +28,18 @@ RCC_DIR += ./GeneratedFiles
 #Include file(s)
 include(Konclude.pri)
 
-unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/librdf.a
-unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/libraptor2.a
-unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/librasqal.a
-unix:!macx: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/libxml2.a
+unix: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/librdf.a
+unix: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/libraptor2.a
+unix: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/librasqal.a
+unix: LIBS += $$PWD/External/librdf/Linux/x64/lib/release/libxml2.a
 unix:!macx: LIBS += -lz -lltdl -lgmp -ldl
 
 INCLUDEPATH += $$PWD/External/librdf/Linux/x64/include
 DEPENDPATH += $$PWD/External/librdf/Linux/x64/include
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/librdf.a
-unix:!macx: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/libraptor2.a
-unix:!macx: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/librasqal.a
-unix:!macx: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/libxml2.a
+unix: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/librdf.a
+unix: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/libraptor2.a
+unix: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/librasqal.a
+unix: PRE_TARGETDEPS += $$PWD/External/librdf/Linux/x64/lib/release/libxml2.a
 
 
