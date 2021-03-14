@@ -27,13 +27,15 @@ namespace Konclude {
 
 		namespace HTTP {
 
-			CQtHttpResponseHandler::CQtHttpResponseHandler(CQtHttpRequest* request, CQtHttpResponse* response, cint64 downloadSizeLimit, CHttpTransactionManager* manager) {
+			CQtHttpResponseHandler::CQtHttpResponseHandler(CQtHttpRequest* request, CQtHttpResponse* response, cint64 downloadSizeLimit, bool downloadLimitCancel, CHttpTransactionManager* manager) {
 				mRequest = request;
 				mResponse = response;
 				mManager = manager;
 				mDownloadSizeLimit = downloadSizeLimit;
 				mTotalBytesReceived = 0;
+				mDownloadLimitCancel = downloadLimitCancel;
 				mAborted = false;
+				mDeleting = false;
 			}
 
 			CQtHttpRequest* CQtHttpResponseHandler::getRequest() {
@@ -45,10 +47,16 @@ namespace Konclude {
 			}
 
 			void CQtHttpResponseHandler::downloadProgress(qint64 bytesReceived, qint64 bytesTotal) {
-				mTotalBytesReceived += bytesReceived;
+				mTotalBytesReceived = bytesReceived;
 				if (mTotalBytesReceived > mDownloadSizeLimit && !mAborted) {
+					mManager->abort(mRequest, mResponse, CHttpTransactionManager::ABORT_DOWNLOAD_SIZE_LIMIT_REACHED);
 					mAborted = true;
-					mManager->abort(mRequest, mResponse);
+					if (!mDownloadLimitCancel) {
+						mDeleting = true;
+					}
+				}
+				if (mDeleting) {
+					mResponse->getQNetworkReply()->skip(mTotalBytesReceived);
 				}
 			}
 

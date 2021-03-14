@@ -461,6 +461,39 @@ namespace Konclude {
 
 
 
+			CReasonerEvaluationDoubleDataValue* CReasonerEvaluationSpecifiedTimeExtractor::extractMemoryUsageEvaluationData(QDomDocument& document, const QString& responseFileString) {
+				CReasonerEvaluationDoubleDataValue* doubleEvalValue = nullptr;
+
+				if (mCacher) {
+					doubleEvalValue = dynamic_cast<CReasonerEvaluationDoubleDataValue*>(mCacher->getCachedDataValue(responseFileString, (cint64)CReasonerEvaluationExtractor::MEMORYUSAGEEXTRACTOR));
+				}
+
+				if (!doubleEvalValue) {
+
+					QDomElement rootEl = document.documentElement();
+					QString memoryUsageString = rootEl.attribute("maxMemoryUsage");
+
+
+					QDomElement childEl = rootEl.firstChildElement();
+					while (!childEl.isNull() && memoryUsageString.isEmpty()) {
+						memoryUsageString = childEl.attribute("maxMemoryUsage");
+						childEl = childEl.nextSiblingElement();
+					}
+
+					bool parsedOk = false;
+					cint64 memoryUsage = memoryUsageString.toLongLong(&parsedOk);
+					if (parsedOk) {
+						doubleEvalValue = new CReasonerEvaluationDoubleDataValue(memoryUsage);
+					}
+
+					if (mCacher) {
+						mCacher->addDataValueToCache(responseFileString, (cint64)CReasonerEvaluationSpecifiedTimeExtractor::MEMORYUSAGEEXTRACTOR, doubleEvalValue);
+					}
+
+				}
+				return doubleEvalValue;
+			}
+
 
 
 
@@ -611,6 +644,10 @@ namespace Konclude {
 						CReasonerEvaluationDoubleDataValue* doubleErrorEvalValue = extractErrorEvaluationData(document,responseFileString);
 						if (mExtractorType == CReasonerEvaluationExtractor::ERROREXTRACTOR) {
 							evalValue = doubleErrorEvalValue;
+						}
+						CReasonerEvaluationDoubleDataValue* doubleMemoryUsageEvalValue = extractMemoryUsageEvaluationData(document, responseFileString);
+						if (mExtractorType == CReasonerEvaluationExtractor::MEMORYUSAGEEXTRACTOR) {
+							evalValue = doubleMemoryUsageEvalValue;
 						}
 						CReasonerEvaluationDoubleDataValue* doubleTimeoutEvalValue = extractTimeoutEvaluationData(document,responseFileString);
 						if (mExtractorType == CReasonerEvaluationExtractor::TIMEOUTEXTRACTOR) {

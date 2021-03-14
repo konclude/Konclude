@@ -43,6 +43,8 @@ namespace Konclude {
 					mOriginPreSynchronizer = preSynchronizer;
 					mDataWritten = false;
 
+					mThreadedWriting = CConfigDataReader::readConfigBoolean(mLoaderConfig, "Konclude.SPARQL.Server.ThreadedSocketWriting", true);
+
 					cint64 writeBufferBlockingLimit = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.SPARQL.Server.WriteBufferBlockingLimit", 20);
 					if (writeBufferBlockingLimit > 0) {
 						mWriteLimitSemaphore = new QSemaphore(writeBufferBlockingLimit);
@@ -54,6 +56,11 @@ namespace Konclude {
 
 					mStreamSPARQLHeader = QString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\" xml:base=\"http://www.w3.org/2005/sparql-results#\" xmlns:owl=\"http://www.w3.org/2002/07/owl#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">").toLocal8Bit();
 					mStreamSPARQLFooter = QString("\r\n</sparql>").toLocal8Bit();
+
+					mWrittenContinueSemaphore = nullptr;
+					if (!mThreadedWriting) {
+						mWrittenContinueSemaphore = new QSemaphore();
+					}
 
 				}
 
@@ -86,6 +93,9 @@ namespace Konclude {
 
 					if (mWriteLimitSemaphore) {
 						delete mWriteLimitSemaphore;
+					}
+					if (mWrittenContinueSemaphore) {
+						delete mWrittenContinueSemaphore;
 					}
 				}
 
@@ -198,6 +208,9 @@ namespace Konclude {
 							bool last = rswe->isLast();
 							writeStreamDataToSocket(bufferList, last);
 							mWriteLimitSemaphore->release(1);
+							if (mWrittenContinueSemaphore) {
+								mWrittenContinueSemaphore->release(1);
+							}
 							mDataWritten = true;
 							return true;
 						}
@@ -230,6 +243,9 @@ namespace Konclude {
 						mWriteLimitSemaphore->acquire(1);
 					}
 					postEvent(new CResultStreamingWriteEvent(bufferList, last));
+					if (!mThreadedWriting && mWrittenContinueSemaphore) {
+						mWrittenContinueSemaphore->acquire();
+					}
 					//writeStreamDataToSocket(buffer, last);
 					//mDataWritten = true;
 					return !mWritingFailed;

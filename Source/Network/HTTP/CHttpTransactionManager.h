@@ -62,7 +62,7 @@ namespace Konclude {
 
 					enum ABORT_REASON {
 						ABORT_NO_REASON = 1,
-						ABORT_DOWNLOAD_SIZE_LIMIT_REACHED = 1
+						ABORT_DOWNLOAD_SIZE_LIMIT_REACHED = 2
 					};
 
 

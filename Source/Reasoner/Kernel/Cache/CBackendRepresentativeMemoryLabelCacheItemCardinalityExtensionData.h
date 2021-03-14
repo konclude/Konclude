@@ -62,7 +62,7 @@ namespace Konclude {
 					public:
 
 						//! Constructor
-						CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData(CBackendRepresentativeMemoryCacheContext* context);
+						CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData(CContext* context);
 
 						CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData* initCardinalityExtensionData();
 

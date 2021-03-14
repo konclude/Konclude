@@ -29,9 +29,6 @@ namespace Konclude {
 
 
 			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData() {
-				mRealizationIterator = nullptr;
-				mRealizationScheduled = false;
-				mExpectedFillerCount = 0;
 			}
 
 
@@ -47,8 +44,6 @@ namespace Konclude {
 
 
 
-
-
 			QList<COptimizedComplexVariableIndividualUpdateCardinalityLinker*>* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::getCardinalityUpdatePropagationIteratorList() {
 				return &mUpdateCardinalityIteratorList;
 			}
@@ -57,39 +52,12 @@ namespace Konclude {
 				mUpdateCardinalityIteratorList.append(iterator);
 				return this;
 			}
-
-
-
-			CRealizationIndividualInstanceItemReferenceIterator* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::getRealizationIterator() {
-				return mRealizationIterator;
-			}
-
-			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::setRealizationIterator(CRealizationIndividualInstanceItemReferenceIterator* iterator) {
-				mRealizationIterator = iterator;
-				return this;
-			}
+			
 
 			QSet<CRealizationIndividualInstanceItemReference>* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::getPropagationInstanceItemSet() {
 				return &mInstItemRolePropInstItemSet;
 			}
 
-			bool COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::isRealizationScheduled() {
-				return mRealizationScheduled;
-			}
-
-			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::setRealizationScheduled(bool scheduled) {
-				mRealizationScheduled = scheduled;
-				return this;
-			}
-
-			cint64 COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::getExpectedFillerCount() {
-				return mExpectedFillerCount;
-			}
-
-			COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData::setExpectedFillerCount(cint64 count) {
-				mExpectedFillerCount = count;
-				return this;
-			}
 
 
 		}; // end namespace Answerer

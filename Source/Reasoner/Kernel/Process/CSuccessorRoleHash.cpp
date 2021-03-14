@@ -30,39 +30,124 @@ namespace Konclude {
 			namespace Process {
 
 
-				CSuccessorRoleHash::CSuccessorRoleHash(CProcessContext* context) : CPROCESSHASH<cint64,CIndividualLinkEdge*>(context),mContext(context) {
+				CSuccessorRoleHash::CSuccessorRoleHash(CProcessContext* context) : mContext(context) {
+					mSuccessorLinkHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64, CIndividualLinkEdge*>, CProcessContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
+					mPrevSuccessorLinkHash = nullptr;
+					mPrevValidatingRequired = false;
 				}
 
 
 				CSuccessorRoleHash* CSuccessorRoleHash::initSuccessorRoleHash(CSuccessorRoleHash* prevRoleSuccHash) {
 					if (prevRoleSuccHash) {
-						CPROCESSHASH<cint64, CIndividualLinkEdge*>::operator=(*prevRoleSuccHash);
+
+						if (!prevRoleSuccHash->mPrevSuccessorLinkHash && prevRoleSuccHash->mSuccessorLinkHash->size() <= 100) {
+							*mSuccessorLinkHash = *prevRoleSuccHash->mSuccessorLinkHash;
+							mPrevSuccessorLinkHash = nullptr;
+							mPrevValidatingRequired = false;
+						} else if (!prevRoleSuccHash->mPrevSuccessorLinkHash && prevRoleSuccHash->mSuccessorLinkHash->size() > 100) {
+							mSuccessorLinkHash->clear();
+							mPrevSuccessorLinkHash = prevRoleSuccHash->mSuccessorLinkHash;
+							mPrevValidatingRequired = false;
+						} else {
+
+							if (prevRoleSuccHash->mSuccessorLinkHash->size() * 10 > prevRoleSuccHash->mPrevSuccessorLinkHash->size()) {
+								*mSuccessorLinkHash = *prevRoleSuccHash->mSuccessorLinkHash;
+
+								for (CPROCESSHASH<cint64, CIndividualLinkEdge*>::const_iterator it = prevRoleSuccHash->mPrevSuccessorLinkHash->constBegin(), itEnd = prevRoleSuccHash->mPrevSuccessorLinkHash->constEnd(); it != itEnd; ++it) {
+									cint64 neighbourId = it.key();
+									if (!mPrevValidatingRequired || !prevRoleSuccHash->mSuccessorLinkHash->contains(neighbourId)) {
+										CIndividualLinkEdge* link = it.value();
+										mSuccessorLinkHash->insertMulti(neighbourId, link);
+									}
+								}
+								mPrevSuccessorLinkHash = nullptr;
+								mPrevValidatingRequired = false;
+							} else {
+								*mSuccessorLinkHash = *prevRoleSuccHash->mSuccessorLinkHash;
+								mPrevSuccessorLinkHash = prevRoleSuccHash->mPrevSuccessorLinkHash;
+								mPrevValidatingRequired = false;
+							}
+
+						}
+
 					} else {
-						CPROCESSHASH<cint64,CIndividualLinkEdge*>::clear();
+						mPrevValidatingRequired = false;
+						mSuccessorLinkHash->clear();
+						mPrevSuccessorLinkHash = nullptr;
 					}
 					return this;
 				}
 
 				CSuccessorRoleHash* CSuccessorRoleHash::insertSuccessorRoleLink(cint64 indi, CIndividualLinkEdge* link) {
-					CPROCESSHASH<cint64,CIndividualLinkEdge*>::insertMulti(indi,link);
+
+					if (mPrevSuccessorLinkHash && mPrevSuccessorLinkHash->contains(indi) && !mSuccessorLinkHash->contains(indi)) {
+						for (CPROCESSHASH<cint64, CIndividualLinkEdge*>::const_iterator it = mPrevSuccessorLinkHash->find(indi), itEnd = mPrevSuccessorLinkHash->constEnd(); it != itEnd; ++it) {
+							cint64 indiId = it.key();
+							if (indiId != indi) {
+								break;
+							}
+							CIndividualLinkEdge* link = it.value();
+							mSuccessorLinkHash->insertMulti(indiId, link);
+							mPrevValidatingRequired = true;
+						}
+					}
+
+					mSuccessorLinkHash->insertMulti(indi,link);
 					return this;
 				}
 
 				CSuccessorRoleIterator CSuccessorRoleHash::getSuccessorRoleIterator(cint64 indi) {
-					return CSuccessorRoleIterator(indi,CPROCESSHASH<cint64,CIndividualLinkEdge*>::find(indi),CPROCESSHASH<cint64,CIndividualLinkEdge*>::end());
+					if (!mPrevSuccessorLinkHash || mSuccessorLinkHash->contains(indi)) {
+						return CSuccessorRoleIterator(indi, mSuccessorLinkHash->find(indi), mSuccessorLinkHash->end());
+					} else if (mPrevSuccessorLinkHash && mPrevSuccessorLinkHash->contains(indi)) {
+						return CSuccessorRoleIterator(indi, mPrevSuccessorLinkHash->find(indi), mPrevSuccessorLinkHash->end());
+					} else {
+						return CSuccessorRoleIterator(indi, mSuccessorLinkHash->end(), mSuccessorLinkHash->end());
+					}
 				}
 
 				bool CSuccessorRoleHash::hasSuccessorIndividualNode(cint64 indi) {
-					return CPROCESSHASH<cint64,CIndividualLinkEdge*>::contains(indi);
+					if (mSuccessorLinkHash->contains(indi)) {
+						return true;
+					}
+					if (mPrevSuccessorLinkHash && mPrevSuccessorLinkHash->contains(indi)) {
+						return true;
+					}
+					return false;
 				}
 
 				CSuccessorRoleHash* CSuccessorRoleHash::removeSuccessor(cint64 indi) {
-					CPROCESSHASH<cint64,CIndividualLinkEdge*>::remove(indi);
+
+					if (mPrevSuccessorLinkHash && mPrevSuccessorLinkHash->contains(indi)) {
+						for (CPROCESSHASH<cint64, CIndividualLinkEdge*>::const_iterator it = mPrevSuccessorLinkHash->constBegin(), itEnd = mPrevSuccessorLinkHash->constEnd(); it != itEnd; ) {
+							cint64 indiId = it.key();
+							if (!mPrevValidatingRequired || !mSuccessorLinkHash->contains(indiId)) {
+								do {
+									CIndividualLinkEdge* link = it.value();
+									mSuccessorLinkHash->insertMulti(indiId, link);
+									++it;
+								} while (it != itEnd && it.key() == indiId);
+							} else {
+								++it;
+							}
+						}
+						mPrevSuccessorLinkHash = nullptr;
+					}
+
+					mSuccessorLinkHash->remove(indi);
 					return this;
 				}
 
 				CSuccessorIterator CSuccessorRoleHash::getSuccessorIterator() {
-					return CSuccessorIterator(CPROCESSHASH<cint64,CIndividualLinkEdge*>::begin(),CPROCESSHASH<cint64,CIndividualLinkEdge*>::end());
+					if (mPrevSuccessorLinkHash) {
+						if (mPrevValidatingRequired) {
+							return CSuccessorIterator(mSuccessorLinkHash->begin(), mSuccessorLinkHash->end(), mPrevSuccessorLinkHash->begin(), mPrevSuccessorLinkHash->end(), mSuccessorLinkHash);
+						} else {
+							return CSuccessorIterator(mSuccessorLinkHash->begin(), mSuccessorLinkHash->end(), mPrevSuccessorLinkHash->begin(), mPrevSuccessorLinkHash->end());
+						}
+					} else {
+						return CSuccessorIterator(mSuccessorLinkHash->begin(), mSuccessorLinkHash->end());
+					}
 				}
 
 

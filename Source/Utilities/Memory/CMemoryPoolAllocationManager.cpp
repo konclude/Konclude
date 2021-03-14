@@ -244,6 +244,12 @@ namespace Konclude {
 				return mFreeMemoryPoolCount;
 			}
 
+			CMemoryTemporaryAllocationManager* CMemoryPoolAllocationManager::addUsedMemoryPools(CMemoryPool* memoryPools) {
+				mUsedMemoryPoolList = memoryPools->append(mUsedMemoryPoolList);
+				return this;
+			}
+
+
 
 		}; // end namespace Memory
 

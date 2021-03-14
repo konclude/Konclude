@@ -27,7 +27,8 @@ namespace Konclude {
 		namespace Answerer {
 
 			
-			CAnsweringPropagationSteeringAbsorptionEntailmentController::CAnsweringPropagationSteeringAbsorptionEntailmentController() {
+			CAnsweringPropagationSteeringAbsorptionEntailmentController::CAnsweringPropagationSteeringAbsorptionEntailmentController(CConcept* restrictedTopPropagation) {
+				mRestrictedTopPropagation = restrictedTopPropagation;
 			}
 
 
@@ -49,10 +50,21 @@ namespace Konclude {
 				return true;
 			}
 
+			bool CAnsweringPropagationSteeringAbsorptionEntailmentController::isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId) {
+				return true;
+			}
+
+
 			bool CAnsweringPropagationSteeringAbsorptionEntailmentController::isPreparationBindingAllIndividuals(CVariable* variable) {
 				return true;
 			}
 
+			bool CAnsweringPropagationSteeringAbsorptionEntailmentController::isRestrictedTopPropagation(CConcept* concept) {
+				if (mRestrictedTopPropagation == concept) {
+					return true;
+				}
+				return false;
+			}
 
 
 		}; // end namespace Answerer

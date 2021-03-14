@@ -65,6 +65,7 @@ namespace Konclude {
 					COptimizedComplexVariableCompositionItem* getBaseItem();
 					COptimizedComplexVariableCompositionItemDependence* getBaseItemDependence();
 
+					virtual bool clearComputation();
 
 				// protected methods
 				protected:

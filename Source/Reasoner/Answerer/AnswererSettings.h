@@ -67,7 +67,7 @@ namespace Konclude {
 			class CAnswererContext;
 			class COntologyAnsweringItem;
 			class COptimizedComplexVariableCompositionItem;
-			class COptimizedComplexBuildingVariableCompositionsItem;
+			class COptimizedComplexBuildingIndividualVariableCompositionsItem;
 			class COptimizedComplexVariableRolePropagationItem;
 			class COptimizedComplexVariableRolePropagationJoiningItem;
 			class COptimizedComplexVariableRolePropagationReplacementItem;
@@ -83,7 +83,15 @@ namespace Konclude {
 			class CRedlandRasqalSubQueryBindingPositionResolvingHash;
 			class CAnsweringPropagationSteeringAbsorptionExtensionItemController;
 			class COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem;
-
+			class COptimizedComplexVariableCompositionItemDependence;
+			class COptimizedComplexBuildingVariableCompositionsItem;
+			class COptimizedComplexBuildingClassVariableCompositionsItem;
+			class COptimizedComplexVariableConceptSubSuperItem;
+			class COptimizedComplexVariableRoleSubSuperItem;
+			class COptimizedComplexVariableSubSuperClassesPropagationItem;
+			class COptimizedComplexVariableSubSuperPropertiesPropagationItem;
+			class COptimizedComplexVariableIndividualTypeExtensionItem;
+			class COptimizedComplexVariableIndividualNeighboringPropertyExtensionItem;
 
 			// Custom Events >= 2000
 			const QEvent::Type EVENTANSWERINGINITIALIZING			= (QEvent::Type)2001;

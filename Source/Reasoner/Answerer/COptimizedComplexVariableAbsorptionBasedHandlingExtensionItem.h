@@ -29,6 +29,7 @@
 #include "COptimizedComplexVariableCompositionItem.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData.h"
 #include "CAnsweringSplitEntailmentTestingCancellationAdapter.h"
+#include "CAnsweringSplitPropagationTestControllingItem.h"
 
 
 
@@ -102,8 +103,8 @@ namespace Konclude {
 
 					bool isPropagationInitializationIndividualsSplitted();
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setPropagationInitializationIndividualsSplitted(bool splitted);
-					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* addPropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController);
-					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* removePropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController);
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* addPropagationSteeringController(CAnsweringPropagationSteeringController* propagationSteeringController);
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* removePropagationSteeringController(CAnsweringPropagationSteeringController* propagationSteeringController);
 
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setPropagationInitializationIndividualsSplittedTestsRemaining(bool remainingTests);
 					bool hasRemainingPropagationInitializationIndividualsSplittedTests();
@@ -116,8 +117,27 @@ namespace Konclude {
 
 					CAnsweringSplitEntailmentTestingCancellationAdapter* getEntailmentTestingCancellationAdapter();
 
+					CAnsweringSplitPropagationTestControllingItem* getNextPreparedSplitPropagationTestControllingItem();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* addReaminingPreparedSplitPropagationTestControllingItem(CAnsweringSplitPropagationTestControllingItem* item);
+					bool hasPreparedSplitPropagationTestControllingItems();
+					bool hasRemainingPreparedSplitPropagationTestControllingItems();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* initPreparedSplitPropagationTestControllingItemSize(cint64 preparedSplitSize);
+					CAnsweringSplitPropagationTestControllingItem*& getPreparedSplitPropagationTestControllingItem(cint64 preparedSplitId);
+
+					CAnsweringSplitPropagationTestControllingItem* getNextSplitPropagationTestControllingItem();
+					CAnsweringSplitPropagationTestControllingItem* getSplitPropagationTestingItem(cint64 splitItemId);
+
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* addRemainingRepeatedSplitTestingItem(CAnsweringSplitPropagationTestControllingItem* item);
+					QList<CAnsweringSplitPropagationTestControllingItem*>* getRemainingRepeatedSplitTestingItemList();
+
+					bool isSplitPropagationItemProcessingQueued();
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* setSplitPropagationItemProcessingQueued(bool queued);
+
+					virtual bool clearComputation();
+
 				// protected methods
 				protected:
+					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* addSplitPropagationTestingItem(cint64 splitItemId, CAnsweringSplitPropagationTestControllingItem* item);
 
 				// protected variables
 				protected:
@@ -142,13 +162,23 @@ namespace Konclude {
 					bool mDependentMappingsComputationScheduled;
 					bool mPropagationInitializationIndividualsSplitted;
 					bool mPropagationInitializationIndividualsSplittedTestsRemaining;
-					QSet<CAnsweringPropagationSteeringAbsorptionExtensionItemController*> mPropagationSteeringControllerSet;
+					QSet<CAnsweringPropagationSteeringController*> mPropagationSteeringControllerSet;
 
 					cint64 mNextPropagationInitializationIndividualsSplittedTestId;
 
 					bool mEntailmentFound;
 
 					CAnsweringSplitEntailmentTestingCancellationAdapter* mCancellationAdapter;
+
+					QHash<cint64, CAnsweringSplitPropagationTestControllingItem*> mSplitPropagationTestingItemHash;
+					cint64 mNextSplitPropagationTestingItemId;
+
+					QList<CAnsweringSplitPropagationTestControllingItem*> mRemainingRepeatedSplitTestingItemList;
+
+					QVector<CAnsweringSplitPropagationTestControllingItem*> mPreparedSplitTestingItemVec;
+					QList<CAnsweringSplitPropagationTestControllingItem*> mRemainingPreparedSplitTestingItemList;
+
+					bool mSplitPropagationItemProcessingQueued;
 
 				// private methods
 				private:

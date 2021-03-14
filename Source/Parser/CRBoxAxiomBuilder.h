@@ -58,6 +58,8 @@
 #include "Parser/Expressions/CDataPropertyDomainExpression.h"
 #include "Parser/Expressions/CDataPropertyRangeExpression.h"
 
+#include "Parser/Expressions/CObjectPropertyVariableExpression.h"
+#include "Parser/Expressions/CDataPropertyVariableExpression.h"
 
 // Other includes
 
@@ -98,6 +100,15 @@ namespace Konclude {
 
 				virtual CDataPropertyExpression* getDataProberty(const QString& dataPropertyName) = 0;
 				virtual CDataPropertyExpression* getDataProberty(const QStringRef& dataPropertyName) = 0;
+
+
+				virtual CObjectPropertyVariableExpression* getObjectPropertyVariable(const QStringRef &objectPropertyVariableName) = 0;
+				virtual CObjectPropertyVariableExpression* getObjectPropertyVariable(const QString &objectPropertyVariableName) = 0;
+
+				virtual CDataPropertyVariableExpression* getDataPropertyVariable(const QStringRef &dataPropertyVariableName) = 0;
+				virtual CDataPropertyVariableExpression* getDataPropertyVariable(const QString &dataPropertyVariableName) = 0;
+
+
 
 				virtual CSubDataPropertyOfExpression* getSubDataPropertyOf(const CEXPRESSIONLIST<CBuildExpression*>& expressions) = 0;
 				virtual CSubDataPropertyOfExpression* getSubDataPropertyOf(CBuildExpression* expression1, CBuildExpression* expression2) = 0;

@@ -100,8 +100,11 @@ namespace Konclude {
 						//! Constructor
 						CBackendAssociationCacheHandler(CBackendRepresentativeMemoryCacheReader* backAssCacheReader, CBackendRepresentativeMemoryCacheWriter* backAssCacheWriter);
 
+						CBackendRepresentativeMemoryCache* getCache();
 
 						CBackendAssociationCacheHandler* setWorkingOntology(CConcreteOntology* ontology);
+						CBackendAssociationCacheHandler* checkRecomputationIdUsage(cint64 recomputationId);
+
 
 						bool commitCacheMessages(CCalculationAlgorithmContext* calcAlgContext);
 
@@ -112,6 +115,9 @@ namespace Konclude {
 
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* getIndividualAssociationData(CIndividual* individual, CCalculationAlgorithmContext* calcAlgContext);
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* getIndividualAssociationData(cint64 indiId, CCalculationAlgorithmContext* calcAlgContext);
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* getIndividualAssociationData(cint64 indiId, bool recordAccess, CCalculationAlgorithmContext* calcAlgContext);
+
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* getIndividualRepresentativeIdResolvedAssociationData(cint64 indiId, CCalculationAlgorithmContext* calcAlgContext);
 
 
 						CIndividualRepresentativeBackendCacheLoadedAssociationData* getIndividualAssociationLoadingData(cint64 indiId, CCalculationAlgorithmContext* calcAlgContext);
@@ -162,9 +168,12 @@ namespace Konclude {
 						bool hasRoleInAssociatedCompinationRoleSetLabel(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, CRole* role, bool inversed);
 
 
+						bool visitNeighbourArrayIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourArrayId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours, CCalculationAlgorithmContext* calcAlgContext);
 
+						bool visitNeighbourIndividualIdsForNeighbourArrayIdFromCursor(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 id, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic, cint64 cursor)> visitFunc, bool visitOnlyDeterministicNeighbours, cint64 cursor, CCalculationAlgorithmContext* calcAlgContext);
 						bool visitNeighbourIndividualIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours, CCalculationAlgorithmContext* calcAlgContext);
 						cint64 getNeighbourCountForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, CCalculationAlgorithmContext* calcAlgContext);
+						cint64 getNeighbourCountForArrayPos(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 pos, CCalculationAlgorithmContext* calcAlgContext);
 
 
 					// protected methods
@@ -208,11 +217,7 @@ namespace Konclude {
 
 
 						CPROCESSHASH< TRoleInversionPair, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >* mRoleInversionTmpRefNeighbourInstantiatedRoleSetLabelHash;
-						CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >* mRoleInversionSetTmpRefNeighbourInstantiatedRoleSetLabelHash;
-
-
-						CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >* mRoleInversionSetTmpRefCombinedNeighbourRoleInstantiatedSetLabelHash;
-						CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >* mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash;
+						CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >* mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT];
 
 						CPROCESSHASH< CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker*, CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* >* mTmpConceptLabelTmpCardDataHash;
 

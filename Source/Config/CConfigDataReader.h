@@ -61,10 +61,15 @@ namespace Konclude {
 
 				static QString readConfigString(CConfiguration *config, const QString &configString, const QString &defaultValue = QString(), bool *errorFlag = 0);
 				static qint64 readConfigInteger(CConfiguration *config, const QString &configString, qint64 defaultValue = 0, bool *errorFlag = 0);
+				static double readConfigDouble(CConfiguration *config, const QString &configString, double defaultValue = 0, bool *errorFlag = 0);
 				static bool readConfigBoolean(CConfiguration *config, const QString &configString, bool defaultValue = false, bool *errorFlag = 0);
+				static QStringList readConfigStringList(CConfiguration *config, const QString &configString, const QStringList& defaultValue = QStringList(), bool *errorFlag = 0);
+
 				static QString readConfigString(CConfigurationProvider *configProv, const QString &configString, const QString &defaultValue = QString(), bool *errorFlag = 0);
 				static qint64 readConfigInteger(CConfigurationProvider *configProv, const QString &configString, qint64 defaultValue = 0, bool *errorFlag = 0);
+				static double readConfigDouble(CConfigurationProvider *configProv, const QString &configString, double defaultValue = 0, bool *errorFlag = 0);
 				static bool readConfigBoolean(CConfigurationProvider *configProv, const QString &configString, bool defaultValue = false, bool *errorFlag = 0);
+				static QStringList readConfigStringList(CConfigurationProvider *configProv, const QString &configString, const QStringList& defaultValue = QStringList(), bool *errorFlag = 0);
 
 			// protected methods
 			protected:

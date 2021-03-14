@@ -43,6 +43,18 @@ namespace Konclude {
 					// generate worker framework
 					LOG(WARNING,"::Konclude::Reasoner::Kernel::ExperimentalReasonerManager",logTr("Initializing EXPERIMENTAL Reasoner."),this);
 
+					if (mConfgAdaptThreadPoolToWorkerCount) {
+						QThreadPool::globalInstance()->setMaxThreadCount(mWorkControllerCount);
+					}
+					if (mBlockThreadPoolThreadCount > 0) {
+						for (cint64 i = 0; i < mBlockThreadPoolThreadCount; ++i) {
+							QtConcurrent::run(QThreadPool::globalInstance(), [&]() {
+								mBlockThreadPoolThreadsBlockingSemaphore.acquire(1);
+								mBlockThreadPoolThreadsReleasingSemaphore.release(1);
+							});
+						}
+					}
+
 					unsatCache = new COccurrenceUnsatisfiableCache(mWorkControllerCount+2);
 					mSatExpCache = new CSignatureSatisfiableExpanderCache(configProvider->getCurrentConfiguration());
 					mReuseCompGraphCache = new CReuseCompletionGraphCache();

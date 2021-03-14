@@ -35,6 +35,7 @@
 #include "Reasoner/Answerer/COptimizedComplexExpressionOntologyAnsweringItem.h"
 #include "Reasoner/Answerer/COptimizedComplexVariableCompositionItemDependence.h"
 #include "Reasoner/Answerer/COptimizedComplexVariableCompositionItem.h"
+#include "Reasoner/Answerer/COptimizedComplexBuildingClassVariableCompositionsItem.h"
 
 #include "Reasoner/Query/CVariableBindingsAnswersResult.h"
 #include "Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringQuery.h"
@@ -45,6 +46,7 @@
 #include "Reasoner/Query/CVariableBindingsAnswersListResult.h"
 #include "Reasoner/Query/CVariableBindingStringResult.h"
 #include "Reasoner/Query/CVariableBindingsAnswersOrderedMapResult.h"
+#include "Reasoner/Query/CComplexAxiomsClassVariablesAnsweringQuery.h"
 
 #include "Reasoner/Realization/CConceptRealizationInstanceToIndividualVisitor.h"
 #include "Reasoner/Realization/CSameRealizationIndividualVisitor.h"
@@ -95,6 +97,10 @@ namespace Konclude {
 
 						COptimizedComplexVariableCompositionItem* getResultUsingLastVariableCompositionItem();
 
+						COptimizedComplexVariableCompositionItem* mLastVarItem = nullptr;
+						COptimizedComplexBuildingVariableCompositionsItem* mVarBuildItem = nullptr;
+						COptimizedComplexBuildingIndividualVariableCompositionsItem* mVarBuildIndividualItem = nullptr;
+						COptimizedComplexBuildingClassVariableCompositionsItem* mVarBuildClassItem = nullptr;
 
 					// protected methods
 					protected:
@@ -121,8 +127,8 @@ namespace Konclude {
 
 						class CInstanceBindingAddingVisitor : public CSameRealizationIndividualVisitor, public CConceptRealizationInstanceToIndividualVisitor {
 						public:
-							CInstanceBindingAddingVisitor(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CIndividualNameResolver* indiNameResolver, CComplexQueryExpressionProcessingData* queryProcessingData, CVariableBindingsQueryResultWriter* resultWriter) {
-								mCompAssIndVarQuery = compAssIndVarQuery;
+							CInstanceBindingAddingVisitor(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexVariablesAnsweringQuery* compAssIndVarQuery, CIndividualNameResolver* indiNameResolver, CComplexQueryExpressionProcessingData* queryProcessingData, CVariableBindingsQueryResultWriter* resultWriter) {
+								mCompVarQuery = compAssIndVarQuery;
 								mBindsAnswersResult = bindsAnswersResult;
 								mFilteringAnsweringMapping = filteringAnsweringMapping;
 								mIndiNameResolver = indiNameResolver;
@@ -149,19 +155,19 @@ namespace Konclude {
 
 							bool visitIndividual(const CIndividualReference& indiRef) {
 								if (!mBinding) {
-									mBinding = mResultWriter->createVariableBindingResult(indiRef, mCompAssIndVarQuery, mIndiNameResolver);
+									mBinding = mResultWriter->createVariableBindingResult(indiRef, mCompVarQuery, mIndiNameResolver);
 									mBindResListAnswer = new CVariableBindingsListAnswerResult();
 									mBindResListAnswer->addResultVariableBinding(mBinding);
 								} else {
 									QString indiName = mIndiNameResolver->getIndividualName(indiRef);
 									mBinding->initVariableBinding(indiRef, indiName);
 								}
-								mResultWriter->addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mBindsAnswersResult, mBindResListAnswer, mFilteringAnsweringMapping, mCompAssIndVarQuery, mQueryProcessingData, 1);
+								mResultWriter->addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mBindsAnswersResult, mBindResListAnswer, mFilteringAnsweringMapping, mCompVarQuery, mQueryProcessingData, 1);
 								return true;
 							}
 
 							CVariableBindingsQueryResultWriter* mResultWriter;
-							CComplexAssertionsIndividualVariablesAnsweringQuery* mCompAssIndVarQuery;
+							CComplexVariablesAnsweringQuery* mCompVarQuery;
 							CVariableBindingsAnswersResult* mBindsAnswersResult;
 							CVariableBindingFilteringAnswerMapping* mFilteringAnsweringMapping;
 							CIndividualNameResolver* mIndiNameResolver;
@@ -199,18 +205,22 @@ namespace Konclude {
 						};
 
 
+						//COptimizedComplexVariableCompositionItem* mLastVarItem = nullptr;
+						//COptimizedComplexBuildingVariableCompositionsItem* mVarBuildItem = nullptr;
 						CVariableBindingsQueryResultWriter mResultWriter;
 						CComplexQueryExpressionProcessingData* mQueryProcessingData;
 						bool mAbbreviatedIRIs = false;
 						QStringList mVarList;
 						QHash<CExpressionVariable*, cint64> mDisVarIdHash;
+						CComplexVariablesAnsweringQuery* mCompVarQuery;
 						CComplexAssertionsIndividualVariablesAnsweringQuery* mCompAssIndVarQuery;
-						COptimizedComplexBuildingVariableCompositionsItem* mVarBuildItem;
+						CComplexAxiomsClassVariablesAnsweringQuery* mCompAxClassVarQuery;
 						CVariableBindingFilteringAnswerMapping* mFilteringAnsweringMapping = nullptr;
 						bool mAnswersWriteable = true;
 						cint64 mLastOnlyCountingWritten = 0;
 						COptimizedComplexExpressionOntologyAnsweringItem* mOntoAnsweringItem;
 						CVariableBindingsAnswersResult* mBindsAnswersResult = nullptr;
+						cint64 mSplitComputedMappingCount = 0;
 						bool mDistinct;
 						QList<cint64> mAnswerDistinguishedVariableMappingIndexList;
 						QList<cint64> mNonAnswerVariableMappingIndexList;
@@ -218,7 +228,6 @@ namespace Konclude {
 						CConceptRealization* mConceptRealization;
 						cint64 mAnswerVarCount;
 						CVariableBindingResultVector** mBindingResultVectorArray;
-						COptimizedComplexVariableCompositionItem* mLastVarItem = nullptr;
 						CIndividualNameResolver* mIndiNameResolver;
 						COptimizedComplexVariableIndividualMappings* mLastVarItemMapping = nullptr;
 						COptimizedComplexConceptItem* mConceptItem;

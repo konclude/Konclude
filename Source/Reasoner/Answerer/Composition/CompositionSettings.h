@@ -57,7 +57,7 @@ namespace Konclude {
 
 
 				// forward declarations
-
+				class CAbstractVariableMappingsCompositionItemRequirementProcessor;
 
 
 

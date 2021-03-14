@@ -96,6 +96,10 @@ namespace Konclude {
 
 					virtual CReasonerEvaluationRequestClientBaseThread* readConfig(CConfiguration* config);
 
+					virtual bool processTimer(qint64 timerID); 
+					virtual bool closeRequestTimeoutContinueRestart();
+					virtual bool closeAllRequestTimeout();
+					virtual bool closeNextRequest();
 
 				// protected variables
 				protected:
@@ -109,6 +113,13 @@ namespace Konclude {
 
 					cint64 mConfResponseSizeLimit;
 
+					QList<CReasonerEvaluationRequestResponse*> mAllRequestList;
+					cint64 mRemainingRestartRepeatingRequests;
+
+					cint64 mTotalInitRequests;
+					cint64 mRestartRepeatingRequests;
+
+					cint64 mConfSeparateQueryingTimeout;
 
 				// private methods
 				private:

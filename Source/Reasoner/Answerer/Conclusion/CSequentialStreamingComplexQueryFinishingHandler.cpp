@@ -38,22 +38,30 @@ namespace Konclude {
 				}
 
 
-
+				
 
 
 				void CSequentialStreamingComplexQueryFinishingHandler::processUpdatedBindingsCardinalityLinkers() {
-					while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && (!mLastVarItemProcessingDep->isBatchProcessed() || mLastVarItemProcessingDep->loadNextBatch())) {
 
-						while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() <= mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && mLastVarItemProcessingDep->getBatchCurrentBindingsCardinalityLinker(false)) {
-							COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = mLastVarItemProcessingDep->getBatchCurrentBindingsCardinalityLinker(true);
+					COptimizedComplexVariableCompositionItemDependence* varItemProcessingDep = mLastVarItemProcessingDep;
+					if (varItemProcessingDep->getDependentItem()->hasSplitComputations()) {
+						varItemProcessingDep = new COptimizedComplexVariableCompositionItemDependence(varItemProcessingDep->getDependentItem()->getCurrentSplitComputationItem());
+						mSplitComputedMappingCount += varItemProcessingDep->getDependentItem()->getVariableMappingsCurrentCount();
+					}
+
+
+					while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompVarQuery->getResultLimitIncludingOffset() || mCompVarQuery->getResultLimitIncludingOffset() == -1) && (!varItemProcessingDep->isBatchProcessed() || varItemProcessingDep->loadNextBatch())) {
+
+						while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() <= mCompVarQuery->getResultLimitIncludingOffset() || mCompVarQuery->getResultLimitIncludingOffset() == -1) && varItemProcessingDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+							COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = varItemProcessingDep->getBatchCurrentBindingsCardinalityLinker(true);
 							COptimizedComplexVariableIndividualBindings* bindings = bindingLinker->getBindings();
 							COptimizedComplexVariableIndividualBindingsCardinality* cardinalites = bindingLinker->getInitialCardinalities();
 
 							handleBindingCardinalityLinker(bindings, cardinalites);
 						}
 
-						while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompAssIndVarQuery->getResultLimitIncludingOffset() || mCompAssIndVarQuery->getResultLimitIncludingOffset() == -1) && mLastVarItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
-							COptimizedComplexVariableIndividualUpdateCardinalityLinker* updatedCardinalityLinker = mLastVarItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(true);
+						while ((mQueryProcessingData->getOffsetSkippedMappingCount() + mBindsAnswersResult->getResultCount() < mCompVarQuery->getResultLimitIncludingOffset() || mCompVarQuery->getResultLimitIncludingOffset() == -1) && varItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+							COptimizedComplexVariableIndividualUpdateCardinalityLinker* updatedCardinalityLinker = varItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(true);
 							if (!mDistinct) {
 								COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites = updatedCardinalityLinker->getPreviousCardinality();
 								COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = updatedCardinalityLinker->getUpdatedBindingsCardinalityLinker();
@@ -67,6 +75,11 @@ namespace Konclude {
 							}
 						}
 					}
+
+					if (varItemProcessingDep != mLastVarItemProcessingDep) {
+						delete varItemProcessingDep;
+					}
+
 				}
 
 

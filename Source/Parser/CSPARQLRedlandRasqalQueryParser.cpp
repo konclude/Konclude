@@ -69,14 +69,17 @@ namespace Konclude {
 			return successfullParsed;
 		}
 
+		bool CSPARQLRedlandRasqalQueryParser::parseQueryTextList(const QStringList& queryTextList) {
+			return processQueryText(queryTextList.join(" "));
+		}
 
 		bool CSPARQLRedlandRasqalQueryParser::parseQueryText(const QString& filetext) {
 			return processQueryText(filetext);
 		}
 
 
-		bool CSPARQLRedlandRasqalQueryParser::parseQueryTextList(const QStringList& queryTextList) {
-			return processQueryText(queryTextList.join(" "));
+		bool CSPARQLRedlandRasqalQueryParser::parseQueryTextList(const QStringList& queryTextList, const QString& queryName) {
+			return processQueryText(queryTextList.join(" "), queryName);
 		}
 
 		CQuery* CSPARQLRedlandRasqalQueryParser::getQuery() {
@@ -127,21 +130,21 @@ namespace Konclude {
 				raptor_sequence* tripleSeq = rasqal_graph_pattern_get_triples(query, gp);
 				// check if it can be processed by Konclude
 				bool supported = true;
-				int seqSize = raptor_sequence_size(tripleSeq);
-				for (int i = 0; i < seqSize; ++i) {
-					rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(tripleSeq, i);
-					if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->predicate)) {
-						supported = false;
-					} else if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->object)) {
-						if (RASQAL_LITERAL_URI == rasqal_literal_get_type(triple->predicate)) {
-							const char* predicateString = (const char*)rasqal_literal_as_string(triple->predicate);
-							if (strcmp(predicateString, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") == 0) {
-								supported = false;
-							}
-						}
-					}
-					
-				}
+				//int seqSize = raptor_sequence_size(tripleSeq);
+				//for (int i = 0; i < seqSize; ++i) {
+				//	rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(tripleSeq, i);
+				//	if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->predicate)) {
+				//		supported = false;
+				//	} else if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->object)) {
+				//		if (RASQAL_LITERAL_URI == rasqal_literal_get_type(triple->predicate)) {
+				//			const char* predicateString = (const char*)rasqal_literal_as_string(triple->predicate);
+				//			if (strcmp(predicateString, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") == 0) {
+				//				supported = false;
+				//			}
+				//		}
+				//	}
+				//	
+				//}
 
 				if (!supported) {
 					return -1;
@@ -183,7 +186,7 @@ namespace Konclude {
 
 
 
-		bool CSPARQLRedlandRasqalQueryParser::processQueryText(const QString& queryText) {
+		bool CSPARQLRedlandRasqalQueryParser::processQueryText(const QString& queryText, const QString& queryName) {
 
 			QList<CQuerySPARQLBasicGraphPatternExpression*> sparqlQueryList;
 
@@ -216,7 +219,7 @@ namespace Konclude {
 			if (!err && rasqalQuery) {
 				if (rasqal_query_graph_pattern_visit2(rasqalQuery, rasqal_graph_pattern_visit_fn, &queryGenFunColl) == 0) {
 					queryGenFunColl.additionalKBDependencies.remove(mOntology->getOntologyName());
-					mQuery = new CRedlandRasqalBGPsCompositionQuery(mBaseOntology, mOntology, queryGenFunColl.additionalKBDependencies, queryText, world, redlandQuery, rasqalQuery, mConfig);
+					mQuery = new CRedlandRasqalBGPsCompositionQuery(mBaseOntology, mOntology, queryGenFunColl.additionalKBDependencies, queryText, world, redlandQuery, rasqalQuery, mConfig, queryName);
 					if (!messageList.isEmpty()) {
 						LOG(WARN, "Konclude::Parser::RedlandRasqalSPARQLQueryParser", logTr("Redland Rasqal query parsing and preparation warnings: '%1'.").arg(messageList.join("; ")), this);
 					}

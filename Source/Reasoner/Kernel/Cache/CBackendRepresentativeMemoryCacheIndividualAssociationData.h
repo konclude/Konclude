@@ -31,6 +31,7 @@
 #include "CBackendRepresentativeMemoryCachingFlags.h"
 #include "CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash.h"
 #include "CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray.h"
+#include "CBackendRepresentativeMemoryCacheIndividualAssociationContext.h"
 
 
 // Other includes
@@ -64,14 +65,19 @@ namespace Konclude {
 						//! Constructor
 						CBackendRepresentativeMemoryCacheIndividualAssociationData();
 
-						CBackendRepresentativeMemoryCacheIndividualAssociationData* initAssociationData(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData);
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* initAssociationData(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, bool increaseUpdateId = true);
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* initAssociationData(cint64 indiId);
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setIndividualId(cint64 indiId);
 
 						CBackendRepresentativeMemoryLabelCacheItem* getDeterministicConceptSetLabelCacheEntry();
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* setDeterministicConceptSetLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem* cacheEntry);
 
 						CBackendRepresentativeMemoryLabelCacheItem* getLabelCacheEntry(cint64 labelType);
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* setLabelCacheEntry(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* cacheEntry);
+
+
+						CBackendRepresentativeMemoryLabelCacheItem* getDeterministicMergedSameConsideredLabelCacheEntry();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setDeterministicMergedSameConsideredLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem* cacheEntry);
 
 
 						CBackendRepresentativeMemoryCardinalityCacheItem* getBackendCardinalityCacheEntry();
@@ -89,7 +95,9 @@ namespace Konclude {
 
 						cint64 getAssociationDataUpdateId();
 						cint64 getCacheUpdateId();
+						cint64 getCacheTouchId();
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* setCacheUpdateId(cint64 updateId);
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setCacheTouchId(cint64 updateId);
 
 
 
@@ -105,14 +113,54 @@ namespace Konclude {
 
 						cint64 getRepresentativeSameIndividualId();
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* setRepresentativeSameIndividualId(cint64 indiId);
+						cint64 hasRepresentativeSameIndividualMerging();
+
+
+						cint64 getDeterministicSameIndividualId();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setDeterministicSameIndividualId(cint64 indiId);
+						cint64 hasDeterministicSameIndividualMerging();
+
 
 						cint64 getAssociatedIndividualId();
 
 
-						cint64 hasRepresentativeSameIndividualMerging();
+
+						cint64 hasProblematicLevel();
+						cint64 getProblematicLevel();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setProblematicLevel(cint64 level);
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* incProblematicLevel(cint64 count = 1);
 
 
-						CBackendRepresentativeMemoryCacheIndividualAssociationData* prevData = nullptr;
+
+						cint64 hasProblematicLeveledNeigbour();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setProblematicLeveledNeigbour(bool neighbourPropLeveled);
+
+
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* getPreviousData();
+#ifdef KONCLUDE_CACHE_DEBUGGING_DATA_GENERATION
+						cint64 mDebugUpdateRecomputationId = -1;
+						bool mDebugNeighbourCompletionRequested = false;
+						bool mDebugNeighbourCompletionPerformed = false;
+						bool mDebugNeighbourCompletionExtended = false;
+						bool mDebugSameIndividualsCompletion = false;
+						QString mDebugUpdateFunction;
+						CIndividual* mDebugIndi = nullptr;
+#endif
+
+
+						CBackendRepresentativeMemoryCacheIndividualAssociationContext* getIndividualAssociationMemoryContext();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setIndividualAssociationMemoryContext(CBackendRepresentativeMemoryCacheIndividualAssociationContext* memCon);
+
+
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setLastPropagationCuttingUpdateId(cint64 id);
+						cint64 getLastPropagationCuttingUpdateId();
+						bool hasLastPropagationCuttingUpdateId();
+
+
+						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* getPropagationCutRemovedNeighbourIndividualLinker();
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* setPropagationCutRemovedNeighbourIndividualLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* linker);
+
+
 					// protected methods
 					protected:
 
@@ -121,22 +169,38 @@ namespace Konclude {
 						CBackendRepresentativeMemoryLabelCacheItem* mLabelCacheEntries[CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT];
 						CBackendRepresentativeMemoryCardinalityCacheItem* mCardinalityCacheEntry;
 
+						CBackendRepresentativeMemoryLabelCacheItem* mDetMergedSameConsideredLabelCacheEntry;
+
 						cint64 mIndiID;
 
 						bool mIncompletelyMarked;
 						bool mIndirectlyConnectedNominalIndividual;
 						bool mIndirectlyConnectedIndividualIntegration;
 
+
+						cint64 mProblematicLevel;
+						bool mProblematicLeveledNeighbour;
+
+
 						cint64 mAssociationDataUpdateId;
 						cint64 mCacheUpdateId;
+						cint64 mCacheTouchId;
 						cint64 mLastIntegratedIndirectlyConnectedIndividualsChangeId;
 
 						CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* mNeighbourRoleSetHash;
 						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* mRoleSetNeighbourArray;
 
 						cint64 mRepresentativeSameIndiId;
+						cint64 mDeterministicSameIndiId;
 
 
+						cint64 mLastPropagationCuttingUpdateId;
+						CBackendRepresentativeMemoryCacheIndividualAssociationContext* mMemContext;
+
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* mPrevData = nullptr;
+
+
+						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* mPropCutRemovedNeighbourIndiLinker;
 
 					// private methods
 					private:

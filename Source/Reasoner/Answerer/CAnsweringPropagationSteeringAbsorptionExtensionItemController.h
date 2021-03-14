@@ -30,7 +30,7 @@
 #include "CAnsweringHandler.h"
 #include "CAnsweringPropagationSteeringController.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem.h"
-#include "COptimizedComplexBuildingVariableCompositionsItem.h"
+#include "COptimizedComplexBuildingIndividualVariableCompositionsItem.h"
 
 
 // Other includes
@@ -81,8 +81,10 @@ namespace Konclude {
 					virtual bool finalizeWithBindingExtraction();
 
 					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, CIndividual* indi);
+					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId);
 					virtual bool isPreparationBindingAllIndividuals(CVariable* variable);
 
+					virtual bool isRestrictedTopPropagation(CConcept* concept);
 
 				// protected methods
 				protected:
@@ -90,7 +92,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* mAbsorptionPropagationItem;
-					COptimizedComplexBuildingVariableCompositionsItem* mVarBuildingItem;
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* mVarBuildingItem;
 
 					CVariable* mSplitVar;
 					QSet<CIndividualReference>* mSplitIndiSet;

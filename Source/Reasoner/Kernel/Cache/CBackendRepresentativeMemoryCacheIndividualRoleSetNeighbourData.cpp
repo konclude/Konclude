@@ -69,15 +69,30 @@ namespace Konclude {
 					return mIndiIdLinker;
 				}
 
-				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData::setIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker) {
-					mIndiIdLinker = indiIdLinker;
-					mCount = mIndiIdLinker->getCount();
+				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData::incIndividualCount(cint64 count) {
+					mCount += count;
 					return this;
 				}
 
 
-				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData::addIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker) {
-					mCount += indiIdLinker->getCount();
+				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData::decIndividualCount(cint64 count) {
+					mCount -= count;
+					return this;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData::setIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker, bool updateCounter) {
+					mIndiIdLinker = indiIdLinker;
+					if (updateCounter) {
+						mCount = mIndiIdLinker->getCount();
+					}
+					return this;
+				}
+
+
+				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData::addIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker, bool incCounter) {
+					if (incCounter) {
+						mCount += indiIdLinker->getCount();
+					}
 					mIndiIdLinker = indiIdLinker->append(mIndiIdLinker);
 					return this;
 				}

@@ -39,6 +39,8 @@
 // Other includes
 #include "Utilities/Container/CLinker.h"
 
+#include "Reasoner/Kernel/Algorithm/CCalculationErrorProcessingException.h"
+
 #include "Reasoner/Kernel/Process/CConceptSaturationDescriptor.h"
 #include "Reasoner/Kernel/Process/CConceptDescriptor.h"
 #include "Reasoner/Kernel/Process/CIndividualMergingHash.h"
@@ -63,6 +65,7 @@ namespace Konclude {
 		namespace Kernel {
 
 			using namespace Process;
+			using namespace Algorithm;
 
 			namespace Cache {
 
@@ -83,6 +86,7 @@ namespace Konclude {
 
 						CBackendRepresentativeMemoryCacheReader* updateSlot(CBackendRepresentativeMemoryCacheSlotItem* updatedSlot);
 						CBackendRepresentativeMemoryCacheReader* fixOntologyData(CBackendRepresentativeMemoryCacheOntologyData* ontologyData);
+						CBackendRepresentativeMemoryCacheReader* checkRecomputationIdUsage(cint64 recomputationId);
 
 
 						CBackendRepresentativeMemoryCacheReader* setWorkingOntology(cint64 ontologyIdentifier);
@@ -134,6 +138,12 @@ namespace Konclude {
 						const CCacheValue getCacheValue(CBackendRepresentativeMemoryCacheTemporaryLabelReferenceDataLinker* neigbourRoleInstantiatedSetTmpLabelLinker);
 
 
+						bool isCacheValueRoleInverse(const CCacheValue& cacheValue);
+						bool isCacheValueRoleNondeterministic(const CCacheValue& cacheValue);
+						bool isCacheValueRoleNominal(const CCacheValue& cacheValue);
+						bool isCacheValueRoleAssertion(const CCacheValue& cacheValue);
+
+
 						bool visitNominalIndirectlyConnectedIndividualIds(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* nomConnData, function<bool(cint64 indiId)> visitFunc);
 						bool visitIndividualIdsOfAssociatedIndividualSetLabel(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CBackendRepresentativeMemoryLabelCacheItem* indiSetLabel, function<bool(cint64 indiId)> visitFunc);
 
@@ -158,8 +168,12 @@ namespace Konclude {
 
 
 
+						bool visitNeighbourIndividualIdsForNeighbourArrayIdFromCursor(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 arrayId, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic, cint64 nextCursor)> visitFunc, bool visitOnlyDeterministicNeighbours = true, cint64 cursor = 0);
 						bool visitNeighbourIndividualIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours = true);
+						bool visitNeighbourArrayIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours = true);
+
 						cint64 getNeighbourCountForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role);
+						cint64 getNeighbourCountForArrayPos(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 pos);
 
 
 						bool visitRolesOfAssociatedNeigbourRoleSetLabel(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, function<bool(CRole* role, bool inversed, bool assertionLinkBase, bool nominalLinkBase, bool nondeterministic)> visitFunc);
@@ -199,6 +213,7 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem mEmptyCardSigResCacheItem;
 
 						cint64 mOntologyIdentifier;
+						cint64 mRecomputationId;
 						CBackendRepresentativeMemoryCacheOntologyData* mOntologyData;
 						CBackendRepresentativeMemoryCacheOntologyData* mFixedOntologyData;
 

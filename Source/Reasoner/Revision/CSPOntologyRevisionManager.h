@@ -24,6 +24,7 @@
 // Libraries includes
 #include <QString>
 #include <QHash>
+#include <QUuid>
 
 // Namespace includes
 #include "COntologyRevisionManager.h"
@@ -121,6 +122,7 @@ namespace Konclude {
 					COntologyRevision* createNewOntologyRevision(const QString& ontologyName, bool forceCreation, bool reportError, CCommandRecordRouter& commandRecordRouter);
 					QString createNewOntology(const QString& ontologyName, QList<CNamePrefix*>* prefixList, CCommandRecordRouter& commandRecordRouter);
 
+					bool checkHasOntology(const QString& ontologyName);
 
 				// protected variables
 				protected:

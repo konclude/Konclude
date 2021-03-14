@@ -67,17 +67,25 @@ namespace Konclude {
 					virtual CVariableBindingResult* initVariableBinding(const CIndividualReference& indiRef, const QString& resolvedIndiName) = 0;
 					virtual CVariableBindingResult* initVariableBinding(CIndividual* individual) = 0;
 					virtual CVariableBindingResult* initVariableBinding(CDataLiteral* dataLiteral) = 0;
+					virtual CVariableBindingResult* initVariableBinding(CConcept* concept) = 0;
+					virtual CVariableBindingResult* initVariableBinding(CRole* role) = 0;
 
 
-					enum VariableBindingType { VBTNAMEDINDIVIDUAL, VBTANONYMOUSINDIVIDUAL, VBTLITERAL };
+					enum VariableBindingType {
+						VBTNAMEDINDIVIDUAL, VBTANONYMOUSINDIVIDUAL, VBTLITERAL, VBTCLASS, VBTPROPERTY
+					};
 
 					virtual VariableBindingType getVariableBindingType() = 0;
 
+					bool isClassBindingType();
+					bool isPropertyBindingType();
 					bool isNamedIndividualBindingType();
 					bool isAnonymousIndividualBindingType();
 					bool isLiteralBindingType();
 
 					virtual const QString& getBindingString() = 0;
+					virtual QString getClassBindingString() = 0;
+					virtual QString getPropertyBindingString() = 0;
 					virtual QString getNamedIndividualBindingString() = 0;
 					virtual QString getLiteralDatatypeBindingString() = 0;
 					virtual QString getLiteralDatavalueBindingString() = 0;

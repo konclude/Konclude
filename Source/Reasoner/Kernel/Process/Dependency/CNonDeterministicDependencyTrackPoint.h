@@ -76,6 +76,8 @@ namespace Konclude {
 
 							bool isClashedOrIrelevantBranch();
 
+							CXLinker<cint64>* getInvolvedIndividualIdsLinker();
+							CNonDeterministicDependencyTrackPoint* setInvolvedIndividualIdsLinker(CXLinker<cint64>* linker);
 
 						// protected methods
 						protected:
@@ -85,6 +87,7 @@ namespace Konclude {
 							CClashedDependencyDescriptor* mClashes;
 							CBranchTreeNode* mBranchNode;
 							bool mClashedIrelevant;
+							CXLinker<cint64>* mInvolvedIndiLinker;
 
 						// private methods
 						private:

@@ -19,6 +19,7 @@
  */
 
 #include "COptimizedComplexExpressionOntologyAnsweringItem.h"
+#include "COptimizedComplexBuildingIndividualMixedVariableCompositionsItem.h"
 
 
 namespace Konclude {
@@ -54,7 +55,10 @@ namespace Konclude {
 				}
 
 				mNextQueryExtensionId = 1;
-
+				mCacheAnswersSizeBytes = 0;
+				mCacheAnswersCount = 0;
+				mNextUsageWeight = 1;
+				mDeleteMoreCacheEntriesWhileQueryProcessing = true;
 
 				mConfCollectProcessStatistics = CConfigDataReader::readConfigBoolean(configuration, "Konclude.Calculation.Answering.CollectProcessStatistics", false);
 
@@ -102,12 +106,24 @@ namespace Konclude {
 			}
 
 
+			COptimizedComplexVariableRoleSubSuperItem* COptimizedComplexExpressionOntologyAnsweringItem::getRoleSubSuperItem(CRole* role, bool superPropItem) {
+				return mRoleSubSuperItemHash.value(QPair<CRole*, bool>(role, superPropItem));
+			}
+
+			COptimizedComplexExpressionOntologyAnsweringItem* COptimizedComplexExpressionOntologyAnsweringItem::setRoleSubSuperItem(CRole* role, bool superPropItem, COptimizedComplexVariableRoleSubSuperItem* item) {
+				mRoleSubSuperItemHash.insert(QPair<CRole*, bool>(role, superPropItem), item);
+				return this;
+			}
+
+
+
 			COptimizedComplexConceptItem* COptimizedComplexExpressionOntologyAnsweringItem::getComplexConceptItem(CConcept* concept, bool negation, bool create, bool* created) {
 				COptimizedComplexConceptItem*& conceptItem = mConceptNegItemHash[TConceptNegPair(concept, negation)];
 				if (!conceptItem && create) {
 					conceptItem = new COptimizedComplexConceptItem();
 					conceptItem->initComplexConcept(concept, negation);
 					conceptItem->setConceptItemId(getNextComplexConceptItemId());
+					mComplexConceptItemContainerSet.insert(conceptItem);
 					if (conceptItem->representsConceptClass()) {
 						mConceptClassItemReorderingList.append(conceptItem);
 					}
@@ -135,6 +151,11 @@ namespace Konclude {
 
 			QList<COptimizedComplexConceptItem*>* COptimizedComplexExpressionOntologyAnsweringItem::getConceptClassItemReorderingList() {
 				return &mConceptClassItemReorderingList;
+			}
+
+
+			QSet<COptimizedComplexConceptItem*>* COptimizedComplexExpressionOntologyAnsweringItem::getComplexConceptItemContainer() {
+				return &mComplexConceptItemContainerSet;
 			}
 
 
@@ -193,18 +214,18 @@ namespace Konclude {
 
 
 
-			CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* COptimizedComplexExpressionOntologyAnsweringItem::createBuildingVariableItemProcessingLinker() {
-				CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* varBuildItemLinker = mBuildingVarItemProcessingLinker;
+			CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>* COptimizedComplexExpressionOntologyAnsweringItem::createBuildingVariableItemProcessingLinker() {
+				CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>* varBuildItemLinker = mBuildingVarItemProcessingLinker;
 				if (varBuildItemLinker) {
 					mBuildingVarItemProcessingLinker = mBuildingVarItemProcessingLinker->getNext();
 				} else {
-					varBuildItemLinker = new CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>();
+					varBuildItemLinker = new CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>();
 				}
 				varBuildItemLinker->clearNext();
 				return varBuildItemLinker;
 			}
 
-			COptimizedComplexExpressionOntologyAnsweringItem* COptimizedComplexExpressionOntologyAnsweringItem::releaseBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* varBuildItemLinker) {
+			COptimizedComplexExpressionOntologyAnsweringItem* COptimizedComplexExpressionOntologyAnsweringItem::releaseBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>* varBuildItemLinker) {
 				mBuildingVarItemProcessingLinker = varBuildItemLinker->append(mBuildingVarItemProcessingLinker);
 				return this;
 			}
@@ -453,6 +474,73 @@ namespace Konclude {
 				return tmpId;
 			}
 
+
+			cint64 COptimizedComplexExpressionOntologyAnsweringItem::getCacheAnswersCount() {
+				return mCacheAnswersCount;
+			}
+
+			cint64 COptimizedComplexExpressionOntologyAnsweringItem::getCacheAnswersSizeBytes() {
+				return mCacheAnswersSizeBytes;
+			}
+
+
+			COptimizedComplexExpressionOntologyAnsweringItem* COptimizedComplexExpressionOntologyAnsweringItem::setCacheAnswersCount(cint64 count) {
+				mCacheAnswersCount = count;
+				return this;
+			}
+
+			COptimizedComplexExpressionOntologyAnsweringItem* COptimizedComplexExpressionOntologyAnsweringItem::setCacheAnswersSizeBytes(cint64 size) {
+				mCacheAnswersSizeBytes = size;
+				return this;
+			}
+
+
+			QMap<double, CCacheAnswersWeightedUsageCostItemData>* COptimizedComplexExpressionOntologyAnsweringItem::getCacheAnswersWeightedUsageCostItemSetDataMap() {
+				return &mCacheAnswersWeightedUsageCostItemSetDataMap;
+			}
+
+
+			QMap<cint64, QList<COptimizedComplexVariableCompositionItem*>* >* COptimizedComplexExpressionOntologyAnsweringItem::getCacheAnswersUpdateDepthVariableCompositionItemsMap() {
+				return &mCacheAnswersUpdateDepthVariableCompositionItemsMap;
+			}
+
+
+
+			QSet<COptimizedComplexVariableCompositionItem*>* COptimizedComplexExpressionOntologyAnsweringItem::getVariableCompositionItemContainer() {
+				return &mVarCompItemContainer;
+			}
+
+			double COptimizedComplexExpressionOntologyAnsweringItem::getNextUsageWeight() {
+				return mNextUsageWeight;
+			}
+
+			COptimizedComplexExpressionOntologyAnsweringItem* COptimizedComplexExpressionOntologyAnsweringItem::setNextUsageWeight(double weight) {
+				mNextUsageWeight = weight;
+				return this;
+			}
+
+			bool COptimizedComplexExpressionOntologyAnsweringItem::canDeleteMoreCacheEntriesWhileQueryProcessing() {
+				return mDeleteMoreCacheEntriesWhileQueryProcessing;
+			}
+
+			COptimizedComplexExpressionOntologyAnsweringItem* COptimizedComplexExpressionOntologyAnsweringItem::setDeleteMoreCacheEntriesWhileQueryProcessing(bool deleteable) {
+				mDeleteMoreCacheEntriesWhileQueryProcessing = deleteable;
+				return this;
+			}
+
+
+			QList<COptimizedComplexConceptItem*>* COptimizedComplexExpressionOntologyAnsweringItem::getCacheAnswersComplexConceptItemUpdateList() {
+				return &mCacheAnswersComplexConceptItemUpdateList;
+			}
+
+
+			QHash<CRole*, QSet<TConceptNegPair>*>* COptimizedComplexExpressionOntologyAnsweringItem::getRoleDomainImpliedConceptSetHash() {
+				return &mRoleDomainImpliedConceptSetHash;
+			}
+
+			QHash<CConcept*, CConcept*>* COptimizedComplexExpressionOntologyAnsweringItem::getActivationPropagationSplitConceptHash() {
+				return &mActivationPropagationSplitConceptHash;
+			}
 
 		}; // end namespace Answerer
 

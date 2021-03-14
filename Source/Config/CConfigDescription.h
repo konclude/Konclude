@@ -29,7 +29,9 @@
 #include "CConfigType.h"
 #include "CConvertStringConfigType.h"
 #include "CConvertIntegerConfigType.h"
+#include "CConvertDoubleConfigType.h"
 #include "CConvertBooleanConfigType.h"
+#include "CConvertStringListConfigType.h"
 
 // Other includes
 
@@ -74,7 +76,9 @@ namespace Konclude {
 
 				virtual bool supportsStringConvertion();
 				virtual bool supportsIntegerConvertion();
+				virtual bool supportsDoubleConvertion();
 				virtual bool supportsBooleanConvertion();
+				virtual bool supportsStringListConvertion();
 
 
 
@@ -90,7 +94,9 @@ namespace Konclude {
 
 				bool stringConvertable;
 				bool integerConvertable;
+				bool doubleConvertable;
 				bool booleanConvertable;
+				bool stringListConvertable;
 		
 			// private methods
 			private:

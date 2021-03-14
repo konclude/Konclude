@@ -32,6 +32,7 @@ namespace Konclude {
 				CTrackedClashedDependencyLine::CTrackedClashedDependencyLine(CPROCESSINGSET<CTrackedClashedDescriptorHasher>* clashedSet) {
 					mFreeTrackedClashedDescriptors = nullptr;
 					mClashedSet = clashedSet;
+					mInvolvedIndividualSet = nullptr;
 				}
 
 
@@ -46,6 +47,33 @@ namespace Konclude {
 					mPrevLevelsTrackedNonDetClashes = nullptr;
 					mPrevLevelsTrackedNonDetBranchingClashes = nullptr;
 					mIndependentTrackedClashes = nullptr;
+					return this;
+				}
+
+
+				CTrackedClashedDependencyLine* CTrackedClashedDependencyLine::analyseInvolvedIndividuals(CTrackedClashedDescriptor* clashedDes) {
+					if (mInvolvedIndividualSet) {
+						for (CTrackedClashedDescriptor* clashedDesIt = clashedDes; clashedDes; clashedDes = clashedDes->getNextDescriptor()) {
+							CIndividualProcessNode* indiNode = clashedDesIt->getAppropriatedIndividual();
+							if (indiNode && indiNode->getNominalIndividual()) {
+								mInvolvedIndividualSet->insert(indiNode->getNominalIndividual()->getIndividualID());
+							}
+						}
+					}
+					return this;
+				}
+
+				CTrackedClashedDependencyLine* CTrackedClashedDependencyLine::addInvolvedIndividual(CIndividualProcessNode* indiNode) {
+					if (mInvolvedIndividualSet && indiNode && indiNode->getNominalIndividual()) {
+						mInvolvedIndividualSet->insert(indiNode->getNominalIndividual()->getIndividualID());
+					}
+					return this;
+				}
+
+				CTrackedClashedDependencyLine* CTrackedClashedDependencyLine::addInvolvedIndividual(cint64 indiId) {
+					if (mInvolvedIndividualSet) {
+						mInvolvedIndividualSet->insert(indiId);
+					}
 					return this;
 				}
 
@@ -289,6 +317,16 @@ namespace Konclude {
 				bool CTrackedClashedDependencyLine::hasOnlyCurrentIndividualNodeLevelClashesDescriptors() {
 					return !mPrevLevelsTrackedClashes && !mPrevLevelsTrackedNonDetClashes && !mPrevLevelsTrackedNonDetBranchingClashes;
 				}
+
+				CTrackedClashedDependencyLine* CTrackedClashedDependencyLine::setInvolvedIndividualTrackingSet(CPROCESSINGSET<cint64>* indiTrackingSet) {
+					mInvolvedIndividualSet = indiTrackingSet;
+					return this;
+				}
+
+				CPROCESSINGSET<cint64>* CTrackedClashedDependencyLine::getInvolvedIndividualTrackingSet() {
+					return mInvolvedIndividualSet;
+				}
+
 
 
 			}; // end namespace Algorithm

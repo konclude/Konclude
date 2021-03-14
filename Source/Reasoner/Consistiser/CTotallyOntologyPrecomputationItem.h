@@ -34,6 +34,7 @@
 #include "CSaturationIndividualDataItem.h"
 #include "CSaturationIndividualAnalysationObserver.h"
 #include "CIndividualPrecomputationCoordinationHash.h"
+#include "CIndividualPrecomputationTestingItem.h"
 
 
 // Other includes
@@ -50,6 +51,7 @@
 #include "Reasoner/Ontology/CIndividualReference.h"
 
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
+#include "Reasoner/Kernel/Cache/CBackendIndividualRetrievalComputationUpdateCoordinationHash.h"
 
 #include "Reasoner/Query/CApproximatedSaturationCalculationJob.h"
 
@@ -62,6 +64,7 @@ namespace Konclude {
 	namespace Reasoner {
 
 		using namespace Kernel::Task;
+		using namespace Kernel::Cache;
 		using namespace Consistence;
 		using namespace Ontology;
 		using namespace Query;
@@ -149,7 +152,6 @@ namespace Konclude {
 					bool hasALLIndividualsSaturationOrderd();
 					CTotallyOntologyPrecomputationItem* setALLIndividualsSaturationOrderd(bool allSaturationOrderd);
 
-
 					bool failAfterConsistencyConceptSaturation();
 					bool failAfterConsistencyChecking();
 					bool failAfterConceptSaturation();
@@ -180,6 +182,15 @@ namespace Konclude {
 					QList<CIndividual*>* getRemainingRequiredABoxSaturationIndividuals();
 					CTotallyOntologyPrecomputationItem* addRequiredABoxSaturationIndividual(CIndividual* individual);
 					CTotallyOntologyPrecomputationItem* setTripleIndexedIndividualSaturated(bool saturated);
+					CTotallyOntologyPrecomputationItem* setRequiredABoxSaturationIndividualLinker(CXLinker<CIndividual*>* individualLinker);
+					bool hasRequiredABoxSaturationIndividualLinker();
+					cint64 getRemainingRequiredABoxSaturationIndividualCount();
+					CTotallyOntologyPrecomputationItem* setRemainingRequiredABoxSaturationIndividualCount(cint64 count);
+					CTotallyOntologyPrecomputationItem* decRemainingRequiredABoxSaturationIndividualCount(cint64 count = 1);
+
+					CIndividual* getNextRequiredABoxSaturationIndividual(bool moveNext = true);
+					CTotallyOntologyPrecomputationItem* addRequiredABoxSaturationIndividualLinkerArray(CXLinker<CIndividual*>* individualLinkerArray);
+					CTotallyOntologyPrecomputationItem* clearRequiredABoxSaturationIndividualLinkerArrays();
 
 
 					cint64 getHandledTriplesIndividualSaturatedId();
@@ -236,6 +247,7 @@ namespace Konclude {
 					CTotallyOntologyPrecomputationItem* setIndividualStepRunning(bool satStepRunning);
 
 
+					cint64 getIndividualComputationRunningCount();
 					bool isIndividualComputationRunning();
 					CTotallyOntologyPrecomputationItem* setIndividualComputationRunning(bool indiCompRunning);
 					CTotallyOntologyPrecomputationItem* incIndividualComputationRunningCount(cint64 incCount = 1);
@@ -250,6 +262,7 @@ namespace Konclude {
 					CTotallyOntologyPrecomputationItem* setIndividualPrecomputationClashed(bool checked);
 					bool hasIndividualPrecomputationClashed();
 					bool* getIndividualPrecomputationClashedPointer();
+					bool* getIndividualPrecomputationExpansionLimitedReachedPointer();
 
 
 
@@ -299,6 +312,12 @@ namespace Konclude {
 					CTotallyOntologyPrecomputationItem* setIndividualsSaturationCacheSynchronisation(bool synchronized);
 
 
+
+					bool hasIndividualsSaturationAllOrderedCacheRetrieved();
+					CTotallyOntologyPrecomputationItem* setIndividualsSaturationAllOrderedCacheRetrieved(bool retrieved);
+
+
+
 					CIndividualPrecomputationCoordinationHash* getCurrentIndividualComputationCoordinationHash();
 					CTotallyOntologyPrecomputationItem* setCurrentIndividualComputationCoordinationHash(CIndividualPrecomputationCoordinationHash* coordHash);
 					QSet<CIndividualReference>* getCurrentIndividualComputationSet();
@@ -306,23 +325,103 @@ namespace Konclude {
 					QSet<CIndividualReference>* getIncompletelyHandledIndividualSet();
 					cint64 getCurrentIncompletelyHandledIndividualRetrievalLimit();
 					CTotallyOntologyPrecomputationItem* setCurrentIncompletelyHandledIndividualRetrievalLimit(cint64 limit);
+					double getCurrentIncompletelyHandledIndividualRetrievalThresholdFactor();
+					cint64 getCurrentIncompletelyHandledIndividualRetrievalThreshold();
+					CTotallyOntologyPrecomputationItem* setCurrentIncompletelyHandledIndividualRetrievalThreshold(cint64 threshold);
 					bool hasAllIncompletelyHandledIndividualsRetrieved();
 					CTotallyOntologyPrecomputationItem* setAllIncompletelyHandledIndividualsRetrieved(bool allRetrieved);
+
+
+					bool hasFirstIncompletelyHandledIndividualsRetrieved();
+					CTotallyOntologyPrecomputationItem* setFirstIncompletelyHandledIndividualsRetrieved(bool retrieved);
 
 
 					cint64 getLastMinimumRetrievedIncompletelyHandledIndividualId();
 					CTotallyOntologyPrecomputationItem* setLastMinimumRetrievedIncompletelyHandledIndividualId(cint64 minId);
 
+					cint64 getIndividualSaturationSizeLimit();
 
 					cint64 getCurrentIncompletelyHandledIndividualComputationLimit();
 					CTotallyOntologyPrecomputationItem* setCurrentIncompletelyHandledIndividualComputationLimit(cint64 limit);
 
 
+					double getMaximumRecomputationExpansionPropagationCuttedReductionFactor();
+					double getCurrentRecomputationExpansionPropagationCuttedReductionFactor();
+					CTotallyOntologyPrecomputationItem* setCurrentRecomputationExpansionPropagationCuttedReductionFactor(double redFac);
+					CTotallyOntologyPrecomputationItem* incCurrentRecomputationExpansionPropagationCuttedReductionFactor(double redFac);
+					CTotallyOntologyPrecomputationItem* decCurrentRecomputationExpansionPropagationCuttedReductionFactor(double redFac);
+					double getRecomputationExpansionPropagationCuttedReductionIncreaseFactor();
+					double getRecomputationExpansionPropagationCuttedReductionRecoveryFactor();
+
+					cint64 getRecomputationExpansionPropagationCuttedCount();
+					CTotallyOntologyPrecomputationItem* incRecomputationExpansionPropagationCuttedCount(cint64 count);
+
+
+
+					double getRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount();
+					CTotallyOntologyPrecomputationItem* setRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount(cint64 indiCount);
+
+					double getIncompletelyHandlingIndividualComputationLimitIncreasingFactor();
+
+
+
 					QTime* getInitializationTime();
+					QTime*& getIndividualSaturationTime();
+					QTime*& getIndividualPrecomputationTime();
 
 
 					cint64 getNextRepresentativeCacheRecomputationId();
 
+
+
+					bool isPrecompuationRetrievingIncompletelyHandledIndividuals();
+					CTotallyOntologyPrecomputationItem* setPrecompuationRetrievingIncompletelyHandledIndividuals(bool retrievingIndividuals);
+
+
+					cint64 getNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize();
+					CTotallyOntologyPrecomputationItem* setNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize(bool straekSize);
+					CTotallyOntologyPrecomputationItem* incNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize(bool incStreakSize = 1);
+
+
+
+					bool isPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested();
+					CTotallyOntologyPrecomputationItem* setPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested(bool retrievalRequested);
+
+
+					CIndividualPrecomputationCoordinationHash* getPrecomputationProcessingCoordinationHash();
+					CIndividualPrecomputationCoordinationHash* getPrecomputationRetrievalCoordinationHash();
+					CTotallyOntologyPrecomputationItem* setPrecomputationProcessingCoordinationHash(CIndividualPrecomputationCoordinationHash* coordHash);
+					CTotallyOntologyPrecomputationItem* setPrecomputationRetrievalCoordinationHash(CIndividualPrecomputationCoordinationHash* coordHash);
+
+
+					CTotallyOntologyPrecomputationItem* setPrecomputationProcessingCoordinationHashIteratorCurrent(CIndividualPrecomputationCoordinationHash::const_iterator coordHashIt);
+					CIndividualPrecomputationCoordinationHash::const_iterator getPrecomputationProcessingCoordinationHashIteratorCurrent();
+
+					CTotallyOntologyPrecomputationItem* setPrecomputationProcessingCoordinationHashIteratorEnd(CIndividualPrecomputationCoordinationHash::const_iterator coordHashIt);
+					CIndividualPrecomputationCoordinationHash::const_iterator getPrecomputationProcessingCoordinationHashIteratorEnd();
+
+
+					bool hadBasicPrecompuationMode();
+					CTotallyOntologyPrecomputationItem* setBasicPrecompuationMode(bool basicMode);
+
+					double getBasicPrecompuationSubsequentIndividualLimitReductionFactor();
+					CTotallyOntologyPrecomputationItem* setBasicPrecompuationSubsequentIndividualLimitReductionFactor(double factor);
+
+
+					double getBasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor();
+					double getBasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor();
+
+					QMap<cint64, CIndividualPrecomputationTestingItem*>* getRecomputationIdTestingItemMap();
+					cint64 getMaxHandledRecomputationIdRemainingReporting();
+					CTotallyOntologyPrecomputationItem* setMaxHandledRecomputationIdRemainingReporting(cint64 remainingCount);
+					CTotallyOntologyPrecomputationItem* decMaxHandledRecomputationIdRemainingReporting(cint64 count = 1);
+
+
+					double getBasicPrecompuationParallelizationReductionFactor();
+					CTotallyOntologyPrecomputationItem* setBasicPrecompuationParallelizationReductionFactor(double factor);
+
+					double getBasicPrecompuationParallelizationInitializationFactor();
+					double getBasicPrecompuationParallelizationIncreasingFactor();
 
 
 				// protected methods
@@ -359,6 +458,7 @@ namespace Konclude {
 					bool mIndividualPrecomputationCreated;
 					bool mIndividualPrecomputationChecked;
 					bool mIndividualPrecomputationClashed;
+					bool mIndividualPrecomputationExpansionLimitedReachedPointer;
 
 					CPrecomputationTestingStep* mConsistencePrecomputationStep;
 					CPrecomputationTestingStep* mCyclePrecomputationStep;
@@ -384,6 +484,8 @@ namespace Konclude {
 					bool mNomDelayedConSatUpdated;
 
 					QList<CIndividual*> mRemainingABoxIndiSatList;
+					CXLinker<CIndividual*>* mRemainingABoxIndiSatLinker;
+					QList<CXLinker<CIndividual*>*> mRemainingABoxIndiSatLinkerArrayList;
 					cint64 mHandledTriplesIndiSaturatedId;
 					bool mTriplesIndexedIndisSaturated;
 
@@ -407,18 +509,35 @@ namespace Konclude {
 					bool mAllIndividualSaturaturationOrderd;
 
 					bool mIndividualsSaturationCacheSynchronisation;
+					bool mIndividualsSaturationAllOrderedCacheRetrieved;
 					QSet<CIndividualReference> mIncompHandledIndiSet;
 					QSet<CIndividualReference> mCurrentIndiComputationSet;
 					CIndividualPrecomputationCoordinationHash* mCurrentIndiCompCoordHash;
 					cint64 mCurrentIncompIndiRetrievalLimit;
+					cint64 mCurrentIncompIndiRetrievalThreshold;
+					double mCurrentIncompIndiRetrievalThresholdFactor;
 					bool mAllIncompIndiRetrieved;
+					bool mFirstIncompletelyHandledIndividualsRetrieved;
 					cint64 mLastMinRetrievedIncompIndiId;
 					cint64 mCurrentIncompIndiComputationLimit;
 
+					double mMaximumRecomputationExpansionPropagationCuttedReductionFactor;
+					double mCurrentRecomputationExpansionPropagationCuttedReductionFactor;
+					double mRecomputationExpansionPropagationCuttedReductionIncreaseFactor;
+					double mRecomputationExpansionPropagationCuttedReductionRecoveryFactor;
+
+					cint64 mIncompletelyHandledIndividualComputationPropagationCutReservedSize;
+					cint64 mRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount;
+					double mIncompletelyHandlingIndividualComputationLimitIncreasingFactor;
+					cint64 mIndividualSaturationCount;
+
 					cint64 mNextRepresentativeCacheRecomputationId = 1;
+					cint64 mRemainingRequiredABoxSaturationIndividualCount = 0;
 
 
 					QTime mInitTime;
+					QTime* mIndividualSaturationTime;
+					QTime* mIndividualPrecomputationTime;
 
 
 					bool mSaturationOccurrenceStatisticsCollected;
@@ -428,6 +547,34 @@ namespace Konclude {
 					bool mForceCompletionGraphConstruction;
 					bool mFullCompletionGraphConstruction;
 					bool mFullCompletionGraphConstructed;
+
+
+					bool mPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested;
+					bool mPrecompuationRetrievingIncompletelyHandledIndividuals;
+					CIndividualPrecomputationCoordinationHash* mPrecomputationProcessingCoordinationHash;
+					CIndividualPrecomputationCoordinationHash* mPrecomputationRetrievalCoordinationHash;
+
+					CIndividualPrecomputationCoordinationHash::const_iterator mPrecomputationProcessingCoordinationHashIteratorCurrent;
+					CIndividualPrecomputationCoordinationHash::const_iterator mPrecomputationProcessingCoordinationHashIteratorEnd;
+
+
+					bool mHadBasicPrecompuationMode;
+					double mBasicPrecompuationSubsequentIndividualLimitReductionFactor;
+					double mBasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor;
+					double mBasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor;
+
+					cint64 mNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize;
+
+					QMap<cint64, CIndividualPrecomputationTestingItem*> mRecomputationIdTestingItemMap;
+					cint64 mMaxHandledRecomputationIdRemainingReporting;
+
+
+
+					double mBasicPrecompuationParallelizationReductionFactor;
+					double mBasicPrecompuationParallelizationInitializationFactor;
+					double mBasicPrecompuationParallelizationIncreasingFactor;
+
+
 
 				// private methods
 				private:

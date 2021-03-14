@@ -29,12 +29,15 @@ namespace Konclude {
 			namespace Composition {
 
 				CQtConcurrentVariableMappingsCompositionJoinComputator::CQtConcurrentVariableMappingsCompositionJoinComputator() {
+					mComputerName = "Concurrent Qt join";
 				}
 
 
-				CAbstractVariableMappingsCompositionComputator* CQtConcurrentVariableMappingsCompositionJoinComputator::configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
-					CAbstractVariableMappingsCompositionJoinComputator::configureComputator(ontoAnsweringItem, answererContext);
+				CAbstractVariableMappingsCompositionComputator* CQtConcurrentVariableMappingsCompositionJoinComputator::configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAbstractVariableMappingsCompositionItemRequirementProcessor* reqProcessor, CAnswererContext* answererContext) {
+					CAbstractVariableMappingsCompositionJoinComputator::configureComputator(ontoAnsweringItem, reqProcessor, answererContext);
 					mConcurrentJoinComputationTaskCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinComputationTaskCount", 211);
+					mConfBatchMaxHandlingCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinComputationMaxBatchHandlingCount", 10000);
+					mConfSplitTestingBatchMaxHandlingCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinLastStepSplitTestingComputationMaxBatchHandlingCount", 1000);
 					mConfPartitionizedMemoryManagement = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinPartitionizedMemoryManagement", false);
 					mConfPerformanceLogging = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinPerformanceLogging", false);
 					mConfCheckingSideDirectJoining = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentJoinDirectJoiningForCheckingSide", false);
@@ -253,8 +256,8 @@ namespace Konclude {
 
 
 
-					function<void(bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, cint64& sampleInsertionCount, CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> joiningHashSampleBatchingFunc =
-						[&](bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, cint64& sampleInsertionCount, CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
+					function<void(bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, cint64& sampleInsertionCount, CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> joiningHashSampleBatchingFunc =
+						[&](bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, cint64& sampleInsertionCount, CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
 
 						cint64 batchSize = 1;
 						++sampleInsertionCount;
@@ -265,7 +268,7 @@ namespace Konclude {
 							lastBindingLinker = itemDep->getBatchCurrentBindingsCardinalityLinker(true);
 						}
 
-						CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* vecData = keyMappingBatchDataVector.getVectorLinkerData(keyMappingBatchDataVector.getNextIndex(true), true);
+						CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* vecData = keyMappingBatchDataVector.getVectorLinkerData(keyMappingBatchDataVector.getNextIndex(true), true);
 						CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* data = nullptr;
 						if (!mConfPartitionizedMemoryManagement) {
 							data = keyMappingBatchDataVector.createBatchLinker();
@@ -279,61 +282,84 @@ namespace Konclude {
 					};
 
 
+					cint64 batchMaxHandlingCount = mConfBatchMaxHandlingCount;
+					if (mConfAllowSplitModeActivation && joiningItem->isLastComputation() && !joiningItem->isSplitComputationMode()) {
+						batchMaxHandlingCount = mConfSplitTestingBatchMaxHandlingCount;
+					}
 
 
+					function<void(bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> joiningHashBindingsInsertingCheckingBatchingFunc =
+						[&](bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
 
-					function<void(bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> joiningHashBindingsInsertingCheckingBatchingFunc =
-						[&](bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
+						cint64 batchHandlingCount = 0;
+						while (batchHandlingCount++ < batchMaxHandlingCount && itemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+							cint64 batchSize = 1;
+							COptimizedComplexVariableIndividualBindingsCardinalityLinker* firstBindingLinker = itemDep->getBatchCurrentBindingsCardinalityLinker(true);
+							COptimizedComplexVariableIndividualBindingsCardinalityLinker* lastBindingLinker = firstBindingLinker;
+							while (batchSize++ < currentBatchSizeLimit && itemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+								lastBindingLinker = itemDep->getBatchCurrentBindingsCardinalityLinker(true);
+							}
 
-						cint64 batchSize = 1;
-						COptimizedComplexVariableIndividualBindingsCardinalityLinker* firstBindingLinker = itemDep->getBatchCurrentBindingsCardinalityLinker(true);
-						COptimizedComplexVariableIndividualBindingsCardinalityLinker* lastBindingLinker = firstBindingLinker;
-						while (batchSize++ < currentBatchSizeLimit && itemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
-							lastBindingLinker = itemDep->getBatchCurrentBindingsCardinalityLinker(true);
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* vecData = keyMappingBatchDataVector.getVectorLinkerData(keyMappingBatchDataVector.getNextIndex(true), true);
+							CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* data = nullptr;
+							if (!mConfPartitionizedMemoryManagement) {
+								data = keyMappingBatchDataVector.createBatchLinker();
+							} else {
+								data = vecData->createBatchLinker();
+							}
+							data->setBatchBindingsCardinalityLinkers(firstBindingLinker, lastBindingLinker);
+							data->setInserting(inserting);
+							data->setLeftSide(left);
+							vecData->addBatchLinker(data);
 						}
-
-						CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* vecData = keyMappingBatchDataVector.getVectorLinkerData(keyMappingBatchDataVector.getNextIndex(true), true);
-						CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* data = nullptr;
-						if (!mConfPartitionizedMemoryManagement) {
-							data = keyMappingBatchDataVector.createBatchLinker();
-						} else {
-							data = vecData->createBatchLinker();
-						}
-						data->setBatchBindingsCardinalityLinkers(firstBindingLinker, lastBindingLinker);
-						data->setInserting(inserting);
-						data->setLeftSide(left);
-						vecData->addBatchLinker(data);
 					};
 
 
 
-					function<void(bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> joiningHashCardinalitiesInsertingCheckingBatchingFunc =
-						[&](bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
+					function<void(bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> joiningHashCardinalitiesInsertingCheckingBatchingFunc =
+						[&](bool left, COptimizedComplexVariableCompositionItemDependence* itemDep, bool inserting, CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
 
-						cint64 batchSize = 1;
-						COptimizedComplexVariableIndividualUpdateCardinalityLinker* firstCardinalityLinker = itemDep->getBatchCurrentUpdatedCardinalityLinker(true);
-						COptimizedComplexVariableIndividualUpdateCardinalityLinker* lastCardinalityLinker = firstCardinalityLinker;
-						while (batchSize++ < currentBatchSizeLimit && itemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
-							lastCardinalityLinker = itemDep->getBatchCurrentUpdatedCardinalityLinker(true);
+						cint64 batchHandlingCount = 0;
+						while (batchHandlingCount++ < batchMaxHandlingCount && itemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+							cint64 batchSize = 1;
+							COptimizedComplexVariableIndividualUpdateCardinalityLinker* firstCardinalityLinker = itemDep->getBatchCurrentUpdatedCardinalityLinker(true);
+							COptimizedComplexVariableIndividualUpdateCardinalityLinker* lastCardinalityLinker = firstCardinalityLinker;
+							while (batchSize++ < currentBatchSizeLimit && itemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+								lastCardinalityLinker = itemDep->getBatchCurrentUpdatedCardinalityLinker(true);
+							}
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* vecData = keyMappingBatchDataVector.getVectorLinkerData(keyMappingBatchDataVector.getNextIndex(true), true);
+							CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* data = nullptr;
+							if (!mConfPartitionizedMemoryManagement) {
+								data = keyMappingBatchDataVector.createBatchLinker();
+							} else {
+								data = vecData->createBatchLinker();
+							}
+							data->setBatchCardinalityUpdateLinkers(firstCardinalityLinker, lastCardinalityLinker);
+							data->setInserting(inserting);
+							data->setLeftSide(left);
+							vecData->addBatchLinker(data);
 						}
-						CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* vecData = keyMappingBatchDataVector.getVectorLinkerData(keyMappingBatchDataVector.getNextIndex(true), true);
-						CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* data = nullptr;
-						if (!mConfPartitionizedMemoryManagement) {
-							data = keyMappingBatchDataVector.createBatchLinker();
-						} else {
-							data = vecData->createBatchLinker();
-						}
-						data->setBatchCardinalityUpdateLinkers(firstCardinalityLinker, lastCardinalityLinker);
-						data->setInserting(inserting);
-						data->setLeftSide(left);
-						vecData->addBatchLinker(data);
 					};
 
 
 
 
 
+					bool splitComputationMode = joiningItem->isSplitComputationMode();
+					cint64 leftSplitCount = joiningItem->getLeftSplitCount();
+					cint64 rightSplitCount = joiningItem->getRightSplitCount();
+					cint64 leftSplitPos = joiningItem->getLeftSplitPosition();
+					cint64 rightSplitPos = joiningItem->getRightSplitPosition();
 
+					CXLinker<cint64>* leftRemainingBindingLinker = nullptr;
+					CXLinker<cint64>* rightRemainingBindingLinker = nullptr;
+
+					if (splitComputationMode) {
+						leftRemainingBindingLinker = variablePositionMapping->getLeftRemainingBindingLinker();
+						rightRemainingBindingLinker = variablePositionMapping->getRightRemainingBindingLinker();
+					}
+
+					cint64 splitComputationCount = 0;
 
 
 
@@ -344,14 +370,13 @@ namespace Konclude {
 					// map & reduce of step 1
 					cint64 keyMappingSize = mConfConcurrentJoiningHashCount;
 
-					function<CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>(const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData)> bindingBatchesHashingKeyMapFunc =
-						[&](const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData) ->CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker> {
+					function<CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>(const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData)> bindingBatchesHashingKeyMapFunc =
+						[&](const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData) ->CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker> {
 
-						CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker> keyMappedVec(keyMappingSize);
+						CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker> keyMappedVec(keyMappingSize);
 						if (batchData) {
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> processingBatchData(*batchData);
 
-							CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* batchLinker = processingBatchData.takeNextBatchLinker();
+							CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* batchLinker = batchData->getNextBatchLinker();
 							while (batchLinker) {
 
 								bool leftSide = batchLinker->isLeftSide();
@@ -361,24 +386,34 @@ namespace Konclude {
 								while (bindingsCardinalityCurrentLinker) {
 
 									CXLinker<cint64>* keyBindingLinker = leftKeyBindingLinker;
+									CXLinker<cint64>* remainingBindingLinker = leftRemainingBindingLinker;
+									cint64 splitCount = leftSplitCount;
+									cint64 splitPos = leftSplitPos;
 									if (!leftSide) {
 										keyBindingLinker = rightKeyBindingLinker;
+										remainingBindingLinker = rightRemainingBindingLinker;
+										splitPos = rightSplitPos;
+										splitCount = rightSplitCount;
 									}
 
-									COptimizedComplexVariableJoiningHasher bindingHasher(bindingsCardinalityCurrentLinker->getBindings()->getBindingArray(), keyBindingLinker);
+									COptimizedComplexVariableJoiningWithRemainingHasher bindingHasher(bindingsCardinalityCurrentLinker->getBindings()->getBindingArray(), keyBindingLinker, remainingBindingLinker);
 									cint64 keyHashValue = bindingHasher.getHashValue();
-									cint64 mappedKeyIndex = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue) % keyMappingSize;
+									uint uintHashValue = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue);
+									cint64 mappedKeyIndex = uintHashValue % keyMappingSize;
 
-									CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* keyMappedVecData = keyMappedVec.getVectorLinkerData(mappedKeyIndex, true);
-									CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker* mappedKeyDataLinker = nullptr;
-									if (!mConfPartitionizedMemoryManagement) {
-										mappedKeyDataLinker = keyMappedVec.createBatchLinker();
-									} else {
-										mappedKeyDataLinker = keyMappedVecData->createBatchLinker();
+									if (!splitComputationMode || bindingHasher.getRemainingHashValue() % splitCount == splitPos) {
+
+										CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* keyMappedVecData = keyMappedVec.getVectorLinkerData(mappedKeyIndex, true);
+										CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker* mappedKeyDataLinker = nullptr;
+										if (!mConfPartitionizedMemoryManagement) {
+											mappedKeyDataLinker = keyMappedVec.createBatchLinker();
+										} else {
+											mappedKeyDataLinker = keyMappedVecData->createBatchLinker();
+										}
+										mappedKeyDataLinker->initMappedKeysBindingsCardinalityData(bindingHasher, mappedKeyIndex, bindingsCardinalityCurrentLinker->getBindings(), bindingsCardinalityCurrentLinker->getInitialCardinalities(), nullptr, leftSide, inserting);
+										keyMappedVecData->addBatchLinker(mappedKeyDataLinker);
+
 									}
-									mappedKeyDataLinker->initMappedKeysBindingsCardinalityData(bindingHasher, mappedKeyIndex, bindingsCardinalityCurrentLinker->getBindings(), bindingsCardinalityCurrentLinker->getInitialCardinalities(), nullptr, leftSide, inserting);
-									keyMappedVecData->addBatchLinker(mappedKeyDataLinker);
-
 									bindingsCardinalityCurrentLinker = batchLinker->getNextBatchBindingsCardinalityLinker(true);
 								}
 
@@ -388,29 +423,38 @@ namespace Konclude {
 								while (cardinalityUpdateLinker) {
 
 									CXLinker<cint64>* keyBindingLinker = leftKeyBindingLinker;
+									CXLinker<cint64>* remainingBindingLinker = leftRemainingBindingLinker;
+									cint64 splitCount = leftSplitCount;
+									cint64 splitPos = leftSplitPos;
 									if (!leftSide) {
 										keyBindingLinker = rightKeyBindingLinker;
+										remainingBindingLinker = rightRemainingBindingLinker;
+										splitPos = rightSplitPos;
+										splitCount = rightSplitCount;
 									}
 
-									COptimizedComplexVariableJoiningHasher bindingHasher(cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings()->getBindingArray(), keyBindingLinker);
+									COptimizedComplexVariableJoiningWithRemainingHasher bindingHasher(cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings()->getBindingArray(), keyBindingLinker, remainingBindingLinker);
 									cint64 keyHashValue = bindingHasher.getHashValue();
-									cint64 mappedKeyIndex = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue) % keyMappingSize;
+									uint uintHashValue = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue);
+									cint64 mappedKeyIndex = uintHashValue % keyMappingSize;
 
-									CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* keyMappedVecData = keyMappedVec.getVectorLinkerData(mappedKeyIndex, true);
-									CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker* mappedKeyDataLinker = nullptr;
-									if (!mConfPartitionizedMemoryManagement) {
-										mappedKeyDataLinker = keyMappedVec.createBatchLinker();
-									} else {
-										mappedKeyDataLinker = keyMappedVecData->createBatchLinker();
+									if (!splitComputationMode || bindingHasher.getRemainingHashValue() % splitCount == splitPos) {
+										CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* keyMappedVecData = keyMappedVec.getVectorLinkerData(mappedKeyIndex, true);
+										CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker* mappedKeyDataLinker = nullptr;
+										if (!mConfPartitionizedMemoryManagement) {
+											mappedKeyDataLinker = keyMappedVec.createBatchLinker();
+										} else {
+											mappedKeyDataLinker = keyMappedVecData->createBatchLinker();
+										}
+										mappedKeyDataLinker->initMappedKeysBindingsCardinalityData(bindingHasher, mappedKeyIndex, cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings(), cardinalityUpdateLinker->getNewCardinality(), cardinalityUpdateLinker->getPreviousCardinality(), leftSide, inserting);
+										keyMappedVecData->addBatchLinker(mappedKeyDataLinker);
+
 									}
-									mappedKeyDataLinker->initMappedKeysBindingsCardinalityData(bindingHasher, mappedKeyIndex, cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings(), cardinalityUpdateLinker->getNewCardinality(), cardinalityUpdateLinker->getPreviousCardinality(), leftSide, inserting);
-									keyMappedVecData->addBatchLinker(mappedKeyDataLinker);
-
 									cardinalityUpdateLinker = batchLinker->getNextCardinalityUpdateLinker(true);
 								}
 
 
-								batchLinker = processingBatchData.takeNextBatchLinker();
+								batchLinker = batchLinker->getNext();
 							}
 						}
 
@@ -418,15 +462,15 @@ namespace Konclude {
 					};
 
 
-					function<void(CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& reduceVec)> bindingBatchesHashingKeyReduceFunc =
-						[&](CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& reduceVec) -> void {
+					function<void(CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& reduceVec)> bindingBatchesHashingKeyReduceFunc =
+						[&](CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>& reduceVec) -> void {
 
 						if (vec.size() < reduceVec.size()) {
 							vec.resize(reduceVec.size());
 						}
 						for (cint64 i = 0; i < vec.count(); ++i) {
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>*& vecData = vec[i];
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* const & reduceVecData = reduceVec[i];
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>*& vecData = vec[i];
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* const & reduceVecData = reduceVec[i];
 							if (reduceVecData) {
 								if (!vecData) {
 									vecData = reduceVecData;
@@ -450,7 +494,7 @@ namespace Konclude {
 
 
 					auto joinedVariableMappingCreationRightLeftCopyingVecInsertionFunc = [&](COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* leftLinker, COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* rightLinker, bool swap,
-																							 CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& bindingsMappedVec, CMemoryAllocationManager* memMan, COptimizedComplexVariableIndividualBindings*& tmpJoinedBindings) -> void {
+																							 CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& bindingsMappedVec, CMemoryAllocationManager* memMan, COptimizedComplexVariableIndividualBindings*& tmpJoinedBindings) -> void {
 						
 
 						CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker* mappedBindingsDataLinker = nullptr;
@@ -480,7 +524,7 @@ namespace Konclude {
 							cint64 keyHashValue = tmpBindingsHasher.getHashValue();
 							cint64 mappedBindingsIndex = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue) % bindingsMappingSize;
 
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* bindingsMappedVecData = bindingsMappedVec.getVectorLinkerData(mappedBindingsIndex, true);
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* bindingsMappedVecData = bindingsMappedVec.getVectorLinkerData(mappedBindingsIndex, true);
 
 							// copy data with corresponding memory manager
 							memMan = bindingsMappedVecData->getMemoryAllocationManager();
@@ -505,10 +549,10 @@ namespace Konclude {
 
 
 
-					function<CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>(const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* const & keyMappedBindingsVecData)> bindingBatchesHashingJoinMapFunc =
-						[&](const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* const & keyMappedBindingsVecData) -> CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> {
+					function<CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>(const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* const & keyMappedBindingsVecData)> bindingBatchesHashingJoinMapFunc =
+						[&](const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>* const & keyMappedBindingsVecData) -> CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> {
 
-						CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> bindingsMappedVec(bindingsMappingSize);
+						CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> bindingsMappedVec(bindingsMappingSize);
 
 						COptimizedComplexVariableJoiningHashMemoryManaged* lastJoiningHash = nullptr;
 						QTime* time = nullptr;
@@ -517,9 +561,7 @@ namespace Konclude {
 							time->start();
 						}
 						if (keyMappedBindingsVecData) {
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker> processingKeyMappedBindingsVecData(*keyMappedBindingsVecData);
-
-							CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker* batchLinker = processingKeyMappedBindingsVecData.takeNextBatchLinker();
+							CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker* batchLinker = keyMappedBindingsVecData->getNextBatchLinker();
 							COptimizedComplexVariableIndividualBindings* tmpJoinedBindings = nullptr;
 
 							while (batchLinker) {
@@ -597,7 +639,7 @@ namespace Konclude {
 									}
 								}
 
-								batchLinker = processingKeyMappedBindingsVecData.takeNextBatchLinker();
+								batchLinker = batchLinker->getNext();
 							}
 						}
 
@@ -613,15 +655,15 @@ namespace Konclude {
 
 
 
-					function<void(CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& reduceVec)> bindingBatchesHashingJoinReduceFunc =
-						[&](CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& reduceVec) -> void {
+					function<void(CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& reduceVec)> bindingBatchesHashingJoinReduceFunc =
+						[&](CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& vec, const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>& reduceVec) -> void {
 
 						if (vec.size() < reduceVec.size()) {
 							vec.resize(reduceVec.size());
 						}
 						for (cint64 i = 0; i < vec.count(); ++i) {
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>*& vecData = vec[i];
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* const & reduceVecData = reduceVec[i];
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>*& vecData = vec[i];
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* const & reduceVecData = reduceVec[i];
 							if (reduceVecData) {
 								if (!vecData) {
 									vecData = reduceVecData;
@@ -644,8 +686,8 @@ namespace Konclude {
 
 					// map (& reduce) of step 3
 
-					function<COptimizedComplexVariableIndividualMappingsMultiHashPart*(const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* const & mappedBindingsVecData)> bindingBatchesInsertingMapFunc =
-						[&](const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* const & mappedBindingsVecData) -> COptimizedComplexVariableIndividualMappingsMultiHashPart* {
+					function<COptimizedComplexVariableIndividualMappingsMultiHashPart*(const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* const & mappedBindingsVecData)> bindingBatchesInsertingMapFunc =
+						[&](const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>* const & mappedBindingsVecData) -> COptimizedComplexVariableIndividualMappingsMultiHashPart* {
 
 
 
@@ -658,9 +700,8 @@ namespace Konclude {
 						COptimizedComplexVariableIndividualMappingsMultiHashPart* joinedVarMappingMultiHashPart = nullptr;
 
 						if (mappedBindingsVecData) {
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> processingMappedBindingsVecData(*mappedBindingsVecData);
 
-							CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker* batchLinker = processingMappedBindingsVecData.takeNextBatchLinker();
+							CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker* batchLinker = mappedBindingsVecData->getNextBatchLinker();
 
 							while (batchLinker) {
 
@@ -675,7 +716,7 @@ namespace Konclude {
 
 								joinedVarMappingMultiHashPart->addInsertingBindingsCardinalityLinkerCopy(joinedLinker, hashValue, true);
 
-								batchLinker = processingMappedBindingsVecData.takeNextBatchLinker();
+								batchLinker = batchLinker->getNext();
 							}
 						}
 
@@ -715,7 +756,7 @@ namespace Konclude {
 						}
 					};
 
-					function<void(CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> mapReducedConcurrentJoinInsertionComputation = [&](CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
+					function<void(CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> mapReducedConcurrentJoinInsertionComputation = [&](CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
 						if (!keyMappingBatchDataVector.isEmpty()) {
 
 							QTime* stepTimer = nullptr;
@@ -723,7 +764,7 @@ namespace Konclude {
 								stepTimer = new QTime();
 								stepTimer->start();
 							}
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker> mappedJoiningHashKeyVec = QtConcurrent::blockingMappedReduced<CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>>(keyMappingBatchDataVector, bindingBatchesHashingKeyMapFunc, bindingBatchesHashingKeyReduceFunc);
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker> mappedJoiningHashKeyVec = QtConcurrent::blockingMappedReduced<CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker>>(keyMappingBatchDataVector, bindingBatchesHashingKeyMapFunc, bindingBatchesHashingKeyReduceFunc);
 							if (stepTimer) {
 								cint64 partitionsUsed = 0;
 								for (cint64 i = 0; i < keyMappingBatchDataVector.size(); ++i) {
@@ -731,7 +772,12 @@ namespace Konclude {
 										++partitionsUsed;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 1 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(keyMappingBatchDataVector.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed), this);
+								QString x1 = QString("Insertion step 1 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(keyMappingBatchDataVector.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x1.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x1, this);
+								}
 								delete stepTimer;
 							}
 
@@ -741,7 +787,7 @@ namespace Konclude {
 								stepTimer = new QTime();
 								stepTimer->start();
 							}
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> mappedJoinedHashKeyVec = QtConcurrent::blockingMappedReduced<CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>>(mappedJoiningHashKeyVec, bindingBatchesHashingJoinMapFunc, bindingBatchesHashingJoinReduceFunc);
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> mappedJoinedHashKeyVec = QtConcurrent::blockingMappedReduced<CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>>(mappedJoiningHashKeyVec, bindingBatchesHashingJoinMapFunc, bindingBatchesHashingJoinReduceFunc);
 							if (stepTimer) {
 								cint64 partitionsUsed = 0;
 								for (cint64 i = 0; i < mappedJoiningHashKeyVec.size(); ++i) {
@@ -749,7 +795,12 @@ namespace Konclude {
 										++partitionsUsed;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 2 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedJoiningHashKeyVec.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed), this);
+								QString x2 = QString("Insertion step 2 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedJoiningHashKeyVec.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x2.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x2, this);
+								}
 								delete stepTimer;
 
 								cint64 statMaxJoiningCount = 0;
@@ -775,7 +826,12 @@ namespace Konclude {
 								if (statUsedCount > 0) {
 									averageProcessingTime = statTotalProcessingTime / statUsedCount;
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 2 of concurrent join computation for item %1 had in average %2 (max %3) created joins and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageJoiningCount).arg(statMaxJoiningCount).arg(averageProcessingTime).arg(statMaxProcessingTime), this);
+								QString x3 = QString("Insertion step 2 of concurrent join computation for item %1 had in average %2 (max %3) created joins and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageJoiningCount).arg(statMaxJoiningCount).arg(averageProcessingTime).arg(statMaxProcessingTime);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x3.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x3, this);
+								}
 							}
 
 
@@ -792,7 +848,12 @@ namespace Konclude {
 										++partitionsUsed;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 3 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedJoinedHashKeyVec.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed), this);
+								QString x4 = QString("Insertion step 3 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedJoinedHashKeyVec.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x4.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x4, this);
+								}
 								delete stepTimer;
 
 								cint64 statMaxInsertionCount = 0;
@@ -818,7 +879,12 @@ namespace Konclude {
 								if (statUsedCount > 0) {
 									averageProcessingTime = statTotalProcessingTime / statUsedCount;
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 3 of concurrent join computation for item %1 had in average %2 (max %3) bindings insertions and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageInsertionCount).arg(statMaxInsertionCount).arg(averageProcessingTime).arg(statMaxProcessingTime), this);
+								QString x5 = QString("Insertion step 3 of concurrent join computation for item %1 had in average %2 (max %3) bindings insertions and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageInsertionCount).arg(statMaxInsertionCount).arg(averageProcessingTime).arg(statMaxProcessingTime);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x5.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x5, this);
+								}
 							}
 
 
@@ -831,13 +897,13 @@ namespace Konclude {
 							CMemoryPool* mappedKeyBatchHashVecMemPools = keyMappingBatchDataVector.takeMemoryPools();
 							CMemoryPool* mappedJoiningHashVecMemPools = mappedJoiningHashKeyVec.takeMemoryPools();
 							CMemoryPool* mappedJoinedHashVecMemPools = mappedJoinedHashKeyVec.takeMemoryPools();
-							QtConcurrent::run(QThreadPool::globalInstance(), [=] {
+							CConcurrentTaskScheduler::run([=] {
 								clearMemoryPoolsFunc(mappedKeyBatchHashVecMemPools);
 							});
-							QtConcurrent::run(QThreadPool::globalInstance(), [=] {
+							CConcurrentTaskScheduler::run([=] {
 								clearMemoryPoolsFunc(mappedJoiningHashVecMemPools);
 							});
-							QtConcurrent::run(QThreadPool::globalInstance(), [=] {
+							CConcurrentTaskScheduler::run([=] {
 								clearMemoryPoolsFunc(mappedJoinedHashVecMemPools);
 							});
 							keyMappingBatchDataVector.clear();
@@ -848,7 +914,12 @@ namespace Konclude {
 										++partitionsUsed;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Insertion step 4 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedVarMappingParts.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed), this);
+								QString x6 = QString("Insertion step 4 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedVarMappingParts.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x6.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x6, this);
+								}
 								delete stepTimer;
 							}
 
@@ -886,15 +957,14 @@ namespace Konclude {
 
 
 
-					function<CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>(const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData)> bindingBatchesHashingDirectJoiningMapFunc =
-						[&](const CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData) ->CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> {
+					function<CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>(const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData)> bindingBatchesHashingDirectJoiningMapFunc =
+						[&](const CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>* const & batchData) ->CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> {
 
-						CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> bindingsMappedVec(bindingsMappingSize);
+						CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> bindingsMappedVec(bindingsMappingSize);
 						if (batchData) {
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> processingBatchData(*batchData);
 							COptimizedComplexVariableIndividualBindings* tmpJoinedBindings = nullptr;
 
-							CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* batchLinker = processingBatchData.takeNextBatchLinker();
+							CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker* batchLinker = batchData->getNextBatchLinker();
 							while (batchLinker) {
 
 								bool leftSide = batchLinker->isLeftSide();
@@ -903,34 +973,43 @@ namespace Konclude {
 								while (bindingsCardinalityCurrentLinker) {
 
 									CXLinker<cint64>* keyBindingLinker = leftKeyBindingLinker;
+									CXLinker<cint64>* remainingBindingLinker = leftRemainingBindingLinker;
+									cint64 splitCount = leftSplitCount;
+									cint64 splitPos = leftSplitPos;
 									if (!leftSide) {
 										keyBindingLinker = rightKeyBindingLinker;
+										remainingBindingLinker = rightRemainingBindingLinker;
+										splitPos = rightSplitPos;
+										splitCount = rightSplitCount;
 									}
 
-									COptimizedComplexVariableJoiningHasher bindingHasher(bindingsCardinalityCurrentLinker->getBindings()->getBindingArray(), keyBindingLinker);
+									COptimizedComplexVariableJoiningWithRemainingHasher bindingHasher(bindingsCardinalityCurrentLinker->getBindings()->getBindingArray(), keyBindingLinker, remainingBindingLinker);
 									cint64 keyHashValue = bindingHasher.getHashValue();
-									cint64 mappedKeyIndex = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue) % keyMappingSize;
+									uint uintHashValue = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue);
+									cint64 mappedKeyIndex = uintHashValue % keyMappingSize;
 
-									COptimizedComplexVariableJoiningHashMemoryManaged* joiningHash = joiningHashVector[mappedKeyIndex];
+									if (!splitComputationMode || bindingHasher.getRemainingHashValue() % splitCount == splitPos) {
+										COptimizedComplexVariableJoiningHashMemoryManaged* joiningHash = joiningHashVector[mappedKeyIndex];
 
-									if (joiningHash) {
+										if (joiningHash) {
 
-										const COptimizedComplexVariableJoiningData& joiningData = joiningHash->value(bindingHasher);
+											const COptimizedComplexVariableJoiningData& joiningData = joiningHash->value(bindingHasher);
 
-										bool leftSide = batchLinker->isLeftSide();
+											bool leftSide = batchLinker->isLeftSide();
 
-										COptimizedComplexVariableIndividualBindings* varMapping = bindingsCardinalityCurrentLinker->getBindings();
-										COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites = bindingsCardinalityCurrentLinker->getInitialCardinalities();
-										COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites = nullptr;
+											COptimizedComplexVariableIndividualBindings* varMapping = bindingsCardinalityCurrentLinker->getBindings();
+											COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites = bindingsCardinalityCurrentLinker->getInitialCardinalities();
+											COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites = nullptr;
 
-										COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = joiningHash->createDataLinker();
+											COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = joiningHash->createDataLinker();
 
-										COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker tmpLinker(varMapping, newCardinalites, prevCardinalites);
-										for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!leftSide); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
-											joinedVariableMappingCreationRightLeftCopyingVecInsertionFunc(existingOtherLinkerIt, &tmpLinker, leftSide, bindingsMappedVec, bindingsMappedVec.getMemoryAllocationManager(), tmpJoinedBindings);
+											COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker tmpLinker(varMapping, newCardinalites, prevCardinalites);
+											for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!leftSide); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
+												joinedVariableMappingCreationRightLeftCopyingVecInsertionFunc(existingOtherLinkerIt, &tmpLinker, leftSide, bindingsMappedVec, bindingsMappedVec.getMemoryAllocationManager(), tmpJoinedBindings);
+											}
 										}
-									}
 
+									}
 
 									bindingsCardinalityCurrentLinker = batchLinker->getNextBatchBindingsCardinalityLinker(true);
 								}
@@ -941,31 +1020,40 @@ namespace Konclude {
 								while (cardinalityUpdateLinker) {
 
 									CXLinker<cint64>* keyBindingLinker = leftKeyBindingLinker;
+									CXLinker<cint64>* remainingBindingLinker = leftRemainingBindingLinker;
+									cint64 splitCount = leftSplitCount;
+									cint64 splitPos = leftSplitPos;
 									if (!leftSide) {
 										keyBindingLinker = rightKeyBindingLinker;
+										remainingBindingLinker = rightRemainingBindingLinker;
+										splitPos = rightSplitPos;
+										splitCount = rightSplitCount;
 									}
 
-									COptimizedComplexVariableJoiningHasher bindingHasher(cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings()->getBindingArray(), keyBindingLinker);
+									COptimizedComplexVariableJoiningWithRemainingHasher bindingHasher(cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings()->getBindingArray(), keyBindingLinker, remainingBindingLinker);
 									cint64 keyHashValue = bindingHasher.getHashValue();
-									cint64 mappedKeyIndex = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue) % keyMappingSize;
+									uint uintHashValue = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue);
+									cint64 mappedKeyIndex = uintHashValue % keyMappingSize;
 
-									COptimizedComplexVariableJoiningHashMemoryManaged* joiningHash = joiningHashVector[mappedKeyIndex];
+									if (!splitComputationMode || bindingHasher.getRemainingHashValue() % splitCount == splitPos) {
+										COptimizedComplexVariableJoiningHashMemoryManaged* joiningHash = joiningHashVector[mappedKeyIndex];
 
-									if (joiningHash) {
+										if (joiningHash) {
 
-										const COptimizedComplexVariableJoiningData& joiningData = joiningHash->value(bindingHasher);
+											const COptimizedComplexVariableJoiningData& joiningData = joiningHash->value(bindingHasher);
 
-										bool leftSide = batchLinker->isLeftSide();
+											bool leftSide = batchLinker->isLeftSide();
 
-										COptimizedComplexVariableIndividualBindings* varMapping = cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings();
-										COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites = cardinalityUpdateLinker->getNewCardinality();
-										COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites = cardinalityUpdateLinker->getPreviousCardinality();
+											COptimizedComplexVariableIndividualBindings* varMapping = cardinalityUpdateLinker->getUpdatedBindingsCardinalityLinker()->getBindings();
+											COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites = cardinalityUpdateLinker->getNewCardinality();
+											COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites = cardinalityUpdateLinker->getPreviousCardinality();
 
-										COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = joiningHash->createDataLinker();
+											COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = joiningHash->createDataLinker();
 
-										COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker tmpLinker(varMapping, newCardinalites, prevCardinalites);
-										for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!leftSide); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
-											joinedVariableMappingCreationRightLeftCopyingVecInsertionFunc(existingOtherLinkerIt, &tmpLinker, leftSide, bindingsMappedVec, bindingsMappedVec.getMemoryAllocationManager(), tmpJoinedBindings);
+											COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker tmpLinker(varMapping, newCardinalites, prevCardinalites);
+											for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!leftSide); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
+												joinedVariableMappingCreationRightLeftCopyingVecInsertionFunc(existingOtherLinkerIt, &tmpLinker, leftSide, bindingsMappedVec, bindingsMappedVec.getMemoryAllocationManager(), tmpJoinedBindings);
+											}
 										}
 									}
 
@@ -974,7 +1062,7 @@ namespace Konclude {
 								}
 
 
-								batchLinker = processingBatchData.takeNextBatchLinker();
+								batchLinker = batchLinker->getNext();
 							}
 						}
 
@@ -985,7 +1073,7 @@ namespace Konclude {
 
 
 
-					function<void(CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> mapReducedConcurrentJoinCheckingComputation = [&](CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
+					function<void(CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector)> mapReducedConcurrentJoinCheckingComputation = [&](CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker>& keyMappingBatchDataVector) -> void {
 						if (!keyMappingBatchDataVector.isEmpty()) {
 
 							QTime* stepTimer = nullptr;
@@ -993,7 +1081,7 @@ namespace Konclude {
 								stepTimer = new QTime();
 								stepTimer->start();
 							}
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> mappedJoinedHashKeyVec = QtConcurrent::blockingMappedReduced<CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>>(keyMappingBatchDataVector, bindingBatchesHashingDirectJoiningMapFunc, bindingBatchesHashingJoinReduceFunc);
+							CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker> mappedJoinedHashKeyVec = QtConcurrent::blockingMappedReduced<CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker>>(keyMappingBatchDataVector, bindingBatchesHashingDirectJoiningMapFunc, bindingBatchesHashingJoinReduceFunc);
 							if (stepTimer) {
 								cint64 partitionsUsed = 0;
 								for (cint64 i = 0; i < joiningHashVector.size(); ++i) {
@@ -1001,7 +1089,12 @@ namespace Konclude {
 										++partitionsUsed;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Checking step 1 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(joiningHashVector.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed), this);
+								QString x1 = QString("Checking step 1 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(joiningHashVector.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x1.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x1, this);
+								}
 								delete stepTimer;
 
 								cint64 statMaxJoiningCount = 0;
@@ -1019,7 +1112,21 @@ namespace Konclude {
 										statTotalProcessingTime += joiningHash->mProcessingTime;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Checking step 1 of concurrent join computation for item %1 had in average %2 (max %3) created joins and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(statTotalJoiningCount / statUsedCount).arg(statMaxJoiningCount).arg(statTotalProcessingTime / statUsedCount).arg(statMaxProcessingTime), this);
+								cint64 averageJoiningCount = 0;
+								if (statUsedCount > 0) {
+									averageJoiningCount = statTotalJoiningCount / statUsedCount;
+								}
+								cint64 averageProcessingTime = 0;
+								if (statUsedCount > 0) {
+									averageProcessingTime = statTotalProcessingTime / statUsedCount;
+								}
+
+								QString x2 = QString("Checking step 1 of concurrent join computation for item %1 had in average %2 (max %3) created joins and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageJoiningCount).arg(statMaxJoiningCount).arg(averageProcessingTime).arg(statMaxProcessingTime);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x2.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x2, this);
+								}
 							}
 
 
@@ -1038,7 +1145,12 @@ namespace Konclude {
 										++partitionsUsed;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Checking step 2 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedJoinedHashKeyVec.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed), this);
+								QString x3 = QString("Checking step 2 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedJoinedHashKeyVec.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x3.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x3, this);
+								}
 								delete stepTimer;
 
 								cint64 statMaxInsertionCount = 0;
@@ -1056,7 +1168,21 @@ namespace Konclude {
 										statTotalProcessingTime += joinedVarMappingMultiHashPart->mStatsProcessingTime;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Checking step 2 of concurrent join computation for item %1 had in average %2 (max %3) bindings insertions and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(statTotalInsertionCount / statUsedCount).arg(statMaxInsertionCount).arg(statTotalProcessingTime / statUsedCount).arg(statMaxProcessingTime), this);
+								cint64 averageTotalInsertionCount = 0;
+								if (statUsedCount > 0) {
+									averageTotalInsertionCount = statTotalInsertionCount / statUsedCount;
+								}
+								cint64 averageProcessingTime = 0;
+								if (statUsedCount > 0) {
+									averageProcessingTime = statTotalProcessingTime / statUsedCount;
+								}
+
+								QString x4 = QString("Checking step 2 of concurrent join computation for item %1 had in average %2 (max %3) bindings insertions and took in average %4 (max %5) ms.").arg(joiningItem->getComputationStepId()).arg(averageTotalInsertionCount).arg(statMaxInsertionCount).arg(averageProcessingTime).arg(statMaxProcessingTime);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x4.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x4, this);
+								}
 							}
 
 
@@ -1068,10 +1194,10 @@ namespace Konclude {
 							bindingBatchesInsertingReduceFunc(mappedVarMappingParts);
 							CMemoryPool* mappedKeyBatchHashVecMemPools = keyMappingBatchDataVector.takeMemoryPools();
 							CMemoryPool* mappedJoinedHashVecMemPools = mappedJoinedHashKeyVec.takeMemoryPools();
-							QtConcurrent::run(QThreadPool::globalInstance(), [=] {
+							CConcurrentTaskScheduler::run([=] {
 								clearMemoryPoolsFunc(mappedKeyBatchHashVecMemPools);
 							});
-							QtConcurrent::run(QThreadPool::globalInstance(), [=] {
+							CConcurrentTaskScheduler::run([=] {
 								clearMemoryPoolsFunc(mappedJoinedHashVecMemPools);
 							});
 							keyMappingBatchDataVector.clear();
@@ -1082,7 +1208,12 @@ namespace Konclude {
 										++partitionsUsed;
 									}
 								}
-								LOG(INFO, getLogDomain(), logTr("Checking step 3 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedVarMappingParts.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed), this);
+								QString x5 = QString("Checking step 3 of concurrent join computation for item %3 with %4/%1 tasks took %2 ms.").arg(mappedVarMappingParts.size()).arg(stepTimer->elapsed()).arg(joiningItem->getComputationStepId()).arg(partitionsUsed);
+								if (mConfDirectPerformanceConsoleOutput) {
+									cout << x5.toLocal8Bit().constData() << endl;
+								} else {
+									LOG(INFO, getLogDomain(), x5, this);
+								}
 								delete stepTimer;
 							}
 
@@ -1107,18 +1238,18 @@ namespace Konclude {
 
 					bool mappingProcessed = false;
 					bool requiresScheduling = false;
-					while (!joiningItem->isSamplingCompleted() && joiningItem->requiresMoreVariableMappingsComputation() && (!leftItemDep->isBatchProcessed(false) || !rightItemDep->isBatchProcessed(false) || leftItemDep->loadNextBatch(false) || rightItemDep->loadNextBatch(false)) && !requiresScheduling) {
+					while (!joiningItem->isSamplingCompleted() && requiresMoreVariableMappingComputation(joiningItem, true) && (!leftItemDep->isBatchProcessed(false) || !rightItemDep->isBatchProcessed(false) || leftItemDep->loadNextBatch(false) || rightItemDep->loadNextBatch(false)) && !requiresScheduling) {
 
-						CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingBatchDataVector(currentBatchSizeCount);
-						while (joiningItem->requiresMoreVariableMappingsComputation() && ((leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) || (rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize))) {
+						CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingBatchDataVector(currentBatchSizeCount);
+						while (requiresMoreVariableMappingComputation(joiningItem, true) && ((leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) || (rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize))) {
 
-							if (joiningItem->requiresMoreVariableMappingsComputation() && leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
+							if (requiresMoreVariableMappingComputation(joiningItem, true) && leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
 								mappingProcessed = true;
 
 								joiningHashSampleBatchingFunc(true, leftItemDep, leftSampleInsertionCount, keyMappingBatchDataVector);
 							}
 
-							if (joiningItem->requiresMoreVariableMappingsComputation() && rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
+							if (requiresMoreVariableMappingComputation(joiningItem, true) && rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
 								mappingProcessed = true;
 
 								joiningHashSampleBatchingFunc(false, rightItemDep, rightSampleInsertionCount, keyMappingBatchDataVector);
@@ -1180,52 +1311,52 @@ namespace Konclude {
 						}
 
 
-						while (joiningItem->requiresMoreVariableMappingsComputation() && (!insertingItemDep->isBatchProcessed() || insertingItemDep->loadNextBatch())) {
+						while (requiresMoreVariableMappingComputation(joiningItem, false) && (!insertingItemDep->isBatchProcessed() || insertingItemDep->loadNextBatch())) {
 
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingBindingsBatchDataVector(currentBatchSizeCount);
-							while (joiningItem->requiresMoreVariableMappingsComputation() && insertingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+							while (requiresMoreVariableMappingComputation(joiningItem, false) && insertingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
 								mappingProcessed = true;
 
+								CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingBindingsBatchDataVector(currentBatchSizeCount);
 								joiningHashBindingsInsertingCheckingBatchingFunc(leftInsertion, insertingItemDep, true, keyMappingBindingsBatchDataVector);
+								mapReducedConcurrentJoinInsertionComputation(keyMappingBindingsBatchDataVector);
 							}
-							mapReducedConcurrentJoinInsertionComputation(keyMappingBindingsBatchDataVector);
 
 
 
 							// inserting remaining cardinality updates
-							CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingCardinalitiesBatchDataVector(currentBatchSizeCount);
-							while (joiningItem->requiresMoreVariableMappingsComputation() && insertingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+							while (requiresMoreVariableMappingComputation(joiningItem, false) && insertingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
 								mappingProcessed = true;
 
+								CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingCardinalitiesBatchDataVector(currentBatchSizeCount);
 								joiningHashCardinalitiesInsertingCheckingBatchingFunc(leftInsertion, insertingItemDep, true, keyMappingCardinalitiesBatchDataVector);
+								mapReducedConcurrentJoinInsertionComputation(keyMappingCardinalitiesBatchDataVector);
 							}
-							mapReducedConcurrentJoinInsertionComputation(keyMappingCardinalitiesBatchDataVector);
 						}
 
 
 
 						if (insertingItemDep->isProcessingFinished()) {
-							while (joiningItem->requiresMoreVariableMappingsComputation() && (!checkingItemDep->isBatchProcessed() || checkingItemDep->loadNextBatch())) {
+							while (requiresMoreVariableMappingComputation(joiningItem, false) && (!checkingItemDep->isBatchProcessed() || checkingItemDep->loadNextBatch())) {
 
 
 								// checking remaining mappings
-								CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingBindingsBatchDataVector(currentBatchSizeCount);
-								while (joiningItem->requiresMoreVariableMappingsComputation() && checkingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+								while (requiresMoreVariableMappingComputation(joiningItem, false) && checkingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
 									mappingProcessed = true;
 
+									CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingBindingsBatchDataVector(currentBatchSizeCount);
 									joiningHashBindingsInsertingCheckingBatchingFunc(!leftInsertion, checkingItemDep, false, keyMappingBindingsBatchDataVector);
+									checkingHandlingFunc(keyMappingBindingsBatchDataVector);
 								}
-								checkingHandlingFunc(keyMappingBindingsBatchDataVector);
 
 
 								// checking remaining cardinality updates
-								CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingCardinalitiesBatchDataVector(currentBatchSizeCount);
-								while (joiningItem->requiresMoreVariableMappingsComputation() && checkingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+								while (requiresMoreVariableMappingComputation(joiningItem, false) && checkingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
 									mappingProcessed = true;
 
+									CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector<CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker> keyMappingCardinalitiesBatchDataVector(currentBatchSizeCount);
 									joiningHashCardinalitiesInsertingCheckingBatchingFunc(!leftInsertion, checkingItemDep, false, keyMappingCardinalitiesBatchDataVector);
+									checkingHandlingFunc(keyMappingCardinalitiesBatchDataVector);
 								}
-								checkingHandlingFunc(keyMappingCardinalitiesBatchDataVector);
 							}
 
 						}

@@ -318,6 +318,15 @@ namespace Konclude {
 						} else {
 							conText += QString(" %1. ").arg(con->getRole()->getRoleTag());
 						}
+						if (con->getVariableLinker()) {
+							cint64 varId = con->getVariable()->getPathVariableID();
+							QString varIdString = QString("%1").arg(varId);
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+							QString debugVariableName = con->getVariable()->mDebugVariableName;
+							varIdString += QString("~%1").arg(debugVariableName);
+#endif
+							conText += QString(" >>{%1} ").arg(varId);
+						}
 						conText += QString::number(con->getOperandList()->getData()->getConceptTag());
 					}
 

@@ -28,6 +28,7 @@
 #include "RealizerSettings.h"
 #include "COptimizedKPSetRoleInstancesItem.h"
 #include "COptimizedKPSetIndividualComplexRoleData.h"
+#include "COptimizedKPSetIndividualInstantiatedItemMultiHash.h"
 
 
 // Other includes
@@ -61,7 +62,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(const CRealizationIndividualInstanceItemReference& indiInstItemRef, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, bool considerSameMergedIndis);
+					COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(const CRealizationIndividualInstanceItemReference& indiInstItemRef, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, bool considerSameMergedIndis);
 
 
 					virtual bool requiresInitialization();
@@ -93,6 +94,12 @@ namespace Konclude {
 				protected:
 					bool moveToNextPossiblePosition(bool forceNextPosition = false);
 
+					void initializePossibleInstanceDataIteration();
+
+					bool initializeComplexDataIteration();
+
+					void initializeNeighbourArrayIteration();
+
 					bool isSameIndividualsMerged(const CRealizationIndividualInstanceItemReference& indiInstItemRef);
 
 				// protected variables
@@ -102,11 +109,12 @@ namespace Konclude {
 					COptimizedKPSetRoleInstancesItem* mRoleInstancesItem;
 					bool mInversed;
 
-					QHash<cint64, COptimizedKPSetIndividualItem*>* mIndividualInstantiatedItemHash;
+					COptimizedKPSetIndividualInstantiatedItemMultiHash* mIndividualInstantiatedItemHash;
 					CIndividualVector* mIndividualVector;
 
 
 					bool mNeighbourPossibleInstanceDataIteratorsInitialized;
+					bool mNeighbourPossibleInstanceDataIterationNewlyInitialized;
 					bool mNeighbourPossibleInstanceDataIteratorsFinished;
 					COptimizedKPSetRoleInstancesHash::const_iterator mNeighbourPossibleInstanceDataIt;
 					COptimizedKPSetRoleInstancesHash::const_iterator mNeighbourPossibleInstanceDataItEnd;
@@ -122,6 +130,7 @@ namespace Konclude {
 					cint64 mCurrentNeighbourArrayVisitingPositionCursor;
 
 
+					bool mNeighbourComplexDataIterationNewlyInitialized;
 					bool mNeighbourComplexDataIteratorsInitialized;
 					bool mNeighbourComplexDataIteratorsFinished;
 					COptimizedKPSetRoleInstancesHash::const_iterator mNeighbourComplexInstanceDataIt;
@@ -141,6 +150,13 @@ namespace Konclude {
 
 					bool mConsiderSameMergedIndis;
 					bool mSameMergedIndisInCache;
+
+
+					cint64 mNeighbourArrayIndiVisitedCount;
+					cint64 mNeighbourArrayIndiMergedCount;
+					cint64 mNeighbourArrayVisistedCount;
+					cint64 mNeighbourArrayCount;
+					cint64 mNeighbourArrayVisitedPosIndiCount;
 
 
 				// private methods

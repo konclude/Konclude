@@ -33,7 +33,6 @@ namespace Konclude {
 				mRole = role;
 				mInversed = inversed;
 				mPropagationVarIdx = propVarIdx;
-				mComputationDependentItemList.append(mBaseItem);
 
 				mFillerInstanceItemCount = 0;
 				mRealizationFinishedFillerInstanceItemCount = 0;
@@ -67,12 +66,12 @@ namespace Konclude {
 
 
 
-			QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* COptimizedComplexVariableRolePropagationAbstractItem::getWaitingProcessedRealizationIteratorDataList() {
+			QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase*>* COptimizedComplexVariableRolePropagationAbstractItem::getWaitingProcessedRealizationIteratorDataList() {
 				return &mWaitingProcessedRealizationIteratorDataList;
 			}
 
 
-			QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* COptimizedComplexVariableRolePropagationAbstractItem::getSchedulingRealizationIteratorDataList() {
+			QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase*>* COptimizedComplexVariableRolePropagationAbstractItem::getSchedulingRealizationIteratorDataList() {
 				return &mSchedulingRealizationIteratorDataList;
 			}
 
@@ -80,6 +79,12 @@ namespace Konclude {
 			QHash<CRealizationIndividualInstanceItemReference, COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* COptimizedComplexVariableRolePropagationAbstractItem::getInstanceItemRolePropagationInstanceIterationDataHash() {
 				return &mInstItemRolePropInstIterationDataHash;
 			}
+
+
+			QVector<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataHashMemoryManaged*>* COptimizedComplexVariableRolePropagationAbstractItem::getInstanceItemRolePropagationInstanceIterationDataHashVector() {
+				return &mInstItemRolePropInstIterationDataHashVector;
+			}
+
 
 
 			QList<COntologyProcessingRequirement*>* COptimizedComplexVariableRolePropagationAbstractItem::geSchedulingRealizationRequirementIteratorDataList() {
@@ -127,6 +132,11 @@ namespace Konclude {
 
 			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::setPropagationHandledInstanceItemCount(cint64 count) {
 				mPropagationHandledInstanceItemCount = count;
+				return this;
+			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::setPropagatedInstanceItemCount(cint64 count) {
+				mPropagatedInstanceItemCount = count;
 				return this;
 			}
 
@@ -181,6 +191,52 @@ namespace Konclude {
 			double COptimizedComplexVariableRolePropagationAbstractItem::getExpectedFillerPerPropagationItemCount() {
 				return mExpectedFillerAllPropagationItemCount / getPropagationInstanceItemCount();
 			}
+
+			COptimizedComplexVariableRolePropagationAbstractItem* COptimizedComplexVariableRolePropagationAbstractItem::resetIterationHash() {
+
+				for (QHash<CRealizationIndividualInstanceItemReference, COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>::const_iterator it = mInstItemRolePropInstIterationDataHash.constBegin(), itEnd = mInstItemRolePropInstIterationDataHash.constEnd(); it != itEnd; ++it) {
+					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* data = it.value();
+					delete data;
+				}
+				mInstItemRolePropInstIterationDataHash.clear();
+				mSchedulingRealizationIteratorDataList.clear();
+
+
+				for (COntologyProcessingRequirement* redData : mSchedulingRealizationRequirementIteratorDataList) {
+					delete redData;
+				}
+				mSchedulingRealizationRequirementIteratorDataList.clear();
+
+				for (cint64 i = 0; i < mInstItemRolePropInstIterationDataHashVector.size(); ++i) {
+					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataHashMemoryManaged*& hash = mInstItemRolePropInstIterationDataHashVector[i];
+					if (hash) {
+						CMemoryPool* memPoolIt = hash->getMemoryPools();
+						while (memPoolIt) {
+							CMemoryPool* tmpMemPool = memPoolIt;
+							memPoolIt = memPoolIt->getNext();
+							delete[] tmpMemPool->getMemoryBlockData();
+							delete tmpMemPool;
+						}
+						hash = nullptr;
+					}
+				}
+
+				return this;
+			}
+
+			bool COptimizedComplexVariableRolePropagationAbstractItem::clearComputation() {
+				COptimizedComplexVariableCompositionSingleDependenceItem::clearComputation();
+				resetIterationHash();
+
+				mFillerInstanceItemCount = 0;
+				mRealizationFinishedFillerInstanceItemCount = 0;
+				mPropagationHandledInstanceItemCount = 0;
+				mScheduledRealizationCount = 0;
+				mPropagatedInstanceItemCount = 0;
+				mExpectedFillerAllPropagationItemCount = 0;
+				return true;
+			}
+
 
 		}; // end namespace Answerer
 

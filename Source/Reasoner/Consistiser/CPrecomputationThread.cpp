@@ -34,6 +34,7 @@ namespace Konclude {
 				mCurrRunningTestParallelCount = 0;
 				mConfMaxTestParallelCount = 1;
 				mStatCalculatingJobs = 0;
+				mConfMaxTestBatchCreationCount = -1;
 
 				startThread(QThread::HighPriority);
 			}
@@ -88,12 +89,19 @@ namespace Konclude {
 			bool CPrecomputationThread::doNextPendingTests() {
 				bool createdNewTests = false;
 				bool nextTestCreated = true;
+				cint64 jobCreationCount = 0;
 				while (canProcessMoreTests() && nextTestCreated) {
 					nextTestCreated = false;
 					bool workCreated = createNextTest();
 					if (workCreated) {
+						++jobCreationCount;
 						nextTestCreated = true;
-						createdNewTests = true;
+						if (mConfMaxTestBatchCreationCount == -1 || jobCreationCount <= mConfMaxTestBatchCreationCount) {
+							createdNewTests = true;
+						} else {
+							createdNewTests = false;
+							postEvent(new CRescheduleJobCreationEvent());
+						}
 					} else {
 						nextTestCreated = false;
 					}
@@ -227,6 +235,12 @@ namespace Konclude {
 					}
 					return true;
 
+				} else if (type == CRetrievedPrecomputationIndividualsCallbackEvent::EVENTTYPE) {
+					CRetrievedPrecomputationIndividualsCallbackEvent* cpoe = (CRetrievedPrecomputationIndividualsCallbackEvent*)event;
+
+					precomputationIndividualsRetrieved(cpoe->getOntologyPrecomputationItem(), cpoe);
+					return true;
+
 				} else if (type == CPrecomputationCalculatedCallbackEvent::EVENTTYPE) {
 					CPrecomputationCalculatedCallbackEvent* pcce = (CPrecomputationCalculatedCallbackEvent*)event;
 
@@ -268,6 +282,9 @@ namespace Konclude {
 
 					doNextPendingTests();
 
+					return true;
+				} else if (type == CRescheduleJobCreationEvent::EVENTTYPE) {
+					doNextPendingTests();
 					return true;
 				}
 				return false;

@@ -29,6 +29,7 @@
 #include "CComplexConceptItemComputationProcess.h"
 #include "CRequirementWaitingDependencyData.h"
 #include "COptimizedComplexConceptInstanziatedIndividualItemHash.h"
+#include "CCacheAnswersWeightedUsageCostItem.h"
 
 
 
@@ -70,7 +71,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexConceptItem {
+			class COptimizedComplexConceptItem : public CCacheAnswersWeightedUsageCostItem {
 				// public methods
 				public:
 					//! Constructor
@@ -179,6 +180,20 @@ namespace Konclude {
 					COptimizedComplexConceptItem* setKnownInstanceIndividualSet(QSet<CIndividualReference>* instanceSet);
 
 					QSet<CRealizationIndividualInstanceItemReference>* getPossibleInstanceItemSet();
+					QSet<CRealizationIndividualInstanceItemReference>::const_iterator getPossibleInstanceItemSetCandidatePropagationIterator();
+					COptimizedComplexConceptItem* setPossibleInstanceItemSetCandidatePropagationIterator(QSet<CRealizationIndividualInstanceItemReference>::const_iterator it);
+
+					QSet<CRealizationIndividualInstanceItemReference>* getPossibleInstanceCandidatePropagationItemSet();
+					COptimizedComplexConceptItem* setPossibleInstanceCandidatePropagationItemSet(QSet<CRealizationIndividualInstanceItemReference>* set);
+
+
+					bool hasPossibleInstanceItemSetCandidatePropagationIteratorInitialized();
+					COptimizedComplexConceptItem* setPossibleInstanceItemSetCandidatePropagationIteratorInitialized(bool initialized);
+
+					cint64 getPossibleInstanceCandidatePropagationBeginningKnownInstancesCount();
+					COptimizedComplexConceptItem* setPossibleInstanceCandidatePropagationBeginningKnownInstancesCount(cint64 count);
+
+
 					COptimizedComplexConceptInstanziatedIndividualItemHash* getKnownInstanceItems();
 
 					COptimizedComplexConceptItem* setPossibleInstanceItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet);
@@ -263,6 +278,17 @@ namespace Konclude {
 					COptimizedComplexVariableConceptBaseItem* getVariableConceptBaseItem();
 					COptimizedComplexConceptItem* setVariableConceptBaseItem(COptimizedComplexVariableConceptBaseItem* baseItem);
 
+					COptimizedComplexVariableConceptSubSuperItem* getVariableConceptSuperClassesItem();
+					COptimizedComplexConceptItem* setVariableConceptSuperClassesItem(COptimizedComplexVariableConceptSubSuperItem* superItem);
+
+					COptimizedComplexVariableConceptSubSuperItem* getVariableConceptSubClassesItem();
+					COptimizedComplexConceptItem* setVariableConceptSubClassesItem(COptimizedComplexVariableConceptSubSuperItem* superItem);
+
+
+					COptimizedComplexVariableConceptSubSuperItem* getVariableConceptSuperSubClassesItem(bool superClasses);
+					COptimizedComplexConceptItem* setVariableConceptSuperSubClassesItem(COptimizedComplexVariableConceptSubSuperItem* item, bool superClasses);
+
+
 
 					bool isTopObjectPropertyUsed();
 					COptimizedComplexConceptItem* setTopObjectPropertyUsage(bool topObjectPropertyUsed);
@@ -282,6 +308,20 @@ namespace Konclude {
 #ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
 					QStringList debugVariableNameUseList;
 #endif
+
+
+					virtual bool clearComputation();
+
+
+					cint64 getMemoryConsumption();
+
+
+
+					cint64 getLastConceptInstancesCacheReportedCount();
+					cint64 getLastConceptInstancesCacheReportedSize();
+
+					COptimizedComplexConceptItem* setLastConceptInstancesCacheReportedCount(cint64 count);
+					COptimizedComplexConceptItem* setLastConceptInstancesCacheReportedSize(cint64 size);
 
 
 				// protected methods
@@ -335,6 +375,10 @@ namespace Konclude {
 
 
 					QSet<CRealizationIndividualInstanceItemReference>* mPossibleInstanceItemSet;
+					QSet<CRealizationIndividualInstanceItemReference>* mPossibleInstanceCandidatePropagationItemSet;
+					QSet<CRealizationIndividualInstanceItemReference>::const_iterator mPossibleInstanceItemSetCandidatePropagationIterator;
+					bool mPossibleInstanceItemSetCandidatePropagationIteratorInitialized = false;
+					cint64 mPossibleInstanceCandidatePropagationBeginningKnownInstancesCount = 0;
 					cint64 mPossibleTestedNonInstanceCount;
 					cint64 mRealizationRetrievedInstanceCandidateCount;
 
@@ -356,6 +400,8 @@ namespace Konclude {
 
 
 					COptimizedComplexVariableConceptBaseItem* mVarConBaseItem;
+					COptimizedComplexVariableConceptSubSuperItem* mVarConSuperClassesItem;
+					COptimizedComplexVariableConceptSubSuperItem* mVarConSubClassesItem;
 
 
 					bool mConceptAbsorbed;
@@ -373,6 +419,9 @@ namespace Konclude {
 					cint64 mLastRetrievingCertainInstanceItemCount;
 					double mMinimalRetrievingInstanceItemSize;
 
+
+					cint64 mLastConceptInstancesCacheReportedCount;
+					cint64 mLastConceptInstancesCacheReportedSize;
 
 
 				// private methods

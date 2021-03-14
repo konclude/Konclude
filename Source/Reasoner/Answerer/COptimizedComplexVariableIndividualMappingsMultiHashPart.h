@@ -102,6 +102,7 @@ namespace Konclude {
 					COptimizedComplexVariableIndividualMappingsMultiHashPart* removeBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker);
 
 					cint64 getLastUpdatedBindingCount(bool update = true);
+					cint64 getLastMemoryUsageSize(bool update = true);
 
 
 
@@ -138,10 +139,12 @@ namespace Konclude {
 
 					COptimizedComplexVariableIndividualMappingsMultiHashPart* extendAddedBindingsCardinalityBatchLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker);
 
+
 				// protected variables
 				protected:
 					cint64 mBindingCount;
 					cint64 mLastUpdatedBindingCount;
+					cint64 mLastMemoryUsageSize;
 					cint64 mBindingSize;
 
 
@@ -150,7 +153,7 @@ namespace Konclude {
 					COptimizedComplexVariableIndividualBindings* mFreeBindingsCopy;
 
 
-					CQtManagedRestrictedModificationHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*> mMappingCardinalityHash;
+					CQtManagedRestrictedModificationHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* mMappingCardinalityHash;
 
 
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker* mLastAddedBindingsCardinalityLinker;

@@ -52,7 +52,9 @@ namespace Konclude {
 		}
 
 		bool COntologyOWL2QtXMLRenderer::endRender(CRenderedItemLinker* renderedItemLinker) {
-			mAxiomRenderedItemLinker = (CRenderedQtXMLItemLinker*)renderedItemLinker;
+			if (renderedItemLinker) {
+				mAxiomRenderedItemLinker = (CRenderedQtXMLItemLinker*)renderedItemLinker->append(mAxiomRenderedItemLinker);
+			}
 			return true;
 		}
 

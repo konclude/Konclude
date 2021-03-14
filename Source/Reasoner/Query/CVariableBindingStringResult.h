@@ -65,6 +65,8 @@ namespace Konclude {
 					virtual CVariableBindingResult* initVariableBinding(const CIndividualReference& indiRef, CIndividualNameResolver* indiNameResolver);
 					virtual CVariableBindingResult* initVariableBinding(const CIndividualReference& indiRef, const QString& resolvedIndiName);
 					virtual CVariableBindingResult* initVariableBinding(CIndividual* individual);
+					virtual CVariableBindingResult* initVariableBinding(CConcept* concept);
+					virtual CVariableBindingResult* initVariableBinding(CRole* role);
 					virtual CVariableBindingResult* initVariableBinding(CDataLiteral* dataLiteral);
 
 
@@ -79,6 +81,8 @@ namespace Konclude {
 					virtual QString getQueryResultString();
 					virtual bool isResultEquivalentTo(CQueryResult *otherQueryResult);
 
+					virtual QString getClassBindingString();
+					virtual QString getPropertyBindingString();
 					virtual QString getNamedIndividualBindingString();
 					virtual QString getLiteralDatatypeBindingString();
 					virtual QString getLiteralDatavalueBindingString();

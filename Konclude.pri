@@ -25,6 +25,7 @@ HEADERS += \
    ./Source\Concurrent\CEventChannel.h \
    ./Source\Concurrent\CEventAllocator.h \
    ./Source\Concurrent\CEvent.h \
+   ./Source\Concurrent\CConcurrentTaskScheduler.h \
    ./Source\Concurrent\Callback\CSynchronizedCallbackListExecuter.h \
    ./Source\Concurrent\Callback\CCallbackRememberLinkedExecuter.h \
    ./Source\Concurrent\Callback\CCallbackListExecuter.h \
@@ -56,19 +57,23 @@ HEADERS += \
    ./Source\Config\CConfigurationBase.h \
    ./Source\Config\CConfiguration.h \
    ./Source\Config\CConfigType.h \
-   ./Source\Config\CConfigDescription.h \
    ./Source\Config\CConfigDebugDataReader.h \
+   ./Source\Config\CBooleanConfigType.h \
+   ./Source\Config\CConvertDoubleConfigType.h \
+   ./Source\Config\CDoubleConfigType.h \
+   ./Source\Config\CConvertStringListConfigType.h \
+   ./Source\Config\CStringListConfigType.h \
    ./Source\Config\CConfigDataReader.h \
    ./Source\Config\CConfigData.h \
-   ./Source\Config\CBooleanConfigType.h \
+   ./Source\Config\CConfigDescription.h \
    ./Source\Context\ContextSettings.h \
    ./Source\Context\CMemoryPoolReallocationIncreasingContext.h \
    ./Source\Context\CMemoryPoolNewAllocationIncreasingContext.h \
    ./Source\Context\CMemoryPoolNewAllocationContext.h \
    ./Source\Context\CContextBase.h \
    ./Source\Context\CContext.h \
-   ./Source\Control\Command\CReasonerManagerConfigType.h \
    ./Source\Control\Command\CReasonerConfigurationGroup.h \
+   ./Source\Control\Command\CReasonerManagerConfigType.h \
    ./Source\Control\Command\CReasonerCommanderGlobalConfiguration.h \
    ./Source\Control\Command\CReasonerCommandBuilder.h \
    ./Source\Control\Command\CPreconditionSynchronizer.h \
@@ -298,7 +303,6 @@ HEADERS += \
    ./Source\Control\Loader\CTestHashModificationLoader.h \
    ./Source\Control\Loader\CSPARQLResultsComparisonLoader.h \
    ./Source\Control\Loader\CSPARQLHttpServerLoader.h \
-   ./Source\Control\Loader\CSPARQLBatchFileLoader.h \
    ./Source\Control\Loader\CRecursionTestDataGeneratorLoader.h \
    ./Source\Control\Loader\CReasonerEvaluationTestcaseStatisticCollectionGeneratorLoader.h \
    ./Source\Control\Loader\CReasonerEvaluationProgramLoader.h \
@@ -337,6 +341,7 @@ HEADERS += \
    ./Source\Control\Loader\CCLIClassClassificationBatchProcessingLoader.h \
    ./Source\Control\Loader\CCLIBatchProcessingLoader.h \
    ./Source\Control\Loader\CAnalyseReasonerLoader.h \
+   ./Source\Control\Loader\CSPARQLBatchFileLoader.h \
    ./Source\Logger\LoggerSettings.h \
    ./Source\Logger\CQtDebugPrintLogObserver.h \
    ./Source\Logger\COREFilePrintLogObserver.h \
@@ -361,8 +366,6 @@ HEADERS += \
    ./Source\Network\CNetworkResponse.h \
    ./Source\Network\CNetworkRequest.h \
    ./Source\Network\HTTP\HttpSettings.h \
-   ./Source\Network\HTTP\CQtHttpTransactionManager.h \
-   ./Source\Network\HTTP\CQtHttpResponseHandler.h \
    ./Source\Network\HTTP\CQtHttpResponse.h \
    ./Source\Network\HTTP\CQtHttpRequestParser.h \
    ./Source\Network\HTTP\CQtHttpRequestBodyOnlyParser.h \
@@ -374,11 +377,13 @@ HEADERS += \
    ./Source\Network\HTTP\CQtHttpConnectionHandlerPooledFactory.h \
    ./Source\Network\HTTP\CQtHttpConnectionHandlerFactory.h \
    ./Source\Network\HTTP\CQtHttpConnectionHandler.h \
-   ./Source\Network\HTTP\CHttpTransactionManager.h \
    ./Source\Network\HTTP\CHttpResponseExtractor.h \
    ./Source\Network\HTTP\CHttpResponse.h \
    ./Source\Network\HTTP\CHttpRequestFactory.h \
    ./Source\Network\HTTP\CHttpRequest.h \
+   ./Source\Network\HTTP\CQtHttpResponseHandler.h \
+   ./Source\Network\HTTP\CHttpTransactionManager.h \
+   ./Source\Network\HTTP\CQtHttpTransactionManager.h \
    ./Source\Network\HTTP\Events\CReleaseResponseEvent.h \
    ./Source\Network\HTTP\Events\CInstallRequestFinishedCallbackEvent.h \
    ./Source\Network\HTTP\Events\CHttpRequstEvent.h \
@@ -444,6 +449,12 @@ HEADERS += \
    ./Source\Parser\CSPARQLQueryParser.h \
    ./Source\Parser\CSPARQLRedlandRasqalReasoningBGPQueryParser.h \
    ./Source\Parser\CRDFRedlandExternalTriplesDSNConnectingParser.h \
+   ./Source\Parser\CRDFRedlandRaptorSimpleConcurrentParser.h \
+   ./Source\Parser\CSPARQLExtendedMappingBuildingParser.h \
+   ./Source\Parser\CSPARQLBuildingParserTripleData.h \
+   ./Source\Parser\CSPARQLBuildingParserTermData.h \
+   ./Source\Parser\COntologyMultiAutoParsingLoader.h \
+   ./Source\Parser\COntologyQtXMLDocumentParser.h \
    ./Source\Parser\Expressions\ExpressionSettings.h \
    ./Source\Parser\Expressions\CVariableAssociator.h \
    ./Source\Parser\Expressions\CUnorderedPairObjectPropertyTermExpressionAssociator.h \
@@ -507,7 +518,6 @@ HEADERS += \
    ./Source\Parser\Expressions\CQueryExpression.h \
    ./Source\Parser\Expressions\CQueryAreClassesEquivalentExpression.h \
    ./Source\Parser\Expressions\CQueryAreClassesDisjointExpression.h \
-   ./Source\Parser\Expressions\CPropertyTermExpression.h \
    ./Source\Parser\Expressions\CPrecedentBuildPropertyExpression.h \
    ./Source\Parser\Expressions\CPrecedentBuildIndividualExpression.h \
    ./Source\Parser\Expressions\CPrecedentBuildClassExpression.h \
@@ -637,13 +647,18 @@ HEADERS += \
    ./Source\Parser\Expressions\CClassAxiomExpression.h \
    ./Source\Parser\Expressions\CClassAssertionExpression.h \
    ./Source\Parser\Expressions\CCardinalityAssociator.h \
-   ./Source\Parser\Expressions\CBuildExpression.h \
    ./Source\Parser\Expressions\CAxiomExpression.h \
    ./Source\Parser\Expressions\CAsymmetricObjectPropertyExpression.h \
    ./Source\Parser\Expressions\CAssertionAxiomExpression.h \
    ./Source\Parser\Expressions\CAnonymousIndividualVariableExpression.h \
    ./Source\Parser\Expressions\CAnonymousIndividualExpression.h \
    ./Source\Parser\Expressions\CQuerySPARQLSelectBasicGraphPatternExpression.h \
+   ./Source\Parser\Expressions\CBuildExpression.h \
+   ./Source\Parser\Expressions\CClassVariableExpression.h \
+   ./Source\Parser\Expressions\CObjectPropertyVariableExpression.h \
+   ./Source\Parser\Expressions\CDataPropertyVariableExpression.h \
+   ./Source\Parser\Expressions\CPropertyVariableExpression.h \
+   ./Source\Parser\Expressions\CPropertyTermExpression.h \
    ./Source\Parser\FunctionalJAVACC\TokenManager.h \
    ./Source\Parser\FunctionalJAVACC\TokenMgrError.h \
    ./Source\Parser\FunctionalJAVACC\OWL2FunctionalStyleParserTokenManager.h \
@@ -712,11 +727,11 @@ HEADERS += \
    ./Source\Reasoner\Answerer\COptimizedComplexConceptInstanziatedIndividualItemHash.h \
    ./Source\Reasoner\Answerer\COptimizedComplexExpressionAnsweringHandler.h \
    ./Source\Reasoner\Answerer\CConfigurationAnsweringHandlerFactory.h \
-   ./Source\Reasoner\Answerer\COptimizedComplexBuildingVariableCompositionsItem.h \
+   ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedQueryMaterialization.h \
+   ./Source\Reasoner\Answerer\CEntailmentVariableBuildingItemData.h \
    ./Source\Reasoner\Answerer\COntologyAnsweringItem.h \
    ./Source\Reasoner\Answerer\CMappingsInstancesComputationMode.h \
    ./Source\Reasoner\Answerer\CFirstQueuedAnsweringHandlerProvider.h \
-   ./Source\Reasoner\Answerer\CEntailmentVariableBuildingItemData.h \
    ./Source\Reasoner\Answerer\CEntailmentQueryProcessingData.h \
    ./Source\Reasoner\Answerer\CComputedItemDataNotificationLinker.h \
    ./Source\Reasoner\Answerer\AnswererSettings.h \
@@ -756,7 +771,6 @@ HEADERS += \
    ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedSubsumptionSuperClass.h \
    ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedSubsumptionSubClass.h \
    ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedSatisfiable.h \
-   ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedQueryMaterialization.h \
    ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedInstanceItem.h \
    ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedInstanceIndividual.h \
    ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedInstanceEntailment.h \
@@ -784,6 +798,7 @@ HEADERS += \
    ./Source\Reasoner\Answerer\CComplexQueryCompositionRedlandRasqalProcessingData.h \
    ./Source\Reasoner\Answerer\COptimizedComplexCompositionRedlandRasqalAnsweringHandler.h \
    ./Source\Reasoner\Answerer\CRedlandRasqalSubQueryProcessingData.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableRoleSubSuperItem.h \
    ./Source\Reasoner\Answerer\CRedlandRasqalModelSubQueryResolver.h \
    ./Source\Reasoner\Answerer\CAnsweringMessageDataRequirementCompletedSubQueryAnswering.h \
    ./Source\Reasoner\Answerer\CRedlandRasqalSubQueryTripleResolvingData.h \
@@ -794,6 +809,34 @@ HEADERS += \
    ./Source\Reasoner\Answerer\CRedlandRasqalLiteralHasher.h \
    ./Source\Reasoner\Answerer\COptimizedComplexVariableExtractionItem.h \
    ./Source\Reasoner\Answerer\CAnsweringSplitEntailmentTestingCancellationAdapter.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableCompositionItemRoleSamplingData.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataHashMemoryManaged.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataMemoryManaged.h \
+   ./Source\Reasoner\Answerer\CAnsweringPropagationExtendedSteeringController.h \
+   ./Source\Reasoner\Answerer\CAnsweringSplitPropagationTestingVariableData.h \
+   ./Source\Reasoner\Answerer\CAnsweringSplitPropagationTestingVariableBindingData.h \
+   ./Source\Reasoner\Answerer\CAnsweringSplitPropagationTestControllingItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableJoiningWithRemainingHasher.h \
+   ./Source\Reasoner\Answerer\CCacheAnswersWeightedUsageCostItemData.h \
+   ./Source\Reasoner\Answerer\CCacheAnswersWeightedUsageCostItem.h \
+   ./Source\Reasoner\Answerer\CAnsweringPropagationSteeringAbsorptionPropagationController.h \
+   ./Source\Reasoner\Answerer\CAnsweringMessageDataRequirementCompletedSubClassAxiomEntailment.h \
+   ./Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedClassSubsumption.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexBuildingIndividualVariableCompositionsItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexBuildingClassVariableCompositionsItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexBuildingVariableCompositionsItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableConceptSubSuperItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableSubSuperClassesPropagationItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexBuildingPropertyVariableCompositionsItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexBuildingObjectPropertyVariableCompositionsItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableSubSuperPropertiesPropagationItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexBuildingIndividualMixedVariableCompositionsItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableIndividualTypeExtensionItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableIndividualTypeExtensionProcessingRealizationData.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableCompositionItemUpdateData.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableIndividualNeighboringPropertyExtensionItem.h \
+   ./Source\Reasoner\Answerer\COptimizedComplexVariableIndividualPropertyExtensionProcessingRealizationData.h \
    ./Source\Reasoner\Answerer\Events\CAnsweringRequirementCompletedEvent.h \
    ./Source\Reasoner\Answerer\Events\CAnsweringPreparedEvent.h \
    ./Source\Reasoner\Answerer\Events\CAnsweringOntologyPreparationEvent.h \
@@ -803,22 +846,31 @@ HEADERS += \
    ./Source\Reasoner\Answerer\Events\CAnsweringComplexQueryCompletedEvent.h \
    ./Source\Reasoner\Answerer\Events\CAnsweringCalculationCompletedEvent.h \
    ./Source\Reasoner\Answerer\Events\CAnswerComplexQueryEvent.h \
+   ./Source\Reasoner\Answerer\Composition\CAbstractVariableMappingsCompositionComputator.h \
+   ./Source\Reasoner\Answerer\Composition\CAbstractVariableMappingsCompositionJoinComputator.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionJoinComputator.h \
+   ./Source\Reasoner\Answerer\Composition\CompositionSettings.h \
+   ./Source\Reasoner\Answerer\Composition\CAbstractVariableMappingsCompositionItemRequirementProcessor.h \
+   ./Source\Reasoner\Answerer\Composition\CAbstractVariableMappingsCompositionPropagationComputator.h \
    ./Source\Reasoner\Answerer\Composition\CSequentialVariableMappingsCompositionJoinComputator.h \
+   ./Source\Reasoner\Answerer\Composition\CSequentialVariableMappingsCompositionPropagationComputator.h \
    ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker.h \
    ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker.h \
    ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker.h \
-   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData.h \
-   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector.h \
-   ./Source\Reasoner\Answerer\Composition\CompositionSettings.h \
-   ./Source\Reasoner\Answerer\Composition\CAbstractVariableMappingsCompositionJoinComputator.h \
-   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionJoinComputator.h \
-   ./Source\Reasoner\Answerer\Composition\CAbstractVariableMappingsCompositionComputator.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionBaseBindingsCardinalityLinkerBatchLinker.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionPropagationBindingsCardinalityLinkerBatchLinker.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionPropagationComputator.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionPropagationMappedKeyBindingsCardinalityLinker.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionPropagationMappedPropagatedBindingsCardinalityLinker.h \
+   ./Source\Reasoner\Answerer\Composition\CQtConcurrentVariableMappingsCompositionPropagationRealizationSchedulingBatchLinkerVector.h \
    ./Source\Reasoner\Answerer\Conclusion\ConclusionSettings.h \
    ./Source\Reasoner\Answerer\Conclusion\CAbstractComplexQueryFinishingHandler.h \
    ./Source\Reasoner\Answerer\Conclusion\CSequentialStreamingComplexQueryFinishingHandler.h \
    ./Source\Reasoner\Answerer\Conclusion\CQtConcurrentStreamingComplexQueryFinishingHandler.h \
-   ./Source\Reasoner\Answerer\Conclusion\CAbstractStreamingComplexQueryFinishingHandler.h \
    ./Source\Reasoner\Answerer\Conclusion\CVariableBindingsQueryResultWriter.h \
+   ./Source\Reasoner\Answerer\Conclusion\CAbstractStreamingComplexQueryFinishingHandler.h \
    ./Source\Reasoner\Classification\CPropertyRoleClassification.h \
    ./Source\Reasoner\Classification\ClassificationSettings.h \
    ./Source\Reasoner\Classification\CClassificationStatisticsCollectionStrings.h \
@@ -955,6 +1007,8 @@ HEADERS += \
    ./Source\Reasoner\Consistiser\Events\CPrecomputeOntologyEvent.h \
    ./Source\Reasoner\Consistiser\Events\CPrecomputationCalculatedCallbackEvent.h \
    ./Source\Reasoner\Consistiser\Events\CCallbackPrecomputedOntologyEvent.h \
+   ./Source\Reasoner\Consistiser\Events\CRetrievedPrecomputationIndividualsCallbackEvent.h \
+   ./Source\Reasoner\Consistiser\Events\CRescheduleJobCreationEvent.h \
    ./Source\Reasoner\Generator\GeneratorSettings.h \
    ./Source\Reasoner\Generator\CStringRefStringHasher.h \
    ./Source\Reasoner\Generator\CSatisfiableCalculationTaskFromCalculationJobGenerator.h \
@@ -983,6 +1037,7 @@ HEADERS += \
    ./Source\Reasoner\Generator\CApproximatedSaturationCalculationJobGenerator.h \
    ./Source\Reasoner\Generator\CActiveEntitySubExpressionVisitorUpdater.h \
    ./Source\Reasoner\Generator\CConcreteOntologyExtendibleQueryExtendedBuilder.h \
+   ./Source\Reasoner\Generator\CConcreteOntologyRedlandTriplesDataQueryingExpressionMapper.h \
    ./Source\Reasoner\Kernel\KernelSettings.h \
    ./Source\Reasoner\Kernel\Algorithm\CUnsatisfiableCacheHandler.h \
    ./Source\Reasoner\Kernel\Algorithm\CTrackedClashedDescriptorHasher.h \
@@ -1149,7 +1204,7 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheSlotItem.h \
    ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheRoleAssertionLinker.h \
    ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheReader.h \
-   ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheOntologyData.h \
+   ./Source\Reasoner\Kernel\Cache\CacheSettings.h \
    ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheOntologyContext.h \
    ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData.h \
    ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheLabelAssociationWriteData.h \
@@ -1164,7 +1219,13 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCache.h \
    ./Source\Reasoner\Kernel\Cache\CBackendCacheWriteData.h \
    ./Source\Reasoner\Kernel\Cache\CBackendCache.h \
-   ./Source\Reasoner\Kernel\Cache\CacheSettings.h \
+   ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker.h \
+   ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker.h \
+   ./Source\Reasoner\Kernel\Cache\CBackendIndividualRetrievalComputationUpdateCoordinationHash.h \
+   ./Source\Reasoner\Kernel\Cache\CBackendIndividualRetrievalComputationUpdateCoordinationHashData.h \
+   ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheOntologyData.h \
+   ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheIndividualAssociationContext.h \
+   ./Source\Reasoner\Kernel\Cache\CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker.h \
    ./Source\Reasoner\Kernel\Cache\Events\CWriteUnsatisfiableCacheEntryEvent.h \
    ./Source\Reasoner\Kernel\Cache\Events\CWriteSaturationCacheDataEvent.h \
    ./Source\Reasoner\Kernel\Cache\Events\CWriteSatisfiableCacheEntryEvent.h \
@@ -1173,7 +1234,9 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Cache\Events\CWriteComputedConcequencesCacheEntryEvent.h \
    ./Source\Reasoner\Kernel\Cache\Events\CWriteCachedDataEvent.h \
    ./Source\Reasoner\Kernel\Cache\Events\CWriteBackendAssociationCachedEvent.h \
+   ./Source\Reasoner\Kernel\Cache\Events\CInitializeIndividualAssociationsCacheEvent.h \
    ./Source\Reasoner\Kernel\Cache\Events\CRetrieveIncompletelyAssociationCachedEvent.h \
+   ./Source\Reasoner\Kernel\Cache\Events\CReportMaximumHandledRecomputationIdsEvent.h \
    ./Source\Reasoner\Kernel\Calculation\CTaskHandleAlgorithmBuilder.h \
    ./Source\Reasoner\Kernel\Calculation\CConfigDependedCalculationFactory.h \
    ./Source\Reasoner\Kernel\Calculation\CConfigDependedCalculationEnvironmentFactory.h \
@@ -1186,7 +1249,6 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Manager\ManagerSettings.h \
    ./Source\Reasoner\Kernel\Manager\CRequirementPreparingData.h \
    ./Source\Reasoner\Kernel\Manager\CReasoningTaskData.h \
-   ./Source\Reasoner\Kernel\Manager\CReasonerManagerThread.h \
    ./Source\Reasoner\Kernel\Manager\CReasonerManager.h \
    ./Source\Reasoner\Kernel\Manager\CRealizationManager.h \
    ./Source\Reasoner\Kernel\Manager\CPreprocessingManager.h \
@@ -1195,7 +1257,7 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Manager\COntologyRequirementPair.h \
    ./Source\Reasoner\Kernel\Manager\CExperimentalReasonerManager.h \
    ./Source\Reasoner\Kernel\Manager\CAnalyseReasonerManager.h \
-   ./Source\Reasoner\Kernel\Manager\Events\CRequirementProcessedCallbackEvent.h \
+   ./Source\Reasoner\Kernel\Manager\CReasonerManagerThread.h \
    ./Source\Reasoner\Kernel\Manager\Events\CReasoningSatisfiableCalculationJobEvent.h \
    ./Source\Reasoner\Kernel\Manager\Events\CQueryJobCalculatedSatisfiableCallbackEvent.h \
    ./Source\Reasoner\Kernel\Manager\Events\CQueriedTaxonomyComputedCallbackEvent.h \
@@ -1203,6 +1265,7 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Manager\Events\CJobCalculatedSatisfiableCallbackEvent.h \
    ./Source\Reasoner\Kernel\Manager\Events\CCalcQueryEvent.h \
    ./Source\Reasoner\Kernel\Manager\Events\CCalcedQueryEvent.h \
+   ./Source\Reasoner\Kernel\Manager\Events\CRequirementProcessedCallbackEvent.h \
    ./Source\Reasoner\Kernel\Process\ProcessSettings.h \
    ./Source\Reasoner\Kernel\Process\CVariableBindingTriggerLinker.h \
    ./Source\Reasoner\Kernel\Process\CVariableBindingTriggerHash.h \
@@ -1545,6 +1608,11 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Process\CAnalizedConceptExpansionLinker.h \
    ./Source\Reasoner\Kernel\Process\CAdditionalProcessRoleAssertionsLinker.h \
    ./Source\Reasoner\Kernel\Process\CAdditionalProcessDataAssertionsLinker.h \
+   ./Source\Reasoner\Kernel\Process\CBackendNeighbourExpansionControllingData.h \
+   ./Source\Reasoner\Kernel\Process\CBackendNeighbourExpansionQueue.h \
+   ./Source\Reasoner\Kernel\Process\CBackendNeighbourExpansionQueueDataLinker.h \
+   ./Source\Reasoner\Kernel\Process\CIndividualLinkerRotationProcessingQueue.h \
+   ./Source\Reasoner\Kernel\Process\CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData.h \
    ./Source\Reasoner\Kernel\Process\Dependency\DependencySettings.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CVARBINDVARIABLEDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CVARBINDPROPAGATEJOINDependencyNode.h \
@@ -1580,12 +1648,10 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Process\Dependency\CORONLYOPTIONDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CORDisjunctDependencyTrackPoint.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CORDependencyNode.h \
-   ./Source\Reasoner\Kernel\Process\Dependency\CNonDeterministicDependencyTrackPoint.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CNonDeterministicDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CNOMINALDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CNEGVALUEDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode.h \
-   ./Source\Reasoner\Kernel\Process\Dependency\CMERGEDLINKDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CMERGEDIndividualDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CMERGEDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CMERGEDCONCEPTDependencyNode.h \
@@ -1596,7 +1662,6 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Process\Dependency\CDISTINCTDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CDeterministicDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CDependencyTrackPoint.h \
-   ./Source\Reasoner\Kernel\Process\Dependency\CDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CDependencyIterator.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CDependency.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CDATATYPETRIGGERDependencyNode.h \
@@ -1617,6 +1682,13 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Process\Dependency\CATLEASTDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CANDDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Dependency\CALLDependencyNode.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\CDependencyNode.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\CNonDeterministicDependencyTrackPoint.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\CREUSEBACKENDEXPANSIONMODESDependencyNode.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\CREUSEBACKENDVALUEDependencyNode.h \
+   ./Source\Reasoner\Kernel\Process\Dependency\CMERGEDLINKDependencyNode.h \
    ./Source\Reasoner\Kernel\Process\Marker\MarkerSettings.h \
    ./Source\Reasoner\Kernel\Process\Marker\CMarker.h \
    ./Source\Reasoner\Kernel\Strategy\CUnsatisfiableCacheRetrievalStrategy.h \
@@ -1634,7 +1706,6 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Task\CSaturationTaskData.h \
    ./Source\Reasoner\Kernel\Task\CSaturationOccurrenceStatisticsCollectingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSaturationIndividualsAnalysingAdapter.h \
-   ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationPossibleInstancesMergingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.h \
@@ -1645,7 +1716,6 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererSubsumptionMessageAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererQueryingPropagationAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererQueryingMaterializationAdapter.h \
-   ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererInstancePropagationMessageAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererBindingPropagationAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableCalculationTaskStatusPropagator.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableCalculationTaskJobCallbackExecuter.h \
@@ -1653,11 +1723,12 @@ HEADERS += \
    ./Source\Reasoner\Kernel\Task\CIncrementalConsistenceTaskData.h \
    ./Source\Reasoner\Kernel\Task\CConsistenceTaskData.h \
    ./Source\Reasoner\Kernel\Task\CCalculationStatisticsCollector.h \
-   ./Source\Reasoner\Kernel\Task\CCalculationConfigurationExtension.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableTaskCancellationAdapter.h \
+   ./Source\Reasoner\Kernel\Task\CCalculationConfigurationExtension.h \
+   ./Source\Reasoner\Kernel\Task\CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h \
    ./Source\Reasoner\Kernel\Task\CSatisfiableCalculationTask.h \
+   ./Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererInstancePropagationMessageAdapter.h \
    ./Source\Reasoner\Ontology\OntologySettings.h \
-   ./Source\Reasoner\Ontology\CVariable.h \
    ./Source\Reasoner\Ontology\CUnsatisfiableCachingTags.h \
    ./Source\Reasoner\Ontology\CTerminology.h \
    ./Source\Reasoner\Ontology\CTBox.h \
@@ -1798,6 +1869,7 @@ HEADERS += \
    ./Source\Reasoner\Ontology\CConcreteOntology.h \
    ./Source\Reasoner\Ontology\CConceptVector.h \
    ./Source\Reasoner\Ontology\CConceptTextFormater.h \
+   ./Source\Reasoner\Ontology\CVariable.h \
    ./Source\Reasoner\Ontology\CConceptTagComparer.h \
    ./Source\Reasoner\Ontology\CConceptSaturationReferenceLinkingData.h \
    ./Source\Reasoner\Ontology\CConceptSatisfiableReferenceLinkingData.h \
@@ -2051,6 +2123,12 @@ HEADERS += \
    ./Source\Reasoner\Query\CComplexAnsweringExpressionQuery.h \
    ./Source\Reasoner\Query\CComplexAssertionsIndividualVariablesAnsweringExtendibleQuery.h \
    ./Source\Reasoner\Query\CComplexQueryExtendibleData.h \
+   ./Source\Reasoner\Query\CComplexAxiomsClassVariablesAnsweringQuery.h \
+   ./Source\Reasoner\Query\CComplexVariablesAnsweringQuery.h \
+   ./Source\Reasoner\Query\CComplexAxiomsPropertyVariablesAnsweringQuery.h \
+   ./Source\Reasoner\Query\CComplexAxiomsObjectPropertyVariablesAnsweringQuery.h \
+   ./Source\Reasoner\Query\CComplexAxiomsDataPropertyVariablesAnsweringQuery.h \
+   ./Source\Reasoner\Query\CComplexAxiomsIndividualMixedVariablesAnsweringQuery.h \
    ./Source\Reasoner\Realization\RealizationSettings.h \
    ./Source\Reasoner\Realization\CSameRealizationIndividualVisitor.h \
    ./Source\Reasoner\Realization\CSameRealization.h \
@@ -2061,7 +2139,6 @@ HEADERS += \
    ./Source\Reasoner\Realization\CRoleRealizationInstanceVisitor.h \
    ./Source\Reasoner\Realization\CRoleRealizationInstanceToIndividualVisitor.h \
    ./Source\Reasoner\Realization\CRoleRealizationIndividualVisitor.h \
-   ./Source\Reasoner\Realization\CRoleRealization.h \
    ./Source\Reasoner\Realization\CRoleInstantiatedItem.h \
    ./Source\Reasoner\Realization\CRoleInstanceItem.h \
    ./Source\Reasoner\Realization\CRealizationRemainingInstancesEstimation.h \
@@ -2077,9 +2154,14 @@ HEADERS += \
    ./Source\Reasoner\Realization\CConceptRealizationInstanceToIndividualVisitor.h \
    ./Source\Reasoner\Realization\CConceptRealizationIndividualVisitor.h \
    ./Source\Reasoner\Realization\CConceptRealizationConceptVisitor.h \
-   ./Source\Reasoner\Realization\CConceptRealization.h \
    ./Source\Reasoner\Realization\CConceptInstantiatedItem.h \
    ./Source\Reasoner\Realization\CConceptInstanceItem.h \
+   ./Source\Reasoner\Realization\CConceptRealizationHierarchyNodeVisitor.h \
+   ./Source\Reasoner\Realization\CConceptRealizationInstantiatedToHierarchyNodeVisitor.h \
+   ./Source\Reasoner\Realization\CRoleRealizationHierarchyNodeVisitor.h \
+   ./Source\Reasoner\Realization\CRoleRealizationInstantiatedToHierarchyNodeVisitor.h \
+   ./Source\Reasoner\Realization\CConceptRealization.h \
+   ./Source\Reasoner\Realization\CRoleRealization.h \
    ./Source\Reasoner\Realizer\RealizerSettings.h \
    ./Source\Reasoner\Realizer\CRealizingTestingStep.h \
    ./Source\Reasoner\Realizer\CRealizingTestingItem.h \
@@ -2148,6 +2230,7 @@ HEADERS += \
    ./Source\Reasoner\Realizer\CIndividualConceptInstanceTestingItem.h \
    ./Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingThread.h \
    ./Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingItem.h \
+   ./Source\Reasoner\Realizer\COptimizedKPSetIndividualInstantiatedItemMultiHash.h \
    ./Source\Reasoner\Realizer\Events\CRealizingCalculatedCallbackEvent.h \
    ./Source\Reasoner\Realizer\Events\CRealizeOntologyEvent.h \
    ./Source\Reasoner\Realizer\Events\CRealizationMessageEvent.h \
@@ -2157,11 +2240,18 @@ HEADERS += \
    ./Source\Reasoner\Revision\COntologyRevision.h \
    ./Source\Reasoner\Revision\COntologyConfigurationExtension.h \
    ./Source\Reasoner\Revision\CSPOntologyRevisionManager.h \
+   ./Source\Reasoner\Revision\Persistence\COntologyRevisionRedlandExternalTriplesSPARQLServicePersistencer.h \
+   ./Source\Reasoner\Revision\Persistence\CConfigurationBasedOntologyRevisionPersistencerFactory.h \
+   ./Source\Reasoner\Revision\Persistence\COntologyRevisionDirectoryOWLRDFFilePersistencer.h \
    ./Source\Reasoner\Revision\Persistence\PersistenceSettings.h \
    ./Source\Reasoner\Revision\Persistence\COntologyRevisionPersistencerFactory.h \
-   ./Source\Reasoner\Revision\Persistence\COntologyRevisionPersistencer.h \
+   ./Source\Reasoner\Revision\Persistence\COntologyRevisionRedlandExternalStoredTriplesConnectionData.h \
+   ./Source\Reasoner\Revision\Persistence\COntologyRevisionMultiPersistencer.h \
+   ./Source\Reasoner\Revision\Persistence\CNameBasedOntologyRevisionPersistencerFactory.h \
+   ./Source\Reasoner\Revision\Persistence\COntologyRevisionDirectoryFilePersistencerBase.h \
    ./Source\Reasoner\Revision\Persistence\COntologyRevisionDirectoryOWL2XMLFilePersistencer.h \
-   ./Source\Reasoner\Revision\Persistence\CConfigurationBasedOntologyRevisionPersistencerFactory.h \
+   ./Source\Reasoner\Revision\Persistence\COntologyRevisionPersistencer.h \
+   ./Source\Reasoner\Revision\Persistence\COntologyRevisionRedlandExternalTriplesDSNOnlyWritingPersistencer.h \
    ./Source\Reasoner\Taxonomy\TaxonomySettings.h \
    ./Source\Reasoner\Taxonomy\CTaxonomy.h \
    ./Source\Reasoner\Taxonomy\CRolePropertiesParentChildPredecessorHierarchyNode.h \
@@ -2200,19 +2290,35 @@ HEADERS += \
    ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualAssertionIndexCacheData.h \
    ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualAssertionIndexCache.h \
    ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualAssertionConvertionIndexer.h \
+   ./Source\Reasoner\Triples\CTriplesDataIterator.h \
    ./Source\Reasoner\Triples\CRedlandStoredTriplesData.h \
    ./Source\Reasoner\Triples\CRedlandNodeHasher.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualAssertionConvertionQtConcurrentIndexer.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesIndexingBaseBatchLinkerVector.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesIndexingBaseBatchLinkerVectorData.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesIndexingBaseBatchLinker.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesIndexingBaseResolvingLinker.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualResolvingHashMemoryManaged.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesIndividualPreProcessMemoryManagingContext.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesDataModelIterator.h \
+   ./Source\Reasoner\Triples\CRedlandStoredTriplesDataLinkerIterator.h \
+   ./Source\Renderer\COntologyAxiomExpressionsRenderVisitor.h \
+   ./Source\Renderer\CRenderedRedlandRDFNodeItemBaseLinker.h \
+   ./Source\Renderer\COntologyRedlandRDFRenderer.h \
+   ./Source\Renderer\CRenderedRedlandRDFTripleItemBaseLinker.h \
    ./Source\Renderer\RendererSettings.h \
    ./Source\Renderer\CRenderWriteManager.h \
    ./Source\Renderer\CRenderedQtXMLItemLinker.h \
-   ./Source\Renderer\CRenderedItemLinker.h \
    ./Source\Renderer\COntologyRenderVisitor.h \
    ./Source\Renderer\COntologyRenderer.h \
    ./Source\Renderer\COntologyParsedBuildExpressionRenderVisitor.h \
    ./Source\Renderer\COntologyOWL2QtXMLRenderer.h \
    ./Source\Renderer\COntologyExtractionManager.h \
    ./Source\Renderer\COntologyEmptyDefaultRenderer.h \
-   ./Source\Renderer\COntologyAxiomExpressionsRenderVisitor.h \
+   ./Source\Renderer\CRenderedRDFTripleItemBaseLinker.h \
+   ./Source\Renderer\CRenderedItemLinker.h \
+   ./Source\Renderer\CRenderedRDFNodeItemBaseLinker.h \
+   ./Source\Renderer\COntologyRDFRendererBase.h \
    ./Source\Scheduler\SchedulerSettings.h \
    ./Source\Scheduler\CTaskStatusPropagator.h \
    ./Source\Scheduler\CTaskStatus.h \
@@ -2446,12 +2552,18 @@ HEADERS += \
    ./Source\Test\Evaluation\CReasonerEvaluationAnalyseContext.h \
    ./Source\Test\Evaluation\CCriticalSystemProcessTester.h \
    ./Source\Test\Evaluation\CConfigDependendReasonerEvaluationFactory.h \
+   ./Source\Test\Evaluation\CReasonerMemoryUsageCheckingThread.h \
+   ./Source\Test\Evaluation\CReasonerEvaluationGroupRequestReasonerMemoryUsageAnalyser.h \
    ./Source\Test\Evaluation\Events\CReasonerEvaluationUpdateEvent.h \
    ./Source\Test\Evaluation\Events\CReasonerEvaluationTestsuiteEvent.h \
-   ./Source\Test\Evaluation\Events\CReasonerEvaluationStartEvent.h \
    ./Source\Test\Evaluation\Events\CReasonerEvaluationProgramFileChangedEvent.h \
    ./Source\Test\Evaluation\Events\CReasonerEvaluationProgramEvent.h \
    ./Source\Test\Evaluation\Events\CReasonerEvaluationNextEvent.h \
+   ./Source\Test\Evaluation\Events\CReasonerMemoryUsageFinishedEvent.h \
+   ./Source\Test\Evaluation\Events\CReasonerEvaluationStartEvent.h \
+   ./Source\Test\Evaluation\Events\CReasonerEvaluationReasonerStartEvent.h \
+   ./Source\Test\Evaluation\Events\CReasonerEvaluationReasonerStopEvent.h \
+   ./Source\Test\Evaluation\Events\CReasonerEvaluationReasonerRestartEvent.h \
    ./Source\Test\Events\CTestTestfileEvent.h \
    ./Source\Test\Events\CEvaluateTestfileTestEvent.h \
    ./Source\Utilities\UtilitiesSettings.h \
@@ -2472,12 +2584,12 @@ HEADERS += \
    ./Source\Utilities\CLinker.hpp \
    ./Source\Utilities\CHashableIntConvertedNTuble.hpp \
    ./Source\Utilities\CDynRefVector.hpp \
-   ./Source\Utilities\CDynRefBucket.hpp \
    ./Source\Utilities\CDynamicExpandingMemoryManager.hpp \
    ./Source\Utilities\CDblNegLinker.hpp \
    ./Source\Utilities\CDblLinker.hpp \
    ./Source\Utilities\CAllocationObject.h \
    ./Source\Utilities\CAllocationLinker.h \
+   ./Source\Utilities\CDynRefBucket.hpp \
    ./Source\Utilities\Container\CVector.h \
    ./Source\Utilities\Container\CTemporaryDataArrayMemoryStorer.h \
    ./Source\Utilities\Container\CSortedNegLinker.h \
@@ -2512,6 +2624,7 @@ HEADERS += \
    ./Source\Utilities\Container\CDefaultDynamicReferenceVector.h \
    ./Source\Utilities\Container\CDefaultDoubleDynamicReferenceVector.h \
    ./Source\Utilities\Container\CDataArrayMemoryManager.h \
+   ./Source\Utilities\Container\CQtManagedRestrictedModificationSharingHash.h \
    ./Source\Utilities\Memory\MemorySettings.h \
    ./Source\Utilities\Memory\CTempMemoryPoolContainerAllocationManager.h \
    ./Source\Utilities\Memory\CReallocationIncreasingMemoryPoolProvider.h \
@@ -2524,8 +2637,6 @@ HEADERS += \
    ./Source\Utilities\Memory\CMemoryTemporaryAllocationManager.h \
    ./Source\Utilities\Memory\CMemoryPoolProvider.h \
    ./Source\Utilities\Memory\CMemoryPoolContainerAllocationManager.h \
-   ./Source\Utilities\Memory\CMemoryPoolContainer.h \
-   ./Source\Utilities\Memory\CMemoryPoolAllocationManager.h \
    ./Source\Utilities\Memory\CMemoryPool.h \
    ./Source\Utilities\Memory\CMemoryAllocator.h \
    ./Source\Utilities\Memory\CMemoryAllocationManager.h \
@@ -2539,6 +2650,8 @@ HEADERS += \
    ./Source\Utilities\Memory\CCentralizedAllocationConfigProvidedDependendLimitation.h \
    ./Source\Utilities\Memory\CAllocationLimitator.h \
    ./Source\Utilities\Memory\CAllocationLimitationProvider.h \
+   ./Source\Utilities\Memory\CMemoryPoolAllocationManager.h \
+   ./Source\Utilities\Memory\CMemoryPoolContainer.h \
 
 SOURCES += \
    ./Source/CKoncludeInfo.cpp \
@@ -2566,6 +2679,7 @@ SOURCES += \
    ./Source/Concurrent/CEventAllocator.cpp \
    ./Source/Concurrent/CEvent.cpp \
    ./Source/Concurrent/CThread.cpp \
+   ./Source/Concurrent/CConcurrentTaskScheduler.cpp \
    ./Source/Concurrent/Callback/CSynchronizedCallbackListExecuter.cpp \
    ./Source/Concurrent/Callback/CCallbackRememberLinkedExecuter.cpp \
    ./Source/Concurrent/Callback/CCallbackListExecuter.cpp \
@@ -2595,16 +2709,21 @@ SOURCES += \
    ./Source/Config/CConfigurationBase.cpp \
    ./Source/Config/CConfiguration.cpp \
    ./Source/Config/CConfigType.cpp \
-   ./Source/Config/CConfigDescription.cpp \
    ./Source/Config/CConfigDebugDataReader.cpp \
-   ./Source/Config/CConfigDataReader.cpp \
-   ./Source/Config/CConfigData.cpp \
    ./Source/Config/CBooleanConfigType.cpp \
+   ./Source/Config/CConvertDoubleConfigType.cpp \
+   ./Source/Config/CDoubleConfigType.cpp \
+   ./Source/Config/CConvertStringListConfigType.cpp \
+   ./Source/Config/CStringListConfigType.cpp \
+   ./Source/Config/CConfigData.cpp \
+   ./Source/Config/CConfigDescription.cpp \
+   ./Source/Config/CConfigDataReader.cpp \
    ./Source/Context/CMemoryPoolReallocationIncreasingContext.cpp \
    ./Source/Context/CMemoryPoolNewAllocationIncreasingContext.cpp \
    ./Source/Context/CMemoryPoolNewAllocationContext.cpp \
    ./Source/Context/CContextBase.cpp \
    ./Source/Context/CContext.cpp \
+   ./Source/Control/Command/CReasonerConfigurationGroup.cpp \
    ./Source/Control/Command/CReasonerManagerConfigType.cpp \
    ./Source/Control/Command/CReasonerCommanderGlobalConfiguration.cpp \
    ./Source/Control/Command/CReasonerCommandBuilder.cpp \
@@ -2627,7 +2746,6 @@ SOURCES += \
    ./Source/Control/Command/CCommandBuilder.cpp \
    ./Source/Control/Command/CCommand.cpp \
    ./Source/Control/Command/CClassificationManagerConfigType.cpp \
-   ./Source/Control/Command/CReasonerConfigurationGroup.cpp \
    ./Source/Control/Command/Events/CRealizeCommandEvent.cpp \
    ./Source/Control/Command/Events/COntologyPreparedCallbackEvent.cpp \
    ./Source/Control/Command/Events/CInitializeEvent.cpp \
@@ -2679,7 +2797,6 @@ SOURCES += \
    ./Source/Control/Command/Instructions/CParseSPARQLCommandsCommand.cpp \
    ./Source/Control/Command/Instructions/CParseProcessSPARQLUpdateTextCommand.cpp \
    ./Source/Control/Command/Instructions/CParseProcessSPARQLTextCommand.cpp \
-   ./Source/Control/Command/Instructions/CParseProcessSPARQLManageTextCommand.cpp \
    ./Source/Control/Command/Instructions/CParseOWLlinkCommandsCommand.cpp \
    ./Source/Control/Command/Instructions/CParseOWL2XMLQueryCommand.cpp \
    ./Source/Control/Command/Instructions/CParseOWL2XMLOntologyCommand.cpp \
@@ -2768,8 +2885,8 @@ SOURCES += \
    ./Source/Control/Command/Instructions/CCreateKnowledgeBaseRevisionUpdateCommand.cpp \
    ./Source/Control/Command/Instructions/CConnectKnowledgeBaseExternalTriplesDSNCommand.cpp \
    ./Source/Control/Command/Instructions/CParseInstallKnowledgeBaseExternalTriplesDSNConnectionCommand.cpp \
+   ./Source/Control/Command/Instructions/CParseProcessSPARQLManageTextCommand.cpp \
    ./Source/Control/Command/Records/CUnspecifiedMessageInformationRecord.cpp \
-   ./Source/Control/Command/Records/CUnspecifiedMessageErrorRecord.cpp \
    ./Source/Control/Command/Records/CStopProcessCommandRecord.cpp \
    ./Source/Control/Command/Records/CStartProcessCommandRecord.cpp \
    ./Source/Control/Command/Records/CProcessErrorRecord.cpp \
@@ -2778,8 +2895,8 @@ SOURCES += \
    ./Source/Control/Command/Records/CFinishProcessCommandRecord.cpp \
    ./Source/Control/Command/Records/CClosureProcessCommandRecord.cpp \
    ./Source/Control/Command/Records/CBuildSubCommandRecord.cpp \
+   ./Source/Control/Command/Records/CUnspecifiedMessageErrorRecord.cpp \
    ./Source/Control/Interface/CommandLine/CSPARQLServerComandLinePreparationTranslator.cpp \
-   ./Source/Control/Interface/CommandLine/CSPARQLFileComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/COWLLinkServerComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/COWLLinkFileComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CHelpComandLinePreparationTranslator.cpp \
@@ -2792,6 +2909,7 @@ SOURCES += \
    ./Source/Control/Interface/CommandLine/CCLIConsistencyComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CCLIComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CCLIClassClassificationComandLinePreparationTranslator.cpp \
+   ./Source/Control/Interface/CommandLine/CSPARQLFileComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/JNI/com_konclude_jnibridge_QueryingBridge.cpp \
    ./Source/Control/Interface/JNI/com_konclude_jnibridge_KoncludeReasonerBridge.cpp \
    ./Source/Control/Interface/JNI/com_konclude_jnibridge_AxiomExpressionBuildingBridge.cpp \
@@ -2831,7 +2949,6 @@ SOURCES += \
    ./Source/Control/Loader/CTestHashModificationLoader.cpp \
    ./Source/Control/Loader/CSPARQLResultsComparisonLoader.cpp \
    ./Source/Control/Loader/CSPARQLHttpServerLoader.cpp \
-   ./Source/Control/Loader/CSPARQLBatchFileLoader.cpp \
    ./Source/Control/Loader/CRecursionTestDataGeneratorLoader.cpp \
    ./Source/Control/Loader/CReasonerEvaluationTestcaseStatisticCollectionGeneratorLoader.cpp \
    ./Source/Control/Loader/CReasonerEvaluationProgramLoader.cpp \
@@ -2870,6 +2987,7 @@ SOURCES += \
    ./Source/Control/Loader/CAnalyseReasonerLoader.cpp \
    ./Source/Control/Loader/CConfigurableCoutLogObserverLoader.cpp \
    ./Source/Control/Loader/CCommandLineTranlatorHelpLoader.cpp \
+   ./Source/Control/Loader/CSPARQLBatchFileLoader.cpp \
    ./Source/Logger/CQtDebugPrintLogObserver.cpp \
    ./Source/Logger/COREFilePrintLogObserver.cpp \
    ./Source/Logger/COREConsolePrintLogObserver.cpp \
@@ -2878,10 +2996,10 @@ SOURCES += \
    ./Source/Logger/CLogIdentifier.cpp \
    ./Source/Logger/CLogger.cpp \
    ./Source/Logger/CLogDomain.cpp \
-   ./Source/Logger/CConsolePrintLogObserver.cpp \
-   ./Source/Logger/CConsolePrintConfigurableLogObserver.cpp \
    ./Source/Logger/CCallbackRequestLogMessagesContext.cpp \
    ./Source/Logger/CAbstractLogObserver.cpp \
+   ./Source/Logger/CConsolePrintConfigurableLogObserver.cpp \
+   ./Source/Logger/CConsolePrintLogObserver.cpp \
    ./Source/Logger/Events/CRequestLogMessagesEvent.cpp \
    ./Source/Logger/Events/CReleaseLogMessagesEvent.cpp \
    ./Source/Logger/Events/CLoggingEvent.cpp \
@@ -2890,9 +3008,6 @@ SOURCES += \
    ./Source/Logger/Record/CContextRecordData.cpp \
    ./Source/Network/CNetworkResponse.cpp \
    ./Source/Network/CNetworkRequest.cpp \
-   ./Source/Network/HTTP/CQtHttpTransactionManager.cpp \
-   ./Source/Network/HTTP/CQtHttpResponseHandler.cpp \
-   ./Source/Network/HTTP/CQtHttpResponse.cpp \
    ./Source/Network/HTTP/CQtHttpRequestParser.cpp \
    ./Source/Network/HTTP/CQtHttpRequestBodyOnlyParser.cpp \
    ./Source/Network/HTTP/CQtHttpRequest.cpp \
@@ -2908,6 +3023,9 @@ SOURCES += \
    ./Source/Network/HTTP/CHttpResponse.cpp \
    ./Source/Network/HTTP/CHttpRequestFactory.cpp \
    ./Source/Network/HTTP/CHttpRequest.cpp \
+   ./Source/Network/HTTP/CQtHttpResponse.cpp \
+   ./Source/Network/HTTP/CQtHttpResponseHandler.cpp \
+   ./Source/Network/HTTP/CQtHttpTransactionManager.cpp \
    ./Source/Network/HTTP/Events/CReleaseResponseEvent.cpp \
    ./Source/Network/HTTP/Events/CInstallRequestFinishedCallbackEvent.cpp \
    ./Source/Network/HTTP/Events/CHttpRequstEvent.cpp \
@@ -2972,6 +3090,12 @@ SOURCES += \
    ./Source/Parser/CSPARQLQueryParser.cpp \
    ./Source/Parser/CSPARQLRedlandRasqalReasoningBGPQueryParser.cpp \
    ./Source/Parser/CRDFRedlandExternalTriplesDSNConnectingParser.cpp \
+   ./Source/Parser/CRDFRedlandRaptorSimpleConcurrentParser.cpp \
+   ./Source/Parser/CSPARQLExtendedMappingBuildingParser.cpp \
+   ./Source/Parser/CSPARQLBuildingParserTermData.cpp \
+   ./Source/Parser/CSPARQLBuildingParserTripleData.cpp \
+   ./Source/Parser/COntologyMultiAutoParsingLoader.cpp \
+   ./Source/Parser/COntologyQtXMLDocumentParser.cpp \
    ./Source/Parser/Expressions/CVariableAssociator.cpp \
    ./Source/Parser/Expressions/CUnorderedPairObjectPropertyTermExpressionAssociator.cpp \
    ./Source/Parser/Expressions/CUnorderedPairIndividualTermExpressionAssociator.cpp \
@@ -3034,7 +3158,6 @@ SOURCES += \
    ./Source/Parser/Expressions/CQueryExpression.cpp \
    ./Source/Parser/Expressions/CQueryAreClassesEquivalentExpression.cpp \
    ./Source/Parser/Expressions/CQueryAreClassesDisjointExpression.cpp \
-   ./Source/Parser/Expressions/CPropertyTermExpression.cpp \
    ./Source/Parser/Expressions/CPrecedentBuildPropertyExpression.cpp \
    ./Source/Parser/Expressions/CPrecedentBuildIndividualExpression.cpp \
    ./Source/Parser/Expressions/CPrecedentBuildClassExpression.cpp \
@@ -3171,6 +3294,11 @@ SOURCES += \
    ./Source/Parser/Expressions/CAnonymousIndividualVariableExpression.cpp \
    ./Source/Parser/Expressions/CAnonymousIndividualExpression.cpp \
    ./Source/Parser/Expressions/CQuerySPARQLSelectBasicGraphPatternExpression.cpp \
+   ./Source/Parser/Expressions/CClassVariableExpression.cpp \
+   ./Source/Parser/Expressions/CObjectPropertyVariableExpression.cpp \
+   ./Source/Parser/Expressions/CDataPropertyVariableExpression.cpp \
+   ./Source/Parser/Expressions/CPropertyVariableExpression.cpp \
+   ./Source/Parser/Expressions/CPropertyTermExpression.cpp \
    ./Source/Parser/FunctionalJAVACC/OWL2FunctionalStyleParserTokenManager.cpp \
    ./Source/Parser/FunctionalJAVACC/TokenMgrError.cpp \
    ./Source/Parser/FunctionalJAVACC/Token.cpp \
@@ -3231,15 +3359,15 @@ SOURCES += \
    ./Source/Reasoner/Answerer/COptimizedComplexConceptInstanziatedIndividualItemLinker.cpp \
    ./Source/Reasoner/Answerer/COptimizedComplexConceptInstanziatedIndividualItemHasher.cpp \
    ./Source/Reasoner/Answerer/COptimizedComplexConceptInstanziatedIndividualItemHash.cpp \
-   ./Source/Reasoner/Answerer/COptimizedComplexBuildingVariableCompositionsItem.cpp \
    ./Source/Reasoner/Answerer/COntologyAnsweringItem.cpp \
    ./Source/Reasoner/Answerer/CMappingsInstancesComputationMode.cpp \
    ./Source/Reasoner/Answerer/CFirstQueuedAnsweringHandlerProvider.cpp \
+   ./Source/Reasoner/Answerer/CComputedItemDataNotificationLinker.cpp \
    ./Source/Reasoner/Answerer/CEntailmentVariableBuildingItemData.cpp \
    ./Source/Reasoner/Answerer/CEntailmentQueryProcessingData.cpp \
    ./Source/Reasoner/Answerer/CConfigurationAnsweringHandlerFactory.cpp \
-   ./Source/Reasoner/Answerer/CComputedItemDataNotificationLinker.cpp \
    ./Source/Reasoner/Answerer/CComplexQueryExpressionProcessingData.cpp \
+   ./Source/Reasoner/Answerer/CRedlandRasqalModelSubQueryResolver.cpp \
    ./Source/Reasoner/Answerer/CComplexQueryMaterializationData.cpp \
    ./Source/Reasoner/Answerer/CComplexQueryFinishingBuildingVariableCompositionsItemData.cpp \
    ./Source/Reasoner/Answerer/CComplexConceptStepInstanceComputationProcess.cpp \
@@ -3275,6 +3403,7 @@ SOURCES += \
    ./Source/Reasoner/Answerer/CAnsweringMessageDataCalculationCompletedSubsumptionSuperClass.cpp \
    ./Source/Reasoner/Answerer/CAnsweringMessageDataCalculationCompletedSubsumptionSubClass.cpp \
    ./Source/Reasoner/Answerer/CAnsweringMessageDataCalculationCompletedSatisfiable.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexBuildingIndividualVariableCompositionsItem.cpp \
    ./Source/Reasoner/Answerer/CAnsweringMessageDataCalculationCompletedQueryMaterialization.cpp \
    ./Source/Reasoner/Answerer/CAnsweringMessageDataCalculationCompletedInstanceItem.cpp \
    ./Source/Reasoner/Answerer/CAnsweringMessageDataCalculationCompletedInstanceIndividual.cpp \
@@ -3304,7 +3433,6 @@ SOURCES += \
    ./Source/Reasoner/Answerer/CComplexQueryCompositionRedlandRasqalProcessingData.cpp \
    ./Source/Reasoner/Answerer/COptimizedComplexCompositionRedlandRasqalAnsweringHandler.cpp \
    ./Source/Reasoner/Answerer/CRedlandRasqalSubQueryProcessingData.cpp \
-   ./Source/Reasoner/Answerer/CRedlandRasqalModelSubQueryResolver.cpp \
    ./Source/Reasoner/Answerer/CAnsweringMessageDataRequirementCompletedSubQueryAnswering.cpp \
    ./Source/Reasoner/Answerer/CRedlandRasqalSubQueryTripleResolvingData.cpp \
    ./Source/Reasoner/Answerer/CRedlandRasqalSubQueryBindingPositionResolvingHashData.cpp \
@@ -3314,6 +3442,34 @@ SOURCES += \
    ./Source/Reasoner/Answerer/CRedlandRasqalLiteralHasher.cpp \
    ./Source/Reasoner/Answerer/COptimizedComplexVariableExtractionItem.cpp \
    ./Source/Reasoner/Answerer/CAnsweringSplitEntailmentTestingCancellationAdapter.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableCompositionItemRoleSamplingData.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataHashMemoryManaged.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataMemoryManaged.cpp \
+   ./Source/Reasoner/Answerer/CAnsweringSplitPropagationTestingVariableData.cpp \
+   ./Source/Reasoner/Answerer/CAnsweringSplitPropagationTestingVariableBindingData.cpp \
+   ./Source/Reasoner/Answerer/CAnsweringSplitPropagationTestControllingItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableJoiningWithRemainingHasher.cpp \
+   ./Source/Reasoner/Answerer/CAnsweringPropagationExtendedSteeringController.cpp \
+   ./Source/Reasoner/Answerer/CCacheAnswersWeightedUsageCostItemData.cpp \
+   ./Source/Reasoner/Answerer/CCacheAnswersWeightedUsageCostItem.cpp \
+   ./Source/Reasoner/Answerer/CAnsweringPropagationSteeringAbsorptionPropagationController.cpp \
+   ./Source/Reasoner/Answerer/CAnsweringMessageDataRequirementCompletedSubClassAxiomEntailment.cpp \
+   ./Source/Reasoner/Answerer/CAnsweringMessageDataCalculationCompletedClassSubsumption.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexBuildingClassVariableCompositionsItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexBuildingVariableCompositionsItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableConceptSubSuperItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableSubSuperClassesPropagationItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexBuildingPropertyVariableCompositionsItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexBuildingObjectPropertyVariableCompositionsItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableRoleSubSuperItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableSubSuperPropertiesPropagationItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexBuildingIndividualMixedVariableCompositionsItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableIndividualTypeExtensionItem.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableIndividualTypeExtensionProcessingRealizationData.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableCompositionItemUpdateData.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableIndividualPropertyExtensionProcessingRealizationData.cpp \
+   ./Source/Reasoner/Answerer/COptimizedComplexVariableIndividualNeighboringPropertyExtensionItem.cpp \
    ./Source/Reasoner/Answerer/Events/CAnsweringRequirementCompletedEvent.cpp \
    ./Source/Reasoner/Answerer/Events/CAnsweringPreparedEvent.cpp \
    ./Source/Reasoner/Answerer/Events/CAnsweringOntologyPreparationEvent.cpp \
@@ -3323,20 +3479,29 @@ SOURCES += \
    ./Source/Reasoner/Answerer/Events/CAnsweringComplexQueryCompletedEvent.cpp \
    ./Source/Reasoner/Answerer/Events/CAnsweringCalculationCompletedEvent.cpp \
    ./Source/Reasoner/Answerer/Events/CAnswerComplexQueryEvent.cpp \
-   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker.cpp \
-   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker.cpp \
-   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker.cpp \
-   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVectorData.cpp \
-   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector.cpp \
    ./Source/Reasoner/Answerer/Composition/CAbstractVariableMappingsCompositionComputator.cpp \
    ./Source/Reasoner/Answerer/Composition/CAbstractVariableMappingsCompositionJoinComputator.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVectorData.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector.cpp \
    ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinComputator.cpp \
+   ./Source/Reasoner/Answerer/Composition/CAbstractVariableMappingsCompositionItemRequirementProcessor.cpp \
+   ./Source/Reasoner/Answerer/Composition/CAbstractVariableMappingsCompositionPropagationComputator.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionPropagationComputator.cpp \
+   ./Source/Reasoner/Answerer/Composition/CSequentialVariableMappingsCompositionPropagationComputator.cpp \
    ./Source/Reasoner/Answerer/Composition/CSequentialVariableMappingsCompositionJoinComputator.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionPropagationRealizationSchedulingBatchLinkerVector.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionBaseBindingsCardinalityLinkerBatchLinker.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionPropagationBindingsCardinalityLinkerBatchLinker.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionPropagationMappedKeyBindingsCardinalityLinker.cpp \
+   ./Source/Reasoner/Answerer/Composition/CQtConcurrentVariableMappingsCompositionPropagationMappedPropagatedBindingsCardinalityLinker.cpp \
    ./Source/Reasoner/Answerer/Conclusion/CAbstractComplexQueryFinishingHandler.cpp \
    ./Source/Reasoner/Answerer/Conclusion/CSequentialStreamingComplexQueryFinishingHandler.cpp \
+   ./Source/Reasoner/Answerer/Conclusion/CVariableBindingsQueryResultWriter.cpp \
    ./Source/Reasoner/Answerer/Conclusion/CQtConcurrentStreamingComplexQueryFinishingHandler.cpp \
    ./Source/Reasoner/Answerer/Conclusion/CAbstractStreamingComplexQueryFinishingHandler.cpp \
-   ./Source/Reasoner/Answerer/Conclusion/CVariableBindingsQueryResultWriter.cpp \
    ./Source/Reasoner/Classification/CPropertyRoleClassification.cpp \
    ./Source/Reasoner/Classification/CClassificationStatisticsCollectionStrings.cpp \
    ./Source/Reasoner/Classification/CClassificationStatistics.cpp \
@@ -3433,7 +3598,6 @@ SOURCES += \
    ./Source/Reasoner/Consistence/CConsistenceData.cpp \
    ./Source/Reasoner/Consistence/CConsistenceCalculationStatisticsCollection.cpp \
    ./Source/Reasoner/Consistence/CConsistence.cpp \
-   ./Source/Reasoner/Consistiser/CTotallyPrecomputationThread.cpp \
    ./Source/Reasoner/Consistiser/CTotallyOntologyPrecomputationItem.cpp \
    ./Source/Reasoner/Consistiser/CSaturationPrecomputationTestingItem.cpp \
    ./Source/Reasoner/Consistiser/CSaturationObserver.cpp \
@@ -3465,10 +3629,13 @@ SOURCES += \
    ./Source/Reasoner/Consistiser/CConsistencePrecomputationTestingItem.cpp \
    ./Source/Reasoner/Consistiser/CConsistenceObserver.cpp \
    ./Source/Reasoner/Consistiser/CConceptCyclePrecomputationTestingItem.cpp \
+   ./Source/Reasoner/Consistiser/CTotallyPrecomputationThread.cpp \
    ./Source/Reasoner/Consistiser/Events/CSaturationPrecomputationCalculatedCallbackEvent.cpp \
    ./Source/Reasoner/Consistiser/Events/CPrecomputeOntologyEvent.cpp \
    ./Source/Reasoner/Consistiser/Events/CPrecomputationCalculatedCallbackEvent.cpp \
    ./Source/Reasoner/Consistiser/Events/CCallbackPrecomputedOntologyEvent.cpp \
+   ./Source/Reasoner/Consistiser/Events/CRetrievedPrecomputationIndividualsCallbackEvent.cpp \
+   ./Source/Reasoner/Consistiser/Events/CRescheduleJobCreationEvent.cpp \
    ./Source/Reasoner/Generator/CStringRefStringHasher.cpp \
    ./Source/Reasoner/Generator/CSatisfiableCalculationTaskFromCalculationJobGenerator.cpp \
    ./Source/Reasoner/Generator/CSatisfiableCalculationJobGenerator.cpp \
@@ -3496,12 +3663,13 @@ SOURCES += \
    ./Source/Reasoner/Generator/CApproximatedSaturationCalculationJobGenerator.cpp \
    ./Source/Reasoner/Generator/CActiveEntitySubExpressionVisitorUpdater.cpp \
    ./Source/Reasoner/Generator/CConcreteOntologyExtendibleQueryExtendedBuilder.cpp \
+   ./Source/Reasoner/Generator/CConcreteOntologyRedlandTriplesDataQueryingExpressionMapper.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CUnsatisfiableCacheHandler.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDescriptorHasher.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDescriptor.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CTrackedClashedDependencyLine.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CSaturationNodeExpansionCacheHandler.cpp \
-   ./Source/Reasoner/Kernel/Algorithm/CSaturationNodeBackendAssociationCacheHandler.cpp \
+   ./Source/Reasoner/Kernel/Algorithm/CBackendAssociationCacheHandler.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskSaturationPreyingAnalyser.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskSaturationOccurrenceStatisticsCollector.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CSatisfiableTaskSaturationIndividualsAnalyser.cpp \
@@ -3550,7 +3718,7 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Algorithm/CCalculationChooseTaskHandleAlgorithm.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CCalculationAlgorithmContextBase.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CCalculationAlgorithmContext.cpp \
-   ./Source/Reasoner/Kernel/Algorithm/CBackendAssociationCacheHandler.cpp \
+   ./Source/Reasoner/Kernel/Algorithm/CSaturationNodeBackendAssociationCacheHandler.cpp \
    ./Source/Reasoner/Kernel/Cache/CUnsatisfiableCacheWriter.cpp \
    ./Source/Reasoner/Kernel/Cache/CUnsatisfiableCacheReader.cpp \
    ./Source/Reasoner/Kernel/Cache/CUnsatisfiableCache.cpp \
@@ -3675,6 +3843,12 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCache.cpp \
    ./Source/Reasoner/Kernel/Cache/CBackendCacheWriteData.cpp \
    ./Source/Reasoner/Kernel/Cache/CBackendCache.cpp \
+   ./Source/Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker.cpp \
+   ./Source/Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker.cpp \
+   ./Source/Reasoner/Kernel/Cache/CBackendIndividualRetrievalComputationUpdateCoordinationHash.cpp \
+   ./Source/Reasoner/Kernel/Cache/CBackendIndividualRetrievalComputationUpdateCoordinationHashData.cpp \
+   ./Source/Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheIndividualAssociationContext.cpp \
+   ./Source/Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker.cpp \
    ./Source/Reasoner/Kernel/Cache/Events/CWriteUnsatisfiableCacheEntryEvent.cpp \
    ./Source/Reasoner/Kernel/Cache/Events/CWriteSaturationCacheDataEvent.cpp \
    ./Source/Reasoner/Kernel/Cache/Events/CWriteSatisfiableCacheEntryEvent.cpp \
@@ -3683,7 +3857,9 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Cache/Events/CWriteComputedConcequencesCacheEntryEvent.cpp \
    ./Source/Reasoner/Kernel/Cache/Events/CWriteCachedDataEvent.cpp \
    ./Source/Reasoner/Kernel/Cache/Events/CWriteBackendAssociationCachedEvent.cpp \
+   ./Source/Reasoner/Kernel/Cache/Events/CInitializeIndividualAssociationsCacheEvent.cpp \
    ./Source/Reasoner/Kernel/Cache/Events/CRetrieveIncompletelyAssociationCachedEvent.cpp \
+   ./Source/Reasoner/Kernel/Cache/Events/CReportMaximumHandledRecomputationIdsEvent.cpp \
    ./Source/Reasoner/Kernel/Calculation/CTaskHandleAlgorithmBuilder.cpp \
    ./Source/Reasoner/Kernel/Calculation/CConfigDependedCalculationFactory.cpp \
    ./Source/Reasoner/Kernel/Calculation/CConfigDependedCalculationEnvironmentFactory.cpp \
@@ -3701,10 +3877,9 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Manager/CPrecomputationManager.cpp \
    ./Source/Reasoner/Kernel/Manager/COntologyRequirementPreparingData.cpp \
    ./Source/Reasoner/Kernel/Manager/COntologyRequirementPair.cpp \
-   ./Source/Reasoner/Kernel/Manager/CExperimentalReasonerManager.cpp \
    ./Source/Reasoner/Kernel/Manager/CAnalyseReasonerManager.cpp \
+   ./Source/Reasoner/Kernel/Manager/CExperimentalReasonerManager.cpp \
    ./Source/Reasoner/Kernel/Manager/CReasonerManagerThread.cpp \
-   ./Source/Reasoner/Kernel/Manager/Events/CRequirementProcessedCallbackEvent.cpp \
    ./Source/Reasoner/Kernel/Manager/Events/CReasoningSatisfiableCalculationJobEvent.cpp \
    ./Source/Reasoner/Kernel/Manager/Events/CQueryJobCalculatedSatisfiableCallbackEvent.cpp \
    ./Source/Reasoner/Kernel/Manager/Events/CQueriedTaxonomyComputedCallbackEvent.cpp \
@@ -3712,6 +3887,7 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Manager/Events/CJobCalculatedSatisfiableCallbackEvent.cpp \
    ./Source/Reasoner/Kernel/Manager/Events/CCalcQueryEvent.cpp \
    ./Source/Reasoner/Kernel/Manager/Events/CCalcedQueryEvent.cpp \
+   ./Source/Reasoner/Kernel/Manager/Events/CRequirementProcessedCallbackEvent.cpp \
    ./Source/Reasoner/Kernel/Process/CVariableBindingTriggerLinker.cpp \
    ./Source/Reasoner/Kernel/Process/CVariableBindingTriggerHash.cpp \
    ./Source/Reasoner/Kernel/Process/CVariableBindingTriggerData.cpp \
@@ -4053,6 +4229,11 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Process/CAnalizedConceptExpansionLinker.cpp \
    ./Source/Reasoner/Kernel/Process/CAdditionalProcessRoleAssertionsLinker.cpp \
    ./Source/Reasoner/Kernel/Process/CAdditionalProcessDataAssertionsLinker.cpp \
+   ./Source/Reasoner/Kernel/Process/CBackendNeighbourExpansionControllingData.cpp \
+   ./Source/Reasoner/Kernel/Process/CBackendNeighbourExpansionQueue.cpp \
+   ./Source/Reasoner/Kernel/Process/CBackendNeighbourExpansionQueueDataLinker.cpp \
+   ./Source/Reasoner/Kernel/Process/CIndividualLinkerRotationProcessingQueue.cpp \
+   ./Source/Reasoner/Kernel/Process/CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CVARBINDVARIABLEDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CVARBINDPROPAGATEJOINDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CVARBINDPROPAGATEIMPLICATIONDependencyNode.cpp \
@@ -4087,12 +4268,10 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Process/Dependency/CORONLYOPTIONDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CORDisjunctDependencyTrackPoint.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CORDependencyNode.cpp \
-   ./Source/Reasoner/Kernel/Process/Dependency/CNonDeterministicDependencyTrackPoint.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CNonDeterministicDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CNOMINALDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CNEGVALUEDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CMERGEPOSSIBLEINSTANCEINDIVIDUALDependencyNode.cpp \
-   ./Source/Reasoner/Kernel/Process/Dependency/CMERGEDLINKDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CMERGEDIndividualDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CMERGEDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CMERGEDCONCEPTDependencyNode.cpp \
@@ -4124,6 +4303,12 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Process/Dependency/CATLEASTDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CANDDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Dependency/CALLDependencyNode.cpp \
+   ./Source/Reasoner/Kernel/Process/Dependency/CNonDeterministicDependencyTrackPoint.cpp \
+   ./Source/Reasoner/Kernel/Process/Dependency/CREUSEBACKENDEXPANSIONMODESDependencyNode.cpp \
+   ./Source/Reasoner/Kernel/Process/Dependency/CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode.cpp \
+   ./Source/Reasoner/Kernel/Process/Dependency/CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode.cpp \
+   ./Source/Reasoner/Kernel/Process/Dependency/CREUSEBACKENDVALUEDependencyNode.cpp \
+   ./Source/Reasoner/Kernel/Process/Dependency/CMERGEDLINKDependencyNode.cpp \
    ./Source/Reasoner/Kernel/Process/Marker/CMarker.cpp \
    ./Source/Reasoner/Kernel/Strategy/CUnsatisfiableCacheRetrievalStrategy.cpp \
    ./Source/Reasoner/Kernel/Strategy/CTaskProcessingPriorityStrategy.cpp \
@@ -4131,15 +4316,14 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Strategy/CIndividualAncestorDepthMaximumConceptProcessingPriorityStrategy.cpp \
    ./Source/Reasoner/Kernel/Strategy/CGenerativeNonDeterministicUnsatisfiableCacheRetrievalStrategy.cpp \
    ./Source/Reasoner/Kernel/Strategy/CEqualDepthTaskProcessingPriorityStrategy.cpp \
-   ./Source/Reasoner/Kernel/Strategy/CEqualDepthCacheOrientatedProcessingPriorityStrategy.cpp \
    ./Source/Reasoner/Kernel/Strategy/CConcreteConceptProcessingOperatorPriorityStrategy.cpp \
    ./Source/Reasoner/Kernel/Strategy/CConceptProcessingPriorityStrategy.cpp \
+   ./Source/Reasoner/Kernel/Strategy/CEqualDepthCacheOrientatedProcessingPriorityStrategy.cpp \
    ./Source/Reasoner/Kernel/Task/CTaskPreyingListner.cpp \
    ./Source/Reasoner/Kernel/Task/CTaskPreyingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSaturationTaskData.cpp \
    ./Source/Reasoner/Kernel/Task/CSaturationOccurrenceStatisticsCollectingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSaturationIndividualsAnalysingAdapter.cpp \
-   ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRepresentativeBackendUpdatingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRealizationPossibleInstancesMergingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRealizationPossibleAssertionCollectingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRealizationMarkedCandidatesMessageAdapter.cpp \
@@ -4150,17 +4334,19 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererSubsumptionMessageAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererQueryingPropagationAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererQueryingMaterializationAdapter.cpp \
-   ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererInstancePropagationMessageAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererBindingPropagationAdapter.cpp \
-   ./Source/Reasoner/Kernel/Task/CSatisfiableCalculationTaskStatusPropagator.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableCalculationTaskJobCallbackExecuter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableCalculationJobInstantiation.cpp \
    ./Source/Reasoner/Kernel/Task/CIncrementalConsistenceTaskData.cpp \
    ./Source/Reasoner/Kernel/Task/CConsistenceTaskData.cpp \
    ./Source/Reasoner/Kernel/Task/CCalculationStatisticsCollector.cpp \
-   ./Source/Reasoner/Kernel/Task/CCalculationConfigurationExtension.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableTaskCancellationAdapter.cpp \
+   ./Source/Reasoner/Kernel/Task/CCalculationConfigurationExtension.cpp \
+   ./Source/Reasoner/Kernel/Task/CSatisfiableCalculationTaskStatusPropagator.cpp \
+   ./Source/Reasoner/Kernel/Task/CSatisfiableTaskRepresentativeBackendUpdatingAdapter.cpp \
    ./Source/Reasoner/Kernel/Task/CSatisfiableCalculationTask.cpp \
+   ./Source/Reasoner/Kernel/Task/CSatisfiableTaskAnswererInstancePropagationMessageAdapter.cpp \
+   ./Source/Reasoner/Ontology/CConceptTextFormater.cpp \
    ./Source/Reasoner/Ontology/CConcept.cpp \
    ./Source/Reasoner/Ontology/CVariable.cpp \
    ./Source/Reasoner/Ontology/CUnsatisfiableCachingTags.cpp \
@@ -4302,7 +4488,6 @@ SOURCES += \
    ./Source/Reasoner/Ontology/CConcreteOntologyContextBase.cpp \
    ./Source/Reasoner/Ontology/CConcreteOntology.cpp \
    ./Source/Reasoner/Ontology/CConceptVector.cpp \
-   ./Source/Reasoner/Ontology/CConceptTextFormater.cpp \
    ./Source/Reasoner/Ontology/CConceptTagComparer.cpp \
    ./Source/Reasoner/Ontology/CConceptSaturationReferenceLinkingData.cpp \
    ./Source/Reasoner/Ontology/CConceptSatisfiableReferenceLinkingData.cpp \
@@ -4552,6 +4737,12 @@ SOURCES += \
    ./Source/Reasoner/Query/CComplexAnsweringExpressionQuery.cpp \
    ./Source/Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringExtendibleQuery.cpp \
    ./Source/Reasoner/Query/CComplexQueryExtendibleData.cpp \
+   ./Source/Reasoner/Query/CComplexAxiomsClassVariablesAnsweringQuery.cpp \
+   ./Source/Reasoner/Query/CComplexVariablesAnsweringQuery.cpp \
+   ./Source/Reasoner/Query/CComplexAxiomsPropertyVariablesAnsweringQuery.cpp \
+   ./Source/Reasoner/Query/CComplexAxiomsObjectPropertyVariablesAnsweringQuery.cpp \
+   ./Source/Reasoner/Query/CComplexAxiomsDataPropertyVariablesAnsweringQuery.cpp \
+   ./Source/Reasoner/Query/CComplexAxiomsIndividualMixedVariablesAnsweringQuery.cpp \
    ./Source/Reasoner/Realization/CSameRealizationIndividualVisitor.cpp \
    ./Source/Reasoner/Realization/CSameRealization.cpp \
    ./Source/Reasoner/Realization/CSameInstanceItem.cpp \
@@ -4561,7 +4752,6 @@ SOURCES += \
    ./Source/Reasoner/Realization/CRoleRealizationInstanceVisitor.cpp \
    ./Source/Reasoner/Realization/CRoleRealizationInstanceToIndividualVisitor.cpp \
    ./Source/Reasoner/Realization/CRoleRealizationIndividualVisitor.cpp \
-   ./Source/Reasoner/Realization/CRoleRealization.cpp \
    ./Source/Reasoner/Realization/CRoleInstantiatedItem.cpp \
    ./Source/Reasoner/Realization/CRoleInstanceItem.cpp \
    ./Source/Reasoner/Realization/CRealizationRemainingInstancesEstimation.cpp \
@@ -4577,9 +4767,14 @@ SOURCES += \
    ./Source/Reasoner/Realization/CConceptRealizationInstanceToIndividualVisitor.cpp \
    ./Source/Reasoner/Realization/CConceptRealizationIndividualVisitor.cpp \
    ./Source/Reasoner/Realization/CConceptRealizationConceptVisitor.cpp \
-   ./Source/Reasoner/Realization/CConceptRealization.cpp \
    ./Source/Reasoner/Realization/CConceptInstantiatedItem.cpp \
    ./Source/Reasoner/Realization/CConceptInstanceItem.cpp \
+   ./Source/Reasoner/Realization/CConceptRealization.cpp \
+   ./Source/Reasoner/Realization/CConceptRealizationHierarchyNodeVisitor.cpp \
+   ./Source/Reasoner/Realization/CConceptRealizationInstantiatedToHierarchyNodeVisitor.cpp \
+   ./Source/Reasoner/Realization/CRoleRealizationHierarchyNodeVisitor.cpp \
+   ./Source/Reasoner/Realization/CRoleRealizationInstantiatedToHierarchyNodeVisitor.cpp \
+   ./Source/Reasoner/Realization/CRoleRealization.cpp \
    ./Source/Reasoner/Realizer/CRealizingTestingStep.cpp \
    ./Source/Reasoner/Realizer/CRealizingTestingItem.cpp \
    ./Source/Reasoner/Realizer/CRealizingContext.cpp \
@@ -4647,6 +4842,7 @@ SOURCES += \
    ./Source/Reasoner/Realizer/CIndividualConceptInstanceTestingItem.cpp \
    ./Source/Reasoner/Realizer/CIncrementalKPSetOntologyConceptRealizingThread.cpp \
    ./Source/Reasoner/Realizer/CIncrementalKPSetOntologyConceptRealizingItem.cpp \
+   ./Source/Reasoner/Realizer/COptimizedKPSetIndividualInstantiatedItemMultiHash.cpp \
    ./Source/Reasoner/Realizer/Events/CRealizingCalculatedCallbackEvent.cpp \
    ./Source/Reasoner/Realizer/Events/CRealizeOntologyEvent.cpp \
    ./Source/Reasoner/Realizer/Events/CRealizationMessageEvent.cpp \
@@ -4655,10 +4851,17 @@ SOURCES += \
    ./Source/Reasoner/Revision/COntologyRevision.cpp \
    ./Source/Reasoner/Revision/COntologyConfigurationExtension.cpp \
    ./Source/Reasoner/Revision/CSPOntologyRevisionManager.cpp \
-   ./Source/Reasoner/Revision/Persistence/COntologyRevisionPersistencerFactory.cpp \
-   ./Source/Reasoner/Revision/Persistence/COntologyRevisionPersistencer.cpp \
-   ./Source/Reasoner/Revision/Persistence/COntologyRevisionDirectoryOWL2XMLFilePersistencer.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionRedlandExternalTriplesDSNOnlyWritingPersistencer.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionRedlandExternalTriplesSPARQLServicePersistencer.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionDirectoryOWLRDFFilePersistencer.cpp \
    ./Source/Reasoner/Revision/Persistence/CConfigurationBasedOntologyRevisionPersistencerFactory.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionPersistencerFactory.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionMultiPersistencer.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionPersistencer.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionRedlandExternalStoredTriplesConnectionData.cpp \
+   ./Source/Reasoner/Revision/Persistence/CNameBasedOntologyRevisionPersistencerFactory.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionDirectoryOWL2XMLFilePersistencer.cpp \
+   ./Source/Reasoner/Revision/Persistence/COntologyRevisionDirectoryFilePersistencerBase.cpp \
    ./Source/Reasoner/Taxonomy/CTaxonomy.cpp \
    ./Source/Reasoner/Taxonomy/CRolePropertiesParentChildPredecessorHierarchyNode.cpp \
    ./Source/Reasoner/Taxonomy/CRolePropertiesParentChildPredecessorHierarchy.cpp \
@@ -4694,19 +4897,35 @@ SOURCES += \
    ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexCacheDataUpdateHandler.cpp \
    ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexCacheData.cpp \
    ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexCache.cpp \
-   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionConvertionIndexer.cpp \
    ./Source/Reasoner/Triples/CRedlandStoredTriplesData.cpp \
    ./Source/Reasoner/Triples/CRedlandNodeHasher.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionConvertionQtConcurrentIndexer.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndexingBaseBatchLinkerVectorData.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndexingBaseBatchLinkerVector.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndexingBaseBatchLinker.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndexingBaseResolvingLinker.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualResolvingHashMemoryManaged.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualPreProcessMemoryManagingContext.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionConvertionIndexer.cpp \
+   ./Source/Reasoner/Triples/CTriplesDataIterator.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesDataModelIterator.cpp \
+   ./Source/Reasoner/Triples/CRedlandStoredTriplesDataLinkerIterator.cpp \
+   ./Source/Renderer/COntologyAxiomExpressionsRenderVisitor.cpp \
+   ./Source/Renderer/COntologyRDFRendererBase.cpp \
+   ./Source/Renderer/COntologyOWL2QtXMLRenderer.cpp \
+   ./Source/Renderer/COntologyRedlandRDFRenderer.cpp \
+   ./Source/Renderer/CRenderedRedlandRDFNodeItemBaseLinker.cpp \
+   ./Source/Renderer/CRenderedRedlandRDFTripleItemBaseLinker.cpp \
    ./Source/Renderer/CRenderWriteManager.cpp \
    ./Source/Renderer/CRenderedQtXMLItemLinker.cpp \
-   ./Source/Renderer/CRenderedItemLinker.cpp \
    ./Source/Renderer/COntologyRenderVisitor.cpp \
    ./Source/Renderer/COntologyRenderer.cpp \
    ./Source/Renderer/COntologyParsedBuildExpressionRenderVisitor.cpp \
-   ./Source/Renderer/COntologyOWL2QtXMLRenderer.cpp \
    ./Source/Renderer/COntologyExtractionManager.cpp \
    ./Source/Renderer/COntologyEmptyDefaultRenderer.cpp \
-   ./Source/Renderer/COntologyAxiomExpressionsRenderVisitor.cpp \
+   ./Source/Renderer/CRenderedRDFTripleItemBaseLinker.cpp \
+   ./Source/Renderer/CRenderedItemLinker.cpp \
+   ./Source/Renderer/CRenderedRDFNodeItemBaseLinker.cpp \
    ./Source/Scheduler/CTaskStatusPropagator.cpp \
    ./Source/Scheduler/CTaskStatus.cpp \
    ./Source/Scheduler/CTaskSchedulerCommunicator.cpp \
@@ -4723,8 +4942,6 @@ SOURCES += \
    ./Source/Scheduler/CTaskReserveArrayQueueItem.cpp \
    ./Source/Scheduler/CTaskReserveArrayQueueConsumer.cpp \
    ./Source/Scheduler/CTaskReserveArrayQueue.cpp \
-   ./Source/Scheduler/CTaskProcessorThreadBase.cpp \
-   ./Source/Scheduler/CTaskProcessorThread.cpp \
    ./Source/Scheduler/CTaskProcessorSchedulerThread.cpp \
    ./Source/Scheduler/CTaskProcessorContextBase.cpp \
    ./Source/Scheduler/CTaskProcessorContext.cpp \
@@ -4752,7 +4969,6 @@ SOURCES += \
    ./Source/Scheduler/CTaskCallbackExecuter.cpp \
    ./Source/Scheduler/CTaskAllocator.cpp \
    ./Source/Scheduler/CTask.cpp \
-   ./Source/Scheduler/CSingleThreadTaskProcessorUnit.cpp \
    ./Source/Scheduler/CMemoryPoolDistributor.cpp \
    ./Source/Scheduler/CEventHandlerVendor.cpp \
    ./Source/Scheduler/CEventDistributionMemoryPoolReleaser.cpp \
@@ -4764,6 +4980,9 @@ SOURCES += \
    ./Source/Scheduler/CConcreteMemoryPoolDistributor.cpp \
    ./Source/Scheduler/CBooleanTrueResultCancelTaskStatusPropagator.cpp \
    ./Source/Scheduler/CBooleanTaskResult.cpp \
+   ./Source/Scheduler/CTaskProcessorThread.cpp \
+   ./Source/Scheduler/CTaskProcessorThreadBase.cpp \
+   ./Source/Scheduler/CSingleThreadTaskProcessorUnit.cpp \
    ./Source/Scheduler/Events/CUpdateTaskStatusEvent.cpp \
    ./Source/Scheduler/Events/CTaskStatusUpdatedEvent.cpp \
    ./Source/Scheduler/Events/CTaskDispenseNotificationEvent.cpp \
@@ -4936,12 +5155,18 @@ SOURCES += \
    ./Source/Test/Evaluation/CReasonerEvaluationAnalyseContext.cpp \
    ./Source/Test/Evaluation/CCriticalSystemProcessTester.cpp \
    ./Source/Test/Evaluation/CConfigDependendReasonerEvaluationFactory.cpp \
+   ./Source/Test/Evaluation/CReasonerMemoryUsageCheckingThread.cpp \
+   ./Source/Test/Evaluation/CReasonerEvaluationGroupRequestReasonerMemoryUsageAnalyser.cpp \
    ./Source/Test/Evaluation/Events/CReasonerEvaluationUpdateEvent.cpp \
    ./Source/Test/Evaluation/Events/CReasonerEvaluationTestsuiteEvent.cpp \
-   ./Source/Test/Evaluation/Events/CReasonerEvaluationStartEvent.cpp \
    ./Source/Test/Evaluation/Events/CReasonerEvaluationProgramFileChangedEvent.cpp \
    ./Source/Test/Evaluation/Events/CReasonerEvaluationProgramEvent.cpp \
    ./Source/Test/Evaluation/Events/CReasonerEvaluationNextEvent.cpp \
+   ./Source/Test/Evaluation/Events/CReasonerMemoryUsageFinishedEvent.cpp \
+   ./Source/Test/Evaluation/Events/CReasonerEvaluationStartEvent.cpp \
+   ./Source/Test/Evaluation/Events/CReasonerEvaluationReasonerStartEvent.cpp \
+   ./Source/Test/Evaluation/Events/CReasonerEvaluationReasonerStopEvent.cpp \
+   ./Source/Test/Evaluation/Events/CReasonerEvaluationReasonerRestartEvent.cpp \
    ./Source/Test/Events/CTestTestfileEvent.cpp \
    ./Source/Test/Events/CEvaluateTestfileTestEvent.cpp \
    ./Source/Utilities/CObjectContainer.cpp \
@@ -4982,19 +5207,16 @@ SOURCES += \
    ./Source/Utilities/Container/CDefaultDoubleDynamicReferenceVector.cpp \
    ./Source/Utilities/Container/CDataArrayMemoryManager.cpp \
    ./Source/Utilities/Container/CDynamicReferenceBucket.cpp \
+   ./Source/Utilities/Container/CQtManagedRestrictedModificationSharingHash.cpp \
    ./Source/Utilities/Memory/CTempMemoryPoolContainerAllocationManager.cpp \
    ./Source/Utilities/Memory/CReallocationIncreasingMemoryPoolProvider.cpp \
    ./Source/Utilities/Memory/CObjectParameterizingAllocator.cpp \
    ./Source/Utilities/Memory/CObjectMemoryPoolAllocator.cpp \
    ./Source/Utilities/Memory/CObjectAllocator.cpp \
    ./Source/Utilities/Memory/CNewCentralizedLimitedAllocationMemoryPoolProvider.cpp \
-   ./Source/Utilities/Memory/CNewAllocationMemoryPoolProvider.cpp \
    ./Source/Utilities/Memory/CNewAllocationIncreasingMemoryPoolProvider.cpp \
    ./Source/Utilities/Memory/CMemoryTemporaryAllocationManager.cpp \
    ./Source/Utilities/Memory/CMemoryPoolProvider.cpp \
-   ./Source/Utilities/Memory/CMemoryPoolContainerAllocationManager.cpp \
-   ./Source/Utilities/Memory/CMemoryPoolContainer.cpp \
-   ./Source/Utilities/Memory/CMemoryPoolAllocationManager.cpp \
    ./Source/Utilities/Memory/CMemoryPool.cpp \
    ./Source/Utilities/Memory/CMemoryAllocator.cpp \
    ./Source/Utilities/Memory/CMemoryAllocationManager.cpp \
@@ -5008,3 +5230,7 @@ SOURCES += \
    ./Source/Utilities/Memory/CCentralizedAllocationConfigProvidedDependendLimitation.cpp \
    ./Source/Utilities/Memory/CAllocationLimitator.cpp \
    ./Source/Utilities/Memory/CAllocationLimitationProvider.cpp \
+   ./Source/Utilities/Memory/CMemoryPoolAllocationManager.cpp \
+   ./Source/Utilities/Memory/CMemoryPoolContainerAllocationManager.cpp \
+   ./Source/Utilities/Memory/CMemoryPoolContainer.cpp \
+   ./Source/Utilities/Memory/CNewAllocationMemoryPoolProvider.cpp \

@@ -141,6 +141,7 @@ namespace Konclude {
 						CQtHttpConnectionHandlerReleaser* mReleaser;
 						bool mQueued;
 						bool mForceDisconnect;
+						bool mThreadedWriting;
 
 						cint64 mChunkPart;
 						CPreconditionSynchronizer* mOriginPreSynchronizer;
@@ -150,6 +151,7 @@ namespace Konclude {
 						QByteArray mStreamSPARQLFooter;
 
 						QSemaphore* mWriteLimitSemaphore;
+						QSemaphore* mWrittenContinueSemaphore;
 						bool mBlockingWarned;
 
 

@@ -117,6 +117,20 @@ namespace Konclude {
 					mBackendIndirectCompatibilityExpansionQueue = nullptr;
 					mUseBackendIndirectCompatibilityExpansionQueue = nullptr;
 					mPrevBackendIndirectCompatibilityExpansionQueue = nullptr;
+
+					mBackendIndividualReuseExpansionQueue = nullptr;
+					mUseBackendIndividualReuseExpansionQueue = nullptr;
+					mPrevBackendIndividualReuseExpansionQueue = nullptr;
+					mBackendLateIndividualReuseExpansionQueue = nullptr;
+					mUseBackendLateIndividualReuseExpansionQueue = nullptr;
+					mPrevBackendLateIndividualReuseExpansionQueue = nullptr;
+					mBackendIndividualNeighbourExpansionQueue = nullptr;
+					mUseBackendIndividualNeighbourExpansionQueue = nullptr;
+					mPrevBackendIndividualNeighbourExpansionQueue = nullptr;
+
+					mBackendIndividualLateReuseExpansionActivated = false;
+
+
 					mBackendDirectInfluenceExpansionQueue = nullptr;
 					mUseBackendDirectInfluenceExpansionQueue = nullptr;
 					mPrevBackendDirectInfluenceExpansionQueue = nullptr;
@@ -152,10 +166,16 @@ namespace Konclude {
 					mLocBackendLoadedAssociationHash = nullptr;
 					mUseBackendConceptSetLabelProcessingHash = nullptr;
 					mLocBackendConceptSetLabelProcessingHash = nullptr;
+					mUseBackendNeighbourExpansionControllingData = nullptr;
+					mLocBackendNeighbourExpansionControllingData = nullptr;
 
 					mDelayedBackendInitProcQueue = nullptr;
 					mUseDelayedBackendInitProcQueue = nullptr;
 					mPrevDelayedBackendInitProcQueue = nullptr;
+
+					mBackendNeighbourExpansionQueue = nullptr;
+					mUseBackendNeighbourExpansion = nullptr;
+					mPrevBackendNeighbourExpansion = nullptr;
 
 					mIndiDepthProcessingQueue = nullptr;
 					mUseIndiDepthProcessingQueue = nullptr;
@@ -237,6 +257,11 @@ namespace Konclude {
 					mCurrentMergedPossibleInstanceIndividualLinkersLinker = nullptr;
 					mLastMergedPossibleInstanceIndividualLinker = nullptr;
 					mLastBackendCacheIntegratedIndiNodeLinker = nullptr;
+					mBackendCacheIntegratedIndividualNodeCount = 0;
+					mBackendCacheIntegratedSameIndividualNodeCount = 0;
+
+					mBackendCacheUpdateIndividualsInitialized = false;
+					mRepresentativeNeighbourExpansionIndividualNodeLinker = nullptr;
 				}
 
 
@@ -314,6 +339,8 @@ namespace Konclude {
 					mLocBackendLoadedAssociationHash = nullptr;
 					mUseBackendConceptSetLabelProcessingHash = nullptr;
 					mLocBackendConceptSetLabelProcessingHash = nullptr;
+					mUseBackendNeighbourExpansionControllingData = nullptr;
+					mLocBackendNeighbourExpansionControllingData = nullptr;
 					mNextIndividualNodeID = 0;
 					mNextSatResSuccExtIndividualNodeID = -1;
 					mNextPropagationID = 1;
@@ -335,7 +362,11 @@ namespace Konclude {
 					mLastMergedPossibleInstanceIndividualLinker = nullptr;
 					mCurrentMergedPossibleInstanceIndividualLinkersLinker = nullptr;
 					mLastBackendCacheIntegratedIndiNodeLinker = nullptr;
+					mBackendCacheIntegratedIndividualNodeCount = 0;
+					mBackendCacheIntegratedSameIndividualNodeCount = 0;
 					mLocalIndiVector = nullptr;
+					mBackendCacheUpdateIndividualsInitialized = false;
+					mRepresentativeNeighbourExpansionIndividualNodeLinker = nullptr;
 					if (processingDataBox) {
 						mPossibleInstanceIndividualMergingStopped = processingDataBox->mPossibleInstanceIndividualMergingStopped;
 						mPossibleInstanceIndividualMergingSize = processingDataBox->mPossibleInstanceIndividualMergingSize;
@@ -345,6 +376,8 @@ namespace Konclude {
 						mLastMergedPossibleInstanceIndividualLinker = processingDataBox->mLastMergedPossibleInstanceIndividualLinker;
 						mCurrentMergedPossibleInstanceIndividualLinkersLinker = processingDataBox->mCurrentMergedPossibleInstanceIndividualLinkersLinker;
 						mLastBackendCacheIntegratedIndiNodeLinker = processingDataBox->mLastBackendCacheIntegratedIndiNodeLinker;
+						mBackendCacheIntegratedIndividualNodeCount = processingDataBox->mBackendCacheIntegratedIndividualNodeCount;
+						mBackendCacheIntegratedSameIndividualNodeCount = processingDataBox->mBackendCacheIntegratedSameIndividualNodeCount;
 						mBranchingInstruction = processingDataBox->mBranchingInstruction;
 						mUseIndiProcessQueue = processingDataBox->mUseIndiProcessQueue;
 						prevIndiProcVec = processingDataBox->mIndiProcessVector;
@@ -403,6 +436,8 @@ namespace Konclude {
 						mPrevDelayedBackendInitProcQueue = processingDataBox->mUseDelayedBackendInitProcQueue;
 						mUseDelayedBackendInitProcQueue = mPrevDelayedBackendInitProcQueue;
 
+						mPrevBackendNeighbourExpansion = processingDataBox->mUseBackendNeighbourExpansion;
+						mUseBackendNeighbourExpansion = mPrevBackendNeighbourExpansion;
 
 						mPrevRoleAssertionProcessQueue = processingDataBox->mUseRoleAssertionProcessQueue;
 						mUseRoleAssertionProcessQueue = mPrevRoleAssertionProcessQueue;
@@ -412,6 +447,15 @@ namespace Konclude {
 						mUseBackendIndirectCompatibilityExpansionQueue = mPrevBackendIndirectCompatibilityExpansionQueue;
 						mPrevBackendDirectInfluenceExpansionQueue = processingDataBox->mUseBackendDirectInfluenceExpansionQueue;
 						mUseBackendDirectInfluenceExpansionQueue = mPrevBackendDirectInfluenceExpansionQueue;
+
+						mPrevBackendIndividualReuseExpansionQueue = processingDataBox->mUseBackendIndividualReuseExpansionQueue;
+						mUseBackendIndividualReuseExpansionQueue = mPrevBackendIndividualReuseExpansionQueue;
+						mBackendIndividualLateReuseExpansionActivated = processingDataBox->mBackendIndividualLateReuseExpansionActivated;
+						mPrevBackendLateIndividualReuseExpansionQueue = processingDataBox->mUseBackendLateIndividualReuseExpansionQueue;
+						mUseBackendLateIndividualReuseExpansionQueue = mPrevBackendLateIndividualReuseExpansionQueue;
+						mPrevBackendIndividualNeighbourExpansionQueue = processingDataBox->mUseBackendIndividualNeighbourExpansionQueue;
+						mUseBackendIndividualNeighbourExpansionQueue = mPrevBackendIndividualNeighbourExpansionQueue;
+
 						mPrevBranchingTree = processingDataBox->mUseBranchingTree;
 						mUseBranchingTree = mPrevBranchingTree;
 						mOntologyTopConcept = processingDataBox->mOntologyTopConcept;
@@ -448,6 +492,7 @@ namespace Konclude {
 						mUseMarkerIndiNodeHash = processingDataBox->mUseMarkerIndiNodeHash;
 						mUseBackendConceptSetLabelProcessingHash = processingDataBox->mUseBackendConceptSetLabelProcessingHash;
 						mUseBackendLoadedAssociationHash = processingDataBox->mUseBackendLoadedAssociationHash;
+						mUseBackendNeighbourExpansionControllingData = processingDataBox->mUseBackendNeighbourExpansionControllingData;
 						mIncrementalExpansionInitialized = processingDataBox->mIncrementalExpansionInitialized;
 						mNextIncrementalIndiExpID = processingDataBox->mNextIncrementalIndiExpID;
 						mNextRoleAssertionCreationID = processingDataBox->mNextRoleAssertionCreationID;
@@ -468,6 +513,8 @@ namespace Konclude {
 						mSaturationATMOSTMergingProcessLinker = processingDataBox->mSaturationATMOSTMergingProcessLinker;
 						mUseIndiVector = processingDataBox->mUseIndiVector;
 
+						mBackendCacheUpdateIndividualsInitialized = processingDataBox->mBackendCacheUpdateIndividualsInitialized;
+						mRepresentativeNeighbourExpansionIndividualNodeLinker = processingDataBox->mRepresentativeNeighbourExpansionIndividualNodeLinker;
 
 						if (processingDataBox->mIndiSaturationProcessVector) {
 							getIndividualSaturationProcessNodeVector(true)->referenceVector(processingDataBox->mIndiSaturationProcessVector);
@@ -532,6 +579,10 @@ namespace Konclude {
 					clearBackendDirectInfluenceExpansionQueue();
 					clearBackendIndirectCompatibilityExpansionQueue();
 					clearDelayedBackendConceptSetLabelProcessingInitializationQueue();
+					clearBackendNeighbourExpansionQueue();
+					clearBackendIndividualNeighbourExpansionQueue();
+					clearBackendIndividualReuseExpansionQueue();
+					clearBackendLateIndividualNeighbourExpansionQueue();
 					return this;
 				}
 
@@ -843,6 +894,95 @@ namespace Konclude {
 					mPrevBackendIndirectCompatibilityExpansionQueue = nullptr;
 					return this;
 				}
+
+
+
+
+
+
+
+
+				bool CProcessingDataBox::isBackendIndividualLateReuseExpansionActivated() {
+					return mBackendIndividualLateReuseExpansionActivated;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setBackendIndividualLateReuseExpansionActivated(bool activated) {
+					mBackendIndividualLateReuseExpansionActivated = activated;
+					return this;
+				}
+
+
+
+				CIndividualUnsortedProcessingQueue* CProcessingDataBox::getBackendIndividualReuseExpansionQueue(bool create) {
+					if (!mBackendLateIndividualReuseExpansionQueue && create) {
+						mBackendLateIndividualReuseExpansionQueue = CObjectParameterizingAllocator< CIndividualUnsortedProcessingQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mBackendLateIndividualReuseExpansionQueue->initProcessingQueue(mPrevBackendLateIndividualReuseExpansionQueue);
+						mUseBackendLateIndividualReuseExpansionQueue = mBackendLateIndividualReuseExpansionQueue;
+					}
+					return mUseBackendLateIndividualReuseExpansionQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearBackendIndividualReuseExpansionQueue() {
+					mBackendLateIndividualReuseExpansionQueue = nullptr;
+					mUseBackendLateIndividualReuseExpansionQueue = nullptr;
+					mPrevBackendLateIndividualReuseExpansionQueue = nullptr;
+					return this;
+				}
+
+
+
+
+
+
+
+
+				CIndividualUnsortedProcessingQueue* CProcessingDataBox::getBackendLateIndividualNeighbourExpansionQueue(bool create) {
+					if (!mBackendIndividualReuseExpansionQueue && create) {
+						mBackendIndividualReuseExpansionQueue = CObjectParameterizingAllocator< CIndividualUnsortedProcessingQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mBackendIndividualReuseExpansionQueue->initProcessingQueue(mPrevBackendIndividualReuseExpansionQueue);
+						mUseBackendIndividualReuseExpansionQueue = mBackendIndividualReuseExpansionQueue;
+					}
+					return mUseBackendIndividualReuseExpansionQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearBackendLateIndividualNeighbourExpansionQueue() {
+					mBackendIndividualReuseExpansionQueue = nullptr;
+					mUseBackendIndividualReuseExpansionQueue = nullptr;
+					mPrevBackendIndividualReuseExpansionQueue = nullptr;
+					return this;
+				}
+
+
+
+
+
+
+
+
+
+
+
+
+
+				CIndividualLinkerRotationProcessingQueue* CProcessingDataBox::getBackendIndividualNeighbourExpansionQueue(bool create) {
+					if (!mBackendIndividualNeighbourExpansionQueue && create) {
+						mBackendIndividualNeighbourExpansionQueue = CObjectParameterizingAllocator< CIndividualLinkerRotationProcessingQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mBackendIndividualNeighbourExpansionQueue->initProcessingQueue(mPrevBackendIndividualNeighbourExpansionQueue);
+						mUseBackendIndividualNeighbourExpansionQueue = mBackendIndividualNeighbourExpansionQueue;
+					}
+					return mUseBackendIndividualNeighbourExpansionQueue;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearBackendIndividualNeighbourExpansionQueue() {
+					mBackendIndividualNeighbourExpansionQueue = nullptr;
+					mUseBackendIndividualNeighbourExpansionQueue = nullptr;
+					mPrevBackendIndividualNeighbourExpansionQueue = nullptr;
+					return this;
+				}
+
 
 
 
@@ -2243,6 +2383,27 @@ namespace Konclude {
 				}
 
 
+				cint64 CProcessingDataBox::getBackendCacheIntegratedIndividualNodeCount() {
+					return mBackendCacheIntegratedIndividualNodeCount;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::incBackendCacheIntegratedIndividualNodeCount(cint64 count) {
+					mBackendCacheIntegratedIndividualNodeCount += count;
+					return this;
+				}
+
+
+
+
+				cint64 CProcessingDataBox::getBackendCacheIntegratedSameIndividualNodeCount() {
+					return mBackendCacheIntegratedSameIndividualNodeCount;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::incBackendCacheIntegratedSameIndividualNodeCount(cint64 count) {
+					mBackendCacheIntegratedSameIndividualNodeCount += count;
+					return this;
+				}
+
 
 
 				CXLinker<CIndividualProcessNode*>* CProcessingDataBox::getLastBackendCacheIntegratedIndividualNodeLinker() {
@@ -2251,10 +2412,12 @@ namespace Konclude {
 
 				CProcessingDataBox* CProcessingDataBox::setLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker) {
 					mLastBackendCacheIntegratedIndiNodeLinker = indiLinker;
+					mBackendCacheIntegratedIndividualNodeCount = indiLinker->getCount();
 					return this;
 				}
 
 				CProcessingDataBox* CProcessingDataBox::addLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker) {
+					mBackendCacheIntegratedIndividualNodeCount += indiLinker->getCount();
 					mLastBackendCacheIntegratedIndiNodeLinker = indiLinker->append(mLastBackendCacheIntegratedIndiNodeLinker);
 					return this;
 				}
@@ -2305,6 +2468,55 @@ namespace Konclude {
 					mPrevDelayedBackendInitProcQueue = nullptr;
 					return this;
 				}
+
+
+				CBackendNeighbourExpansionControllingData* CProcessingDataBox::getBackendNeighbourExpansionControllingData(bool createOrLocalize) {
+					if (createOrLocalize && !mLocBackendNeighbourExpansionControllingData) {
+						mLocBackendNeighbourExpansionControllingData = CObjectParameterizingAllocator<CBackendNeighbourExpansionControllingData, CProcessContext*>::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mProcessContext), mProcessContext);
+						mLocBackendNeighbourExpansionControllingData->initExpansionControllingData(mUseBackendNeighbourExpansionControllingData);
+						mUseBackendNeighbourExpansionControllingData = mLocBackendNeighbourExpansionControllingData;
+					}
+					return mUseBackendNeighbourExpansionControllingData;
+				}
+
+
+
+				CBackendNeighbourExpansionQueue* CProcessingDataBox::getBackendNeighbourExpansionQueue(bool create) {
+					if (!mBackendNeighbourExpansionQueue && create) {
+						mBackendNeighbourExpansionQueue = CObjectParameterizingAllocator< CBackendNeighbourExpansionQueue, CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(), mProcessContext);
+						mBackendNeighbourExpansionQueue->initBackendNeighbourExpansionQueue(mPrevBackendNeighbourExpansion);
+						mUseBackendNeighbourExpansion = mBackendNeighbourExpansionQueue;
+					}
+					return mUseBackendNeighbourExpansion;
+				}
+
+
+				CProcessingDataBox* CProcessingDataBox::clearBackendNeighbourExpansionQueue() {
+					mBackendNeighbourExpansionQueue = nullptr;
+					mUseBackendNeighbourExpansion = nullptr;
+					mPrevBackendNeighbourExpansion = nullptr;
+					return this;
+				}
+
+				bool CProcessingDataBox::hasBackendCacheUpdateIndividualsInitialized() {
+					return mBackendCacheUpdateIndividualsInitialized;
+				}
+
+				CProcessingDataBox* CProcessingDataBox::setBackendCacheUpdateIndividualsInitialized(bool initialized) {
+					mBackendCacheUpdateIndividualsInitialized = initialized;
+					return this;
+				}
+
+
+				CXLinker<CIndividualProcessNode*>* CProcessingDataBox::getRepresentativeNeighbourExpansionIndividualNodeLinker() {
+					return mRepresentativeNeighbourExpansionIndividualNodeLinker;
+				}
+				CProcessingDataBox* CProcessingDataBox::addRepresentativeNeighbourExpansionIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker) {
+					mRepresentativeNeighbourExpansionIndividualNodeLinker = indiLinker->append(mRepresentativeNeighbourExpansionIndividualNodeLinker);
+					return this;
+				}
+
+
 
 			}; // end namespace Process
 

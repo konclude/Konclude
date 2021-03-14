@@ -71,7 +71,27 @@ namespace Konclude {
 			}
 			return intValue;
 		}
-		
+
+
+		double CConfigDataReader::readConfigDouble(CConfiguration *config, const QString &configString, double defaultValue, bool *errorFlag) {
+			double doubleValue = defaultValue;
+			if (config) {
+				CConfigData *configData = config->getRelatedConfigChange(configString, true);
+				if (configData && configData->supportsDoubleConvertion()) {
+					doubleValue = configData->getDouble();
+				} else {
+					if (errorFlag) {
+						*errorFlag = true;
+					}
+				}
+			} else {
+				if (errorFlag) {
+					*errorFlag = true;
+				}
+			}
+			return doubleValue;
+		}
+
 		bool CConfigDataReader::readConfigBoolean(CConfiguration *config, const QString &configString, bool defaultValue, bool *errorFlag) {
 			qint64 boolValue = defaultValue;
 			if (config) {
@@ -91,13 +111,39 @@ namespace Konclude {
 			return boolValue;
 		}
 
+		QStringList CConfigDataReader::readConfigStringList(CConfiguration *config, const QString &configString, const QStringList& defaultValue, bool *errorFlag) {
+			QStringList stringListValue = defaultValue;
+			if (config) {
+				CConfigData *configData = config->getRelatedConfigChange(configString, true);
+				if (configData && configData->supportsStringListConvertion()) {
+					stringListValue = configData->getStringList();
+				} else {
+					if (errorFlag) {
+						*errorFlag = true;
+					}
+				}
+			} else {
+				if (errorFlag) {
+					*errorFlag = true;
+				}
+			}
+			return stringListValue;
+		}
 
 		QString CConfigDataReader::readConfigString(CConfigurationProvider *configProv, const QString &configString, const QString &defaultValue, bool *errorFlag) {
 			CConfiguration *config = 0;
 			if (configProv) {
 				config = configProv->getCurrentConfiguration();
 			}
-			return readConfigString(config,configString,defaultValue,errorFlag);
+			return readConfigString(config, configString, defaultValue, errorFlag);
+		}
+
+		double CConfigDataReader::readConfigDouble(CConfigurationProvider *configProv, const QString &configString, double defaultValue, bool *errorFlag) {
+			CConfiguration *config = 0;
+			if (configProv) {
+				config = configProv->getCurrentConfiguration();
+			}
+			return readConfigDouble(config,configString,defaultValue,errorFlag);
 		}
 
 		qint64 CConfigDataReader::readConfigInteger(CConfigurationProvider *configProv, const QString &configString, qint64 defaultValue, bool *errorFlag) {

@@ -98,6 +98,8 @@ namespace Konclude {
 					stepName = QString("Role-Realization");
 				} else if (mProcessingType == OPSANSWERCOMPLEXQUERY) {
 					stepName = QString("Complex-Query-Answering");
+				} else if (mProcessingType == OPSPRECOMPUTEOCCURRENCESTATISTICS) {
+					stepName = QString("Occurrence-Statistics-Collection");
 				}
 				return stepName;
 			}

@@ -39,6 +39,11 @@ namespace Konclude {
 					return this;
 				}
 
+				CBackendRepresentativeMemoryCache* CBackendRepresentativeMemoryCacheWriter::getCache() {
+					return mCache;
+				}
+
+
 			}; // end namespace Cache
 
 		}; // end namespace Kernel

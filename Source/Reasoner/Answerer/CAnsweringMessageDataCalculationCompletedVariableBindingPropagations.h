@@ -56,22 +56,22 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(CSatisfiableCalculationJob* calcJob, CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem);
+					CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(CSatisfiableCalculationJob* calcJob, CAnsweringPropagationSteeringController* propagationSteeringController, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem);
 
 
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* getAbsorptionPropagationItem();
-					COptimizedComplexBuildingVariableCompositionsItem* getVariableBuildingItem();
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* getVariableBuildingItem();
 
-					CAnsweringPropagationSteeringAbsorptionExtensionItemController* getPropagationSteeringController();
+					CAnsweringPropagationSteeringController* getPropagationSteeringController();
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
-					CAnsweringPropagationSteeringAbsorptionExtensionItemController* mPropagationSteeringController;
+					CAnsweringPropagationSteeringController* mPropagationSteeringController;
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* mAbsorptionPropagationExtension;
-					COptimizedComplexBuildingVariableCompositionsItem* mBuildingVarItem;
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* mBuildingVarItem;
 
 
 				// private methods

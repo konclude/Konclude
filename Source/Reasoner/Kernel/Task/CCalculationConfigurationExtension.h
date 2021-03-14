@@ -170,6 +170,7 @@ namespace Konclude {
 
 						bool isForceManyConceptSaturationActivated();
 
+						bool isNewMergingsBackendOnlyInferringNeighbourExpansionActivated();
 						bool isAllowBackendNeighbourExpansionBlockingActivated();
 						bool isAllowBackendSuccessorExpansionBlockingActivated();
 
@@ -179,6 +180,32 @@ namespace Konclude {
 						bool isGeneratingTestQueriesActivated();
 
 						bool isBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated();
+
+
+						bool isBackendCriticalNeighbourRepresentativeExpansionDelayingActivated();
+
+						bool isBackendCriticalNeighbourExpansionLimitationActivated();
+						bool isBackendCriticalNeighbourExpansionReusingActivated();
+						bool isBackendCriticalNeighbourExpansionLateDynamicReusingActivated();
+						bool isBackendExpansionLimitReachedReuseActivationActivated();
+
+						cint64 getBackendCriticalNeighbourExpansionLimit();
+						cint64 getBackendCriticalNeighbourExpansionPriorityReductionCount();
+						cint64 getBackendCriticalNeighbourDirectExpansionLimit();
+						cint64 getBackendCriticalNeighbourExpansionIndividualsBatchSize();
+						cint64 getBackendCriticalNeighbourExpansionRolesBatchSize();
+						cint64 getBackendCriticalNeighbourDirectExpansionOverCriticalReductionSize();
+
+						bool isBackendDelayedSameInitializationCopyingActivated();
+						bool isBackendOnlyDeterministicRepresentativeIndividualDataConsiderationActivated();
+
+						cint64 getDefaultIndividualPrecomputationCount();
+
+						cint64 getBackendExpansionReuseActivationSameIndividualCount();
+						cint64 getBackendExpansionReuseActivationNeighbourIndividualCount();
+
+						bool isBackendExpandDeterministicallyMergedHandledNeighboursActivated();
+						bool isBackendCardinalityNeighbourExpansionRepresentativeCountingActivated();
 
 					// protected methods
 					protected:
@@ -287,6 +314,58 @@ namespace Konclude {
 						bool mOccurrenceStatisticsCollectionActivated;
 						bool mGeneratingTestQueriesActivated;
 						bool mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated;
+						bool mBackendCriticalNeighbourRepresentativeExpansionDelayingChecked;
+						bool mBackendCriticalNeighbourRepresentativeExpansionDelayingActivated;
+
+
+
+
+						bool mBackendCriticalNeighbourExpansionLimitationActivated;
+						bool mBackendCriticalNeighbourExpansionReusingActivated;
+						bool mBackendExpansionLimitReachedReuseActivationActivated;
+						bool mBackendExpansionLimitReachedReuseActivationChecked;
+
+						cint64 mBackendCriticalNeighbourExpansionLimit;
+						cint64 mBackendCriticalNeighbourExpansionPriorityReductionCount;
+						cint64 mBackendCriticalNeighbourDirectExpansionLimit;
+						cint64 mBackendCriticalNeighbourExpansionIndividualsBatchSize;
+						cint64 mBackendCriticalNeighbourExpansionRolesBatchSize;
+
+						bool mBackendDelayedSameInitializationCopyingActivated;
+						bool mBackendDelayedSameInitializationCopyingChecked;
+						bool mBackendOnlyDeterministicRepresentativeIndividualDataConsiderationActivated;
+						bool mBackendOnlyDeterministicRepresentativeIndividualDataConsiderationChecked;
+
+
+						bool mBackendCriticalNeighbourExpansionLimitationChecked;
+						bool mBackendCriticalNeighbourExpansionReusingChecked;
+						bool mBackendCriticalNeighbourExpansionLateDynamicReusingChecked;
+						bool mBackendCriticalNeighbourExpansionLateDynamicReusingActivated;
+
+						cint64 mDefaultIndividualPrecomputationCount;
+						bool mDefaultIndividualPrecomputationCountChecked;
+						bool mBackendCriticalNeighbourExpansionLimitChecked;
+						bool mBackendCriticalNeighbourExpansionPriorityReductionCountChecked;
+						bool mBackendCriticalNeighbourDirectExpansionLimitChecked;
+						bool mBackendCriticalNeighbourExpansionIndividualsBatchSizeChecked;
+						bool mBackendCriticalNeighbourExpansionRolesBatchSizeChecked;
+
+						bool mBackendCriticalNeighbourDirectExpansionOverCriticalReductionSizeChecked;
+						cint64 mBackendCriticalNeighbourDirectExpansionOverCriticalReductionSize;
+
+
+						bool mBackendExpansionReuseActivationNeighbourIndividualCountChecked;
+						cint64 mBackendExpansionReuseActivationNeighbourIndividualCount;
+						bool mBackendExpansionReuseActivationSameIndividualCountChecked;
+						cint64 mBackendExpansionReuseActivationSameIndividualCount;
+
+
+
+						bool mBackendExpandDeterministicallyMergedHandledNeighboursActivated;
+						bool mBackendExpandDeterministicallyMergedHandledNeighboursChecked;
+						bool mBackendCardinalityNeighbourExpansionRepresentativeCountingActivated;
+						bool mBackendCardinalityNeighbourExpansionRepresentativeCountingChecked;
+
 
 
 						bool mConfDependencyTrackingChecked;
@@ -382,6 +461,8 @@ namespace Konclude {
 
 						bool mConfForceManyConceptSaturationChecked;
 
+						bool mNewMergingsBackendOnlyInferringNeighbourExpansionChecked;
+						bool mNewMergingsBackendOnlyInferringNeighbourExpansionActivated;
 
 						bool mAllowBackendNeighbourExpansionBlockingChecked;
 						bool mAllowBackendSuccessorExpansionBlockingChecked;

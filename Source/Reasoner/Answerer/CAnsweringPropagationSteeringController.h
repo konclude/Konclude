@@ -78,7 +78,10 @@ namespace Konclude {
 					virtual bool finalizeWithBindingExtraction() = 0;
 
 					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, CIndividual* indi) = 0;
+					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId) = 0;
 					virtual bool isPreparationBindingAllIndividuals(CVariable* variable) = 0;
+
+					virtual bool isRestrictedTopPropagation(CConcept* concept) = 0;
 
 
 				// protected methods

@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			COptimizedComplexVariableIndividualMappingsMultiHashPart::COptimizedComplexVariableIndividualMappingsMultiHashPart(cint64 bindingSize) : CMemoryPoolNewAllocationIncreasingContext(500, 500000, 2), mMappingCardinalityHash(this) {
+			COptimizedComplexVariableIndividualMappingsMultiHashPart::COptimizedComplexVariableIndividualMappingsMultiHashPart(cint64 bindingSize) : CMemoryPoolNewAllocationIncreasingContext(500, 500000, 2) {
 				mBindingCount = 0;
 				mLastUpdatedBindingCount = 0;
 				mFirstUpdateCardinalityLinker = nullptr;
@@ -51,6 +51,9 @@ namespace Konclude {
 				mLastAddedBindingsCardinalityBatchLinkerUpdateId = 0;
 				mMaximumCardinalitySameIndividualsJointlyConsidered = 0;
 				mMaximumCardinalitySameIndividualsSeparatelyConsidered = 0;
+				mLastMemoryUsageSize = 0;
+
+				mMappingCardinalityHash = CObjectParameterizingAllocator< CQtManagedRestrictedModificationHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>, CContext* >::allocateAndConstructAndParameterize(this->getMemoryAllocationManager(), this);
 			}
 
 
@@ -74,6 +77,14 @@ namespace Konclude {
 					mLastUpdatedBindingCount = mBindingCount;
 				}
 				return count;
+			}
+
+			cint64 COptimizedComplexVariableIndividualMappingsMultiHashPart::getLastMemoryUsageSize(bool update) {
+				cint64 size = mLastMemoryUsageSize;
+				if (update) {
+					mLastMemoryUsageSize = this->getMemorySize();
+				}
+				return size;
 			}
 
 
@@ -135,7 +146,7 @@ namespace Konclude {
 				++mStatInsertionCount;
 				COptimizedComplexVariableIndividualBindingsCardinalityLinker* linkerCopy = getBindingsCardinalityLinkerCopy(linker);
 				COptimizedComplexVariableIndividualBindingsHasher hasher(linkerCopy, hashValue);
-				COptimizedComplexVariableIndividualBindingsCardinalityLinker*& hashedLinker = mMappingCardinalityHash[hasher];
+				COptimizedComplexVariableIndividualBindingsCardinalityLinker*& hashedLinker = (*mMappingCardinalityHash)[hasher];
 				if (!hashedLinker) {
 					hashedLinker = linkerCopy;
 					if (linkerCopy->getCurrentCardinalities()) {
@@ -144,7 +155,7 @@ namespace Konclude {
 						mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, linkerCopy->getCurrentCardinalities()->getSameIndividualsSeparatlyConsideredCardinality());
 					}
 					addLastAddedBindingsCardinalityLinker(linkerCopy);
-					mBindingCount = mMappingCardinalityHash.size();
+					mBindingCount = mMappingCardinalityHash->size();
 					return true;
 				} else if (addCardinalitiesIfAlreadyPresent) {
 					releaseBindingsCardinalityLinkerCopy(linkerCopy);
@@ -175,7 +186,7 @@ namespace Konclude {
 			bool COptimizedComplexVariableIndividualMappingsMultiHashPart::addBindingsCardinalitiesCopy(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* addedCardinalites) {
 				COptimizedComplexVariableIndividualBindingsCardinalityLinker tmpLinker(bindings, addedCardinalites);
 				COptimizedComplexVariableIndividualBindingsHasher hasher(&tmpLinker);
-				COptimizedComplexVariableIndividualBindingsCardinalityLinker* hashedLinker = mMappingCardinalityHash.value(hasher);
+				COptimizedComplexVariableIndividualBindingsCardinalityLinker* hashedLinker = mMappingCardinalityHash->value(hasher);
 				if (hashedLinker) {
 					if (hashedLinker->getCurrentCardinalities() && hashedLinker->getCurrentCardinalities()->getCardinalityUpdateId() == mCurrentUpdateId) {
 						hashedLinker->getCurrentCardinalities()->addCardinalities(addedCardinalites);
@@ -325,7 +336,7 @@ namespace Konclude {
 			}
 
 			COptimizedComplexVariableIndividualMappingsMultiHashPart* COptimizedComplexVariableIndividualMappingsMultiHashPart::removeBindingsCardinalityLinker(COptimizedComplexVariableIndividualBindingsCardinalityLinker* linker) {
-				mMappingCardinalityHash.remove(linker);
+				mMappingCardinalityHash->remove(linker);
 				return this;
 			}
 

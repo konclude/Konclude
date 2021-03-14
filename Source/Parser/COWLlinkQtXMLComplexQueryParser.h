@@ -27,7 +27,7 @@
 
 // Namespace includes
 #include "CQueryParser.h"
-#include "COntologyParser.h"
+#include "COntologyQtXMLDocumentParser.h"
 #include "COWLlinkQueryParser.h"
 
 
@@ -59,7 +59,7 @@ namespace Konclude {
 			// public methods
 			public:
 				//! Constructor
-				COWLlinkQtXMLComplexQueryParser(CQueryBuilder *queryBuilder, COntologyParser* ontoParser);
+				COWLlinkQtXMLComplexQueryParser(CQueryBuilder *queryBuilder, COntologyQtXMLDocumentParser* ontoParser);
 
 				//! Destructor
 				virtual ~COWLlinkQtXMLComplexQueryParser();
@@ -73,7 +73,7 @@ namespace Konclude {
 
 			// private methods
 			private:
-				COntologyParser* mOntoParser;
+				COntologyQtXMLDocumentParser* mOntoParser;
 
 
 			// private variables

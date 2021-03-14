@@ -28,6 +28,8 @@ namespace Konclude {
 
 		CRenderedItemLinker::CRenderedItemLinker() : CLinkerBase<CRenderedItemLinker*,CRenderedItemLinker>(this) {
 		}
+		CRenderedItemLinker::~CRenderedItemLinker() {
+		}
 
 
 	}; // end namespace Renderer

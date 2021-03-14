@@ -29,7 +29,7 @@ namespace Konclude {
 
 
 			COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator::COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList,
-					QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor)
+					COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor)
 				
 					: COptimizedRepresentativeKPSetCacheLabelItemIterator(labelCacheItemKnownInstancesList, labelCacheItemPossibleInstancesList, individualInstantiatedItemHash, individualVector, sorting, indiInstItemRefCursor, moveOverCursor) {
 
@@ -48,7 +48,7 @@ namespace Konclude {
 			}
 
 			COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator::COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, 
-					QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>>& pssibleLabelRoleInstancesItemInversionPairSetHash, const QSet<TRoleInstancesItemInversedFlagPair>& roleInstancesItemInversionPairSet, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor)
+					COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, const QHash<CBackendRepresentativeMemoryLabelCacheItem*, QSet<TRoleInstancesItemInversedFlagPair>>& pssibleLabelRoleInstancesItemInversionPairSetHash, const QSet<TRoleInstancesItemInversedFlagPair>& roleInstancesItemInversionPairSet, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor)
 				
 					: mPossibleLabelRoleInstancesItemInversionPairSetHash(pssibleLabelRoleInstancesItemInversionPairSetHash), mRoleInstancesItemInversionPairSet(roleInstancesItemInversionPairSet), COptimizedRepresentativeKPSetCacheLabelItemIterator(labelCacheItemKnownInstancesList, labelCacheItemPossibleInstancesList, individualInstantiatedItemHash, individualVector, sorting, indiInstItemRefCursor, moveOverCursor) {
 

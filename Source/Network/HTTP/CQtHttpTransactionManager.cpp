@@ -27,11 +27,12 @@ namespace Konclude {
 
 		namespace HTTP {
 
-			CQtHttpTransactionManager::CQtHttpTransactionManager(cint64 timeoutInterval, cint64 downloadSizeLimit) : CIntervalThread("HttpTransactionManagerThread") {
+			CQtHttpTransactionManager::CQtHttpTransactionManager(cint64 timeoutInterval, cint64 downloadSizeLimit, bool downloadLimitCancel) : CIntervalThread("HttpTransactionManagerThread") {
 				mQNAM = nullptr;
 				startThread();
 				mTimeoutInterval = timeoutInterval;
 				mDownloadSizeLimit = downloadSizeLimit;
+				mDownloadLimitCancel = downloadLimitCancel;
 			}
 
 			CQtHttpTransactionManager::~CQtHttpTransactionManager() {
@@ -42,6 +43,16 @@ namespace Konclude {
 				CQtHttpRequest* httpRequest = new CQtHttpRequest(url);
 				return httpRequest;
 			}
+
+
+			CQtHttpTransactionManager* CQtHttpTransactionManager::setRequestHeader(CHttpRequest* request, const QString& key, const QString& value) {
+				CQtHttpRequest* qtRequest = dynamic_cast<CQtHttpRequest*>(request);
+				if (qtRequest) {
+					qtRequest->getQNetworkRequest()->setRawHeader(key.toUtf8(), value.toUtf8());
+				}
+				return this;
+			}
+
 
 			//CHttpRequest* CQtHttpTransactionManager::createFileDownloadRequest(const QString& url, QIODevice* openWriteFile) {
 			//	CQtHttpDownloadFileRequest* httpRequest = new CQtHttpDownloadFileRequest(url);
@@ -108,6 +119,21 @@ namespace Konclude {
 				return false;
 			}
 
+
+
+			bool CQtHttpTransactionManager::waitFinished(CHttpResponse* response) {
+				if (hasFinished(response)) {
+					return true;
+				} else {
+					CBlockingCallbackData blockingCallbackData;
+					callbackFinished(response, &blockingCallbackData);
+					blockingCallbackData.waitForCallback();
+					return true;
+				}
+			}
+
+
+
 			bool CQtHttpTransactionManager::callbackFinished(CQtHttpResponse* response, CCallbackData* callback) {
 				postEvent(new CAddResponseFinishedCallbackEvent(response,callback));
 				return true;
@@ -170,6 +196,22 @@ namespace Konclude {
 				return false;
 			}
 
+
+			QString* CQtHttpTransactionManager::getErrorString(CHttpResponse* response) {
+				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
+				if (qtResponse) {
+					QNetworkReply* reply = qtResponse->getQNetworkReply();
+					if (reply) {
+						QString errorString = reply->errorString();
+						if (!errorString.isEmpty()) {
+							return new QString(errorString);
+						}
+					}
+				}
+				return nullptr;
+			}
+
+
 			bool CQtHttpTransactionManager::hasFinishedSucecssfully(CHttpResponse* response) {
 				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
 				if (qtResponse) {
@@ -184,6 +226,21 @@ namespace Konclude {
 				return false;
 			}
 
+
+
+			bool CQtHttpTransactionManager::hasFinished(CHttpResponse* response) {
+				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
+				if (qtResponse) {
+					QNetworkReply* reply = qtResponse->getQNetworkReply();
+					if (reply) {
+						//QString errorString = reply->errorString();
+						if (reply->isFinished()) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
 
 			bool CQtHttpTransactionManager::hasBeenAborted(CHttpResponse* response, ABORT_REASON* abortReason) {
 				CQtHttpResponse* qtResponse = dynamic_cast<CQtHttpResponse*>(response);
@@ -249,7 +306,7 @@ namespace Konclude {
 						reply = mQNAM->post(*request->getQNetworkRequest(),*byteArray);
 					}
 					if (mDownloadSizeLimit >= 0) {
-						CQtHttpResponseHandler* handler = new CQtHttpResponseHandler(request, response, mDownloadSizeLimit, this);
+						CQtHttpResponseHandler* handler = new CQtHttpResponseHandler(request, response, mDownloadSizeLimit, mDownloadLimitCancel, this);
 						mHandlerHash.insert(response, handler);
 						connect(reply, &QNetworkReply::downloadProgress, [=](cint64 received, cint64 total) {
 							handler->downloadProgress(received, total);
@@ -341,13 +398,20 @@ namespace Konclude {
 					CAbortRequestEvent* are = (CAbortRequestEvent*)event;
 					CQtHttpResponse* response = (CQtHttpResponse*)are->getResponse();
 					response->setAborted(are->getAbortReason());
-					response->getQNetworkReply()->abort();
 					QString abortReasonString = "none given";
 					ABORT_REASON abortReason = (ABORT_REASON)are->getAbortReason();
 					if (abortReason == ABORT_DOWNLOAD_SIZE_LIMIT_REACHED) {
 						abortReasonString = QString("Download size limit of %1 bytes reached").arg(mDownloadSizeLimit);
+						if (mDownloadLimitCancel) {
+							LOG(WARNING, "::Konclude::Network::HTTP::QtHttpTransactionManager", logTr("HTTP request aborted with reason: %1").arg(abortReasonString), this);
+							response->getQNetworkReply()->abort();
+						} else {
+							LOG(WARNING, "::Konclude::Network::HTTP::QtHttpTransactionManager", logTr("Deleting download stream due to reason: %1").arg(abortReasonString), this);
+						}
+					} else {
+						LOG(WARNING, "::Konclude::Network::HTTP::QtHttpTransactionManager", logTr("HTTP request aborted with reason: %1").arg(abortReasonString), this);
+						response->getQNetworkReply()->abort();
 					}
-					LOG(WARNING, "::Konclude::Network::HTTP::QtHttpTransactionManager", logTr("HTTP request aborted with reason: %1").arg(abortReasonString), this);
 					return true;
 				}
 				return false;

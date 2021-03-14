@@ -64,8 +64,10 @@ namespace Konclude {
 					virtual CVariableBindingResult* initVariableBinding(const CIndividualReference& indiRef, CIndividualNameResolver* indiNameResolver);
 					virtual CVariableBindingResult* initVariableBinding(const CIndividualReference& indiRef, const QString& resolvedIndiName);
 
+					virtual CVariableBindingResult* initVariableBinding(CConcept* concept);
 					virtual CVariableBindingResult* initVariableBinding(CIndividual* individual);
 					virtual CVariableBindingResult* initVariableBinding(CDataLiteral* dataLiteral);
+					virtual CVariableBindingResult* initVariableBinding(CRole* role);
 
 
 					void* getData();

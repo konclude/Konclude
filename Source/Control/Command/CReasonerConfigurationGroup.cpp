@@ -93,6 +93,14 @@ namespace Konclude {
 						"Number of Processor-Threads that are used for task based reasoning.",
 						new CStringConfigType("1")),
 						new CStringConfigType("1"));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.AdaptThreadPoolSizeProcessorCount",
+						"Determines whether the size of the Qt default thread pool is adapted to the processor count.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.BlockingThreadPoolThreadsCount",
+						"Determines the number of threads that are blocked from the default thread pool.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.UniqueNameAssumption",
 						"Determines whether the reasoner treats each individual with distinct name as different of each other.",
 						new CBooleanConfigType(false)),
@@ -316,13 +324,108 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
-
+				
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.IndividualsBackendCacheLoading",
 						"Determines whether the reasoner loads data for individuals from backend cache.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionLimitation",
+						"Determines whether the amount of individuals loaded from the backend cache into the local completion graph is limited (even if expansion to corresponding neighbours is required).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourRepresentativeExpansionDelaying",
+					"Determines whether neighbours are representatively expanded or delayed until the representatively expanded individual has a processing that is not only related to concepts.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendExpansionLimitReachedReuseActivation",
+						"Determines whether expansion reuse is activated once the expansion limit has been reached.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendExpansionReuseActivationNeighbourIndividualCount",
+					"Determines the threshold of (possible) neighbour individuals where the dynamic backend reuse is activated.",
+					new CIntegerConfigType(1)),
+					new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendExpansionReuseActivationSameIndividualCount",
+					"Determines the threshold of (possible) same individuals where the dynamic backend reuse is activated.",
+					new CIntegerConfigType(1)),
+					new CIntegerConfigType(1));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionReusing",
+						"Determines whether non-deterministic consequences stored in the backend cache are reused for expanding the local completion graph.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendExpandDeterministicallyMergedHandledNeighbours",
+					"Determines whether deterministically merged handled individuals are expanded as neighbours in completion graphs.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalCardinalityCheckingNeighbourExpansionRepresentativeCounting",
+					"Determines whether the representative neighbour individuals are counted for a more precise critical cardinality checking for determining whether an expansion is required from the backend.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionLateDynamicReusing",
+						"Determines whether non-deterministic consequences stored in the backend cache are reused for expanding the local completion graph if certain conditions are satisfied (which check whether reuse could save many further expansions).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionLimit",
+						"The limit to how many (neighbour) individuals from the backend cache the local completion graph can be expanded.",
+						new CIntegerConfigType(15000)),
+						new CIntegerConfigType(15000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionPriorityReductionCount",
+						"The number of expansion individuals from the backend cache for which any further expansion is prioritized down.",
+						new CIntegerConfigType(12000)),
+						new CIntegerConfigType(12000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourDirectExpansionLimit",
+						"The number of neighbour individuals that can be directly expanded.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourDirectExpansionOverCriticalReductionSize",
+					"The reduction size for directly expanding neighbour individuals if a critical amount of neighbours has been integrated (-1 for immediate reduction to 0).",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionIndividualsBatchSize",
+						"The number of neighbour individuals that can be expanded in one batch.",
+						new CIntegerConfigType(3)),
+						new CIntegerConfigType(3));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionRolesBatchSize",
+						"The number of different neighbour types that can be expanded in one batch.",
+						new CIntegerConfigType(5)),
+						new CIntegerConfigType(5));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendDelayedSameLabelInitializationCopying",
+						"Determines whether the initialization of individual nodes is delayed (if they have the same label as already existing ones) and their consequences are copied (if possible).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.BackendOnlyDeterministicRepresentativeIndividualDataConsideration",
+						"Determines whether only deterministic representative individual data is considered for expansion.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -438,6 +541,117 @@ namespace Konclude {
 
 
 
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.LateIndividualLabelAssociationIndexing",
+						"Specifies whether the individual label association is indexed (in parallel) after all individual data is written to the cache.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.WaitIndividualLabelAssociationIndexed",
+						"Specifies whether the cache is blocked until individual label association indexing is finished.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.LogStorageStatistics",
+						"Specifies whether storage statistics are logged.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.ThreadedUpdateSynchronization",
+						"Specifies whether the backend cached is updated via a designated thread.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.PendingWriteDataLimit",
+					"Specifies the limit for the pending write data events (-1 for unlimited).",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.IncrementUpdateIdForDeterministicSameAsCompletion",
+					"Specifies whether the update id is incremented for an individual association data if the deterministically same individuals are internally updated.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.MinRequiredDeterministicSameMergedHandledInstallationPossiblitiesForNeighbourCompletion",
+					"Specifies the minimum required number of deterministically same merges handling installation possibilities to perform the neighbour completion.",
+					new CIntegerConfigType(1)),
+					new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.UnchangedDeterministicSameMergeUpdatesForDeterministicSameNeighbourCompletion",
+					"Specifies the number of updates for an individual association data without merges until the neighbour completion is performed.",
+					new CIntegerConfigType(1)),
+					new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.TryingDeterministicSameMergedHandlingInstallationDifferenceCount",
+					"Specifies the difference of (new) deterministically same merges handling installation possibilities, where neighbour completion is tried even if the update is incompatible.",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.BasicPrecomputationModeActivationUpdateMergesPercentRatio",
+					"Specifies the ratio of merged to updated individual data at which the basic precomputation mode is activated, where the expansion is based on the first individual association data.",
+					new CIntegerConfigType(5)),
+					new CIntegerConfigType(5));
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.MaxIncompletelyHandledIndividualsRetrievalCount",
+					"Specifies the maximum number of incompletely handled individuals retrievals until the association data is completed (-1 for no maximum).",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.MaxCacheDataUpdateWritingCount",
+					"Specifies the maximum number of cache updates until the association data is completed (-1 for no maximum).",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.RejectingUpdateIncompatibleIndividualAssociationsRatio",
+					"Specifies the ratio of incompatible individual association changes to all association changes for rejecting the integration of a cache update.",
+					new CDoubleConfigType(1.)),
+					new CDoubleConfigType(1.));
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.RejectingUpdateIncompatiblePropagationCuttedIndividualLinkedNeighbourRatio",
+					"Specifies the ratio of neighbour links of incompatible individual associations with propagation cuts to all individuals for rejecting the integration of a cache update.",
+					new CDoubleConfigType(1.)),
+					new CDoubleConfigType(1.));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.RejectingUpdateIncompatiblePropagationCuttedIndividualLinkedNeighbourCount",
+					"Specifies the number of neighbour links of incompatible individual associations with propagation cuts to all individuals for rejecting the integration of a cache update.",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.SlotUpdateWaitingIncreaseMaximumCount",
+					"Specifies the maximum update waiting count until the reader/writer slots are updated.",
+					new CIntegerConfigType(20)),
+					new CIntegerConfigType(20));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Cache.RepresentativeBackendCache.InterpretUnchangedLabelsAsCompatibleIndividualAssociationUpdates",
+					"Determines whether an update for an individual association data is interpreted as compatible (even if update ids do not match) if the labels do not differ.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Cache.SatisfiableExpander.InitialMemoryLevelForIncreaseRequiredSignatureReferenceCount",
 						"Specifies the initial memory level for which the required signature references for the creation of cache entries is increased.",
 						new CIntegerConfigType(200*1024*1024)),
@@ -478,6 +692,13 @@ namespace Konclude {
 						new CBooleanConfigType(true));
 
 
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.NewMergingsBackendOnlyInferringNeighbourExpansion",
+						"Determines whether only (possibly) inferring neighbours are expanded into the local completion graph for new (deterministic) mergings of individuals.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Optimization.OccurrenceStatisticsCollecting",
 						"Determines whether the occurrence statistics are collected while building completion/saturation graph for consistency checking.",
 						new CBooleanConfigType(true)),
@@ -491,6 +712,14 @@ namespace Konclude {
 						"Determines whether the triple encoded assertions are converted to individual data.",
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ConcurrentIndividualDataConvertion",
+						"Determines whether the triple encoded assertions are concurrently converted to individual data.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.DeleteTriplesDataAfterIndexing",
+						"Determines whether the triples data is deleted after the indexing.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ExternalTriplesDatabaseCaching",
 						"Determines whether the indexing data is stored in an external database.",
@@ -735,22 +964,108 @@ namespace Konclude {
 
 
 
+
+
+
 				// Precomputation configurations
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.ExpansionPropagationCutIndividualsPrecompuationSizeReductionFactor",
+						"Determines the reduction factor for propagation cuts for the individual precomputation size.",
+						new CDoubleConfigType(0.01)),
+						new CDoubleConfigType(0.01));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.ExpansionPropagationCutIndividualsPrecompuationSizeReductionRecoveryFactor",
+						"Determines the recovery factor for the reduction for propagation cuts for the individual precomputation size.",
+						new CDoubleConfigType(0.0005)),
+						new CDoubleConfigType(0.0005));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.ExpansionPropagationCutIndividualsPrecompuationSizeMaximumReductionFactor",
+						"Determines the maximum reduction factor for propagation cuts for the individual precomputation size.",
+						new CDoubleConfigType(0.90)),
+						new CDoubleConfigType(0.90));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.MaximumParallelCalculationCount",
 						"Determines the maximum number of calculation jobs that are created at the same time.",
-						new CIntegerConfigType(10)),
+						new CIntegerConfigType(200)),
 						((CConfigData*)nullptr));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.MaximumBatchJobCreationCount",
+						"Determines how many calculation jobs are created in one batch.",
+						new CIntegerConfigType(20)),
+						new CIntegerConfigType(20));
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.MultipliedUnitsParallelCalculationCount",
 						"Determines how many calculation jobs are created.",
-						new CIntegerConfigType(10)),
-						new CIntegerConfigType(10));
+						new CIntegerConfigType(20)),
+						new CIntegerConfigType(20));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsHandlingCountOntologySizeIncreaseFactor",
+						"Determines the ontology size for which the individuals handling count (for saturation and precomputation) is increased.",
+						new CIntegerConfigType(500000)),
+						new CIntegerConfigType(500000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsHandlingCountOntologySizeMaxIncreaseFactor",
+					"Determines the maximum factor by which the individuals handling count (for saturation and precomputation) is increased.",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor",
+					"Determines the reduction factor for the individual precomputation size limit for the first tests after the basic precomputation mode has finished.",
+					new CDoubleConfigType(0.005)),
+					new CDoubleConfigType(0.005));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor",
+					"Determines how the reduction factor for the individual precomputation size limit after the basic precomputation mode is increased.",
+					new CDoubleConfigType(1.01)),
+					new CDoubleConfigType(1.01));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationParallelizationInitializationFactor",
+					"Determines the reduction factor for the parallelization of the individual precomputation after the basic precomputation mode has finished.",
+					new CDoubleConfigType(1)),
+					new CDoubleConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationParallelizationIncreasingFactor",
+					"Determines how the reduction factor for the parallelization of the individual precomputation after the basic precomputation mode is increased.",
+					new CDoubleConfigType(1.01)),
+					new CDoubleConfigType(1.01));
+
+
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize",
 						"Determines how many individuals are saturated together.",
-						new CIntegerConfigType(1000)),
-						new CIntegerConfigType(1000));
+						new CIntegerConfigType(3000)),
+						new CIntegerConfigType(3000));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsPrecompuationSize",
+						"Determines how many individuals are precomputed together.",
+						new CIntegerConfigType(1500)),
+						new CIntegerConfigType(1500));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.PrecompuationRequiredIndividualRetrievalSize",
+						"Determines how many individuals are retrieved from backend cache for precompuation.",
+						new CIntegerConfigType(200000)),
+						new CIntegerConfigType(200000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.PrecompuationRequiredIndividualRetrievalThresholdPercent",
+						"Determines the threshold (in percent) when the next individuals are retrieved from backend cache for precompuation.",
+						new CIntegerConfigType(50)),
+						new CIntegerConfigType(50));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsPrecompuationLimitIncreasingFactorPercent",
+					"Determines the factor (in percent) that is used to increase the individual precomputation limit.",
+					new CIntegerConfigType(101)),
+					new CIntegerConfigType(101));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.ForceFullCompletionGraphConstruction",
 						"Determines whether the construction of a completion graph is enforced for the consistency check.",
@@ -945,7 +1260,7 @@ namespace Konclude {
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.MaximumParallelTestingCalculationCount",
 						"Determines how many calculation jobs are maximally created per realizer at one time.",
-						new CIntegerConfigType(1)),
+						new CIntegerConfigType(200)),
 						((CConfigData*)nullptr));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.MultipliedUnitsParallelTestingCalculationCount",
 						"Determines how many calculation jobs are created per realizer.",
@@ -986,6 +1301,10 @@ namespace Konclude {
 						new CIntegerConfigType(3)),
 						new CIntegerConfigType(3));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceIndividualsAfterwardsMergingMinimumCount",
+						"Determines how the minimum number of remaining instance tests for using the possible instance individual afterwards merging.",
+						new CIntegerConfigType(10)),
+						new CIntegerConfigType(10));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.NonDeterministicCachedCompletionGraphContinuationPropagationTests",
 						"Determines whether the non-deterministic derived completion graph that is cached from the consistency check is used for the propagation tests (e.g., for propagating marker concepts for role realization).",
@@ -1031,6 +1350,19 @@ namespace Konclude {
 						new CBooleanConfigType(false));
 
 
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.ConccurrentItemInitializationVectorSize",
+					"Determines the size of the vector for tasks for concurrently initializing realization items.",
+					new CIntegerConfigType(200)),
+					new CIntegerConfigType(200));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Realization.ConcurrentIndividualPossibleConceptInstantiationInitialization",
+					"Determines whether individual items are initialized concurrently.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
 
 
 
@@ -1111,6 +1443,23 @@ namespace Konclude {
 						new CStringConfigType("")),
 						new CStringConfigType(""));
 
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.OntologyRevisionPersistencer.LoadingFileEnding",
+					"Determines the file ending that is used for loading.",
+					new CStringConfigType(".*")),
+					new CStringConfigType(".*"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.OntologyRevisionPersistencer.KeepingVersionsLimit",
+					"Determines how many old versions are kept for a persisted knowledge base.",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Persistence.DirectoryOWL2XMLFilePersistencer.BaseDirectory",
 						"Determines the directory where the DirectoryOWL2XMLFilePersistencer persists the ontologies.",
 						new CStringConfigType("./Data/Ontologies/Persistence/")),
@@ -1119,11 +1468,142 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.DirectoryOWL2XMLFilePersistencer.WritingFileEnding",
+					"Determines the file ending for the DirectoryOWL2XMLFilePersistencer.",
+					new CStringConfigType(".owl.xml")),
+					new CStringConfigType(".owl.xml"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.DirectoryOWLRDFFilePersistencer.BaseDirectory",
+						"Determines the directory where the DirectoryOWLRDFFilePersistencer persists the ontologies.",
+						new CStringConfigType("./Data/Ontologies/Persistence/")),
+						new CStringConfigType("./Data/Ontologies/Persistence/"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.DirectoryOWLRDFFilePersistencer.SerializationFormat",
+					"Determines the file format (e.g., rdfxml, turtle, ntriples) with which the DirectoryOWLRDFFilePersistencer persists the ontologies.",
+					new CStringConfigType("turtle")),
+					new CStringConfigType("turtle"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.DirectoryOWLRDFFilePersistencer.WritingFileEnding",
+					"Determines the file ending for the DirectoryOWLRDFFilePersistencer.",
+					new CStringConfigType(".ttl")),
+					new CStringConfigType(".ttl"));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesDSNOnlyWritingPersistencer.DSNConfig",
+					"The DSN config for the external triples database for persisting knowledge bases.",
+					new CStringConfigType("")),
+					new CStringConfigType("dsn='VirtuosoTest',user='dba',password='dba'"));
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesDSNOnlyWritingPersistencer.TriplesDatabaseName",
+					"The name of the external triples database for persisting knowledge bases.",
+					new CStringConfigType("http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName")),
+					new CStringConfigType("http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesDSNOnlyWritingPersistencer.InitialLoading",
+					"Determines whether triples from the external triples database are loaded before persisting new versions.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesDSNOnlyWritingPersistencer.DirectFullTriplesLoading",
+					"Determines whether triples from the external triples database are completely loaded into the reasoner and stored via redland memory hashes.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
 
 
 
 
 
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.ServiceAddress",
+					"The SPARQL service address that is used for persisting knowledge bases.",
+					new CStringConfigType("")),
+					new CStringConfigType("http://localhost:8890/sparql"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.CheckingQueryTemplate",
+					"The query template string that is used to check whether there exists a persisted version of the knowledge bases.",
+					new CStringConfigType("SELECT * FROM NAMED <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>\r\n{\r\n?s ?p ?o .\r\n}\r\nLIMIT 1")),
+					new CStringConfigType("SELECT * FROM NAMED <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>\r\n{\r\n?s ?p ?o .\r\n}\r\nLIMIT 1"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.LoadingQueryTemplate",
+					"The query template string that is used to load a persisted version of the knowledge bases.",
+					new CStringConfigType("SELECT * FROM NAMED <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>\r\n{\r\n?s ?p ?o .\r\n}\r\nLIMIT $LoadingLimit OFFSET $LoadingOffset")),
+					new CStringConfigType("SELECT * FROM NAMED <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>\r\n{\r\n?s ?p ?o .\r\n}\r\nLIMIT $LoadingLimit OFFSET $LoadingOffset"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.PersistingQueryTemplate",
+					"The query template string that is used to persist a version of the knowledge bases.",
+					new CStringConfigType("$PrefixesString\r\nINSERT {\r\n GRAPH <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>\r\n{\r\n$TriplesString\r\n}\r\n}")),
+					new CStringConfigType("$PrefixesString\r\nINSERT {\r\n GRAPH <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>\r\n{\r\n$TriplesString\r\n}\r\n}"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.DeletingQueryTemplate",
+					"The query template string that is used to delete the persisted version of a knowledge bases.",
+					new CStringConfigType("DROP GRAPH <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>")),
+					new CStringConfigType("DROP GRAPH <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>"));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.CreatingQueryTemplate",
+					"The query template string that is used to create a triple database for persisting a knowledge bases.",
+					new CStringConfigType("CREATE GRAPH <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>")),
+					new CStringConfigType("CREATE GRAPH <http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName>"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.TriplesDatabaseName",
+					"The name of the external triples database for persisting knowledge bases.",
+					new CStringConfigType("http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName")),
+					new CStringConfigType("http://Konclude.com/KnowledgeBaseData/Persistence/$PercentEncodedKnowledgeBaseName"));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.InitialLoading",
+					"Determines whether triples from the external triples database are loaded before persisting new versions.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.PersistingStepSize",
+					"Determines whether how many triples are persisted with one query.",
+					new CIntegerConfigType(1000)),
+					new CIntegerConfigType(1000));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.LoadingLimitSize",
+					"Determines whether how many triples are loaded with one query.",
+					new CIntegerConfigType(10000)),
+					new CIntegerConfigType(10000));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer.HTTPPostFormEncodedPersisting",
+					"Determines whether HTTP Post requests (with application/x-wwww-form-encoded content types) are used for persisting knowledge bases (instead of URL encoding the SPARQL Update queries via Redland Rasqal).",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Persistence.MultiPersistencer.PersisterList",
+					"The list of names of the used persistencers.",
+					new CStringListConfigType("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer\tKonclude.Persistence.DirectoryOWLRDFFilePersistencer")),
+					new CStringListConfigType("Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer\tKonclude.Persistence.DirectoryOWLRDFFilePersistencer"));
 
 
 
@@ -1276,6 +1756,69 @@ namespace Konclude {
 
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.ReducibleFactorIntegration",
+						"Determines whether reducible variables are considered for determining the next variable for which mappings are propagated over adjacent properties.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.PropertyScoresIntegration",
+						"Determines whether properties statistics/scores are considered for determining the next variable for which mappings are propagated over adjacent properties.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.PropertyPriorization",
+						"Determines whether the properties are prioritized/ordered for choosing the next propagation.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.VariableCompositionItemRoleSuccessorCountSampling",
+						"Determines whether the number of successors is sampled for determining properties statistics/scores.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.ForceAlwaysVariableCompositionItemRoleSuccessorCountSampling",
+						"Determines whether the number of successors is always sampled for determining properties statistics/scores (otherwise only role instance statistics are used if they are eligible).",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.ReducibleFactorPercent",
+						"Determines the factor that is used to reduce the number of expected mappings for each reducible variable (in percent).",
+						new CIntegerConfigType(80)),
+						new CIntegerConfigType(80));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.PropertyTotalScoreIntegrationPercent",
+						"Determines the factor that is used to integrate the total property score/statistics (in percent).",
+						new CIntegerConfigType(5)),
+						new CIntegerConfigType(5));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.PropertySuccessorStatisticsSamplingFactorIntegrationPercent",
+						"Determines the factor that is used to modify the number of expected mappings w.r.t. statics/samples of estimated successors (in percent).",
+						new CIntegerConfigType(50)),
+						new CIntegerConfigType(50));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.VariableCompositionItemRoleSuccessorSamplingCount",
+						"Determines the amount of samples to estimate the number of successors.",
+						new CIntegerConfigType(20)),
+						new CIntegerConfigType(20));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.NextVariablePropagationHandlingChoise.VariableCompositionItemRoleSuccessorSamplingExpectedMappingIncreaseSize",
+						"Determines the number of expected mappings that increases (multiplies) the sampling size.",
+						new CIntegerConfigType(10000)),
+						new CIntegerConfigType(10000));
+
+
+
+
+
+
+
+
+
+				
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentComputationThreadPoolSize",
@@ -1283,6 +1826,11 @@ namespace Konclude {
 						new CIntegerConfigType(0)),
 						new CIntegerConfigType(0));
 
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AutomaticConcurrentComputationActivation",
+						"Determines whether concurrent query computation steps (e.g., ConcurrentJoinComputation, ConcurrentPropagationComputation) are automatically activated if there are several worker threads.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -1295,6 +1843,16 @@ namespace Konclude {
 						"Determines with how many tasks bindings are concurrently joined.",
 						new CIntegerConfigType(211)),
 						new CIntegerConfigType(211));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinComputationMaxBatchHandlingCount",
+						"Determines the maximum number of batches that are handled at once.",
+						new CIntegerConfigType(10000)),
+						new CIntegerConfigType(10000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinLastStepSplitTestingComputationMaxBatchHandlingCount",
+						"Determines the maximum number of batches that are handled at once for the last step if split.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentJoinPerformanceLogging",
@@ -1312,6 +1870,45 @@ namespace Konclude {
 						"Determines whether the memory management bindings for the concurrent joins of bindings is partitionized.",
 						new CBooleanConfigType(false)), 
 						new CBooleanConfigType(false));
+
+
+
+
+
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentPropagationComputation",
+						"Determines whether bindings are propagated concurrently.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentPropagationComputationTaskCount",
+						"Determines with how many tasks bindings are concurrently propagated.",
+						new CIntegerConfigType(211)),
+						new CIntegerConfigType(211));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentPropagationPerformanceLogging",
+						"Determines whether some performance metrics are logged for the concurrent propagation.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ConcurrentPropagationPartitionizedMemoryManagement",
+						"Determines whether the memory management bindings for the concurrent propagations of bindings is partitionized.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
+
+
+
+
+
+
 
 
 
@@ -1427,9 +2024,57 @@ namespace Konclude {
 						new CIntegerConfigType(50000));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.MaxCandidateInstancePropagationsInitializationIndividualCount",
+					"Determines the maximum number of initialization individuals for instance candidate propagating tests.",
+					new CIntegerConfigType(10000)),
+					new CIntegerConfigType(10000));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.QueryEntailmentTestRestrictedTopPropertyPropagationSplitting",
+					"Determines whether entailment queries with a propagation over the top object property are split up.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AbsorbedIndividualActivationCandidateInstancePropagationSplitting",
+					"Determines whether the propagation of instance candidates is split up if it has been absorbed with an individual activation.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
 
 
 
+
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AllowLastStepSplitComputation",
+					"Determines whether the computation for the last item can be split.",
+					new CBooleanConfigType(true)),
+					new CBooleanConfigType(true));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.LastStepSplitComputationMappingsRequirement",
+					"Determines the number of requested mappings for the last item if a computation split is possible.",
+					new CIntegerConfigType(5000000)),
+					new CIntegerConfigType(5000000));
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.LastStepDirectSplitComputationWithExpectedInputMappings",
+					"Determines the number of expected input mappings for the last item for which the computation split is directly activated.",
+					new CIntegerConfigType(5000000)),
+					new CIntegerConfigType(5000000));
+
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.SkipConceptItemsIntegrationForPropagationOverVariables",
+						"Determines whether the integration/joining of variable mappings of concepts items are skipped for variables over which it is just propagated.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 
@@ -1497,11 +2142,39 @@ namespace Konclude {
 					new CBooleanConfigType(true));
 
 
-				// Testing/Debugging configurations
 
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AnswersCacheMaximumSizeBytes",
+					"Determines the maximum size of cached (intermediate) answers in bytes (-1 for no limited).",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AnswersCacheMaximumCount",
+					"Determines the maximum number of cached (intermediate) answers (-1 for no limited).",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.AnswersCacheUsageWeightIncreaseFactor",
+					"Determines the increase for the usage count for weighting cache entries.",
+					new CDoubleConfigType(1.03)),
+					new CDoubleConfigType(1.03));
+
+
+
+				// Testing/Debugging configurations
 
 				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingData",
 					"If enabled (true) the reasoner is allowed to write debugging data to files.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteDebuggingRepresentativeCacheContent",
+					"If enabled (true) the reasoner writes debugging data of the representative backend cache.",
 					new CBooleanConfigType(false)),
 					new CBooleanConfigType(false));
 
@@ -2119,6 +2792,17 @@ namespace Konclude {
 
 
 
+				// Parsing configurations
+
+				addConfigProperty(new CConfigDescription("Konclude.Parser.RedlandRaptor.ConcurrentParsing",
+						"Determines whether parsing with redland raptor is done concurrently (if possible).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Parser.RedlandRaptor.ConcurrentBytesBatchingSize",
+					"Determines the denominator for the assertion ratio  that are removed for incremental realization tests.",
+					new CIntegerConfigType(50000000)),
+					new CIntegerConfigType(50000000));
 
 				addConfigProperty(new CConfigDescription("Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing",
 						"Determines whether UTF-8 compatibility is enforced for stream-based XML parsing.",
@@ -2315,10 +2999,17 @@ namespace Konclude {
 					"Name of the ontology that is used for processing the SPARQL query if no ontology name is specified, i.e., if there is no 'FROM' clause.",
 					new CStringConfigType("http://Konclude.com/Ontologies/$LastCreatedKnowledgeBaseIfAvailableAndCreateNewAnonymousKnowledgeBaseOtherwise")),
 					new CStringConfigType("http://Konclude.com/Ontologies/$LastCreatedKnowledgeBaseIfAvailableAndCreateNewAnonymousKnowledgeBaseOtherwise"));
+
 				addConfigProperty(new CConfigDescription("Konclude.SPARQL.AlwaysResolveToDefault",
 					"Ignores FROM clauses by always resolving the SPARQL query with the default ontology specified by 'Konclude.SPARQL.DefaultResolvingOntology'.",
 					new CBooleanConfigType(false)),
 					new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.WaitQueryCalculationBeforeContinuingUpdateProcessing",
+					"Specifies whether subsequent SPARQL commands are only processed if previous queries are completely calculated.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
 
 
 				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Server.Port",
@@ -2342,6 +3033,12 @@ namespace Konclude {
 						"Determines the network write buffer limit up to which the result generation is not blocked.",
 						new CIntegerConfigType(20)),
 						new CIntegerConfigType(20));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.SPARQL.Server.ThreadedSocketWriting",
+						"Determines whether the data is written into the socket with a separate thread.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 				addConfigProperty(new CConfigDescription("Konclude.SPARQL.File.WriteBufferBlockingLimit",
 						"Determines the file write buffer limit up to which the result generation is not blocked.",
@@ -2496,6 +3193,16 @@ namespace Konclude {
 						new CStringConfigType("Evaluation/Responses/R-000/"));
 
 
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ReasonerRestartPausingTime",
+						"Waiting time after restarting the reasoner.",
+						new CIntegerConfigType(10000)),
+						new CIntegerConfigType(10000));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ReasonerTerminationPausingTime",
+						"Waiting time after terminating the reasoner.",
+						new CIntegerConfigType(-1)),
+						new CIntegerConfigType(-1));
+
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.TestingCount",
@@ -2514,6 +3221,11 @@ namespace Konclude {
 						new CIntegerConfigType(-1)),
 						new CIntegerConfigType(-1));
 
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ResponseDownloadSizeLimitCancel",
+						"Determines whether the request is canceled if the download size limit is reached.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.RequestTimeout",
 						"The time limit for the reasoner to complete a single request.",
@@ -2592,8 +3304,8 @@ namespace Konclude {
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.WaitingTimeAfterReasonerCreation",
 						"Waiting time after reasoner has created in milliseconds.",
-						new CIntegerConfigType(false)),
-						new CIntegerConfigType(false));
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SPARQLSendPrepareBeforeQuerying",
 						"Sending a SPARQL PREPARE command before starting querying.",
@@ -2610,13 +3322,22 @@ namespace Konclude {
 						new CIntegerConfigType(-1)),
 						new CIntegerConfigType(-1));
 
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SPARQLQueryingTimeout",
+					"Separate SPARQL querying timeout (if it is set to -1, then the normal 'Konclude.Evaluation.RequestTimeout' is used).",
+					new CIntegerConfigType(-1)),
+					new CIntegerConfigType(-1));
 
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SPARQLQueryTimeoutRestartRepeatPreparation",
+						"Whether the reasoner is restarted after reaching a timeout for a query and continuing afterwards with the next query.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.SystemReadyRetestTimeForTests",
 						"Waiting time for retest whether system is ready for next evaluation test in milliseconds.",
-						new CIntegerConfigType(false)),
-						new CIntegerConfigType(false));
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.CriticalSystemProcessTesterProgram",
 						"Program/Script/Command Line that returns 1 if there are running critical processes on the system.",
@@ -2633,6 +3354,26 @@ namespace Konclude {
 						"Additional arguments for the termination program.",
 						new CStringConfigType("")),
 						new CStringConfigType(""));
+
+
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.MemoryUsageCheckingInterval",
+						"The interval with which the memory usage is checked for the evaluated reasoner process",
+						new CIntegerConfigType(100)),
+						new CIntegerConfigType(100));
+
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.MemoryUsageCheckingProgram",
+						"The program/script with which the memory usage is checked.",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Evaluation.CheckingMemoryUsage",
+						"Specifies whether the memory usage is checked.",
+						new CBooleanConfigType(false)),
+						new CBooleanConfigType(false));
+
 
 
 				addConfigProperty(new CConfigDescription("Konclude.CLI.Output.WriteDeclarations",

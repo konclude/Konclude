@@ -99,6 +99,11 @@ namespace Konclude {
 					QList<QString> takeAddedImportOntologyList();
 
 
+					virtual bool resetAxiomUpdates();
+
+					QSet<CAxiomExpression*>* getAddedAxiomSet();
+
+
 				// protected functions
 				protected:
 

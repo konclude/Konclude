@@ -33,6 +33,7 @@
 #include "Utilities/UtilitiesSettings.h"
 #include "Utilities/Container/CQtManagedRestrictedModificationHash.h"
 #include "Utilities/Container/CQtManagedRestrictedModificationList.h"
+#include "Utilities/Container/CQtManagedRestrictedModificationMap.h"
 #include "Utilities/Container/CQtManagedRestrictedModificationSet.h"
 
 // Logger includes
@@ -121,6 +122,8 @@ namespace Konclude {
 				const QEvent::Type EVENTWRITECOMPUTEDCONSEQUENCESCACHEDATAENTRY		= (QEvent::Type)2006;
 				const QEvent::Type EVENTWRITEBACKENDASSOCIATIONENTRY				= (QEvent::Type)2007;
 				const QEvent::Type EVENTRETRIEVEINCOMPLETELYASSOCIATIONCACHED		= (QEvent::Type)2008;
+				const QEvent::Type EVENTINITIALIZEINDIVIDUALSASSOCIATIONSCACHE		= (QEvent::Type)2009;
+				const QEvent::Type EVENTREPORTMAXIMUMHANDLEDRECOMPUTATIONID			= (QEvent::Type)2010;
 
 
 				// defines
@@ -128,6 +131,12 @@ namespace Konclude {
 #define CCACHINGHASH CQtManagedRestrictedModificationHash
 #define CCACHINGLIST CQtManagedRestrictedModificationList
 #define CCACHINGSET CQtManagedRestrictedModificationSet
+#define CCACHINGMAP CQtManagedRestrictedModificationMap
+
+
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+#define KONCLUDE_CACHE_DEBUGGING_DATA_GENERATION
+#endif
 
 
 			}; // end namespace Cache

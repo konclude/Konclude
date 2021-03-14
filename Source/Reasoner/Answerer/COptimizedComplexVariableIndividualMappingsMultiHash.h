@@ -77,16 +77,27 @@ namespace Konclude {
 
 					COptimizedComplexVariableIndividualMappingsMultiHash* resetBindingCount();
 
+					virtual COptimizedComplexVariableIndividualMappings* clearComputedMappings();
+
+					cint64 getMultiHashPartsCount();
+
+
+					virtual CMemoryAllocationManager* getBindingsMemoryAllocationManager();
+					virtual COptimizedComplexVariableIndividualMappings* updateBindingsMemoryConsumption();
+
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					CMemoryPoolNewAllocationIncreasingContext* mContext;
 
 					cint64 mMultiHashPartsCount;
 					COptimizedComplexVariableIndividualMappingsMultiHashPart** mMultiHashPartArray;
 
 					cint64 mLastBindingCardinalityBatchLinkerUpdateId;
+
+					cint64 mLastContextMemoryIntegratedSize;
 
 				// private methods
 				private:

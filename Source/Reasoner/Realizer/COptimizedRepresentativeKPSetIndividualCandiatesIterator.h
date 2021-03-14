@@ -28,6 +28,7 @@
 #include "RealizerSettings.h"
 #include "COptimizedKPSetRoleInstancesItem.h"
 #include "COptimizedKPSetIndividualComplexRoleData.h"
+#include "COptimizedKPSetIndividualInstantiatedItemMultiHash.h"
 
 
 // Other includes
@@ -62,7 +63,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedRepresentativeKPSetIndividualCandiatesIterator(const QMap<cint64, IndividualIdCandidateData>& candidateIndiIdsMap, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true);
+					COptimizedRepresentativeKPSetIndividualCandiatesIterator(const QMap<cint64, IndividualIdCandidateData>& candidateIndiIdsMap, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true);
 
 
 					virtual bool requiresInitialization();
@@ -95,7 +96,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CBackendRepresentativeMemoryCacheReader* mBackendAssocCacheReader;
-					QHash<cint64, COptimizedKPSetIndividualItem*>* mIndividualInstantiatedItemHash;
+					COptimizedKPSetIndividualInstantiatedItemMultiHash* mIndividualInstantiatedItemHash;
 					CIndividualVector* mIndividualVector;
 					CRealizationIndividualSorting mSorting;
 					CRealizationIndividualInstanceItemReference mIndiInstItemRefCursor;

@@ -63,6 +63,20 @@ namespace Konclude {
 			}
 
 
+			bool CRoleRealization::requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, CRole* role, bool onlyOne) {
+				CRoleInstantiatedItem* roleItem = getRoleInstantiatedItem(role);
+				return requiresSourceIndividualRolesRealization(sourceIndiRealItemRef, roleItem, onlyOne);
+			}
+
+			bool CRoleRealization::isSourceIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRole* role) {
+				CRoleInstantiatedItem* roleItem = getRoleInstantiatedItem(role);
+				return isSourceIndividualRole(indiRealItemRef, roleItem);
+			}
+
+			bool CRoleRealization::requiresSourceIndividualRoleRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRole* role) {
+				CRoleInstantiatedItem* roleItem = getRoleInstantiatedItem(role);
+				return requiresSourceIndividualRoleRealization(indiRealItemRef, roleItem);
+			}
 
 
 

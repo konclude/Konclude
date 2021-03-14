@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			CAnsweringMessageDataCalculationCompletedVariableBindingPropagations::CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(CSatisfiableCalculationJob* calcJob, CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem) : CAnsweringMessageDataCalculationCompleted(calcJob, VARIABLEBINDINGPPROPAGATIONCALCULATION) {
+			CAnsweringMessageDataCalculationCompletedVariableBindingPropagations::CAnsweringMessageDataCalculationCompletedVariableBindingPropagations(CSatisfiableCalculationJob* calcJob, CAnsweringPropagationSteeringController* propagationSteeringController, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem) : CAnsweringMessageDataCalculationCompleted(calcJob, VARIABLEBINDINGPPROPAGATIONCALCULATION) {
 				mAbsorptionPropagationExtension = absorptionPropagationExtension;
 				mBuildingVarItem = buildingVarItem;
 				mPropagationSteeringController = propagationSteeringController;
@@ -39,12 +39,12 @@ namespace Konclude {
 				return mAbsorptionPropagationExtension;
 			}
 
-			COptimizedComplexBuildingVariableCompositionsItem* CAnsweringMessageDataCalculationCompletedVariableBindingPropagations::getVariableBuildingItem() {
+			COptimizedComplexBuildingIndividualVariableCompositionsItem* CAnsweringMessageDataCalculationCompletedVariableBindingPropagations::getVariableBuildingItem() {
 				return mBuildingVarItem;
 			}
 
 
-			CAnsweringPropagationSteeringAbsorptionExtensionItemController* CAnsweringMessageDataCalculationCompletedVariableBindingPropagations::getPropagationSteeringController() {
+			CAnsweringPropagationSteeringController* CAnsweringMessageDataCalculationCompletedVariableBindingPropagations::getPropagationSteeringController() {
 				return mPropagationSteeringController;
 			}
 

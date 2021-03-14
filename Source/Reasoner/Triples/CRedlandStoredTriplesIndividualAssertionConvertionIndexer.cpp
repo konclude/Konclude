@@ -35,10 +35,11 @@ namespace Konclude {
 
 			CRedlandStoredTriplesIndividualAssertionConvertionIndexer::~CRedlandStoredTriplesIndividualAssertionConvertionIndexer() {
 			}
-
+			
 
 			bool CRedlandStoredTriplesIndividualAssertionConvertionIndexer::indexABoxIndividuals(CConcreteOntology* updateConcreteOntology, COntologyTriplesData* ontologyTripleData) {
-				
+				mIndexingTime.start();
+				mUupdatingOntology = updateConcreteOntology;
 				mPreprocessContext = new CPreProcessContextBase(updateConcreteOntology, updateConcreteOntology->getConfiguration());
 
 				mAnonymousOntologyIdentifier = updateConcreteOntology->getOntologyName() + ":";
@@ -104,54 +105,11 @@ namespace Konclude {
 						mNextIndiId++;
 					}
 
-
-					cint64 conceptAssertionCount = 0;
-					cint64 objectPropertyAssertionCount = 0;
-					cint64 dataPropertyAssertionCount = 0;
-
-					CIndividualNodeData* lastIndiData = nullptr;
-					librdf_node* lastSubjectNode = nullptr;
-
-					CXLinker<librdf_statement*>* statementLinker = redlandTriplesData->getRedlandStatementLinker();
-					if (statementLinker) {
-
-						while (statementLinker) {
-
-							librdf_statement* statement = statementLinker->getData();
-							identifyIndividuals(statement, rdfTypePredicate, namedIndividualObject, lastIndiData, lastSubjectNode, updateConcreteOntology, conceptAssertionCount, redlandTriplesData, dataPropertyAssertionCount, objectPropertyAssertionCount);
-
-
-							statementLinker = statementLinker->getNext();
-						}
-					}  else {
-						librdf_stream* stream = librdf_model_as_stream(redlandTriplesData->getRedlandIndexedModel());
-						if (stream) {
-							while (!librdf_stream_end(stream)) {
-								librdf_statement* statement = librdf_stream_get_object(stream);
-								identifyIndividuals(statement, rdfTypePredicate, namedIndividualObject, lastIndiData, lastSubjectNode, updateConcreteOntology, conceptAssertionCount, redlandTriplesData, dataPropertyAssertionCount, objectPropertyAssertionCount);
-								librdf_stream_next(stream);
-							}
-							librdf_free_stream(stream);
-						}
-
-					}
-
-
-					updateConcreteOntology->getABox()->setNextIndividualId(mNextIndiId);
-
-
-					LOG(INFO, "::Konclude::Reasoner::TripleEncodedAssertionsIndexer", QString("Identified %1 concept, %2 object property, and %3 data property assertions for overall %4 individuals").arg(conceptAssertionCount).arg(objectPropertyAssertionCount).arg(dataPropertyAssertionCount).arg(mNextIndiId), this);
-
-#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
-					//QString modelString = mIndividualAssertionIndexCache->getRepresentativeCacheModelString();
-					//QFile modelFile("./Debugging/RepresentativeCache/assertion-index-data.txt");
-					//if (modelFile.open(QIODevice::WriteOnly)) {
-					//	modelFile.write(modelString.toUtf8());
-					//}
-#endif
+					indexTriples(redlandTriplesData, rdfTypePredicate, namedIndividualObject, updateConcreteOntology);
 
 				}
 
+				LOG(INFO, "::Konclude::Reasoner::TripleEncodedAssertionsIndexer", QString("Identified %1 concept, %2 object property, and %3 data property assertions for overall %4 individuals in %5 ms.").arg(mConceptAssertionCount).arg(mObjectPropertyAssertionCount).arg(mDataPropertyAssertionCount).arg(mNextIndiId).arg(mIndexingTime.elapsed()), this);
 				delete mPreprocessContext;
 
 				return newTriplesMapped;
@@ -229,6 +187,17 @@ namespace Konclude {
 
 			CDatatype* CRedlandStoredTriplesIndividualAssertionConvertionIndexer::getDatatypeFromDatatypeUri(librdf_uri* uri, CConcreteOntology* ontology, CRedlandStoredTriplesData* ontologyTripleData) {
 				CDatatype* datatype = nullptr;
+				ensureDatatypeHashInitialized(ontology, ontologyTripleData);
+
+				if (uri) {
+					datatype = mDatatypeIriDatatypeHash.value(CRedlandUriHasher(uri));
+				} else {
+					datatype = mDefaultDatatype;
+				}
+				return datatype;
+			}
+
+			void CRedlandStoredTriplesIndividualAssertionConvertionIndexer::ensureDatatypeHashInitialized(CConcreteOntology* ontology, CRedlandStoredTriplesData* ontologyTripleData) {
 				if (!mDatatypeHashInitialized) {
 					CBUILDHASH<CDatatype*, CDatatypeExpression*>* datatypeDatatypeExpHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
 					for (CBUILDHASH<CDatatype*, CDatatypeExpression*>::const_iterator it = datatypeDatatypeExpHash->constBegin(), itEnd = datatypeDatatypeExpHash->constEnd(); it != itEnd; ++it) {
@@ -242,15 +211,9 @@ namespace Konclude {
 					}
 					mDatatypeHashInitialized = true;
 				}
-				if (uri) {
-					datatype = mDatatypeIriDatatypeHash.value(CRedlandUriHasher(uri));
-				} else {
-					datatype = mDefaultDatatype;
-				}
-				return datatype;
 			}
 
-			void CRedlandStoredTriplesIndividualAssertionConvertionIndexer::identifyIndividuals(librdf_statement* statement, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CIndividualNodeData* &lastIndiData, librdf_node* lastSubjectNode, CConcreteOntology* updateConcreteOntology, cint64 &conceptAssertionCount, CRedlandStoredTriplesData* redlandTriplesData, cint64 &dataPropertyAssertionCount, cint64 &objectPropertyAssertionCount) {
+			void CRedlandStoredTriplesIndividualAssertionConvertionIndexer::identifyIndividuals(librdf_statement* statement, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CIndividualNodeData* &lastIndiData, librdf_node* lastSubjectNode, CConcreteOntology* updateConcreteOntology, CRedlandStoredTriplesData* redlandTriplesData) {
 				librdf_node* predicateNode = librdf_statement_get_predicate(statement);
 				librdf_node* objectNode = librdf_statement_get_object(statement);
 				librdf_node* subjectNode = librdf_statement_get_subject(statement);
@@ -266,7 +229,7 @@ namespace Konclude {
 							CConceptAssertionLinker* conceptAssertionLinker = CObjectAllocator<CConceptAssertionLinker>::allocateAndConstruct(mMemMan);
 							conceptAssertionLinker->initNegLinker(conceptData->mConcept, false);
 							lastIndiData->mIndividual->addAssertionConceptLinker(conceptAssertionLinker);
-							conceptAssertionCount++;
+							mConceptAssertionCount++;
 						}
 						if (lastIndiData && librdf_node_is_resource(subjectNode)) {
 							lastIndiData->mIndividual->setAnonymousIndividual(false);
@@ -294,7 +257,7 @@ namespace Konclude {
 								dataAssertionLinker->initDataAssertionLinker(roleData->mRole, dataLiteral);
 
 								lastIndiData->mIndividual->addAssertionDataLinker(dataAssertionLinker);
-								dataPropertyAssertionCount++;
+								mDataPropertyAssertionCount++;
 							}
 						} else {
 							if (!librdf_node_is_literal(objectNode)) {
@@ -308,11 +271,85 @@ namespace Konclude {
 								CReverseRoleAssertionLinker* reverseRoleAssertionLinker = CObjectAllocator<CReverseRoleAssertionLinker>::allocateAndConstruct(mMemMan);
 								reverseRoleAssertionLinker->initReverseRoleAssertionLinker(roleAssertionLinker, lastIndiData->mIndividual);
 								targetIndiNode->mIndividual->addReverseAssertionRoleLinker(reverseRoleAssertionLinker);
-								objectPropertyAssertionCount++;
+								mObjectPropertyAssertionCount++;
 							}
 						}
 					}
 				}
+			}
+
+			void CRedlandStoredTriplesIndividualAssertionConvertionIndexer::indexTriples(CRedlandStoredTriplesData* redlandTriplesData, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CConcreteOntology* updateConcreteOntology) {
+
+				CIndividualNodeData* lastIndiData = nullptr;
+				librdf_node* lastSubjectNode = nullptr;
+
+				CXLinker<librdf_statement*>* statementLinker = redlandTriplesData->getRedlandStatementLinker();
+				if (statementLinker) {
+
+					while (statementLinker) {
+
+						librdf_statement* statement = statementLinker->getData();
+						identifyIndividuals(statement, rdfTypePredicate, namedIndividualObject, lastIndiData, lastSubjectNode, updateConcreteOntology, redlandTriplesData);
+
+
+						statementLinker = statementLinker->getNext();
+					}
+				} else {
+					librdf_stream* stream = librdf_model_as_stream(redlandTriplesData->getRedlandIndexedModel());
+					if (stream) {
+						while (!librdf_stream_end(stream)) {
+							librdf_statement* statement = librdf_stream_get_object(stream);
+							identifyIndividuals(statement, rdfTypePredicate, namedIndividualObject, lastIndiData, lastSubjectNode, updateConcreteOntology, redlandTriplesData);
+							librdf_stream_next(stream);
+						}
+						librdf_free_stream(stream);
+					}
+				}
+
+
+				bool deleteIndexedTriplesData = CConfigDataReader::readConfigBoolean(updateConcreteOntology->getConfiguration(), "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.DeleteTriplesDataAfterIndexing", false);
+				if (deleteIndexedTriplesData) {
+					auto tripleDeleteMapFunc = [&](CRedlandStoredTriplesData* redlandTriplesData) {
+						if (redlandTriplesData) {
+
+							librdf_world* world = redlandTriplesData->getRedlandWorld();
+							mMemMan = updateConcreteOntology->getDataBoxes()->getBoxContext()->getMemoryAllocationManager();
+
+
+							CXLinker<librdf_statement*>* statementLinker = redlandTriplesData->getRedlandStatementLinker();
+							if (statementLinker) {
+
+								while (statementLinker) {
+									librdf_statement* statement = statementLinker->getData();
+									librdf_free_statement(statement);
+									CXLinker<librdf_statement*>* tmpStatementLinker = statementLinker;
+									statementLinker = statementLinker->getNext();
+									delete tmpStatementLinker;
+								}
+								redlandTriplesData->setRedlandStatementLinker(nullptr);
+							} else {
+								librdf_stream* stream = librdf_model_as_stream(redlandTriplesData->getRedlandIndexedModel());
+								if (stream) {
+									while (!librdf_stream_end(stream)) {
+										librdf_statement* statement = librdf_stream_get_object(stream);
+										librdf_model_remove_statement(redlandTriplesData->getRedlandIndexedModel(), statement);
+										librdf_free_statement(statement);
+										librdf_stream_next(stream);
+									}
+									librdf_free_stream(stream);
+								}
+
+							}
+
+						}
+					};
+					tripleDeleteMapFunc(redlandTriplesData);
+				}
+
+
+				updateConcreteOntology->getABox()->setNextIndividualId(mNextIndiId);
+
+
 			}
 
 		}; // end namespace Triples

@@ -31,6 +31,8 @@ namespace Konclude {
 			COptimizedComplexVariableCompositionSingleDependenceItem::COptimizedComplexVariableCompositionSingleDependenceItem(COptimizedComplexVariableCompositionItem* baseItem) : mBaseItemDependence(baseItem) {
 				mBaseItem = baseItem;
 				mComputationDependentItemList.append(mBaseItem);
+				mBaseItem->addComputationSuccessorItem(this);
+				mComputationItemDepth = mBaseItem->getComputationItemDepth() + 1;
 			}
 
 
@@ -47,6 +49,11 @@ namespace Konclude {
 			}
 
 
+			bool COptimizedComplexVariableCompositionSingleDependenceItem::clearComputation() {
+				COptimizedComplexVariableCompositionItem::clearComputation();
+				mBaseItemDependence.reset();
+				return true;
+			}
 
 		}; // end namespace Answerer
 

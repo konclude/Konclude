@@ -33,22 +33,48 @@ namespace Konclude {
 				CConnectionSuccessorSet::CConnectionSuccessorSet(CProcessContext* context) : mContext(context) {
 					mAncConnID = CINT64_MIN;
 					mConnSet = nullptr;
+					mPrevConnSet = nullptr;
 				}
 
 				CConnectionSuccessorSet* CConnectionSuccessorSet::initConnectionSuccessorSet(CConnectionSuccessorSet* connSuccSet) {
 					if (connSuccSet) {
 						mAncConnID = connSuccSet->mAncConnID;
 						if (connSuccSet->mConnSet) {
+
 							if (!mConnSet) {
-								mConnSet = CObjectParameterizingAllocator< CPROCESSSET<cint64>,CContext* >::allocateAndConstructAndParameterize(mContext->getUsedMemoryAllocationManager(),mContext);
+								mConnSet = CObjectParameterizingAllocator< CPROCESSSET<cint64>, CContext* >::allocateAndConstructAndParameterize(mContext->getUsedMemoryAllocationManager(), mContext);
+							} else {
+								mConnSet->clear();
 							}
-							*mConnSet = *connSuccSet->mConnSet;
+
+
+							if (!connSuccSet->mPrevConnSet && connSuccSet->mConnSet->size() <= 100) {
+								*mConnSet = *connSuccSet->mConnSet;
+								mPrevConnSet = nullptr;
+							} else if (!connSuccSet->mPrevConnSet && connSuccSet->mConnSet->size() > 100) {
+								mPrevConnSet = connSuccSet->mConnSet;
+							} else {
+								if (connSuccSet->mConnSet->size() * 10 > connSuccSet->mPrevConnSet->size()) {
+									*mConnSet = *connSuccSet->mPrevConnSet;
+									for (CPROCESSSET<cint64>::const_iterator it = connSuccSet->mConnSet->constBegin(), itEnd = connSuccSet->mConnSet->constEnd(); it != itEnd; ++it) {
+										cint64 indiId = *it;
+										mConnSet->insert(indiId);
+									}
+									mPrevConnSet = nullptr;
+								} else {
+									*mConnSet = *connSuccSet->mConnSet;
+									mPrevConnSet = connSuccSet->mPrevConnSet;
+								}
+
+							}
+
 						}
 					} else {
 						mAncConnID = CINT64_MIN;
 						if (mConnSet) {
 							mConnSet->clear();
 						}
+						mPrevConnSet = nullptr;
 					}
 					return this;
 				}
@@ -56,6 +82,9 @@ namespace Konclude {
 
 
 				bool CConnectionSuccessorSet::hasConnectionSuccessor(cint64 indiID) {
+					if (mPrevConnSet && mPrevConnSet->contains(indiID)) {
+						return true;
+					}
 					if (mConnSet) {
 						return mConnSet->contains(indiID);
 					} 
@@ -70,7 +99,9 @@ namespace Konclude {
 								mConnSet = CObjectParameterizingAllocator< CPROCESSSET<cint64>,CContext* >::allocateAndConstructAndParameterize(mContext->getUsedMemoryAllocationManager(),mContext);
 								mConnSet->insert(mAncConnID);
 							}
-							mConnSet->insert(indiID);
+							if (!mPrevConnSet || !mPrevConnSet->contains(indiID)) {
+								mConnSet->insert(indiID);
+							}
 						} else {
 							mAncConnID = indiID;
 						}
@@ -80,6 +111,15 @@ namespace Konclude {
 
 
 				CConnectionSuccessorSet* CConnectionSuccessorSet::removeConnection(cint64 indiID) {
+					if (mPrevConnSet) {
+						if (mPrevConnSet->contains(indiID)) {
+							for (CPROCESSSET<cint64>::const_iterator it = mPrevConnSet->constBegin(), itEnd = mPrevConnSet->constEnd(); it != itEnd; ++it) {
+								cint64 indiId = *it;
+								mConnSet->insert(indiId);
+							}
+							mPrevConnSet = nullptr;
+						}
+					}
 					if (mConnSet) {
 						mConnSet->remove(indiID);
 					} else if (mAncConnID == indiID) {
@@ -90,7 +130,9 @@ namespace Konclude {
 
 
 				CConnectionSuccessorSetIterator CConnectionSuccessorSet::getConnectionSuccessorIterator() {
-					if (mConnSet) {
+					if (mPrevConnSet) {
+						return CConnectionSuccessorSetIterator(mConnSet->begin(), mConnSet->end(), mPrevConnSet->begin(), mPrevConnSet->end());
+					} else if (mConnSet) {
 						return CConnectionSuccessorSetIterator(mConnSet->begin(), mConnSet->end());
 					} else {
 						return CConnectionSuccessorSetIterator(mAncConnID);
@@ -105,6 +147,8 @@ namespace Konclude {
 						} else {
 							return 0;
 						}
+					} else if (mPrevConnSet) {
+						return mConnSet->count() + mPrevConnSet->count();
 					} else {
 						return mConnSet->count();
 					}

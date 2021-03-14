@@ -30,14 +30,14 @@ namespace Konclude {
 			namespace Cache {
 
 
-				CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData::CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData(CBackendRepresentativeMemoryCacheContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
+				CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData::CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData(CContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
 					mCacheItemExtensionType = TAG_RESOLVING_HASH;
 				}
 
 
 
 				CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData* CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData::initTagLabelResolvingExtensionData() {
-					mTagLabelResolvingDataLinkerHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingDataLinker*>, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
+					mTagLabelResolvingDataLinkerHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingDataLinker*>, CContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
 					return this;
 				}
 

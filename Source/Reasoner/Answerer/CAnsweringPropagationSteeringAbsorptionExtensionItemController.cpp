@@ -62,6 +62,19 @@ namespace Konclude {
 				return false;
 			}
 
+
+			bool CAnsweringPropagationSteeringAbsorptionExtensionItemController::isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId) {
+				if (mSplitIndiSet && mSplitVar == variable) {
+					return mSplitIndiSet->contains(indiId);
+				}
+				QSet<CIndividualReference>* individualBindingSet = mAbsorptionPropagationItem->getVariableSteeringIndividualBindingSet(variable);
+				if (individualBindingSet) {
+					return individualBindingSet->contains(indiId);
+				}
+				return false;
+			}
+
+
 			bool CAnsweringPropagationSteeringAbsorptionExtensionItemController::isPreparationBindingAllIndividuals(CVariable* variable) {
 				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionData = mAbsorptionPropagationItem->getAbsorptionBasedHandlingData();
 				CExpressionVariable* expVariable = absorptionData->getExpressionVariableVariableHash()->value(variable);
@@ -71,6 +84,9 @@ namespace Konclude {
 				return false;
 			}
 
+			bool CAnsweringPropagationSteeringAbsorptionExtensionItemController::isRestrictedTopPropagation(CConcept* concept) {
+				return false;
+			}
 
 
 		}; // end namespace Answerer

@@ -57,11 +57,11 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation(CSatisfiableCalculationJob* calcJob, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableIndividualBindingsCardinalityLinker* testingVarIndiBindingCardLinker);
+					CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation(CSatisfiableCalculationJob* calcJob, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableIndividualBindingsCardinalityLinker* testingVarIndiBindingCardLinker);
 
 
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* getAbsorptionPropagationItem();
-					COptimizedComplexBuildingVariableCompositionsItem* getVariableBuildingItem();
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* getVariableBuildingItem();
 
 					COptimizedComplexVariableIndividualBindings* getPropagatedBinding();
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker* getPropagatedBindingCardinalityLinker();
@@ -72,7 +72,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* mAbsorptionPropagationExtension;
-					COptimizedComplexBuildingVariableCompositionsItem* mBuildingVarItem;
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* mBuildingVarItem;
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker* mPropagatedBindingCardinalityLinker;
 
 

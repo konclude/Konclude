@@ -30,7 +30,7 @@
 #include "CAnsweringHandler.h"
 #include "CAnsweringPropagationSteeringController.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem.h"
-#include "COptimizedComplexBuildingVariableCompositionsItem.h"
+#include "COptimizedComplexBuildingIndividualVariableCompositionsItem.h"
 
 
 // Other includes
@@ -81,8 +81,10 @@ namespace Konclude {
 					virtual bool finalizeWithBindingExtraction();
 
 					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, CIndividual* indi);
+					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId);
 					virtual bool isPreparationBindingAllIndividuals(CVariable* variable);
 
+					virtual bool isRestrictedTopPropagation(CConcept* concept);
 
 				// protected methods
 				protected:
@@ -90,7 +92,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* mAbsorptionPropagationItem;
-					COptimizedComplexBuildingVariableCompositionsItem* mVarBuildingItem;
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* mVarBuildingItem;
 					COptimizedComplexVariableIndividualBindings mBinding;
 					CSameRealization* mSameRealization;
 
@@ -98,15 +100,20 @@ namespace Konclude {
 					class CInstanceBindingIndividualCheckingVisitor : public CSameRealizationIndividualVisitor {
 					public:
 						bool* mContainsIndiFlag;
-						CIndividual* mIndividual;
+						cint64 mIndividualId;
 
 						CInstanceBindingIndividualCheckingVisitor(bool* containsIndiFlag, CIndividual* individual) {
-							mIndividual = individual;
+							mIndividualId = individual->getIndividualID();
+							mContainsIndiFlag = containsIndiFlag;
+						}
+
+						CInstanceBindingIndividualCheckingVisitor(bool* containsIndiFlag, cint64 indiId) {
+							mIndividualId = indiId;
 							mContainsIndiFlag = containsIndiFlag;
 						}
 
 						bool visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
-							if (indiRef.getIndividualID() == mIndividual->getIndividualID() && mContainsIndiFlag) {
+							if (indiRef.getIndividualID() == mIndividualId && mContainsIndiFlag) {
 								*mContainsIndiFlag = true;
 							}
 							return false;

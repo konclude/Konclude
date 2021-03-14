@@ -60,7 +60,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem, bool* unstatFlagPointer = nullptr);
+					CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem, bool* unstatFlagPointer = nullptr, bool* expLimitReachedFlag = nullptr);
 
 					virtual PRECOMPUTATIONTYPE getPrecomputationTestingType();
 
@@ -82,7 +82,6 @@ namespace Konclude {
 					CTaskPreyingAdapter mTaskPreyingAdapter;
 					CSatisfiableTaskRepresentativeBackendUpdatingAdapter mRepresentativeCacheUpdatingAdapter;
 					CConsistenceObserver* mObserver;
-					QList<CIndividualReference> mIndiComputationList;
 					CIndividualPrecomputationCoordinationHash* mIndiCompCoordHash;
 
 

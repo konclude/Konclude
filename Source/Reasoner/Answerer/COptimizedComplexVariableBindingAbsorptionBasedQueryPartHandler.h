@@ -73,6 +73,9 @@ namespace Konclude {
 
 
 
+					CConcept* createVariableBindingPropagationToVariableConcept(CConcept* followingTriggerConcept, CRole* role, CVariable* variable);
+					CConcept* createVariableBindingPropagationToPreparedVariableConcept(CConcept* followingTriggerConcept, CRole* role, CExpressionVariable* destVariable);
+
 
 
 					CConcept* createVariableBindingPropagationConcept(CConcept* followingTriggerConcept, CRole* role);
@@ -96,6 +99,10 @@ namespace Konclude {
 
 					CConcept* createTriggerConcept();
 					CConcept* createPropagationConcept(CConcept* followingTriggerConcept, CRole* role);
+
+					CConcept* createPropagationToVariableConcept(CConcept* followingTriggerConcept, CRole* role, CVariable* variable);
+					CConcept* createPropagationToPreparedVariableConcept(CConcept* followingTriggerConcept, CRole* role, CExpressionVariable* destVariable);
+
 					CConcept* createRepeatedTopRolePropagationConcept(CConcept* followingTriggerConcept);
 
 					virtual COptimizedComplexVariableAbstractNonDisconnectingAbsorptionBasedQueryPartHandler* handleCurrentVariableSwitch(CExpressionVariable* newCurrentVariable);

@@ -31,6 +31,8 @@
 #include "CProcessContext.h"
 #include "CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationRoleNeighbourExpansionData.h"
 #include "CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData.h"
+#include "CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData.h"
+#include "CBackendNeighbourExpansionQueue.h"
 
 // Other includes
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheIndividualAssociationData.h"
@@ -104,8 +106,13 @@ namespace Konclude {
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setLastNeighbourInfluenceTestedConceptDescriptor(CConceptDescriptor* conDes);
 						CPROCESSHASH< QPair<CRole*, bool>, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationRoleNeighbourExpansionData >* getRoleNeighbourExpansionDataHash(bool createIfNotExists = true);
 						CPROCESSHASH< cint64, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData >* getNeighbourExpansionDataHash(bool createIfNotExists = true);
+						CPROCESSHASH< CBackendRepresentativeMemoryLabelCacheItem*, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData >* getNeighbourLabelExpansionDataHash(cint64 arrayId, bool createIfNotExists = true);
 						bool hasNeighbourInfluenceTestingCriticalCardinalityReset();
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* hasNeighbourInfluenceTestingCriticalCardinalityReset(bool reset);
+
+						cint64 getLastMergedIntoIndividualTestingCriticalCardinalityReset();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setLastMergedIntoIndividualTestingCriticalCardinalityReset(cint64 indiId);
+
 
 
 						CIndividualLinkEdge* getLastNewNeighbourLinkEdge();
@@ -131,6 +138,11 @@ namespace Konclude {
 						bool hasDeterministicDifferentIndividualDifferentiated();
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setDeterministicDifferentIndividualDifferentiated(bool differentiated);
 
+
+
+
+						bool hasPrioritziedPropagationLinksEstablished();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setPrioritziedPropagationLinksEstablished(bool established);
 
 
 
@@ -165,6 +177,15 @@ namespace Konclude {
 						CXLinker<CIndividualProcessNode*>* getLastDirectExpansionHandledMergedNodeLinker();
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setLastDirectExpansionHandledMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker);
 
+						CXLinker<CIndividualProcessNode*>* getLastInferringExpansionHandledMergedNodeLinker();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setLastInferringExpansionHandledMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker);
+
+
+
+						CXLinker<CIndividualProcessNode*>* getLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker);
+
+
 						CXLinker<CIndividualProcessNode*>* getLastIndirectCompatibilityExpansionHandledMergedNodeLinker();
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setLastIndirectCompatibilityExpansionHandledMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker);
 
@@ -182,6 +203,10 @@ namespace Konclude {
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setAllNeighbourForcedExpansion(bool expanded);
 
 
+						bool hasAllNeighbourExpansionScheduled();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setAllNeighbourExpansionScheduled(bool expansionScheduled);
+						bool hasAllNeighbourForcedExpansionScheduled();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setAllNeighbourForcedExpansionScheduled(bool expansionScheduled);
 
 
 
@@ -192,6 +217,20 @@ namespace Konclude {
 
 						bool hasNonConceptSetBackendLabelRelatedProcessing();
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setNonConceptSetBackendLabelRelatedProcessing(bool nonConceptSetRelatedProcessing);
+
+
+
+						bool hasNonConceptSetBackendNeighbourLabelRelatedProcessing();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setNonConceptSetBackendNeighbourLabelRelatedProcessing(bool nonConceptSetRelatedProcessing);
+
+
+						bool hasNeighbourLabelRepresentativeExpansion();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setNeighbourLabelRepresentativeExpansion(bool repExp);
+
+						bool hasNeighbourLabelRepresentativeExpansionInstalled();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* installNeighbourLabelRepresentativeExpansion(CXLinker<CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData*>* linker);
+						CXLinker<CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData*>* getNeighbourLabelRepresentativeExpansionLinker();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* clearNeighbourLabelRepresentativeExpansionLinker();
 
 
 
@@ -209,8 +248,44 @@ namespace Konclude {
 						bool isBackendConceptSetInitializationDelayingRegistered();
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setBackendConceptSetInitializationDelayingRegistered(bool registered);
 
-						CXLinker<CIndividualProcessNode*>* getDelayedAdditionalLinkInitializationLinker();
-						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* addDelayedAdditionalLinkInitializationLinker(CXLinker<CIndividualProcessNode*>* linker);
+
+
+						CNonDeterministicDependencyTrackPoint* getBackendExpansionReuseDependencyTrackPoint();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setBackendExpansionReuseDependencyTrackPoint(CNonDeterministicDependencyTrackPoint* depTrackPoint);
+
+						CXLinker<CIndividualProcessNode*>* getLastReuseExpansionHandledMergedNodeLinker();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setLastReuseExpansionHandledMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker);
+						
+						bool hasReuseNonDeterministicSameIndividualMerged();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setReuseNonDeterministicSameIndividualMerged(bool merged);
+
+						bool hasReuseNonDeterministicDifferentIndividualStated();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setReuseNonDeterministicDifferentIndividualStated(bool stated);
+
+						bool hasReuseNonDeterministicConceptsAdded();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setReuseNonDeterministicConceptsAdded(bool added);
+
+						bool hasNewlyMergedIndividuals();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setNewlyMergedIndividuals(bool newlyMerged);
+
+						bool hasNonDeterministicallyMergedIndividuals();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setNonDeterministicallyMergedIndividuals(bool nonDeterministicallyMerged);
+
+						bool hasNewlyMergedAllNeighbourExpansion();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setNewlyMergedAllNeighbourExpansion(bool allExpanded);
+
+						bool hasNewlyMergedInferringNeighbourExpansion();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setNewlyMergedInferringNeighbourExpansion(bool inferringExpanded);
+
+
+						CBackendNeighbourExpansionQueue* getBackendNeighbourExpansionQueue(bool create = true);
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* clearBackendNeighbourExpansionQueue();
+
+						CPROCESSHASH< CRole*, cint64 >* getRoleRepresentativeNeighbourCountHash(bool create = true);
+
+
+						bool isScheduledIndividual();
+						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* setScheduledIndividual(bool scheduled);
 
 
 					// protected methods
@@ -237,7 +312,9 @@ namespace Konclude {
 						bool mNeighbourInfluenceTestingCriticalCardinalityReset;
 						CPROCESSHASH< QPair<CRole*, bool>, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationRoleNeighbourExpansionData >* mRoleNeighbourExpansionDataHash;
 						CPROCESSHASH< cint64, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData >* mNeighbourExpansionDataHash;
+						CPROCESSHASH< CBackendRepresentativeMemoryLabelCacheItem*, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData >** mNeighbourLabelExpansionDataHashArray;
 
+						CPROCESSHASH< CRole*, cint64 >* mRoleRepNeighbourCountHash;
 
 
 						CXLinker<CIndividualProcessNode*>* mMergedIndiNodeLinker;
@@ -247,12 +324,16 @@ namespace Konclude {
 						bool mMergedIndirectlyConnectedNominalIndividuals;
 						bool mAllNeighbourExpansion;
 						bool mAllNeighbourForcedExpansion;
+						bool mAllNeighbourExpansionScheduled;
+						bool mAllNeighbourForcedExpansionScheduled;
 
 						CXLinker<CIndividualProcessNode*>* mLastIndirectlyConnectedNominalIndividualsHandledMergedNodeLinker;
 						CXLinker<CIndividualProcessNode*>* mLastIndirectlyConnectedNominalIndividualsTestedMergedNodeLinker;
 						CXLinker<CIndividualProcessNode*>* mLastSynchronizedConceptsTestedMergedNodeLinker;
 						CXLinker<CIndividualProcessNode*>* mLastCriticalNeighboursTestedMergedNodeLinker;
 						CXLinker<CIndividualProcessNode*>* mLastDirectExpansionHandledMergedNodeLinker;
+						CXLinker<CIndividualProcessNode*>* mLastInferringExpansionHandledMergedNodeLinker;
+						CXLinker<CIndividualProcessNode*>* mLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker;
 						CXLinker<CIndividualProcessNode*>* mLastIndirectCompatibilityExpansionHandledMergedNodeLinker;
 
 						CIndividualLinkEdge* mLastNewNeighbourLinkEdge;
@@ -262,10 +343,11 @@ namespace Konclude {
 						CIndividualLinkEdge* mIndirectConnectedIndiTestedLinkEdge;
 
 
+						bool mNewlyMergedIndividuals;
 						bool mDeterministicSameIndividualMerged;
 						bool mDeterministicDifferentIndividualDifferentiated;
 						bool mNomainlIndirectConnectionIndividualExpanded;
-
+						bool mPrioritziedPropagationLinksEstablished;
 
 
 						cint64 mLastMergedIndiCount;
@@ -281,9 +363,33 @@ namespace Konclude {
 						bool mBackendConceptSetInitializationDelayingRegistered;
 
 
+						bool mNonConceptSetNeighbourLabelRelatedProcessing;
+						CXLinker<CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData*>* mNeighbourLabelRepresentativeExpansionLinker;
+						bool mNeighbourLabelRepresentativeExpansion;
+
 
 						CXLinker<CIndividualProcessNode*>* mDelayedAdditionalLinkInitializationLinker;
 
+						CNonDeterministicDependencyTrackPoint* mBackendExpansionReuseDependencyTrackPoint;
+						CXLinker<CIndividualProcessNode*>* mLastReuseExpansionHandledMergedNodeLinker;
+						bool mReuseNonDeterministicSameIndividualMerged;
+						bool mReuseNonDeterministicDifferentIndividualStated;
+						bool mReuseNonDeterministicConceptsAdded;
+
+
+						CBackendNeighbourExpansionQueue* mBackendNeighbourExpansionQueue;
+						CBackendNeighbourExpansionQueue* mPrevBackendNeighbourExpansion;
+						CBackendNeighbourExpansionQueue* mUseBackendNeighbourExpansion;
+
+
+						bool mNewlyMergedAllNeighbourExpansion;
+						bool mNewlyMergedInferringNeighbourExpansion;
+						bool mNonDeterministicallyMergedIndividuals;
+
+
+						cint64 mLastMergedIntoIndividualTestingCriticalCardinalityReset;
+
+						bool mScheduledIndividual;
 
 
 					// private methods

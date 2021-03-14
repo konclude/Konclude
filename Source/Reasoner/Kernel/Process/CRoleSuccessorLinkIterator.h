@@ -61,7 +61,8 @@ namespace Konclude {
 					public:
 						//! Constructor
 						CRoleSuccessorLinkIterator();
-						CRoleSuccessorLinkIterator(const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& beginIt, const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& endIt);
+						CRoleSuccessorLinkIterator(const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt);
+						CRoleSuccessorLinkIterator(const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt2, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt2);
 						CRoleSuccessorLinkIterator(CIndividualLinkEdge* linkLinker, CIndividualLinkEdge* lastLink = nullptr);
 
 						bool hasNext();
@@ -74,8 +75,12 @@ namespace Konclude {
 					protected:
 						CIndividualLinkEdge* mLinkLinker;
 						CIndividualLinkEdge* mLastLink;
-						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mBeginIt;
-						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mEndIt;
+						bool mIterator1;
+						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mBeginIt1;
+						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mEndIt1;
+						bool mIterator2;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator mBeginIt2;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator mEndIt2;
 
 					// private methods
 					private:

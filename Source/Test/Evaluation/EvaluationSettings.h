@@ -67,7 +67,11 @@ namespace Konclude {
 			const QEvent::Type EVENTREASONEREVALUATIONNEXT			= (QEvent::Type)3004;
 			const QEvent::Type EVENTREASONEREVALUATIONPROGRAM		= (QEvent::Type)3005;
 			const QEvent::Type EVENTREASONEREVALUATIONCHANGEDFILE	= (QEvent::Type)3006;
-			const QEvent::Type EVENTREASONEREVALUATIONUPDATE		= (QEvent::Type)3007;
+			const QEvent::Type EVENTREASONEREVALUATIONUPDATE = (QEvent::Type)3007;
+			const QEvent::Type EVENTREASONERMEMORYUSAGEFINISHED = (QEvent::Type)3008;
+			const QEvent::Type EVENTREASONEREVALUATIONREASONERSTART = (QEvent::Type)3009;
+			const QEvent::Type EVENTREASONEREVALUATIONREASONERRESTART = (QEvent::Type)3010;
+			const QEvent::Type EVENTREASONEREVALUATIONREASONERSTOP = (QEvent::Type)3011;
 
 
 		}; // end namespace Evaluation

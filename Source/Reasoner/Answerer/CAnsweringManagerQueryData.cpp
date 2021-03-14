@@ -27,10 +27,11 @@ namespace Konclude {
 		namespace Answerer {
 
 			
-			CAnsweringManagerQueryData::CAnsweringManagerQueryData(CComplexAnsweringQuery* query, CCallbackData* callback) {
+			CAnsweringManagerQueryData::CAnsweringManagerQueryData(CComplexAnsweringQuery* query, CCallbackData* callback, bool compositionQuery) {
 				mQuery = query;
 				mCallback = callback;
 				mThread = nullptr;
+				mCompositionQuery = compositionQuery;
 			}
 	
 			CComplexAnsweringQuery* CAnsweringManagerQueryData::getQuery() {
@@ -48,6 +49,10 @@ namespace Konclude {
 			CAnsweringManagerQueryData* CAnsweringManagerQueryData::setThread(CAnswererThread* thread) {
 				mThread = thread;
 				return this;
+			}
+
+			bool CAnsweringManagerQueryData::isCompositionQuery() {
+				return mCompositionQuery;
 			}
 
 		}; // end namespace Answerer

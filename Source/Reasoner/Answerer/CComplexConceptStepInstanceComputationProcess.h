@@ -89,6 +89,7 @@ namespace Konclude {
 
 					CComplexConceptStepInstanceComputationProcess* addComputedInstancesCountRequirement(cint64 count, CComputedItemDataNotificationLinker* notificationLinker);
 
+					CComplexConceptStepInstanceComputationProcess* clearComputedInstancesCount();
 
 
 				// protected methods

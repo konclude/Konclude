@@ -60,6 +60,7 @@ namespace Konclude {
 					COptimizedComplexVariableCompositionItemVariableIndexMapping();
 
 
+					cint64 getSearchedVariablePosition(CExpressionVariable* varExp);
 
 				// protected methods
 				protected:

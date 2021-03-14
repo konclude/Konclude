@@ -60,6 +60,7 @@ namespace Konclude {
 						//! Constructor
 						CConnectionSuccessorSetIterator(cint64 connID = CINT64_MIN);
 						CConnectionSuccessorSetIterator(const CPROCESSSET<cint64>::iterator& beginIt, const CPROCESSSET<cint64>::iterator& endIt);
+						CConnectionSuccessorSetIterator(const CPROCESSSET<cint64>::iterator& beginIt1, const CPROCESSSET<cint64>::iterator& endIt1, const CPROCESSSET<cint64>::iterator& beginIt2, const CPROCESSSET<cint64>::iterator& endIt2);
 
 						bool hasNext();
 						cint64 nextSuccessorConnectionID(bool moveNext = true);
@@ -70,8 +71,12 @@ namespace Konclude {
 
 					// protected variables
 					protected:
-						CPROCESSSET<cint64>::iterator mBeginIt;
-						CPROCESSSET<cint64>::iterator mEndIt;
+						CPROCESSSET<cint64>::iterator mBeginIt1;
+						CPROCESSSET<cint64>::iterator mEndIt1;
+						CPROCESSSET<cint64>::iterator mBeginIt2;
+						CPROCESSSET<cint64>::iterator mEndIt2;
+						bool mIterator1;
+						bool mIterator2;
 						cint64 mConnID;
 
 					// private methods

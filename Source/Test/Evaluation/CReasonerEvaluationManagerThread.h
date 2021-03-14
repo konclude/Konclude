@@ -65,6 +65,7 @@
 #include "CReasonerEvaluationGroupRequestReasonerStatisticValueCollectingCSVComparisonAnalyser.h"
 #include "CReasonerEvaluationGroupRequestReasonerResultSubsumptionAnalyser.h"
 #include "CReasonerEvaluationGroupRequestReasonerResultCountingAnalyser.h"
+#include "CReasonerEvaluationGroupRequestReasonerMemoryUsageAnalyser.h"
 
 // Other includes
 #include "Config/CConfiguration.h"

@@ -30,7 +30,7 @@
 
 // Other includes
 #include "Reasoner/Query/CVariableBindingResult.h"
-#include "Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexVariablesAnsweringQuery.h"
 #include "Reasoner/Query/CVariableBindingStringDataResult.h"
 #include "Reasoner/Query/CVariableBindingStringResult.h"
 #include "Reasoner/Query/CVariableBindingsAnswersResult.h"
@@ -68,16 +68,18 @@ namespace Konclude {
 
 						virtual ~CVariableBindingsQueryResultWriter();
 
-						CVariableBindingResult* createVariableBindingResult(CComplexAssertionsIndividualVariablesAnsweringQuery* query, bool dataliteral);
-						CVariableBindingResult* createVariableBindingResult(CDataLiteral* dataLiteral, CComplexAssertionsIndividualVariablesAnsweringQuery* query);
-						CVariableBindingResult* createVariableBindingResult(CIndividual* individual, CComplexAssertionsIndividualVariablesAnsweringQuery* query);
+						CVariableBindingResult* createVariableBindingResult(CComplexVariablesAnsweringQuery* query, bool dataliteral);
+						CVariableBindingResult* createVariableBindingResult(CDataLiteral* dataLiteral, CComplexVariablesAnsweringQuery* query);
+						CVariableBindingResult* createVariableBindingResult(CIndividual* individual, CComplexVariablesAnsweringQuery* query);
+						CVariableBindingResult* createVariableBindingResult(CConcept* concept, CComplexVariablesAnsweringQuery* query);
+						CVariableBindingResult* createVariableBindingResult(CRole* role, CComplexVariablesAnsweringQuery* query);
 
-						CVariableBindingResult* createVariableBindingResult(const CIndividualReference& indiRef, CComplexAssertionsIndividualVariablesAnsweringQuery* query, CIndividualNameResolver* indiNameResolver);
-						CVariableBindingResult* createVariableBindingResult(const CIndividualReference& indiRef, CComplexAssertionsIndividualVariablesAnsweringQuery* query, const QString& resolvedIndiName);
+						CVariableBindingResult* createVariableBindingResult(const CIndividualReference& indiRef, CComplexVariablesAnsweringQuery* query, CIndividualNameResolver* indiNameResolver);
+						CVariableBindingResult* createVariableBindingResult(const CIndividualReference& indiRef, CComplexVariablesAnsweringQuery* query, const QString& resolvedIndiName);
 
-						CVariableBindingsAnswersResult* addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1);
-						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1);
-						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryExpressionProcessingData* queryProcessingData, cint64 cardinality);
+						CVariableBindingsAnswersResult* addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1);
+						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality = 1);
+						CVariableBindingsAnswersResult* addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryExpressionProcessingData* queryProcessingData, cint64 cardinality);
 
 
 						CVariableBindingsAnswersResult* addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, cint64 cardinality = 1);

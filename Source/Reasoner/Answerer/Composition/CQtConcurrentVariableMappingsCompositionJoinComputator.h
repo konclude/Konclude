@@ -30,11 +30,13 @@
 #include "CQtConcurrentVariableMappingsCompositionJoinBindingsCardinalityLinkerBatchLinker.h"
 #include "CQtConcurrentVariableMappingsCompositionJoinMappedKeysBindingsCardinalityLinker.h"
 #include "CQtConcurrentVariableMappingsCompositionJoinMappedJoinedBindingsCardinalityLinker.h"
-#include "CQtConcurrentVariableMappingsCompositionJoinBatchLinkerVector.h"
+#include "CQtConcurrentVariableMappingsCompositionBaseBatchLinkerVector.h"
 
 // Other includes
 #include "Reasoner/Answerer/COptimizedComplexVariableIndividualMappingsMultiHash.h"
+#include "Reasoner/Answerer/COptimizedComplexVariableJoiningWithRemainingHasher.h"
 
+#include "Concurrent/CConcurrentTaskScheduler.h"
 
 
 // Logger includes
@@ -48,6 +50,8 @@
 
 
 namespace Konclude {
+
+	using namespace Concurrent;
 
 	namespace Reasoner {
 
@@ -70,7 +74,7 @@ namespace Konclude {
 						//! Constructor
 						CQtConcurrentVariableMappingsCompositionJoinComputator();
 
-						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
+						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAbstractVariableMappingsCompositionItemRequirementProcessor* reqProcessor, CAnswererContext* answererContext);
 
 
 
@@ -85,6 +89,8 @@ namespace Konclude {
 					private:
 						cint64 mConfBatchSizeLimit = 200;
 						cint64 mConfBatchSizeCount = 200;
+						cint64 mConfBatchMaxHandlingCount = 10000;
+						cint64 mConfSplitTestingBatchMaxHandlingCount = 1000;
 						cint64 mConfConcurrentJoiningHashCount = 50;
 						cint64 mConfConcurrentVariableMappingPartCount = 50;
 
@@ -93,6 +99,7 @@ namespace Konclude {
 
 						bool mConfPartitionizedMemoryManagement = false;
 						bool mConfCheckingSideDirectJoining = false;
+						bool mConfDirectPerformanceConsoleOutput = false;
 
 						bool mConfPerformanceLogging = false;
 

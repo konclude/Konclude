@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Realizer {
 
 
-			COptimizedRepresentativeKPSetIndividualRoleFillerItemIterator::COptimizedRepresentativeKPSetIndividualRoleFillerItemIterator(const CRealizationIndividualInstanceItemReference& indiInstItemRef, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor) {
+			COptimizedRepresentativeKPSetIndividualRoleFillerItemIterator::COptimizedRepresentativeKPSetIndividualRoleFillerItemIterator(const CRealizationIndividualInstanceItemReference& indiInstItemRef, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor) {
 				mIndiInstItemRef = indiInstItemRef;
 				mRoleInstancesItem = roleInstancesItem;
 				mInversed = inversed;
@@ -164,17 +164,18 @@ namespace Konclude {
 					if (mIndiInstItemRefCursor.isNonEmpty()) {
 						cint64 cursorId = mIndiInstItemRefCursor.getIndividualID();
 
+						const QMap<cint64, IndividualIdSourceData>& neighbourIndiIdsMap = mNeighbourIndiIdsMap;
 						if (mIterateAscending) {
 							if (mMoveOverCursor) {
-								mNeighbourIndiIdsMapItBegin = mNeighbourIndiIdsMap.upperBound(cursorId);
+								mNeighbourIndiIdsMapItBegin = neighbourIndiIdsMap.upperBound(cursorId);
 							} else {
-								mNeighbourIndiIdsMapItBegin = mNeighbourIndiIdsMap.lowerBound(cursorId);
+								mNeighbourIndiIdsMapItBegin = neighbourIndiIdsMap.lowerBound(cursorId);
 							}
 						} else {
 							if (mMoveOverCursor) {
-								mNeighbourIndiIdsMapItEnd = mNeighbourIndiIdsMap.lowerBound(cursorId);
+								mNeighbourIndiIdsMapItEnd = neighbourIndiIdsMap.lowerBound(cursorId);
 							} else {
-								mNeighbourIndiIdsMapItEnd = mNeighbourIndiIdsMap.upperBound(cursorId);
+								mNeighbourIndiIdsMapItEnd = neighbourIndiIdsMap.upperBound(cursorId);
 							}
 						}
 					}
@@ -274,7 +275,7 @@ namespace Konclude {
 					mCurrentIndiInstanceOnlyPossible = false;
 					mCurrentSourceData = neighbourIndiIdsMapIt.value();
 					mCurentIndividual = mIndividualVector->getData(indiId);
-					mCurrentIndividualItem = mIndividualInstantiatedItemHash->value(indiId);
+					mCurrentIndividualItem = mIndividualInstantiatedItemHash->getIndividualInstantiatedItem(indiId);
 					mCurrentIndiInstItemRef = CRealizationIndividualInstanceItemReference(CIndividualReference(mCurentIndividual, mCurrentIndiId), mCurrentIndividualItem);
 
 					if (isValidIteratorPosition(mHasCurrentIndiId, mCurrentSourceData)) {
@@ -282,12 +283,12 @@ namespace Konclude {
 					} else if (!mInitializationRequired) {
 
 						if (mIterateAscending) {
-							++mNeighbourIndiIdsMapIt;
+							++neighbourIndiIdsMapIt;
 						} else {
-							if (mNeighbourIndiIdsMapIt == mNeighbourIndiIdsMapItBegin) {
-								mNeighbourIndiIdsMapIt = mNeighbourIndiIdsMapItEnd;
+							if (neighbourIndiIdsMapIt == mNeighbourIndiIdsMapItBegin) {
+								neighbourIndiIdsMapIt = mNeighbourIndiIdsMapItEnd;
 							} else {
-								--mNeighbourIndiIdsMapIt;
+								--neighbourIndiIdsMapIt;
 							}
 						}
 
@@ -385,15 +386,18 @@ namespace Konclude {
 				if (mHasCurrentIndiId && (mIterateAscending && mCurrentIndiId < cursorId || !mIterateAscending && mCurrentIndiId > cursorId)) {
 					mLastIndiId = -1;
 					mIterationMoved = true;
+					const QMap<cint64, IndividualIdSourceData>& neighbourIndiIdsMap = mNeighbourIndiIdsMap;
 					if (mIterateAscending) {
-						mNeighbourIndiIdsMapIt = mNeighbourIndiIdsMap.lowerBound(cursorId);
+						mNeighbourIndiIdsMapIt = neighbourIndiIdsMap.lowerBound(cursorId);
+						mNeighbourIndiIdsMapItEnd = neighbourIndiIdsMap.constEnd();
 					} else {
-						mNeighbourIndiIdsMapIt = mNeighbourIndiIdsMap.upperBound(cursorId);
+						mNeighbourIndiIdsMapIt = neighbourIndiIdsMap.upperBound(cursorId);
+						mNeighbourIndiIdsMapItEnd = neighbourIndiIdsMap.constEnd();
 						if (mNeighbourIndiIdsMapIt != mNeighbourIndiIdsMapItEnd) {
 							--mNeighbourIndiIdsMapIt;
 						}
 					}
-					if (mNeighbourIndiIdsMapIt != mNeighbourIndiIdsMap.end()) {
+					if (mNeighbourIndiIdsMapIt != mNeighbourIndiIdsMap.constEnd()) {
 						moveToValidPosition(mNeighbourIndiIdsMapIt);
 					} else {
 						mHasCurrentIndiId = false;

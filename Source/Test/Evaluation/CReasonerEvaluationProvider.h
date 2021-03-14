@@ -66,6 +66,8 @@ namespace Konclude {
 					virtual bool createReasoner(CConfiguration *config) = 0;
 					virtual CReasonerEvaluationTerminationResult* destroyReasoner() = 0;
 
+					virtual bool restartReasoner();
+
 					virtual QString getReasonerAddressString() = 0;
 
 

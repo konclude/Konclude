@@ -30,7 +30,7 @@ namespace Konclude {
 			namespace Process {
 
 
-				CIndividualRepresentativeBackendCacheLoadedAssociationHash::CIndividualRepresentativeBackendCacheLoadedAssociationHash(CProcessContext* context) : CPROCESSHASH<cint64, CIndividualRepresentativeBackendCacheLoadedAssociationData>(context) {
+				CIndividualRepresentativeBackendCacheLoadedAssociationHash::CIndividualRepresentativeBackendCacheLoadedAssociationHash(CProcessContext* context) : CQtManagedRestrictedModificationSharingHash<cint64, CIndividualRepresentativeBackendCacheLoadedAssociationData>(context) {
 				}
 				
 
@@ -38,12 +38,11 @@ namespace Konclude {
 					if (prevHash) {
 						*this = *prevHash;
 					} else {
-						CPROCESSHASH<cint64, CIndividualRepresentativeBackendCacheLoadedAssociationData>::clear();
+						CQtManagedRestrictedModificationSharingHash<cint64, CIndividualRepresentativeBackendCacheLoadedAssociationData>::clear();
 					}
 					return this;
 				}
-
-
+				  
 			}; // end namespace Process
 
 		}; // end namespace Kernel

@@ -49,13 +49,10 @@ namespace Konclude {
 				cint64 CReapplyRoleSuccessorHash::insertRoleSuccessorLink(CRole* role, CIndividualLinkEdge* link, CReapplyQueueIterator* reapplyQueueIterator) {
 					CReapplyRoleSuccessorData& roleSuccData = mRoleSuccessorDataHash[role];
 					if (roleSuccData.mLinkSet) {
-						if (!roleSuccData.mLocatedLinkSet) {
-							CPROCESSHASH<cint64,CIndividualLinkEdge*>* newLinkSet = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CIndividualLinkEdge*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mContext),mContext);
-							newLinkSet->init(roleSuccData.mLinkSet,mContext);
-							roleSuccData.mLinkSet = newLinkSet;
-							roleSuccData.mLocatedLinkSet = true;
-						}
-						roleSuccData.mLinkSet->insert(getCoupledIndividualID(link),link);
+						cint64 coupId = getCoupledIndividualID(link);
+						ensureRoleSuccessorDataLocalated(roleSuccData);
+						eliminateRoleSuccessorPreviousShareData(roleSuccData, coupId);
+						roleSuccData.mLinkSet->insert(coupId, link);
 					}
 					roleSuccData.mLinkLinker = link->append(roleSuccData.mLinkLinker);
 					roleSuccData.mLinkCount++;
@@ -67,16 +64,63 @@ namespace Konclude {
 				}
 
 
+
+				void CReapplyRoleSuccessorHash::ensureRoleSuccessorDataLocalated(CReapplyRoleSuccessorData &roleSuccData) {
+					if (!roleSuccData.mLocatedLinkSet) {
+
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>* referredLinkSet = roleSuccData.mLinkSet;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>* referredPrevLinkSet = roleSuccData.mPrevLinkSet;
+
+
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>* newLinkSet = CObjectParameterizingAllocator< CPROCESSHASH<cint64, CIndividualLinkEdge*>, CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mContext), mContext);
+						roleSuccData.mLinkSet = newLinkSet;
+						roleSuccData.mPrevLinkSet = nullptr;
+						roleSuccData.mLocatedLinkSet = true;
+
+
+
+						if (!referredPrevLinkSet && referredLinkSet->size() <= 100) {
+							newLinkSet->init(referredLinkSet, mContext);
+						} else if (!referredPrevLinkSet && referredLinkSet->size() > 100) {
+							roleSuccData.mPrevLinkSet = referredLinkSet;
+						} else {
+
+							if (referredLinkSet->size() * 10 > referredPrevLinkSet->size()) {
+								newLinkSet->init(referredPrevLinkSet, mContext);
+
+								for (CPROCESSHASH<cint64, CIndividualLinkEdge*>::const_iterator it = referredLinkSet->constBegin(), itEnd = referredLinkSet->constEnd(); it != itEnd; ++it) {
+									cint64 neighbourId = it.key();
+									CIndividualLinkEdge* link = it.value();
+									newLinkSet->insert(neighbourId, link);
+								}
+							} else {
+								newLinkSet->init(referredLinkSet, mContext);
+								roleSuccData.mPrevLinkSet = referredPrevLinkSet;
+							}
+
+						}
+					}
+				}
+
+
+				void CReapplyRoleSuccessorHash::eliminateRoleSuccessorPreviousShareData(CReapplyRoleSuccessorData &roleSuccData, cint64 coupId) {
+					if (roleSuccData.mPrevLinkSet && roleSuccData.mPrevLinkSet->contains(coupId)) {
+						for (CPROCESSHASH<cint64, CIndividualLinkEdge*>::const_iterator it = roleSuccData.mPrevLinkSet->constBegin(), itEnd = roleSuccData.mPrevLinkSet->constEnd(); it != itEnd; ++it) {
+							cint64 neighbourId = it.key();
+							CIndividualLinkEdge* link = it.value();
+							roleSuccData.mLinkSet->insert(neighbourId, link);
+						}
+						roleSuccData.mPrevLinkSet = nullptr;
+					}
+				}
+
 				CReapplyRoleSuccessorHash* CReapplyRoleSuccessorHash::removeRoleSuccessorLink(CRole* role, CIndividualLinkEdge* link) {
 					CReapplyRoleSuccessorData& roleSuccData = mRoleSuccessorDataHash[role];
 					if (roleSuccData.mLinkSet) {
-						if (!roleSuccData.mLocatedLinkSet) {
-							CPROCESSHASH<cint64,CIndividualLinkEdge*>* newLinkSet = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CIndividualLinkEdge*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mContext),mContext);
-							newLinkSet->init(roleSuccData.mLinkSet,mContext);
-							roleSuccData.mLinkSet = newLinkSet;
-							roleSuccData.mLocatedLinkSet = true;
-						}
-						roleSuccData.mLinkSet->remove(getCoupledIndividualID(link));
+						cint64 coupId = getCoupledIndividualID(link);
+						ensureRoleSuccessorDataLocalated(roleSuccData);
+						eliminateRoleSuccessorPreviousShareData(roleSuccData, coupId);
+						roleSuccData.mLinkSet->remove(coupId);
 					} else {
 						if (roleSuccData.mLinkLinker) {
 							// replace by set
@@ -103,13 +147,9 @@ namespace Konclude {
 				CReapplyRoleSuccessorHash* CReapplyRoleSuccessorHash::removeRoleSuccessorLink(CRole* role, cint64 sourceIndiID, cint64 destinationIndiID) {
 					CReapplyRoleSuccessorData& roleSuccData = mRoleSuccessorDataHash[role];
 					if (roleSuccData.mLinkSet) {
-						if (!roleSuccData.mLocatedLinkSet) {
-							CPROCESSHASH<cint64,CIndividualLinkEdge*>* newLinkSet = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CIndividualLinkEdge*>,CContext* >::allocateAndConstructAndParameterize(CContext::getMemoryAllocationManager(mContext),mContext);
-							newLinkSet->init(roleSuccData.mLinkSet,mContext);
-							roleSuccData.mLinkSet = newLinkSet;
-							roleSuccData.mLocatedLinkSet = true;
-						}
-						cint64 searchedCoupledID = getCoupledIndividualID(sourceIndiID,destinationIndiID);
+						cint64 searchedCoupledID = getCoupledIndividualID(sourceIndiID, destinationIndiID);
+						ensureRoleSuccessorDataLocalated(roleSuccData);
+						eliminateRoleSuccessorPreviousShareData(roleSuccData, searchedCoupledID);
 						roleSuccData.mLinkSet->remove(searchedCoupledID);
 					} else {
 						if (roleSuccData.mLinkLinker) {
@@ -170,7 +210,11 @@ namespace Konclude {
 
 						} else {
 							cint64 searchedCoupledID = getCoupledIndividualID(sourceIndiID,destinationIndiID);
-							return roleSuccData->mLinkSet->value(searchedCoupledID,nullptr);
+							CIndividualLinkEdge* link = roleSuccData->mLinkSet->value(searchedCoupledID,nullptr);
+							if (!link && roleSuccData->mPrevLinkSet) {
+								link = roleSuccData->mPrevLinkSet->value(searchedCoupledID, nullptr);
+							}
+							return link;
 						}
 					}
 					return nullptr;
@@ -188,7 +232,9 @@ namespace Konclude {
 				bool CReapplyRoleSuccessorHash::hasRoleSuccessor(CRole* role) {
 					CReapplyRoleSuccessorData* roleSuccData = nullptr;
 					if (mRoleSuccessorDataHash.tryGetValuePointer(role,roleSuccData)) {
-						if (roleSuccData->mLinkSet) {
+						if (roleSuccData->mPrevLinkSet) {
+							return !roleSuccData->mLinkSet->isEmpty() || !roleSuccData->mPrevLinkSet->isEmpty();
+						} else if(roleSuccData->mLinkSet) {
 							return !roleSuccData->mLinkSet->isEmpty();
 						} else {
 							return roleSuccData->mLinkLinker != nullptr;
@@ -201,7 +247,9 @@ namespace Konclude {
 				CRoleSuccessorLinkIterator CReapplyRoleSuccessorHash::getRoleSuccessorLinkIterator(CRole* role) {
 					CReapplyRoleSuccessorData* roleSuccData = nullptr;
 					if (mRoleSuccessorDataHash.tryGetValuePointer(role,roleSuccData)) {
-						if (roleSuccData->mLinkSet) {
+						if (roleSuccData->mPrevLinkSet) {
+							return CRoleSuccessorLinkIterator((roleSuccData->mLinkSet)->begin(), (roleSuccData->mLinkSet)->end(), (roleSuccData->mPrevLinkSet)->begin(), (roleSuccData->mPrevLinkSet)->end());
+						} else if (roleSuccData->mLinkSet) {
 							return CRoleSuccessorLinkIterator((roleSuccData->mLinkSet)->begin(),(roleSuccData->mLinkSet)->end());
 						} else {
 							return CRoleSuccessorLinkIterator(roleSuccData->mLinkLinker);
@@ -218,7 +266,9 @@ namespace Konclude {
 						if (linkCount) {
 							*linkCount = roleSuccData->mLinkCount;
 						}
-						if (roleSuccData->mLinkSet) {
+						if (roleSuccData->mPrevLinkSet) {
+							return CRoleSuccessorLinkIterator((roleSuccData->mLinkSet)->begin(), (roleSuccData->mLinkSet)->end(), (roleSuccData->mPrevLinkSet)->begin(), (roleSuccData->mPrevLinkSet)->end());
+						} else if (roleSuccData->mLinkSet) {
 							return CRoleSuccessorLinkIterator((roleSuccData->mLinkSet)->begin(),(roleSuccData->mLinkSet)->end());
 						} else {
 							return CRoleSuccessorLinkIterator(roleSuccData->mLinkLinker);
@@ -235,7 +285,9 @@ namespace Konclude {
 						if (linkCount) {
 							*linkCount = roleSuccData->mLinkCount;
 						}
-						if (roleSuccData->mLinkSet) {
+						if (roleSuccData->mPrevLinkSet) {
+							return CRoleSuccessorLinkIterator((roleSuccData->mLinkSet)->begin(), (roleSuccData->mLinkSet)->end(), (roleSuccData->mPrevLinkSet)->begin(), (roleSuccData->mPrevLinkSet)->end());
+						} else if (roleSuccData->mLinkSet) {
 							return CRoleSuccessorLinkIterator((roleSuccData->mLinkSet)->begin(),(roleSuccData->mLinkSet)->end());
 						} else {
 							return CRoleSuccessorLinkIterator(roleSuccData->mLinkLinker);
@@ -321,6 +373,7 @@ namespace Konclude {
 				CRoleSuccessorIterator CReapplyRoleSuccessorHash::getRoleIterator() {
 					return CRoleSuccessorIterator(mRoleSuccessorDataHash.begin(),mRoleSuccessorDataHash.end());
 				}
+
 
 			}; // end namespace Process
 

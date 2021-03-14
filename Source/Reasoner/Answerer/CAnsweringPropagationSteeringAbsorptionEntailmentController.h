@@ -69,7 +69,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringPropagationSteeringAbsorptionEntailmentController();
+					CAnsweringPropagationSteeringAbsorptionEntailmentController(CConcept* restrictedTopPropagation = nullptr);
 
 					//! Destructor
 					virtual ~CAnsweringPropagationSteeringAbsorptionEntailmentController();
@@ -78,15 +78,18 @@ namespace Konclude {
 					virtual bool finalizeWithClashing();
 					virtual bool finalizeWithBindingExtraction();
 
+					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId);
 					virtual bool isPreparationBindingNominalIndividual(CVariable* variable, CIndividual* indi);
 					virtual bool isPreparationBindingAllIndividuals(CVariable* variable);
 
+					virtual bool isRestrictedTopPropagation(CConcept* concept);
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					CConcept* mRestrictedTopPropagation;
 
 
 				// private methods

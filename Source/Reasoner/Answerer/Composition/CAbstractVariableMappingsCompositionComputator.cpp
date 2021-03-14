@@ -31,8 +31,9 @@ namespace Konclude {
 				CAbstractVariableMappingsCompositionComputator::CAbstractVariableMappingsCompositionComputator() {
 				}
 
-				CAbstractVariableMappingsCompositionComputator* CAbstractVariableMappingsCompositionComputator::configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext) {
+				CAbstractVariableMappingsCompositionComputator* CAbstractVariableMappingsCompositionComputator::configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAbstractVariableMappingsCompositionItemRequirementProcessor* reqProcessor, CAnswererContext* answererContext) {
 					mOntoAnsweringItem = ontoAnsweringItem;
+					mReqProcessor = reqProcessor;
 
 					mConfMappingsRepeatedlyInsufficientDependencyComputationIncreasingFactor = 1.3;
 					mConfMappingsRepeatedlyInsufficientDependencyComputationIncreasingFactor = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.MappingsRepeatedlyInsufficientDependencyComputationIncreasingFactorPercent", 130) / 100.;
@@ -46,6 +47,9 @@ namespace Konclude {
 
 
 
+				bool CAbstractVariableMappingsCompositionComputator::processRequirements(const QList<COntologyProcessingRequirement*>& reqList, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext) {
+					return mReqProcessor->processCompositionItemRequirements(reqList, compVarItem, buildingVarItem, answererContext);
+				}
 
 
 				bool CAbstractVariableMappingsCompositionComputator::queueVariableItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem) {
@@ -94,7 +98,7 @@ namespace Konclude {
 					}
 				}
 
-
+				
 
 				COptimizedComplexVariableIndividualBindingsCardinalityLinker* CAbstractVariableMappingsCompositionComputator::createBindingsLinkerForVariableCompositionItems(COptimizedComplexVariableIndividualBindings* bindings, COptimizedComplexVariableIndividualBindingsCardinality* cardinality, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CMemoryAllocationManager* memMan) {
 					if (!memMan) {
@@ -114,14 +118,28 @@ namespace Konclude {
 					if (allMappingsComputed) {
 						varCompItem->setVariableMappingsComputed(true);
 					}
-					if (varCompItem->getVariableMapping()->getBindingCount() <= 0) {
+					if (varCompItem->getVariableMapping()->getBindingCount() <= 0 && !varCompItem->hasSplitComputations() && !varCompItem->isSplitComputationMode()) {
 						buildingVarItem->setSatisfiability(false);
 					}
-					QList<COptimizedComplexVariableCompositionItem*>* updateList = varCompItem->getComputationUpdateItemList();
-					for (COptimizedComplexVariableCompositionItem* updateItem : *updateList) {
+					QList<COptimizedComplexVariableCompositionItemUpdateData>* updateList = varCompItem->getComputationUpdateItemList();
+					for (COptimizedComplexVariableCompositionItemUpdateData updateData  : *updateList) {
+						COptimizedComplexVariableCompositionItem* updateItem = updateData.getVariableCompositionItem();
+						COptimizedComplexBuildingVariableCompositionsItem* reschedulingBuildingVarItem = updateData.getVariableBuildingItem();
+						if (!reschedulingBuildingVarItem) {
+							reschedulingBuildingVarItem = buildingVarItem;
+						}
 						updateItem->decDependencyUpdatingCount();
 						if (updateItem->getDependencyUpdatingCount() == 0) {
-							queueVariableItemComputation(buildingVarItem, updateItem);
+							queueVariableItemComputation(reschedulingBuildingVarItem, updateItem);
+							if (updateData.getVariableBuildingItem()) {
+								reschedulingBuildingVarItem->decWaitingSubVariableBuildingItemCount();
+								if (reschedulingBuildingVarItem->getWaitingSubVariableBuildingItemCount() == 0) {
+									if (!reschedulingBuildingVarItem->isProcessingQueued()) {
+										reschedulingBuildingVarItem->setProcessingQueued(true);
+										mOntoAnsweringItem->addProcessingVariableBuildingItem(reschedulingBuildingVarItem);
+									}
+								}
+							}
 						}
 					}
 					updateList->clear();

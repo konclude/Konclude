@@ -42,8 +42,8 @@ namespace Konclude {
 			}
 
 
-			bool CReasonerEvaluationRequestClientBaseThread::evaluateReasoner(const QString& initFileString, const QString& testFileString, const QString& addressString, CConfiguration* configuration, CCallbackData* callback) {
-				postEvent(new CReasonerEvaluationStartEvent(initFileString,testFileString,addressString,configuration,callback));
+			bool CReasonerEvaluationRequestClientBaseThread::evaluateReasoner(const QString& initFileString, const QString& testFileString, CReasonerEvaluationProvider* reasonerProvider, CConfiguration* configuration, CCallbackData* callback) {
+				postEvent(new CReasonerEvaluationStartEvent(initFileString,testFileString, reasonerProvider,configuration,callback));
 				return true;
 			}
 
@@ -69,6 +69,7 @@ namespace Konclude {
 				mReplaceLoadOntologiesWithTells = false;
 				mResolveAppreviatedIRIsForReplacedTells = false;
 				mDownloadSizeLimit = -1;
+				mDownloadSizeLimitCancel = false;
 				mResponse = nullptr;
 				mTransManager = nullptr;
 			}
@@ -88,11 +89,12 @@ namespace Konclude {
 				mResolveAppreviatedIRIsForReplacedTells = CConfigDataReader::readConfigInteger(config, "Konclude.Evaluation.ResolveAppreviatedIRIsForReplacedTells");
 
 				mDownloadSizeLimit = CConfigDataReader::readConfigInteger(config, "Konclude.Evaluation.ResponseDownloadSizeLimit");
+				mDownloadSizeLimitCancel = CConfigDataReader::readConfigInteger(config, "Konclude.Evaluation.ResponseDownloadSizeLimitCancel", false);
 
 				if (mTransManager) {
 					delete mTransManager;
 				}
-				mTransManager = new CQtHttpTransactionManager(1000 * 60 * 60 * 24 * 14, mDownloadSizeLimit);
+				mTransManager = new CQtHttpTransactionManager(1000 * 60 * 60 * 24 * 14, mDownloadSizeLimit, mDownloadSizeLimitCancel);
 
 				return this;
 			}
@@ -107,7 +109,8 @@ namespace Konclude {
 					mResponse = new CReasonerEvaluationRequestResult();
 					mInitFileString = rese->getInitFileString();
 					mTestFileString = rese->getTestFileString();
-					mAddressString = rese->getAddressString();
+					mReasonerProvider = rese->getReasonerProvider();
+					mAddressString = mReasonerProvider->getReasonerAddressString();
 					mConfig = rese->getConfiguration();
 					mRequestFinishedCallback = rese->getCallback();
 					++mCurrentOperationNumber;

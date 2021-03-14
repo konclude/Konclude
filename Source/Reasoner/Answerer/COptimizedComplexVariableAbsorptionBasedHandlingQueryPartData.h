@@ -155,6 +155,12 @@ namespace Konclude {
 					bool isTopObjectPropertyUsed();
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setTopObjectPropertyUsage(bool topObjectPropertyUsed);
 
+					bool isTopObjectPropertyAbsorptionPropagation();
+					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setTopObjectPropertyAbsorptionPropagation(bool topObjectPropertyAbsorptionPropagation);
+
+					bool isTopObjectPropertyInitializationPropagation();
+					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setTopObjectPropertyInitializationPropagation(bool topObjectPropertyInitializationPropagation);
+
 
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* resetAbsorption();
 
@@ -170,6 +176,15 @@ namespace Konclude {
 
 					bool hasNonTrivialAbsorptionPropagation();
 					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setNonTrivialAbsorptionPropagation(bool prop);
+
+
+					CConcept* getRestrictedTopPropagationConcept();
+					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setRestrictedTopPropagationConcept(CConcept* concept);
+
+
+					bool hasRestrictedTopPropagationConceptChecked();
+					COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* setRestrictedTopPropagationConceptChecked(bool checked);
+
 
 				// protected methods
 				protected:
@@ -222,8 +237,13 @@ namespace Konclude {
 					bool mIndiVariables;
 
 					bool mTopObjectPropertyUsed;
+					bool mTopObjectPropertyAbsorptionPropagation;
+					bool mTopObjectPropertyInitializationPropagation;
 
 					bool mNonTrivialAbsorptionPropagation;
+
+					bool mRestrictedTopPropagationConceptChecked;
+					CConcept* mRestrictedTopPropagationConcept;
 
 					QHash<QPair<CObjectPropertyTermExpression*, bool>, CConcept*> mInitialObjectPropertyPropagatedTriggerConceptHash;
 

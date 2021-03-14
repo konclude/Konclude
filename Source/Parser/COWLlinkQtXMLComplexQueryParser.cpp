@@ -27,7 +27,7 @@ namespace Konclude {
 
 
 
-		COWLlinkQtXMLComplexQueryParser::COWLlinkQtXMLComplexQueryParser(CQueryBuilder *queryBuilder, COntologyParser* ontoParser) : COWLlinkQueryParser(queryBuilder) {
+		COWLlinkQtXMLComplexQueryParser::COWLlinkQtXMLComplexQueryParser(CQueryBuilder *queryBuilder, COntologyQtXMLDocumentParser* ontoParser) : COWLlinkQueryParser(queryBuilder) {
 			mOntoParser = ontoParser;
 			LOG(INFO,"::Konclude::Parser::OWLlinkQtXMLComplexQueryParser",logTr("OWLlink Query Parser initialized."),this);
 		}

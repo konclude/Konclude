@@ -31,7 +31,6 @@ namespace Konclude {
 			COptimizedComplexVariableReductionItem::COptimizedComplexVariableReductionItem(COptimizedComplexVariableCompositionItem* baseItem, cint64 reductionVarIdx) : COptimizedComplexVariableCompositionSingleDependenceItem(baseItem) {
 				mBaseItem = baseItem;
 				mReductionVarIdx = reductionVarIdx;
-				mComputationDependentItemList.append(mBaseItem);
 			}
 
 

@@ -32,7 +32,6 @@ namespace Konclude {
 				mBaseItem = baseItem;
 				mRole = role;
 				mVarIdx = varIdx;
-				mComputationDependentItemList.append(mBaseItem);
 			}
 
 

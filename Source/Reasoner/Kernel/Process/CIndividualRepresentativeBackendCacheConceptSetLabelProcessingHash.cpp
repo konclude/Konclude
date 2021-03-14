@@ -30,7 +30,7 @@ namespace Konclude {
 			namespace Process {
 
 
-				CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash::CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash(CProcessContext* context) : CPROCESSHASH<CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher, CIndividualRepresentativeBackendCacheConceptSetLabelProcessingData>(context) {
+				CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash::CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash(CProcessContext* context) : CQtManagedRestrictedModificationSharingHash<CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher, CIndividualRepresentativeBackendCacheConceptSetLabelProcessingData>(context) {
 				}
 				
 
@@ -38,11 +38,10 @@ namespace Konclude {
 					if (prevHash) {
 						*this = *prevHash;
 					} else {
-						CPROCESSHASH<CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher, CIndividualRepresentativeBackendCacheConceptSetLabelProcessingData>::clear();
+						CQtManagedRestrictedModificationSharingHash<CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher, CIndividualRepresentativeBackendCacheConceptSetLabelProcessingData>::clear();
 					}
 					return this;
 				}
-
 
 			}; // end namespace Process
 

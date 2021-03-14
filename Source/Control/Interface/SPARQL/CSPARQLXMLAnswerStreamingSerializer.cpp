@@ -162,7 +162,7 @@ namespace Konclude {
 						if (varBin) {
 							mStreamWriter->writeStartElement("binding");
 							mStreamWriter->writeAttribute("name", varString);
-							if (varBin->isNamedIndividualBindingType()) {
+							if (varBin->isNamedIndividualBindingType() || varBin->isClassBindingType() || varBin->isPropertyBindingType()) {
 								mStreamWriter->writeTextElement("uri", varBin->getQueryResultString());
 							} else if (varBin->isAnonymousIndividualBindingType()) {
 								mStreamWriter->writeTextElement("bnode", varBin->getQueryResultString());

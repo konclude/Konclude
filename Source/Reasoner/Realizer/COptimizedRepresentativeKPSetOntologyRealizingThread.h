@@ -129,10 +129,109 @@ namespace Konclude {
 					};
 
 
+					class CPossibleConceptInstancesInitializationBatchingData {
+						public:
+							QList<COptimizedRepresentativeKPSetConceptSetCacheLabelItemData*> mLabelItemDataList;
+							cint64 mLabelItemAssociatedIndiCount = 0;
+
+							void addLabelItemData(COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* itemData) {
+								mLabelItemDataList.append(itemData);
+								mLabelItemAssociatedIndiCount += itemData->getLabelCacheItem()->getIndividualAssociationCount();
+							}
+					};
+
+
+
+					class CPossibleConceptInstanceInitializationLinker : public CLinkerBase<cint64, CPossibleConceptInstanceInitializationLinker> {
+					public:
+						COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* mLabelItemData = nullptr;
+
+						CPossibleConceptInstanceInitializationLinker* initInitializationLinker(cint64 indiId, COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* labelItemData) {
+							setData(indiId);
+							mLabelItemData = labelItemData;
+							return this;
+						}
+					};
+
+					class CPossibleConceptInstanceInitializationLinkerData {
+					public:
+						CPossibleConceptInstanceInitializationLinker* mFirst = nullptr;
+						CPossibleConceptInstanceInitializationLinker* mLast = nullptr;
+
+						CPossibleConceptInstanceInitializationLinkerData* addLinker(CPossibleConceptInstanceInitializationLinker* linker) {
+							if (!mFirst) {
+								mFirst = mLast = linker;
+							} else {
+								mFirst = linker->append(mFirst);
+							}
+							return this;
+						}
+
+						CPossibleConceptInstanceInitializationLinkerData* addLinkerData(const CPossibleConceptInstanceInitializationLinkerData& data) {
+							if (data.mFirst) {
+								if (!mFirst) {
+									mFirst = data.mFirst;
+									mLast = data.mLast;
+								} else {
+									mLast->setNext(data.mFirst);
+									mLast = data.mLast;
+								}
+							}
+							return this;
+						}
+					};
+
+
+
+
+
+					class CSameIndividualInstanceInitializationLinker : public CLinkerBase<cint64, CSameIndividualInstanceInitializationLinker> {
+					public:
+						COptimizedKPSetIndividualItem* mIndiItem = nullptr;
+
+						CSameIndividualInstanceInitializationLinker* initInitializationLinker(cint64 indiId, COptimizedKPSetIndividualItem* indiItem) {
+							setData(indiId);
+							mIndiItem = indiItem;
+							return this;
+						}
+					};
+
+					class CSameIndividualInstanceInitializationLinkerData {
+					public:
+						CSameIndividualInstanceInitializationLinker* mFirst = nullptr;
+						CSameIndividualInstanceInitializationLinker* mLast = nullptr;
+
+						CSameIndividualInstanceInitializationLinkerData* addLinker(CSameIndividualInstanceInitializationLinker* linker) {
+							if (!mFirst) {
+								mFirst = mLast = linker;
+							} else {
+								mFirst = linker->append(mFirst);
+							}
+							return this;
+						}
+
+						CSameIndividualInstanceInitializationLinkerData* addLinkerData(const CSameIndividualInstanceInitializationLinkerData& data) {
+							if (data.mFirst) {
+								if (!mFirst) {
+									mFirst = data.mFirst;
+									mLast = data.mLast;
+								} else {
+									mLast->setNext(data.mFirst);
+									mLast = data.mLast;
+								}
+							}
+							return this;
+						}
+					};
+
+
+
 					virtual COntologyRealizingItem* initializeOntologyRealizingItem(CConcreteOntology* ontology, CConfigurationBase* config);
 					virtual void readCalculationConfig(CConfigurationBase *config);
 
 					virtual bool createNextTest();
+
+					CRealizationEntailmentQueuedIndividualConceptInstanceTestingItem* getEntailmentIndividualConceptInstanceTestingItem(QList<CRealizationEntailmentQueuedIndividualConceptInstanceTestingItem *>* entIndConInstTestList, COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem);
 
 					virtual bool finishOntologyRealizing(COptimizedRepresentativeKPSetOntologyRealizingItem* totallyPreCompItem);
 					virtual bool realizingTested(COntologyRealizingItem* ontPreCompItem, CRealizingTestingItem* preTestItem, CRealizingCalculatedCallbackEvent* pcce);
@@ -146,7 +245,7 @@ namespace Konclude {
 					bool checkTrivialInstanceConceptRepresentativeCacheBasedMerging(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, CConcept* concept, bool conceptNegation, CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, bool* mergableFlag, bool* unmergableFlag, cint64* mergingOperationLimit);
 
 
-					bool createNextConceptInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetIndividualItem* instantiatedItem, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
+					bool createNextConceptInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetIndividualItem* instantiatedItem, cint64 remainingTestingCount, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
 					bool createNextRoleInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetRoleInstancesItem* instancesItem, COptimizedKPSetIndividualItemPair itemPair, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
 					bool createNextSameIndividualsTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetIndividualItem* instantiatedItem1, COptimizedKPSetIndividualItem* instantiatedItem2, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
 					bool createIndividualsConsistencyTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem);
@@ -179,13 +278,15 @@ namespace Konclude {
 					virtual bool initializeIndividualProcessingKPSetsFromConsistencyData(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem);
 
 
-					bool initializeRepresentativeIndividualProcessing(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CBackendRepresentativeMemoryLabelCacheItem* conSetLabelItem, COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* conSetLabelCacheItemData, QHash<cint64, QList<CIndividualReference> >* individualPossibleSameIndividualListHash);
+					bool initializeRepresentativeIndividualProcessing(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CBackendRepresentativeMemoryLabelCacheItem* conSetLabelItem, COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* conSetLabelCacheItemData, QHash<cint64, QList<CIndividualReference> >** individualPossibleSameIndividualListHash);
 
 
 					bool extractKnownPossibleIndividualDataFromConsistencyData(CIndividualProcessNode* indiProcNode, QList<COptimizedKPSetConceptInstancesItem*>* knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>* possibleInstancesList, QList<CIndividualReference>* knownSameIndividualList, QList<CIndividualReference>* possibleSameIndividualList, CIndividualProcessNodeVector* indiProcVector, const QList<COptimizedKPSetConceptInstancesItem*>& equivClassList, COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem);
 
 
 					bool initializeEquivalentClassList(QList<COptimizedKPSetConceptInstancesItem*>* equivClassList, COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem);
+
+					COptimizedKPSetIndividualItem* initializeKPSetsForIndividualConcurrently(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CIndividual* individual, QList<COptimizedKPSetConceptInstancesItem*>& knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>& possibleInstancesList, QList<CIndividualReference>& knownSameIndividualIdList);
 
 					bool initializeKPSetsForIndividual(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, cint64 indiId, CIndividual* individual, QList<COptimizedKPSetConceptInstancesItem*>& knownInstancesList, QList<COptimizedKPSetConceptInstancesItem*>& possibleInstancesList, QList<CIndividualReference>& knownSameIndividualIdList);
 					bool addKPSetDirectSuperInstances(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesHash* knownPossibleInstancesHash, COptimizedKPSetConceptInstancesItem* instanceItem, bool knownInstance);
@@ -259,6 +360,7 @@ namespace Konclude {
 					bool checkFinishSameIndividualProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetIndividualItem* instantiatedItem);
 					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, CLinker<COntologyRealizingDynamicRequirmentProcessingData*>* procDataLinker);
 					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, COntologyRealizingDynamicRequirmentProcessingData* procData);
+					COptimizedRepresentativeKPSetOntologyRealizingThread* setDynamicRequirementProcessed(COntologyRealizingItem* ontRealItem, CRealizingTestingStep* realizingStep, const QList<COntologyRealizingDynamicRequirmentProcessingData*>& procDataList);
 					bool checkFinishConceptInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetConceptInstancesItem* conceptItem);
 					bool checkFinishRoleInstancesProcessing(COntologyRealizingItem* ontRealItem, COptimizedKPSetRoleInstancesItem* roleItem);
 
@@ -273,7 +375,7 @@ namespace Konclude {
 
 
 
-					CPossibleInstancesIndividualsMergingData* getPossibleInstancesMergingData(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetIndividualItem* instantiatedItem);
+					CPossibleInstancesIndividualsMergingData* getPossibleInstancesMergingData(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetIndividualItem* instantiatedItem, cint64 remainingTestingCount);
 
 
 				// protected variables
@@ -294,6 +396,7 @@ namespace Konclude {
 					cint64 mConfPossibleInstanceIndividualsAfterwardsMergingProvidingCount;
 					cint64 mConfPossibleInstanceIndividualsAfterwardsMergingMaximumAttemptCount;
 					bool mConfNonDeterministicSatisfiableCalculationContinuation;
+					cint64 mConfMinimumPossibleInstanceIndividualsAfterwardsMergingCount;
 
 
 #ifdef REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
@@ -301,6 +404,9 @@ namespace Konclude {
 					QString mDebugTransitiveCollectionString;
 #endif // REALIZATION_TRANSITIVE_EXTRACTION_DEBUG_STRINGS
 
+
+					bool mConfConcurrentIndividualPossibleConceptInstantiationInitialization;
+					cint64 mConfConcurrentHandlingVectorSize;
 
 				// private methods
 				private:

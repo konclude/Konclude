@@ -122,6 +122,19 @@ namespace Konclude {
 				}
 			}
 
+
+			bool CConceptRealization::isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConcept* concept) {
+				CConceptInstantiatedItem* conItem = getInstantiatedItem(concept);
+				return isConceptInstance(indiRealItemRef, conItem);
+			}
+
+
+			bool CConceptRealization::requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConcept* concept) {
+				CConceptInstantiatedItem* conItem = getInstantiatedItem(concept);
+				return requiresConceptInstanceRealization(indiRealItemRef, conItem);
+			}
+
+
 		}; // end namespace Realization
 
 	}; // end namespace Reasoner

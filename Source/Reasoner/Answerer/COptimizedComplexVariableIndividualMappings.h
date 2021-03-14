@@ -66,7 +66,7 @@ namespace Konclude {
 
 
 					enum VARIABLE_TYPE {
-						INDIVIDUAL_VARIABLE, DATA_LITERAL_VARIABLE
+						INDIVIDUAL_VARIABLE, DATA_LITERAL_VARIABLE, CLASS_VARIABLE, PROPERTY_VARIABLE
 					};
 
 
@@ -102,6 +102,20 @@ namespace Konclude {
 					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* getLastAddedBindingsCardinalityBatchLinker();
 					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* getFirstAddedBindingsCardinalityBatchLinker();
 
+					virtual COptimizedComplexVariableIndividualMappings* clearComputedMappings();
+
+
+					cint64 getBindingsMemoryUsage();
+					COptimizedComplexVariableIndividualMappings* setBindingsMemoryUsage(cint64 usage);
+					COptimizedComplexVariableIndividualMappings* incBindingsMemoryUsage(cint64 usageInc);
+
+
+					virtual CMemoryAllocationManager* getBindingsMemoryAllocationManager() = 0;
+					virtual COptimizedComplexVariableIndividualMappings* updateBindingsMemoryConsumption() = 0;
+
+
+					double getComputationCost();
+					COptimizedComplexVariableIndividualMappings* setComputationCost(double cost);
 
 				// protected methods
 				protected:
@@ -127,6 +141,12 @@ namespace Konclude {
 
 					cint64 mCurrentLinkerBatchingSize;
 					double mLinkerBatchingSizeIncreasingFactor;
+
+
+					cint64 mBindingsMemoryUsage;
+
+					double mComputationCost;
+
 
 				// private methods
 				private:

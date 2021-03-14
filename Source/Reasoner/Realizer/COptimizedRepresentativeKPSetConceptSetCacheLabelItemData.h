@@ -56,7 +56,11 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedRepresentativeKPSetConceptSetCacheLabelItemData();
+					COptimizedRepresentativeKPSetConceptSetCacheLabelItemData(CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem);
+
+
+					CBackendRepresentativeMemoryLabelCacheItem* getLabelCacheItem();
+
 
 					bool hasPossibleInstances();
 					COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* setPossibleInstances(bool possibleInstances);
@@ -74,6 +78,8 @@ namespace Konclude {
 				// protected variables
 				protected:
 					bool mPossibleInstances;
+
+					CBackendRepresentativeMemoryLabelCacheItem* mLabelCacheItem;
 
 					QHash<COptimizedKPSetConceptInstancesItem*, COptimizedRepresentativeKPSetConceptSetCacheLabelItemInstancesData*> mInstancesItemDataHash;
 					QList<COptimizedKPSetConceptInstancesItem*> mKnownInstancesItemList;

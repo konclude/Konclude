@@ -169,6 +169,7 @@ namespace Konclude {
 						mChunkPart = 0;
 						mResponseFile = nullptr;
 						mWritingFailed = false;
+						mWritingAppendingMode = false;
 
 
 						if (mConfLogProcessingTimes) {
@@ -209,7 +210,16 @@ namespace Konclude {
 					mWritingStarted = true;
 					if (!resFileString.isEmpty()) {
 						mResponseFile = new QFile(resFileString);
-						if (!mResponseFile->open(QIODevice::WriteOnly)) {
+						bool fileOpen = false;
+						if (!mWritingAppendingMode) {
+							fileOpen = mResponseFile->open(QIODevice::WriteOnly);
+						} else {
+							fileOpen = mResponseFile->open(QIODevice::Append);
+							if (fileOpen) {
+								mResponseFile->write(QString("\r\n\r\n").toLocal8Bit());
+							}
+						}
+						if (!fileOpen) {
 							LOG(ERROR, getLogDomain(), logTr("Opening file '%1' for writing failed.").arg(resFileString), this);
 							delete mResponseFile;
 							mResponseFile = nullptr;
@@ -255,6 +265,9 @@ namespace Konclude {
 						mResponseFile->write(mStreamSPARQLFooter);
 						LOG(INFO, getLogDomain(), logTr("Last part of %1 with %2 bytes written.").arg(mChunkPart).arg(bufferSize), this);
 						mResponseFile->close();
+						mWritingAppendingMode = true;
+						mWritingStarted = false;
+						delete mResponseFile;
 					}
 				} else {
 					if (mResponseFile) {

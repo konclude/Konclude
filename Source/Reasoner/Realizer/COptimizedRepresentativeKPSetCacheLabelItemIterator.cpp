@@ -39,7 +39,7 @@ namespace Konclude {
 			}
 
 			COptimizedRepresentativeKPSetCacheLabelItemIterator::COptimizedRepresentativeKPSetCacheLabelItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, 
-					QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor) {
+				COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor) {
 
 				mLabelCacheItemKnwonInstancesList = labelCacheItemKnownInstancesList;
 				mLabelCacheItemPossibleInstancesList = labelCacheItemPossibleInstancesList;
@@ -240,7 +240,7 @@ namespace Konclude {
 			bool COptimizedRepresentativeKPSetCacheLabelItemIterator::loadInstanceIndividualAssociationsIteratorData(CAssociationMapIteratorData* associationIteratorData) {
 				cint64 indiId = associationIteratorData->mIterator.currentAssociatedIndividualId();
 				if (!associationIteratorData->mCurrentIndiRealizationItem) {
-					associationIteratorData->mCurrentIndiRealizationItem = mIndividualInstantiatedItemHash->value(indiId);
+					associationIteratorData->mCurrentIndiRealizationItem = mIndividualInstantiatedItemHash->getIndividualInstantiatedItem(indiId);
 				}
 				if (mIndividualVector && !associationIteratorData->mIndividual) {
 					associationIteratorData->mIndividual = mIndividualVector->getData(indiId);

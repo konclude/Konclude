@@ -423,6 +423,8 @@ namespace Konclude {
 					existNegation = true;
 				}
 
+			
+
 				//if (CIRIName::getRecentIRIName(role->getPropertyNameLinker()) == "#LocativeAttribute") {
 				//	if (CIRIName::getRecentIRIName(concept->getOperandList()->getData()->getClassNameLinker()) == "#Heart") {
 				//		bool bug = true;
@@ -502,9 +504,14 @@ namespace Konclude {
 
 
 				//const QList<CRoleSubRoleChainData> subRoleChainDataList(mRoleSubRoleChainDataHash.values(role));
-				const CRecTravSubRoleChainDataItem& recTravSubRoleChainDataItem(mRoleRecTravSubRoleChainDataHash.value(role));
-				QSet<CRole*> locUnfoldRoleSet;
-				generateRoleChainAutomatConcept(role,recTravSubRoleChainDataItem,locUnfoldRoleSet,beginState,endState,transType);
+				if (role->getRoleTag() == 1) {
+					appendTransitionOperandConceptLinker(endState, createTransitionOperandConceptLinker(beginState, false));
+
+				} else {
+					const CRecTravSubRoleChainDataItem& recTravSubRoleChainDataItem(mRoleRecTravSubRoleChainDataHash.value(role));
+					QSet<CRole*> locUnfoldRoleSet;
+					generateRoleChainAutomatConcept(role, recTravSubRoleChainDataItem, locUnfoldRoleSet, beginState, endState, transType);
+				}
 
 				// search fitting sub role chains
 				//bool hasFittingSubRole = false;

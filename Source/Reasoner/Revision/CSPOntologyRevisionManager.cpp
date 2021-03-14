@@ -46,6 +46,7 @@ namespace Konclude {
 				mHasFirstOntologyRevisionUpdate = false;
 
 				mOntoRevPersistencer = persistencer;
+				ontologyCount = 0;
 			}
 
 
@@ -185,10 +186,15 @@ namespace Konclude {
 					CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 					QString kbName = rKBRevUpC->getKnowledgeBaseName();
-					if (!nameIDHash.contains(kbName)) {
+					if (!checkHasOntology(kbName)) {
 						CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' does not exist.").arg(kbName),&commandRecordRouter);
 					} else {
-						nameIDHash.remove(kbName);
+						if (nameIDHash.contains(kbName)) {
+							nameIDHash.remove(kbName);
+						}
+						if (mOntoRevPersistencer) {
+							mOntoRevPersistencer->deletePersistedOntology(kbName);
+						}
 					}
 					CStopProcessCommandRecord::makeRecord(&commandRecordRouter);
 					CFinishProcessCommandRecord::makeRecord(&commandRecordRouter);
@@ -199,9 +205,13 @@ namespace Konclude {
 					CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 					QString kbName = getConfigComm->getKnowlegeBaseString();
-					if (!nameIDHash.contains(kbName)) {
+					if (!checkHasOntology(kbName)) {
 						CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' does not exist.").arg(kbName),&commandRecordRouter);
 					} else {
+						if (!nameIDHash.contains(kbName)) {
+							createNewOntologyRevisionFromBasementOntology(kbName, commandRecordRouter);
+						}
+
 						qint64 revPath = nameIDHash.value(kbName);
 						COntologyRevision *currOntologyRev = revisionHash.value(revPath,0);
 						if (currOntologyRev) {
@@ -221,9 +231,14 @@ namespace Konclude {
 					CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 					QString kbName = getConfigComm->getKnowlegeBaseString();
-					if (!nameIDHash.contains(kbName)) {
+					if (!checkHasOntology(kbName)) {
 						CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' doesn't exist.").arg(kbName),&commandRecordRouter);
 					} else {
+						if (!nameIDHash.contains(kbName)) {
+							createNewOntologyRevisionFromBasementOntology(kbName, commandRecordRouter);
+						}
+
+
 						qint64 revPath = nameIDHash.value(kbName);
 						COntologyRevision *currOntologyRev = revisionHash.value(revPath,0);
 						if (currOntologyRev) {
@@ -242,9 +257,13 @@ namespace Konclude {
 					CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 					QString kbName = setConfigComm->getKnowlegeBaseString();
-					if (!nameIDHash.contains(kbName)) {
+					if (!checkHasOntology(kbName)) {
 						CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' doesn't exist.").arg(kbName),&commandRecordRouter);
 					} else {
+						if (!nameIDHash.contains(kbName)) {
+							createNewOntologyRevisionFromBasementOntology(kbName, commandRecordRouter);
+						}
+
 						qint64 revPath = nameIDHash.value(kbName);
 						COntologyRevision *currOntologyRev = revisionHash.value(revPath,0);
 						if (currOntologyRev) {
@@ -296,9 +315,14 @@ namespace Konclude {
 						qint64 nextRevPath = nextOntRev->getOntologyRevisionPath();
 						qint64 nextRevDepth = nextOntRev->getOntologyRevisionDepth();
 
-						if (!nameIDHash.contains(kbName)) {
+						if (!checkHasOntology(kbName)) {
 							CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' doesn't exist.").arg(kbName),&commandRecordRouter);
 						} else {
+
+							if (!nameIDHash.contains(kbName)) {
+								createNewOntologyRevisionFromBasementOntology(kbName, commandRecordRouter);
+							}
+
 							qint64 revPath = nameIDHash.value(kbName);
 							COntologyRevision *ontologyRev = revisionHash.value(revPath,0);
 							if (ontologyRev) {
@@ -372,9 +396,14 @@ namespace Konclude {
 					CStartProcessCommandRecord::makeRecord(&commandRecordRouter);
 
 					QString kbName = gCurrKBRevUpC->getKnowledgeBaseName();
-					if (!nameIDHash.contains(kbName)) {
+					if (!checkHasOntology(kbName)) {
 						CUnspecifiedMessageErrorRecord::makeRecord(QString("KnowledgeBase '%1' doesn't exist.").arg(kbName),&commandRecordRouter);
 					} else {
+
+						if (!nameIDHash.contains(kbName)) {
+							createNewOntologyRevisionFromBasementOntology(kbName, commandRecordRouter);
+						}
+
 						qint64 revPath = nameIDHash.value(kbName);
 						COntologyRevision *currOntologyRev = revisionHash.value(revPath,0);
 
@@ -428,13 +457,13 @@ namespace Konclude {
 			COntologyRevision* CSPOntologyRevisionManager::createNewOntologyRevision(const QString& ontologyName, bool forceCreation, bool reportError, CCommandRecordRouter& commandRecordRouter) {
 				QString kbName = ontologyName;
 
-				bool kbExist = nameIDHash.contains(kbName);
+				bool kbExist = checkHasOntology(kbName);
 
 				bool createdKBForLastOntologyRevisionUpdateKBNameOrNewAnonymous = false;
 				if (!kbExist && mLastOntologyRevisionUpdateKBNameOrNewAnonymous == kbName) {
 					kbName = createNewOntology("", nullptr, commandRecordRouter);
 					createdKBForLastOntologyRevisionUpdateKBNameOrNewAnonymous = true;
-					kbExist = nameIDHash.contains(kbName);
+					kbExist = checkHasOntology(kbName);
 				}
 
 				if (!kbExist && !forceCreation) {
@@ -443,7 +472,7 @@ namespace Konclude {
 					}
 				} else {
 
-					if (!kbExist) {
+					if (!nameIDHash.contains(kbName)) {
 						createNewOntologyRevisionFromBasementOntology(kbName, commandRecordRouter);
 					}
 
@@ -490,13 +519,25 @@ namespace Konclude {
 				return nullptr;
 			}
 
-			
+
+			bool CSPOntologyRevisionManager::checkHasOntology(const QString& ontologyName) {
+				QString kbName = ontologyName;
+				if (nameIDHash.contains(kbName)) {
+					return true;
+				} else if (mOntoRevPersistencer && mOntoRevPersistencer->hasOntologyPersisted(kbName)) {
+					return true;
+				}
+				return false;
+			}
+
+
+
 			QString CSPOntologyRevisionManager::createNewOntology(const QString& ontologyName, QList<CNamePrefix*>* prefixList, CCommandRecordRouter& commandRecordRouter) {
 				QString kbName = ontologyName;
 				if (kbName.isEmpty()) {
-					QString unKBName = QString("http://Konclude.com/Ontologies/UnnamedOntologies/%1/%2/").arg(nextUnamedOntologyNumber++).arg(QDateTime::currentMSecsSinceEpoch());
+					QString unKBName = QString("http://Konclude.com/Ontologies/UnnamedOntologies/%1/%2/").arg(nextUnamedOntologyNumber++).arg(QUuid::createUuid().toString().replace("{", "").replace("}", ""));
 					while (nameIDHash.contains(unKBName)) {
-						unKBName = QString("http://Konclude.com/Ontologies/UnnamedOntologies/%1/%2/").arg(nextUnamedOntologyNumber++).arg(QDateTime::currentMSecsSinceEpoch());
+						unKBName = QString("http://Konclude.com/Ontologies/UnnamedOntologies/%1/%2/").arg(nextUnamedOntologyNumber++).arg(QUuid::createUuid().toString().replace("{", "").replace("}", ""));
 					}
 					kbName = unKBName;
 				}

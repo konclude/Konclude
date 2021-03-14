@@ -103,6 +103,8 @@ namespace Konclude {
 
 					virtual bool processCustomsEvents(QEvent::Type type, CCustomEvent *event);
 
+					void createQueuedAnswererThread();
+
 				// protected variables
 				protected:
 					CConfiguration* mConfig;
@@ -117,9 +119,12 @@ namespace Konclude {
 					QSet<CAnswererThread*> mProcessingThreadSet;
 					cint64 mCurrentThreadCount;
 					cint64 mConfMaxThreadCount;
+					
 
-
-					QList<CAnsweringManagerQueryData*> mQueuedQueryList;
+					QList<CAnsweringManagerQueryData*> mQueuedExpressionQueryList;
+					QList<CAnsweringManagerQueryData*> mQueuedCompositionQueryList;
+					cint64 mCompositionQueryProcessingCount;
+					cint64 mMaxCompositionQueryProcessingCount;
 					QSet<CAnsweringManagerQueryData*> mProcessingQuerySet;
 
 					QReadWriteLock mReadWriteLock;

@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation::CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation(CSatisfiableCalculationJob* calcJob, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableIndividualBindingsCardinalityLinker* testingVarIndiBindingCardLinker)
+			CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation::CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation(CSatisfiableCalculationJob* calcJob, COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absorptionPropagationExtension, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableIndividualBindingsCardinalityLinker* testingVarIndiBindingCardLinker)
 					: CAnsweringMessageDataCalculationCompleted(calcJob, VARIABLEBINDINGCONFIRMATIONCALCULATION), mPropagatedBindingCardinalityLinker(testingVarIndiBindingCardLinker) {
 				mAbsorptionPropagationExtension = absorptionPropagationExtension;
 				mBuildingVarItem = buildingVarItem;
@@ -39,7 +39,7 @@ namespace Konclude {
 				return mAbsorptionPropagationExtension;
 			}
 
-			COptimizedComplexBuildingVariableCompositionsItem* CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation::getVariableBuildingItem() {
+			COptimizedComplexBuildingIndividualVariableCompositionsItem* CAnsweringMessageDataCalculationCompletedVariableBindingConfirmation::getVariableBuildingItem() {
 				return mBuildingVarItem;
 			}
 

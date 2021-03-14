@@ -115,6 +115,7 @@ namespace Konclude {
 					CConfiguration *mLoaderConfig;
 
 					QFile* mResponseFile;
+					bool mWritingAppendingMode;
 					bool mWritingStarted;
 					bool mWritingFailed;
 					cint64 mChunkPart;

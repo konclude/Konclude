@@ -118,6 +118,7 @@ namespace Konclude {
 
 					CMemoryAllocationManager* mMemMan;
 
+					cint64 mLastConceptId;
 			};
 
 		}; // end namespace Preprocess

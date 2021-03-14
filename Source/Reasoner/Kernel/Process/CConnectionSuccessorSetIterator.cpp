@@ -33,18 +33,28 @@ namespace Konclude {
 
 				CConnectionSuccessorSetIterator::CConnectionSuccessorSetIterator(cint64 connID) {
 					mConnID = connID;
+					mIterator1 = false;
+					mIterator2 = false;
 				}
 
 
 				CConnectionSuccessorSetIterator::CConnectionSuccessorSetIterator(const CPROCESSSET<cint64>::iterator& beginIt, const CPROCESSSET<cint64>::iterator& endIt)
-						: mBeginIt(beginIt),mEndIt(endIt) {
+						: mBeginIt1(beginIt),mEndIt1(endIt) {
 					mConnID = CINT64_MIN;
+					mIterator1 = true;
+					mIterator2 = false;
+				}
+
+				CConnectionSuccessorSetIterator::CConnectionSuccessorSetIterator(const CPROCESSSET<cint64>::iterator& beginIt1, const CPROCESSSET<cint64>::iterator& endIt1, const CPROCESSSET<cint64>::iterator& beginIt2, const CPROCESSSET<cint64>::iterator& endIt2)
+					: mBeginIt1(beginIt1), mEndIt1(endIt1), mBeginIt2(beginIt2), mEndIt2(endIt2) {
+					mConnID = CINT64_MIN;
+					mIterator1 = true;
+					mIterator2 = true;
 				}
 
 
-
 				bool CConnectionSuccessorSetIterator::hasNext() {
-					return mConnID != CINT64_MIN || mBeginIt != mEndIt;
+					return mConnID != CINT64_MIN || mIterator1 && mBeginIt1 != mEndIt1 || mIterator2 && mBeginIt2 != mEndIt2;
 				}
 
 				cint64 CConnectionSuccessorSetIterator::nextSuccessorConnectionID(bool moveNext) {
@@ -55,10 +65,15 @@ namespace Konclude {
 							mConnID = CINT64_MIN;
 						}
 					}
-					if (mBeginIt != mEndIt) {
-						indiID = *mBeginIt;
+					if (mIterator1 && mBeginIt1 != mEndIt1) {
+						indiID = *mBeginIt1;
 						if (moveNext) {
-							++mBeginIt;
+							++mBeginIt1;
+						}
+					} else if (mIterator2 && mBeginIt2 != mEndIt2) {
+						indiID = *mBeginIt2;
+						if (moveNext) {
+							++mBeginIt2;
 						}
 					}
 					return indiID;

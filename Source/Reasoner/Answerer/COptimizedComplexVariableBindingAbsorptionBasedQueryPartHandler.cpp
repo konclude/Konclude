@@ -129,6 +129,7 @@ namespace Konclude {
 				} else if (!alreadyExistingInitializerConcept && !mQueryPart->hasIndividualVariables()) {
 					CConcept* topPropConcept = createRepeatedTopRolePropagationConcept(mQueryPart->getInitializerConcept());
 					mQueryPart->setInitializerConcept(topPropConcept);
+					mQueryPart->setTopObjectPropertyInitializationPropagation(true);
 				}
 
 				return this;
@@ -214,6 +215,11 @@ namespace Konclude {
 				CConcept* currentTriggerConcept = mQueryPart->getVariableLastTriggerConcept(currentVariable);
 
 				CRole* role = mOntoAnsweringItem->getOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getObjectPropertyTermRoleMappingHash()->value(objectProperty->getObjectPropertyTermExpression());
+				CRole* topRole = mOntoAnsweringItem->getOntology()->getDataBoxes()->getRBox()->getTopObjectRole();
+				if (topRole == role) {
+					mQueryPart->setTopObjectPropertyAbsorptionPropagation(true);
+				}
+
 				bool inversed = dynamic_cast<CIndividualVariableExpression*>(objectProperty->getFirstIndividualTermExpression()) == currentVariable;
 				if (inversed) {
 					role = role->getInverseRole();
@@ -259,7 +265,7 @@ namespace Konclude {
 				}
 
 
-				CConcept* propagationConcept = createVariableBindingPropagationConcept(nextTriggerConcept, role);
+				CConcept* propagationConcept = createVariableBindingPropagationToPreparedVariableConcept(nextTriggerConcept, role, otherVariable);
 				addConceptOperand(currentTriggerConcept, propagationConcept, false);
 
 				mQueryPart->propagateConceptPropagatedVariables(lastTrigger, currentTriggerConcept);
@@ -269,6 +275,27 @@ namespace Konclude {
 				mQueryPart->setLastTriggerConcept(lastTrigger);
 				mQueryPart->setLastTriggerVariable(otherVariable);
 				return otherVariable;
+			}
+
+
+
+
+
+			CConcept* COptimizedComplexVariableBindingAbsorptionBasedQueryPartHandler::createVariableBindingPropagationToVariableConcept(CConcept* followingTriggerConcept, CRole* role, CVariable* variable) {
+				CConcept* concept = createVariableBindingPropagationConcept(followingTriggerConcept, role);
+				CSortedLinker<CVariable*>* varLInker = CObjectAllocator< CSortedLinker<CVariable*> >::allocateAndConstruct(mMemMan);
+				varLInker->setData(variable);
+				concept->setVariableLinker(varLInker);
+				return concept;
+			}
+
+			CConcept* COptimizedComplexVariableBindingAbsorptionBasedQueryPartHandler::createVariableBindingPropagationToPreparedVariableConcept(CConcept* followingTriggerConcept, CRole* role, CExpressionVariable* destVariable) {
+				if (!role->isComplexRole() && mQueryPart->getPrepareVariableSet()->contains(destVariable)) {
+					CVariable* variable = getPropagationVariableForVariableExpression(destVariable);
+					return createVariableBindingPropagationToVariableConcept(followingTriggerConcept, role, variable);
+				} else {
+					return createVariableBindingPropagationConcept(followingTriggerConcept, role);
+				}
 			}
 
 
@@ -387,6 +414,24 @@ namespace Konclude {
 
 
 
+			CConcept* COptimizedComplexVariableBindingAbsorptionBasedQueryPartHandler::createPropagationToVariableConcept(CConcept* followingTriggerConcept, CRole* role, CVariable* variable) {
+				CConcept* concept = createPropagationConcept(followingTriggerConcept, role);
+				CSortedLinker<CVariable*>* varLInker = CObjectAllocator< CSortedLinker<CVariable*> >::allocateAndConstruct(mMemMan);
+				varLInker->setData(variable);
+				concept->setVariableLinker(varLInker);
+				return concept;
+			}
+
+			CConcept* COptimizedComplexVariableBindingAbsorptionBasedQueryPartHandler::createPropagationToPreparedVariableConcept(CConcept* followingTriggerConcept, CRole* role, CExpressionVariable* destVariable) {
+				if (!role->isComplexRole() && mQueryPart->getPrepareVariableSet()->contains(destVariable)) {
+					CVariable* variable = getPropagationVariableForVariableExpression(destVariable);
+					return createPropagationToVariableConcept(followingTriggerConcept, role, variable);
+				} else {
+					return createPropagationConcept(followingTriggerConcept, role);
+				}
+			}
+
+
 
 			CConcept* COptimizedComplexVariableBindingAbsorptionBasedQueryPartHandler::createPropagationConcept(CConcept* followingTriggerConcept, CRole* role) {
 				CConcept* succPropConcept = createNewConcept();
@@ -501,6 +546,11 @@ namespace Konclude {
 				}
 
 				CRole* role = mOntoAnsweringItem->getOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getObjectPropertyTermRoleMappingHash()->value(objectProperty->getObjectPropertyTermExpression());
+				CRole* topRole = mOntoAnsweringItem->getOntology()->getDataBoxes()->getRBox()->getTopObjectRole();
+				if (topRole == role) {
+					mQueryPart->setTopObjectPropertyAbsorptionPropagation(true);
+				}
+
 				bool inversed = dynamic_cast<CIndividualVariableExpression*>(objectProperty->getSecondIndividualTermExpression()) == currentVariable;
 				if (inversed) {
 					role = role->getInverseRole();

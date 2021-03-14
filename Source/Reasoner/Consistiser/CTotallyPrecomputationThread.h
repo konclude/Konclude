@@ -71,6 +71,8 @@ namespace Konclude {
 
 		namespace Consistiser {
 
+//#define KONCLUDE_DEBUG_PRECOMPUTATION_SCHEDULING_LOGS
+
 			using namespace Events;
 
 			class CConceptNegationSaturationItem : public QPair<CSaturationConceptDataItem*,QPair<CConcept*,bool> > {
@@ -187,6 +189,15 @@ namespace Konclude {
 					virtual bool precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CPrecomputationCalculatedCallbackEvent* pcce);
 					virtual bool precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CSaturationPrecomputationCalculatedCallbackEvent* pcce);
 
+					void synchronouslyRetrieveIndividualsPrecomputation(CTotallyOntologyPrecomputationItem* totallyPreCompItem, COntologyPrecomputationItem* ontPreCompItem);
+
+					virtual bool precomputationIndividualsRetrieved(COntologyPrecomputationItem* ontPreCompItem, CRetrievedPrecomputationIndividualsCallbackEvent* pcce);
+					virtual bool precomputationIndividualsRetrieved(COntologyPrecomputationItem* ontPreCompItem, bool directly);
+					bool decrementUsageFromIndividualPrecomputationCoordinationHash(CIndividualPrecomputationCoordinationHash* indiPrecompCoordHash, CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+					bool requestIndividualsPrecomputationRetrieval(CTotallyOntologyPrecomputationItem* totallyPreCompItem, bool allIndividualsSaturated);
+					bool retrieveIndividualsPrecomputation(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
+
+
 					bool createIndividualPrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					bool createConsistencePrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					bool createConceptCyclePrecomputation(CConceptCycleData* conceptCycleData, CTotallyOntologyPrecomputationItem* totallyPreCompItem);
@@ -229,7 +240,6 @@ namespace Konclude {
 					QList<CIndividualReference> getIndividualComputationList(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 					QList<CIndividualReference> getNextIndividualComputationPartList(CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
-					bool decrementUsageFromIndividualPrecomputationCoordinationHash(CIndividualPrecomputationCoordinationHash* indiPrecompCoordHash, CTotallyOntologyPrecomputationItem* totallyPreCompItem);
 
 
 				// protected variables
@@ -237,7 +247,6 @@ namespace Konclude {
 					CReuseCompletionGraphCacheWriter* mReuseCompletionGraphCacheWriter;
 					CBackendRepresentativeMemoryCache* mBackendAssocCache;
 
-					cint64 mIndividualSaturationCount;
 					bool mConfForceFullCompletionGraphConstruction;
 					bool mConfConditionalFullCompletionGraphConstruction;
 
@@ -246,6 +255,10 @@ namespace Konclude {
 
 					double mConfFullCGCExclusionConditionMaximumIndividualConceptRatio;
 					double mConfFullCGCSuggestionConditionMaximumIndividualConceptRatio;
+
+
+					double mConfPrecomputationIndividualsRetrievalWhileSaturation;
+
 
 				// private methods
 				private:

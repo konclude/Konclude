@@ -38,6 +38,12 @@ namespace Konclude {
 			bool CVariableBindingResult::isNamedIndividualBindingType() {
 				return getVariableBindingType() == VBTNAMEDINDIVIDUAL;
 			}
+			bool CVariableBindingResult::isClassBindingType() {
+				return getVariableBindingType() == VBTCLASS;
+			}
+			bool CVariableBindingResult::isPropertyBindingType() {
+				return getVariableBindingType() == VBTPROPERTY;
+			}
 
 			bool CVariableBindingResult::isAnonymousIndividualBindingType() {
 				return getVariableBindingType() == VBTANONYMOUSINDIVIDUAL;

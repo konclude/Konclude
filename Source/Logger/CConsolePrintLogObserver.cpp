@@ -58,11 +58,19 @@ namespace Konclude {
 			} else {
 				logLevelString = "notice";
 			}
+			QString logString = QString("{%1} %2 [%3]>> %4\r\n").arg(logLevelString).arg(message->getDateTimeMSecString()).arg(message->getDomain()).arg(message->getMessage());
+			std::cout << logString.toLocal8Bit().data() << std::flush;
 
-			std::cout	<< "{" << logLevelString.toLocal8Bit().data() << "} "
-						<< message->getDateTimeMSecString().toLocal8Bit().data()
-						<< "[" << message->getDomain().toLocal8Bit().data() 
-						<< "]>> " << message->getMessage().toLocal8Bit().data() << "\r\n"<<std::flush;
+
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+			QFile loggingFile(QString("./Debugging/logging.txt"));
+			if (loggingFile.open(QIODevice::Append)) {
+				QByteArray data = logString.toUtf8();
+				loggingFile.write(data);
+				loggingFile.write("\r\n");
+				loggingFile.close();
+			}
+#endif
 		}
 
 

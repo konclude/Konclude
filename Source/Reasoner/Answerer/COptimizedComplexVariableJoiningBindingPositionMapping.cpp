@@ -40,24 +40,37 @@ namespace Konclude {
 				mLeftPosMapArray = new cint64[mLeftMapSize];
 				mLeftKeyBindingLinker = nullptr;
 				mRightKeyBindingLinker = nullptr;
+				mLeftRemainingBindingLinker = nullptr;
+				mRightRemainingBindingLinker = nullptr;
+			}
+
+			CXLinker<cint64>* COptimizedComplexVariableJoiningBindingPositionMapping::copyKeyBindingLinker(CXLinker<cint64>* originalKeyBindingLinker) {
+				CXLinker<cint64>* copiedKeyBindingLinker = nullptr;
+				CXLinker<cint64>* lastRightKeyBindingLinker = nullptr;
+				for (CXLinker<cint64>* keyBindingLinkerIt = originalKeyBindingLinker; keyBindingLinkerIt; keyBindingLinkerIt = keyBindingLinkerIt->getNext()) {
+					cint64 keyIdx = keyBindingLinkerIt->getData();
+					CXLinker<cint64>* newKeyBindingLinker = new CXLinker<cint64>();
+					newKeyBindingLinker->initLinker(keyIdx);
+					if (lastRightKeyBindingLinker) {
+						lastRightKeyBindingLinker->setNext(newKeyBindingLinker);
+						lastRightKeyBindingLinker = newKeyBindingLinker;
+					} else {
+						lastRightKeyBindingLinker = newKeyBindingLinker;
+						copiedKeyBindingLinker = newKeyBindingLinker;
+					}
+				}
+				return copiedKeyBindingLinker;
 			}
 
 			COptimizedComplexVariableJoiningBindingPositionMapping::~COptimizedComplexVariableJoiningBindingPositionMapping() {
-				delete mRightPosMapArray;
-				delete mLeftPosMapArray;
+				delete[] mRightPosMapArray;
+				delete[] mLeftPosMapArray;
 
-				CXLinker<cint64>* keyBindingLinkerIt = mLeftKeyBindingLinker;
-				while (keyBindingLinkerIt) {
-					CXLinker<cint64>* tmpKeyBindingLinkerIt = keyBindingLinkerIt;
-					keyBindingLinkerIt = keyBindingLinkerIt->getNext();
-					delete tmpKeyBindingLinkerIt;
-				}
-				keyBindingLinkerIt = mRightKeyBindingLinker;
-				while (keyBindingLinkerIt) {
-					CXLinker<cint64>* tmpKeyBindingLinkerIt = keyBindingLinkerIt;
-					keyBindingLinkerIt = keyBindingLinkerIt->getNext();
-					delete tmpKeyBindingLinkerIt;
-				}
+				deleteKeyBindingLinker(mLeftKeyBindingLinker);
+				deleteKeyBindingLinker(mRightKeyBindingLinker);
+				deleteKeyBindingLinker(mLeftRemainingBindingLinker);
+				deleteKeyBindingLinker(mRightRemainingBindingLinker);
+
 			}
 
 
@@ -80,32 +93,15 @@ namespace Konclude {
 				mLeftKeyBindingLinker = nullptr;
 				mRightKeyBindingLinker = nullptr;
 
-				CXLinker<cint64>* lastRightKeyBindingLinker = nullptr;
-				for (CXLinker<cint64>* keyBindingLinkerIt = mapping.mRightKeyBindingLinker; keyBindingLinkerIt; keyBindingLinkerIt = keyBindingLinkerIt->getNext()) {
-					cint64 keyIdx = keyBindingLinkerIt->getData();
-					CXLinker<cint64>* newKeyBindingLinker = new CXLinker<cint64>();
-					newKeyBindingLinker->initLinker(keyIdx);
-					if (lastRightKeyBindingLinker) {
-						lastRightKeyBindingLinker->setNext(newKeyBindingLinker);
-						lastRightKeyBindingLinker = newKeyBindingLinker;
-					} else {
-						lastRightKeyBindingLinker = newKeyBindingLinker;
-						mRightKeyBindingLinker = newKeyBindingLinker;
-					}
-				}
-				CXLinker<cint64>* lastLeftKeyBindingLinker = nullptr;
-				for (CXLinker<cint64>* keyBindingLinkerIt = mapping.mLeftKeyBindingLinker; keyBindingLinkerIt; keyBindingLinkerIt = keyBindingLinkerIt->getNext()) {
-					cint64 keyIdx = keyBindingLinkerIt->getData();
-					CXLinker<cint64>* newKeyBindingLinker = new CXLinker<cint64>();
-					newKeyBindingLinker->initLinker(keyIdx);
-					if (lastLeftKeyBindingLinker) {
-						lastLeftKeyBindingLinker->setNext(newKeyBindingLinker);
-						lastLeftKeyBindingLinker = newKeyBindingLinker;
-					} else {
-						lastLeftKeyBindingLinker = newKeyBindingLinker;
-						mLeftKeyBindingLinker = newKeyBindingLinker;
-					}
-				}
+				mRightKeyBindingLinker = copyKeyBindingLinker(mapping.mRightKeyBindingLinker);
+				mLeftKeyBindingLinker = copyKeyBindingLinker(mapping.mLeftKeyBindingLinker);
+
+				mLeftRemainingBindingLinker = nullptr;
+				mRightRemainingBindingLinker = nullptr;
+
+				mRightRemainingBindingLinker = copyKeyBindingLinker(mapping.mRightRemainingBindingLinker);
+				mLeftRemainingBindingLinker = copyKeyBindingLinker(mapping.mLeftRemainingBindingLinker);
+
 			}
 
 
@@ -274,6 +270,32 @@ namespace Konclude {
 			}
 
 
+
+			CXLinker<cint64>* COptimizedComplexVariableJoiningBindingPositionMapping::getLeftRemainingBindingLinker() {
+				return mLeftRemainingBindingLinker;
+			}
+
+			CXLinker<cint64>* COptimizedComplexVariableJoiningBindingPositionMapping::getRightRemainingBindingLinker() {
+				return mRightRemainingBindingLinker;
+			}
+
+			COptimizedComplexVariableJoiningBindingPositionMapping* COptimizedComplexVariableJoiningBindingPositionMapping::setLeftRemainingBindingLinker(CXLinker<cint64>* linker) {
+				mLeftRemainingBindingLinker = linker;
+				return this;
+			}
+
+			COptimizedComplexVariableJoiningBindingPositionMapping* COptimizedComplexVariableJoiningBindingPositionMapping::setRightRemainingBindingLinker(CXLinker<cint64>* linker) {
+				mRightRemainingBindingLinker = linker;
+				return this;
+			}
+
+			void COptimizedComplexVariableJoiningBindingPositionMapping::deleteKeyBindingLinker(CXLinker<cint64>* keyBindingLinkerIt) {
+				while (keyBindingLinkerIt) {
+					CXLinker<cint64>* tmpKeyBindingLinkerIt = keyBindingLinkerIt;
+					keyBindingLinkerIt = keyBindingLinkerIt->getNext();
+					delete tmpKeyBindingLinkerIt;
+				}
+			}
 
 		}; // end namespace Answerer
 

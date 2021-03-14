@@ -37,6 +37,9 @@ namespace Konclude {
 			}
 
 
+			bool CReasonerEvaluationProvider::restartReasoner() {
+				return false;
+			}
 
 		}; // end namespace Evaluation
 

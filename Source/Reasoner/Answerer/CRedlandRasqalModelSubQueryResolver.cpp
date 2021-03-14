@@ -1319,8 +1319,16 @@ namespace Konclude {
 				librdf_world* world = subQueryProcData->getRedlandWorld();
 				rasqal_world* rasqal_world_ptr = librdf_world_get_rasqal(world);
 				if (varBin) {
-					if (varBin->isNamedIndividualBindingType()) {
+					if (varBin->isNamedIndividualBindingType() ) {
 						QByteArray bytes = varBin->getNamedIndividualBindingString().toUtf8();
+						raptor_uri* uri = (raptor_uri*)librdf_new_uri(world, (const unsigned char*)bytes.constData());
+						l = rasqal_new_uri_literal(rasqal_world_ptr, uri); /* transfer uri ownership to literal */
+					} else if (varBin->isClassBindingType()) {
+						QByteArray bytes = varBin->getClassBindingString().toUtf8();
+						raptor_uri* uri = (raptor_uri*)librdf_new_uri(world, (const unsigned char*)bytes.constData());
+						l = rasqal_new_uri_literal(rasqal_world_ptr, uri); /* transfer uri ownership to literal */
+					} else if (varBin->isPropertyBindingType()) {
+						QByteArray bytes = varBin->getPropertyBindingString().toUtf8();
 						raptor_uri* uri = (raptor_uri*)librdf_new_uri(world, (const unsigned char*)bytes.constData());
 						l = rasqal_new_uri_literal(rasqal_world_ptr, uri); /* transfer uri ownership to literal */
 					} else if (varBin->isAnonymousIndividualBindingType()) {
@@ -1359,6 +1367,14 @@ namespace Konclude {
 				if (varBin) {
 					if (varBin->isNamedIndividualBindingType()) {
 						QByteArray bytes = varBin->getNamedIndividualBindingString().toUtf8();
+						librdf_uri *uri = librdf_new_uri(world, (const unsigned char*)bytes.constData());
+						node = librdf_new_node_from_uri(world, uri);
+					} else if ( varBin->isPropertyBindingType()) {
+						QByteArray bytes = varBin->getPropertyBindingString().toUtf8();
+						librdf_uri *uri = librdf_new_uri(world, (const unsigned char*)bytes.constData());
+						node = librdf_new_node_from_uri(world, uri);
+					} else if ( varBin->isClassBindingType()) {
+						QByteArray bytes = varBin->getClassBindingString().toUtf8();
 						librdf_uri *uri = librdf_new_uri(world, (const unsigned char*)bytes.constData());
 						node = librdf_new_node_from_uri(world, uri);
 					} else if (varBin->isAnonymousIndividualBindingType()) {

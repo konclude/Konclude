@@ -32,54 +32,78 @@ namespace Konclude {
 
 
 				CSuccessorIterator::CSuccessorIterator() {
-					mLastSucc = -1;
+					mLastSucc = CINT64_MIN;
+					mIterator1 = false;
+					mIterator2 = false;
 				}
 
 
 				CSuccessorIterator::CSuccessorIterator(const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& beginIt, const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& endIt)
-						: mBeginIt(beginIt),mEndIt(endIt) {
+						: mBeginIt1(beginIt),mEndIt1(endIt) {
 
-					mLastSucc = -1;
-					while (mBeginIt != mEndIt && mBeginIt.value() == nullptr) {
-						++mBeginIt;
+					mLastSucc = CINT64_MIN;
+					mIterator1 = true;
+					mIterator2 = false;
+					while (mBeginIt1 != mEndIt1 && mBeginIt1.value() == nullptr) {
+						++mBeginIt1;
+					}
+				}
+
+				
+				CSuccessorIterator::CSuccessorIterator(const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt2, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt2, const CPROCESSHASH<cint64, CIndividualLinkEdge*>* it2ValHash)
+					: mBeginIt1(beginIt1), mEndIt1(endIt1), mBeginIt2(beginIt2), mEndIt2(endIt2) {
+
+					mLastSucc = CINT64_MIN;
+					mIterator1 = true;
+					mIterator2 = true;
+					while (mBeginIt1 != mEndIt1 && mBeginIt1.value() == nullptr) {
+						++mBeginIt1;
+					}
+					mIt2ValHash = it2ValHash;
+					while (mBeginIt2 != mEndIt2 && mBeginIt2.value() == nullptr && (!mIt2ValHash || mIt2ValHash->contains(mBeginIt2.key()))) {
+						++mBeginIt2;
 					}
 				}
 
 
-
 				bool CSuccessorIterator::hasNext() {
-					return mBeginIt != mEndIt;
+					return mIterator1 && mBeginIt1 != mEndIt1 || mIterator2 && mBeginIt2 != mEndIt2;
 				}
 
 				CIndividualLinkEdge* CSuccessorIterator::nextLink(bool moveNext) {
 					CIndividualLinkEdge* link = nullptr;
-					if (mBeginIt != mEndIt) {
-						link = mBeginIt.value();
-						mLastSucc = mBeginIt.key();
-						if (moveNext) {
-							++mBeginIt;
-							while (mBeginIt != mEndIt && (mBeginIt.value() == nullptr || mLastSucc == mBeginIt.key())) {
-								++mBeginIt;
-							}
-						}
+					cint64 indiID = 0;
+					if (mIterator1 && mBeginIt1 != mEndIt1) {
+						iterate(link, indiID, moveNext, mBeginIt1, mEndIt1, nullptr);
+					} else if (mIterator2 && mBeginIt2 != mEndIt2) {
+						iterate(link, indiID, moveNext, mBeginIt2, mEndIt2, mIt2ValHash);
 					}
 					return link;
 				}
 
 
 				cint64 CSuccessorIterator::nextIndividualID(bool moveNext) {
+					CIndividualLinkEdge* link = nullptr;
 					cint64 indiID = 0;
-					if (mBeginIt != mEndIt) {
-						indiID = mBeginIt.key();
-						mLastSucc = mBeginIt.key();
-						if (moveNext) {
-							++mBeginIt;
-							while (mBeginIt != mEndIt && (mBeginIt.value() == nullptr || mLastSucc == mBeginIt.key())) {
-								++mBeginIt;
-							}
-						}
+					if (mIterator1 && mBeginIt1 != mEndIt1) {
+						iterate(link, indiID, moveNext, mBeginIt1, mEndIt1, nullptr);
+					} else if (mIterator2 && mBeginIt2 != mEndIt2) {
+						iterate(link, indiID, moveNext, mBeginIt2, mEndIt2, mIt2ValHash);
 					}
 					return indiID;
+				}
+
+				bool CSuccessorIterator::iterate(CIndividualLinkEdge*& link, cint64& indiId, bool moveNext, CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt, CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt, const CPROCESSHASH<cint64, CIndividualLinkEdge*>* itValHash) {
+					link = beginIt.value();
+					indiId = beginIt.key();
+					mLastSucc = beginIt.key();
+					if (moveNext) {
+						++beginIt;
+						while (beginIt != endIt && (beginIt.value() == nullptr || mLastSucc == beginIt.key()) && (!itValHash || itValHash->contains(beginIt.key()))) {
+							++beginIt;
+						}
+					}						
+					return true;
 				}
 
 			}; // end namespace Process

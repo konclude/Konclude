@@ -30,7 +30,7 @@ namespace Konclude {
 			namespace Cache {
 
 
-				CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData::CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData(CBackendRepresentativeMemoryCacheContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
+				CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData::CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData(CContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
 					mCacheItemExtensionType = INDIVIDUAL_ASSOCIATION_MAP;
 				}
 

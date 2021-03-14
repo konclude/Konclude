@@ -101,6 +101,11 @@ namespace Konclude {
 				return this;
 			}
 
+			CComplexConceptStepInstanceComputationProcess* CComplexConceptStepInstanceComputationProcess::clearComputedInstancesCount() {
+				mComputedInstancesCount = 0;
+				mStarted = false;
+				return this;
+			}
 
 
 

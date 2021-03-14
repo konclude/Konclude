@@ -202,6 +202,12 @@ namespace Konclude {
 						calculationCreationContinued = handlerData->mAnsweringHandler->continueCalculationCreation(mAnswererContext);
 						calculationCreated |= calculationCreationContinued;
 					}
+					if (calculationCreated) {
+						handlerData->mProcessing = true;
+						mProcessingAnsweringHandlerSet.insert(handlerData);
+					} else {
+						mProcessingAnsweringHandlerSet.remove(handlerData);
+					}
 					if (!calculationCreationContinued) {
 						handlerData->mQueued = false;
 						mQueuedAnsweringHandlerList.removeFirst();
@@ -216,14 +222,7 @@ namespace Konclude {
 							mReadWriteLock.unlock();
 							delete handlerData;
 						}
-					} else {
-						mProcessingAnsweringHandlerSet.remove(handlerData);
 					}
-					if (calculationCreated) {
-						handlerData->mProcessing = true;
-						mProcessingAnsweringHandlerSet.insert(handlerData);
-					}
-
 				}
 				submitCalculationJobs();
 				return createdCalculationJobs;

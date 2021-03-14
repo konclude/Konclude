@@ -31,17 +31,39 @@ namespace Konclude {
 			COptimizedComplexConceptInstanziatedIndividualItemHash::COptimizedComplexConceptInstanziatedIndividualItemHash() {
 				mAddedLinker = nullptr;
 				mTmpLinker = nullptr;
+				mMemManContext = new CMemoryPoolNewAllocationIncreasingContext(500, 500000, 2);
+				mIndiRefLinkerHash = CObjectParameterizingAllocator< CQtManagedRestrictedModificationHash<COptimizedComplexConceptInstanziatedIndividualItemHasher, COptimizedComplexConceptInstanziatedIndividualItemLinker*>, CContext* >::allocateAndConstructAndParameterize(getInstancesMemoryAllocationManager(), mMemManContext);
+			}
+
+			COptimizedComplexConceptInstanziatedIndividualItemHash::~COptimizedComplexConceptInstanziatedIndividualItemHash() {
+				if (mMemManContext) {
+					CMemoryPool* memPools = mMemManContext->getMemoryPools();
+					CMemoryPool* memPoolsIt = memPools;
+					while (memPoolsIt) {
+						CMemoryPool* tmpMemPool = memPoolsIt;
+						memPoolsIt = memPoolsIt->getNext();
+						delete[] tmpMemPool->getMemoryBlockData();
+						delete tmpMemPool;
+					}
+					delete mMemManContext;
+					mMemManContext = nullptr;
+				}
+			}
+
+
+			CMemoryAllocationManager* COptimizedComplexConceptInstanziatedIndividualItemHash::getInstancesMemoryAllocationManager() {
+				return mMemManContext->getMemoryAllocationManager();
 			}
 
 
 			COptimizedComplexConceptInstanziatedIndividualItemHash* COptimizedComplexConceptInstanziatedIndividualItemHash::addRealizationIndividualInstanceItemReference(const CRealizationIndividualInstanceItemReference& itemRef) {
-
 				if (!mTmpLinker) {
-					mTmpLinker = new COptimizedComplexConceptInstanziatedIndividualItemLinker(itemRef);
+					mTmpLinker = CObjectAllocator<COptimizedComplexConceptInstanziatedIndividualItemLinker>::allocateAndConstruct(getInstancesMemoryAllocationManager());
+					mTmpLinker->initLinker(itemRef);
 				} else {
 					mTmpLinker->initLinker(itemRef);
 				}
-				COptimizedComplexConceptInstanziatedIndividualItemLinker*& insertedLinker = this->operator[](mTmpLinker);
+				COptimizedComplexConceptInstanziatedIndividualItemLinker*& insertedLinker = mIndiRefLinkerHash->operator[](mTmpLinker);
 				if (!insertedLinker) {
 					insertedLinker = mTmpLinker;
 					mAddedLinker = mTmpLinker->append(mAddedLinker);
@@ -51,8 +73,29 @@ namespace Konclude {
 			}
 
 
+			CQtManagedRestrictedModificationHash<COptimizedComplexConceptInstanziatedIndividualItemHasher, COptimizedComplexConceptInstanziatedIndividualItemLinker*>* COptimizedComplexConceptInstanziatedIndividualItemHash::getIndividualInstanceItemReferenceLinkerHash() {
+				return mIndiRefLinkerHash;
+			}
+
+			COptimizedComplexConceptInstanziatedIndividualItemHash* COptimizedComplexConceptInstanziatedIndividualItemHash::remove(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker) {
+				mIndiRefLinkerHash->remove(linker);
+				return this;
+			}
+
 			COptimizedComplexConceptInstanziatedIndividualItemLinker* COptimizedComplexConceptInstanziatedIndividualItemHash::getAddedRealizationIndividualInstanceItemReferenceLinker() {
 				return mAddedLinker;
+			}
+
+			cint64 COptimizedComplexConceptInstanziatedIndividualItemHash::getMemoryConsumption() {
+				return mMemManContext->getMemorySize();
+			}
+
+			cint64 COptimizedComplexConceptInstanziatedIndividualItemHash::size() {
+				return mIndiRefLinkerHash->size();
+			}
+
+			bool COptimizedComplexConceptInstanziatedIndividualItemHash::isEmpty() {
+				return mIndiRefLinkerHash->isEmpty();
 			}
 
 

@@ -69,6 +69,9 @@ namespace Konclude {
 					virtual CObjectContainer *getObjectContainer(bool create = true);
 					virtual COntologyContextMemoryManager *getOnologyMemoryManager(COntologyContextMemoryManagerProvider *provider = nullptr);
 
+
+					virtual COntologyContext* addUsedMemoryPools(CMemoryPool* memoryPools);
+
 				// protected methods
 				protected:
 

@@ -675,6 +675,8 @@ namespace Konclude {
 						//	updateTaskStatus(parentTask);
 						//}
 						updateTask = updateTask->getParentTask();
+					} else {
+						updateTask = nullptr;
 					}
 				} else {
 					updateTask = nullptr;

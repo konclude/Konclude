@@ -26,7 +26,7 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "COptimizedComplexBuildingVariableCompositionsItem.h"
+#include "COptimizedComplexBuildingIndividualVariableCompositionsItem.h"
 
 
 
@@ -59,7 +59,7 @@ namespace Konclude {
 					CEntailmentVariableBuildingItemData();
 
 
-					CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* mProcDataLinker;
+					CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>* mProcDataLinker;
 					bool mHasResult;
 					bool mHasRequested;
 

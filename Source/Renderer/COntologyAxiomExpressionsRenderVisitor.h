@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef KONCLUDE_RENDERER_COntologyAxiomExpressionsRenderVisitor_H
-#define KONCLUDE_RENDERER_COntologyAxiomExpressionsRenderVisitor_H
+#ifndef KONCLUDE_RENDERER_CONTOLOGYAXIOMEXPRESSIONSRENDERVISITOR_H
+#define KONCLUDE_RENDERER_CONTOLOGYAXIOMEXPRESSIONSRENDERVISITOR_H
 
 // Libraries includes
 
@@ -32,7 +32,11 @@
 
 
 // Other includes
+#include "Reasoner/Triples/CTriplesData.h"
+
+
 #include "Reasoner/Ontology/CConcreteOntology.h"
+#include "Reasoner/Ontology/COntologyTriplesIndividualAssertionsVisitor.h"
 
 #include "Parser/Expressions/CSubClassOfExpression.h"
 #include "Parser/Expressions/CClassTermExpression.h"
@@ -95,6 +99,7 @@
 
 #include "Reasoner/Generator/CStringRefStringHasher.h"
 
+
 // Logger includes
 #include "Logger/CLogger.h"
 
@@ -104,6 +109,7 @@ namespace Konclude {
 
 	using namespace Reasoner::Ontology;
 	using namespace Reasoner::Generator;
+	using namespace Reasoner::Triples;
 	using namespace Parser::Expression;
 
 	namespace Renderer {
@@ -118,7 +124,7 @@ namespace Konclude {
 		*		\brief		TODO
 		*
 		*/
-		class COntologyAxiomExpressionsRenderVisitor : public COntologyRenderVisitor {
+		class COntologyAxiomExpressionsRenderVisitor : public COntologyRenderVisitor, protected COntologyTriplesIndividualAssertionsVisitor {
 			// public methods
 			public:
 				//! Constructor
@@ -126,10 +132,22 @@ namespace Konclude {
 
 
 				bool visitAndRender(const CQtList<CAxiomExpression*>& axiomList, CConcreteOntology* ontology, COntologyRenderer* renderer);
+				bool visitAndRender(COntologyTriplesData* ontTriplesData, CConcreteOntology* ontology, COntologyRenderer* renderer);
+				bool visitAndRender(QList<CTriplesData*>* triplesDataList, CConcreteOntology* ontology, COntologyRenderer* renderer);
+
 
 
 			// protected methods
 			protected:
+
+
+				virtual bool visitRoleAssertion(CRole* role, cint64 otherIndividualId, COntologyTriplesAssertionsAccessor* accessor);
+				virtual bool visitReverseRoleAssertion(CRole* role, cint64 otherIndividualId, COntologyTriplesAssertionsAccessor* accessor);
+				virtual bool visitDataAssertion(CRole* role, CDataLiteral* dataLiteral, COntologyTriplesAssertionsAccessor* accessor);
+				virtual bool visitConceptAssertion(CConcept* concept, COntologyTriplesAssertionsAccessor* accessor);
+				virtual bool visitIndividualName(const QString& indiName, COntologyTriplesAssertionsAccessor* accessor);
+
+
 
 				bool addRemainingVisitingAndRenderEntity(CExpressionEntity* entity);
 
@@ -241,7 +259,10 @@ namespace Konclude {
 			// protected variables
 			protected:
 				CBUILDHASH<CConcept*,CClassTermExpression*>* mConceptClassTermMapHash;
-				CBUILDHASH<CClassTermExpression*,CClassAxiomExpression*>* mClassTermExpClassAxiomHash;
+				CBUILDHASH<CClassTermExpression*, CClassAxiomExpression*>* mClassTermExpClassAxiomHash;
+				CBUILDHASH<CRole*, CObjectPropertyTermExpression*>* mRoleObjectPropertyTermMapHash;
+				CBUILDHASH<CRole*, CDataPropertyTermExpression*>* mRoleDataPropertyTermMapHash;
+				CBUILDHASH<CDatatype*, CDatatypeExpression*>* mDatatypeDatatypeExpHash;
 				COntologyRenderer* mRenderer;
 				CConcreteOntology* mOntology;
 
@@ -251,6 +272,12 @@ namespace Konclude {
 				QSet<CBuildExpression*> mTestedAxiomSet;
 				QSet<CAxiomExpression*> mVisitedAxiomSet;
 				QList<CAxiomExpression*> mRemainingAxiomList;
+
+				cint64 mTriplesAssertionVisitingIndividualId;
+				QString mTriplesAssertionVisitingIndividualName;
+
+
+				CRenderedItemLinker* mVisitingTempRenderedLinker;
 
 
 			// private methods
@@ -265,4 +292,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_RENDERER_COntologyAxiomExpressionsRenderVisitor_H
+#endif // KONCLUDE_RENDERER_CONTOLOGYAXIOMEXPRESSIONSRENDERVISITOR_H

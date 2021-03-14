@@ -393,6 +393,9 @@ namespace Konclude {
 
 
 
+			bool CIncrementalPrecomputationThread::precomputationIndividualsRetrieved(COntologyPrecomputationItem* ontPreCompItem, CRetrievedPrecomputationIndividualsCallbackEvent* pcce) {
+				return false;
+			}
 
 
 			bool CIncrementalPrecomputationThread::precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CSaturationPrecomputationCalculatedCallbackEvent* pcce) {

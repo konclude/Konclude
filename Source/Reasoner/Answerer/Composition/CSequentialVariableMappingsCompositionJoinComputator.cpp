@@ -29,6 +29,7 @@ namespace Konclude {
 			namespace Composition {
 
 				CSequentialVariableMappingsCompositionJoinComputator::CSequentialVariableMappingsCompositionJoinComputator() {
+					mComputerName = "Sequential join";
 				}
 
 
@@ -86,6 +87,27 @@ namespace Konclude {
 
 
 
+
+
+					bool splitComputationMode = joiningItem->isSplitComputationMode();
+					cint64 leftSplitCount = joiningItem->getLeftSplitCount();
+					cint64 rightSplitCount = joiningItem->getRightSplitCount();
+					cint64 leftSplitPos = joiningItem->getLeftSplitPosition();
+					cint64 rightSplitPos = joiningItem->getRightSplitPosition();
+
+					CXLinker<cint64>* leftRemainingBindingLinker = nullptr;
+					CXLinker<cint64>* rightRemainingBindingLinker = nullptr;
+
+					if (splitComputationMode) {
+						leftRemainingBindingLinker = variablePositionMapping->getLeftRemainingBindingLinker();
+						rightRemainingBindingLinker = variablePositionMapping->getRightRemainingBindingLinker();
+					}
+
+					cint64 splitComputationCount = 0;
+					CMemoryAllocationManager* bindingsMemMan = joinedVarMapping->getBindingsMemoryAllocationManager();
+
+
+
 					auto joiningVariableMappingCreationFunc = [&](COptimizedComplexVariableIndividualBindings* leftvarMapping, COptimizedComplexVariableIndividualBindingsCardinality* leftNewCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* leftPrevCardinalites, COptimizedComplexVariableIndividualBindings* rightvarMapping, COptimizedComplexVariableIndividualBindingsCardinality* rightNewCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* righPrevCardinalites) -> void {
 
 
@@ -120,10 +142,10 @@ namespace Konclude {
 						TIndividualInstanceItemDataBinding* rightBinding = rightvarMapping->getBindingArray();
 
 						if (!joinedBindings) {
-							joinedBindings = createBindingsForVariableCompositionItems(joinSize, joiningItem, buildingVarItem);
+							joinedBindings = createBindingsForVariableCompositionItems(joinSize, joiningItem, buildingVarItem, bindingsMemMan);
 						}
 						if (!joinedCardinalites && (leftCardinalites || rightCardinalites || reduction)) {
-							joinedCardinalites = createBindingsCardinalitesForVariableCompositionItems(joiningItem, buildingVarItem);
+							joinedCardinalites = createBindingsCardinalitesForVariableCompositionItems(joiningItem, buildingVarItem, bindingsMemMan);
 							cardCreated = true;
 						}
 						if (leftCardinalites && rightCardinalites) {
@@ -184,7 +206,7 @@ namespace Konclude {
 
 
 						if (!joinedLinker) {
-							joinedLinker = createBindingsLinkerForVariableCompositionItems(joinedBindings, joinedCardinalites, joiningItem, buildingVarItem);
+							joinedLinker = createBindingsLinkerForVariableCompositionItems(joinedBindings, joinedCardinalites, joiningItem, buildingVarItem, bindingsMemMan);
 						} else {
 							joinedLinker->setInitialCardinality(joinedCardinalites);
 						}
@@ -212,60 +234,105 @@ namespace Konclude {
 
 
 					function<void(bool left, CXLinker<cint64>* keyBindingLinker, COptimizedComplexVariableIndividualBindings* varMapping, COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites, cint64& sampleLimit)> joiningHashSampleInserterFunc = [&](bool left, CXLinker<cint64>* keyBindingLinker, COptimizedComplexVariableIndividualBindings* varMapping, COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites, cint64& sampleCount) -> void {
-						COptimizedComplexVariableJoiningHasher bindingHasher(varMapping->getBindingArray(), keyBindingLinker);
-						COptimizedComplexVariableJoiningData& joiningData = (*joiningHash)[bindingHasher];
 
-						//if (left) {
-						//	joiningData.mLeftAdded++;
-						//} else {
-						//	joiningData.mRightAdded++;
-						//}
+						CXLinker<cint64>* remainingBindingLinker = leftRemainingBindingLinker;
+						cint64 splitCount = leftSplitCount;
+						cint64 splitPos = leftSplitPos;
+						if (!left) {
+							remainingBindingLinker = rightRemainingBindingLinker;
+							splitPos = rightSplitPos;
+							splitCount = rightSplitCount;
+						}
 
-						if (!joiningData.hasBindings(left)) {
-							++sampleCount;
+						COptimizedComplexVariableJoiningWithRemainingHasher bindingHasher(varMapping->getBindingArray(), keyBindingLinker, remainingBindingLinker);
+
+						cint64 keyHashValue = bindingHasher.getHashValue();
+						uint uintHashValue = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue);
+
+						if (!splitComputationMode || bindingHasher.getRemainingHashValue() % splitCount == splitPos) {
+
+							COptimizedComplexVariableJoiningData& joiningData = (*joiningHash)[bindingHasher];
+
+							//if (left) {
+							//	joiningData.mLeftAdded++;
+							//} else {
+							//	joiningData.mRightAdded++;
+							//}
+
+							if (!joiningData.hasBindings(left)) {
+								++sampleCount;
+							}
+							COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = new COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker(varMapping, newCardinalites, prevCardinalites);
+							for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!left); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
+								joiningVariableMappingCreationLeftRightLinkerFunc(existingOtherLinkerIt, linker, left);
+							}
+							joiningData.addBindingLinker(left, linker);
 						}
-						COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = new COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker(varMapping, newCardinalites, prevCardinalites);
-						for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!left); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
-							joiningVariableMappingCreationLeftRightLinkerFunc(existingOtherLinkerIt, linker, left);
-						}
-						joiningData.addBindingLinker(left, linker);
 					};
 
 
 
 					function<void(bool left, CXLinker<cint64>* keyBindingLinker, COptimizedComplexVariableIndividualBindings* varMapping, COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites)> joiningHashInserterFunc = [&](bool left, CXLinker<cint64>* keyBindingLinker, COptimizedComplexVariableIndividualBindings* varMapping, COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites) -> void {
-						COptimizedComplexVariableJoiningHasher bindingHasher(varMapping->getBindingArray(), keyBindingLinker);
-						COptimizedComplexVariableJoiningData& joiningData = (*joiningHash)[bindingHasher];
-
-						//if (left) {
-						//	joiningData.mLeftAdded++;
-						//} else {
-						//	joiningData.mRightAdded++;
-						//}
-
-
-						COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = new COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker(varMapping, newCardinalites, prevCardinalites);
-						for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!left); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
-							joiningVariableMappingCreationLeftRightLinkerFunc(existingOtherLinkerIt, linker, left);
+						CXLinker<cint64>* remainingBindingLinker = leftRemainingBindingLinker;
+						cint64 splitCount = leftSplitCount;
+						cint64 splitPos = leftSplitPos;
+						if (!left) {
+							remainingBindingLinker = rightRemainingBindingLinker;
+							splitPos = rightSplitPos;
+							splitCount = rightSplitCount;
 						}
-						joiningData.addBindingLinker(left, linker);
+
+						COptimizedComplexVariableJoiningWithRemainingHasher bindingHasher(varMapping->getBindingArray(), keyBindingLinker, remainingBindingLinker);
+						cint64 keyHashValue = bindingHasher.getHashValue();
+						uint uintHashValue = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue);
+
+						if (!splitComputationMode || bindingHasher.getRemainingHashValue() % splitCount == splitPos) {
+							COptimizedComplexVariableJoiningData& joiningData = (*joiningHash)[bindingHasher];
+
+							//if (left) {
+							//	joiningData.mLeftAdded++;
+							//} else {
+							//	joiningData.mRightAdded++;
+							//}
+
+
+							COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* linker = new COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker(varMapping, newCardinalites, prevCardinalites);
+							for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!left); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
+								joiningVariableMappingCreationLeftRightLinkerFunc(existingOtherLinkerIt, linker, left);
+							}
+							joiningData.addBindingLinker(left, linker);
+						}
 					};
 
 
 					// assuming that all mappings from the inserter side have been inserted
 					function<void(bool left, CXLinker<cint64>* keyBindingLinker, COptimizedComplexVariableIndividualBindings* varMapping, COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites)> joiningHashCheckerFunc = [&](bool left, CXLinker<cint64>* keyBindingLinker, COptimizedComplexVariableIndividualBindings* varMapping, COptimizedComplexVariableIndividualBindingsCardinality* newCardinalites, COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites) -> void {
-						COptimizedComplexVariableJoiningHasher bindingHasher(varMapping->getBindingArray(), keyBindingLinker);
-						const COptimizedComplexVariableJoiningData& joiningData = joiningHash->value(bindingHasher);
+						CXLinker<cint64>* remainingBindingLinker = leftRemainingBindingLinker;
+						cint64 splitCount = leftSplitCount;
+						cint64 splitPos = leftSplitPos;
+						if (!left) {
+							remainingBindingLinker = rightRemainingBindingLinker;
+							splitPos = rightSplitPos;
+							splitCount = rightSplitCount;
+						}
 
-						//if (left) {
-						//	joiningData.mLeftAdded++;
-						//} else {
-						//	joiningData.mRightAdded++;
-						//}
+						COptimizedComplexVariableJoiningWithRemainingHasher bindingHasher(varMapping->getBindingArray(), keyBindingLinker, remainingBindingLinker);
+						cint64 keyHashValue = bindingHasher.getHashValue();
+						uint uintHashValue = uint((keyHashValue >> (8 * sizeof(uint) - 1)) ^ keyHashValue);
 
-						COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker tmpLinker(varMapping, newCardinalites, prevCardinalites);
-						for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!left); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
-							joiningVariableMappingCreationLeftRightLinkerFunc(existingOtherLinkerIt, &tmpLinker, left);
+						if (!splitComputationMode || bindingHasher.getRemainingHashValue() % splitCount == splitPos) {
+							const COptimizedComplexVariableJoiningData& joiningData = joiningHash->value(bindingHasher);
+
+							//if (left) {
+							//	joiningData.mLeftAdded++;
+							//} else {
+							//	joiningData.mRightAdded++;
+							//}
+
+							COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker tmpLinker(varMapping, newCardinalites, prevCardinalites);
+							for (COptimizedComplexVariableJoiningBindingsCardinalitiesDataLinker* existingOtherLinkerIt = joiningData.getBindingLinker(!left); existingOtherLinkerIt; existingOtherLinkerIt = existingOtherLinkerIt->getNext()) {
+								joiningVariableMappingCreationLeftRightLinkerFunc(existingOtherLinkerIt, &tmpLinker, left);
+							}
 						}
 					};
 
@@ -279,11 +346,11 @@ namespace Konclude {
 
 					bool mappingProcessed = false;
 					bool requiresScheduling = false;
-					while (!joiningItem->isSamplingCompleted() && joiningItem->requiresMoreVariableMappingsComputation() && (!leftItemDep->isBatchProcessed(false) || !rightItemDep->isBatchProcessed(false) || leftItemDep->loadNextBatch(false) || rightItemDep->loadNextBatch(false)) && !requiresScheduling) {
+					while (!joiningItem->isSamplingCompleted() && requiresMoreVariableMappingComputation(joiningItem, true) && (!leftItemDep->isBatchProcessed(false) || !rightItemDep->isBatchProcessed(false) || leftItemDep->loadNextBatch(false) || rightItemDep->loadNextBatch(false)) && !requiresScheduling) {
 
-						while (joiningItem->requiresMoreVariableMappingsComputation() && ((leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) || (rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize))) {
+						while (requiresMoreVariableMappingComputation(joiningItem, true) && ((leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) || (rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize))) {
 
-							if (joiningItem->requiresMoreVariableMappingsComputation() && leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
+							if (requiresMoreVariableMappingComputation(joiningItem, true) && leftItemDep->getBatchCurrentBindingsCardinalityLinker(false) && leftSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
 								mappingProcessed = true;
 								++leftSampleInsertionCount;
 								COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = leftItemDep->getBatchCurrentBindingsCardinalityLinker(true);
@@ -293,7 +360,7 @@ namespace Konclude {
 								joiningHashSampleInserterFunc(true, leftKeyBindingLinker, bindings, cardinalites, nullptr, leftSampleKeyCount);
 							}
 
-							if (joiningItem->requiresMoreVariableMappingsComputation() && rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
+							if (requiresMoreVariableMappingComputation(joiningItem, true) && rightItemDep->getBatchCurrentBindingsCardinalityLinker(false) && rightSampleInsertionCount < mConfSamplingBasedJoinMappingSize) {
 								mappingProcessed = true;
 								++rightSampleInsertionCount;
 								COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = rightItemDep->getBatchCurrentBindingsCardinalityLinker(true);
@@ -357,10 +424,10 @@ namespace Konclude {
 						}
 
 
-						while (joiningItem->requiresMoreVariableMappingsComputation() && (!insertingItemDep->isBatchProcessed() || insertingItemDep->loadNextBatch())) {
+						while (requiresMoreVariableMappingComputation(joiningItem, false) && (!insertingItemDep->isBatchProcessed() || insertingItemDep->loadNextBatch())) {
 
 							// inserting remaining mappings
-							while (joiningItem->requiresMoreVariableMappingsComputation() && insertingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+							while (requiresMoreVariableMappingComputation(joiningItem, false) && insertingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
 								mappingProcessed = true;
 								COptimizedComplexVariableIndividualBindingsCardinalityLinker* inertingLinker = insertingItemDep->getBatchCurrentBindingsCardinalityLinker(true);
 
@@ -374,7 +441,7 @@ namespace Konclude {
 
 
 							// inserting remaining cardinality updates
-							while (joiningItem->requiresMoreVariableMappingsComputation() && insertingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+							while (requiresMoreVariableMappingComputation(joiningItem, false) && insertingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
 								mappingProcessed = true;
 								COptimizedComplexVariableIndividualUpdateCardinalityLinker* insertingUpdatedCardinalityLinker = insertingItemDep->getBatchCurrentUpdatedCardinalityLinker(true);
 
@@ -388,11 +455,11 @@ namespace Konclude {
 						}
 
 						if (insertingItemDep->isProcessingFinished()) {
-							while (joiningItem->requiresMoreVariableMappingsComputation() && (!checkingItemDep->isBatchProcessed() || checkingItemDep->loadNextBatch())) {
+							while (requiresMoreVariableMappingComputation(joiningItem, false) && (!checkingItemDep->isBatchProcessed() || checkingItemDep->loadNextBatch())) {
 
 
 								// checking remaining mappings
-								while (joiningItem->requiresMoreVariableMappingsComputation() && checkingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
+								while (requiresMoreVariableMappingComputation(joiningItem, false) && checkingItemDep->getBatchCurrentBindingsCardinalityLinker(false)) {
 									mappingProcessed = true;
 									COptimizedComplexVariableIndividualBindingsCardinalityLinker* checkingLinker = checkingItemDep->getBatchCurrentBindingsCardinalityLinker(true);
 
@@ -404,7 +471,7 @@ namespace Konclude {
 
 
 								// checking remaining cardinality updates
-								while (joiningItem->requiresMoreVariableMappingsComputation() && checkingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+								while (requiresMoreVariableMappingComputation(joiningItem, false) && checkingItemDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
 									mappingProcessed = true;
 									COptimizedComplexVariableIndividualUpdateCardinalityLinker* checkingUpdatedCardinalityLinker = checkingItemDep->getBatchCurrentUpdatedCardinalityLinker(true);
 

@@ -260,6 +260,10 @@ namespace Konclude {
 					}
 				}
 
+				cint64 conCount = mConceptVector->getItemCount();
+				mLastConceptId = conCount;
+
+
 				return ontology;
 			}
 
@@ -267,6 +271,24 @@ namespace Konclude {
 
 
 			CConcreteOntology* CSubroleTransformationPreProcess::continuePreprocessing() {
+				cint64 conCount = mConceptVector->getItemCount();
+
+				if (!mABox->hasUniversalConnectionIndividual()) {
+					for (qint64 i = mLastConceptId; i < conCount && !mABox->hasUniversalConnectionIndividual(); ++i) {
+						CConcept *concept = mConceptVector->getLocalData(i);
+						if (concept) {
+							cint64 opCode = concept->getOperatorCode();
+							if (opCode == CCALL || opCode == CCSOME || opCode == CCIMPLALL || opCode == CCBRANCHALL || opCode == CCVARBINDALL || opCode == CCPBINDALL || opCode == CCVARPBACKALL) {
+								CRole* role = concept->getRole();
+								if (role->getRoleTag() == 1) {
+									makeUniversalConnectionIndividual();
+								}
+							}
+						}
+					}
+				}
+				mLastConceptId = conCount;
+
 				return mOntology;
 			}
 
@@ -279,12 +301,13 @@ namespace Konclude {
 				CConcept* universalConnNominalValueCon = nullptr;
 				CConcept* universalConnNominalCon = nullptr;
 				if (!mABox->hasUniversalConnectionIndividual()) {
-					univConnIndiID = mTBox->getNextConceptID();
+					univConnIndiID = mABox->getNextIndividualId();
 					mABox->setUniversalConnectionIndividualID(univConnIndiID);
 					mABox->setHasUniversalConnectionIndividual(true);
 					universalConnIndi = CObjectAllocator< CIndividual >::allocateAndConstruct(mMemMan);
 					universalConnIndi->initIndividual(univConnIndiID);
-					mIndiVec->setData(univConnIndiID,universalConnIndi);
+					universalConnIndi->setFakeIndividual(true);
+					mIndiVec->setData(univConnIndiID, universalConnIndi);
 
 					cint64 valueConTag = mTBox->getNextConceptID();
 					universalConnNominalValueCon = CObjectAllocator< CConcept >::allocateAndConstruct(mMemMan);

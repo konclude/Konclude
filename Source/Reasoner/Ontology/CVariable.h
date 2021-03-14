@@ -65,6 +65,9 @@ namespace Konclude {
 					bool operator<=(const CVariable& beforeData);
 					bool operator<=(const CVariable*& beforeData);
 
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+					QString mDebugVariableName;
+#endif
 				// protected methods
 				protected:
 

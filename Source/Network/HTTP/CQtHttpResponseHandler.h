@@ -62,7 +62,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CQtHttpResponseHandler(CQtHttpRequest* request, CQtHttpResponse* response, cint64 downloadSizeLimit, CHttpTransactionManager* manager);
+					CQtHttpResponseHandler(CQtHttpRequest* request, CQtHttpResponse* response, cint64 downloadSizeLimit, bool downloadLimitCancel, CHttpTransactionManager* manager);
 
 
 					CQtHttpRequest* getRequest();
@@ -79,8 +79,10 @@ namespace Konclude {
 					CQtHttpResponse* mResponse;
 
 					cint64 mDownloadSizeLimit;
+					bool mDownloadLimitCancel;
 					CHttpTransactionManager* mManager;
 					bool mAborted;
+					bool mDeleting;
 					cint64 mTotalBytesReceived;
 
 				// private methods

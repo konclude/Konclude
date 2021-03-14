@@ -119,9 +119,6 @@ namespace Konclude {
 								}
 							}
 						} else {
-							if (satCalcTask == satCalcTask->getRootTask()) {
-								bool bug = true;
-							}
 							taskResult->installResult(false);
 							taskStatus->setFinished(true);
 						}

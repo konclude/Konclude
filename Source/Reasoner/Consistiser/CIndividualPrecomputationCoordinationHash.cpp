@@ -29,21 +29,6 @@ namespace Konclude {
 
 
 			CIndividualPrecomputationCoordinationHash::CIndividualPrecomputationCoordinationHash() {
-				mUsageCount = 0;
-			}
-
-			CIndividualPrecomputationCoordinationHash* CIndividualPrecomputationCoordinationHash::incUsageCount(cint64 incCount) {
-				mUsageCount += incCount;
-				return this;
-			}
-
-			CIndividualPrecomputationCoordinationHash* CIndividualPrecomputationCoordinationHash::detUsageCount(cint64 decCount) {
-				mUsageCount -= decCount;
-				return this;
-			}
-
-			cint64 CIndividualPrecomputationCoordinationHash::getUsageCount() {
-				return mUsageCount;
 			}
 
 

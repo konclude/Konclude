@@ -38,6 +38,8 @@
 #include "Reasoner/Consistiser/Events/CPrecomputeOntologyEvent.h"
 #include "Reasoner/Consistiser/Events/CPrecomputationCalculatedCallbackEvent.h"
 #include "Reasoner/Consistiser/Events/CSaturationPrecomputationCalculatedCallbackEvent.h"
+#include "Reasoner/Consistiser/Events/CRetrievedPrecomputationIndividualsCallbackEvent.h"
+#include "Reasoner/Consistiser/Events/CRescheduleJobCreationEvent.h"
 
 
 #include "Reasoner/Ontology/CConcept.h"
@@ -110,9 +112,14 @@ namespace Konclude {
 					virtual bool precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CPrecomputationCalculatedCallbackEvent* pcce) = 0;
 					virtual bool precomputationTested(COntologyPrecomputationItem* ontPreCompItem, CPrecomputationTestingItem* preTestItem, CSaturationPrecomputationCalculatedCallbackEvent* pcce) = 0;
 
+
+					virtual bool precomputationIndividualsRetrieved(COntologyPrecomputationItem* ontPreCompItem, CRetrievedPrecomputationIndividualsCallbackEvent* pcce) = 0;
+
+
 				// protected variables
 				protected:
 					qint64 mConfMaxTestParallelCount;
+					qint64 mConfMaxTestBatchCreationCount;
 
 					qint64 mCurrRunningTestParallelCount;
 

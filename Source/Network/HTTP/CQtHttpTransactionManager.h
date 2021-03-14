@@ -45,6 +45,7 @@
 #include "Network/HTTP/Events/CAbortRequestEvent.h"
 
 #include "Concurrent/CIntervalThread.h"
+#include "Concurrent/Callback/CBlockingCallbackData.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -53,6 +54,7 @@
 namespace Konclude {
 
 	using namespace Concurrent;
+	using namespace Callback;
 
 	namespace Network {
 
@@ -75,7 +77,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CQtHttpTransactionManager(cint64 timeoutInterval = 5*60*1000, cint64 downloadSizeLimit = -1);
+					CQtHttpTransactionManager(cint64 timeoutInterval = 5*60*1000, cint64 downloadSizeLimit = -1, bool downloadLimitCancel = false);
 
 					//! Destructor
 					virtual ~CQtHttpTransactionManager();
@@ -89,6 +91,12 @@ namespace Konclude {
 					virtual CHttpResponse* getResponse(CHttpRequest* request);
 					virtual CQtHttpResponse* getResponse(CQtHttpRequest* request);
 
+
+					virtual CQtHttpTransactionManager* setRequestHeader(CHttpRequest* request, const QString& key, const QString& value);
+
+
+					virtual bool waitFinished(CHttpResponse* response);
+
 					virtual bool callbackFinished(CHttpResponse* response, CCallbackData* callback);
 					virtual bool callbackFinished(CQtHttpResponse* response, CCallbackData* callback);
 					virtual bool callbackFinishedRequest(CHttpResponse* response, CCallbackData* callbackData);
@@ -98,9 +106,12 @@ namespace Konclude {
 					virtual bool callbackResponseData(CHttpResponse* response, QByteArray* dataArray, CCallbackData* callback);
 					virtual QByteArray* getResponseData(CHttpResponse* response);
 					virtual bool hasFinishedSucecssfully(CHttpResponse* response);
+					virtual bool hasFinished(CHttpResponse* response);
 					virtual bool hasBeenAborted(CHttpResponse* response, ABORT_REASON* abortReason = nullptr);
 
 					virtual bool abort(CHttpRequest* request, CHttpResponse* response, ABORT_REASON abortReason = ABORT_NO_REASON);
+
+					virtual QString* getErrorString(CHttpResponse* response);
 
 				// protected slots
 				protected slots:
@@ -120,6 +131,7 @@ namespace Konclude {
 				protected:
 					cint64 mTimeoutInterval;
 					cint64 mDownloadSizeLimit;
+					bool mDownloadLimitCancel;
 					QNetworkAccessManager* mQNAM;
 					QHash<QNetworkReply*,CQtHttpResponse*> mReplyResponseHash;
 					QSet<CQtHttpResponse*> mCriticalTimeoutSet;

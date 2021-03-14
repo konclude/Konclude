@@ -2414,6 +2414,11 @@ namespace Konclude {
 				mDataValueVariableBuildHash = mOntoBuild->getDataValueVariableBuildHash();
 				mDataLiteralVariableBuildHash = mOntoBuild->getDataLiteralVariableBuildHash();
 
+				mClassVariableBuildHash = mOntoBuild->getClassVariableBuildHash();
+				mObjectPropertyVariableBuildHash = mOntoBuild->getObjectPropertyVariableBuildHash();
+				mDataPropertyVariableBuildHash = mOntoBuild->getDataPropertyVariableBuildHash();
+
+
 				mDataPropertyBuildHash = mOntoBuild->getDataPropertyEntityBuildHash();
 				mDataLexicalValueBuildHash = mOntoBuild->getDataLexicalValueBuildHash();
 
@@ -2873,6 +2878,84 @@ namespace Konclude {
 				}
 				return expression;
 			}
+
+
+
+			CClassVariableExpression* CConcreteOntologyBuildDataUpdater::getClassVariable(const QStringRef &classVariableName) {
+				CClassVariableExpression* expression = nullptr;
+				expression = mClassVariableBuildHash->value(classVariableName);
+				if (!expression) {
+					expression = new CClassVariableExpression(classVariableName.toString());
+					expression->setEntityID(mNextEntityNumber++);
+					mClassVariableBuildHash->insert(classVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETCLASSVARIABLE);
+				}
+				return expression;
+			}
+
+			CClassVariableExpression* CConcreteOntologyBuildDataUpdater::getClassVariable(const QString &classVariableName) {
+				CClassVariableExpression* expression = nullptr;
+				expression = mClassVariableBuildHash->value(classVariableName);
+				if (!expression) {
+					expression = new CClassVariableExpression(classVariableName);
+					expression->setEntityID(mNextEntityNumber++);
+					mClassVariableBuildHash->insert(classVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETCLASSVARIABLE);
+				}
+				return expression;
+			}
+
+
+			CObjectPropertyVariableExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyVariable(const QStringRef &objectPropertyVariableName) {
+				CObjectPropertyVariableExpression* expression = nullptr;
+				expression = mObjectPropertyVariableBuildHash->value(objectPropertyVariableName);
+				if (!expression) {
+					expression = new CObjectPropertyVariableExpression(objectPropertyVariableName.toString());
+					expression->setEntityID(mNextEntityNumber++);
+					mObjectPropertyVariableBuildHash->insert(objectPropertyVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYVARIABLE);
+				}
+				return expression;
+			}
+
+			CObjectPropertyVariableExpression* CConcreteOntologyBuildDataUpdater::getObjectPropertyVariable(const QString &objectPropertyVariableName) {
+				CObjectPropertyVariableExpression* expression = nullptr;
+				expression = mObjectPropertyVariableBuildHash->value(objectPropertyVariableName);
+				if (!expression) {
+					expression = new CObjectPropertyVariableExpression(objectPropertyVariableName);
+					expression->setEntityID(mNextEntityNumber++);
+					mObjectPropertyVariableBuildHash->insert(objectPropertyVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYVARIABLE);
+				}
+				return expression;
+			}
+
+
+			CDataPropertyVariableExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyVariable(const QStringRef &dataPropertyVariableName) {
+				CDataPropertyVariableExpression* expression = nullptr;
+				expression = mDataPropertyVariableBuildHash->value(dataPropertyVariableName);
+				if (!expression) {
+					expression = new CDataPropertyVariableExpression(dataPropertyVariableName.toString());
+					expression->setEntityID(mNextEntityNumber++);
+					mDataPropertyVariableBuildHash->insert(dataPropertyVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYVARIABLE);
+				}
+				return expression;
+			}
+
+			CDataPropertyVariableExpression* CConcreteOntologyBuildDataUpdater::getDataPropertyVariable(const QString &dataPropertyVariableName) {
+				CDataPropertyVariableExpression* expression = nullptr;
+				expression = mDataPropertyVariableBuildHash->value(dataPropertyVariableName);
+				if (!expression) {
+					expression = new CDataPropertyVariableExpression(dataPropertyVariableName);
+					expression->setEntityID(mNextEntityNumber++);
+					mDataPropertyVariableBuildHash->insert(dataPropertyVariableName, expression);
+					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETOBJECTPROPERTYVARIABLE);
+				}
+				return expression;
+			}
+
+
 
 
 

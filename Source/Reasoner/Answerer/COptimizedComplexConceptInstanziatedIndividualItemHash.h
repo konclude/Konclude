@@ -34,6 +34,8 @@
 #include "Utilities/UtilitiesSettings.h"
 #include "Utilities/Container/CLinker.h"
 
+#include "Context/CMemoryPoolNewAllocationIncreasingContext.h"
+
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -43,6 +45,7 @@ namespace Konclude {
 
 	using namespace Utilities;
 	using namespace Container;
+	using namespace Context;
 
 	namespace Reasoner {
 
@@ -57,15 +60,25 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexConceptInstanziatedIndividualItemHash : public QHash<COptimizedComplexConceptInstanziatedIndividualItemHasher, COptimizedComplexConceptInstanziatedIndividualItemLinker*> {
+			class COptimizedComplexConceptInstanziatedIndividualItemHash {
 				// public methods
 				public:
 					//! Constructor
 					COptimizedComplexConceptInstanziatedIndividualItemHash();
+					~COptimizedComplexConceptInstanziatedIndividualItemHash();
 
 					COptimizedComplexConceptInstanziatedIndividualItemHash* addRealizationIndividualInstanceItemReference(const CRealizationIndividualInstanceItemReference& itemRef);
 					COptimizedComplexConceptInstanziatedIndividualItemLinker* getAddedRealizationIndividualInstanceItemReferenceLinker();
+					COptimizedComplexConceptInstanziatedIndividualItemHash* remove(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker);
 					
+					CMemoryAllocationManager* getInstancesMemoryAllocationManager();
+					cint64 getMemoryConsumption();
+					cint64 size();
+					bool isEmpty();
+
+					CQtManagedRestrictedModificationHash<COptimizedComplexConceptInstanziatedIndividualItemHasher, COptimizedComplexConceptInstanziatedIndividualItemLinker*>* getIndividualInstanceItemReferenceLinkerHash();
+
+
 				// protected methods
 				protected:
 
@@ -74,6 +87,9 @@ namespace Konclude {
 					COptimizedComplexConceptInstanziatedIndividualItemLinker* mAddedLinker;
 					COptimizedComplexConceptInstanziatedIndividualItemLinker* mTmpLinker;
 
+					CQtManagedRestrictedModificationHash<COptimizedComplexConceptInstanziatedIndividualItemHasher, COptimizedComplexConceptInstanziatedIndividualItemLinker*>* mIndiRefLinkerHash;
+
+					CMemoryPoolNewAllocationIncreasingContext* mMemManContext;
 
 				// private methods
 				private:

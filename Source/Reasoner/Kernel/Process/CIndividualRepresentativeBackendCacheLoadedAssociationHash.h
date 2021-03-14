@@ -31,12 +31,15 @@
 
 
 // Other includes
+#include "Utilities/Container/CQtManagedRestrictedModificationSharingHash.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
 
 
 namespace Konclude {
+
+	using namespace Utilities::Container;
 
 	namespace Reasoner {
 
@@ -52,7 +55,7 @@ namespace Konclude {
 				 *		\brief		TODO
 				 *
 				 */
-				class CIndividualRepresentativeBackendCacheLoadedAssociationHash : public CPROCESSHASH<cint64, CIndividualRepresentativeBackendCacheLoadedAssociationData> {
+				class CIndividualRepresentativeBackendCacheLoadedAssociationHash : public CQtManagedRestrictedModificationSharingHash<cint64, CIndividualRepresentativeBackendCacheLoadedAssociationData> {
 					// public methods
 					public:
 						//! Constructor

@@ -69,6 +69,9 @@ namespace Konclude {
 			}
 
 			char* CMemoryPoolContainerAllocationManager::getMemoryBlock(cint64 memoryBlockSize) {
+#ifdef KONCLUDE_DIRECT_NEW_MEMORY_ALLOCATION
+				return new char[memoryBlockSize];
+#endif // KONCLUDE_DIRECT_NEW_MEMORY_ALLOCATION
 				char* memBlock = 0;
 				bool allocated = false;
 				CMemoryPool* memoryPool = mMemoryPoolContainer->getMemoryPools();
@@ -84,7 +87,7 @@ namespace Konclude {
 					if (memoryPool) {
 						char* memBlockEnd = memoryPool->getMemoryBlockEnd();
 						char* memBlockPointer = memoryPool->getMemoryBlockPointer();
-						if (memBlockPointer+memoryBlockSize <= memBlockEnd) {
+						if (memBlockPointer+memoryBlockSize < memBlockEnd) {
 							memBlock = memBlockPointer;
 							memoryPool->setMemoryBlockPointer(memBlockPointer+memoryBlockSize);
 							allocated = true;
@@ -113,6 +116,14 @@ namespace Konclude {
 
 
 			char* CMemoryPoolContainerAllocationManager::getMemoryBlock(cint64 memoryBlockSize, cint64 alignment) {
+#ifdef KONCLUDE_DIRECT_NEW_MEMORY_ALLOCATION
+				char* data = new char[memoryBlockSize + alignment];
+				cint64 alignmentMask = alignment - 1;
+				if (alignmentMask & cint64(data)) {
+					data = (char*)((cint64(data) & ~alignmentMask) + alignment);
+				}
+				return data;
+#endif // KONCLUDE_DIRECT_NEW_MEMORY_ALLOCATION
 				char* memBlock = 0;
 				bool allocated = false;
 				CMemoryPool* memoryPool = mMemoryPoolContainer->getMemoryPools();
@@ -129,7 +140,7 @@ namespace Konclude {
 						char* memBlockEnd = memoryPool->getMemoryBlockEnd();
 						char* memBlockPointer = memoryPool->getMemoryBlockPointer();
 						cint64 maxBlockAlloc = (cint64)(memBlockPointer)+(cint64)(memoryBlockSize+alignment);
-						if (maxBlockAlloc <= (cint64)memBlockEnd) {
+						if (maxBlockAlloc < (cint64)memBlockEnd) {
 							// alignment is 2^N
 							cint64 alignmentMask = alignment-1;
 							memBlock = memBlockPointer;
@@ -160,7 +171,7 @@ namespace Konclude {
 					if (memoryPool) {
 						char* memBlockEnd = memoryPool->getMemoryBlockEnd();
 						char* memBlockPointer = memoryPool->getMemoryBlockPointer();
-						if (memBlockPointer+memoryBlockSize <= memBlockEnd) {
+						if (memBlockPointer+memoryBlockSize < memBlockEnd) {
 							memBlock = memBlockPointer;
 							memoryPool->setMemoryBlockPointer(memBlockPointer+memoryBlockSize);
 							allocated = true;

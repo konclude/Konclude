@@ -44,8 +44,73 @@ namespace Konclude {
 				mIndividualItemPossibleInstanceMergingLinkerHash = nullptr;
 				mPrefferedPossibleInstancesSet = nullptr;
 				mModelMergingCheckedSet = nullptr;
+				mConcurrentInitializationKnownInstancesLists = nullptr;
+				mConcurrentInitializationPossibleInstancesLists = nullptr;
 				return this;
 			}
+
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::prepareConcurrentInitialization(cint64 size) {
+				mConcurrentInitializationKnownInstancesLists = new QList<COptimizedKPSetIndividualItem *>*[size];
+				mConcurrentInitializationPossibleInstancesLists = new QList<COptimizedKPSetIndividualItem *>*[size];
+				for (cint64 i = 0; i < size; ++i) {
+					mConcurrentInitializationKnownInstancesLists[i] = nullptr;
+					mConcurrentInitializationPossibleInstancesLists[i] = nullptr;
+				}
+
+				return this;
+			}
+
+			cint64 COptimizedKPSetConceptInstancesItem::finishConcurrentInitialization(cint64 size) {
+				cint64 possInitCount = 0;
+
+				for (cint64 i = 0; i < size; ++i) {
+					QList<COptimizedKPSetIndividualItem *>* knownInstancesLists = mConcurrentInitializationKnownInstancesLists[i];
+					QList<COptimizedKPSetIndividualItem *>* possInstancesLists = mConcurrentInitializationPossibleInstancesLists[i];
+
+					if (knownInstancesLists) {
+						for (COptimizedKPSetIndividualItem* knownInstance : *knownInstancesLists) {
+							mKnownInstancesMap.insert(knownInstance->getIndividualId(), knownInstance);
+						}
+						delete knownInstancesLists;
+					}
+					if (possInstancesLists) {
+						for (COptimizedKPSetIndividualItem* possInstance : *possInstancesLists) {
+							mPossibleInstancesMap.insert(possInstance->getIndividualId(), possInstance);
+							++possInitCount;
+						}
+						delete possInstancesLists;
+					}
+				}
+
+				delete[] mConcurrentInitializationKnownInstancesLists;
+				delete[] mConcurrentInitializationPossibleInstancesLists;
+				mConcurrentInitializationKnownInstancesLists = nullptr;
+				mConcurrentInitializationPossibleInstancesLists = nullptr;
+
+				return possInitCount;
+			}
+
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addKnownInstanceConcurrently(COptimizedKPSetIndividualItem* item, cint64 indiVecPos) {
+				QList<COptimizedKPSetIndividualItem *>*& knownInstancesLists = mConcurrentInitializationKnownInstancesLists[indiVecPos];
+				if (!knownInstancesLists) {
+					knownInstancesLists = new QList<COptimizedKPSetIndividualItem *>();
+				}
+				knownInstancesLists->append(item);
+				return this;
+			}
+
+			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::addPossibleInstanceConcurrently(COptimizedKPSetIndividualItem* item, cint64 indiVecPos) {
+				QList<COptimizedKPSetIndividualItem *>*& possInstancesLists = mConcurrentInitializationPossibleInstancesLists[indiVecPos];
+				if (!possInstancesLists) {
+					possInstancesLists = new QList<COptimizedKPSetIndividualItem *>();
+				}
+				possInstancesLists->append(item);
+				return this;
+			}
+
+
 
 			COptimizedKPSetConceptInstancesItem* COptimizedKPSetConceptInstancesItem::setInitialUnprocessedSuccessorItemCount() {
 				mUnprocessedSuccItemCount = mSuccessorItemList.count();
@@ -68,6 +133,12 @@ namespace Konclude {
 			QMap<cint64, COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getPossibleInstancesMap() {
 				return &mPossibleInstancesMap;
 			}
+
+
+			QHash<cint64, CRealizingTestingItem*>* COptimizedKPSetConceptInstancesItem::getPossibleInstanceTestingItemHash() {
+				return &mPossibleInstanceTestingItemHash;
+			}
+
 
 			QList<COptimizedKPSetConceptInstancesItem*>* COptimizedKPSetConceptInstancesItem::getParentItemList() {
 				return &mParentItemList;
@@ -201,7 +272,7 @@ namespace Konclude {
 				return this;
 			}
 
-			QMap<cint64, COptimizedKPSetIndividualItem*>* COptimizedKPSetConceptInstancesItem::getPrefferedPossibleInstanceTestingSet() {
+			QMap<cint64, COptimizedKPSetIndividualItem*>*& COptimizedKPSetConceptInstancesItem::getPrefferedPossibleInstanceTestingSet() {
 				return mPrefferedPossibleInstancesSet;
 			}
 

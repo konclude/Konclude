@@ -35,6 +35,8 @@ namespace Konclude {
 					mMultiHashPartArray[i] = new COptimizedComplexVariableIndividualMappingsMultiHashPart(bindingSize);
 				}
 				mLastBindingCardinalityBatchLinkerUpdateId = 0;
+				mLastContextMemoryIntegratedSize = 0;
+				mContext = nullptr;
 			}
 
 
@@ -43,6 +45,19 @@ namespace Konclude {
 					delete mMultiHashPartArray[i];
 				}
 				delete [] mMultiHashPartArray;
+
+				if (mContext) {
+					CMemoryPool* memPools = mContext->getMemoryPools();
+					CMemoryPool* memPoolsIt = memPools;
+					while (memPoolsIt) {
+						CMemoryPool* tmpMemPool = memPoolsIt;
+						memPoolsIt = memPoolsIt->getNext();
+						delete[] tmpMemPool->getMemoryBlockData();
+						delete tmpMemPool;
+					}
+					delete mContext;
+					mContext = nullptr;
+				}
 			}
 
 
@@ -54,6 +69,9 @@ namespace Konclude {
 				}
 			}
 
+			cint64 COptimizedComplexVariableIndividualMappingsMultiHash::getMultiHashPartsCount() {
+				return mMultiHashPartsCount;
+			}
 
 
 			COptimizedComplexVariableIndividualMappingsMultiHash* COptimizedComplexVariableIndividualMappingsMultiHash::updateLinkers(COptimizedComplexVariableIndividualMappingsMultiHashPart* multiPart) {
@@ -116,6 +134,10 @@ namespace Konclude {
 			COptimizedComplexVariableIndividualMappingsMultiHash* COptimizedComplexVariableIndividualMappingsMultiHash::updateBindingCount(COptimizedComplexVariableIndividualMappingsMultiHashPart* multiPart) {
 				mBindingCount -= multiPart->getLastUpdatedBindingCount(true);
 				mBindingCount += multiPart->getBindingCount();
+
+				mBindingsMemoryUsage -= multiPart->getLastMemoryUsageSize(true);
+				mBindingsMemoryUsage += multiPart->getMemorySize();
+
 
 				mMaximumCardinalitySameIndividualsJointlyConsidered = qMax(mMaximumCardinalitySameIndividualsJointlyConsidered, multiPart->getMaximumCardinalitySameIndividualsJointlyConsidered());
 				mMaximumCardinalitySameIndividualsSeparatelyConsidered = qMax(mMaximumCardinalitySameIndividualsSeparatelyConsidered, multiPart->getMaximumCardinalitySameIndividualsSeparatelyConsidered());
@@ -189,6 +211,64 @@ namespace Konclude {
 				return this;
 			}
 
+
+
+			CMemoryAllocationManager* COptimizedComplexVariableIndividualMappingsMultiHash::getBindingsMemoryAllocationManager() {
+				if (!mContext) {
+					mContext = new CMemoryPoolNewAllocationIncreasingContext(500, 500000, 2);
+				}
+				return mContext->getMemoryAllocationManager();
+			}
+
+
+
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappingsMultiHash::updateBindingsMemoryConsumption() {
+				if (mContext) {
+					cint64 newContextMemoryIntegratedSize = mContext->getMemorySize();
+					if (newContextMemoryIntegratedSize != mLastContextMemoryIntegratedSize) {
+						mBindingsMemoryUsage -= mLastContextMemoryIntegratedSize;
+						mBindingsMemoryUsage += newContextMemoryIntegratedSize;
+						mLastContextMemoryIntegratedSize = newContextMemoryIntegratedSize;
+					}
+				}
+				return this;
+			}
+
+
+
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappingsMultiHash::clearComputedMappings() {
+				if (mContext) {
+					CMemoryPool* memPools = mContext->getMemoryPools();
+					CMemoryPool* memPoolsIt = memPools;
+					while (memPoolsIt) {
+						CMemoryPool* tmpMemPool = memPoolsIt;
+						memPoolsIt = memPoolsIt->getNext();
+						delete[] tmpMemPool->getMemoryBlockData();
+						delete tmpMemPool;
+					}
+					delete mContext;
+					mContext = nullptr;
+				}
+
+				for (cint64 i = 0; i < mMultiHashPartsCount; ++i) {
+					COptimizedComplexVariableIndividualMappingsMultiHashPart*& multiHashPart = mMultiHashPartArray[i];
+					CMemoryPool* memPools = multiHashPart->getMemoryPools();
+					CMemoryPool* memPoolsIt = memPools;
+					while (memPoolsIt) {
+						CMemoryPool* tmpMemPool = memPoolsIt;
+						memPoolsIt = memPoolsIt->getNext();
+						delete[] tmpMemPool->getMemoryBlockData();
+						delete tmpMemPool;
+					}
+					delete multiHashPart;
+					multiHashPart = nullptr;
+				}
+
+				for (cint64 i = 0; i < mMultiHashPartsCount; ++i) {
+					mMultiHashPartArray[i] = new COptimizedComplexVariableIndividualMappingsMultiHashPart(mBindingSize);
+				}
+				return COptimizedComplexVariableIndividualMappings::clearComputedMappings();
+			}
 
 
 		}; // end namespace Answerer

@@ -58,6 +58,7 @@ namespace Konclude {
 			public:
 				//! Constructor
 				CRenderedItemLinker();
+				virtual ~CRenderedItemLinker();
 
 
 			// protected methods

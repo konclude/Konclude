@@ -69,6 +69,13 @@ namespace Konclude {
 
 					COptimizedKPSetConceptInstancesItem* initInstancesItem(CHierarchyNode* hierNode);
 
+
+					COptimizedKPSetConceptInstancesItem* prepareConcurrentInitialization(cint64 size);
+					cint64 finishConcurrentInitialization(cint64 size);
+					COptimizedKPSetConceptInstancesItem* addKnownInstanceConcurrently(COptimizedKPSetIndividualItem* item, cint64 indiVecPos);
+					COptimizedKPSetConceptInstancesItem* addPossibleInstanceConcurrently(COptimizedKPSetIndividualItem* item, cint64 indiVecPos);
+
+
 					COptimizedKPSetConceptInstancesItem* setInitialUnprocessedSuccessorItemCount();
 
 					CHierarchyNode* getHierarchyNode();
@@ -76,6 +83,7 @@ namespace Konclude {
 
 					QMap<cint64, COptimizedKPSetIndividualItem*>* getKnownInstancesMap();
 					QMap<cint64, COptimizedKPSetIndividualItem*>* getPossibleInstancesMap();
+					QHash<cint64, CRealizingTestingItem*>* getPossibleInstanceTestingItemHash();
 
 					QList<COptimizedKPSetConceptInstancesItem*>* getParentItemList();
 					QList<COptimizedKPSetConceptInstancesItem*>* getSuccessorItemList();
@@ -116,7 +124,7 @@ namespace Konclude {
 					bool hasPossibleInstances();
 					COptimizedKPSetIndividualItem* takeNextTestingPossibleInstance();
 					COptimizedKPSetConceptInstancesItem* removeTestingPossibleInstance(COptimizedKPSetIndividualItem* possInstance);
-					QMap<cint64, COptimizedKPSetIndividualItem*>* getPrefferedPossibleInstanceTestingSet();
+					QMap<cint64, COptimizedKPSetIndividualItem*>*& getPrefferedPossibleInstanceTestingSet();
 
 
 					COptimizedKPSetConceptInstancesItem* setConceptInstancesTestingFinished(bool finished);
@@ -150,8 +158,14 @@ namespace Konclude {
 					QMap<cint64, COptimizedKPSetIndividualItem*> mKnownInstancesMap;
 					QMap<cint64, COptimizedKPSetIndividualItem*> mPossibleInstancesMap;
 
+					QList<COptimizedKPSetIndividualItem*>** mConcurrentInitializationKnownInstancesLists;
+					QList<COptimizedKPSetIndividualItem*>** mConcurrentInitializationPossibleInstancesLists;
+
 					QList<COptimizedKPSetConceptInstancesItem*> mParentItemList;
 					QList<COptimizedKPSetConceptInstancesItem*> mSuccessorItemList;
+
+					QHash<cint64, CRealizingTestingItem*> mPossibleInstanceTestingItemHash;
+
 
 					cint64 mUnprocessedSuccItemCount;
 					cint64 mTestingPossInstanceCount;

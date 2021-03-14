@@ -64,6 +64,7 @@ namespace Konclude {
 
 							CMERGEDLINKDependencyNode* initMERGEDLINKDependencyNode(CConceptDescriptor* conceptDescriptor, CIndividualProcessNode* individualNode, CDependencyTrackPoint* prevMergingStepDependencyTrackPoint, CDependencyTrackPoint* prevLinkDependencyTrackPoint);
 							
+							CDependency* getPreviousLinkDependency();
 
 						// protected methods
 						protected:

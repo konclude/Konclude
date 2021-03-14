@@ -225,6 +225,7 @@ namespace Konclude {
 
 
 						bool findNextPossibleInstanceMergingIndividual(CIndividualProcessNode* processIndi, CPossibleInstancesIndividualsMergingData* possInstanceMergingData, CCalculationAlgorithmContextBase* calcAlgContext, CPROCESSHASH<CBackendRepresentativeMemoryLabelCacheItem*, bool>*& testConceptLabelSetHash, CIndividualProcessNode** foundMergingIndiNode = nullptr, cint64* foundMergingIndiId = nullptr, bool* ruleApplicationFreeMerging = nullptr);
+						bool findNextPossibleInstanceMergingIndividual(CIndividualProcessNode* processIndi, CPossibleInstancesIndividualsMergingData* possInstanceMergingData, CCalculationAlgorithmContextBase* calcAlgContext, CPROCESSHASH<CBackendRepresentativeMemoryLabelCacheItem*, bool>*& testConceptLabelSetHash, cint64 individualMaxMergingAttemptCount, CIndividualProcessNode** foundMergingIndiNode = nullptr, cint64* foundMergingIndiId = nullptr, bool* ruleApplicationFreeMerging = nullptr);
 						bool tryPossibleInstanceMerging(CIndividualProcessNode* processIndi, CPossibleInstancesIndividualsMergingData* possInstanceMergingData, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
@@ -268,6 +269,11 @@ namespace Konclude {
 
 
 						CIndividualProcessNode* takeNextProcessIndividual(CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+
+						bool ensurePropagationCutLinksToExpandedIndividual(CIndividualProcessNode* propCutIndiNode, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locPropCutIndiBackendSyncData, CBackendNeighbourExpansionQueueDataLinker* backendNeighbourExpDataLinker, cint64 neighbourIndiId, CCalculationAlgorithmContextBase* calcAlgContext);
+
 						bool continueIndividualProcessing(CIndividualProcessNode*& indiProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool tableauRuleProcessing(CIndividualProcessNode*& indiProcNode,CConceptProcessDescriptor*& conProcDes, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -529,7 +535,7 @@ namespace Konclude {
 
 						void addDataAssertion(CIndividualProcessNode*& processIndi, CDataAssertionLinker* dataAssertionLinker, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 
-						bool checkBackendCachedNominalConnection(CIndividualProcessNode*& processIndi, CRole* role, cint64 nominalId, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool checkBackendCachedNominalConnection(CIndividualProcessNode*& processIndi, CRole* role, cint64 nominalId, CDependencyTrackPoint* depTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						void applyAutomatChooseRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
 						void applyBOTTOMRule(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -635,6 +641,13 @@ namespace Konclude {
 
 						CNonDeterministicDependencyTrackPoint* createNonDeterministicDependencyTrackPointBranch(CNonDeterministicDependencyNode* dependencyNode, bool singleBranch, CCalculationAlgorithmContextBase* calcAlgContext);
 
+						CREUSEBACKENDEXPANSIONMODESDependencyNode* createREUSEBACKENDEXPANSIONMODESDependency(CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode* createREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependency(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode* createREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependency(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						CREUSEBACKENDVALUEDependencyNode* createREUSEBACKENDVALUEDependency(CDependencyTrackPoint*& valueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+						bool isRestrictedTopObjectPropertyPropagation(CIndividualProcessNode*& processIndi, CIndividualProcessNode*& destIndi, CConcept* concept, bool negated, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						bool isConceptAdditionAtomaric(CConcept* addingConcept, bool negate, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -679,7 +692,7 @@ namespace Konclude {
 						void installConceptRoleBranchTrigger(CIndividualProcessNode*& processIndi, CConceptDescriptor* conceptDescriptor, CDependencyTrackPoint* depTrackPoint, CProcessingRestrictionSpecification* procRest, CConceptRoleBranchingTrigger* trigger, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						CConceptDescriptor* addConceptToIndividualReturnConceptDescriptor(CConcept* addingConcept, bool negate, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* dependencyTrackPoint, bool allowPreprocessing, bool allowInitalization, CCalculationAlgorithmContextBase* calcAlgContext);
-						void addConceptToIndividualSkipANDProcessing(CConcept* addingConcept, bool negate, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* dependencyTrackPoint, bool allowPreprocessing, bool allowInitalization, CCalculationAlgorithmContextBase* calcAlgContext);
+						void addConceptToIndividualSkipANDProcessing(CConcept* addingConcept, bool negate, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* dependencyTrackPoint, bool allowPreprocessing, bool allowInitalization, bool markModification, CCalculationAlgorithmContextBase* calcAlgContext);
 						void addConceptToIndividual(CConcept* addingConcept, bool negate, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* dependencyTrackPoint, bool allowPreprocessing, bool allowInitalization, CCalculationAlgorithmContextBase* calcAlgContext);
 						void addConceptsToIndividual(CSortedNegLinker<CConcept*>* conceptAddLinker, bool negate, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* dependencyTrackPoint, bool allowPreprocessing, bool allowInitalization, cint64* conceptCount, CCalculationAlgorithmContextBase* calcAlgContext);
 						void addConceptsToIndividual(CXNegLinker<CConcept*>* conceptAddLinker, bool negate, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* dependencyTrackPoint, bool allowPreprocessing, bool allowInitalization, cint64* conceptCount, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -712,6 +725,8 @@ namespace Konclude {
 
 						bool addIndividualToBackendDirectInfluenceExpansionQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool addIndividualToBackendIndirectCompatibilityExpansionQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool addIndividualToBackendReuseExpansionQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool addIndividualToBackendNeighbourExpansionQueue(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool registerProcessedIndividualForBackendConceptSetLabel(CIndividualProcessNode* individual, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData, CCalculationAlgorithmContextBase* calcAlgContext);
 
@@ -885,6 +900,45 @@ namespace Konclude {
 						bool tryInitalizingFromSaturatedData(CIndividualProcessNode*& indi, CXSortedNegLinker<CConcept*>* initConceptLinker, CDependencyTrackPoint* depTrackPoint, bool allowPreprocess, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
+
+
+
+
+
+
+
+
+
+						bool hasNondeterministicDependency(CDependencyTrackPoint* dependencyTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
+
+
+
+
+
+
+
+
+						bool prepareBackendExpansionReuseBranching(CCalculationAlgorithmContextBase* calcAlgContext);
+						bool prepareBackendIndividualFixedReuseExpansion(CIndividualProcessNode*& indiProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool prepareBackendIndividualPrioritizedReuseExpansion(CIndividualProcessNode*& indiProcNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool reuseIndividualBackendExpansion(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool checkIndividualBackendExpansionReuseable(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						
+						
+						
+						CIndividualProcessNode* queuedIndividualBackendNeighbourExpansion(CIndividualProcessNode*& baseIndiNode, CBackendNeighbourExpansionControllingData* expContData, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						bool canDelayRepresentativeNeighbourExpansion(CIndividualProcessNode* expIndiNode, CBackendNeighbourExpansionQueueDataLinker* backendNeighbourExpDataLinker, CPROCESSHASH<CBackendRepresentativeMemoryLabelCacheItem *, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData>* labelNeighbourExpDelayDataHash, CBackendRepresentativeMemoryLabelCacheItem* expandingLabel, CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourAssData, cint64 arrayPos, cint64 lastCursor, cint64 neighbourIndiId, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData*& labelNeighbourExpansionData, bool& expansionDelaying, bool& representativeExpansion, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool delayingRepresentativeNeighbourExpansion(CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, bool expansionDelaying, bool representativeExpansion, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData* labelNeighbourExpansionData, cint64 lastCursor, cint64 neighbourIndiId, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						bool markIndividualNodeBackendNonConceptSetNeighbourLabelRelatedProcessingForDisjointRoles(CIndividualProcessNode* indiNode, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool markIndividualNodeBackendNonConceptSetNeighbourLabelRelatedProcessing(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool markIndividualNodeBackendNonConceptSetRelatedAndNeighbourLabelRelatedProcessing(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool markIndividualNodeBackendNonConceptSetRelatedAndNeighbourLabelRelatedProcessingForDisjointRoles(CIndividualProcessNode* indiNode, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);
+
+
 						CIndividualProcessNode* getLocalizedForcedBackendInitializedNominalIndividualNode(cint64 nominalId, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualProcessNode* getLocalizedForcedBackendInitializedNominalIndividualNode(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 
@@ -893,14 +947,15 @@ namespace Konclude {
 						bool tryEstablishExpansionBlockingWithBackendCacheSynchronisation(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool tryDelayIndividualNodeInitializationWithBackendConceptSetLabel(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool markIndividualNodeBackendNonConceptSetRelatedProcessing(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool markIndividualNodeBackendNonConceptSetRelatedProcessingForDisjointRoles(CIndividualProcessNode* indiNode, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher getIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher getIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher(CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData, CCalculationAlgorithmContextBase* calcAlgContext);
-
 
 						bool visitIndividualsRelevantMergingsBackendSynchronisationDataIndividuals(CIndividualProcessNode* indiNode, CXLinker<cint64>* mergedIndiLinker, CXLinker<cint64>* lastProcessedMergedIndiLinker, bool localize, function<bool(CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* locBackendSyncDataIndiNode, CDependencyTrackPoint* backSyncDepTrackPoint)> visitFunc, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool visitIndividualsRelevantBackendSynchronisationDataIndividuals(CIndividualProcessNode* indiNode, bool localize, function<bool(CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* locBackendSyncDataIndiNode, CDependencyTrackPoint* backSyncDepTrackPoint)> visitFunc, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool visitNewlyMergedIndividualsBackendSynchronisationData(CIndividualProcessNode* indiNode, CPROCESSHASH<CIndividualProcessNode*, CDependencyTrackPoint*>* newIndiMergedHash, bool visitBaseIndividual, function<bool(CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* locBackendSyncDataIndiNode, CDependencyTrackPoint* backSyncDepTrackPoint)> visitFunc, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool visitNewlyMergedIndividualsBackendSynchronisationData(CIndividualProcessNode* indiNode, CXLinker<CIndividualProcessNode*>* newIndiMergedLinker, CXLinker<CIndividualProcessNode*>* prevIndiMergedLinker, bool visitBaseIndividual, function<bool(CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* locBackendSyncDataIndiNode, CDependencyTrackPoint* backSyncDepTrackPoint)> visitFunc, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool visitNewlyMergedOnlyDeterministicRepresentativeIndividualsBackendSynchronisationData(CIndividualProcessNode* indiNode, CXLinker<CIndividualProcessNode*>* newIndiMergedLinker, CXLinker<CIndividualProcessNode*>* prevIndiMergedLinker, bool visitBaseIndividual, function<bool(CIndividualProcessNode* baseIndiNode, CIndividualProcessNode* locBackendSyncDataIndiNode, CDependencyTrackPoint* backSyncDepTrackPoint)> visitFunc, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool validateBackendSynchronisationContinued(CIndividualProcessNode* indi, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData, CConcept* addedConcept, bool addedConceptNegation, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeBackendCacheConceptsSynchronization(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -908,15 +963,21 @@ namespace Konclude {
 						bool testIndividualNodeBackendCacheSameMergedBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool testIndividualNodeBackendCacheNewMergings(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
-						bool testIndividualNodeConceptBackendCacheNeighbourExpansionBlockingCritical(CConcept* concept, bool conNegation, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool testIndividualNodeConceptBackendCacheNeighbourExpansionBlockingCritical(CConcept* concept, bool conNegation, bool nondeterministic, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool debugCheckDirectlyInfluencedNeighbourWithPropagationPossible(CConcept* concept, bool conNegation, CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeBackendCacheNominalIndirectConnectionBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
+						cint64 getBackendCacheRoleRepresentativeNeighbourCount(CIndividualProcessNode* indiNode, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool expandDirectlyInfluencedIndividualNeighbourNodesFromBackendCache(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 
-						bool expandDirectlyInfluencedNeighbourWithPropagation(CConcept* concept, bool conNegation, CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CDependencyTrackPoint* backSyncDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool expandDirectlyInfluencedNeighboursWithPropagation(CConcept* concept, bool conNegation, bool nondeterministic, CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CIndividualProcessNode* locBackendSyncDataIndiNode, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CDependencyTrackPoint* backSyncDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						CAnsweringPropagationSteeringController* getPropagationSteeringController(CCalculationAlgorithmContextBase* calcAlgContext);
+						bool isNeighbourExpansionWithPropagationAllowed(CIndividualProcessNode* indiNode, CConcept* concept, bool conNegation, cint64 neighbourIndiId, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool canExpandDirectlyInfluencedNeighbourWithPropagation(CIndividualProcessNode* indiNode, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CDependencyTrackPoint* backSyncDepTrackPoint, CConcept* concept, bool conNegation, bool nondeterministic, CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData& neighbourExpansionData, cint64 neighbourIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourAssData, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool canExpansionPotentiallyInfluenceNeighbourWithPotentialPropagation(CIndividualProcessNode* indiNode, CConcept* concept, bool conNegation, bool nondeterministic, CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 neighbourIndiId, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						bool expandIndirectlyConnectedIndividuals(CIndividualProcessNode* indiNode, bool checkExpansionRequired, CCalculationAlgorithmContextBase* calcAlgContext);
 
@@ -925,9 +986,14 @@ namespace Konclude {
 						
 						
 						CPROCESSHASH< QPair<CRole*, bool>, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationRoleNeighbourExpansionData >* getBackendSynchronizationFilledRoleNeighbourExpansionDataHash(CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CCalculationAlgorithmContextBase* calcAlgContext);
-						bool expandIndividualAllNeighboursFromBackendCache(CIndividualProcessNode* indiNode, CIndividualProcessNode* backendSyncDataIndiNode, bool forceExpansion, CDependencyTrackPoint* backSyncDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
-						bool expandIndividualNeighbourNodeFromBackendCache(CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, cint64 neighbourIndiId, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData& neighbourExpansionData, bool forceExpansion, bool forceProcessing, CDependencyTrackPoint* baseDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool expandIndividualInferringNeighboursFromBackendCache(CIndividualProcessNode* indiNode, CIndividualProcessNode* backendSyncDataIndiNode, bool forceExpansion, CDependencyTrackPoint* backSyncDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool expandIndividualAllNeighboursFromBackendCache(CIndividualProcessNode* indiNode, CIndividualProcessNode* backendSyncDataIndiNode, bool forceExpansion, bool nonDeterministicConsequencesMissingExpansion, CDependencyTrackPoint* backSyncDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool expandIndividualNeighbourNodeFromBackendCache(CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, cint64 neighbourIndiId, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData& neighbourExpansionData, bool forceExpansion, bool forceProcessing, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData** representativeLabelExpansionData, CDependencyTrackPoint* baseDepTrackPoint, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool expandIndividualNeighbourNodeFromBackendCache(CIndividualProcessNode* indiNode, cint64 neighbourIndiId, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						bool initializeNeighbourExpansionWithPropagation(CIndividualProcessNode* indiNode, CIndividualProcessNode* locBackendSyncDataIndiNode, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CDependencyTrackPoint* backSyncDepTrackPoint, cint64 arrayId, CConcept* concept, bool conNegation, bool nondeterministic, CRole* role, bool forceExpansion, bool propCutExpansion, bool nonDeterministicConsequencesMissingExpansion, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool ensureBaseLinkExpansion(CIndividualProcessNode* expIndiNode, CIndividualProcessNode* indiNode, cint64 neighbourNodeId, CCalculationAlgorithmContextBase* calcAlgContext);
+
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* getLocalizedIndividualBackendCacheSnychronisationData(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
@@ -1041,11 +1107,16 @@ namespace Konclude {
 						CIndividualUnsortedProcessingQueue* mBackendSyncRetestProcessingQueue;
 						CIndividualUnsortedProcessingQueue* mBackendDirectInfluenceExpansionQueue;
 						CIndividualUnsortedProcessingQueue* mBackendIndirectCompatibilityExpansionQueue;
+						CIndividualLinkerRotationProcessingQueue* mBackendNeighbourExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mBackendLateNeighbourExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mBackendReuseExpansionQueue;
 						CIndividualDepthProcessingQueue* mIncrementalExpansionInitializingProcessingQueue;
 						CIndividualCustomPriorityProcessingQueue* mIncrementalExpansionProcessingQueue;
 						CIndividualDepthProcessingQueue* mIncrementalCompatibilityCheckingQueue;
 
-						enum INDINODEQUEUETYPE { INQT_NONE, INQT_CACHETEST, INQT_IMMEDIATE, INQT_DELAYEDBACKENDINIT, INQT_ROLEASS, INQT_BACKENDSYNCRETEST, INQT_BACKENDDIRECTINFLUENCEEXPANSION, INQT_BACKENDINDIRECTCOMPATIBILITYEXPANSION, INQT_DETEXP, INQT_VSTSATTESTING, INQT_VSTRIGGERING, INQT_BLOCKREACT, INQT_COMPCACHEDREACT, INQT_BLOCKUP, INQT_DEPTHNORMAL, INQT_NOMINAL, INQT_NOMINALCACHINGLOSSREACTIVATION, INQT_DEPTHFIRST, INQT_OUTDATED, INQT_VARBINDBATCHQUE, INQT_DELAYEDNOMINAL };
+						enum INDINODEQUEUETYPE {
+							INQT_NONE, INQT_CACHETEST, INQT_IMMEDIATE, INQT_DELAYEDBACKENDINIT, INQT_ROLEASS, INQT_BACKENDSYNCRETEST, INQT_BACKENDDIRECTINFLUENCEEXPANSION, INQT_BACKENDINDIRECTCOMPATIBILITYEXPANSION, INQT_DETEXP, INQT_VSTSATTESTING, INQT_VSTRIGGERING, INQT_BLOCKREACT, INQT_COMPCACHEDREACT, INQT_BLOCKUP, INQT_DEPTHNORMAL, INQT_NOMINAL, INQT_NOMINALCACHINGLOSSREACTIVATION, INQT_DEPTHFIRST, INQT_OUTDATED, INQT_VARBINDBATCHQUE, INQT_DELAYEDNOMINAL, INQT_BACKENDEXPANSIONREUSE
+						};
 						INDINODEQUEUETYPE mIndiNodeFromQueueType;
 
 						double mMinConceptProcessingPriorityLevel;
@@ -1217,6 +1288,7 @@ namespace Konclude {
 						bool mOptAnalogousPropagationPathBlocking;
 
 
+						bool mConfDelayedBackendInitializiation;
 						bool mOptDelayedBackendInitializiation;
 						bool mOptDelayedBackendInitializiationWithRootLinkers;
 
@@ -1225,6 +1297,7 @@ namespace Konclude {
 
 						bool mConfAllowBackendSuccessorExpansionBlocking;
 						bool mConfAllowBackendNeighbourExpansionBlocking;
+						bool mConfOnlyDeterministicRepresentativeBackendIndividualDataConsideration;
 
 
 						bool mConfOccurrenceStatisticsCollecting;
@@ -1254,6 +1327,51 @@ namespace Konclude {
 						bool mConfCachingBlockingFromSaturation;
 
 						bool mConfMergeConstructedIndividualNode;
+						bool mOptMergeConstructedIndividualNode;
+
+
+
+
+
+
+						bool mConfVariableBindingSteeringBackendNeighbourExpansion;
+						bool mConfBackendExpansionReuse;
+						bool mConfBackendExpansionLimitReachedReuseActivation;
+						bool mConfBackendExpansionLateDynamicReuseActivation;
+						cint64 mConfBackendExpansionSameIndividualCountReuseActivation;
+						cint64 mConfBackendExpansionNeighbourIndividualCountReuseActivation;
+						bool mConfLimitBackendNeighbourExpansion;
+						bool mConfAllProblematicBackendNeighbourDirectExpansion;
+						cint64 mConfMinBackendNeighbourDirectExpansionCount;
+						cint64 mOptMinBackendNeighbourDirectExpansionCount;
+
+						cint64 mConfMinDirectNeighbourExpansionOverCriticalReductionSize;
+						cint64 mOptMinDirectNeighbourExpansionOverCriticalReductionSize;
+
+
+						cint64 mConfMaxBackendNeighbourTotalExpansionCount;
+						cint64 mOptMaxBackendNeighbourTotalExpansionCount;
+						cint64 mConfCriticalBackendNeighbourTotalExpansionCount;
+						cint64 mOptCriticalBackendNeighbourTotalExpansionCount;
+						cint64 mConfQueuedBackendNeighbourExpansionIndisBatchSize;
+						cint64 mOptQueuedBackendNeighbourExpansionIndisBatchSize;
+						cint64 mConfQueuedBackendNeighbourExpansionRolesBatchCount;
+						cint64 mOptQueuedBackendNeighbourExpansionRolesBatchCount;
+
+						bool mConfAtmostAllDirectBackendNeighbourExpansion;
+						cint64 mConfDefaultIndividualPrecomputationCount;
+
+						bool mConfNeighbourLabelRepresentativeExpansionDelaying;
+						bool mOptNeighbourLabelRepresentativeExpansionDelaying;
+
+						bool mOptLimitBackendNeighbourExpansion;
+						bool mOptBackendExpansionReuse;
+
+						bool mConfNewMergingsOnlyInferringExpansion;
+
+						bool mConfExpandDeterministicMergedHandledNeighbours = true;
+						bool mConfCardinalityNeighbourExpansionRepresentativeCounting = false;
+
 
 
 
@@ -1278,6 +1396,11 @@ namespace Konclude {
 
 
 
+
+						cint64 mStatRepresentativeExpansionTryingNeighbourIndividualCount = 0;
+						cint64 mStatRepresentativeExpandedNeighbourIndividualCount = 0;
+						cint64 mStatRepresentativeExpansionAlreadyExistingNeighbourIndividualCount = 0;
+						cint64 mStatRepresentativeDelayedNeighbourIndividualExpansionCount = 0;
 
 
 
@@ -1447,6 +1570,19 @@ namespace Konclude {
 
 						bool mFirstBlockingTestDebugWritten = false;
 						bool mFirstBindingCreationDebugWritten = false;
+
+
+
+						QSet<cint64> mPropCuttedIndiIds;
+						QSet<cint64> mPropCuttedExpandedIndiIds;
+
+
+
+						cint64 nextReportingExpansionCount = 1000;
+						cint64 lastRecomputationTaskId = 0;
+						cint64 lastTaskDepth = 100;
+						cint64 debugExpansionCount = 500;
+
 
 					// private methods
 					private:

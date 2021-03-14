@@ -29,7 +29,7 @@
 
 // Namespace includes
 #include "PersistenceSettings.h"
-#include "COntologyRevisionPersistencer.h"
+#include "COntologyRevisionDirectoryFilePersistencerBase.h"
 
 
 // Other includes
@@ -73,7 +73,7 @@ namespace Konclude {
 				 *		\brief		TODO
 				 *
 				 */
-				class COntologyRevisionDirectoryOWL2XMLFilePersistencer : public COntologyRevisionPersistencer, public CLogDomain {
+				class COntologyRevisionDirectoryOWL2XMLFilePersistencer : public COntologyRevisionDirectoryFilePersistencerBase {
 					// public methods
 					public:
 						//! Constructor
@@ -82,31 +82,17 @@ namespace Konclude {
 						//! Destructor
 						virtual ~COntologyRevisionDirectoryOWL2XMLFilePersistencer();
 
-						virtual bool persistOntologyRevision(COntologyRevision* ontoRev, COntologyRevision* prevOntoRev);
-
-						virtual bool loadLatestOntologyRevision(const QString& ontologyName, COntologyRevision* ontoRev);
-
-						virtual bool hasNewOntologyRevision(const QString& ontologyName, COntologyRevision* ontoRev);
-
 					// protected methods
 					protected:
-						QStringList getOntologyFileNameParts(const QString& ontologyName);
-						bool isOntologyFileNameNewer(const QString& currentOntologyName, const QString& newOntologyName);
 
-						QString getNextPersistingOntologyRevisionString(const QString& ontologyName, const QStringList& pathSepStrings, COntologyRevision* ontoRev);
-
+						virtual bool writeOntologyToFile(QFile* file, COntologyRevision* ontoRev);
 
 					// protected variables
 					protected:
-						QString mConfBaseDirectory;
 						bool mConfEnforceUTF8ConvertingParsing;
 
-						QString mOWLNS;
 
-						CConfiguration* mConfig;
 
-						QHash<QString,QString> mOntologyNameLastFileHash;
-						QHash<COntologyRevision*,QString> mOntologyNameFileHash;
 					
 					// private methods
 					private:

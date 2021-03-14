@@ -57,7 +57,7 @@ namespace Konclude {
 				 *		\brief		TODO
 				 *
 				 */
-				class CSuccessorRoleHash : public CPROCESSHASH<cint64,CIndividualLinkEdge*> {
+				class CSuccessorRoleHash {
 					// public methods
 					public:
 						//! Constructor
@@ -79,6 +79,9 @@ namespace Konclude {
 					// protected variables
 					protected:
 						CProcessContext* mContext;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>* mSuccessorLinkHash;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>* mPrevSuccessorLinkHash;
+						bool mPrevValidatingRequired;
 
 					// private methods
 					private:

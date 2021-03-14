@@ -69,7 +69,7 @@ namespace Konclude {
 
 
 						//! Constructor
-						CBackendRepresentativeMemoryLabelCacheItemExtensionData(CBackendRepresentativeMemoryCacheContext* context);
+						CBackendRepresentativeMemoryLabelCacheItemExtensionData(CContext* context);
 
 
 						LABEL_CACHE_ITEM_EXTENSION_TYPE getExtensionType();
@@ -79,7 +79,7 @@ namespace Konclude {
 
 					// protected variables
 					protected:
-						CBackendRepresentativeMemoryCacheContext* mContext;
+						CContext* mContext;
 
 						LABEL_CACHE_ITEM_EXTENSION_TYPE mCacheItemExtensionType;
 

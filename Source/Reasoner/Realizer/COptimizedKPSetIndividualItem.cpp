@@ -89,6 +89,12 @@ namespace Konclude {
 				return &mPossibleSameInstantiatedItemSet;
 			}
 
+
+			QHash<cint64, CRealizingTestingItem*>* COptimizedKPSetIndividualItem::getPossibleSameIndividualTestingItemHash() {
+				return &mPossibleSameIndividualTestingItemHash;
+			}
+
+
 			cint64 COptimizedKPSetIndividualItem::getPossibleSameInstantiatedItemCount() {
 				return mPossibleSameInstantiatedItemSet.count();
 			}

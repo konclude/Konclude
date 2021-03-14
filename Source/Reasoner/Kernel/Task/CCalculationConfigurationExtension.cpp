@@ -118,11 +118,33 @@ namespace Konclude {
 					mConfForceManyConceptSaturationChecked = false;
 					mMaxRecProConceptCountChecked = false;
 
+					mNewMergingsBackendOnlyInferringNeighbourExpansionChecked = false;
 					mAllowBackendNeighbourExpansionBlockingChecked = false;
 					mAllowBackendSuccessorExpansionBlockingChecked = false;
 					mOccurrenceStatisticsCollectionChecked = false;
 					mGeneratingTestQueriesChecked = false;
 					mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesChecked = false;
+
+					mBackendCriticalNeighbourRepresentativeExpansionDelayingChecked = false;
+					mBackendCriticalNeighbourExpansionLimitationChecked = false;
+					mBackendCriticalNeighbourExpansionReusingChecked = false;
+					mBackendCriticalNeighbourExpansionLateDynamicReusingChecked = false;
+					mBackendCriticalNeighbourExpansionLimitChecked = false;
+					mBackendExpansionLimitReachedReuseActivationChecked = false;
+					mBackendCriticalNeighbourExpansionPriorityReductionCountChecked = false;
+					mBackendCriticalNeighbourDirectExpansionLimitChecked = false;
+					mBackendCriticalNeighbourDirectExpansionOverCriticalReductionSizeChecked = false;
+					mBackendCriticalNeighbourExpansionIndividualsBatchSizeChecked = false;
+					mBackendCriticalNeighbourExpansionRolesBatchSizeChecked = false;
+					mBackendExpansionReuseActivationNeighbourIndividualCountChecked = false;
+					mBackendExpansionReuseActivationSameIndividualCountChecked = false;
+					mBackendDelayedSameInitializationCopyingChecked = false;
+					mDefaultIndividualPrecomputationCountChecked = false;
+
+					mBackendCardinalityNeighbourExpansionRepresentativeCountingChecked = false;
+					mBackendExpandDeterministicallyMergedHandledNeighboursChecked = false;
+
+					mBackendOnlyDeterministicRepresentativeIndividualDataConsiderationChecked = false;
 				}
 
 
@@ -860,6 +882,14 @@ namespace Konclude {
 					return mAllowBackendNeighbourExpansionBlockingActivated;
 				}
 
+				bool CCalculationConfigurationExtension::isNewMergingsBackendOnlyInferringNeighbourExpansionActivated() {
+					if (!mNewMergingsBackendOnlyInferringNeighbourExpansionChecked) {
+						mNewMergingsBackendOnlyInferringNeighbourExpansionActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.NewMergingsBackendOnlyInferringNeighbourExpansion", true);
+						mNewMergingsBackendOnlyInferringNeighbourExpansionChecked = true;
+					}
+					return mNewMergingsBackendOnlyInferringNeighbourExpansionActivated;
+				}
+
 				bool CCalculationConfigurationExtension::isAllowBackendSuccessorExpansionBlockingActivated() {
 					if (!mAllowBackendSuccessorExpansionBlockingChecked) {
 						mAllowBackendSuccessorExpansionBlockingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.AllowBackendSuccessorExpansionBlocking", true);
@@ -893,6 +923,163 @@ namespace Konclude {
 					}
 					return mBlockingTestsIgnoringCompletionGraphCachedNonBlockedNodesActivated;
 				}
+
+
+
+
+
+				bool CCalculationConfigurationExtension::isBackendCriticalNeighbourRepresentativeExpansionDelayingActivated() {
+					if (!mBackendCriticalNeighbourRepresentativeExpansionDelayingChecked) {
+						mBackendCriticalNeighbourRepresentativeExpansionDelayingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourRepresentativeExpansionDelaying", true);
+						mBackendCriticalNeighbourRepresentativeExpansionDelayingChecked = true;
+					}
+					return mBackendCriticalNeighbourRepresentativeExpansionDelayingActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isBackendCriticalNeighbourExpansionLimitationActivated() {
+					if (!mBackendCriticalNeighbourExpansionLimitationChecked) {
+						mBackendCriticalNeighbourExpansionLimitationActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionLimitation", true);
+						mBackendCriticalNeighbourExpansionLimitationChecked = true;
+					}
+					return mBackendCriticalNeighbourExpansionLimitationActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isBackendCriticalNeighbourExpansionReusingActivated() {
+					if (!mBackendCriticalNeighbourExpansionReusingChecked) {
+						mBackendCriticalNeighbourExpansionReusingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionReusing", false);
+						mBackendCriticalNeighbourExpansionReusingChecked = true;
+					}
+					return mBackendCriticalNeighbourExpansionReusingActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isBackendCriticalNeighbourExpansionLateDynamicReusingActivated() {
+					if (!mBackendCriticalNeighbourExpansionLateDynamicReusingChecked) {
+						mBackendCriticalNeighbourExpansionLateDynamicReusingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionLateDynamicReusing", false);
+						mBackendCriticalNeighbourExpansionLateDynamicReusingChecked = true;
+					}
+					return mBackendCriticalNeighbourExpansionLateDynamicReusingActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isBackendExpansionLimitReachedReuseActivationActivated() {
+					if (!mBackendExpansionLimitReachedReuseActivationChecked) {
+						mBackendExpansionLimitReachedReuseActivationActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendExpansionLimitReachedReuseActivation", true);
+						mBackendExpansionLimitReachedReuseActivationChecked = true;
+					}
+					return mBackendExpansionLimitReachedReuseActivationActivated;
+				}
+
+
+				cint64 CCalculationConfigurationExtension::getBackendCriticalNeighbourExpansionLimit() {
+					if (!mBackendCriticalNeighbourExpansionLimitChecked) {
+						mBackendCriticalNeighbourExpansionLimit = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionLimit", 15000);
+						mBackendCriticalNeighbourExpansionLimitChecked = true;
+					}
+					return mBackendCriticalNeighbourExpansionLimit;
+				}
+
+				cint64 CCalculationConfigurationExtension::getDefaultIndividualPrecomputationCount() {
+					if (!mDefaultIndividualPrecomputationCountChecked) {
+						mDefaultIndividualPrecomputationCount = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsPrecompuationSize", 1500);
+						mDefaultIndividualPrecomputationCountChecked = true;
+					}
+					return mDefaultIndividualPrecomputationCount;
+				}
+
+				cint64 CCalculationConfigurationExtension::getBackendCriticalNeighbourExpansionPriorityReductionCount() {
+					if (!mBackendCriticalNeighbourExpansionPriorityReductionCountChecked) {
+						mBackendCriticalNeighbourExpansionPriorityReductionCount = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionPriorityReductionCount", 12000);
+						mBackendCriticalNeighbourExpansionPriorityReductionCountChecked = true;
+					}
+					return mBackendCriticalNeighbourExpansionPriorityReductionCount;
+				}
+
+				cint64 CCalculationConfigurationExtension::getBackendCriticalNeighbourDirectExpansionLimit() {
+					if (!mBackendCriticalNeighbourDirectExpansionLimitChecked) {
+						mBackendCriticalNeighbourDirectExpansionLimit = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourDirectExpansionLimit", 10);
+						mBackendCriticalNeighbourDirectExpansionLimitChecked = true;
+					}
+					return mBackendCriticalNeighbourDirectExpansionLimit;
+				}
+
+				cint64 CCalculationConfigurationExtension::getBackendCriticalNeighbourDirectExpansionOverCriticalReductionSize() {
+					if (!mBackendCriticalNeighbourDirectExpansionOverCriticalReductionSizeChecked) {
+						mBackendCriticalNeighbourDirectExpansionOverCriticalReductionSize = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourDirectExpansionOverCriticalReductionSize", 200);
+						mBackendCriticalNeighbourDirectExpansionOverCriticalReductionSizeChecked = true;
+					}
+					return mBackendCriticalNeighbourDirectExpansionOverCriticalReductionSize;
+				}
+				cint64 CCalculationConfigurationExtension::getBackendCriticalNeighbourExpansionIndividualsBatchSize() {
+					if (!mBackendCriticalNeighbourExpansionIndividualsBatchSizeChecked) {
+						mBackendCriticalNeighbourExpansionIndividualsBatchSize = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionIndividualsBatchSize", 3);
+						mBackendCriticalNeighbourExpansionIndividualsBatchSizeChecked = true;
+					}
+					return mBackendCriticalNeighbourExpansionIndividualsBatchSize;
+				}
+
+				cint64 CCalculationConfigurationExtension::getBackendCriticalNeighbourExpansionRolesBatchSize() {
+					if (!mBackendCriticalNeighbourExpansionRolesBatchSizeChecked) {
+						mBackendCriticalNeighbourExpansionRolesBatchSize = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendCriticalNeighbourExpansionRolesBatchSize", 5);
+						mBackendCriticalNeighbourExpansionRolesBatchSizeChecked = true;
+					}
+					return mBackendCriticalNeighbourExpansionRolesBatchSize;
+				}
+
+
+				bool CCalculationConfigurationExtension::isBackendDelayedSameInitializationCopyingActivated() {
+					if (!mBackendDelayedSameInitializationCopyingChecked) {
+						mBackendDelayedSameInitializationCopyingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendDelayedSameLabelInitializationCopying", true);
+						mBackendDelayedSameInitializationCopyingChecked = true;
+					}
+					return mBackendDelayedSameInitializationCopyingActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isBackendOnlyDeterministicRepresentativeIndividualDataConsiderationActivated() {
+					if (!mBackendOnlyDeterministicRepresentativeIndividualDataConsiderationChecked) {
+						mBackendOnlyDeterministicRepresentativeIndividualDataConsiderationActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendOnlyDeterministicRepresentativeIndividualDataConsideration", true);
+						mBackendOnlyDeterministicRepresentativeIndividualDataConsiderationChecked = true;
+					}
+					return mBackendOnlyDeterministicRepresentativeIndividualDataConsiderationActivated;
+				}
+
+
+
+				cint64 CCalculationConfigurationExtension::getBackendExpansionReuseActivationNeighbourIndividualCount() {
+					if (!mBackendExpansionReuseActivationNeighbourIndividualCountChecked) {
+						mBackendExpansionReuseActivationNeighbourIndividualCount = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendExpansionReuseActivationNeighbourIndividualCount", 1);
+						mBackendExpansionReuseActivationNeighbourIndividualCountChecked = true;
+					}
+					return mBackendExpansionReuseActivationNeighbourIndividualCount;
+				}
+
+
+				cint64 CCalculationConfigurationExtension::getBackendExpansionReuseActivationSameIndividualCount() {
+					if (!mBackendExpansionReuseActivationSameIndividualCountChecked) {
+						mBackendExpansionReuseActivationSameIndividualCount = CConfigDataReader::readConfigInteger(this, "Konclude.Calculation.Optimization.BackendExpansionReuseActivationSameIndividualCount", 1);
+						mBackendExpansionReuseActivationSameIndividualCountChecked = true;
+					}
+					return mBackendExpansionReuseActivationSameIndividualCount;
+				}
+
+
+
+				bool CCalculationConfigurationExtension::isBackendExpandDeterministicallyMergedHandledNeighboursActivated() {
+					if (!mBackendExpandDeterministicallyMergedHandledNeighboursChecked) {
+						mBackendExpandDeterministicallyMergedHandledNeighboursActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendExpandDeterministicallyMergedHandledNeighbours", true);
+						mBackendExpandDeterministicallyMergedHandledNeighboursChecked = true;
+					}
+					return mBackendExpandDeterministicallyMergedHandledNeighboursActivated;
+				}
+
+				bool CCalculationConfigurationExtension::isBackendCardinalityNeighbourExpansionRepresentativeCountingActivated() {
+					if (!mBackendCardinalityNeighbourExpansionRepresentativeCountingChecked) {
+						mBackendCardinalityNeighbourExpansionRepresentativeCountingActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Calculation.Optimization.BackendCriticalCardinalityCheckingNeighbourExpansionRepresentativeCounting", false);
+						mBackendCardinalityNeighbourExpansionRepresentativeCountingChecked = true;
+					}
+					return mBackendCardinalityNeighbourExpansionRepresentativeCountingActivated;
+				}
+
 
 			}; // end namespace Task
 

@@ -27,69 +27,10 @@ namespace Konclude {
 
 		namespace Query {
 
-			CComplexAssertionsIndividualVariablesAnsweringQuery::CComplexAssertionsIndividualVariablesAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) : CComplexAnsweringExpressionQuery(baseOntology,expressionOntology,configuration,queryName) {
-				mAxiomExpressions = axiomExpressions;
-				mDisVariables = disVariables;
-				mDistinct = false;
-				mBooleanEntailmentResult = false;
-				mResultLimit = -1;
-				mResultOffset = 0;
+			CComplexAssertionsIndividualVariablesAnsweringQuery::CComplexAssertionsIndividualVariablesAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) : CComplexVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration,queryName) {
 			}
 
 			CComplexAssertionsIndividualVariablesAnsweringQuery::~CComplexAssertionsIndividualVariablesAnsweringQuery() {
-			}
-
-			QList<CAxiomExpression*>* CComplexAssertionsIndividualVariablesAnsweringQuery::getAxiomExpressions() {
-				return &mAxiomExpressions;
-			}
-
-
-			bool CComplexAssertionsIndividualVariablesAnsweringQuery::isDistinctRequired() {
-				return mDistinct;
-			}
-
-			CComplexAssertionsIndividualVariablesAnsweringQuery* CComplexAssertionsIndividualVariablesAnsweringQuery::setDistinctRequired(bool distinctRequired) {
-				mDistinct = distinctRequired;
-				return this;
-			}
-
-
-			QList<CExpressionVariable*>* CComplexAssertionsIndividualVariablesAnsweringQuery::getDistinguishedVariableExpressions() {
-				return &mDisVariables;
-			}
-
-			bool CComplexAssertionsIndividualVariablesAnsweringQuery::isBooleanEntailmentResultRequired() {
-				return mBooleanEntailmentResult;
-			}
-
-			CComplexAssertionsIndividualVariablesAnsweringQuery* CComplexAssertionsIndividualVariablesAnsweringQuery::setBooleanEntailmentResultRequired(bool booleanEntailmentResultRequired) {
-				mBooleanEntailmentResult = booleanEntailmentResultRequired;
-				return this;
-			}
-
-			cint64 CComplexAssertionsIndividualVariablesAnsweringQuery::getResultLimit() {
-				return mResultLimit;
-			}
-
-			CComplexAssertionsIndividualVariablesAnsweringQuery* CComplexAssertionsIndividualVariablesAnsweringQuery::setResultLimit(cint64 resultLimit) {
-				mResultLimit = resultLimit;
-				return this;
-			}
-
-			cint64 CComplexAssertionsIndividualVariablesAnsweringQuery::getResultOffset() {
-				return mResultOffset;
-			}
-
-			CComplexAssertionsIndividualVariablesAnsweringQuery* CComplexAssertionsIndividualVariablesAnsweringQuery::setResultOffset(cint64 resultOffset) {
-				mResultOffset = resultOffset;
-				return this;
-			}
-
-			cint64 CComplexAssertionsIndividualVariablesAnsweringQuery::getResultLimitIncludingOffset() {
-				if (mResultLimit == -1) {
-					return mResultLimit;
-				}
-				return mResultOffset + mResultLimit;
 			}
 
 

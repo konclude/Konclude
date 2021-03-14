@@ -84,6 +84,7 @@ namespace Konclude {
 					virtual CReasonerEvaluationDoubleDataValue* extractTotalResponseEvaluationData(QDomDocument& document, const QString& responseFileString);
 					virtual CReasonerEvaluationDoubleDataValue* extractTimeoutErrorEvaluationData(QDomDocument& document, const QString& responseFileString);
 					virtual CReasonerEvaluationDoubleDataValue* extractErrorEvaluationData(QDomDocument& document, const QString& responseFileString);
+					virtual CReasonerEvaluationDoubleDataValue* extractMemoryUsageEvaluationData(QDomDocument& document, const QString& responseFileString);
 					virtual CReasonerEvaluationDoubleDataValue* extractTimeoutEvaluationData(QDomDocument& document, const QString& responseFileString);
 					virtual CReasonerEvaluationStringValue* extractResponseFileEvaluationData(QDomDocument& document, const QString& responseFileString);
 					virtual CReasonerEvaluationStringValue* extractRequestFileEvaluationData(QDomDocument& document, const QString& responseFileString);

@@ -60,7 +60,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData(CBackendRepresentativeMemoryCacheContext* context);
+						CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData(CContext* context);
 
 						CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* initNeighbourArrayIndexData(CBackendRepresentativeMemoryLabelCacheItem* combinedNeighbourRoleSetLabel);
 						CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* initNeighbourArrayIndexData(CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* neighArrayIndexData);

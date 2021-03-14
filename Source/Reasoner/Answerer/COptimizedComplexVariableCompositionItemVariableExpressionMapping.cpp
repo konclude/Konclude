@@ -42,8 +42,12 @@ namespace Konclude {
 					remove(varCompItem);
 				} else {
 					COptimizedComplexVariableCompositionItemVariableExpressionMapping::iterator it = find(varCompItem);					
-					while (it != end() && it.value() == itemIndexMapping) {
-						it = erase(it);
+					while (it != end() && it.key() == varCompItem) {
+						if (it.value() == itemIndexMapping) {
+							it = erase(it);
+						} else {
+							++it;
+						}
 					}
 				}
 				return this;

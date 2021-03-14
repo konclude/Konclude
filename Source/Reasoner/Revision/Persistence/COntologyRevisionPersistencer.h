@@ -67,6 +67,8 @@ namespace Konclude {
 
 						virtual bool hasNewOntologyRevision(const QString& ontologyName, COntologyRevision* ontoRev) = 0;
 
+						virtual bool hasOntologyPersisted(const QString& ontologyName) = 0;
+						virtual bool deletePersistedOntology(const QString& ontologyName) = 0;
 
 					// protected methods
 					protected:

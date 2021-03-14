@@ -626,6 +626,48 @@ namespace Konclude {
 					return depNode;
 				}
 
+
+
+				CREUSEBACKENDEXPANSIONMODESDependencyNode* CDependencyFactory::createREUSEBACKENDEXPANSIONMODESDependency(CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CREUSEBACKENDEXPANSIONMODESDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CREUSEBACKENDEXPANSIONMODESDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initREUSEBACKENDEXPANSIONMODESDependencyNode(calcAlgContext->getUsedBranchTreeNode(), prevDepTrackPoint);
+					}
+					return depNode;
+				}
+
+
+				CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode* CDependencyFactory::createREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependency(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode(calcAlgContext->getUsedBranchTreeNode(), processIndi, prevDepTrackPoint);
+					}
+					return depNode;
+				}
+
+				CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode* CDependencyFactory::createREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependency(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode(calcAlgContext->getUsedBranchTreeNode(), processIndi, prevDepTrackPoint);
+					}
+					return depNode;
+				}
+
+
+
+				CREUSEBACKENDVALUEDependencyNode* CDependencyFactory::createREUSEBACKENDVALUEDependency(CDependencyTrackPoint*& valueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext) {
+					CREUSEBACKENDVALUEDependencyNode* depNode = nullptr;
+					if (mConfBuildDependencies) {
+						depNode = CObjectParameterizingAllocator< CREUSEBACKENDVALUEDependencyNode, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
+						depNode->initVALUEDependencyNode(conDes, processIndi, prevDepTrackPoint, nominalDepTrackPoint);
+						valueDepTrackPoint = depNode->getContinueDependencyTrackPoint();
+					}
+					return depNode;
+				}
+
 			}; // end namespace Algorithm
 
 		}; // end namespace Kernel

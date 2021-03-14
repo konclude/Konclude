@@ -53,7 +53,7 @@ namespace Konclude {
 					// not enough memory even for the log message
 					//LOG(CATASTROPHIC,"::Konclude::Utilities::NewAllocationMemoryPoolProvider",logTr("Memory allocation failed."),this);
 				}
-				cint64 memoryBlockSize = qMax(mDefaultPoolSize,minPoolSize);
+				cint64 memoryBlockSize = qMax(mDefaultPoolSize,minPoolSize) + 8;
 				char* memoryBlock = new char[memoryBlockSize];
 				if (!memoryBlock) {
 					LOG(CATASTROPHIC,"::Konclude::Utilities::NewAllocationMemoryPoolProvider",logTr("Memory allocation failed."),this);

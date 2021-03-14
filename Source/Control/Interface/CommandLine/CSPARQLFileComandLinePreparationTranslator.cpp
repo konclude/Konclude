@@ -105,7 +105,7 @@ namespace Konclude {
 
 						QString modArgText = argumentText.trimmed();
 						QString parmArgText;
-
+						
 						if (modArgText.startsWith("-")) {
 							parmArgText = modArgText;
 							while (parmArgText.startsWith("-")) {
@@ -114,7 +114,7 @@ namespace Konclude {
 							}
 						}
 
-						if (parmArgText.indexOf("r") == 0 || parmArgText.indexOf("R") == 0 || parmArgText.indexOf("o") == 0 || parmArgText.indexOf("O") == 0) {
+						if (parmArgText.size() == 1 && (parmArgText.indexOf("r") == 0 || parmArgText.indexOf("R") == 0 || parmArgText.indexOf("o") == 0 || parmArgText.indexOf("O") == 0)) {
 							// response/output file
 							argumentTranslated = true;
 							mSPARQLResponseFileName = "response.xml";
@@ -133,7 +133,7 @@ namespace Konclude {
 						} else if (CCommandLinePreparationTranslator::translate(argumentText, remainingArgList)) {
 							argumentTranslated = true;
 
-						} else if (parmArgText.indexOf("s") == 0 || parmArgText.indexOf("S") == 0) {
+						} else if (parmArgText.size() == 1 && (parmArgText.indexOf("s") == 0 || parmArgText.indexOf("S") == 0)) {
 							// sparql query/input file
 							QString configVal = "query.sparql";
 							if (remainingArgList.count() > 0) {

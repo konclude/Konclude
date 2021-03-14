@@ -31,10 +31,16 @@
 // Namespace includes
 #include "CReasonerEvaluationTerminationResult.h"
 #include "CReasonerEvaluationProvider.h"
+#include "CReasonerMemoryUsageCheckingThread.h"
 
+#include "Test/Evaluation/Events/CReasonerEvaluationReasonerStartEvent.h"
+#include "Test/Evaluation/Events/CReasonerEvaluationReasonerRestartEvent.h"
+#include "Test/Evaluation/Events/CReasonerEvaluationReasonerStopEvent.h"
 
 // Other includes
 #include "Config/CConfigDataReader.h"
+
+#include "Concurrent/Callback/CBlockingCallbackData.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -44,10 +50,13 @@
 namespace Konclude {
 
 	using namespace Config;
+	using namespace Concurrent::Callback;
 
 	namespace Test {
 
 		namespace Evaluation {
+
+			using namespace Events;
 
 
 			/*! 
@@ -58,7 +67,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CReasonerExecutableEvaluationProvider : public QObject, public CReasonerEvaluationProvider {
+			class CReasonerExecutableEvaluationProvider : public CIntervalThread, public CLogIdentifier, public CReasonerEvaluationProvider {
 				Q_OBJECT
 
 				// public methods
@@ -70,6 +79,7 @@ namespace Konclude {
 					virtual ~CReasonerExecutableEvaluationProvider();
 
 
+					virtual bool restartReasoner();
 					virtual bool createReasoner(CConfiguration *config);
 					virtual CReasonerEvaluationTerminationResult* destroyReasoner();
 
@@ -79,12 +89,26 @@ namespace Konclude {
 				protected:
 					bool assistTermination(Q_PID processID);
 
+					virtual bool processTimer(qint64 timerID);
+					void startReasonerThreaded();
+					void terminateReasonerThreaded();
+					bool restartReasonerThreaded();
+
+					bool processCustomsEvents(QEvent::Type type, CCustomEvent* event);
+
+					void startReasoner();
+					void terminateReasoner();
+
 				public slots:
 					void processError(QProcess::ProcessError error);
 					void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
+					
+
 				// protected variables
 				protected:
+					CConfiguration* mConfig;
+
 					QString mReasonerName;
 					QString mReasonerBinaryFile;
 					QString mReasonerBinaryArguments;
@@ -97,6 +121,22 @@ namespace Konclude {
 					cint64 mKillTimeout;
 					QString mKillScriptString;
 					QString mKillScriptArgumentsString;
+
+					cint64 mRestartSleepTime;
+					cint64 mTerminationSleepTime;
+
+
+					CReasonerMemoryUsageCheckingThread* mMemoryCheckingThread;
+
+
+					QString mReasonerStdOutText;
+					QString mReasonerStdErrText;
+					QString mReasonerErrorString;
+					bool mReasonerForcedTermination = false;
+					cint64 mMaxMemoryUsage = 0;
+					bool mReasonerFinishedInTime = true;
+					bool mCheckingMemoryUsage = false;
+
 
 				// private methods
 				private:

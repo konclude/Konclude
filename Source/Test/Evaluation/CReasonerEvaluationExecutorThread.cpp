@@ -46,7 +46,7 @@ namespace Konclude {
 				mNextTestExecutionNumber = 0;
 				mTestCount = 0;
 				mErrorCommBreakCount = 2;
-				mFirstTest = true;
+				mFirstTest = false;
 				mCriticalProcessesTester = nullptr;
 				mConfTestcaseEvaluationExceptionLimit = -1;
 				mCurrentErrorTestRetryCount = 0;
@@ -429,7 +429,7 @@ namespace Konclude {
 					QThread::msleep(mWaitingTimeAfterReasonerCreation);
 				}
 				mCurrentReasonerClient = getReasonerClientForTestfile(testcaseInput);
-				mCurrentReasonerClient->evaluateReasoner(testcaseInit,testcaseInput,addressString,mConfiguration,new CReasonerEvaluationNextEvent(this,0));
+				mCurrentReasonerClient->evaluateReasoner(testcaseInit,testcaseInput, mReasonerProvider,mConfiguration,new CReasonerEvaluationNextEvent(this,0));
 				LOG(INFO, getLogDomain(), logTr("Executing reasoner for test case '%1'.").arg(testcaseInput), this);
 				return true;
 			}

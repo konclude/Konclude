@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Realizer {
 
 
-			COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator::COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector)
+			COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator::COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector)
 				: COptimizedRepresentativeKPSetCacheLabelItemIterator(labelCacheItemKnownInstancesList, QList<CBackendRepresentativeMemoryLabelCacheItem*>(), individualInstantiatedItemHash, individualVector, CRealizationIndividualSorting(CRealizationIndividualSorting::SORT_TYPE_INDIVIDUAL_ID, CRealizationIndividualSorting::SORT_ORDER_ASCENDING, CRealizationIndividualSorting::SORT_GROUP_SAME_UNIQUE), CRealizationIndividualInstanceItemReference()) {
 
 

@@ -73,12 +73,13 @@ namespace Konclude {
 				virtual bool parseQueryFile(const QString& filename);
 				virtual bool parseQueryText(const QString& filetext);
 				virtual bool parseQueryTextList(const QStringList& queryTextList);
+				virtual bool parseQueryTextList(const QStringList& queryTextList, const QString& queryName);
 
 				CQuery* getQuery();
 
 			// protected methods
 			protected:
-				bool processQueryText(const QString& queryText);
+				bool processQueryText(const QString& queryText, const QString& queryName = "Unknown-Rasqal-Query");
 				
 			// protected variables
 			protected:

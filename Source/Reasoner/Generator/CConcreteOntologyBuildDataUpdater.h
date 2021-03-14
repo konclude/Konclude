@@ -356,6 +356,20 @@ namespace Konclude {
 					virtual CDataLiteralVariableExpression* getDataLiteralVariable(const QString &dataLiteralVariableName);
 
 
+
+					virtual CClassVariableExpression* getClassVariable(const QStringRef &classVariableName);
+					virtual CClassVariableExpression* getClassVariable(const QString &classVariableName);
+
+
+					virtual CObjectPropertyVariableExpression* getObjectPropertyVariable(const QStringRef &objectPropertyVariableName);
+					virtual CObjectPropertyVariableExpression* getObjectPropertyVariable(const QString &objectPropertyVariableName);
+
+					virtual CDataPropertyVariableExpression* getDataPropertyVariable(const QStringRef &dataPropertyVariableName);
+					virtual CDataPropertyVariableExpression* getDataPropertyVariable(const QString &dataPropertyVariableName);
+
+
+
+
 					virtual CClassAssertionExpression* getClassAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
 					virtual CClassAssertionExpression* getClassAssertion(CBuildExpression* expression1, CBuildExpression* expression2);
 					virtual CObjectPropertyAssertionExpression* getObjectPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
@@ -466,6 +480,11 @@ namespace Konclude {
 					CBUILDHASH<CStringRefStringHasher, CDataValueVariableExpression*>* mDataValueVariableBuildHash;
 					CBUILDHASH<CStringRefStringHasher, CDataLiteralVariableExpression*>* mDataLiteralVariableBuildHash;
 
+
+
+					CBUILDHASH<CStringRefStringHasher, CClassVariableExpression*>* mClassVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CObjectPropertyVariableExpression*>* mObjectPropertyVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CDataPropertyVariableExpression*>* mDataPropertyVariableBuildHash;
 
 
 					CMAPPINGHASH<QString,CNamePrefix*>* mAbbreviatedNamePrefixMapHash;

@@ -61,6 +61,9 @@ namespace Konclude {
 	namespace Parser {
 
 
+		int raptor_iostream_read_bytes_from_qiodevice(void *context, void *ptr, size_t size, size_t nmemb);
+		int raptor_iostream_read_eof_func_from_qiodevice(void *context);
+		void raptor_log_handler_error_notifier(void *user_data, raptor_log_message *message);
 
 
 		/*! 
@@ -92,7 +95,7 @@ namespace Konclude {
 
 			// protected methods
 			protected:
-				CRedlandStoredTriplesData* getUpdatingTripleData();
+				CRedlandStoredTriplesData* getUpdatingTripleData(bool forceNew = true);
 
 
 			// protected variables

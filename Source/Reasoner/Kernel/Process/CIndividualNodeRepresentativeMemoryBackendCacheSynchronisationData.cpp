@@ -43,7 +43,9 @@ namespace Konclude {
 				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::initSynchronisationData(CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* synchData) {
 					mRoleNeighbourExpansionDataHash = nullptr;
 					mNeighbourExpansionDataHash = nullptr;
+					mNeighbourLabelExpansionDataHashArray = nullptr;
 					mIntegratedMergedIndividualIdSet = nullptr;
+					mRoleRepNeighbourCountHash = nullptr;
 					mRemainingIndirectCompatibilityMergedIndividualCheckingSet = nullptr;
 					if (synchData) {
 						mLastCriticalNeighbourTestedConDes = synchData->mLastCriticalNeighbourTestedConDes;
@@ -52,11 +54,13 @@ namespace Konclude {
 						mLastSynchedConDes = synchData->mLastSynchedConDes;
 						mLastNeighbourInfluenceTestedConDes = synchData->mLastNeighbourInfluenceTestedConDes;
 						mNeighbourInfluenceTestingCriticalCardinalityReset = synchData->mNeighbourInfluenceTestingCriticalCardinalityReset;
+						mLastMergedIntoIndividualTestingCriticalCardinalityReset = synchData->mLastMergedIntoIndividualTestingCriticalCardinalityReset;
 						mAssociationData = synchData->mAssociationData;
 						mSynchron = synchData->mSynchron;
 						mCriticalNeighbour = synchData->mCriticalNeighbour;
 						mDeterministicSameIndividualMerged = synchData->mDeterministicSameIndividualMerged;
 						mDeterministicDifferentIndividualDifferentiated = synchData->mDeterministicDifferentIndividualDifferentiated;
+						mPrioritziedPropagationLinksEstablished = synchData->mPrioritziedPropagationLinksEstablished;
 						mCriticalIndirectConnectedIndis = synchData->mCriticalIndirectConnectedIndis;
 						mNomainlIndirectConnectionIndividualExpanded = synchData->mNomainlIndirectConnectionIndividualExpanded;
 						mLastCriticalNeighbourLinkEdge = synchData->mLastCriticalNeighbourLinkEdge;
@@ -68,6 +72,9 @@ namespace Konclude {
 						mLastProcessedMergedIndividualLinker = synchData->mLastProcessedMergedIndividualLinker;
 						mConceptSetLabelProcessedIndiNodeLinker = synchData->mConceptSetLabelProcessedIndiNodeLinker;
 						mNonConceptSetRelatedProcessing = synchData->mNonConceptSetRelatedProcessing;
+						mNonConceptSetNeighbourLabelRelatedProcessing = synchData->mNonConceptSetNeighbourLabelRelatedProcessing;
+						mNeighbourLabelRepresentativeExpansionLinker = synchData->mNeighbourLabelRepresentativeExpansionLinker;
+						mNeighbourLabelRepresentativeExpansion = synchData->mNeighbourLabelRepresentativeExpansion;
 						mBackendConceptSetInitialized = synchData->mBackendConceptSetInitialized;
 						mBackendConceptSetInitializationQueued = synchData->mBackendConceptSetInitializationQueued;
 						mBackendConceptSetInitializationRequired = synchData->mBackendConceptSetInitializationRequired;
@@ -78,15 +85,27 @@ namespace Konclude {
 						if (synchData->mNeighbourExpansionDataHash) {
 							getNeighbourExpansionDataHash()->init(synchData->mNeighbourExpansionDataHash);
 						}
+						if (synchData->mNeighbourLabelExpansionDataHashArray) {
+							cint64 arraySize = mAssociationData->getRoleSetNeighbourArray()->getIndexData()->getArraySize();
+							for (cint64 i = 0; i < arraySize; ++i) {
+								CPROCESSHASH< CBackendRepresentativeMemoryLabelCacheItem*, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData >* hash = synchData->mNeighbourLabelExpansionDataHashArray[i];
+								getNeighbourLabelExpansionDataHash(i, true)->init(hash);
+							}
+						}
 						if (synchData->mIntegratedMergedIndividualIdSet) {
 							getIntegratedMergedIndividualIdSet()->init(synchData->mIntegratedMergedIndividualIdSet);
 						}
 						if (synchData->mRemainingIndirectCompatibilityMergedIndividualCheckingSet) {
 							getRemainingIndirectCompatibilityMergedIndividualCheckingSet()->init(synchData->mRemainingIndirectCompatibilityMergedIndividualCheckingSet);
 						}
+						if (synchData->mRoleRepNeighbourCountHash) {
+							getRoleRepresentativeNeighbourCountHash(true)->init(synchData->mRoleRepNeighbourCountHash);
+						}
 						mMergedIndividualsAllNeighbourExpanded = synchData->mMergedIndividualsAllNeighbourExpanded;
 						mAllNeighbourExpansion = synchData->mAllNeighbourExpansion;
 						mAllNeighbourForcedExpansion = synchData->mAllNeighbourForcedExpansion;
+						mAllNeighbourExpansionScheduled = synchData->mAllNeighbourExpansionScheduled;
+						mAllNeighbourForcedExpansionScheduled = synchData->mAllNeighbourForcedExpansionScheduled;
 						mMergedIndirectlyConnectedNominalIndividuals = synchData->mMergedIndirectlyConnectedNominalIndividuals;
 						mMergedIndiNodeLinker = synchData->mMergedIndiNodeLinker;
 						mLastIndirectlyConnectedNominalIndividualsTestedMergedNodeLinker = synchData->mLastIndirectlyConnectedNominalIndividualsTestedMergedNodeLinker;
@@ -94,7 +113,22 @@ namespace Konclude {
 						mLastSynchronizedConceptsTestedMergedNodeLinker = synchData->mLastSynchronizedConceptsTestedMergedNodeLinker;
 						mLastCriticalNeighboursTestedMergedNodeLinker = synchData->mLastCriticalNeighboursTestedMergedNodeLinker;
 						mLastDirectExpansionHandledMergedNodeLinker = synchData->mLastDirectExpansionHandledMergedNodeLinker;
+						mLastInferringExpansionHandledMergedNodeLinker = synchData->mLastInferringExpansionHandledMergedNodeLinker;
+						mLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker = synchData->mLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker;
+						mLastReuseExpansionHandledMergedNodeLinker = synchData->mLastReuseExpansionHandledMergedNodeLinker;
 						mLastIndirectCompatibilityExpansionHandledMergedNodeLinker = synchData->mLastIndirectCompatibilityExpansionHandledMergedNodeLinker;
+						mBackendExpansionReuseDependencyTrackPoint = synchData->mBackendExpansionReuseDependencyTrackPoint;
+						mReuseNonDeterministicSameIndividualMerged = synchData->mReuseNonDeterministicSameIndividualMerged;
+						mReuseNonDeterministicDifferentIndividualStated = synchData->mReuseNonDeterministicDifferentIndividualStated;
+						mReuseNonDeterministicConceptsAdded = synchData->mReuseNonDeterministicConceptsAdded;
+						mUseBackendNeighbourExpansion = synchData->mUseBackendNeighbourExpansion;
+						mPrevBackendNeighbourExpansion = synchData->mUseBackendNeighbourExpansion;
+						mBackendNeighbourExpansionQueue = nullptr;
+						mNewlyMergedIndividuals = synchData->mNewlyMergedIndividuals;
+						mNewlyMergedAllNeighbourExpansion = synchData->mNewlyMergedAllNeighbourExpansion;
+						mNewlyMergedInferringNeighbourExpansion = synchData->mNewlyMergedInferringNeighbourExpansion;
+						mNonDeterministicallyMergedIndividuals = synchData->mNonDeterministicallyMergedIndividuals;
+						mScheduledIndividual = synchData->mScheduledIndividual;
 					} else {
 						mLastIndirectConnectedIndiTestedConDes = nullptr;
 						mLastSynchronizationTestedConDes = nullptr;
@@ -102,6 +136,7 @@ namespace Konclude {
 						mLastSynchedConDes = nullptr;
 						mLastNeighbourInfluenceTestedConDes = nullptr;
 						mNeighbourInfluenceTestingCriticalCardinalityReset = false;
+						mLastMergedIntoIndividualTestingCriticalCardinalityReset = -1;
 						mAssociationData = nullptr;
 						mLastCriticalNeighbourLinkEdge = nullptr;
 						mCriticalCardinalityInitiallyChecked = false;
@@ -111,15 +146,20 @@ namespace Konclude {
 						mCriticalNeighbour = false;
 						mDeterministicSameIndividualMerged = false;
 						mDeterministicDifferentIndividualDifferentiated = false;
+						mPrioritziedPropagationLinksEstablished = false;
 						mCriticalIndirectConnectedIndis = false;
 						mNomainlIndirectConnectionIndividualExpanded = false;
 						mCriticalCardinality = false;
 						mRoleNeighbourExpansionDataHash = nullptr;
 						mNeighbourExpansionDataHash = nullptr;
+						mNeighbourLabelExpansionDataHashArray = nullptr;
 						mConceptSetLabelProcessedIndiNodeLinker = nullptr;
 						mLastProcessedMergedIndividualLinker = nullptr;
 						mLastMergedIndiCount = 0;
 						mNonConceptSetRelatedProcessing = false;
+						mNonConceptSetNeighbourLabelRelatedProcessing = false;
+						mNeighbourLabelRepresentativeExpansionLinker = nullptr;
+						mNeighbourLabelRepresentativeExpansion = false;
 						mBackendConceptSetInitialized = false;
 						mBackendConceptSetInitializationQueued = false;
 						mBackendConceptSetInitializationRequired = false;
@@ -127,14 +167,32 @@ namespace Konclude {
 						mMergedIndividualsAllNeighbourExpanded = false;
 						mAllNeighbourExpansion = false;
 						mAllNeighbourForcedExpansion = false;
+						mAllNeighbourExpansionScheduled = false;
+						mAllNeighbourForcedExpansionScheduled = false;
 						mMergedIndirectlyConnectedNominalIndividuals = false;
 						mMergedIndiNodeLinker = nullptr;
 						mLastIndirectlyConnectedNominalIndividualsHandledMergedNodeLinker = nullptr;
 						mLastIndirectlyConnectedNominalIndividualsTestedMergedNodeLinker = nullptr;
 						mLastSynchronizedConceptsTestedMergedNodeLinker = nullptr;
+						mRoleRepNeighbourCountHash = nullptr;
 						mLastCriticalNeighboursTestedMergedNodeLinker = nullptr;
 						mLastDirectExpansionHandledMergedNodeLinker = nullptr;
+						mLastInferringExpansionHandledMergedNodeLinker = nullptr;
+						mLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker = nullptr;
+						mLastReuseExpansionHandledMergedNodeLinker = nullptr;
 						mLastIndirectCompatibilityExpansionHandledMergedNodeLinker = nullptr;
+						mBackendExpansionReuseDependencyTrackPoint = nullptr;
+						mReuseNonDeterministicSameIndividualMerged = false;
+						mReuseNonDeterministicDifferentIndividualStated = false;
+						mReuseNonDeterministicConceptsAdded = false;
+						mBackendNeighbourExpansionQueue = nullptr;
+						mUseBackendNeighbourExpansion = nullptr;
+						mPrevBackendNeighbourExpansion = nullptr;
+						mNewlyMergedIndividuals = false;
+						mNewlyMergedAllNeighbourExpansion = false;
+						mNewlyMergedInferringNeighbourExpansion = false;
+						mNonDeterministicallyMergedIndividuals = false;
+						mScheduledIndividual = false;
 					}
 					return this;
 				}
@@ -147,6 +205,7 @@ namespace Konclude {
 					mLastSynchedConDes = nullptr;
 					mLastNeighbourInfluenceTestedConDes = nullptr;
 					mNeighbourInfluenceTestingCriticalCardinalityReset = false;
+					mLastMergedIntoIndividualTestingCriticalCardinalityReset = -1;
 					mCriticalCardinalityInitiallyChecked = false;
 					mLastCriticalNeighbourLinkEdge = nullptr;
 					mLastNewNeighbourLinkEdge = nullptr;
@@ -156,15 +215,20 @@ namespace Konclude {
 					mCriticalNeighbour = false;
 					mDeterministicSameIndividualMerged = false;
 					mDeterministicDifferentIndividualDifferentiated = false;
+					mPrioritziedPropagationLinksEstablished = false;
 					mCriticalIndirectConnectedIndis = false;
 					mNomainlIndirectConnectionIndividualExpanded = false;
 					mCriticalCardinality = false;
 					mRoleNeighbourExpansionDataHash = nullptr;
 					mNeighbourExpansionDataHash = nullptr;
+					mNeighbourLabelExpansionDataHashArray = nullptr;
 					mLastProcessedMergedIndividualLinker = nullptr;
 					mLastMergedIndiCount = 0;
 					mConceptSetLabelProcessedIndiNodeLinker = nullptr;
 					mNonConceptSetRelatedProcessing = false;
+					mNonConceptSetNeighbourLabelRelatedProcessing = false;
+					mNeighbourLabelRepresentativeExpansionLinker = nullptr;
+					mNeighbourLabelRepresentativeExpansion = false;
 					mBackendConceptSetInitialized = false;
 					mBackendConceptSetInitializationQueued = false;
 					mBackendConceptSetInitializationRequired = false;
@@ -173,15 +237,77 @@ namespace Konclude {
 					mMergedIndividualsAllNeighbourExpanded = false;
 					mAllNeighbourExpansion = false;
 					mAllNeighbourForcedExpansion = false;
+					mAllNeighbourExpansionScheduled = false;
+					mAllNeighbourForcedExpansionScheduled = false;
 					mMergedIndirectlyConnectedNominalIndividuals = false;
 					mMergedIndiNodeLinker = nullptr;
 					mLastIndirectlyConnectedNominalIndividualsHandledMergedNodeLinker = nullptr;
 					mLastIndirectlyConnectedNominalIndividualsTestedMergedNodeLinker = nullptr;
 					mLastSynchronizedConceptsTestedMergedNodeLinker = nullptr;
+					mRoleRepNeighbourCountHash = nullptr;
 					mLastCriticalNeighboursTestedMergedNodeLinker = nullptr;
 					mLastDirectExpansionHandledMergedNodeLinker = nullptr;
+					mLastInferringExpansionHandledMergedNodeLinker = nullptr;
+					mLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker = nullptr;
+					mLastReuseExpansionHandledMergedNodeLinker = nullptr;
 					mLastIndirectCompatibilityExpansionHandledMergedNodeLinker = nullptr;
 					mRemainingIndirectCompatibilityMergedIndividualCheckingSet = nullptr;
+					mBackendExpansionReuseDependencyTrackPoint = nullptr;
+					mReuseNonDeterministicSameIndividualMerged = false;
+					mReuseNonDeterministicDifferentIndividualStated = false;
+					mReuseNonDeterministicConceptsAdded = false;
+					mBackendNeighbourExpansionQueue = nullptr;
+					mUseBackendNeighbourExpansion = nullptr;
+					mPrevBackendNeighbourExpansion = nullptr;
+					mNewlyMergedIndividuals = false;
+					mNewlyMergedAllNeighbourExpansion = false;
+					mNewlyMergedInferringNeighbourExpansion = false;
+					mNonDeterministicallyMergedIndividuals = false;
+					mScheduledIndividual = false;
+					return this;
+				}
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasNewlyMergedIndividuals() {
+					return mNewlyMergedIndividuals;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setNewlyMergedIndividuals(bool newlyMerged) {
+					mNewlyMergedIndividuals = newlyMerged;
+					return this;
+				}
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasNonDeterministicallyMergedIndividuals() {
+					return mNonDeterministicallyMergedIndividuals;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setNonDeterministicallyMergedIndividuals(bool nonDeterministicallyMerged) {
+					mNonDeterministicallyMergedIndividuals = nonDeterministicallyMerged;
+					return this;
+				}
+
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasNewlyMergedAllNeighbourExpansion() {
+					return mNewlyMergedAllNeighbourExpansion;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setNewlyMergedAllNeighbourExpansion(bool allExpanded) {
+					mNewlyMergedAllNeighbourExpansion = allExpanded;
+					return this;
+				}
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasNewlyMergedInferringNeighbourExpansion() {
+					return mNewlyMergedInferringNeighbourExpansion;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setNewlyMergedInferringNeighbourExpansion(bool inferringExpanded) {
+					mNewlyMergedInferringNeighbourExpansion = inferringExpanded;
 					return this;
 				}
 
@@ -304,6 +430,32 @@ namespace Konclude {
 				}
 
 
+
+				CPROCESSHASH< CBackendRepresentativeMemoryLabelCacheItem*, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData >* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getNeighbourLabelExpansionDataHash(cint64 arrayId, bool createIfNotExists) {
+					if (!mNeighbourLabelExpansionDataHashArray) {
+						cint64 arraySize = 0; 
+						arraySize = mAssociationData->getRoleSetNeighbourArray()->getIndexData()->getArraySize();
+						mNeighbourLabelExpansionDataHashArray = CObjectAllocator< CPROCESSHASH< CBackendRepresentativeMemoryLabelCacheItem*, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData >* >::allocateAndConstructArray(mContext->getUsedMemoryAllocationManager(), arraySize);
+					}
+					CPROCESSHASH< CBackendRepresentativeMemoryLabelCacheItem*, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData >*& hash = mNeighbourLabelExpansionDataHashArray[arrayId];
+					if (!hash) {
+						hash = CObjectParameterizingAllocator< CPROCESSHASH< CBackendRepresentativeMemoryLabelCacheItem*, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData >, CProcessContext* >::allocateAndConstructAndParameterize(mContext->getUsedMemoryAllocationManager(), mContext);
+					}
+					return hash;
+				}
+
+
+
+
+				CPROCESSHASH< CRole*, cint64 >* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getRoleRepresentativeNeighbourCountHash(bool create) {
+					if (!mRoleRepNeighbourCountHash && create) {
+						mRoleRepNeighbourCountHash = CObjectParameterizingAllocator< CPROCESSHASH< CRole*, cint64 >, CProcessContext* >::allocateAndConstructAndParameterize(mContext->getUsedMemoryAllocationManager(), mContext);
+					}
+					return mRoleRepNeighbourCountHash;
+				}
+
+
+
 				CConceptDescriptor* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getLastNeighbourInfluenceTestedConceptDescriptor() {
 					return mLastNeighbourInfluenceTestedConDes;
 				}
@@ -327,6 +479,14 @@ namespace Konclude {
 				}
 
 
+				cint64 CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getLastMergedIntoIndividualTestingCriticalCardinalityReset() {
+					return mLastMergedIntoIndividualTestingCriticalCardinalityReset;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setLastMergedIntoIndividualTestingCriticalCardinalityReset(cint64 indiId) {
+					mLastMergedIntoIndividualTestingCriticalCardinalityReset = indiId;
+					return this;
+				}
 
 
 
@@ -394,6 +554,17 @@ namespace Konclude {
 
 				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setDeterministicDifferentIndividualDifferentiated(bool differentiated) {
 					mDeterministicDifferentIndividualDifferentiated = differentiated;
+					return this;
+				}
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasPrioritziedPropagationLinksEstablished() {
+					return mPrioritziedPropagationLinksEstablished;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setPrioritziedPropagationLinksEstablished(bool established) {
+					mPrioritziedPropagationLinksEstablished = established;
 					return this;
 				}
 
@@ -471,6 +642,30 @@ namespace Konclude {
 
 
 
+				CXLinker<CIndividualProcessNode*>* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getLastInferringExpansionHandledMergedNodeLinker() {
+					return mLastInferringExpansionHandledMergedNodeLinker;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setLastInferringExpansionHandledMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker) {
+					mLastInferringExpansionHandledMergedNodeLinker = linker;
+					return this;
+				}
+
+
+
+				CXLinker<CIndividualProcessNode*>* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker() {
+					return mLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker) {
+					mLastNewlyMergedExpansionRequiringCheckingMergedNodeLinker = linker;
+					return this;
+				}
+
+
+
+
+
 				CXLinker<CIndividualProcessNode*>* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getLastIndirectCompatibilityExpansionHandledMergedNodeLinker() {
 					return mLastIndirectCompatibilityExpansionHandledMergedNodeLinker;
 				}
@@ -512,23 +707,23 @@ namespace Konclude {
 
 
 
-				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasAllNeighbourExpansion() {
-					return mAllNeighbourExpansion;
-				}
-
-				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setAllNeighbourExpansion(bool expanded) {
-					mAllNeighbourExpansion = expanded;
-					return this;
-				}
-
-
-
 				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasMergedIndirectlyConnectedNominalIndividuals() {
 					return mMergedIndirectlyConnectedNominalIndividuals;
 				}
 
 				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setMergedIndirectlyConnectedNominalIndividuals(bool connection) {
 					mMergedIndirectlyConnectedNominalIndividuals = connection;
+					return this;
+				}
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasAllNeighbourExpansion() {
+					return mAllNeighbourExpansion;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setAllNeighbourExpansion(bool expanded) {
+					mAllNeighbourExpansion = expanded;
 					return this;
 				}
 
@@ -541,6 +736,36 @@ namespace Konclude {
 					mAllNeighbourForcedExpansion = expanded;
 					return this;
 				}
+
+
+
+
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasAllNeighbourExpansionScheduled() {
+					return mAllNeighbourExpansionScheduled;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setAllNeighbourExpansionScheduled(bool expansionScheduled) {
+					mAllNeighbourExpansionScheduled = expansionScheduled;
+					return this;
+				}
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasAllNeighbourForcedExpansionScheduled() {
+					return mAllNeighbourForcedExpansionScheduled;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setAllNeighbourForcedExpansionScheduled(bool expansionScheduled) {
+					mAllNeighbourForcedExpansionScheduled = expansionScheduled;
+					return this;
+				}
+
+
+
+
+
 
 
 				cint64 CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getLastMergedIndividualCount() {
@@ -584,6 +809,58 @@ namespace Konclude {
 					return this;
 				}
 
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasNonConceptSetBackendNeighbourLabelRelatedProcessing() {
+					return mNonConceptSetNeighbourLabelRelatedProcessing;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setNonConceptSetBackendNeighbourLabelRelatedProcessing(bool nonConceptSetRelatedProcessing) {
+					mNonConceptSetNeighbourLabelRelatedProcessing = nonConceptSetRelatedProcessing;
+					return this;
+				}
+
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasNeighbourLabelRepresentativeExpansionInstalled() {
+					return mNeighbourLabelRepresentativeExpansionLinker != nullptr;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::installNeighbourLabelRepresentativeExpansion(CXLinker<CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData*>* linker) {
+					mNeighbourLabelRepresentativeExpansionLinker = linker->append(mNeighbourLabelRepresentativeExpansionLinker);
+					return this;
+				}
+
+				CXLinker<CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationLabelNeighbourExpansionData*>* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getNeighbourLabelRepresentativeExpansionLinker() {
+					return mNeighbourLabelRepresentativeExpansionLinker;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::clearNeighbourLabelRepresentativeExpansionLinker() {
+					mNeighbourLabelRepresentativeExpansionLinker = nullptr;
+					return this;
+				}
+
+
+
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasNeighbourLabelRepresentativeExpansion() {
+					return mNeighbourLabelRepresentativeExpansion;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setNeighbourLabelRepresentativeExpansion(bool repExp) {
+					mNeighbourLabelRepresentativeExpansion = repExp;
+					return this;
+				}
+
+
+
+
+
+
+
+
 				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::isBackendConceptSetInitialized() {
 					return mBackendConceptSetInitialized;
 				}
@@ -620,6 +897,82 @@ namespace Konclude {
 
 				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setBackendConceptSetInitializationDelayingRegistered(bool registered) {
 					mBackendConceptSetInitializationDelayingRegistered = registered;
+					return this;
+				}
+
+				CNonDeterministicDependencyTrackPoint* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getBackendExpansionReuseDependencyTrackPoint() {
+					return mBackendExpansionReuseDependencyTrackPoint;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setBackendExpansionReuseDependencyTrackPoint(CNonDeterministicDependencyTrackPoint* depTrackPoint) {
+					mBackendExpansionReuseDependencyTrackPoint = depTrackPoint;
+					return this;
+				}
+
+
+
+
+				CXLinker<CIndividualProcessNode*>* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getLastReuseExpansionHandledMergedNodeLinker() {
+					return mLastReuseExpansionHandledMergedNodeLinker;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setLastReuseExpansionHandledMergedNodeLinker(CXLinker<CIndividualProcessNode*>* linker) {
+					mLastReuseExpansionHandledMergedNodeLinker = linker;
+					return this;
+				}
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasReuseNonDeterministicSameIndividualMerged() {
+					return mReuseNonDeterministicSameIndividualMerged;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setReuseNonDeterministicSameIndividualMerged(bool merged) {
+					mReuseNonDeterministicSameIndividualMerged = merged;
+					return this;
+				}
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasReuseNonDeterministicDifferentIndividualStated() {
+					return mReuseNonDeterministicDifferentIndividualStated;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setReuseNonDeterministicDifferentIndividualStated(bool stated) {
+					mReuseNonDeterministicDifferentIndividualStated = stated;
+					return this;
+				}
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::hasReuseNonDeterministicConceptsAdded() {
+					return mReuseNonDeterministicConceptsAdded;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setReuseNonDeterministicConceptsAdded(bool added) {
+					mReuseNonDeterministicConceptsAdded = added;
+					return this;
+				}
+
+
+				bool CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::isScheduledIndividual() {
+					return mScheduledIndividual;
+				}
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::setScheduledIndividual(bool scheduled) {
+					mScheduledIndividual = scheduled;
+					return this;
+				}
+
+
+				CBackendNeighbourExpansionQueue* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::getBackendNeighbourExpansionQueue(bool create) {
+					if (!mBackendNeighbourExpansionQueue && create) {
+						mBackendNeighbourExpansionQueue = CObjectParameterizingAllocator< CBackendNeighbourExpansionQueue, CProcessContext* >::allocateAndConstructAndParameterize(mContext->getUsedMemoryAllocationManager(), mContext);
+						mBackendNeighbourExpansionQueue->initBackendNeighbourExpansionQueue(mPrevBackendNeighbourExpansion);
+						mUseBackendNeighbourExpansion = mBackendNeighbourExpansionQueue;
+					}
+					return mUseBackendNeighbourExpansion;
+				}
+
+
+				CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData::clearBackendNeighbourExpansionQueue() {
+					mBackendNeighbourExpansionQueue = nullptr;
+					mUseBackendNeighbourExpansion = nullptr;
+					mPrevBackendNeighbourExpansion = nullptr;
 					return this;
 				}
 

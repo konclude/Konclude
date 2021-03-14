@@ -65,16 +65,19 @@ namespace Konclude {
 							mLinkLinker = nullptr;
 							mLocatedLinkSet = false;
 							mLinkSet = nullptr;
+							mPrevLinkSet = nullptr;
 							mLinkCount = 0;
 						}
 						inline CReapplyRoleSuccessorData(const CReapplyRoleSuccessorData& roleSuccData) : mReapplyQueue(roleSuccData.mReapplyQueue) {
 							mLinkSet = roleSuccData.mLinkSet;
+							mPrevLinkSet = roleSuccData.mPrevLinkSet;
 							mLocatedLinkSet = false;
 							mLinkCount = roleSuccData.mLinkCount;
 							mLinkLinker = roleSuccData.mLinkLinker;
 						}
 
-						CPROCESSHASH<cint64,CIndividualLinkEdge*> *mLinkSet;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>* mLinkSet;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>* mPrevLinkSet;
 						CIndividualLinkEdge* mLinkLinker;
 						bool mLocatedLinkSet;
 						cint64 mLinkCount;

@@ -65,9 +65,16 @@ namespace Konclude {
 
 			// protected methods
 			protected:
-				QList<CAxiomExpression*> getTripleOWLAxioms(QHash<QString,CRDFHahsedSubjectData>* subjectTripleHash, bool anonymousIndividualsAsVariables = false);
+				virtual QList<CAxiomExpression*> getTripleOWLAxioms(QHash<QString,CRDFHahsedSubjectData>* subjectTripleHash, bool anonymousIndividualsAsVariables = false);
 
-				QList<CAxiomExpression*> getTripleOWLAxioms(QList<CRDFStringTriple>* tripleStringList, bool anonymousIndividualsAsVariables = false, QSet<CExpressionVariable*>* varExpSet = nullptr);
+				virtual QList<CAxiomExpression*> getTripleOWLAxioms(QList<CRDFStringTriple>* tripleStringList, bool anonymousIndividualsAsVariables = false, QSet<CExpressionVariable*>* varExpSet = nullptr);
+
+
+				CIndividualTermExpression* getIndividualTermExpression(const QString& subjectString, bool anonymousIndividualsAsVariables, QSet<CExpressionVariable*>* varExpSet = nullptr);
+				CDataLiteralTermExpression* getDataLiteralTermExpression(const QString &objectString, QSet<CExpressionVariable*>* varExpSet = nullptr);
+				CClassTermExpression* getClassTermExpression(const QString &objectString, QSet<CExpressionVariable*>* varExpSet = nullptr);
+				CDataPropertyTermExpression* getDataPropertyTermExpression(const QString &objectString, QSet<CExpressionVariable*>* varExpSet = nullptr);
+				CObjectPropertyTermExpression* getObjectPropertyTermExpression(const QString &objectString, QSet<CExpressionVariable*>* varExpSet = nullptr);
 
 				bool isDataProperty(const QString& propertyName);
 

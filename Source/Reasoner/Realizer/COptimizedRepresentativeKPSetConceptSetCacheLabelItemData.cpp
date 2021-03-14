@@ -28,10 +28,14 @@ namespace Konclude {
 		namespace Realizer {
 
 
-			COptimizedRepresentativeKPSetConceptSetCacheLabelItemData::COptimizedRepresentativeKPSetConceptSetCacheLabelItemData() {
+			COptimizedRepresentativeKPSetConceptSetCacheLabelItemData::COptimizedRepresentativeKPSetConceptSetCacheLabelItemData(CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem) {
+				mLabelCacheItem = labelCacheItem;
 				mPossibleInstances = false;
 			}
 
+			CBackendRepresentativeMemoryLabelCacheItem* COptimizedRepresentativeKPSetConceptSetCacheLabelItemData::getLabelCacheItem() {
+				return mLabelCacheItem;
+			}
 
 			bool COptimizedRepresentativeKPSetConceptSetCacheLabelItemData::hasPossibleInstances() {
 				return mPossibleInstances;

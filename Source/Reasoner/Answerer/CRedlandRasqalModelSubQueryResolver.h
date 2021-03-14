@@ -91,6 +91,7 @@ namespace Konclude {
 					bool isTriplesContextLiteralsReset();
 					CRedlandRasqalModelSubQueryResolver* setTriplesContextLiteralsReset(bool reset);
 
+
 				// protected methods
 				protected:
 					void releaseRedlandResolvingModel();

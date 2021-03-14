@@ -37,6 +37,7 @@
 #include "Concurrent/Callback/CCallbackData.h"
 
 #include "../CacheSettings.h"
+#include "../CBackendIndividualRetrievalComputationUpdateCoordinationHash.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -69,17 +70,22 @@ namespace Konclude {
 						// public methods
 						public:
 							//! Constructor
-							CRetrieveIncompletelyAssociationCachedEvent(CCallbackData* callbackData, cint64 ontologyIdentifier, QSet<CIndividualReference>* individualSet, cint64 limit);
+							CRetrieveIncompletelyAssociationCachedEvent(CCallbackData* callbackData, cint64 ontologyIdentifier, CBackendIndividualRetrievalComputationUpdateCoordinationHash* lastRetrievalHash, CBackendIndividualRetrievalComputationUpdateCoordinationHash* newRetrievalHash, bool allIndividualsAdded, bool refillRetrievalCoordHash, cint64 limit);
 
 							static const QEvent::Type EVENTTYPE = EVENTRETRIEVEINCOMPLETELYASSOCIATIONCACHED;
 
 
 							CCallbackData* getCallback();
 
-							QSet<CIndividualReference>* getIndividualSet();
+							CBackendIndividualRetrievalComputationUpdateCoordinationHash* getLastIndividualsRetrievalCoordinationHash();
+							CBackendIndividualRetrievalComputationUpdateCoordinationHash* getNewIndividualsRetrievalCoordinationHash();
 							cint64 getRetrievalLimit();
 
 							cint64 getOntologyIdentifier();
+
+							bool hasAllIndividualsAdded();
+
+							bool hasRefillRetrievalCoordHashOrdered();
 
 						// protected methods
 						protected:
@@ -88,8 +94,11 @@ namespace Konclude {
 						protected:
 							cint64 mOntologyIdentifier;
 							CCallbackData* mCallback;
-							QSet<CIndividualReference>* mIndividualSet;
+							CBackendIndividualRetrievalComputationUpdateCoordinationHash* mLastRetrievalHash;
+							CBackendIndividualRetrievalComputationUpdateCoordinationHash* mNewRetrievalHash;
 							cint64 mLimit;
+							bool mAllIndividualsAdded;
+							bool mRefillRetrievalCoordHash;
 
 						// private methods
 						private:

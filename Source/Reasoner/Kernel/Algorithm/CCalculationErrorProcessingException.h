@@ -54,7 +54,7 @@ namespace Konclude {
 					// public methods
 					public:
 						enum ERRORCODE {
-							ECNOERROR = 0, ECNOMINALMISSING = 1, ECCANCELED = 2
+							ECNOERROR = 0, ECNOMINALMISSING = 1, ECCANCELED = 2, ECINVALIDRECOMPUATIONID = 3
 						};
 
 

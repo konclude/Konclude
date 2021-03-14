@@ -63,6 +63,7 @@ namespace Konclude {
 					
 					COptimizedComplexVariableCompositionItem* getDependentItem();
 
+					bool reset();
 
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker* getBatchCurrentBindingsCardinalityLinker(bool moveNext);
 					COptimizedComplexVariableIndividualUpdateCardinalityLinker* getBatchCurrentUpdatedCardinalityLinker(bool moveNext);
@@ -84,6 +85,8 @@ namespace Konclude {
 
 					COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* getBatchProvidedBindingCardinalityBatchLinker(bool moveNext);
 					bool setBatchProvidedBindingCardinalityLinkersProcessed(COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* batchLinker);
+
+
 
 				// protected methods
 				protected:

@@ -45,6 +45,7 @@
 #ifdef KONCLUDE_REDLAND_INTEGRATION
 #include "Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionIndexer.h"
 #include "Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionConvertionIndexer.h"
+#include "Reasoner/Triples/CRedlandStoredTriplesIndividualAssertionConvertionQtConcurrentIndexer.h"
 #endif // !KONCLUDE_REDLAND_INTEGRATION
 
 #include "Utilities/Memory/CTempMemoryPoolContainerAllocationManager.h"

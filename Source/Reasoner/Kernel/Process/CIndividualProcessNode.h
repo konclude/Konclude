@@ -352,6 +352,9 @@ namespace Konclude {
 						CIndividualProcessNode* setBaseConceptsInitialized(bool initialized);
 
 
+						bool hasUniversallyConnectionIndividualInitialized();
+						CIndividualProcessNode* setUniversallyConnectionIndividualInitialized(bool initialized);
+
 						bool hasRoleAssertionsInitialized();
 						CIndividualProcessNode* setRoleAssertionsInitialized(bool initialized);
 
@@ -469,6 +472,9 @@ namespace Konclude {
 						bool isBackendIndirectCompatibilityExpansionQueued();
 						bool isBackendDirectInfluenceExpansionQueued();
 
+						bool isBackendReuseExpansionQueued();
+						bool isBackendNeighbourExpansionQueued();
+
 						CIndividualProcessNode* setProcessingQueued(bool processingQueued);
 						CIndividualProcessNode* setExtendedQueueProcessing(bool extendedQueueProcessing);
 						CIndividualProcessNode* setImmediatelyProcessingQueued(bool immProQue);
@@ -480,6 +486,10 @@ namespace Konclude {
 						CIndividualProcessNode* setBackendDirectInfluenceExpansionQueued(bool queued);
 						CIndividualProcessNode* setIncrementalCompatibilityCheckingQueued(bool incCompChecking);
 						CIndividualProcessNode* setIncrementalExpansionQueued(bool incExpQueued);
+
+						CIndividualProcessNode* setBackendReuseExpansionQueued(bool queued);
+						CIndividualProcessNode* setBackendNeighbourExpansionQueued(bool queued);
+
 
 						CIndividualProcessNode* clearProcessingQueued();
 
@@ -597,6 +607,7 @@ namespace Konclude {
 						const static cint64 PRFCACHEDCOMPUTEDTYPESADDED								= Q_UINT64_C(0x1000000000000);
 
 
+
 						const static cint64 PRFSYNCHRONIZEDBACKEND									= Q_UINT64_C(0x10000000000000);
 						const static cint64 PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED			= Q_UINT64_C(0x20000000000000);
 						const static cint64 PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED			= Q_UINT64_C(0x40000000000000);
@@ -608,8 +619,11 @@ namespace Konclude {
 						const static cint64 PRFSYNCHRONIZEDBACKENNEIGHBOURDFULLEXPANSION			= Q_UINT64_C(0x400000000000000);
 						const static cint64 PRFSYNCHRONIZEDBACKENPROCESSINGDELAYING					= Q_UINT64_C(0x800000000000000);
 
-						const static cint64 PRFINCREMENTALEXPANDING									= Q_UINT64_C(0x1000000000000000);
-						const static cint64 PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED			= Q_UINT64_C(0x2000000000000000);
+						const static cint64 PRFBACKENDEXPANSIONREUSINGINDIVIDUAL					= Q_UINT64_C(0x1000000000000000);
+						const static cint64 PRFBACKENDEXPANSIONREUSEDISCARDED						= Q_UINT64_C(0x2000000000000000);
+
+						const static cint64 PRFINCREMENTALEXPANDING									= Q_UINT64_C(0x4000000000000000);
+						const static cint64 PRFINCREMENTALEXPANSIONRETESTDUEDIRECTMODIFIED			= Q_UINT64_C(0x8000000000000000);
 
 
 						const static cint64 PRFBLOCKINGRELATEDFLAGCOMPINATION						= PRFDIRECTBLOCKED | PRFINDIRECTBLOCKED | PRFPROCESSINGBLOCKED |
@@ -742,6 +756,7 @@ namespace Konclude {
 						CProcessAssertedDataLiteralLinker* mLastAssertedDataLiteralLinker;
 
 						bool mBaseConceptsInitialized;
+						bool mUniversallyConnectionIndividualInitialized;
 
 						bool mNominalIndiTriplesAssertions;
 						bool mLoadedNominalIndiTriplesAssertions;
@@ -795,6 +810,9 @@ namespace Konclude {
 						bool mIncrementalCompatibilityCheckingQueued;
 						bool mIncrementalExpansionQueued;
 						bool mProcessingQueued;
+
+						bool mBackendReuseExpansionQueued;
+						bool mBackendNeighbourExpansionQueued;
 						CIndividualProcessNodePriority mLastProcessingPriority;
 
 						bool mDelayedNominalProcessingQueued;

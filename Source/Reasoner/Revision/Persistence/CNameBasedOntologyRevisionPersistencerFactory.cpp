@@ -1,0 +1,64 @@
+/*
+ *		Copyright (C) 2013-2015, 2019 by the Konclude Developer Team.
+ *
+ *		This file is part of the reasoning system Konclude.
+ *		For details and support, see <http://konclude.com/>.
+ *
+ *		Konclude is free software: you can redistribute it and/or modify
+ *		it under the terms of version 3 of the GNU Lesser General Public
+ *		License (LGPLv3) as published by the Free Software Foundation.
+ *
+ *		Konclude is distributed in the hope that it will be useful,
+ *		but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ *		GNU (Lesser) General Public License for more details.
+ *
+ *		You should have received a copy of the GNU (Lesser) General Public
+ *		License along with Konclude. If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+#include "CNameBasedOntologyRevisionPersistencerFactory.h"
+
+
+namespace Konclude {
+
+	namespace Reasoner {
+
+		namespace Revision {
+
+			namespace Persistence {
+
+				CNameBasedOntologyRevisionPersistencerFactory::CNameBasedOntologyRevisionPersistencerFactory(const QString& persisterName, CConfiguration* config) {
+					mPersisterName = persisterName;
+					mConfig = config;
+				}
+
+				
+				COntologyRevisionPersistencer* CNameBasedOntologyRevisionPersistencerFactory::createOntologyRevisionPersistencer() {
+					COntologyRevisionPersistencer* persistencer = nullptr;
+					QString persistencerName = mPersisterName;
+					if (persistencerName == "Konclude.Persistence.DirectoryOWL2XMLFilePersistencer") {
+						persistencer = new COntologyRevisionDirectoryOWL2XMLFilePersistencer(mConfig);
+					} else if (persistencerName == "Konclude.Persistence.MultiPersistencer") {
+						persistencer = new COntologyRevisionMultiPersistencer(mConfig);
+					}
+#ifdef KONCLUDE_REDLAND_INTEGRATION
+					else if (persistencerName == "Konclude.Persistence.DirectoryOWLRDFFilePersistencer") {
+						persistencer = new COntologyRevisionDirectoryOWLRDFFilePersistencer(mConfig);
+					} else if (persistencerName == "Konclude.Persistence.RedlandExternalTriplesDSNOnlyWritingPersistencer") {
+						persistencer = new COntologyRevisionRedlandExternalTriplesDSNOnlyWritingPersistencer(mConfig);
+					} else if (persistencerName == "Konclude.Persistence.RedlandExternalTriplesSPARQLServicePersistencer") {
+						persistencer = new COntologyRevisionRedlandExternalTriplesSPARQLServicePersistencer(mConfig);
+					}
+#endif // !KONCLUDE_REDLAND_INTEGRATION
+					return persistencer;
+				}
+
+			}; // end namespace Persistence
+
+		}; // end namespace Revision
+
+	}; // end namespace Reasoner
+
+}; // end namespace Konclude

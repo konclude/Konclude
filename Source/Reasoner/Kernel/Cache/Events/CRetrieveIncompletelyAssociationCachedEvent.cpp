@@ -32,8 +32,10 @@ namespace Konclude {
 				namespace Events {
 
 
-					CRetrieveIncompletelyAssociationCachedEvent::CRetrieveIncompletelyAssociationCachedEvent(CCallbackData* callbackData, cint64 ontologyIdentifier, QSet<CIndividualReference>* individualSet, cint64 limit)
-							: CCustomEvent(EVENTTYPE),mCallback(callbackData),mIndividualSet(individualSet), mLimit(limit), mOntologyIdentifier(ontologyIdentifier) {
+					CRetrieveIncompletelyAssociationCachedEvent::CRetrieveIncompletelyAssociationCachedEvent(CCallbackData* callbackData, cint64 ontologyIdentifier, CBackendIndividualRetrievalComputationUpdateCoordinationHash* lastRetrievalHash, CBackendIndividualRetrievalComputationUpdateCoordinationHash* newRetrievalHash, bool allIndividualsAdded, bool refillRetrievalCoordHash, cint64 limit)
+							: CCustomEvent(EVENTTYPE),mCallback(callbackData), mLastRetrievalHash(lastRetrievalHash), mNewRetrievalHash(newRetrievalHash), mLimit(limit), mOntologyIdentifier(ontologyIdentifier), mRefillRetrievalCoordHash(refillRetrievalCoordHash) {
+
+						mAllIndividualsAdded = allIndividualsAdded;
 					}
 
 
@@ -41,8 +43,9 @@ namespace Konclude {
 						return mCallback;
 					}
 
-					QSet<CIndividualReference>* CRetrieveIncompletelyAssociationCachedEvent::getIndividualSet() {
-						return mIndividualSet;
+
+					bool CRetrieveIncompletelyAssociationCachedEvent::hasRefillRetrievalCoordHashOrdered() {
+						return mRefillRetrievalCoordHash;
 					}
 
 					cint64 CRetrieveIncompletelyAssociationCachedEvent::getRetrievalLimit() {
@@ -52,6 +55,20 @@ namespace Konclude {
 					cint64 CRetrieveIncompletelyAssociationCachedEvent::getOntologyIdentifier() {
 						return mOntologyIdentifier;
 					}
+
+					CBackendIndividualRetrievalComputationUpdateCoordinationHash* CRetrieveIncompletelyAssociationCachedEvent::getLastIndividualsRetrievalCoordinationHash() {
+						return mLastRetrievalHash;
+					}
+
+					CBackendIndividualRetrievalComputationUpdateCoordinationHash* CRetrieveIncompletelyAssociationCachedEvent::getNewIndividualsRetrievalCoordinationHash() {
+						return mNewRetrievalHash;
+					}
+
+
+					bool CRetrieveIncompletelyAssociationCachedEvent::hasAllIndividualsAdded() {
+						return mAllIndividualsAdded;
+					}
+
 
 				}; // end namespace Events
 

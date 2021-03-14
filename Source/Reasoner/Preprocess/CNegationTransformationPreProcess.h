@@ -69,6 +69,7 @@ namespace Konclude {
 				private:
 					cint64 mLastConceptId;
 					cint64 mLastRoleId;
+					cint64 mLastIndiId;
 
 				// private variables
 				private:

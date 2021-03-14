@@ -47,7 +47,7 @@ namespace Konclude {
 					}
 				}
 				if (values) {
-					delete values;
+					delete[] values;
 				}
 			}
 

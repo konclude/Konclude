@@ -71,231 +71,27 @@ namespace Konclude {
 					return this;
 				}
 
-				QStringList COWLlinkProcessor::getParserOrderFromFileName(const QString& fileName) {
-					QStringList parserList;
-					bool owl2FunctionalParserAdded = false;
-					bool owl2XMLParserAdded = false;
-					bool turtleParserAdded = false;
-					bool owl2RDFXMLParserAdded = false;
-					QString upperFileString = fileName.toUpper();
-					if (!owl2RDFXMLParserAdded && (upperFileString.endsWith(".OWX") || upperFileString.endsWith(".OWL"))) {
-						owl2RDFXMLParserAdded = true;
-						owl2XMLParserAdded = true;
-						parserList.append(QString("OWL2XML"));
-						parserList.append(QString("OWLRDFXML"));
-					}if (!owl2RDFXMLParserAdded && (upperFileString.endsWith(".RDF.XML") || upperFileString.endsWith(".OWL.RDF.XML"))) {
-						owl2RDFXMLParserAdded = true;
-						parserList.append(QString("OWLRDFXML"));
-					}
-					if (!turtleParserAdded && (upperFileString.endsWith(".NT"))) {
-						turtleParserAdded = true;
-						parserList.append(QString("RDFNTRIPLES"));
-					}
-					if (!turtleParserAdded && (upperFileString.endsWith(".TURTLE") || upperFileString.endsWith(".TTL") || upperFileString.endsWith(".NT"))) {
-						turtleParserAdded = true;
-						parserList.append(QString("RDFTURTLE"));
-					}
-					if (!owl2XMLParserAdded && (upperFileString.endsWith(".OWL.XML") || upperFileString.endsWith(".XML.OWL"))) {
-						owl2XMLParserAdded = true;
-						parserList.append(QString("OWL2XML"));
-					}
-					if (!owl2FunctionalParserAdded && (upperFileString.endsWith(".OWL.FSS") || upperFileString.endsWith(".FSS.OWL"))) {
-						owl2FunctionalParserAdded = true;
-						parserList.append(QString("OWL2Functional"));
-					}
-					if (!owl2XMLParserAdded && (upperFileString.endsWith(".XML"))) {
-						owl2XMLParserAdded = true;
-						parserList.append(QString("OWL2XML"));
-					}
-					if (!owl2FunctionalParserAdded && (upperFileString.endsWith(".FSS"))) {
-						owl2FunctionalParserAdded = true;
-						parserList.append(QString("OWL2Functional"));
-					}
-					if (!owl2XMLParserAdded && (upperFileString.contains(".XML"))) {
-						owl2XMLParserAdded = true;
-						parserList.append(QString("OWL2XML"));
-					}
-					if (!owl2FunctionalParserAdded && (upperFileString.contains(".FSS"))) {
-						owl2FunctionalParserAdded = true;
-						parserList.append(QString("OWL2Functional"));
-					}
-					if (!owl2XMLParserAdded && (upperFileString.contains("XML"))) {
-						owl2XMLParserAdded = true;
-						parserList.append(QString("OWL2XML"));
-					}
-					if (!owl2FunctionalParserAdded && (upperFileString.contains("FSS"))) {
-						owl2FunctionalParserAdded = true;
-						parserList.append(QString("OWL2Functional"));
-					}
-					if (!owl2FunctionalParserAdded) {
-						owl2FunctionalParserAdded = true;
-						parserList.append(QString("OWL2Functional"));
-					}
-					if (!owl2XMLParserAdded) {
-						owl2XMLParserAdded = true;
-						parserList.append(QString("OWL2XML"));
-					}
-					if (!owl2RDFXMLParserAdded) {
-						owl2RDFXMLParserAdded = true;
-						parserList.append(QString("OWLRDFXML"));
-					}
-					if (!turtleParserAdded) {
-						turtleParserAdded = true;
-						parserList.append(QString("RDFTURTLE"));
-					}
-					return parserList;
-				}
-
-
-				CQtHttpTransactionManager* COWLlinkProcessor::getNetworkTransactionManager() {
-					if (!mNetworkManager) {
-						mNetworkManager = new CQtHttpTransactionManager(30*60*1000);
-					}
-					return mNetworkManager;
-				}
-
-
-
-#ifdef KONCLUDE_REDLAND_INTEGRATION
-
-				bool COWLlinkProcessor::parseOntologyWithRaptor(QIODevice* device, CConcreteOntologyUpdateCollectorBuilder *builder, const QString& format, const QString& formatName, const QString& resolvedIRI, QString& parsingTryLogString, QStringList& parserErrorList, CConfiguration* configuration, CCommandRecordRouter& commandRecordRouter) {
-					bool parsingSucceeded = false;
-					CRDFRedlandRaptorParser *owl2Parser = new CRDFRedlandRaptorParser(builder, CTRIPLES_DATA_UPDATE_TYPE::TRIPLES_DATA_ADDITION, format, configuration);
-					parsingTryLogString = QString("Trying %1 parsing of '%2' with Redland Raptor.").arg(formatName).arg(resolvedIRI);
-					LOG(INFO, getLogDomain(), parsingTryLogString, this);
-					if (device->open(QIODevice::ReadOnly)) {
-						device->reset();
-						if (owl2Parser->parseTriples(device, resolvedIRI)) {
-							parsingSucceeded = true;
-							LOG(INFO, getLogDomain(), logTr("Finished %1 parsing of '%2' with Redland Raptor.").arg(formatName).arg(resolvedIRI), this);
-						} else {
-							parserErrorList.append(QString("%1 parsing of '%2' with Redland Raptor failed due to error '%3'.").arg(formatName).arg(resolvedIRI).arg(owl2Parser->getErrorString()));
-						}
-						device->close();
-					} else {
-						CUnspecifiedMessageErrorRecord::makeRecord(QString("Data from '%1' cannot be read.").arg(resolvedIRI), &commandRecordRouter);
-					}
-					delete owl2Parser;
-					return parsingSucceeded;
-				}
-
-#endif // !KONCLUDE_REDLAND_INTEGRATION
-
 
 
 				bool COWLlinkProcessor::parseOntology(QIODevice* device, const QString& ontoIRI, const QString& resolvedIRI, CConcreteOntology *ont, COntologyConfigurationExtension *ontConfig, QList<QString>& importOntologiesList, QStringList& parserErrorList, CCommandRecordRouter& commandRecordRouter) {
 
-					QString iriFileString = resolvedIRI;
-					QStringList parserList = getParserOrderFromFileName(iriFileString);
 
-					CConcreteOntologyUpdateCollectorBuilder *builder = new CConcreteOntologyUpdateCollectorBuilder(ont);
-					builder->initializeBuilding();
+					COntologyMultiAutoParsingLoader loader;
+					bool loaded = loader.parseOntology(device, ontoIRI, resolvedIRI, ont, ontConfig, importOntologiesList, parserErrorList, commandRecordRouter);
 
-					bool parsingSucceeded = false;
-					bool triplesParsed = false;
-					for (QStringList::const_iterator parserIt = parserList.constBegin(), parserItEnd = parserList.constEnd(); !parsingSucceeded && parserIt != parserItEnd; ++parserIt) {
 
-						QString parserString(*parserIt);
-						QString parsingTryLogString;
-
-						if (parserString == "OWLRDFXML") {
-#ifdef KONCLUDE_REDLAND_INTEGRATION
-							parsingSucceeded = parseOntologyWithRaptor(device, builder, "rdfxml", "RDF/XML", resolvedIRI, parsingTryLogString, parserErrorList, ontConfig, commandRecordRouter);
-							if (parsingSucceeded) {
-								triplesParsed = true;
-							}
-#endif // !KONCLUDE_REDLAND_INTEGRATION
-
-						} else if (parserString == "OWL2Functional") {
-							COWL2FunctionalJAVACCOntologyStreamParser *owl2Parser = new COWL2FunctionalJAVACCOntologyStreamParser(builder);
-							parsingTryLogString = QString("Trying stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString);
-							LOG(INFO, getLogDomain(), parsingTryLogString, this);
-							if (device->open(QIODevice::ReadOnly)) {
-								device->reset();
-								if (owl2Parser->parseOntology(device)) {
-									parsingSucceeded = true;
-									LOG(INFO, getLogDomain(), logTr("Finished stream-based OWL2/Functional ontology parsing for '%1'.").arg(iriFileString), this);
-								} else {
-									if (owl2Parser->hasError()) {
-										parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing error: %1").arg(owl2Parser->getErrorString()));
-									}
-									parserErrorList.append(QString("Stream-based OWL2/Functional ontology parsing for '%1' failed.").arg(iriFileString));
-								}
-								device->close();
-							} else {
-								CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI), &commandRecordRouter);
-							}
-
-							delete owl2Parser;
-
-						} else if (parserString == "OWL2XML") {
-
-							bool enforceUTF8ConvertingParsing = CConfigDataReader::readConfigBoolean(ontConfig, "Konclude.Parser.UTF8CompatibilityEnforcedXMLStreamParsing");
-							COWL2QtXMLOntologyStreamParser *owl2Parser = nullptr;
-							if (enforceUTF8ConvertingParsing) {
-								owl2Parser = new COWL2QtXMLOntologyStableStreamParser(builder);
-							} else {
-								owl2Parser = new COWL2QtXMLOntologyStreamParser(builder);
-							}
-							parsingTryLogString = QString("Trying stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString);
-							LOG(INFO, getLogDomain(), parsingTryLogString, this);
-							if (device->open(QIODevice::ReadOnly)) {
-								device->reset();
-								if (owl2Parser->parseOntology(device)) {
-									parsingSucceeded = true;
-									LOG(INFO, getLogDomain(), logTr("Finished stream-based OWL2/XML ontology parsing for '%1'.").arg(iriFileString), this);
-								} else {
-									if (owl2Parser->hasError()) {
-										parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing error: %1").arg(owl2Parser->getErrorString()));
-									}
-									parserErrorList.append(QString("Stream-based OWL2/XML ontology parsing for '%1' failed.").arg(iriFileString));
-								}
-								device->close();
-							} else {
-								CUnspecifiedMessageErrorRecord::makeRecord(QString("Data for '%1' cannot be read.").arg(resolvedIRI), &commandRecordRouter);
-							}
-
-							delete owl2Parser;
-
-						} else if (parserString == "RDFTURTLE") {
-
-#ifdef KONCLUDE_REDLAND_INTEGRATION
-							parsingSucceeded = parseOntologyWithRaptor(device, builder, "turtle", "RDF Turtle", resolvedIRI, parsingTryLogString, parserErrorList, ontConfig, commandRecordRouter);
-							if (parsingSucceeded) {
-								triplesParsed = true;
-							}
-#endif // !KONCLUDE_REDLAND_INTEGRATION
-
-						} else if (parserString == "RDFNTRIPLES") {
-
-#ifdef KONCLUDE_REDLAND_INTEGRATION
-							parsingSucceeded = parseOntologyWithRaptor(device, builder, "ntriples", "RDF NTriples", resolvedIRI, parsingTryLogString, parserErrorList, ontConfig, commandRecordRouter);
-							if (parsingSucceeded) {
-								triplesParsed = true;
-							}
-#endif // !KONCLUDE_REDLAND_INTEGRATION
-
-						}
-					}
-
-					if (triplesParsed) {
-#ifdef KONCLUDE_REDLAND_INTEGRATION
-						CConcreteOntologyRedlandTriplesDataExpressionMapper* triplesMapper = new CConcreteOntologyRedlandTriplesDataExpressionMapper(builder);
-						triplesMapper->mapTriples(ont, ont->getOntologyTriplesData());
-#endif // !KONCLUDE_REDLAND_INTEGRATION
-					}
-					if (parsingSucceeded) {
-						builder->completeBuilding();
-					}
-
-					importOntologiesList.append(builder->takeAddedImportOntologyList());
-					delete builder;
-
-					return parsingSucceeded;
+					return loaded;
 				}
 
 
 
+
+				CQtHttpTransactionManager* COWLlinkProcessor::getNetworkTransactionManager() {
+					if (!mNetworkManager) {
+						mNetworkManager = new CQtHttpTransactionManager(30 * 60 * 1000);
+					}
+					return mNetworkManager;
+				}
 
 
 
@@ -1093,8 +889,9 @@ namespace Konclude {
 											QList<CQuery*> queryList;
 #ifdef KONCLUDE_REDLAND_INTEGRATION
 											if (confRedlandRasqalSPARQLQueryProcessing) {
+												QString queryName = QString("%1-Rasqal-Query-Nr-%2").arg(mQueryPrefix).arg(++mQueryNumber);
 												CSPARQLRedlandRasqalQueryParser* sparqlQueryParser = new CSPARQLRedlandRasqalQueryParser(baseOnt, onto, ontConfig);
-												sparqlQueryParser->parseQueryTextList(queryStringList);
+												sparqlQueryParser->parseQueryTextList(queryStringList, queryName);
 												CQuery* query = sparqlQueryParser->getQuery();
 												if (query) {
 													queryList.append(query);
@@ -1268,6 +1065,7 @@ namespace Konclude {
 
 										CConfiguration* configuration = getConfiguration();
 										bool ignoreFromClause = CConfigDataReader::readConfigBoolean(configuration, "Konclude.SPARQL.AlwaysResolveToDefault");
+										bool waitForQueriesForNextUpdates = CConfigDataReader::readConfigBoolean(configuration, "Konclude.SPARQL.WaitQueryCalculationBeforeContinuingUpdateProcessing");
 
 
 										CSPARQLKnowledgeBaseSplittingOperationParser* sparqlSplittingParser = new CSPARQLKnowledgeBaseSplittingOperationParser();
@@ -1283,6 +1081,7 @@ namespace Konclude {
 
 											CCreateKnowledgeBaseRevisionUpdateCommand* lastGetCurrKBRevC = nullptr;
 											CParseSPARQLQueryCommand* lastSparqlQC = nullptr;
+											CCalculateQueriesCommand* lastCalcQC = nullptr;
 
 											CCommand* lastNonQueryC = nullptr;
 
@@ -1299,20 +1098,28 @@ namespace Konclude {
 														if (lastNonQueryC) {
 															lastGetCurrKBRevC->addCommandPrecondition(new CCommandProcessedPrecondition(lastNonQueryC));
 														}
+														lastNonQueryC = lastGetCurrKBRevC;
 														commandList.append(lastGetCurrKBRevC);
+														lastNonQueryC = lastGetCurrKBRevC;
 													}
 													if (!lastSparqlQC) {
 														lastSparqlQC = new CParseSPARQLQueryCommand(textList, lastGetCurrKBRevC, pSPARQLQueryC);
 														commandList.append(lastSparqlQC);
 														CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand* getDepKBRevUpdateC = new CGetQueryDependentKnowledgeBaseRevisionUpdatesCommand(lastSparqlQC, pSPARQLQueryC);
 														commandList.append(getDepKBRevUpdateC);
+														lastNonQueryC = getDepKBRevUpdateC;
 														CCalculateQueriesCommand* calcQueriesC = new CCalculateQueriesCommand(getDepKBRevUpdateC, pSPARQLQueryC);
 														commandList.append(calcQueriesC);
-													} else {
-														lastSparqlQC->addQueryText(textList);
+														lastCalcQC = calcQueriesC;
+														if (waitForQueriesForNextUpdates) {
+															// may be necessary for avoiding concurrent access to redland rdf nodes/triples (if persistence is enabled/used)
+															lastNonQueryC = calcQueriesC;
+														}
+														lastSparqlQC = nullptr;
 													}
 												} else if (operationType == CSPARQLKnowledgeBaseSplittingOperationData::SPARQL_UPDATE_MANAGE) {
 													foundSparqlOperation = true;
+													lastGetCurrKBRevC = nullptr;
 
 													// some SPARQL update commands may have dependencies to several graphs/knowledge bases, e.g., COPY, i.e., we need a more sophisticated mechanism at some point
 													CParseProcessSPARQLManageTextCommand* ppSPARQLUTC = new CParseProcessSPARQLManageTextCommand(textList, kbString, pSPARQLQueryC);
@@ -2197,6 +2004,7 @@ namespace Konclude {
 											if (concept) {
 												CSatisfiableCalculationJobGenerator* satCalcJobGenerator = new CSatisfiableCalculationJobGenerator(ontRev->getOntology());
 												CSatisfiableCalculationJob* satCalcJob = satCalcJobGenerator->getSatisfiableCalculationJob(concept,false);
+												delete satCalcJobGenerator;
 
 												//CQueryStatisticsCollectionStrings* queryStats = nullptr;
 												//if (true) {

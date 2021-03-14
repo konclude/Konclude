@@ -106,8 +106,6 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
     Note that the settings of the `Configs/querying-config.xml` file are automatically enabled if the `sparqlserver` or `sparqlfile` commands are used in order to deactivate some optimizations that are not yet compatible with the integrated query answering engine. However, the `Configs/querying-config.xml` file also contains some commented out settings that may be interesting for configuring some query answering aspects in more detail (e.g., concurrency, interpretation of anonymous variables, etc.).
 
-	Also note that, at the moment, all results are internally cached/stored and there is currently no memory releasing strategy implemented, i.e., Konclude will eventually run out of memory if it is used to continuously answer (new) queries.
-
 
 - CONFIGURATION:
 
@@ -140,15 +138,21 @@ For more details for building with docker, see also `KoncludeDocker/README.md`.
 Setting up Konclude for building/compiling with Visual Studio 2015/2017:
 - Make sure that Qt is installed and the environment variable QTDIR is set to the QT directory
 - Install the QT VS Tools/Package extension for Visual Studio (enables more comfortable debugging)
-- Copy the QT DLLs (Qt5Networkd.dll, Qt5Network.dll, Qt5Xmld.dll, Qt5Xml.dll, Qt5Cored.dll, Qt5Core.dll) into the root directory of Konclude
+- Copy the QT DLLs (Qt5Networkd.dll, Qt5Network.dll, Qt5Xmld.dll, Qt5Xml.dll, Qt5Cored.dll, Qt5Core.dll, Qt5Concurrentd.dll, Qt5Concurrent.dll) into the root directory of Konclude
 
 
-For MacOS, the Redland RDF Libraries are currently not integrated/tested, i.e., you may want to use/compile the `KoncludeWithoutRedland.pro` project. The executable can be found under `./release/Konclude.app/Contents/MacOS/Konclude`.
 	
 		
 
 # CHANGELOG
 
+
+
+- Konclude v0.7.0-1135:
+    - (Limited) SPARQL and query answering support with Redland Rasqal.
+	- Parallelized consistency checking and query answering.
+	- Several minor reasoning improvements.
+    - Several bug fixes.
 
 - Konclude v0.6.2-965 (pre-release):
     - Support of more SPARQL features (e.g., OPTIONAL, UNION, FILTER, aggregates, etc.) via Redland Rasqal.

@@ -58,6 +58,20 @@ namespace Konclude {
 			}
 
 
+			QSet<CAxiomExpression*>* CConcreteOntologyUpdateCollectorBuilder::getAddedAxiomSet() {
+				return &mLocTellUpdatedAxiomSet;
+			}
+
+			bool CConcreteOntologyUpdateCollectorBuilder::resetAxiomUpdates() {
+
+				mLocTellUpdatedAxiomSet.clear();
+				mLocRetractUpdatedAxiomSet.clear();
+				mLocAddedImportOntologies.clear();
+
+				return true;
+			}
+
+
 
 			bool CConcreteOntologyUpdateCollectorBuilder::completeBuilding() {
 

@@ -122,9 +122,21 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* setIndirectlyConnectedIndividualIntegration(bool indirectlyConnectedIndividualIntegration);
 
 
+
+						bool requireSameAsNeighboursCompletion();
+						CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* setRequireSameAsNeighboursCompletion(bool requireCompletion);
+
+
 						cint64 getRepresentativeSameIndividualId();
 						CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* setRepresentativeSameIndividualId(cint64 indiId);
 
+
+						cint64 getDeterministicSameIndividualId();
+						CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* setDeterministicSameIndividualId(cint64 indiId);
+
+
+						bool isScheduledIndividual();
+						CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* setScheduledIndividual(bool scheduled);
 
 					// protected methods
 					protected:
@@ -152,7 +164,10 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheTemporaryIndividualRoleSetNeighbourUpdateDataLinker* mRoleSetNeighbourUpdateDataLinker;
 
 						cint64 mRepresentativeSameIndiId;
+						cint64 mDeterministicSameIndiId;
+						bool mRequireSameAsNeighboursCompletion;
 
+						bool mScheduledIndividual;
 
 					// private methods
 					private:

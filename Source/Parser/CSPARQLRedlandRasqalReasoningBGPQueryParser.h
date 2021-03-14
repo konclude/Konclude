@@ -34,7 +34,7 @@
 #include "COntologyParser.h"
 #include "CSPARQLQueryBuilder.h"
 #include "COntologyBuilder.h"
-#include "CSPARQLSimpleBuildingParser.h"
+#include "CSPARQLExtendedMappingBuildingParser.h"
 #include "CSPARQLQueryParser.h"
 
 
@@ -69,7 +69,7 @@ namespace Konclude {
 		 *		\brief		TODO
 		 *
 		 */
-		class CSPARQLRedlandRasqalReasoningBGPQueryParser : public CSPARQLSimpleBuildingParser {
+		class CSPARQLRedlandRasqalReasoningBGPQueryParser : public CSPARQLExtendedMappingBuildingParser {
 			// public methods
 			public:
 				//! Constructor
@@ -131,7 +131,7 @@ namespace Konclude {
 
 				CBGPSubQueryGenerationData* createSubQueryGenerationData(rasqal_query *query, CSPARQLRedlandRasqalReasoningBGPQueryParser::CRedlandRasqalBGPSubQueryData* bgpData);
 
-				bool generateBGPBasedSubQueries();
+				bool generateBGPBasedSubQueries(const QStringList& projectedVarList);
 
 				bool integrateFollowingSubQueryRestrictions(CBGPSubQueryGenerationData* subQueryBGPData, CBGPSubQueryGenerationData* followingSubQueryBGPData);
 

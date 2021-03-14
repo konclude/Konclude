@@ -31,14 +31,16 @@ namespace Konclude {
 
 
 				CBackendRepresentativeMemoryCacheIndividualAssociationData::CBackendRepresentativeMemoryCacheIndividualAssociationData() {
+					mMemContext = nullptr;
 				}
 
 
 
-				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::initAssociationData(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData) {
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::initAssociationData(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, bool increaseUpdateId) {
 					initCachingStatusFlags(assData->getStatusFlags());
 					mIndiID = assData->mIndiID;
 					mRepresentativeSameIndiId = assData->mRepresentativeSameIndiId;
+					mDeterministicSameIndiId = assData->mDeterministicSameIndiId;
 					mIncompletelyMarked = assData->mIncompletelyMarked;
 					mIndirectlyConnectedNominalIndividual = assData->mIndirectlyConnectedNominalIndividual;
 					mIndirectlyConnectedIndividualIntegration = assData->mIndirectlyConnectedIndividualIntegration;
@@ -48,10 +50,22 @@ namespace Konclude {
 					}
 					mNeighbourRoleSetHash = nullptr;
 					mRoleSetNeighbourArray = nullptr;
-					mAssociationDataUpdateId = assData->mAssociationDataUpdateId + 1;
+					mAssociationDataUpdateId = assData->mAssociationDataUpdateId;
+					if (increaseUpdateId) {
+						mAssociationDataUpdateId++;
+					}
+					mProblematicLevel = assData->mProblematicLevel;
 					mCacheUpdateId = 0;
+					mCacheTouchId = 0;
 					mLastIntegratedIndirectlyConnectedIndividualsChangeId = assData->mLastIntegratedIndirectlyConnectedIndividualsChangeId;
-					prevData = assData;
+					mPrevData = assData;
+					mProblematicLeveledNeighbour = assData->mProblematicLeveledNeighbour;
+					mDetMergedSameConsideredLabelCacheEntry = assData->mDetMergedSameConsideredLabelCacheEntry;
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+					mDebugIndi = assData->mDebugIndi;
+#endif
+					mLastPropagationCuttingUpdateId = assData->mLastPropagationCuttingUpdateId;
+					mPropCutRemovedNeighbourIndiLinker = assData->mPropCutRemovedNeighbourIndiLinker;
 					return this;
 				}
 
@@ -60,6 +74,7 @@ namespace Konclude {
 					mAssociationDataUpdateId = 1;
 					mIndiID = indiId;
 					mRepresentativeSameIndiId = indiId;
+					mDeterministicSameIndiId = indiId;
 					mIncompletelyMarked = false;
 					mIndirectlyConnectedNominalIndividual = false;
 					mIndirectlyConnectedIndividualIntegration = false;
@@ -69,10 +84,26 @@ namespace Konclude {
 					}
 					mNeighbourRoleSetHash = nullptr;
 					mRoleSetNeighbourArray = nullptr;
+					mProblematicLevel = 0;
 					mCacheUpdateId = 0;
+					mCacheTouchId = 0;
 					mLastIntegratedIndirectlyConnectedIndividualsChangeId = 0;
+					mProblematicLeveledNeighbour = false;
+					mDetMergedSameConsideredLabelCacheEntry = nullptr;
+					mPropCutRemovedNeighbourIndiLinker = nullptr;
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+					mDebugIndi = nullptr;
+#endif
+					mLastPropagationCuttingUpdateId = -1;
 					return this;
 				}
+
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setIndividualId(cint64 indiId) {
+					mIndiID = indiId;
+					return this;
+				}
+
 
 				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheIndividualAssociationData::getDeterministicConceptSetLabelCacheEntry() {
 					return getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL);
@@ -80,6 +111,17 @@ namespace Konclude {
 
 				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setDeterministicConceptSetLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem* cacheEntry) {
 					setLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL, cacheEntry);
+					return this;
+				}
+
+
+
+				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheIndividualAssociationData::getDeterministicMergedSameConsideredLabelCacheEntry() {
+					return mDetMergedSameConsideredLabelCacheEntry;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setDeterministicMergedSameConsideredLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem* cacheEntry) {
+					mDetMergedSameConsideredLabelCacheEntry = cacheEntry;
 					return this;
 				}
 
@@ -141,11 +183,21 @@ namespace Konclude {
 					return mCacheUpdateId;
 				}
 
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getCacheTouchId() {
+					return mCacheTouchId;
+				}
+
 				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setCacheUpdateId(cint64 updateId) {
 					mCacheUpdateId = updateId;
+					mCacheTouchId = updateId;
 					return this;
 				}
 
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setCacheTouchId(cint64 updateId) {
+					mCacheTouchId = updateId;
+					return this;
+				}
 
 
 
@@ -189,12 +241,94 @@ namespace Konclude {
 				}
 
 
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::hasRepresentativeSameIndividualMerging() {
+					return mIndiID != mRepresentativeSameIndiId;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getDeterministicSameIndividualId() {
+					return mDeterministicSameIndiId;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setDeterministicSameIndividualId(cint64 indiId) {
+					mDeterministicSameIndiId = indiId;
+					return this;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::hasDeterministicSameIndividualMerging() {
+					return mIndiID != mDeterministicSameIndiId;
+				}
+
+
 				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getAssociatedIndividualId() {
 					return mIndiID;
 				}
 
-				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::hasRepresentativeSameIndividualMerging() {
-					return mIndiID != mRepresentativeSameIndiId;
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::hasProblematicLevel() {
+					return mProblematicLevel > 0;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getProblematicLevel() {
+					return mProblematicLevel;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setProblematicLevel(cint64 level) {
+					mProblematicLevel = level;
+					return this;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::incProblematicLevel(cint64 count) {
+					mProblematicLevel += count;
+					return this;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::hasProblematicLeveledNeigbour() {
+					return mProblematicLeveledNeighbour;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setProblematicLeveledNeigbour(bool neighbourPropLeveled) {
+					mProblematicLeveledNeighbour = neighbourPropLeveled;
+					return this;
+				}
+
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationContext* CBackendRepresentativeMemoryCacheIndividualAssociationData::getIndividualAssociationMemoryContext() {
+					return mMemContext;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setIndividualAssociationMemoryContext(CBackendRepresentativeMemoryCacheIndividualAssociationContext* memCon) {
+					mMemContext = memCon;
+					return this;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setLastPropagationCuttingUpdateId(cint64 id) {
+					mLastPropagationCuttingUpdateId = id;
+					return this;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheIndividualAssociationData::getLastPropagationCuttingUpdateId() {
+					return mLastPropagationCuttingUpdateId;
+				}
+
+				bool CBackendRepresentativeMemoryCacheIndividualAssociationData::hasLastPropagationCuttingUpdateId() {
+					return mLastPropagationCuttingUpdateId != -1;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::getPreviousData() {
+					return mPrevData;
+				}
+
+
+				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* CBackendRepresentativeMemoryCacheIndividualAssociationData::getPropagationCutRemovedNeighbourIndividualLinker() {
+					return mPropCutRemovedNeighbourIndiLinker;
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendRepresentativeMemoryCacheIndividualAssociationData::setPropagationCutRemovedNeighbourIndividualLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* linker) {
+					mPropCutRemovedNeighbourIndiLinker = linker;
+					return this;
 				}
 
 

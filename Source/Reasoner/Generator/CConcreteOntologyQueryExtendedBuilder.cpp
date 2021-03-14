@@ -189,29 +189,80 @@ namespace Konclude {
 
 
 
-			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const QList<CExpressionVariable*>& ignoreCardVarList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName) {
-				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, ignoreCardVarList, distinctModifier, limit, offset);
-				mSparqlSelectExpList.append(sparqlQuery);
+
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternClassSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, cint64 limit, cint64 offset, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, QList<CExpressionVariable*>(), false, limit, offset);
+				mSparqlClassSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternObjectPropertiesSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, cint64 limit, cint64 offset, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, QList<CExpressionVariable*>(), false, limit, offset);
+				mSparqlObjPropSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternDataPropertiesSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, cint64 limit, cint64 offset, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, QList<CExpressionVariable*>(), false, limit, offset);
+				mSparqlDataPropSelectExpList.append(sparqlQuery);
 				return sparqlQuery;
 			}
 
 
-			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName) {
-				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, orderingList, filteringList, distinctModifier, limit, offset);
-				mSparqlSelectExpList.append(sparqlQuery);
-				return sparqlQuery;
-			}
 
-			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, const QString& queryName) {
-				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, orderingList, filteringList, distinctModifier);
-				mSparqlSelectExpList.append(sparqlQuery);
-				return sparqlQuery;
-			}
-
-
-			CQuerySPARQLAskBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, const QString& queryName) {
+			CQuerySPARQLAskBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternClassAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QString& queryName) {
+				CEXPRESSIONLIST<CFilteringTermExpression*> filteringList;
 				CQuerySPARQLAskBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLAskBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, filteringList);
-				mSparqlAskExpList.append(sparqlQuery);
+				mSparqlClassAskExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+			CQuerySPARQLAskBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternObjectPropertiesAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QString& queryName) {
+				CEXPRESSIONLIST<CFilteringTermExpression*> filteringList;
+				CQuerySPARQLAskBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLAskBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, filteringList);
+				mSparqlObjectPropAskExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+			CQuerySPARQLAskBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternDataPropertiesAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QString& queryName) {
+				CEXPRESSIONLIST<CFilteringTermExpression*> filteringList;
+				CQuerySPARQLAskBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLAskBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, filteringList);
+				mSparqlDataPropAskExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+
+
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternIndividualSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const QList<CExpressionVariable*>& ignoreCardVarList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, ignoreCardVarList, distinctModifier, limit, offset);
+				mSparqlIndividualSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternIndividualSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, orderingList, filteringList, distinctModifier, limit, offset);
+				mSparqlIndividualSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternIndividualSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, orderingList, filteringList, distinctModifier);
+				mSparqlIndividualSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+
+			CQuerySPARQLSelectBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternIndividualMixedSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const QList<CExpressionVariable*>& ignoreCardVarList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName) {
+				CQuerySPARQLSelectBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLSelectBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, disVarList, ignoreCardVarList, distinctModifier, limit, offset);
+				mSparqlIndividualMixedSelectExpList.append(sparqlQuery);
+				return sparqlQuery;
+			}
+
+			CQuerySPARQLAskBasicGraphPatternExpression* CConcreteOntologyQueryExtendedBuilder::getSPARQLBasicGraphPatternIndividualAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, const QString& queryName) {
+				CQuerySPARQLAskBasicGraphPatternExpression* sparqlQuery = new CQuerySPARQLAskBasicGraphPatternExpression(queryName, basicGraphPatternAxiomExp, filteringList);
+				mSparqlIndividualAskExpList.append(sparqlQuery);
 				return sparqlQuery;
 			}
 
@@ -393,67 +444,61 @@ namespace Konclude {
 
 
 
-				foreach(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, mSparqlSelectExpList) {
-					QString queryName = sparqlBgpExp->getName();
-					const QList<CAxiomExpression*>& axiomExps = *sparqlBgpExp->getAxiomExpressionList();
-					const QList<CExpressionVariable*>& disVarExps = *sparqlBgpExp->getOrderedVariableList();
-					const QList<CExpressionVariable*>& ignoreCardVarExps = *sparqlBgpExp->getIgnoreCardinalityVariableList();
-					const QList<COrderingTermExpression*>& orderingExps = *sparqlBgpExp->getOrderedOrderingTermExpressionList();
-					const QList<CFilteringTermExpression*>& filteringExps = *sparqlBgpExp->getFilteringExpressionList();
 
-					CComplexAssertionsIndividualVariablesAnsweringQuery *query = new CComplexAssertionsIndividualVariablesAnsweringQuery(mBaseOntology, mOntology, axiomExps, disVarExps, config, queryName);
-					for (COrderingTermExpression* orderingExp : orderingExps) {
-						COrderingVariableExpression* orderingVarExp = dynamic_cast<COrderingVariableExpression*>(orderingExp);
-						if (orderingVarExp) {
-							CVariableBindingOrdering::ORDERING_TYPE type = CVariableBindingOrdering::ASC;
-							if (orderingVarExp->getOrderingType() == CVariableBindingOrdering::DESC) {
-								type = CVariableBindingOrdering::DESC;
-							}
-							CVariableBindingOrdering* ordering = new CVariableBindingOrdering(orderingVarExp->getOrderingVariable(), type);
-							query->addResultOrdering(ordering);
-						}
-					}
-					for (CFilteringTermExpression* filteringExp : filteringExps) {
-						CVariableBindingFiltering* filtering = createFilterFromExpression(filteringExp);
-						query->addResultFiltering(filtering);
-					}
+				foreach(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, mSparqlIndividualSelectExpList) {
+					createSelectQueryFromBGPExpression(sparqlBgpExp, "Individual", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAssertionsIndividualVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
+				}
 
-					query->setIgnoreCardinalityVariableExpressions(ignoreCardVarExps);
-					query->setResultLimit(sparqlBgpExp->getLimit());
-					query->setResultOffset(sparqlBgpExp->getOffset());
-					query->setDistinctRequired(sparqlBgpExp->isDistinct());
-					CQueryStatisticsCollectionStrings* queryStats = nullptr;
-					if (confBuildQueryStats) {
-						queryStats = new CQueryStatisticsCollectionStrings();
-					}
-					query->setQueryStatistics(queryStats);
-					queryList.append(query);
-					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Assertions-Individual-Variables-Answering-Query '%1' from SPARQL SELECT query.").arg(query->getQueryName()), this);
+				foreach(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, mSparqlClassSelectExpList) {
+					createSelectQueryFromBGPExpression(sparqlBgpExp, "Class", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAxiomsClassVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
+				}
+
+				foreach(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, mSparqlObjPropSelectExpList) {
+					createSelectQueryFromBGPExpression(sparqlBgpExp, "Object-Property", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAxiomsObjectPropertyVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
+				}
+
+				foreach(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, mSparqlDataPropSelectExpList) {
+					createSelectQueryFromBGPExpression(sparqlBgpExp, "Data-Property", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAxiomsDataPropertyVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
 				}
 
 
+				foreach(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, mSparqlIndividualMixedSelectExpList) {
+					createSelectQueryFromBGPExpression(sparqlBgpExp, "Individual-Mixed", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAxiomsIndividualMixedVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
+				}
 
-				foreach(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, mSparqlAskExpList) {
-					QString queryName = sparqlBgpExp->getName();
-					const QList<CAxiomExpression*>& axiomExps = *sparqlBgpExp->getAxiomExpressionList();
-					const QList<CExpressionVariable*> disVarExps;
-					const QList<COrderingTermExpression*> orderingExps;
-					const QList<CFilteringTermExpression*>& filteringExps = *sparqlBgpExp->getFilteringExpressionList();
 
-					CComplexAssertionsIndividualVariablesAnsweringQuery *query = new CComplexAssertionsIndividualVariablesAnsweringQuery(mBaseOntology, mOntology, axiomExps, disVarExps, config, queryName);
-					for (CFilteringTermExpression* filteringExp : filteringExps) {
-						CVariableBindingFiltering* filtering = createFilterFromExpression(filteringExp);
-						query->addResultFiltering(filtering);
-					}
+				foreach(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, mSparqlIndividualAskExpList) {
+					createAskQueryFromBGPExpression(sparqlBgpExp, "Individual", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAssertionsIndividualVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
+				}
 
-					query->setBooleanEntailmentResultRequired(true);
-					CQueryStatisticsCollectionStrings* queryStats = nullptr;
-					if (confBuildQueryStats) {
-						queryStats = new CQueryStatisticsCollectionStrings();
-					}
-					query->setQueryStatistics(queryStats);
-					queryList.append(query);
-					LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Assertions-Individual-Variables-Answering-Query '%1' from SPARQL ASK query.").arg(query->getQueryName()), this);
+				foreach(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, mSparqlClassAskExpList) {
+					createAskQueryFromBGPExpression(sparqlBgpExp, "Class", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAxiomsClassVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
+				}
+
+				foreach(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, mSparqlObjectPropAskExpList) {
+					createAskQueryFromBGPExpression(sparqlBgpExp, "Object-Property", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAxiomsObjectPropertyVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
+				}
+
+				foreach(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, mSparqlDataPropAskExpList) {
+					createAskQueryFromBGPExpression(sparqlBgpExp, "Data-Property", [&](CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) {
+						return new CComplexAxiomsDataPropertyVariablesAnsweringQuery(baseOntology, expressionOntology, axiomExpressions, disVariables, configuration, queryName);
+					}, confBuildQueryStats, queryList);
 				}
 
 
@@ -686,6 +731,71 @@ namespace Konclude {
 
 				queryList.append(CConcreteOntologyQueryBasicBuilder::generateQuerys());
 				return queryList;
+			}
+
+			void CConcreteOntologyQueryExtendedBuilder::createAskQueryFromBGPExpression(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, const QString& typeString, function<CComplexVariablesAnsweringQuery*(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName)> queryFunc, bool confBuildQueryStats, QList<CQuery *> &queryList) {
+				QString queryName = sparqlBgpExp->getName();
+				const QList<CAxiomExpression*>& axiomExps = *sparqlBgpExp->getAxiomExpressionList();
+				const QList<CExpressionVariable*> disVarExps;
+				const QList<COrderingTermExpression*> orderingExps;
+				const QList<CFilteringTermExpression*>& filteringExps = *sparqlBgpExp->getFilteringExpressionList();
+
+				CComplexVariablesAnsweringQuery *query = queryFunc(mBaseOntology, mOntology, axiomExps, disVarExps, config, queryName);
+				for (CFilteringTermExpression* filteringExp : filteringExps) {
+					CVariableBindingFiltering* filtering = createFilterFromExpression(filteringExp);
+					query->addResultFiltering(filtering);
+				}
+
+				query->setBooleanEntailmentResultRequired(true);
+				CQueryStatisticsCollectionStrings* queryStats = nullptr;
+				if (confBuildQueryStats) {
+					queryStats = new CQueryStatisticsCollectionStrings();
+				}
+				query->setQueryStatistics(queryStats);
+				queryList.append(query);
+				LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Assertions-%2-Variables-Answering-Query '%1' from SPARQL ASK query.").arg(query->getQueryName()).arg(typeString), this);
+			}
+
+
+
+			void CConcreteOntologyQueryExtendedBuilder::createSelectQueryFromBGPExpression(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, const QString& typeString, function<CComplexVariablesAnsweringQuery*(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName)> queryFunc, bool confBuildQueryStats, QList<CQuery *> &queryList) {
+				QString queryName = sparqlBgpExp->getName();
+				const QList<CAxiomExpression*>& axiomExps = *sparqlBgpExp->getAxiomExpressionList();
+				const QList<CExpressionVariable*>& disVarExps = *sparqlBgpExp->getOrderedVariableList();
+				const QList<CExpressionVariable*>& ignoreCardVarExps = *sparqlBgpExp->getIgnoreCardinalityVariableList();
+				const QList<COrderingTermExpression*>& orderingExps = *sparqlBgpExp->getOrderedOrderingTermExpressionList();
+				const QList<CFilteringTermExpression*>& filteringExps = *sparqlBgpExp->getFilteringExpressionList();
+
+				CComplexVariablesAnsweringQuery *query = queryFunc(mBaseOntology, mOntology, axiomExps, disVarExps, config, queryName);
+				for (COrderingTermExpression* orderingExp : orderingExps) {
+					COrderingVariableExpression* orderingVarExp = dynamic_cast<COrderingVariableExpression*>(orderingExp);
+					if (orderingVarExp) {
+						CVariableBindingOrdering::ORDERING_TYPE type = CVariableBindingOrdering::ASC;
+						if (orderingVarExp->getOrderingType() == CVariableBindingOrdering::DESC) {
+							type = CVariableBindingOrdering::DESC;
+						}
+						CVariableBindingOrdering* ordering = new CVariableBindingOrdering(orderingVarExp->getOrderingVariable(), type);
+						query->addResultOrdering(ordering);
+					}
+				}
+				for (CFilteringTermExpression* filteringExp : filteringExps) {
+					CVariableBindingFiltering* filtering = createFilterFromExpression(filteringExp);
+					query->addResultFiltering(filtering);
+				}
+
+				if (!ignoreCardVarExps.isEmpty() && dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(query)) {
+					((CComplexAssertionsIndividualVariablesAnsweringQuery*)query)->setIgnoreCardinalityVariableExpressions(ignoreCardVarExps);
+				}
+				query->setResultLimit(sparqlBgpExp->getLimit());
+				query->setResultOffset(sparqlBgpExp->getOffset());
+				query->setDistinctRequired(sparqlBgpExp->isDistinct());
+				CQueryStatisticsCollectionStrings* queryStats = nullptr;
+				if (confBuildQueryStats) {
+					queryStats = new CQueryStatisticsCollectionStrings();
+				}
+				query->setQueryStatistics(queryStats);
+				queryList.append(query);
+				LOG(NOTICE, "::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder", logTr("Generated Complex-Assertions-%2-Variables-Answering-Query '%1' from SPARQL SELECT query.").arg(query->getQueryName()).arg(typeString), this);
 			}
 
 

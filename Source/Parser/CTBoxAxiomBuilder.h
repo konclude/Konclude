@@ -65,6 +65,7 @@
 #include "Parser/Expressions/CDataExactCardinalityExpression.h"
 #include "Parser/Expressions/CDataHasValueExpression.h"
 
+#include "Parser/Expressions/CClassVariableExpression.h"
 
 
 // Other includes
@@ -178,6 +179,8 @@ namespace Konclude {
 
 
 
+				virtual CClassVariableExpression* getClassVariable(const QStringRef &classVariableName) = 0;
+				virtual CClassVariableExpression* getClassVariable(const QString &classVariableName) = 0;
 
 
 

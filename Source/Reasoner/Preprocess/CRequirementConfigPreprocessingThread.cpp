@@ -191,7 +191,7 @@ namespace Konclude {
 				return newTriplesMapped;
 			}
 
-
+			
 
 			bool CRequirementConfigPreprocessingThread::indexTripleEncodedAssertions(CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
 				bool triplesIndexed = false;
@@ -199,11 +199,17 @@ namespace Konclude {
 				COntologyTriplesData* triplesData = ontology->getOntologyTriplesData();
 
 				bool convertToIndividualData = CConfigDataReader::readConfigBoolean(reqConfPreCompItem->getConfiguration(), "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.IndividualDataConvertion");
+				bool concurrentIndividualDataConvertion = CConfigDataReader::readConfigBoolean(reqConfPreCompItem->getConfiguration(), "Konclude.Calculation.Preprocessing.TripleEncodedAssertionsIndexing.ConcurrentIndividualDataConvertion");
 
 #ifdef KONCLUDE_REDLAND_INTEGRATION
 				if (convertToIndividualData) {
-					CRedlandStoredTriplesIndividualAssertionConvertionIndexer* triplesMapper = new CRedlandStoredTriplesIndividualAssertionConvertionIndexer();
-					triplesIndexed = triplesMapper->indexABoxIndividuals(ontology, triplesData);
+					if (!concurrentIndividualDataConvertion) {
+						CRedlandStoredTriplesIndividualAssertionConvertionIndexer* triplesMapper = new CRedlandStoredTriplesIndividualAssertionConvertionIndexer();
+						triplesIndexed = triplesMapper->indexABoxIndividuals(ontology, triplesData);
+					} else {
+						CRedlandStoredTriplesIndividualAssertionConvertionQtConcurrentIndexer* triplesMapper = new CRedlandStoredTriplesIndividualAssertionConvertionQtConcurrentIndexer();
+						triplesIndexed = triplesMapper->indexABoxIndividuals(ontology, triplesData);
+					}
 				} else {
 					CRedlandStoredTriplesIndividualAssertionIndexer* triplesMapper = new CRedlandStoredTriplesIndividualAssertionIndexer();
 					triplesIndexed = triplesMapper->indexABoxIndividuals(ontology, triplesData);

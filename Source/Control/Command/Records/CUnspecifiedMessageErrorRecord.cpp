@@ -46,7 +46,11 @@ namespace Konclude {
 
 
 				void CUnspecifiedMessageErrorRecord::makeRecord(CCommandRecorder *recorder, const QString &message, const QString &domain, CCommand *command) {
-					CUnspecifiedMessageErrorRecord *record = new CUnspecifiedMessageErrorRecord(command,message,domain,70,command->getRecordData());
+					CCommandRecordData * prevRecData = nullptr;
+					if (command) {
+						prevRecData = command->getRecordData();
+					}
+					CUnspecifiedMessageErrorRecord *record = new CUnspecifiedMessageErrorRecord(command,message,domain,70, prevRecData);
 					if (recorder) {
 						recorder->recordData(record);
 					} else {

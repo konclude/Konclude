@@ -33,10 +33,12 @@
 // Logger includes
 #include "Logger/CLogger.h"
 
+#include "Utilities/Memory/CMemoryPool.h"
 
 namespace Konclude {
 
 	using namespace Context;
+	using namespace Utilities::Memory;
 
 	namespace Reasoner {
 
@@ -58,6 +60,8 @@ namespace Konclude {
 
 					//! Destructor
 					virtual ~COntologyContext();
+
+					virtual COntologyContext* addUsedMemoryPools(CMemoryPool* memoryPools) = 0;
 
 				// protected methods
 				protected:

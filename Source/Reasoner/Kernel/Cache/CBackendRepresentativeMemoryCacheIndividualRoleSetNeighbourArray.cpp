@@ -54,6 +54,9 @@ namespace Konclude {
 
 
 				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData& CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray::at(cint64 index) {
+					if (index < 0 || index >= mIndexData->getArraySize()) {
+						bool debug = true;
+					}
 					return mDataArray[index];
 				}
 

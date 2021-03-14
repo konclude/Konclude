@@ -64,14 +64,29 @@ namespace Konclude {
 
 			bool CReasonerEvaluationEvaluatorSPARQL::evaluateResults(CReasonerEvaluationRequestResult* requestResult, CReasonerEvaluationTerminationResult* terminationResult, const QString& inputFileString, const QString& responseFileString, CConfiguration* config, bool includeResponses, bool includeOutputs) {
 
+				QList<CReasonerEvaluationRequestResponse*>* responseList = requestResult->getResponseList();
 				QDomDocument document = createResponseDocument();
 				QDomElement responseNode = document.documentElement();
 				responseNode.setAttribute("response-time",requestResult->getResponseTime());
 				responseNode.setAttribute("test",inputFileString);
 				if (!requestResult->getResponsedInTime()) {
-					responseNode.setAttribute("timeout",1);
+					cint64 timeoutCount = 0;
+					for (CReasonerEvaluationRequestResponse* response : *responseList) {
+						if (response->isTimedOut()) {
+							timeoutCount++;
+						}
+					}
+					responseNode.setAttribute("timeout", 1);
+					if (timeoutCount > 1) {
+						responseNode.setAttribute("timeout-restart-count", timeoutCount);
+					}
 				} else {
 					responseNode.setAttribute("timeout",0);
+				}
+
+				cint64 maxMemoryUsage = terminationResult->getMaxMemoryUsage();
+				if (maxMemoryUsage > 0) {
+					responseNode.setAttribute("maxMemoryUsage", maxMemoryUsage);
 				}
 
 				QDateTime dateTime = QDateTime::currentDateTime();
@@ -95,7 +110,6 @@ namespace Konclude {
 				}
 
 
-				QList<CReasonerEvaluationRequestResponse*>* responseList = requestResult->getResponseList();
 				foreach (CReasonerEvaluationRequestResponse* response, *responseList) {
 					CReasonerEvaluationRequestResponseSPARQL* sparqlResponse = (CReasonerEvaluationRequestResponseSPARQL*)response;
 					if (response->isTimedOut()) {

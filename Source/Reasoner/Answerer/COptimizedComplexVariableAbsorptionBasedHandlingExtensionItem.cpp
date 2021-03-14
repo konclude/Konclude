@@ -39,6 +39,8 @@ namespace Konclude {
 				mNextPropagationInitializationIndividualsSplittedTestId = 1;
 				mEntailmentFound = false;
 				mCancellationAdapter = nullptr;
+				mNextSplitPropagationTestingItemId = 0;
+				mSplitPropagationItemProcessingQueued = false;
 			}
 
 
@@ -140,12 +142,12 @@ namespace Konclude {
 				return this;
 			}
 
-			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::addPropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController) {
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::addPropagationSteeringController(CAnsweringPropagationSteeringController* propagationSteeringController) {
 				mPropagationSteeringControllerSet.insert(propagationSteeringController);
 				return this;
 			}
 
-			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::removePropagationSteeringController(CAnsweringPropagationSteeringAbsorptionExtensionItemController* propagationSteeringController) {
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::removePropagationSteeringController(CAnsweringPropagationSteeringController* propagationSteeringController) {
 				mPropagationSteeringControllerSet.remove(propagationSteeringController);
 				return this;
 			}
@@ -157,7 +159,7 @@ namespace Konclude {
 			}
 
 			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::hasRemainingPropagationInitializationIndividualsSplittedTests() {
-				return mPropagationInitializationIndividualsSplittedTestsRemaining || !mPropagationSteeringControllerSet.isEmpty();
+				return mPropagationInitializationIndividualsSplittedTestsRemaining || !mPropagationSteeringControllerSet.isEmpty() || !mRemainingRepeatedSplitTestingItemList.isEmpty();
 			}
 
 
@@ -185,6 +187,116 @@ namespace Konclude {
 				return mCancellationAdapter;
 			}
 
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::initPreparedSplitPropagationTestControllingItemSize(cint64 preparedSplitSize) {
+				mPreparedSplitTestingItemVec.resize(preparedSplitSize);
+				return this;
+			}
+
+			CAnsweringSplitPropagationTestControllingItem*& COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getPreparedSplitPropagationTestControllingItem(cint64 preparedSplitId) {
+				return mPreparedSplitTestingItemVec[preparedSplitId];
+			}
+
+			CAnsweringSplitPropagationTestControllingItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getNextPreparedSplitPropagationTestControllingItem() {
+				if (!mRemainingPreparedSplitTestingItemList.isEmpty()) {
+					return mRemainingPreparedSplitTestingItemList.takeFirst();
+				}
+				return nullptr;
+			}
+
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::addReaminingPreparedSplitPropagationTestControllingItem(CAnsweringSplitPropagationTestControllingItem* item) {
+				mRemainingPreparedSplitTestingItemList.append(item);
+				return this;
+			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::hasPreparedSplitPropagationTestControllingItems() {
+				return !mPreparedSplitTestingItemVec.isEmpty();
+			}
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::hasRemainingPreparedSplitPropagationTestControllingItems() {
+				return !mRemainingPreparedSplitTestingItemList.isEmpty();
+			}
+
+			CAnsweringSplitPropagationTestControllingItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getNextSplitPropagationTestControllingItem() {
+				CAnsweringSplitPropagationTestControllingItem* item = new CAnsweringSplitPropagationTestControllingItem(mNextSplitPropagationTestingItemId++, mAbsorptionData);
+				addSplitPropagationTestingItem(item->getTestingItemId(), item);
+				return item;
+			}
+
+			CAnsweringSplitPropagationTestControllingItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getSplitPropagationTestingItem(cint64 splitItemId) {
+				return mSplitPropagationTestingItemHash.value(splitItemId);
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::addSplitPropagationTestingItem(cint64 splitItemId, CAnsweringSplitPropagationTestControllingItem* item) {
+				mSplitPropagationTestingItemHash.insert(splitItemId, item);
+				return this;
+			}
+
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::addRemainingRepeatedSplitTestingItem(CAnsweringSplitPropagationTestControllingItem* item) {
+				mRemainingRepeatedSplitTestingItemList.append(item);
+				return this;
+			}
+
+			QList<CAnsweringSplitPropagationTestControllingItem*>* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::getRemainingRepeatedSplitTestingItemList() {
+				return &mRemainingRepeatedSplitTestingItemList;
+			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::isSplitPropagationItemProcessingQueued() {
+				return mSplitPropagationItemProcessingQueued;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::setSplitPropagationItemProcessingQueued(bool queued) {
+				mSplitPropagationItemProcessingQueued = queued;
+				return this;
+			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem::clearComputation() {
+				COptimizedComplexVariableCompositionItem::clearComputation();
+				CExpressionVariable* initializerVariable = mAbsorptionData->getInitializerVariableExpression();
+				CVariable* variable = mAbsorptionData->getVariableExpressionVariableHash()->value(initializerVariable);
+
+
+				for (QHash<cint64, CAnsweringSplitPropagationTestControllingItem*>::const_iterator it = mSplitPropagationTestingItemHash.constBegin(), itEnd = mSplitPropagationTestingItemHash.constEnd(); it != itEnd; ++it) {
+					CAnsweringSplitPropagationTestControllingItem* item = it.value();
+					if (item) {
+						delete item;
+					}
+				}
+				mRemainingRepeatedSplitTestingItemList.clear();
+				mPreparedSplitTestingItemVec.clear();
+
+
+				if (mTestingVariableMapping) {
+					delete mTestingVariableMapping;
+					mTestingVariableMapping = nullptr;
+				}
+				if (mPossibleVariableMapping) {
+					delete mPossibleVariableMapping;
+					mPossibleVariableMapping = nullptr;
+				}
+
+				mPropatationTestCreated = false;
+
+
+				mDependentMappingsComputationScheduled = false;
+				mPropagationInitializationIndividualsSplitted = false;
+				mPropagationInitializationIndividualsSplittedTestsRemaining = false;
+				mNextPropagationInitializationIndividualsSplittedTestId = 1;
+				mEntailmentFound = false;
+				if (mCancellationAdapter) {
+					delete mCancellationAdapter;
+					mCancellationAdapter = nullptr;
+				}
+				mNextSplitPropagationTestingItemId = 0;
+				mSplitPropagationItemProcessingQueued = false;
+
+				return true;
+			}
 
 		}; // end namespace Answerer
 

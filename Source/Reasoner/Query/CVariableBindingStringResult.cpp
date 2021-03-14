@@ -75,6 +75,19 @@ namespace Konclude {
 				return this;
 			}
 
+			CVariableBindingResult* CVariableBindingStringResult::initVariableBinding(CConcept* concept) {
+				mBindingString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
+				mType = CVariableBindingResult::VBTCLASS;
+				return this;
+			}
+
+
+			CVariableBindingResult* CVariableBindingStringResult::initVariableBinding(CRole* role) {
+				mBindingString = CIRIName::getRecentIRIName(role->getPropertyNameLinker());
+				mType = CVariableBindingResult::VBTPROPERTY;
+				return this;
+			}
+
 			CVariableBindingResult* CVariableBindingStringResult::initVariableBinding(CDataLiteral* dataLiteral) {
 				QString literalString = "\"" + dataLiteral->getLexicalDataLiteralValueString();
 				if (dataLiteral->getDatatype()->getDatatypeType() != CDatatype::DT_PLAINLITERAL) {
@@ -130,6 +143,23 @@ namespace Konclude {
 					return false;
 				}
 				return true;
+			}
+
+			QString CVariableBindingStringResult::getClassBindingString() {
+				if (mType == CVariableBindingResult::VBTCLASS) {
+					enfoceBindingString();
+					return mBindingString;
+				}
+				return QString();
+			}
+
+
+			QString CVariableBindingStringResult::getPropertyBindingString() {
+				if (mType == CVariableBindingResult::VBTPROPERTY) {
+					enfoceBindingString();
+					return mBindingString;
+				}
+				return QString();
 			}
 
 			QString CVariableBindingStringResult::getNamedIndividualBindingString() {

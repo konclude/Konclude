@@ -32,15 +32,22 @@ namespace Konclude {
 				CBackendRepresentativeMemoryCacheLabelAssociationWriteData::CBackendRepresentativeMemoryCacheLabelAssociationWriteData() {
 				}
 
-				CBackendRepresentativeMemoryCacheLabelAssociationWriteData* CBackendRepresentativeMemoryCacheLabelAssociationWriteData::initWriteData(cint64 ontologyIdentifier, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker) {
+				CBackendRepresentativeMemoryCacheLabelAssociationWriteData* CBackendRepresentativeMemoryCacheLabelAssociationWriteData::initWriteData(cint64 ontologyIdentifier, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* involvedIndiDataLinker, CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* propCutDataLinker, cint64 repCompId) {
 					mTempAssUseDataLinker = tempAssUseDataLinker;
 					mTempAssWriteDataLinker = tempAssWriteDataLinker;
 					mTempLabelWriteDataLinker = tempLabelWriteDataLinker;
 					mTempCardWriteDataLinker = tempCardWriteDataLinker;
 					mTempNomIndirectConnDataLinker = tempNomIndirectConnDataLinker;
+					mInvolvedIndiDataLinker = involvedIndiDataLinker;
 					mType = BACKENDASSOCIATIONWRITEDATATYPE;
 					mOntologyIdentifier = ontologyIdentifier;
+					mPropCutDataLinker = propCutDataLinker;
+					mRecompuationId = repCompId;
 					return this;
+				}
+
+				cint64 CBackendRepresentativeMemoryCacheLabelAssociationWriteData::getRecompuationId() {
+					return mRecompuationId;
 				}
 
 
@@ -63,6 +70,14 @@ namespace Konclude {
 
 				CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* CBackendRepresentativeMemoryCacheLabelAssociationWriteData::getTemporaryNominalIndirectConnectionDataLinker() {
 					return mTempNomIndirectConnDataLinker;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* CBackendRepresentativeMemoryCacheLabelAssociationWriteData::getTemporaryInvolvedIndividualIdDataLinker() {
+					return mInvolvedIndiDataLinker;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* CBackendRepresentativeMemoryCacheLabelAssociationWriteData::getTemporaryPropagationCutDataLinker() {
+					return mPropCutDataLinker;
 				}
 
 			}; // end namespace Cache

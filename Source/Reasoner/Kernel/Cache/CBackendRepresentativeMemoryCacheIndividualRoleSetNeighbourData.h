@@ -61,9 +61,11 @@ namespace Konclude {
 						bool visitNeighbourIndividualIdsFromCursor(function<bool(cint64 id, cint64 cursor)> visitFunc, cint64 cursor = 0);
 
 						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* getIndividualIdLinker();
-						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* setIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker);
-						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* addIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker);
+						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* setIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker, bool updateCounter = true);
+						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* addIndividualIdLinker(CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourIndividualIdLinker* indiIdLinker, bool incCounter = true);
 						cint64 getIndividualCount();
+						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* incIndividualCount(cint64 count = 1);
+						CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourData* decIndividualCount(cint64 count = 1);
 
 					// protected methods
 					protected:

@@ -58,7 +58,8 @@ namespace Konclude {
 						//! Constructor
 						CSuccessorRoleIterator();
 
-						CSuccessorRoleIterator(cint64 indi, const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& beginIt, const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& endIt);
+						CSuccessorRoleIterator(cint64 indi, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt);
+						CSuccessorRoleIterator(cint64 indi, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt2, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt2);
 
 						bool hasNext();
 						CIndividualLinkEdge* next(bool moveNext = true);
@@ -69,8 +70,12 @@ namespace Konclude {
 					// protected variables
 					protected:
 						cint64 mIndi;
-						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mBeginIt;
-						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mEndIt;
+						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mBeginIt1;
+						CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator mEndIt1;
+						bool mIterator1;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator mBeginIt2;
+						CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator mEndIt2;
+						bool mIterator2;
 
 					// private methods
 					private:

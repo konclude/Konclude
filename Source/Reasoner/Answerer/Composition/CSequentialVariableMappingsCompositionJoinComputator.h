@@ -30,6 +30,7 @@
 
 
 // Other includes
+#include "Reasoner/Answerer/COptimizedComplexVariableJoiningWithRemainingHasher.h"
 
 
 

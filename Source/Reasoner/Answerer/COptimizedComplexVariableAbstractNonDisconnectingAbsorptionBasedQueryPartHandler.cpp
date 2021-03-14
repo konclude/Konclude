@@ -58,6 +58,9 @@ namespace Konclude {
 					variable->initVariable(nullptr, nextVariableId++);
 					variableExpressionVariableHash->insert(expVar, variable);
 					expressionVariableVariableHash->insert(variable, expVar);
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+					variable->mDebugVariableName = expVar->getName();
+#endif
 				}
 				return variable;
 			}

@@ -270,7 +270,7 @@ namespace Konclude {
 						}
 					}
 
-					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternSelectQuery(axiomList, disVarList, orderingList, filteringList, distinctModifier, limit, offset);
+					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternIndividualSelectQuery(axiomList, disVarList, orderingList, filteringList, distinctModifier, limit, offset);
 					mSPARQLBGPQueryList.append(sparqlQuery);
 
 
@@ -283,7 +283,7 @@ namespace Konclude {
 					QList<CFilteringTermExpression*> filteringList;
 					filteringList = getFilters(filterList);
 
-					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternAskQuery(axiomList, filteringList);
+					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternIndividualAskQuery(axiomList, filteringList);
 					mSPARQLBGPQueryList.append(sparqlQuery);
 				}
 			}

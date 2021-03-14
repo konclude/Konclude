@@ -40,22 +40,30 @@ namespace Konclude {
 				}
 
 
-
+				
 
 
 				void CQtConcurrentStreamingComplexQueryFinishingHandler::processUpdatedBindingsCardinalityLinkers() {
 
-					if (!mAllowConcurrentAnswerGeneration || mCompAssIndVarQuery->getResultLimitIncludingOffset() > 0 || mFilteringAnsweringMapping || !mExistBindsAnswersStreamingResult) {
+					if (!mAllowConcurrentAnswerGeneration || mCompVarQuery->getResultLimitIncludingOffset() > 0 || mFilteringAnsweringMapping || !mExistBindsAnswersStreamingResult) {
 						mAllowConcurrentAnswerGeneration = false;
 						CSequentialStreamingComplexQueryFinishingHandler::processUpdatedBindingsCardinalityLinkers();
 					}
 
-					if (!mAnswersWriteable && !mSameRealization->hasPotentiallySameIndividuals() && (mLastVarItemProcessingDep->getDependentItem()->getVariableMapping()->getMaximumCardinalitySameIndividualsSeparatelyConsidered() <= 1 || mDistinct)) {
+					COptimizedComplexVariableCompositionItemDependence* varItemProcessingDep = mLastVarItemProcessingDep;
+					if (varItemProcessingDep->getDependentItem()->hasSplitComputations()) {
+						varItemProcessingDep = new COptimizedComplexVariableCompositionItemDependence(varItemProcessingDep->getDependentItem()->getCurrentSplitComputationItem());
+						mSplitComputedMappingCount += varItemProcessingDep->getDependentItem()->getVariableMappingsCurrentCount();
+					}
+
+					if (!mAnswersWriteable && !mSameRealization->hasPotentiallySameIndividuals() && (varItemProcessingDep->getDependentItem()->getVariableMapping()->getMaximumCardinalitySameIndividualsSeparatelyConsidered() <= 1 || mDistinct)) {
 						//TODO: max cardinality must be 1
-						cint64 currentBindingCount = mLastVarItemProcessingDep->getDependentItem()->getVariableMapping()->getBindingCount();
+						cint64 currentBindingCount = varItemProcessingDep->getDependentItem()->getVariableMapping()->getBindingCount();
 						cint64 writtenResultCount = mLastOnlyCountingWritten;
-						mResultWriter.addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mExistBindsAnswersStreamingResult, nullptr, mFilteringAnsweringMapping, mCompAssIndVarQuery, mQueryProcessingData, currentBindingCount - writtenResultCount);
-						mLastOnlyCountingWritten = currentBindingCount;
+						mResultWriter.addReusedVariableBindingAnswerToResultConsideringOffsetLimit(mExistBindsAnswersStreamingResult, nullptr, mFilteringAnsweringMapping, mCompVarQuery, mQueryProcessingData, currentBindingCount - writtenResultCount);
+						if (!varItemProcessingDep->getDependentItem()->isSplitComputationMode()) {
+							mLastOnlyCountingWritten = currentBindingCount;
+						}
 					} else {
 
 						if (mLastOnlyCountingWritten > 0) {
@@ -64,17 +72,17 @@ namespace Konclude {
 							mLastOnlyCountingWritten = 0;
 						}
 
-						while (!mLastVarItemProcessingDep->isBatchProcessed() || mLastVarItemProcessingDep->loadNextBatchProvidedBatch()) {
+						while (!varItemProcessingDep->isBatchProcessed() || varItemProcessingDep->loadNextBatchProvidedBatch()) {
 
 
 
 							cint64 bindingCardLinkerCount = 0;
 							QVector<COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker*> bindingsCardLinkerBatchVec;
-							while (!mLastVarItemProcessingDep->isBatchProcessed(false) || mLastVarItemProcessingDep->loadNextBatchProvidedBatch(false)) {
+							while (!varItemProcessingDep->isBatchProcessed(false) || varItemProcessingDep->loadNextBatchProvidedBatch(false)) {
 
-								while (mLastVarItemProcessingDep->getBatchProvidedBindingCardinalityBatchLinker(false)) {
-									COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* bindingBatchLinker = mLastVarItemProcessingDep->getBatchProvidedBindingCardinalityBatchLinker(true);
-									mLastVarItemProcessingDep->setBatchProvidedBindingCardinalityLinkersProcessed(bindingBatchLinker);
+								while (varItemProcessingDep->getBatchProvidedBindingCardinalityBatchLinker(false)) {
+									COptimizedComplexVariableIndividualBindingsCardinalityBatchLinker* bindingBatchLinker = varItemProcessingDep->getBatchProvidedBindingCardinalityBatchLinker(true);
+									varItemProcessingDep->setBatchProvidedBindingCardinalityLinkersProcessed(bindingBatchLinker);
 									bindingCardLinkerCount += bindingBatchLinker->getLinkerCount();
 									bindingsCardLinkerBatchVec.append(bindingBatchLinker);
 								}
@@ -85,10 +93,8 @@ namespace Konclude {
 							}
 
 
-
-
-							while (mLastVarItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
-								COptimizedComplexVariableIndividualUpdateCardinalityLinker* updatedCardinalityLinker = mLastVarItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(true);
+							while (varItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(false)) {
+								COptimizedComplexVariableIndividualUpdateCardinalityLinker* updatedCardinalityLinker = varItemProcessingDep->getBatchCurrentUpdatedCardinalityLinker(true);
 								if (!mDistinct) {
 									COptimizedComplexVariableIndividualBindingsCardinality* prevCardinalites = updatedCardinalityLinker->getPreviousCardinality();
 									COptimizedComplexVariableIndividualBindingsCardinalityLinker* bindingLinker = updatedCardinalityLinker->getUpdatedBindingsCardinalityLinker();
@@ -102,6 +108,10 @@ namespace Konclude {
 								}
 							}
 						}
+					}
+
+					if (varItemProcessingDep != mLastVarItemProcessingDep) {
+						delete varItemProcessingDep;
 					}
 				}
 
@@ -167,7 +177,7 @@ namespace Konclude {
 						}
 
 
-						delete useBindingResultVectorArray;
+						delete[] useBindingResultVectorArray;
 						delete useBindResListAnswer;
 
 						CAnswerGenerationData anserGenData;

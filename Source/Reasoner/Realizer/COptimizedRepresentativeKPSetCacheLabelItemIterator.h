@@ -28,6 +28,7 @@
 #include "RealizerSettings.h"
 #include "COptimizedKPSetConceptInstancesItem.h"
 #include "COptimizedRepresentativeKPSetConceptSetCacheLabelItemInstancesData.h"
+#include "COptimizedKPSetIndividualInstantiatedItemMultiHash.h"
 
 
 // Other includes
@@ -64,7 +65,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedRepresentativeKPSetCacheLabelItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true);
+					COptimizedRepresentativeKPSetCacheLabelItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemKnownInstancesList, const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemPossibleInstancesList, COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor = true);
 					virtual ~COptimizedRepresentativeKPSetCacheLabelItemIterator();
 
 
@@ -172,7 +173,7 @@ namespace Konclude {
 				protected:
 					QList<CBackendRepresentativeMemoryLabelCacheItem*> mLabelCacheItemKnwonInstancesList;
 					QList<CBackendRepresentativeMemoryLabelCacheItem*> mLabelCacheItemPossibleInstancesList;
-					QHash<cint64, COptimizedKPSetIndividualItem*>* mIndividualInstantiatedItemHash;
+					COptimizedKPSetIndividualInstantiatedItemMultiHash* mIndividualInstantiatedItemHash;
 
 					QList<CAssociationMapIteratorData*> mUninitializedList;
 

@@ -67,6 +67,24 @@ namespace Konclude {
 		}
 
 
+		QStringList CConfigData::getStringList() {
+			QStringList stringList;
+			CConvertStringListConfigType *conStringListData = dynamic_cast<CConvertStringListConfigType *>(configVal);
+			if (conStringListData) {
+				stringList = conStringListData->getStringList();
+			}
+			return stringList;
+		}
+
+
+		bool CConfigData::readFromStringList(const QStringList& stringList) {
+			CConvertStringListConfigType *conStringListData = dynamic_cast<CConvertStringListConfigType *>(configVal);
+			if (conStringListData) {
+				return conStringListData->readFromStringList(stringList);
+			}
+			return false;
+		}
+
 		bool CConfigData::readFromInteger(qint64 integer) {
 			CConvertIntegerConfigType *conIntegerData = dynamic_cast<CConvertIntegerConfigType *>(configVal);
 			if (conIntegerData) {
@@ -103,6 +121,24 @@ namespace Konclude {
 		}
 
 
+		bool CConfigData::readFromDouble(double value) {
+			CConvertDoubleConfigType *conDoubleData = dynamic_cast<CConvertDoubleConfigType *>(configVal);
+			if (conDoubleData) {
+				return conDoubleData->readFromDouble(value);
+			}
+			return false;
+		}
+
+		double CConfigData::getDouble() {
+			double value = 0;
+			CConvertDoubleConfigType *conDoubleData = dynamic_cast<CConvertDoubleConfigType *>(configVal);
+			if (conDoubleData) {
+				value = conDoubleData->getDouble();
+			}
+			return value;
+		}
+
+
 		CConfigDescription *CConfigData::getConfigDescription() {
 			return configDes;
 		}
@@ -111,6 +147,9 @@ namespace Konclude {
 			return configVal;
 		}
 
+		bool CConfigData::supportsDoubleConvertion() {
+			return configDes->supportsDoubleConvertion();
+		}
 
 		bool CConfigData::supportsStringConvertion() {
 			return configDes->supportsStringConvertion();
@@ -125,6 +164,9 @@ namespace Konclude {
 			return configDes->supportsBooleanConvertion();
 		}
 
+		bool CConfigData::supportsStringListConvertion() {
+			return configDes->supportsStringListConvertion();
+		}
 
 		qint64 CConfigData::getLevelLock() {
 			return lockLevel;

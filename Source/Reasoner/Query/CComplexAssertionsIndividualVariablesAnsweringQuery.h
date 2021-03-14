@@ -26,6 +26,7 @@
 
 // Namespace includes
 #include "CComplexAnsweringExpressionQuery.h"
+#include "CComplexVariablesAnsweringQuery.h"
 
 
 // Other includes
@@ -56,7 +57,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CComplexAssertionsIndividualVariablesAnsweringQuery : public CComplexAnsweringExpressionQuery {
+			class CComplexAssertionsIndividualVariablesAnsweringQuery : public CComplexVariablesAnsweringQuery {
 				// public methods
 				public:
 					//! Constructor
@@ -65,23 +66,6 @@ namespace Konclude {
 					//! Destructor
 					virtual ~CComplexAssertionsIndividualVariablesAnsweringQuery();
 
-
-					QList<CAxiomExpression*>* getAxiomExpressions();
-					QList<CExpressionVariable*>* getDistinguishedVariableExpressions();
-
-					bool isDistinctRequired();
-					CComplexAssertionsIndividualVariablesAnsweringQuery* setDistinctRequired(bool distinctRequired);
-
-					bool isBooleanEntailmentResultRequired();
-					CComplexAssertionsIndividualVariablesAnsweringQuery* setBooleanEntailmentResultRequired(bool booleanEntailmentResultRequired);
-
-					cint64 getResultLimit();
-					CComplexAssertionsIndividualVariablesAnsweringQuery* setResultLimit(cint64 resultLimit);
-
-					cint64 getResultOffset();
-					CComplexAssertionsIndividualVariablesAnsweringQuery* setResultOffset(cint64 resultOffset);
-
-					cint64 getResultLimitIncludingOffset();
 
 					QList<CExpressionVariable*> getIgnoreCardinalityVariableExpressions();
 					CComplexAssertionsIndividualVariablesAnsweringQuery* setIgnoreCardinalityVariableExpressions(const QList<CExpressionVariable*>& varExpList);
@@ -92,15 +76,7 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					QList<CAxiomExpression*> mAxiomExpressions;
-					QList<CExpressionVariable*> mDisVariables;
 					QList<CExpressionVariable*> mIgnoreCardVariables;
-
-					bool mDistinct;
-					bool mBooleanEntailmentResult;
-
-					cint64 mResultLimit;
-					cint64 mResultOffset;
 
 
 				// private methods

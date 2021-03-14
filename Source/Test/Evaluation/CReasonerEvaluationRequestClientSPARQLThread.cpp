@@ -39,6 +39,8 @@ namespace Konclude {
 				mConfSupportsPrepareCommand = false;
 
 				mConfResponseSizeLimit = -1;
+
+				mRemainingRestartRepeatingRequests = 0;
 			}
 
 
@@ -54,6 +56,162 @@ namespace Konclude {
 			}
 
 
+			bool CReasonerEvaluationRequestClientSPARQLThread::processTimer(qint64 timerID) {
+				if (timerID == TIMERIDTOTALTIMEOUT) {
+					++mCurrentOperationNumber;
+					closeAllRequestTimeout();
+					return true;
+				} else if (timerID == TIMERIDREQUESTTIMEOUT) {
+					++mCurrentOperationNumber;
+					CReasonerEvaluationRequestResponseSPARQL* sprqlReqRes = (CReasonerEvaluationRequestResponseSPARQL*)mNextReqRes;
+					if (sprqlReqRes->getOperationMode() != "QUERY" || mNumberInitRequests > 0 || !mConfQueryTimeoutRestartRepeatPreparation || !hasNextRequest()) {
+						closeAllRequestTimeout();
+					} else {
+						closeRequestTimeoutContinueRestart();
+					}
+					return true;
+				}
+				return false;
+			}
+
+
+
+
+			bool CReasonerEvaluationRequestClientSPARQLThread::closeRequestTimeoutContinueRestart() {
+				cint64 elapsedTime = mNextRequestTiming.elapsed();
+				mNextReqRes->setResponseTime(elapsedTime);
+
+				LOG(INFO, getLogDomain(), logTr("Request %1 of %2 timed out, trying restarting reasoner and continuing.").arg(1 + mCurrentRequestCount++).arg(mTotalRequestCount), this);
+
+				mNextReqRes->setTimedOut(true);
+				mResponse->setResponsedInTime(false);
+				mResponse->addResponse(mNextReqRes, mNumberInitRequests-- > 0);
+				mRestartRepeatingRequests = 0;
+
+				cint64 requestNumber = 0;
+				for (CReasonerEvaluationRequestResponse* request : mAllRequestList) {
+					if (request == mNextReqRes) {
+						break;
+					}
+					CReasonerEvaluationRequestResponseSPARQL* sprqlReqRes = (CReasonerEvaluationRequestResponseSPARQL*)request;
+					if (sprqlReqRes->getOperationMode() != "QUERY" || requestNumber <= mTotalInitRequests) {
+						mRemainingRequestList.prepend(request);
+						++mRestartRepeatingRequests;
+					} else {
+						break;
+					}
+					++requestNumber;
+				}
+				mNumberInitRequests = mTotalInitRequests;
+				mTotalRequestCount = mRemainingRequestList.count();
+				mCurrentRequestCount = 0;
+
+				if (hasNextRequest()) {
+					if (!mReasonerProvider->restartReasoner()) {
+						closeAllRequestTimeout();
+						finishReasonerRequests();
+						return false;
+					} else {
+						LOG(INFO, getLogDomain(), logTr("Reasoner restarted, continuing evaluation."), this);
+					}
+					sendNextRequest();
+					return true;
+				} else {
+					finishReasonerRequests();
+					return false;
+				}
+			}
+
+
+
+			bool CReasonerEvaluationRequestClientSPARQLThread::closeAllRequestTimeout() {
+				cint64 elapsedTime = mNextRequestTiming.elapsed();
+
+				LOG(INFO, getLogDomain(), logTr("Request %1 of %2 timed out.").arg(1 + mCurrentRequestCount++).arg(mTotalRequestCount), this);
+
+				if (mRestartRepeatingRequests <= 0) {
+					mNextReqRes->setResponseTime(elapsedTime);
+					mNextReqRes->setTimedOut(true);
+					mResponse->setResponsedInTime(false);
+					mResponse->addResponse(mNextReqRes, mNumberInitRequests-- > 0);
+				} else {
+					--mRestartRepeatingRequests;
+				}
+
+				while (!mRemainingRequestList.isEmpty()) {
+					CReasonerEvaluationRequestResponse* nextReqResp = mRemainingRequestList.takeFirst();
+					if (mRestartRepeatingRequests <= 0) {
+						nextReqResp->setResponseError(true);
+						mResponse->addResponse(nextReqResp, mNumberInitRequests-- > 0);
+					} else {
+						--mRestartRepeatingRequests;
+					}
+				}
+
+				finishReasonerRequests();
+				return true;
+			}
+
+
+
+
+			bool CReasonerEvaluationRequestClientSPARQLThread::closeNextRequest() {
+				stopTimer(TIMERIDREQUESTTIMEOUT);
+
+				cint64 elapsedTime = mNextRequestTiming.elapsed();
+				bool responseError = false;
+
+				QIODevice* device = nullptr;
+
+				if (mRestartRepeatingRequests <= 0) {
+					LOG(INFO, getLogDomain(), logTr("Received response %1 of %2 in %3 ms.").arg(1 + mCurrentRequestCount++).arg(mTotalRequestCount).arg(elapsedTime), this);
+					mNextReqRes->setResponseTime(elapsedTime);
+					if (!mTransManager->hasFinishedSucecssfully(mWebResponse)) {
+						CHttpTransactionManager::ABORT_REASON abortReason = CHttpTransactionManager::ABORT_NO_REASON;
+						if (mTransManager->hasBeenAborted(mWebResponse, &abortReason)) {
+							mNextReqRes->setEvaluationError(true);
+							QString abortReasonString = "none given";
+							if (abortReason == CHttpTransactionManager::ABORT_DOWNLOAD_SIZE_LIMIT_REACHED) {
+								abortReasonString = QString("Response size limit of %1 bytes has been reached").arg(mDownloadSizeLimit);
+							}
+							mNextReqRes->setEvaluationErrorString(QString("Request aborted with reason: %1.").arg(abortReasonString));
+							LOG(WARN, getLogDomain(), logTr("Request has been aborted with reason: %1.").arg(abortReasonString), this);
+						} else {
+							responseError = true;
+							LOG(WARN, getLogDomain(), logTr("Response not successfully retrieved, interpreting it as error."), this);
+						}
+					} else {
+						device = mTransManager->getResponseDataReadDevice(mWebResponse);
+						if (device) {
+							responseError = parseResponse(device);
+						} else {
+							responseError = true;
+						}
+					}
+
+
+					mNextReqRes->setResponseError(responseError);
+					if (!responseError) {
+						mResponse->setSucessfullReasonerCommunication(true);
+					}
+
+					mResponse->addResponse(mNextReqRes, mNumberInitRequests-- > 0);
+				} else {
+					LOG(INFO, getLogDomain(), logTr("Received (restart repeated) response %1 of %2 in %3 ms.").arg(1 + mCurrentRequestCount++).arg(mTotalRequestCount).arg(elapsedTime), this);
+					mRestartRepeatingRequests--;
+					if (mTransManager->hasFinishedSucecssfully(mWebResponse)) {
+						device = mTransManager->getResponseDataReadDevice(mWebResponse);
+						device->readAll();
+					}
+				}
+
+
+				mNextReqRes = nullptr;
+
+				mTransManager->releaseResponse(mWebResponse);
+				return true;
+			}
+
 
 			CReasonerEvaluationRequestClientBaseThread* CReasonerEvaluationRequestClientSPARQLThread::readConfig(CConfiguration* config) {
 				CReasonerEvaluationRequestClientBaseThread::readConfig(config);
@@ -63,6 +221,8 @@ namespace Konclude {
 
 				mConfResponseSizeLimit = CConfigDataReader::readConfigInteger(config, "Konclude.Evaluation.SPARQLResponseSizeLimit", -1);
 
+				mConfQueryTimeoutRestartRepeatPreparation = CConfigDataReader::readConfigBoolean(config, "Konclude.Evaluation.SPARQLQueryTimeoutRestartRepeatPreparation");
+				mConfSeparateQueryingTimeout = CConfigDataReader::readConfigInteger(config, "Konclude.Evaluation.SPARQLQueryingTimeout", -1);
 				return this;
 			}
 
@@ -131,7 +291,12 @@ namespace Konclude {
 
 				mWebRequest = mTransManager->createRequest(QString("http://%1").arg(mAddressString), transReqByteArray);
 				mNextRequestTiming.start();
-				startTimerWithIntervalLimited(TIMERIDREQUESTTIMEOUT, mRequestTimeout, 1);
+				CReasonerEvaluationRequestResponseSPARQL* sprqlReqRes = (CReasonerEvaluationRequestResponseSPARQL*)mNextReqRes;
+				if (mConfSeparateQueryingTimeout != -1 && sprqlReqRes->getOperationMode() == "QUERY") {
+					startTimerWithIntervalLimited(TIMERIDREQUESTTIMEOUT, mConfSeparateQueryingTimeout, 1);
+				} else {
+					startTimerWithIntervalLimited(TIMERIDREQUESTTIMEOUT, mRequestTimeout, 1);
+				}
 
 				mWebResponse = mTransManager->getResponse(mWebRequest);
 				mTransManager->callbackFinishedRequest(mWebResponse,new CReasonerEvaluationNextEvent(this,mCurrentOperationNumber));
@@ -202,8 +367,11 @@ namespace Konclude {
 			bool CReasonerEvaluationRequestClientSPARQLThread::loadReasonerRequests(const QString& initFileString, const QString& testFileString) {
 				mCurrentRequestCount = 0;
 				mTotalRequestCount = 0;
+				mRemainingRestartRepeatingRequests = 0;
+				mRestartRepeatingRequests = 0;
+
 				bool loaded = loadReasonerRequest(initFileString);
-				mNumberInitRequests = mRemainingRequestList.count();
+				mTotalInitRequests = mNumberInitRequests = mRemainingRequestList.count();
 				loaded &= loadReasonerRequest(testFileString);
 				return loaded;
 			}
@@ -277,6 +445,7 @@ namespace Konclude {
 							prepareRequestRespone->setOperationMode("PREPARE");
 							prepareRequestRespone->setOperationName(mSPARQLOperationKeywordNameSet.value("PREPARE"));
 							mRemainingRequestList.append(prepareRequestRespone);
+							mAllRequestList.append(prepareRequestRespone);
 							++mTotalRequestCount;
 							++loadedRequestCount;
 							hasUpdatingOperation = false;
@@ -287,6 +456,7 @@ namespace Konclude {
 
 
 					mRemainingRequestList.append(requestRespone);
+					mAllRequestList.append(requestRespone);
 
 
 					++mTotalRequestCount;

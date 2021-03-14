@@ -69,6 +69,17 @@ namespace Konclude {
 				return &mDataLiteralVariableNameSet;
 			}
 
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getClassVariableNameSet() {
+				return &mClassVariableNameSet;
+			}
+
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getObjectPropertyVariableNameSet() {
+				return &mObjectPropertyVariableNameSet;
+			}
+
+			QSet<QString>* CConcreteOntologyEntityCollectorBuilder::getDataPropertyVariableNameSet() {
+				return &mDataPropertyVariableNameSet;
+			}
 
 
 			cint64 CConcreteOntologyEntityCollectorBuilder::getAxiomNumber() {
@@ -195,6 +206,40 @@ namespace Konclude {
 				mDataLiteralVariableNameSet.insert(dataLiteralVariableName);
 				return nullptr;
 			}
+
+
+
+
+
+
+
+			CClassVariableExpression* CConcreteOntologyEntityCollectorBuilder::getClassVariable(const QStringRef &classVariableName) {
+				return getClassVariable(classVariableName.toString());
+			}
+
+			CClassVariableExpression* CConcreteOntologyEntityCollectorBuilder::getClassVariable(const QString &classVariableName) {
+				mClassVariableNameSet.insert(classVariableName);
+				return nullptr;
+			}
+
+			CObjectPropertyVariableExpression* CConcreteOntologyEntityCollectorBuilder::getObjectPropertyVariable(const QStringRef &objectPropertyVariableName) {
+				return getObjectPropertyVariable(objectPropertyVariableName.toString());
+			}
+
+			CObjectPropertyVariableExpression* CConcreteOntologyEntityCollectorBuilder::getObjectPropertyVariable(const QString &objectPropertyVariableName) {
+				mObjectPropertyVariableNameSet.insert(objectPropertyVariableName);
+				return nullptr;
+			}
+
+			CDataPropertyVariableExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyVariable(const QStringRef &dataPropertyVariableName) {
+				return getDataPropertyVariable(dataPropertyVariableName.toString());
+			}
+
+			CDataPropertyVariableExpression* CConcreteOntologyEntityCollectorBuilder::getDataPropertyVariable(const QString &dataPropertyVariableName) {
+				mDataPropertyVariableNameSet.insert(dataPropertyVariableName);
+				return nullptr;
+			}
+
 
 
 			CDataLiteralExpression* CConcreteOntologyEntityCollectorBuilder::getDataLiteral(CDataLexicalValueExpression* dataLexicalValue, CDatatypeExpression* datatype) {

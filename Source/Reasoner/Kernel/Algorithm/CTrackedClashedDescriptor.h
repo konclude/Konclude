@@ -69,6 +69,9 @@ namespace Konclude {
 
 						bool isAppropriatedIndividualNominal();
 						cint64 getAppropriatedIndividualID();
+						CIndividualProcessNode* getAppropriatedIndividual();
+
+
 						cint64 getAppropriatedIndividualLevel();
 
 						cint64 getBranchingLevelTag();
@@ -97,6 +100,7 @@ namespace Konclude {
 
 					// protected variables
 					protected:
+						CIndividualProcessNode* mIndiNode;
 						cint64 mIndiNodeID;
 						cint64 mIndiNodeLevel;
 						cint64 mBranchingLevelTag;

@@ -119,6 +119,17 @@ namespace Konclude {
 				}
 
 				std::cout << messageString.toLocal8Bit().data() << "\r\n"<<std::flush;
+
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+				QFile loggingFile(QString("./Debugging/logging.txt"));
+				if (loggingFile.open(QIODevice::Append)) {
+					QByteArray data = messageString.toUtf8();
+					loggingFile.write(data);
+					loggingFile.write("\r\n");
+					loggingFile.close();
+				}
+#endif
+
 			}
 		}
 

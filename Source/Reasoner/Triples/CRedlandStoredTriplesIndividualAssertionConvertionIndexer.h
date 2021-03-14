@@ -83,7 +83,8 @@ namespace Konclude {
 					virtual ~CRedlandStoredTriplesIndividualAssertionConvertionIndexer();
 
 
-					bool indexABoxIndividuals(CConcreteOntology* updateConcreteOntology, COntologyTriplesData* ontologyTripleData);
+					virtual bool indexABoxIndividuals(CConcreteOntology* updateConcreteOntology, COntologyTriplesData* ontologyTripleData);
+
 
 
 
@@ -107,9 +108,14 @@ namespace Konclude {
 					CIndividualNodeData* getIndividualData(librdf_node* nodeNode, CConcreteOntology* ontology);
 
 					CDatatype* getDatatypeFromDatatypeUri(librdf_uri* uri, CConcreteOntology* ontology, CRedlandStoredTriplesData* ontologyTripleData);
+
+					void ensureDatatypeHashInitialized(CConcreteOntology* ontology, CRedlandStoredTriplesData* ontologyTripleData);
+
 					CDataLiteralValue* createDataLiteralValue(CDataLiteral* dataLiteral, CConcreteOntology* ontology);
 
-					void identifyIndividuals(librdf_statement* statement, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CIndividualNodeData* &lastIndiData, librdf_node* lastSubjectNode, CConcreteOntology* updateConcreteOntology, cint64 &conceptAssertionCount, CRedlandStoredTriplesData* redlandTriplesData, cint64 &dataPropertyAssertionCount, cint64 &objectPropertyAssertionCount);
+					void identifyIndividuals(librdf_statement* statement, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CIndividualNodeData* &lastIndiData, librdf_node* lastSubjectNode, CConcreteOntology* updateConcreteOntology, CRedlandStoredTriplesData* redlandTriplesData);
+
+					virtual void indexTriples(CRedlandStoredTriplesData* redlandTriplesData, librdf_node* rdfTypePredicate, librdf_node* namedIndividualObject, CConcreteOntology* updateConcreteOntology);
 
 				// protected variables
 				protected:
@@ -155,7 +161,13 @@ namespace Konclude {
 					CDatatype* mDefaultDatatype;
 					CDataLiteralNormalizerPreProcess mDataLiteralNormalizer;
 					CPreProcessContext* mPreprocessContext;
+					CConcreteOntology* mUupdatingOntology;
 
+					cint64 mConceptAssertionCount = 0;
+					cint64 mObjectPropertyAssertionCount = 0;
+					cint64 mDataPropertyAssertionCount = 0;
+
+					QTime mIndexingTime;
 			};
 
 

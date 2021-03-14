@@ -148,7 +148,13 @@ namespace Konclude {
 
 				}
 				if (concept->getVariable()) {
-					addReplacementString += QString("Referenced Variable: %1\r\n").arg(concept->getVariable()->getPathVariableID());
+					cint64 varId = concept->getVariable()->getPathVariableID();
+					QString varIdString = QString("%1").arg(varId);
+#ifndef KONCLUDE_FORCE_ALL_DEBUG_DEACTIVATED
+					QString debugVariableName = concept->getVariable()->mDebugVariableName;
+					varIdString += QString("~%1").arg(debugVariableName);
+#endif
+					addReplacementString += QString("Referenced Variable: %1\r\n").arg(varIdString);
 				}
 				if (concept->getVariableLinker()) {
 					QString variables;

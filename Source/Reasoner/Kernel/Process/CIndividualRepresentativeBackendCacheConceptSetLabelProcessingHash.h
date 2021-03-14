@@ -34,11 +34,15 @@
 // Other includes
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryLabelCacheItem.h"
 
+#include "Utilities/Container/CQtManagedRestrictedModificationSharingHash.h"
+
 // Logger includes
 #include "Logger/CLogger.h"
 
 
 namespace Konclude {
+
+	using namespace Utilities::Container;
 
 	namespace Reasoner {
 
@@ -56,7 +60,7 @@ namespace Konclude {
 				 *		\brief		TODO
 				 *
 				 */
-				class CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash : public CPROCESSHASH<CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher, CIndividualRepresentativeBackendCacheConceptSetLabelProcessingData> {
+				class CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash : public CQtManagedRestrictedModificationSharingHash<CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher, CIndividualRepresentativeBackendCacheConceptSetLabelProcessingData> {
 					// public methods
 					public:
 						//! Constructor

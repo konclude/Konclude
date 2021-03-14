@@ -87,7 +87,7 @@ namespace Konclude {
 						double satFactor = 0;
 						if (expandedCount != 0) {
 							satFactor = qMax(qMin(satCount / (double)expandedCount,1.0),0.0);
-						} else if (satFactor != 0) {
+						} else if (satCount != 0) {
 							satFactor = (1./(satCount*10));
 						}
 						learningOffset = 0.0;

@@ -28,14 +28,14 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			CAnsweringMessageDataCalculationCompletedQueryMaterialization::CAnsweringMessageDataCalculationCompletedQueryMaterialization(CSatisfiableCalculationJob* calcJob, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CComplexQueryMaterializationData* matData) : CAnsweringMessageDataCalculationCompleted(calcJob, QUERYMATERIALIZATIONCALCULATION) {
+			CAnsweringMessageDataCalculationCompletedQueryMaterialization::CAnsweringMessageDataCalculationCompletedQueryMaterialization(CSatisfiableCalculationJob* calcJob, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem, CComplexQueryMaterializationData* matData) : CAnsweringMessageDataCalculationCompleted(calcJob, QUERYMATERIALIZATIONCALCULATION) {
 				mBuildingVarItem = buildingVarItem;
 				mMatData = matData;
 			}
 
 
 
-			COptimizedComplexBuildingVariableCompositionsItem* CAnsweringMessageDataCalculationCompletedQueryMaterialization::getBuildingVariableCompositionItem() {
+			COptimizedComplexBuildingIndividualVariableCompositionsItem* CAnsweringMessageDataCalculationCompletedQueryMaterialization::getBuildingVariableCompositionItem() {
 				return mBuildingVarItem;
 			}
 

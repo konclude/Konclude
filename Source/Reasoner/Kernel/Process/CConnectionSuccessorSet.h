@@ -79,6 +79,7 @@ namespace Konclude {
 					protected:
 						CProcessContext* mContext;
 						CPROCESSSET<cint64>* mConnSet;
+						CPROCESSSET<cint64>* mPrevConnSet;
 						cint64 mAncConnID;
 
 					// private methods

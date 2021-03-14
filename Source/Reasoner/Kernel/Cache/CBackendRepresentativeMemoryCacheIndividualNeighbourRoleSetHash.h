@@ -61,7 +61,7 @@ namespace Konclude {
 						//! Constructor
 						CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash(CBackendRepresentativeMemoryCacheContext* context);
 
-						CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* initNeighbourRoleSetHash(CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash);
+						CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* initNeighbourRoleSetHash(CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash, bool detach = false);
 
 						cint64 getNeighbourCount();
 						CBackendRepresentativeMemoryLabelCacheItem* getNeighbourRoleSetLabel(cint64 neighbourIndiId);
@@ -75,6 +75,7 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheContext* mContext;
 
 						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItem*>* mNeighbourRoleSetLabelHash;
+						CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItem*>* mPrevNeighbourRoleSetLabelHash;
 
 
 					// private methods

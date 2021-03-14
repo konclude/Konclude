@@ -78,7 +78,7 @@ namespace Konclude {
 					virtual ~CReasonerEvaluationRequestClientBaseThread();
 
 
-					bool evaluateReasoner(const QString& initFileString, const QString& testFileString, const QString& addressString, CConfiguration* configuration, CCallbackData* callback);
+					bool evaluateReasoner(const QString& initFileString, const QString& testFileString, CReasonerEvaluationProvider* reasonerProvider, CConfiguration* configuration, CCallbackData* callback);
 					CReasonerEvaluationRequestResult* getReasonerEvaluationResult();
 					virtual bool canHandleRequestFile(const QString& testFileString) = 0;
 
@@ -92,12 +92,12 @@ namespace Konclude {
 					virtual void threadStopped();
 
 
-					bool hasNextRequest();
+					virtual bool hasNextRequest();
 
-					bool closeNextRequest();
-					bool closeAllRequestTimeout();
+					virtual bool closeNextRequest();
+					virtual bool closeAllRequestTimeout();
 
-					bool finishReasonerRequests();
+					virtual bool finishReasonerRequests();
 
 					virtual bool loadReasonerRequests(const QString& initFileString, const QString& testFileString) = 0;
 					virtual bool loadReasonerRequest(const QString& requestFileString) = 0;
@@ -118,6 +118,7 @@ namespace Konclude {
 					QString mInitFileString;
 					QString mTestFileString;
 					QString mAddressString;
+					CReasonerEvaluationProvider* mReasonerProvider;
 					CCallbackData* mRequestFinishedCallback;
 
 					cint64 mRequestTimeout;
@@ -136,10 +137,13 @@ namespace Konclude {
 					QTime mTestingTiming;
 					cint64 mCurrentOperationNumber;
 					cint64 mDownloadSizeLimit;
+					bool mDownloadSizeLimitCancel;
 
 					bool mModifyRequestAbsolutePaths;
 					bool mReplaceLoadOntologiesWithTells;
 					bool mResolveAppreviatedIRIsForReplacedTells;
+
+					bool mConfQueryTimeoutRestartRepeatPreparation;
 
 
 					const static cint64 TIMERIDREQUESTTIMEOUT		= 1;

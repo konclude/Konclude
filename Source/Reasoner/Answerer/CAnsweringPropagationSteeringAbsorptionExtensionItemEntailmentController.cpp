@@ -54,6 +54,16 @@ namespace Konclude {
 				return false;
 			}
 
+
+			bool CAnsweringPropagationSteeringAbsorptionExtensionItemEntailmentController::isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId) {
+				QSet<CIndividualReference>* individualBindingSet = mAbsorptionPropagationItem->getVariableSteeringIndividualBindingSet(variable);
+				if (individualBindingSet) {
+					return individualBindingSet->contains(indiId);
+				}
+				return false;
+			}
+
+
 			bool CAnsweringPropagationSteeringAbsorptionExtensionItemEntailmentController::isPreparationBindingAllIndividuals(CVariable* variable) {
 				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionData = mAbsorptionPropagationItem->getAbsorptionBasedHandlingData();
 				CExpressionVariable* expVariable = absorptionData->getExpressionVariableVariableHash()->value(variable);

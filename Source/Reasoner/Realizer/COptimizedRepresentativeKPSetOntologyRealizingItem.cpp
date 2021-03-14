@@ -82,6 +82,7 @@ namespace Konclude {
 				mOpenPossibleRoleInstancesCount = 0;
 				mInitializedRoleInstancesCount = 0;
 				mRemainingInitalizingRoleInstancesCount = 0;
+				mTestingRoleInstanceCandidateCount = 0;
 				mTopRoleInstancesItem = nullptr;
 				mBottomRoleInstancesItem = nullptr;
 				mRealizationRolesInitialized = false;
@@ -130,9 +131,18 @@ namespace Konclude {
 					mExtraConsistencyTestingRequired = true;
 				}
 
+				mConfConcurrentHandlingVectorSize = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Realization.ConccurrentItemInitializationVectorSize", 200);
+				mIndividualInstantiatedItemHash = new COptimizedKPSetIndividualInstantiatedItemMultiHash(mConfConcurrentHandlingVectorSize);
+
 				mInitTime.start();
 
 				return this;
+			}
+
+
+
+			cint64 COptimizedRepresentativeKPSetOntologyRealizingItem::getConcurrentHandlingVectorSize() {
+				return mConfConcurrentHandlingVectorSize;
 			}
 
 
@@ -749,6 +759,10 @@ namespace Konclude {
 							if (processing) {
 								++schedulingIndividualCount;
 							}
+							if (realReqInstCount >= 1 && iteratorReqDataCallback->getConceptRealizationCount() > 3 && iteratorReqDataCallback->getFoundInstancesCount() <= 0) {
+								// to utilize possible instance mergings
+								realReqInstCount += iteratorReqDataCallback->getConceptRealizationCount() / 2;
+							}
 
 							if (processing && (realReqInstCount < 0 || realReqInstCount > 1 && iteratorReqDataCallback->getFoundInstancesCount() + schedulingIndividualCount < realReqInstCount)) {
 								CRealizationIndividualInstanceItemReferenceIterator* iteratorCopy = iterator->getCopy();
@@ -1167,6 +1181,13 @@ namespace Konclude {
 								if (!subconceptRealizationRequired && !hashData.mInstanceItemData->mMostSpecific && !conceptItem->getPossibleInstancesMap()->contains(indi.getIndividualID())) {
 									conceptItem->getPossibleInstancesMap()->insert(indi.getIndividualID(), indiItem);
 								}
+								if (conceptItem->getPossibleInstancesMap()->contains(indi.getIndividualID())) {
+									QMap<cint64, COptimizedKPSetIndividualItem*>*& prefConInstMap = conceptItem->getPrefferedPossibleInstanceTestingSet();
+									if (!prefConInstMap) {
+										prefConInstMap = new QMap<cint64, COptimizedKPSetIndividualItem *>();
+									}
+									prefConInstMap->insert(indi.getIndividualID(), indiItem);
+								}
 								CRealizationEntailmentQueuedIndividualConceptInstanceTestingItem* incConInstTestItem = new CRealizationEntailmentQueuedIndividualConceptInstanceTestingItem(indiItem, conceptItem, procData);
 								procData->incProcessingItemCount(mRealizeConceptProcessingStep);
 								addEntailmentIndividualConceptInstanceTestingItem(incConInstTestItem);
@@ -1547,9 +1568,8 @@ namespace Konclude {
 					}
 				} else {
 					setAllSameIndividualsProcessing(true);
-					for (QHash<cint64, COptimizedKPSetIndividualItem*>::const_iterator it = mIndividualInstantiatedItemHash.constBegin(), itEnd = mIndividualInstantiatedItemHash.constEnd(); it != itEnd; ++it) {
-						cint64 individualID = it.key();
-						COptimizedKPSetIndividualItem* indiItem = it.value();
+					QList<COptimizedKPSetIndividualItem*>* containerList = mIndividualInstantiatedItemHash->getIndividualInstantiatedItemContainerList();
+					for (COptimizedKPSetIndividualItem*indiItem : *containerList) {
 						if (!indiItem->hasToProcessPossibleSameIndividualsFlag()) {
 							indiItem->setToProcessPossibleSameIndividualsFlag(true);
 							if (procData && indiItem->hasPossibleSameIndividuals()) {
@@ -1745,8 +1765,8 @@ namespace Konclude {
 			}
 
 
-			QHash<cint64, COptimizedKPSetIndividualItem*>* COptimizedRepresentativeKPSetOntologyRealizingItem::getIndividualInstantiatedItemHash() {
-				return &mIndividualInstantiatedItemHash;
+			COptimizedKPSetIndividualInstantiatedItemMultiHash* COptimizedRepresentativeKPSetOntologyRealizingItem::getIndividualInstantiatedItemHash() {
+				return mIndividualInstantiatedItemHash;
 			}
 
 
@@ -1764,25 +1784,12 @@ namespace Konclude {
 
 
 			COptimizedKPSetIndividualItem* COptimizedRepresentativeKPSetOntologyRealizingItem::getIndividualInstantiatedItem(cint64 indiId, bool directCreate, CIndividual* individual) {
-				COptimizedKPSetIndividualItem* instantiatedItem = nullptr;
-				if (directCreate) {
-					COptimizedKPSetIndividualItem*& instantiatedItemPointer = mIndividualInstantiatedItemHash[indiId];
-					if (!instantiatedItemPointer) {
-						instantiatedItemPointer = new COptimizedKPSetIndividualItem();
-						instantiatedItemPointer->initInstantiatedItem(indiId, individual);
-						mInstantiatedItemContainer.append(instantiatedItemPointer);
-						mIndividualInstantiatedItemHash.insert(indiId, instantiatedItemPointer);
-					}
-					instantiatedItem = instantiatedItemPointer;
-				} else {
-					instantiatedItem = mIndividualInstantiatedItemHash.value(indiId);
-				}
-				return instantiatedItem;
+				return mIndividualInstantiatedItemHash->getIndividualInstantiatedItem(indiId, directCreate, individual);
 			}
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingItem::hasIndividualInstantiatedItem(cint64 indiId) {
-				return mIndividualInstantiatedItemHash.contains(indiId);
+				return mIndividualInstantiatedItemHash->hasIndividualInstantiatedItem(indiId);
 			}
 
 
@@ -2038,8 +2045,8 @@ namespace Konclude {
 
 
 
-			bool COptimizedRepresentativeKPSetOntologyRealizingItem::isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConcept* concept) {
-				CConceptInstantiatedItem* conItem = getInstantiatedItem(concept);
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptInstantiatedItem* conItem) {
 				CConceptInstanceItem* indiItem = (CConceptInstanceItem*)indiRealItemRef.getRealizationInstanceItem();
 				COptimizedKPSetConceptInstancesItem* conceptItem = (COptimizedKPSetConceptInstancesItem*)conItem;
 				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiItem;
@@ -2052,7 +2059,7 @@ namespace Konclude {
 							return instanceItemData->mKnownInstance;
 						}
 					}
-				} else {			
+				} else {
 					CBackendRepresentativeMemoryLabelCacheItem* labelItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiRealItemRef.getIndividualID(), CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL);
 					if (labelItem) {
 						COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* labelItemData = getRepresentativeCacheConceptSetLabelItemData(labelItem, false);
@@ -2067,6 +2074,73 @@ namespace Konclude {
 				return false;
 			}
 
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptInstantiatedItem* conItem) {
+				if (!conItem) {
+					return requiresConceptInstanceRealization(indiRealItemRef);
+				}
+				CConceptInstanceItem* indiItem = (CConceptInstanceItem*)indiRealItemRef.getRealizationInstanceItem();
+				COptimizedKPSetConceptInstancesItem* conceptItem = (COptimizedKPSetConceptInstancesItem*)conItem;
+				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiItem;
+				if (indiItem) {
+					COptimizedKPSetConceptInstancesHash* knownPossibleInstancesHash = individualItem->getKnownPossibleInstancesHash();
+					if (knownPossibleInstancesHash) {
+						const COptimizedKPSetConceptInstancesHashData& hashData = knownPossibleInstancesHash->value(conceptItem);
+						COptimizedKPSetConceptInstancesData* instanceItemData = hashData.mInstanceItemData;
+						if (instanceItemData) {
+							if (!instanceItemData->mKnownInstance && instanceItemData->mPossibleInstance && instanceItemData->mTestedInstance) {								
+								return true;
+							}
+						}
+					}
+				} else {
+					CBackendRepresentativeMemoryLabelCacheItem* labelItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiRealItemRef.getIndividualID(), CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL);
+					if (labelItem) {
+						COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* labelItemData = getRepresentativeCacheConceptSetLabelItemData(labelItem, false);
+						if (labelItemData) {
+							COptimizedRepresentativeKPSetConceptSetCacheLabelItemInstancesData* labelConInstItemData = labelItemData->getInstancesItemData(conceptItem, false);
+							if (labelConInstItemData) {
+								return labelConInstItemData->hasPossibleInstances();
+							}
+						}
+					}
+				}
+				return false;
+			}
+
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef) {
+				CConceptInstanceItem* indiItem = (CConceptInstanceItem*)indiRealItemRef.getRealizationInstanceItem();
+				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiItem;
+				if (indiItem) {
+					COptimizedKPSetConceptInstancesHash* knownPossibleInstancesHash = individualItem->getKnownPossibleInstancesHash();
+					for (QHash<COptimizedKPSetConceptInstancesItem*, COptimizedKPSetConceptInstancesHashData>::const_iterator it = knownPossibleInstancesHash->constBegin(), itEnd = knownPossibleInstancesHash->constEnd(); it != itEnd; ++it) {
+						const COptimizedKPSetConceptInstancesHashData& hashData = it.value();
+						COptimizedKPSetConceptInstancesData* instanceItemData = hashData.mInstanceItemData;
+						if (instanceItemData) {
+							if (!instanceItemData->mKnownInstance && instanceItemData->mPossibleInstance && instanceItemData->mTestedInstance) {
+								return true;
+							}
+						}
+					}					
+				} else {
+					CBackendRepresentativeMemoryLabelCacheItem* labelItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiRealItemRef.getIndividualID(), CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL);
+					if (labelItem) {
+						COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* labelItemData = getRepresentativeCacheConceptSetLabelItemData(labelItem, false);
+						if (labelItemData) {
+							QHash<COptimizedKPSetConceptInstancesItem*, COptimizedRepresentativeKPSetConceptSetCacheLabelItemInstancesData*>* possInstHash = labelItemData->getInstancesItemDataHash();
+							for (QHash<COptimizedKPSetConceptInstancesItem*, COptimizedRepresentativeKPSetConceptSetCacheLabelItemInstancesData*>::const_iterator it = possInstHash->constBegin(), itEnd = possInstHash->constEnd(); it != itEnd; ++it) {
+								COptimizedRepresentativeKPSetConceptSetCacheLabelItemInstancesData* labelConInstItemData = it.value();
+								if (labelConInstItemData && labelConInstItemData->hasPossibleInstances()) {
+									return true;
+								}
+							}
+						}
+					}
+				}
+				return false;
+			}
 
 
 
@@ -2173,7 +2247,7 @@ namespace Konclude {
 					knownCacheItemList = *conceptItem->getKnownMostSpecificInstancesLabelCacheItemList();
 					possibleCacheItemList = *conceptItem->getPossibleMostSpecificInstancesLabelCacheItemList();
 				}
-				COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(knownCacheItemList, possibleCacheItemList, &mIndividualInstantiatedItemHash, indiVector, conceptItem, onlyDirect, sorting, indiInstItemRefCursor, moveOverCursor, mBackendAssocCacheReader);
+				COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(knownCacheItemList, possibleCacheItemList, mIndividualInstantiatedItemHash, indiVector, conceptItem, onlyDirect, sorting, indiInstItemRefCursor, moveOverCursor, mBackendAssocCacheReader);
 				return cacheLabelInstancesIterator;
 
 			}
@@ -2277,7 +2351,7 @@ namespace Konclude {
 				}
 
 
-				COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(knownCacheItemList, possibleCacheItemList, &mIndividualInstantiatedItemHash, indiVector, roleInstItem, itemInversed, sorting, indiInstItemRefCursor, moveOverCursor);
+				COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(knownCacheItemList, possibleCacheItemList, mIndividualInstantiatedItemHash, indiVector, roleInstItem, itemInversed, sorting, indiInstItemRefCursor, moveOverCursor);
 				return cacheLabelInstancesIterator;
 			}
 
@@ -2330,7 +2404,7 @@ namespace Konclude {
 					}
 				}
 
-				COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator(knownCacheItemList, possibleCacheItemList, &mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
+				COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator(knownCacheItemList, possibleCacheItemList, mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
 				return cacheLabelInstancesIterator;
 			}
 
@@ -2366,7 +2440,7 @@ namespace Konclude {
 					possibleCacheItemList = dataNondetRoleLabelSet->toList();
 				}
 
-				COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator(knownCacheItemList, possibleCacheItemList, &mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
+				COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator(knownCacheItemList, possibleCacheItemList, mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
 				return cacheLabelInstancesIterator;
 			}
 
@@ -2400,11 +2474,11 @@ namespace Konclude {
 				bool considerSameMergedIndis = sorting.getGrouping() != CRealizationIndividualSorting::SORT_GROUP_SAME_UNIQUE;
 				
 				if (sorting.isNothing()) {
-					fillerIterator = new COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(indiInstItemRef, mBackendAssocCacheReader, roleInstItem, itemInversed, &mIndividualInstantiatedItemHash, indiVector, true);
+					fillerIterator = new COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(indiInstItemRef, mBackendAssocCacheReader, roleInstItem, itemInversed, mIndividualInstantiatedItemHash, indiVector, true);
 				} else if (sorting.getType() == CRealizationIndividualSorting::SORT_TYPE_NOTHING && sorting.getGrouping() == CRealizationIndividualSorting::SORT_GROUP_SAME_UNIQUE && !considerSameMergedIndis) {
-					fillerIterator = new COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(indiInstItemRef, mBackendAssocCacheReader, roleInstItem, itemInversed, &mIndividualInstantiatedItemHash, indiVector, false);
+					fillerIterator = new COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(indiInstItemRef, mBackendAssocCacheReader, roleInstItem, itemInversed, mIndividualInstantiatedItemHash, indiVector, false);
 				} else {
-					fillerIterator = new COptimizedRepresentativeKPSetIndividualRoleFillerItemIterator(indiInstItemRef, mBackendAssocCacheReader, roleInstItem, itemInversed, &mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
+					fillerIterator = new COptimizedRepresentativeKPSetIndividualRoleFillerItemIterator(indiInstItemRef, mBackendAssocCacheReader, roleInstItem, itemInversed, mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
 				}
 				return fillerIterator;
 			}
@@ -2413,7 +2487,7 @@ namespace Konclude {
 
 			CRealizationIndividualInstanceItemReferenceIterator* COptimizedRepresentativeKPSetOntologyRealizingItem::getIterationCandidateIndividualIdIterator(const QMap<cint64, IndividualIdCandidateData>& candidateIndiIdsMap, const CRealizationIndividualSorting& sorting, const CRealizationIndividualInstanceItemReference& indiInstItemRefCursor, bool moveOverCursor) {
 				CIndividualVector* indiVector = mOntology->getABox()->getIndividualVector(false);
-				return new COptimizedRepresentativeKPSetIndividualCandiatesIterator(candidateIndiIdsMap, mBackendAssocCacheReader, &mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
+				return new COptimizedRepresentativeKPSetIndividualCandiatesIterator(candidateIndiIdsMap, mBackendAssocCacheReader, mIndividualInstantiatedItemHash, indiVector, sorting, indiInstItemRefCursor, moveOverCursor);
 			}
 
 
@@ -2515,7 +2589,7 @@ namespace Konclude {
 						qDeleteAll(conceptSetCacheLabelIteratorList);
 						conceptSetCacheLabelIteratorList.clear();
 						if (!validKnownLabelSet.isEmpty() || !validPossibleLabelSet.isEmpty()) {
-							COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, conceptInstancesItemOnlyMostSpecificFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor, mBackendAssocCacheReader);
+							COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelConceptSetItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), mIndividualInstantiatedItemHash, indiVector, possibleLabelConceptInstancesItemOnlyMostSpecificFlagPairSetHash, conceptInstancesItemOnlyMostSpecificFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor, mBackendAssocCacheReader);
 							unmergeableIteratorList.append(cacheLabelInstancesIterator);
 						} else {
 							unsatisfiable = true;
@@ -2589,7 +2663,7 @@ namespace Konclude {
 						qDeleteAll(roleNeighbouringCacheLabelIteratorList);
 						roleNeighbouringCacheLabelIteratorList.clear();
 						if (!validKnownLabelSet.isEmpty() || !validPossibleLabelSet.isEmpty()) {
-							COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), &mIndividualInstantiatedItemHash, indiVector, possibleLabelRoleInstancesItemInversedFlagPairSetHash, roleInstancesItemInversedFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor);
+							COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator* cacheLabelInstancesIterator = new COptimizedRepresentativeKPSetCacheLabelRoleNeighbouringItemIterator(validKnownLabelSet.toList(), validPossibleLabelSet.toList(), mIndividualInstantiatedItemHash, indiVector, possibleLabelRoleInstancesItemInversedFlagPairSetHash, roleInstancesItemInversedFlagPairSet, sorting, indiInstItemRefCursor, moveOverCursor);
 							unmergeableIteratorList.append(cacheLabelInstancesIterator);
 						} else {
 							unsatisfiable = true;
@@ -2731,6 +2805,15 @@ namespace Konclude {
 			}
 
 
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitHierarchyNode(CConceptInstantiatedItem* item, CConceptRealizationHierarchyNodeVisitor* visitor) {
+				COptimizedKPSetConceptInstancesItem* conceptItem = (COptimizedKPSetConceptInstancesItem*)item;
+				bool continueVisiting = true;
+				CHierarchyNode* hierNode = conceptItem->getHierarchyNode();
+				if (hierNode) {
+					continueVisiting = visitor->visitHierarchyNode(hierNode, this);
+				}
+				return true;
+			}
 
 
 			CSameInstanceItem* COptimizedRepresentativeKPSetOntologyRealizingItem::getSameInstanceItem(CRoleInstanceItem* instanceItem) {
@@ -2756,7 +2839,7 @@ namespace Konclude {
 			}
 
 			COptimizedKPSetIndividualItem* COptimizedRepresentativeKPSetOntologyRealizingItem::getInstanceItem(const CIndividualReference& indiRef, bool correctSameIndividualsMerging) {
-				COptimizedKPSetIndividualItem* indiRealItem = mIndividualInstantiatedItemHash.value(indiRef.getIndividualID());
+				COptimizedKPSetIndividualItem* indiRealItem = mIndividualInstantiatedItemHash->getIndividualInstantiatedItem(indiRef.getIndividualID());
 				if (indiRealItem && correctSameIndividualsMerging && indiRealItem->getItemSameIndividualMerged()) {
 					indiRealItem = indiRealItem->getItemSameIndividualMerged();
 				}
@@ -2769,7 +2852,7 @@ namespace Konclude {
 			}
 
 			CRoleInstanceItem* COptimizedRepresentativeKPSetOntologyRealizingItem::getRoleInstanceItem(CIndividual* individual) {
-				CRoleInstanceItem* roleItem = mIndividualInstantiatedItemHash.value(individual->getIndividualID());
+				CRoleInstanceItem* roleItem = mIndividualInstantiatedItemHash->getIndividualInstantiatedItem(individual->getIndividualID());
 				return roleItem;
 			}
 
@@ -3044,6 +3127,25 @@ namespace Konclude {
 				return true;
 			}
 
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitRoleHierarchyNode(CRoleInstantiatedItem* roleItem, CRoleRealizationHierarchyNodeVisitor* visitor) {
+				COptimizedKPSetRoleInstancesRedirectionItem* roleRedirectionItem = (COptimizedKPSetRoleInstancesRedirectionItem*)roleItem;
+				COptimizedKPSetRoleInstancesItem* roleInstItem = roleRedirectionItem->getRedirectedItem();
+				bool roleItemInversed = roleRedirectionItem->isInversed();
+				bool continueVisiting = true;
+
+				CRolePropertiesHierarchyNode* hierNode = nullptr;
+				if (!roleItemInversed) {
+					hierNode = roleInstItem->getRoleHierarchyNode();
+				} else {
+					hierNode = roleInstItem->getInverseRoleHierarchyNode();
+				}
+				if (hierNode) {
+					visitor->visitHierarchyNode(hierNode, this);
+					return true;
+				} else {
+					return false;
+				}
+			}
 
 
 
@@ -3061,45 +3163,63 @@ namespace Konclude {
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitSourceTargetIndividualRoles(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool target, CRoleRealizationInstantiatedVisitor* visitor) {
 				QSet<CRoleInstantiatedItem*> visitRoleItemSet;
-				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiRealItemRef.getRealizationInstanceItem();
+				collectSourceTargetIndividualRoles(indiRealItemRef, target, true, visitRoleItemSet);
 				bool continueVisiting = true;
+				for (QSet<CRoleInstantiatedItem*>::const_iterator it = visitRoleItemSet.constBegin(), itEnd = visitRoleItemSet.constEnd(); it != itEnd && continueVisiting; ++it) {
+					CRoleInstantiatedItem* roleInstItem(*it);
+					continueVisiting = visitor->visitRoleInstantiated(roleInstItem, this);
+				}
+				return true;
+			}
+
+
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::collectSourceTargetIndividualRoles(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool target, bool collectKnown, QSet<CRoleInstantiatedItem*>& roleSetCollection, QSet<CRoleInstantiatedItem*>* excludeRoleSet) {
+				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiRealItemRef.getRealizationInstanceItem();
 				if (individualItem) {
 					COptimizedKPSetRoleNeighbourInstancesHash* roleNeighInsHash = individualItem->getKnownPossibleRoleNeighboursInstancesHash();
 					for (COptimizedKPSetRoleNeighbourInstancesHash::const_iterator it = roleNeighInsHash->constBegin(), itEnd = roleNeighInsHash->constEnd(); it != itEnd; ++it) {
 						COptimizedKPSetRoleInstancesItem* roleItem(it.key());
-						const COptimizedKPSetRoleNeighbourInstancesHashData& neighInstHashData(it.value());
-						bool hasRoleNeighbour = false;
-						bool hasInvRoleNeighbour = false;
+						if (!excludeRoleSet || !excludeRoleSet->contains(roleItem)) {
+							const COptimizedKPSetRoleNeighbourInstancesHashData& neighInstHashData(it.value());
+							bool hasRoleNeighbour = false;
+							bool hasInvRoleNeighbour = false;
 
-						COptimizedKPSetRoleInstancesHash* neighbourHash = nullptr;
-						COptimizedKPSetRoleInstancesHash* invNeighbourHash = nullptr;
-						if (!target) {
-							neighbourHash = neighInstHashData.mRoleSuccessorInstancesHash;
-							invNeighbourHash = neighInstHashData.mRolePredecessorInstancesHash;
-						} else {
-							neighbourHash = neighInstHashData.mRolePredecessorInstancesHash;
-							invNeighbourHash = neighInstHashData.mRoleSuccessorInstancesHash;
-						}
+							COptimizedKPSetRoleInstancesHash* neighbourHash = nullptr;
+							COptimizedKPSetRoleInstancesHash* invNeighbourHash = nullptr;
+							if (!target) {
+								neighbourHash = neighInstHashData.mRoleSuccessorInstancesHash;
+								invNeighbourHash = neighInstHashData.mRolePredecessorInstancesHash;
+							} else {
+								neighbourHash = neighInstHashData.mRolePredecessorInstancesHash;
+								invNeighbourHash = neighInstHashData.mRoleSuccessorInstancesHash;
+							}
 
 
-						if (neighbourHash) {
-							for (COptimizedKPSetRoleInstancesHash::const_iterator itNeigh = neighbourHash->constBegin(), itNeighEnd = neighbourHash->constEnd(); !hasRoleNeighbour && itNeigh != itNeighEnd; ++itNeigh) {
-								const COptimizedKPSetRoleInstancesHashData& roleInstHashData(itNeigh.value());
-								COptimizedKPSetRoleInstancesData* roleInstData = roleInstHashData.mInstanceItemData;
-								if (roleInstData->mKnownInstance) {
-									hasRoleNeighbour = true;
-									visitRoleItemSet.insert(roleItem);
+							if (neighbourHash) {
+								for (COptimizedKPSetRoleInstancesHash::const_iterator itNeigh = neighbourHash->constBegin(), itNeighEnd = neighbourHash->constEnd(); !hasRoleNeighbour && itNeigh != itNeighEnd; ++itNeigh) {
+									const COptimizedKPSetRoleInstancesHashData& roleInstHashData(itNeigh.value());
+									COptimizedKPSetRoleInstancesData* roleInstData = roleInstHashData.mInstanceItemData;
+									if (collectKnown && roleInstData->mKnownInstance) {
+										hasRoleNeighbour = true;
+										roleSetCollection.insert(roleItem);
+									} else if (!collectKnown && !roleInstData->mKnownInstance && roleInstData->mPossibleInstance && !roleInstData->mTestedInstance) {
+										roleSetCollection.insert(roleItem);
+									}
 								}
 							}
-						}
-						CRoleInstantiatedItem* invRoleRedirectedItem = roleItem->getInverseRoleRedirectedItem();
-						if (invRoleRedirectedItem && invNeighbourHash && roleItem->getInverseRoleHierarchyNode()) {
-							for (COptimizedKPSetRoleInstancesHash::const_iterator itNeigh = invNeighbourHash->constBegin(), itNeighEnd = invNeighbourHash->constEnd(); !hasInvRoleNeighbour && itNeigh != itNeighEnd; ++itNeigh) {
-								const COptimizedKPSetRoleInstancesHashData& roleInstHashData(itNeigh.value());
-								COptimizedKPSetRoleInstancesData* roleInstData = roleInstHashData.mInstanceItemData;
-								if (roleInstData->mKnownInstance) {
-									hasInvRoleNeighbour = true;
-									visitRoleItemSet.insert(invRoleRedirectedItem);
+							CRoleInstantiatedItem* invRoleRedirectedItem = roleItem->getInverseRoleRedirectedItem();
+							if (invRoleRedirectedItem && invNeighbourHash && roleItem->getInverseRoleHierarchyNode()) {
+								for (COptimizedKPSetRoleInstancesHash::const_iterator itNeigh = invNeighbourHash->constBegin(), itNeighEnd = invNeighbourHash->constEnd(); !hasInvRoleNeighbour && itNeigh != itNeighEnd; ++itNeigh) {
+									const COptimizedKPSetRoleInstancesHashData& roleInstHashData(itNeigh.value());
+									COptimizedKPSetRoleInstancesData* roleInstData = roleInstHashData.mInstanceItemData;
+									if (collectKnown && roleInstData->mKnownInstance) {
+										hasInvRoleNeighbour = true;
+										roleSetCollection.insert(invRoleRedirectedItem);
+									} else if (!collectKnown && !roleInstData->mKnownInstance && roleInstData->mPossibleInstance && !roleInstData->mTestedInstance) {
+										roleSetCollection.insert(roleItem);
+									}
 								}
 							}
 						}
@@ -3107,30 +3227,36 @@ namespace Konclude {
 				}
 
 				CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiRealItemRef.getIndividualID());
-				if (indiAssData) {
+				if (indiAssData && collectKnown) {
 					CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
 					COptimizedRepresentativeKPSetCombinedNeighbourRoleSetCacheLabelItemData* combinedNeigRoleSetLabelData = getRepresentativeCacheCombinedNeighbourRoleSetLabelItemData(combinedNeigRoleSetLabel, false);
 					if (combinedNeigRoleSetLabelData) {
-						for (COptimizedKPSetRoleInstancesItem* roleItem : *combinedNeigRoleSetLabelData->getKnownInstancesItemSet(false)) {
-							// inversed = target;
-							if (target) {
-								CRoleInstantiatedItem* invRoleRedirectedItem = roleItem->getInverseRoleRedirectedItem();
-								if (invRoleRedirectedItem && roleItem->getInverseRoleHierarchyNode()) {
-									visitRoleItemSet.insert(invRoleRedirectedItem);
+						QSet<COptimizedKPSetRoleInstancesItem*>* roleItemSet = combinedNeigRoleSetLabelData->getKnownInstancesItemSet(false);
+						QSet<COptimizedKPSetRoleInstancesItem*>* invRoleItemSet = combinedNeigRoleSetLabelData->getKnownInstancesItemSet(true);
+						for (COptimizedKPSetRoleInstancesItem* roleItem : *roleItemSet) {
+							if (!excludeRoleSet || !excludeRoleSet->contains(roleItem)) {
+								// inversed = target;
+								if (target) {
+									CRoleInstantiatedItem* invRoleRedirectedItem = roleItem->getInverseRoleRedirectedItem();
+									if (invRoleRedirectedItem && roleItem->getInverseRoleHierarchyNode()) {
+										roleSetCollection.insert(invRoleRedirectedItem);
+									}
+								} else {
+									roleSetCollection.insert(roleItem);
 								}
-							} else {
-								visitRoleItemSet.insert(roleItem);
 							}
 						}
-						for (COptimizedKPSetRoleInstancesItem* roleItem : *combinedNeigRoleSetLabelData->getKnownInstancesItemSet(true)) {
-							// inversed = !target;
-							if (!target) {
-								CRoleInstantiatedItem* invRoleRedirectedItem = roleItem->getInverseRoleRedirectedItem();
-								if (invRoleRedirectedItem && roleItem->getInverseRoleHierarchyNode()) {
-									visitRoleItemSet.insert(invRoleRedirectedItem);
+						for (COptimizedKPSetRoleInstancesItem* roleItem : *invRoleItemSet) {
+							if (!excludeRoleSet || !excludeRoleSet->contains(roleItem)) {
+								// inversed = !target;
+								if (!target) {
+									CRoleInstantiatedItem* invRoleRedirectedItem = roleItem->getInverseRoleRedirectedItem();
+									if (invRoleRedirectedItem && roleItem->getInverseRoleHierarchyNode()) {
+										roleSetCollection.insert(invRoleRedirectedItem);
+									}
+								} else {
+									roleSetCollection.insert(roleItem);
 								}
-							} else {
-								visitRoleItemSet.insert(roleItem);
 							}
 						}
 					}
@@ -3175,12 +3301,20 @@ namespace Konclude {
 							}
 
 
-							if (!visitRoleItemSet.contains(visitRoleRedirectedItem)) {
-								COptimizedKPSetIndividualComplexRoleData* indiComplexData = complexRoleInstItem->getIndividualIdComplexRoleData(indiRealItemRef.getIndividualID(), false);
+							if ((!excludeRoleSet || !excludeRoleSet->contains(complexRoleInstItem)) && !roleSetCollection.contains(visitRoleRedirectedItem)) {
 
+
+								QHash<cint64, COptimizedKPSetIndividualComplexRoleData*>* compDataHash = complexRoleInstItem->getIndividualIdComplexRoleDataHash();
+								COptimizedKPSetIndividualComplexRoleData* indiComplexData = compDataHash->value(indiRealItemRef.getIndividualID());
+
+
+								bool hasComplexInstance = false;
 								if (indiComplexData) {
 
-									bool hasComplexInstance = false;
+									if (!collectKnown && indiComplexData->isInitialized(handleInversed)) {
+										hasComplexInstance = true;
+
+									}
 									COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)indiComplexData;
 									COptimizedKPSetRoleInstancesHash* possNeighbourInstanceHash = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(handleInversed, false);
 									if (possNeighbourInstanceHash) {
@@ -3189,15 +3323,20 @@ namespace Konclude {
 											const COptimizedKPSetRoleInstancesHashData& destIndiInstanceDat = itNeighInst.value();
 											cint64 destIndiId = itNeighInst.key();
 											COptimizedKPSetRoleInstancesData* instanceData = destIndiInstanceDat.mInstanceItemData;
-											if (instanceData && instanceData->mKnownInstance) {
+											if (collectKnown && instanceData && instanceData->mKnownInstance) {
+												hasComplexInstance = true;
+											} else if (!collectKnown && instanceData && !instanceData->mKnownInstance && instanceData->mPossibleInstance && !instanceData->mTestedInstance) {
 												hasComplexInstance = true;
 											}
 										}
 									}
 
-									if (hasComplexInstance) {
-										visitRoleItemSet.insert(visitRoleRedirectedItem);
-									}
+								} else if (compDataHash->contains(indiRealItemRef.getIndividualID())) {
+									hasComplexInstance = true;
+								}
+
+								if (hasComplexInstance) {
+									roleSetCollection.insert(visitRoleRedirectedItem);
 								}
 
 								return true;
@@ -3217,18 +3356,197 @@ namespace Konclude {
 				}
 
 
-				for (QSet<CRoleInstantiatedItem*>::const_iterator it = visitRoleItemSet.constBegin(), itEnd = visitRoleItemSet.constEnd(); it != itEnd && continueVisiting; ++it) {
-					CRoleInstantiatedItem* roleInstItem(*it);
-					continueVisiting = visitor->visitRoleInstantiated(roleInstItem, this);
-				}
 				return true;
 			}
 
 
 
 
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::isSourceIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem) {
+				COptimizedKPSetRoleInstancesRedirectionItem* roleRedirectionItem = (COptimizedKPSetRoleInstancesRedirectionItem*)roleItem;
+				COptimizedKPSetRoleInstancesItem* roleInstItem = roleRedirectionItem->getRedirectedItem();
+				bool roleItemInversed = roleRedirectionItem->isInversed();
+				return isSourceIndividualRole(indiRealItemRef, roleInstItem, roleItemInversed);
+			}
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::requiresSourceIndividualRoleRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem) {
+				COptimizedKPSetRoleInstancesRedirectionItem* roleRedirectionItem = (COptimizedKPSetRoleInstancesRedirectionItem*)roleItem;
+				COptimizedKPSetRoleInstancesItem* roleInstItem = roleRedirectionItem->getRedirectedItem();
+				bool roleItemInversed = roleRedirectionItem->isInversed();
+				return requiresSourceIndividualRoleRealization(indiRealItemRef, roleInstItem, roleItemInversed);
+			}
 
 
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::isSourceIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetRoleInstancesItem* roleItem, bool inversed) {
+				bool reqReal = false;
+				bool isRole = checkHasSourceTargetIndividualRole(indiRealItemRef, roleItem, inversed, reqReal);
+				return isRole;
+			}
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::requiresSourceIndividualRoleRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetRoleInstancesItem* roleItem, bool inversed) {
+				bool reqReal = false;
+				bool isRole = checkHasSourceTargetIndividualRole(indiRealItemRef, roleItem, inversed, reqReal);
+				if (isRole) {
+					return false;
+				}
+				if (reqReal) {
+					return true;
+				}
+				return false;
+			}
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::checkHasSourceTargetIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetRoleInstancesItem* roleItem, bool target, bool& requiresRealization) {
+				COptimizedKPSetIndividualItem* individualItem = (COptimizedKPSetIndividualItem*)indiRealItemRef.getRealizationInstanceItem();
+				if (individualItem) {
+					COptimizedKPSetRoleNeighbourInstancesHash* roleNeighInsHash = individualItem->getKnownPossibleRoleNeighboursInstancesHash();
+					const COptimizedKPSetRoleNeighbourInstancesHashData& neighInstHashData = roleNeighInsHash->value(roleItem);
+
+					COptimizedKPSetRoleInstancesHash* neighbourHash = nullptr;
+					COptimizedKPSetRoleInstancesHash* invNeighbourHash = nullptr;
+					if (!target) {
+						neighbourHash = neighInstHashData.mRoleSuccessorInstancesHash;
+						invNeighbourHash = neighInstHashData.mRolePredecessorInstancesHash;
+					} else {
+						neighbourHash = neighInstHashData.mRolePredecessorInstancesHash;
+						invNeighbourHash = neighInstHashData.mRoleSuccessorInstancesHash;
+					}
+
+
+					if (neighbourHash) {
+						for (COptimizedKPSetRoleInstancesHash::const_iterator itNeigh = neighbourHash->constBegin(), itNeighEnd = neighbourHash->constEnd(); itNeigh != itNeighEnd; ++itNeigh) {
+							const COptimizedKPSetRoleInstancesHashData& roleInstHashData(itNeigh.value());
+							COptimizedKPSetRoleInstancesData* roleInstData = roleInstHashData.mInstanceItemData;
+							if (roleInstData->mKnownInstance) {
+								return true;
+							} else if (!roleInstData->mKnownInstance && roleInstData->mPossibleInstance && !roleInstData->mTestedInstance) {
+								requiresRealization = true;
+							}
+						}
+					}
+					CRoleInstantiatedItem* invRoleRedirectedItem = roleItem->getInverseRoleRedirectedItem();
+					if (invRoleRedirectedItem && invNeighbourHash && roleItem->getInverseRoleHierarchyNode()) {
+						for (COptimizedKPSetRoleInstancesHash::const_iterator itNeigh = invNeighbourHash->constBegin(), itNeighEnd = invNeighbourHash->constEnd(); itNeigh != itNeighEnd; ++itNeigh) {
+							const COptimizedKPSetRoleInstancesHashData& roleInstHashData(itNeigh.value());
+							COptimizedKPSetRoleInstancesData* roleInstData = roleInstHashData.mInstanceItemData;
+							if (roleInstData->mKnownInstance) {
+								return true;
+							} else if (!roleInstData->mKnownInstance && roleInstData->mPossibleInstance && !roleInstData->mTestedInstance) {
+								requiresRealization = true;
+							}
+						}
+					}
+
+				}
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiRealItemRef.getIndividualID());
+				if (indiAssData) {
+					CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+					COptimizedRepresentativeKPSetCombinedNeighbourRoleSetCacheLabelItemData* combinedNeigRoleSetLabelData = getRepresentativeCacheCombinedNeighbourRoleSetLabelItemData(combinedNeigRoleSetLabel, false);
+					if (combinedNeigRoleSetLabelData) {
+						QSet<COptimizedKPSetRoleInstancesItem*>* roleItemSet = combinedNeigRoleSetLabelData->getKnownInstancesItemSet(false);
+						QSet<COptimizedKPSetRoleInstancesItem*>* invRoleItemSet = combinedNeigRoleSetLabelData->getKnownInstancesItemSet(true);
+
+						if (!target && roleItemSet->contains(roleItem) || target && invRoleItemSet->contains(roleItem)) {
+							return true;
+						}
+					}
+
+
+
+
+					CBackendRepresentativeMemoryLabelCacheItem* combinedDetExistRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
+					CBackendRepresentativeMemoryLabelCacheItem* combinedNonDetExistRoleSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
+
+
+					COptimizedRepresentativeKPSetCombinedExistentialRoleSetCacheLabelItemData* combinedDetExistRoleSetLabelData = getRepresentativeCacheCombinedExistentialRoleSetLabelItemData(combinedDetExistRoleSetLabel, false);
+					COptimizedRepresentativeKPSetCombinedExistentialRoleSetCacheLabelItemData* combinedNonDetExistRoleSetLabelData = getRepresentativeCacheCombinedExistentialRoleSetLabelItemData(combinedDetExistRoleSetLabel, false);
+
+					if (combinedDetExistRoleSetLabelData && combinedDetExistRoleSetLabelData->hasComplexCandiateInstancesItems() || combinedNonDetExistRoleSetLabelData && combinedNonDetExistRoleSetLabelData->hasComplexCandiateInstancesItems() || combinedNeigRoleSetLabelData && combinedNeigRoleSetLabelData->hasComplexCandiateInstancesItems()) {
+
+						bool requiresComplexRoleInstInvestigation = false;
+
+						QSet<COptimizedKPSetRoleInstancesItem*> complexRoleInstItemSet;
+						QSet<COptimizedKPSetRoleInstancesItem*> inverseComplexRoleInstItemSet;
+						if (combinedDetExistRoleSetLabelData && combinedDetExistRoleSetLabelData->getComplexCandiateInstancesItemSet(target)->contains(roleItem)) {
+							requiresComplexRoleInstInvestigation = true;
+						}
+						if (combinedNonDetExistRoleSetLabelData && combinedNonDetExistRoleSetLabelData->getComplexCandiateInstancesItemSet(target)->contains(roleItem)) {
+							requiresComplexRoleInstInvestigation = true;
+						}
+						if (combinedNeigRoleSetLabelData && combinedNeigRoleSetLabelData->getComplexCandiateInstancesItemSet(target)->contains(roleItem)) {
+							requiresComplexRoleInstInvestigation = true;
+						}
+
+						// verify that these role have corresponding fillers
+						if (requiresComplexRoleInstInvestigation) {
+
+
+
+							QHash<cint64, COptimizedKPSetIndividualComplexRoleData*>* compDataHash = roleItem->getIndividualIdComplexRoleDataHash();
+							COptimizedKPSetIndividualComplexRoleData* indiComplexData = compDataHash->value(indiRealItemRef.getIndividualID());
+
+							if (indiComplexData) {
+
+								if (indiComplexData->isInitialized(!target)) {
+									requiresRealization = true;
+								}
+
+								COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)indiComplexData;
+								COptimizedKPSetRoleInstancesHash* possNeighbourInstanceHash = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(!target, false);
+								if (possNeighbourInstanceHash) {
+									// TODO: make more efficient by adding/maintaining/using pointer to first known neighbour filler/instance
+									for (COptimizedKPSetRoleInstancesHash::const_iterator itNeighInst = possNeighbourInstanceHash->constBegin(), itNeighInstEnd = possNeighbourInstanceHash->constEnd(); itNeighInst != itNeighInstEnd; ++itNeighInst) {
+										const COptimizedKPSetRoleInstancesHashData& destIndiInstanceDat = itNeighInst.value();
+										cint64 destIndiId = itNeighInst.key();
+										COptimizedKPSetRoleInstancesData* instanceData = destIndiInstanceDat.mInstanceItemData;
+										if (instanceData && instanceData->mKnownInstance) {
+											return true;
+										} else if (instanceData && !instanceData->mKnownInstance && instanceData->mPossibleInstance && !instanceData->mTestedInstance) {
+											requiresRealization = true;
+										}
+									}
+								}
+							} else if (!compDataHash->contains(indiRealItemRef.getIndividualID())) {
+								requiresRealization = true;
+							}
+
+							return false;
+						};
+
+					}
+				}
+
+
+				return false;
+			}
+
+
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, bool onlyOnePerRole) {
+				QSet<CRoleInstantiatedItem*> knownRoleItemSet;
+				if (onlyOnePerRole) {
+					collectSourceTargetIndividualRoles(sourceIndiRealItemRef, false, true, knownRoleItemSet);
+				}
+				QSet<CRoleInstantiatedItem*> visitRoleItemSet;
+				collectSourceTargetIndividualRoles(sourceIndiRealItemRef, false, false, visitRoleItemSet, &knownRoleItemSet);
+				return !visitRoleItemSet.isEmpty();
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, CRoleInstantiatedItem* roleItem, bool onlyOne) {
+				QSet<CRoleInstantiatedItem*> knownRoleItemSet;
+				if (onlyOne) {
+					collectSourceTargetIndividualRoles(sourceIndiRealItemRef, false, true, knownRoleItemSet);
+				}
+				if (knownRoleItemSet.contains(roleItem)) {
+					return true;
+				}
+				QSet<CRoleInstantiatedItem*> visitRoleItemSet;
+				collectSourceTargetIndividualRoles(sourceIndiRealItemRef, false, false, visitRoleItemSet, &knownRoleItemSet);
+				return visitRoleItemSet.contains(roleItem);
+			}
 
 
 
@@ -3832,7 +4150,7 @@ namespace Konclude {
 			COptimizedRepresentativeKPSetConceptSetCacheLabelItemData* COptimizedRepresentativeKPSetOntologyRealizingItem::getRepresentativeCacheConceptSetLabelItemData(CBackendRepresentativeMemoryLabelCacheItem* labelItem, bool createIfNotExists) {
 				COptimizedRepresentativeKPSetConceptSetCacheLabelItemData*& itemData = mRepresentativeCacheConceptSetLabelItemDataHash[labelItem];
 				if (!itemData && createIfNotExists) {
-					itemData = new COptimizedRepresentativeKPSetConceptSetCacheLabelItemData();
+					itemData = new COptimizedRepresentativeKPSetConceptSetCacheLabelItemData(labelItem);
 				}
 				return itemData;
 			}

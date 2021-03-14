@@ -30,7 +30,9 @@ namespace Konclude {
 
 			CRealizingTestingItem::CRealizingTestingItem(COntologyRealizingItem* preproItem, COntologyRealizingDynamicRequirmentProcessingData* procData) {
 				mOntologyPreproItem = preproItem;
-				mProcData = procData;
+				if (procData) {
+					mProcDataList.append(procData);
+				}
 			}
 
 			COntologyRealizingItem* CRealizingTestingItem::getOntologyRealizingItem() {
@@ -42,9 +44,17 @@ namespace Konclude {
 				return this;
 			}
 
-			COntologyRealizingDynamicRequirmentProcessingData* CRealizingTestingItem::getProcessingData() {
-				return mProcData;
+			QList<COntologyRealizingDynamicRequirmentProcessingData*> CRealizingTestingItem::getProcessingDataList() {
+				return mProcDataList;
 			}
+
+			CRealizingTestingItem* CRealizingTestingItem::addProcessingData(COntologyRealizingDynamicRequirmentProcessingData* procData) {
+				if (procData) {
+					mProcDataList.append(procData);
+				}
+				return this;
+			}
+
 
 		}; // end namespace Realizer
 

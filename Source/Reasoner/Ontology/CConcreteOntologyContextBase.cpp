@@ -68,6 +68,12 @@ namespace Konclude {
 				return mOntMemMan;
 			}
 
+			COntologyContext* CConcreteOntologyContextBase::addUsedMemoryPools(CMemoryPool* memoryPools) {
+				mMemMan->addUsedMemoryPools(memoryPools);
+				return this;
+			}
+
+
 		}; // end namespace Ontology
 
 	}; // end namespace Reasoner

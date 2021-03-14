@@ -29,13 +29,14 @@ namespace Konclude {
 
 			namespace Task {
 
-				CSatisfiableTaskAnswererInstancePropagationMessageAdapter::CSatisfiableTaskAnswererInstancePropagationMessageAdapter(CConcept* testingConcept, bool testingNegation, bool candidatePropagation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology, CAnsweringMessageDataObserver* observer) {
+				CSatisfiableTaskAnswererInstancePropagationMessageAdapter::CSatisfiableTaskAnswererInstancePropagationMessageAdapter(CConcept* testingConcept, bool testingNegation, bool candidatePropagation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology, CAnsweringMessageDataObserver* observer, CAnsweringPropagationSteeringController* propagationSteering) {
 					mTestingConcept = testingConcept;
 					mOntology = testingOntology;
 					mMessageObserver = observer;
 					mAnsweringHandler = answeringHandler;
 					mTestingConceptNegation = testingNegation;
 					mCandidatePropagation = candidatePropagation;
+					mPropSteeringController = propagationSteering;
 				}
 
 
@@ -64,6 +65,9 @@ namespace Konclude {
 					return mCandidatePropagation;
 				}
 
+				CAnsweringPropagationSteeringController* CSatisfiableTaskAnswererInstancePropagationMessageAdapter::getAnswererPropagationSteeringController() {
+					return mPropSteeringController;
+				}
 
 
 			}; // end namespace Task

@@ -58,10 +58,12 @@ namespace Konclude {
 
 
 			// Custom Events >= 2000
-			const QEvent::Type EVENTPRECOMPUTEONTOLOGY					= (QEvent::Type)2000;
-			const QEvent::Type EVENTCALLBACKPRECOMPUTEDONTOLOGY			= (QEvent::Type)2001;
-			const QEvent::Type EVENTPRECOMPUTATIONCALCULATEDCALLBACK	= (QEvent::Type)2002;
-			const QEvent::Type EVENTSATURATIONCALCULATEDCALLBACK		= (QEvent::Type)2003;
+			const QEvent::Type EVENTPRECOMPUTEONTOLOGY								= (QEvent::Type)2000;
+			const QEvent::Type EVENTCALLBACKPRECOMPUTEDONTOLOGY						= (QEvent::Type)2001;
+			const QEvent::Type EVENTPRECOMPUTATIONCALCULATEDCALLBACK				= (QEvent::Type)2002;
+			const QEvent::Type EVENTSATURATIONCALCULATEDCALLBACK					= (QEvent::Type)2003;
+			const QEvent::Type EVENTRETRIEVEDPRECOMPUATIONINDIVIDUALSCALLBACK		= (QEvent::Type)2004;
+			const QEvent::Type EVENTRESCHEDULEJOBCREATION							= (QEvent::Type)2005;
 
 
 

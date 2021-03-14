@@ -31,6 +31,8 @@ namespace Konclude {
 				mConfig = config;
 				mConfMaxThreadCount = 2;
 				mCurrentThreadCount = 0;
+				mCompositionQueryProcessingCount = 0;
+				mMaxCompositionQueryProcessingCount = 1;
 				mReasonerManager = reasonerManager;
 
 				if (mQueuedThreadList.isEmpty() && mCurrentThreadCount < mConfMaxThreadCount) {
@@ -94,13 +96,13 @@ namespace Konclude {
 			CAnsweringManager* CAnsweringManagerThread::finishComplexQueryAnswering(CAnsweringHandler* answeringHandler, CAnsweringManagerQueryData* queryData) {
 				mHandlerProvider.releaseAnsweringHandler(answeringHandler);
 				if (queryData) {
+					if (queryData->isCompositionQuery()) {
+						--mCompositionQueryProcessingCount;
+					}
 					mProcessingQuerySet.remove(queryData);
 					CAnswererThread* thread1 = queryData->getThread();
 					mProcessingThreadSet.remove(thread1);
 					mQueuedThreadList.append(thread1);
-					CAnswererThread* thread2 = queryData->getThread();
-					mProcessingThreadSet.remove(thread2);
-					mQueuedThreadList.append(thread2);
 					CCallbackData* callback = queryData->getCallback();
 					if (callback) {
 						callback->doCallback();
@@ -113,32 +115,37 @@ namespace Konclude {
 			
 
 			CAnsweringManager* CAnsweringManagerThread::queueComplexQueryAnswering(CComplexAnsweringQuery* complexAnsweringQuery, CCallbackData* callback) {
-				CAnsweringManagerQueryData* queryData = new CAnsweringManagerQueryData(complexAnsweringQuery, callback);
-				mQueuedQueryList.append(queryData);
+				bool compositionQuery = dynamic_cast<CComplexAnsweringCompositionQuery*>(complexAnsweringQuery);
+				CAnsweringManagerQueryData* queryData = new CAnsweringManagerQueryData(complexAnsweringQuery, callback, compositionQuery);
+				if (compositionQuery) {
+					mQueuedCompositionQueryList.append(queryData);
+				} else {
+					mQueuedExpressionQueryList.append(queryData);
+				}
 				return this;
 			}
 
 			CAnsweringManager* CAnsweringManagerThread::manageComplexQueryAnswering() {
-				if (!mQueuedQueryList.isEmpty()) {
-					if (mQueuedThreadList.isEmpty() && mCurrentThreadCount < mConfMaxThreadCount) {
-						CAnswererThread* answererThread = new CAnswererThread(mReasonerManager);
-						answererThread->initializeAnswerer(mConfig);
-						mQueuedThreadList.append(answererThread);
-						mReadWriteLock.lockForWrite();
-						mAnswererThreadContainer.append(answererThread);
-						mReadWriteLock.unlock();
-						++mCurrentThreadCount;
-					}
+				if (!mQueuedExpressionQueryList.isEmpty() || !mQueuedCompositionQueryList.isEmpty()) {
+					createQueuedAnswererThread();
 					if (!mQueuedThreadList.isEmpty()) {
-						CAnsweringManagerQueryData* queryData = mQueuedQueryList.takeFirst();
-						CComplexAnsweringQuery* complexAnsweringQuery = queryData->getQuery();
-						CAnsweringHandler* handler = mHandlerProvider.getAnsweringHandler(complexAnsweringQuery);
-						CAnswererThread* thread = mQueuedThreadList.takeFirst();
-						queryData->setThread(thread);
-						mProcessingThreadSet.insert(thread);
-						mProcessingQuerySet.insert(queryData);
-						CAnsweringComplexQueryCompletedEvent* completedEventCallback = new CAnsweringComplexQueryCompletedEvent(this, handler, queryData);
-						thread->handleAnswering(handler, complexAnsweringQuery, completedEventCallback);
+						CAnsweringManagerQueryData* queryData = nullptr;
+						if (!mQueuedExpressionQueryList.isEmpty()) {
+							queryData = mQueuedExpressionQueryList.takeFirst();
+						} else if (!mQueuedCompositionQueryList.isEmpty() && mCompositionQueryProcessingCount < mMaxCompositionQueryProcessingCount) {
+							queryData = mQueuedCompositionQueryList.takeFirst();
+							++mCompositionQueryProcessingCount;
+						}
+						if (queryData) {
+							CComplexAnsweringQuery* complexAnsweringQuery = queryData->getQuery();
+							CAnsweringHandler* handler = mHandlerProvider.getAnsweringHandler(complexAnsweringQuery);
+							CAnswererThread* thread = mQueuedThreadList.takeFirst();
+							queryData->setThread(thread);
+							mProcessingThreadSet.insert(thread);
+							mProcessingQuerySet.insert(queryData);
+							CAnsweringComplexQueryCompletedEvent* completedEventCallback = new CAnsweringComplexQueryCompletedEvent(this, handler, queryData);
+							thread->handleAnswering(handler, complexAnsweringQuery, completedEventCallback);
+						}
 					}
 				}
 				return this;
@@ -156,15 +163,8 @@ namespace Konclude {
 					return true;
 				} else if (type == CAnsweringOntologyPreparationEvent::EVENTTYPE) {
 					CAnsweringOntologyPreparationEvent* ape = (CAnsweringOntologyPreparationEvent *)event;
-					if (mQueuedThreadList.isEmpty() && mCurrentThreadCount < mConfMaxThreadCount) {
-						CAnswererThread* answererThread = new CAnswererThread(mReasonerManager);
-						answererThread->initializeAnswerer(mConfig);
-						mQueuedThreadList.append(answererThread);
-						mReadWriteLock.lockForWrite();
-						mAnswererThreadContainer.append(answererThread);
-						mReadWriteLock.unlock();
-						++mCurrentThreadCount;
-					}
+					createQueuedAnswererThread();
+
 					if (!mQueuedThreadList.isEmpty()) {
 						CConcreteOntology* ontology = ape->getOntology();
 						CAnsweringHandler* expressionHandler = mHandlerProvider.getAnsweringHandler(ontology, false);
@@ -175,6 +175,7 @@ namespace Konclude {
 					} else {
 						ape->getCallbackData()->doCallback();
 					}
+					createQueuedAnswererThread();
 					return true;
 				} else if (type == CAnswerComplexQueryEvent::EVENTTYPE) {
 					CAnswerComplexQueryEvent* acqe = (CAnswerComplexQueryEvent *)event;
@@ -199,6 +200,17 @@ namespace Konclude {
 				return false;
 			}
 
+			void CAnsweringManagerThread::createQueuedAnswererThread() {
+				if (mQueuedThreadList.isEmpty() && mCurrentThreadCount < mConfMaxThreadCount) {
+					CAnswererThread* answererThread = new CAnswererThread(mReasonerManager);
+					answererThread->initializeAnswerer(mConfig);
+					mQueuedThreadList.append(answererThread);
+					mReadWriteLock.lockForWrite();
+					mAnswererThreadContainer.append(answererThread);
+					mReadWriteLock.unlock();
+					++mCurrentThreadCount;
+				}
+			}
 
 		}; // end namespace Answerer
 

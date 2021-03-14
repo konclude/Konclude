@@ -40,7 +40,9 @@ namespace Konclude {
 			}
 
 			CComputedItemDataNotificationLinker* CRequirementWaitingDependencyData::takeNotificationLinker() {
-				return mNotificationLinker;
+				CComputedItemDataNotificationLinker* tmpLinker = mNotificationLinker;
+				mNotificationLinker = nullptr;
+				return tmpLinker;
 			}
 
 			CRequirementWaitingDependencyData* CRequirementWaitingDependencyData::addNotificationLinker(CComputedItemDataNotificationLinker* notLinker) {

@@ -33,15 +33,17 @@ namespace Konclude {
 				mInTimeTerminated = false;
 				mTerminationForced = false;
 				mProcessError = false;
+				mMaxMemoryUsage = 0;
 			}
 
-			CReasonerEvaluationTerminationResult* CReasonerEvaluationTerminationResult::initResult(bool processError, bool inTimeTerminated, bool forcedTermination, const QString& errorText, const QString& stnOutText, const QString& errOutText) {
+			CReasonerEvaluationTerminationResult* CReasonerEvaluationTerminationResult::initResult(bool processError, bool inTimeTerminated, bool forcedTermination, const QString& errorText, const QString& stnOutText, const QString& errOutText, cint64 maxMemoryUsage) {
 				mProcessError = processError;
 				mInTimeTerminated = inTimeTerminated;
 				mTerminationForced = forcedTermination;
 				mStandardOutputText = stnOutText;
 				mErrorOutputText = errOutText;
 				mErrorText = errorText;
+				mMaxMemoryUsage = maxMemoryUsage;
 				return this;
 			}
 
@@ -69,6 +71,12 @@ namespace Konclude {
 			QString CReasonerEvaluationTerminationResult::getErrorText() {
 				return mErrorText;
 			}
+
+
+			cint64 CReasonerEvaluationTerminationResult::getMaxMemoryUsage() {
+				return mMaxMemoryUsage;
+			}
+
 
 		}; // end namespace Evaluation
 

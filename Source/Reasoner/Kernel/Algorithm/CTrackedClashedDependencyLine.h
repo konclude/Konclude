@@ -65,6 +65,11 @@ namespace Konclude {
 						CTrackedClashedDependencyLine* sortInTrackedClashedDescriptors(CTrackedClashedDescriptor* clashedDes, bool forceInsertion = false);
 						CTrackedClashedDependencyLine* moveToNextIndividualNodeLevel(cint64 newLevel);
 
+						CTrackedClashedDependencyLine* analyseInvolvedIndividuals(CTrackedClashedDescriptor* clashedDes);
+						CTrackedClashedDependencyLine* addInvolvedIndividual(CIndividualProcessNode* indiNode);
+						CTrackedClashedDependencyLine* addInvolvedIndividual(cint64 indiId);
+
+
 						bool hasLevelTrackedClashedDescriptors();
 						CTrackedClashedDescriptor* takeNextLevelTrackedClashedDescriptor();
 						CTrackedClashedDescriptor* getLevelTrackedClashedDescriptors();
@@ -108,6 +113,11 @@ namespace Konclude {
 						bool hasOnlyIndependentTrackedClashedDescriptorsRemaining();
 						bool hasOnlyCurrentIndividualNodeLevelClashesDescriptors();
 
+
+						CTrackedClashedDependencyLine* setInvolvedIndividualTrackingSet(CPROCESSINGSET<cint64>* indiTrackingSet);
+						CPROCESSINGSET<cint64>* getInvolvedIndividualTrackingSet();
+
+
 					// protected methods
 					protected:
 
@@ -126,6 +136,8 @@ namespace Konclude {
 						CTrackedClashedDescriptor* mFreeTrackedClashedDescriptors;
 
 						CPROCESSINGSET<CTrackedClashedDescriptorHasher>* mClashedSet;
+
+						CPROCESSINGSET<cint64>* mInvolvedIndividualSet;
 
 					// private methods
 					private:

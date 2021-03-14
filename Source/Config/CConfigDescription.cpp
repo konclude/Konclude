@@ -35,6 +35,8 @@ namespace Konclude {
 			stringConvertable = false;
 			integerConvertable = false;
 			booleanConvertable = false;
+			stringListConvertable = false;
+			doubleConvertable = false;
 			if (dynamic_cast<CConvertStringConfigType *>(type)) {
 				stringConvertable = true;
 			}
@@ -43,6 +45,12 @@ namespace Konclude {
 			}
 			if (dynamic_cast<CConvertBooleanConfigType *>(type)) {
 				booleanConvertable = true;
+			}
+			if (dynamic_cast<CConvertDoubleConfigType *>(type)) {
+				doubleConvertable = true;
+			}
+			if (dynamic_cast<CConvertStringListConfigType *>(type)) {
+				stringListConvertable = true;
 			}
 		}
 
@@ -62,6 +70,14 @@ namespace Konclude {
 
 		bool CConfigDescription::supportsBooleanConvertion() {
 			return booleanConvertable;
+		}
+
+		bool CConfigDescription::supportsStringListConvertion() {
+			return stringListConvertable;
+		}
+
+		bool CConfigDescription::supportsDoubleConvertion() {
+			return doubleConvertable;
 		}
 
 		CConfigType *CConfigDescription::getConfigType() {

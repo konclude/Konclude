@@ -38,7 +38,7 @@ namespace Konclude {
 
 
 
-				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CComplexAssertionsIndividualVariablesAnsweringQuery* query, bool dataliteral) {
+				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CComplexVariablesAnsweringQuery* query, bool dataliteral) {
 					if (query->getResultOrderingLinker() || dataliteral) {
 						return new CVariableBindingStringDataResult();
 					} else {
@@ -47,30 +47,37 @@ namespace Konclude {
 				}
 
 
-				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CDataLiteral* dataLiteral, CComplexAssertionsIndividualVariablesAnsweringQuery* query) {
+				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CDataLiteral* dataLiteral, CComplexVariablesAnsweringQuery* query) {
 					return createVariableBindingResult(query, true)->initVariableBinding(dataLiteral);
 				}
 
 
 
-				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CIndividual* individual, CComplexAssertionsIndividualVariablesAnsweringQuery* query) {
+				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CIndividual* individual, CComplexVariablesAnsweringQuery* query) {
 					return createVariableBindingResult(query, true)->initVariableBinding(individual);
 				}
 
 
+				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CConcept* concept, CComplexVariablesAnsweringQuery* query) {
+					return createVariableBindingResult(query, true)->initVariableBinding(concept);
+				}
 
 
-				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(const CIndividualReference& indiRef, CComplexAssertionsIndividualVariablesAnsweringQuery* query, CIndividualNameResolver* indiNameResolver) {
+				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(CRole* role, CComplexVariablesAnsweringQuery* query) {
+					return createVariableBindingResult(query, true)->initVariableBinding(role);
+				}
+
+				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(const CIndividualReference& indiRef, CComplexVariablesAnsweringQuery* query, CIndividualNameResolver* indiNameResolver) {
 					return createVariableBindingResult(query, false)->initVariableBinding(indiRef, indiNameResolver);
 				}
 
 
-				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(const CIndividualReference& indiRef, CComplexAssertionsIndividualVariablesAnsweringQuery* query, const QString& resolvedIndiName) {
+				CVariableBindingResult* CVariableBindingsQueryResultWriter::createVariableBindingResult(const CIndividualReference& indiRef, CComplexVariablesAnsweringQuery* query, const QString& resolvedIndiName) {
 					return createVariableBindingResult(query, false)->initVariableBinding(indiRef, resolvedIndiName);
 				}
 
 
-				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality) {
+				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality) {
 					bool filtered = true;
 					for (CVariableBindingFiltering* filteringLinker = compAssIndVarQuery->getResultFilteringLinker(); filteringLinker && filtered; filteringLinker = filteringLinker->getNext()) {
 						if (!filteringLinker->isFiltered(filteringAnsweringMapping, bindAns)) {
@@ -87,7 +94,7 @@ namespace Konclude {
 
 
 
-				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality) {
+				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addReusedVariableBindingAnswerToResult(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexVariablesAnsweringQuery* compAssIndVarQuery, cint64 cardinality) {
 					if (cardinality > 0) {
 						bool filtered = true;
 						for (CVariableBindingFiltering* filteringLinker = compAssIndVarQuery->getResultFilteringLinker(); filteringLinker && filtered; filteringLinker = filteringLinker->getNext()) {
@@ -108,7 +115,7 @@ namespace Konclude {
 
 
 
-				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryExpressionProcessingData* queryProcessingData, cint64 cardinality) {
+				CVariableBindingsAnswersResult* CVariableBindingsQueryResultWriter::addReusedVariableBindingAnswerToResultConsideringOffsetLimit(CVariableBindingsAnswersResult* bindsAnswersResult, CVariableBindingsListAnswerResult* bindAns, CVariableBindingFilteringAnswerMapping* filteringAnsweringMapping, CComplexVariablesAnsweringQuery* compAssIndVarQuery, CComplexQueryExpressionProcessingData* queryProcessingData, cint64 cardinality) {
 					cint64 writingCardinality = cardinality;
 
 					if (compAssIndVarQuery->getResultOffset() > 0) {

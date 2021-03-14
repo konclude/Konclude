@@ -30,7 +30,7 @@ namespace Konclude {
 		COWLlinkAPIReasonerTestfileTester::COWLlinkAPIReasonerTestfileTester(CConfiguration *config) 
 					: CLogIdentifier("::Konclude::Test::OWLlinkAPIReasonerTestfileTester",this),mConfig(config) {
 
-
+			
 			// 2 weeks timeout
 			mTransManager = new CQtHttpTransactionManager(1000*60*60*24*14);
 

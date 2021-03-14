@@ -92,6 +92,11 @@
 #include "Reasoner/Kernel/Process/Dependency/CDATATYPETRIGGERDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CDATATYPECONNECTIONDependencyNode.h"
 
+#include "Reasoner/Kernel/Process/Dependency/CREUSEBACKENDEXPANSIONMODESDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CREUSEBACKENDVALUEDependencyNode.h"
+
 #include "Utilities/Memory/CObjectParameterizingAllocator.h"
 
 
@@ -187,6 +192,11 @@ namespace Konclude {
 						CDATATYPECONNECTIONDependencyNode* createDATATYPECONNECTIONDependency(CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CMERGEDIndividualDependencyNode* createMERGEDINDIVIDUALDependency(CDependencyTrackPoint*& mergedIndividualContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* mergePrevDepTrackPoint, CDependencyTrackPoint* individualPrevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 						CSAMEINDIVIDUALSMERGEDependencyNode* createSAMEINDIVIDUALMERGEDependency(CDependencyTrackPoint*& expContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* prevOtherDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+
+						CREUSEBACKENDEXPANSIONMODESDependencyNode* createREUSEBACKENDEXPANSIONMODESDependency(CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+						CREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependencyNode* createREUSEBACKENDFIXEDINDIVIDUALEXPANSIONDependency(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+						CREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependencyNode* createREUSEBACKENDPRIORITIZEDINDIVIDUALEXPANSIONDependency(CIndividualProcessNode*& processIndi, CDependencyTrackPoint* prevDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
+						CREUSEBACKENDVALUEDependencyNode* createREUSEBACKENDVALUEDependency(CDependencyTrackPoint*& valueContinueDepTrackPoint, CIndividualProcessNode*& processIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* prevDepTrackPoint, CDependencyTrackPoint* nominalDepTrackPoint, CCalculationAlgorithmContext* calcAlgContext);
 
 					// protected methods
 					protected:

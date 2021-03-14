@@ -30,7 +30,7 @@
 
 
 // Other includes
-
+#include "Context/CMemoryPoolNewAllocationIncreasingContext.h"
 
 
 // Logger includes
@@ -68,15 +68,20 @@ namespace Konclude {
 
 					COptimizedComplexVariableIndividualBindingsCardinalityLinker* takeBindingsCardinalityLinker();
 
+					virtual COptimizedComplexVariableIndividualMappings* clearComputedMappings();
+
+
+					virtual CMemoryAllocationManager* getBindingsMemoryAllocationManager();
+					virtual COptimizedComplexVariableIndividualMappings* updateBindingsMemoryConsumption();
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
+					CMemoryPoolNewAllocationIncreasingContext* mContext;
 
-
-					QHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*> mMappingCardinalityHash;
+					CQtManagedRestrictedModificationHash<COptimizedComplexVariableIndividualBindingsHasher, COptimizedComplexVariableIndividualBindingsCardinalityLinker*>* mMappingCardinalityHash;
 
 
 				// private methods

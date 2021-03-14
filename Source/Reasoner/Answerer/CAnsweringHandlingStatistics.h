@@ -96,6 +96,9 @@ namespace Konclude {
 					qint64 getComplexConceptAssertionEntailmentTestingCount();
 					CAnsweringHandlingStatistics* incComplexConceptAssertionEntailmentTestingCount(qint64 incCount = 1);
 
+					qint64 getComplexConceptSubClassAxiomEntailmentTestingCount();
+					CAnsweringHandlingStatistics* incComplexConceptSubClassAxiomEntailmentTestingCount(qint64 incCount = 1);
+
 
 
 					CAnsweringHandlingStatistics* resetValues();
@@ -119,6 +122,7 @@ namespace Konclude {
 					qint64 mExistentialQueryPartVariableBindingPropagationCount;
 					qint64 mExistentialQueryPartVariableBindingConfirmationCount;
 					qint64 mComplexConceptAssertionEntailmentTestingCount;
+					qint64 mComplexConceptSubClassAxiomEntailmentTestingCount;
 				
 					qint64 mRequestedRealizationRequirementCount;
 

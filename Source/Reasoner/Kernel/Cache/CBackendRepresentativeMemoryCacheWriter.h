@@ -63,6 +63,7 @@ namespace Konclude {
 
 						CBackendRepresentativeMemoryCacheWriter* writeCachedData(CBackendRepresentativeMemoryCacheWriteData* writeData, CMemoryPool* memoryPools);
 
+						CBackendRepresentativeMemoryCache* getCache();
 
 					// protected methods
 					protected:

@@ -26,8 +26,7 @@
 
 // Namespace includes
 #include "AnswererSettings.h"
-#include "COptimizedComplexVariableCompositionItem.h"
-#include "COptimizedComplexConceptItem.h"
+#include "COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase.h"
 
 
 
@@ -54,7 +53,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData {
+			class COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData : public COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase {
 				// public methods
 				public:
 					//! Constructor
@@ -69,21 +68,11 @@ namespace Konclude {
 					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* addCardinalityUpdatePropagationIterator(COptimizedComplexVariableIndividualUpdateCardinalityLinker* iterator);
 
 
-					CRealizationIndividualInstanceItemReferenceIterator* getRealizationIterator();
-					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* setRealizationIterator(CRealizationIndividualInstanceItemReferenceIterator* iterator);
 
 					QSet<CRealizationIndividualInstanceItemReference>* getPropagationInstanceItemSet();
 
 
-					bool isRealizationScheduled();
-					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* setRealizationScheduled(bool scheduled);
 
-
-					cint64 getExpectedFillerCount();
-					COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData* setExpectedFillerCount(cint64 count);
-
-
-					//CRealizationIndividualInstanceItemReference debugPropInstItemRef;
 				// protected methods
 				protected:
 
@@ -91,13 +80,8 @@ namespace Konclude {
 				protected:
 					QList<COptimizedComplexVariableIndividualBindingsCardinalityLinker*> mVariableMappingIteratorList;
 					QList<COptimizedComplexVariableIndividualUpdateCardinalityLinker*> mUpdateCardinalityIteratorList;
-					CRealizationIndividualInstanceItemReferenceIterator* mRealizationIterator;
 					QSet<CRealizationIndividualInstanceItemReference> mInstItemRolePropInstItemSet;
 
-					bool mRealizationScheduled;
-
-
-					cint64 mExpectedFillerCount;
 
 				// private methods
 				private:

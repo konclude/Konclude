@@ -32,6 +32,16 @@ namespace Konclude {
 			}
 
 
+			cint64 COptimizedComplexVariableCompositionItemVariableIndexMapping::getSearchedVariablePosition(CExpressionVariable* varExp) {
+				for (auto it = constBegin(), itEnd = constEnd(); it != itEnd; ++it) {
+					if (it.value() == varExp) {
+						return it.key();
+					}
+				}
+				return -1;
+			}
+
+
 		}; // end namespace Answerer
 
 	}; // end namespace Reasoner

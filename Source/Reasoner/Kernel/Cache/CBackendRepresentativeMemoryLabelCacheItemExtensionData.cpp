@@ -30,7 +30,7 @@ namespace Konclude {
 			namespace Cache {
 
 
-				CBackendRepresentativeMemoryLabelCacheItemExtensionData::CBackendRepresentativeMemoryLabelCacheItemExtensionData(CBackendRepresentativeMemoryCacheContext* context) : CLinkerBase<cint64,CBackendRepresentativeMemoryLabelCacheItemExtensionData>(0,nullptr),mContext(context) {
+				CBackendRepresentativeMemoryLabelCacheItemExtensionData::CBackendRepresentativeMemoryLabelCacheItemExtensionData(CContext* context) : CLinkerBase<cint64,CBackendRepresentativeMemoryLabelCacheItemExtensionData>(0,nullptr),mContext(context) {
 				}
 
 				CBackendRepresentativeMemoryLabelCacheItemExtensionData::LABEL_CACHE_ITEM_EXTENSION_TYPE CBackendRepresentativeMemoryLabelCacheItemExtensionData::getExtensionType() {

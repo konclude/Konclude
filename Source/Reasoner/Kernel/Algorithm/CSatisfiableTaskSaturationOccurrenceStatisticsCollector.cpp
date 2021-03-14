@@ -274,6 +274,18 @@ namespace Konclude {
 							}
 						}
 
+						for (CIndividualSaturationProcessNodeLinker* indiNodeLinkerIt = processingDataBox->getIndividualSaturationAnalysationNodeLinker(); indiNodeLinkerIt; indiNodeLinkerIt = indiNodeLinkerIt->getNext()) {
+							CIndividualSaturationProcessNode* indiProcessNode = indiNodeLinkerIt->getProcessingIndividual();
+							if (indiProcessNode->isOccurrenceStatisticsCollectingRequired() && !indiProcessNode->isOccurrenceStatisticsCollected()) {
+
+								CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker = CObjectAllocator< CIndividualSaturationProcessNodeLinker >::allocateAndConstruct(calcAlgContext->getTemporaryMemoryAllocationManager());
+								indiProcessNodeLinker->initProcessNodeLinker(indiProcessNode, true);
+								succIdentNodeLinker = indiProcessNodeLinker->append(succIdentNodeLinker);
+
+								indiProcessNode->setOccurrenceStatisticsCollected(true);
+							}
+						}
+
 						while (succIdentNodeLinker) {
 							CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker = succIdentNodeLinker;
 							succIdentNodeLinker = succIdentNodeLinker->getNext();
@@ -283,9 +295,10 @@ namespace Konclude {
 							CIndividualSaturationProcessNode* indiProcessNode = indiProcessNodeLinker->getProcessingIndividual();
 
 							visitNodeSuccessors(indiProcessNode, true, false, true, true, true, [&](CIndividualSaturationProcessNode* succNode, cint64 succIndiId)->bool {
-								if (succNode && !succNode->isOccurrenceStatisticsCollected()) {
+								if (succNode && !succNode->isOccurrenceStatisticsCollected() && succNode->isInitialized()) {
 									succNode->setOccurrenceStatisticsCollectingRequired(true);
 									succNode->setOccurrenceStatisticsCollected(true);
+
 									CIndividualSaturationProcessNodeLinker* indiProcessNodeLinker = CObjectAllocator< CIndividualSaturationProcessNodeLinker >::allocateAndConstruct(calcAlgContext->getTemporaryMemoryAllocationManager());
 									indiProcessNodeLinker->initProcessNodeLinker(succNode, true);
 									succIdentNodeLinker = indiProcessNodeLinker->append(succIdentNodeLinker);		
@@ -312,12 +325,15 @@ namespace Konclude {
 
 				bool CSatisfiableTaskSaturationOccurrenceStatisticsCollector::collectConceptOccurrenceStatistics(CIndividualSaturationProcessNode* indiNode, CCalculationAlgorithmContext* calcAlgContext) {
 					CReapplyConceptSaturationLabelSet* conSet = indiNode->getReapplyConceptSaturationLabelSet(false);
-					for (CConceptSaturationDescriptor* conSatDesLinkerIt = conSet->getConceptSaturationDescriptionLinker(); conSatDesLinkerIt; conSatDesLinkerIt = conSatDesLinkerIt->getNext()) {
-						CConcept* concept = conSatDesLinkerIt->getConcept();
-						mOccStatsCacheWriter->incConceptInstanceOccurrencceStatistics(mOntology, concept->getConceptTag(), 1, 0, 0, 1);
-						++mCollectedOccStatsConceptCount;
+					if (conSet) {
+						for (CConceptSaturationDescriptor* conSatDesLinkerIt = conSet->getConceptSaturationDescriptionLinker(); conSatDesLinkerIt; conSatDesLinkerIt = conSatDesLinkerIt->getNext()) {
+							CConcept* concept = conSatDesLinkerIt->getConcept();
+							mOccStatsCacheWriter->incConceptInstanceOccurrencceStatistics(mOntology, concept->getConceptTag(), 1, 0, 0, 1);
+							++mCollectedOccStatsConceptCount;
+						}
+						return true;
 					}
-					return true;
+					return false;
 				}
 
 

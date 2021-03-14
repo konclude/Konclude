@@ -34,6 +34,7 @@
 // Other includes
 #include "Config/CConfigurationGroup.h"
 #include "Config/CIntegerConfigType.h"
+#include "Config/CDoubleConfigType.h"
 #include "Config/CStringConfigType.h"
 #include "Config/CBooleanConfigType.h"
 #include "Config/CConfigDescription.h"

@@ -26,6 +26,7 @@
 
 // Namespace includes
 #include "CompositionSettings.h"
+#include "CAbstractVariableMappingsCompositionItemRequirementProcessor.h"
 
 
 // Other includes
@@ -68,13 +69,15 @@ namespace Konclude {
 						//! Constructor
 						CAbstractVariableMappingsCompositionComputator();
 
-						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
+						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAbstractVariableMappingsCompositionItemRequirementProcessor* reqProcessor, CAnswererContext* answererContext);
 
 						virtual CAbstractVariableMappingsCompositionComputator* computeVariableMappingsComposition(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing);
 
 
 					// protected methods
 					protected:
+						bool processRequirements(const QList<COntologyProcessingRequirement*>& reqList, COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext);
+
 
 						bool queueVariableItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem);
 						bool rescheduleVariableCompositionItemComputation(COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, COptimizedComplexVariableCompositionItem* varCompItem, COptimizedComplexVariableCompositionItem* depSchedulingCompItem, cint64 additionalRequiredMappingCount);
@@ -87,9 +90,12 @@ namespace Konclude {
 						void configureDependentComputationIncreaseFactor(bool dependentItemRescheduled, bool mappingProcessed, COptimizedComplexVariableCompositionItem* compVarItem);
 
 
+
+
 					// protected variables
 					protected:
 						COptimizedComplexExpressionOntologyAnsweringItem* mOntoAnsweringItem;
+						CAbstractVariableMappingsCompositionItemRequirementProcessor* mReqProcessor;
 
 						class CInstanceBindingIndividualCountingVisitor : public CSameRealizationIndividualVisitor {
 						public:

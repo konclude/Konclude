@@ -76,6 +76,8 @@ namespace Konclude {
 					COptimizedComplexVariableConceptBaseItem* setInstanceItemProcessedLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker);
 					COptimizedComplexVariableConceptBaseItem* setInstanceItemRetrievedLinker(COptimizedComplexConceptInstanziatedIndividualItemLinker* linker);
 
+					virtual bool clearComputation();
+
 				// protected methods
 				protected:
 

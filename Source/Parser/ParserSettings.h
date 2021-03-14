@@ -58,6 +58,8 @@ namespace Konclude {
 
 		class CParsingHandlingContext;
 		class CXMLHandler;
+		class CSPARQLBuildingParserTermData;
+		class CSPARQLBuildingParserTripleData;
 
 
 #define CEXPRESSIONLIST CQtList

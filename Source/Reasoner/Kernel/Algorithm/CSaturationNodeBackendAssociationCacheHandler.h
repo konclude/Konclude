@@ -126,6 +126,7 @@ namespace Konclude {
 
 						bool determineFullConceptSetLabelAssociationBackendItem(CIndividualSaturationProcessNode* satNode, cint64 labelType, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CCalculationAlgorithmContext* calcAlgContext);
 
+						bool collectSelfRestrictionRoles(CIndividualSaturationProcessNode* satNode, CPROCESSSET<TRoleInversionPair>*& roleInstantiatedSet, CSortedNegLinker<CRole*>*& roleInstantiatedLinker, CCalculationAlgorithmContext* calcAlgContext);
 
 						bool determineSaturationNodeIndividualCombinedNeighbourRoleInstantiatedSetLabelAssociationBackendItem(CIndividualSaturationProcessNode* satNode, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CCalculationAlgorithmContext* calcAlgContext);
 						bool determineCombinedExistentialRoleInstantiatedSetLabelAssociationBackendItem(CIndividualSaturationProcessNode* satNode, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CCalculationAlgorithmContext* calcAlgContext);

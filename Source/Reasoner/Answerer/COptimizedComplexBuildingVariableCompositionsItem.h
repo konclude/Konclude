@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXBUILDINGVARIABLECOMPOSITIONSITEM_H
-#define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXBUILDINGVARIABLECOMPOSITIONSITEM_H
+#ifndef KONCLUDE_REASONER_ANSWERER_COptimizedComplexBuildingVariableCompositionsItem_H
+#define KONCLUDE_REASONER_ANSWERER_COptimizedComplexBuildingVariableCompositionsItem_H
 
 // Libraries includes
 
@@ -74,88 +74,16 @@ namespace Konclude {
 				public:
 					//! Constructor
 					COptimizedComplexBuildingVariableCompositionsItem(CComplexQueryExpressionProcessingData* queryProcessingData);
-					~COptimizedComplexBuildingVariableCompositionsItem();
+					virtual ~COptimizedComplexBuildingVariableCompositionsItem();
 
 
-
-					COptimizedComplexBuildingVariableCompositionsItem* createExtendingBuildingVariableCompositionsItem();
-
-
-
-
-
-					CComplexQueryMaterializationData* getMaterializationData();
-					COptimizedComplexBuildingVariableCompositionsItem* setMaterializationData(CComplexQueryMaterializationData* tmpOnto);
-
-
-					CComplexQueryFinishingBuildingVariableCompositionsItemData* getBuildingFinishingData();
-					COptimizedComplexBuildingVariableCompositionsItem* setBuildingFinishingData(CComplexQueryFinishingBuildingVariableCompositionsItemData* tmpOnto);
 
 
 
 					QHash<CExpressionVariable*, CBuildExpression*>* getVariableClassTermExpressionHash();
 					COptimizedComplexBuildingVariableCompositionsItem* setVariableClassTermExpressionHash(const QHash<CExpressionVariable*, CBuildExpression*>& hash);
 
-
-					COptimizedComplexBuildingVariableCompositionsItem* addVariableComplexConceptItem(CIndividualVariableExpression* varExp, COptimizedComplexConceptItem* conItem);
-					COptimizedComplexBuildingVariableCompositionsItem* addVariablePropertyAssertion(CIndividualVariableExpression* varExp, CObjectPropertyAssertionExpression* propAssExp);
-
-					COptimizedComplexBuildingVariableCompositionsItem* addVariablePropertyAssertions(const QList<CObjectPropertyAssertionExpression*>& propAssExpList);
-
-
-					QSet<CIndividualVariableExpression*>* getRemainingVariableExpressionSet();
-
-					QList<CObjectPropertyAssertionExpression*> getUnhanledPropertyAssertionsExpressions(CIndividualVariableExpression* varExp);
-
-
-
-
-
-
-					bool isWaitingComputationStep();
-					COptimizedComplexBuildingVariableCompositionsItem* setComputationStepFinished(CComplexConceptStepComputationProcess* computationStep);
-					COptimizedComplexBuildingVariableCompositionsItem* setComputationStepWaiting(CComplexConceptStepComputationProcess* computationStep);
-
-					CComplexQueryExpressionProcessingData* getQueryProcessingData();
-
-
-					bool isInitializedBaseConceptVariableItems();
-					COptimizedComplexBuildingVariableCompositionsItem* setInitializedBaseConceptVariableItems(bool initialized);
-
-
-					QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*>* getVariableConceptItemHash();
-
-					QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* getVariableExpressionVariableCompositionItemHash();
-
-
-
-					bool isRemovingPropertyAssertionDisconnecting(CIndividualVariableExpression* varEpx, CObjectPropertyAssertionExpression* propAss);
-					bool isRemovingDataPropertyAssertionDisconnecting(CIndividualVariableExpression* varEpx, CDataPropertyAssertionExpression* dataPropAss);
-
-					COptimizedComplexBuildingVariableCompositionsItem* setPropertyAssertionHandled(CObjectPropertyAssertionExpression* propAss);
-					COptimizedComplexBuildingVariableCompositionsItem* setVariableExpressionHandled(CIndividualVariableExpression* varEpx);
-					COptimizedComplexBuildingVariableCompositionsItem* setVariableExpressionUnhandled(CIndividualVariableExpression* varEpx);
-
-
-					CIndividualVariableExpression* getOtherVariableExpression(CIndividualVariableExpression* varEpx, CObjectPropertyAssertionExpression* propAss);
-
-
-
-
-					bool hasWaitingVariableCompositionItems();
-					cint64 getVariableCompositionItemWaitingCount();
-					COptimizedComplexBuildingVariableCompositionsItem* incVariableCompositionItemWaitingCount(cint64 incCount = 1);
-					COptimizedComplexBuildingVariableCompositionsItem* decVariableCompositionItemWaitingCount(cint64 decCount = 1);
-
-
-
-					bool isWaitingSubVariableBuildingItems();
-					cint64 getWaitingSubVariableBuildingItemCount();
-					COptimizedComplexBuildingVariableCompositionsItem* incWaitingSubVariableBuildingItemCount(cint64 incCount = 1);
-					COptimizedComplexBuildingVariableCompositionsItem* decWaitingSubVariableBuildingItemCount(cint64 decCount = 1);
-
-
-
+					
 
 					QList<COptimizedComplexVariableCompositionItem*>* getComputeVariableMappingItemList();
 					COptimizedComplexBuildingVariableCompositionsItem* addComputeVariableMappingItem(COptimizedComplexVariableCompositionItem* item);
@@ -169,239 +97,79 @@ namespace Konclude {
 					COptimizedComplexBuildingVariableCompositionsItem* setProcessingQueued(bool queued);
 
 
-					bool isWaitingRoleTargetsRealization();
-					cint64 getWaitingRoleTargetsRealizationCount();
-					COptimizedComplexBuildingVariableCompositionsItem* incWaitingRoleTargetsRealizationCount(cint64 count = 1);
-					COptimizedComplexBuildingVariableCompositionsItem* decWaitingRoleTargetsRealizationCount(cint64 count = 1);
-
-
-
-					bool isWaitingVariableBindingsPropagation();
-					cint64 getWaitingVariableBindingsPropagationCount();
-					COptimizedComplexBuildingVariableCompositionsItem* incVariableBindingsPropagationCount(cint64 count = 1);
-					COptimizedComplexBuildingVariableCompositionsItem* decVariableBindingsPropagationCount(cint64 count = 1);
-
-
-					bool isWaitingVariableBindingsConfirmation();
-					cint64 getWaitingVariableBindingsConfirmationCount();
-					COptimizedComplexBuildingVariableCompositionsItem* incVariableBindingsConfirmationCount(cint64 count = 1);
-					COptimizedComplexBuildingVariableCompositionsItem* decVariableBindingsConfirmationCount(cint64 count = 1);
-
-
-
-					bool isWaitingComputation();
-
-
-
-					CExpressionVariable* getLastHandledVariableExpression();
-					COptimizedComplexBuildingVariableCompositionsItem* setLastHandledVariableExpression(CExpressionVariable* varExp);
-
-
-
-					QSet<CIndividualVariableExpression*>* getReuseVariableExpressionComputationsCheckSet();
-
-
-					QSet<CExpressionVariable*>* getAllVariableSet();
-					COptimizedComplexBuildingVariableCompositionsItem* setAllVariableSet(const QSet<CExpressionVariable*>& varSet);
-
-
-					QSet<CExpressionVariable*>* getDistinguishedVariableSet();
-					COptimizedComplexBuildingVariableCompositionsItem* setDistinguishedVariableSet(const QSet<CExpressionVariable*>& varSet);
-
-
-					QSet<CExpressionVariable*>* getReductionDeniedVariableSet();
-					COptimizedComplexBuildingVariableCompositionsItem* setReductionDeniedVariableSet(const QSet<CExpressionVariable*>& varSet);
-
-
-
-					COptimizedComplexBuildingVariableCompositionsItem* addBasicDataPropertyAssertions(const QList<CDataPropertyAssertionExpression*>& dataPropAssExpList);
-					QList<CDataPropertyAssertionExpression*>* getBasicDataPropertyAssertionList();
-					QSet<CDataLiteralVariableExpression*>* getBasicDataVariableJoiningSet();
-					bool isInitializedBasicDataVariableItems();
-					COptimizedComplexBuildingVariableCompositionsItem* setInitializedBasicDataVariableItems(bool initialized);
-
-					bool isJoinedBasicDataVariableItems();
-					COptimizedComplexBuildingVariableCompositionsItem* setJoinedBasicDataVariableItems(bool initialized);
-
-
-					COptimizedComplexBuildingVariableCompositionsItem* addVariableDataPropertyAssertions(const QList<CDataPropertyAssertionExpression*>& dataPropAssExpList);
-					COptimizedComplexBuildingVariableCompositionsItem* addVariableDataPropertyAssertion(CIndividualVariableExpression* varExp, CDataPropertyAssertionExpression* propAssExp);
-					COptimizedComplexBuildingVariableCompositionsItem* addVariableDataPropertyAssertion(CDataLiteralVariableExpression* varExp, CDataPropertyAssertionExpression* propAssExp);
-
-					QList<CDataPropertyAssertionExpression*> getUnhanledDataPropertyAssertionsExpressions(CIndividualVariableExpression* varExp);
-					QList<CDataPropertyAssertionExpression*> getUnhanledDataPropertyAssertionsExpressions(CDataLiteralVariableExpression* varExp);
-					QList<CIndividualVariableExpression*> getUnhandledDataExtensionIndividualTermExpressions(CDataPropertyAssertionExpression* propAssExp, CIndividualVariableExpression* varExp);
-					COptimizedComplexBuildingVariableCompositionsItem* setDataPropertyAssertionHandled(CDataPropertyAssertionExpression* propAss);
-
-
-
-
-					QHash<CDataLiteralVariableExpression*, CIndividualVariableExpression*>* getDataLiteralVariableIndidualVariableMappingHash();
-					QHash<CIndividualVariableExpression*, QHash<CDataLiteralVariableExpression*, CDataPropertyTermExpression*>>* getIndidualVariableDataLiteralVariableRoleMappingHash();
-
-					bool isInitializedConceptDataVariableExtensionItems();
-					COptimizedComplexBuildingVariableCompositionsItem* setInitializedConceptDataVariableExtensionItems(bool initialized);
-
-					COptimizedComplexBuildingVariableCompositionsItem* addIndidualVariableDataLiteralVariableRoleRequiredExtension(CIndividualVariableExpression* indiVar, CDataLiteralVariableExpression* dataLitVar, CDataPropertyTermExpression* dataRole);
-
-					QSet<CIndividualVariableExpression*>* getRemainingExtendingDataVariableSet();
-
-
-
-					COptimizedComplexBuildingVariableCompositionsItem* getAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem();
-					COptimizedComplexBuildingVariableCompositionsItem* setAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem(COptimizedComplexBuildingVariableCompositionsItem* subItem);
-
-					bool hasAbsorptionBasedQueryPartsOrdinaryEvaluated();
-					COptimizedComplexBuildingVariableCompositionsItem* setAbsorptionBasedQueryPartsOrdinaryEvaluated(bool ordnaryEvaluated);
-
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* getAbsorbingQueryPartsList();
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbingQueryParts(const QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>& list);
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbingQueryPart(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data);
-
-
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* getAbsorbedQueryPartItemExtensionHandlingList();
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbedBasedQueryPartsItemExtensionHandling(const QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>& list);
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbedBasedQueryPartItemExtensionHandling(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data);
-
-
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>* getAbsorbedQueryPartEntailmentCheckingHandlingList();
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbedBasedQueryPartsEntailmentCheckingHandling(const QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*>& list);
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorbedBasedQueryPartEntailmentCheckingHandling(COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* data);
-
-
-
-					COptimizedComplexVariableCompositionItem* getVariableLastCompositionItem(CExpressionVariable* variableExp);
-					CExpressionVariable* getVariableLastCompositionItemAssociatedVariableExpression(CExpressionVariable* variableExp);
-
-					COptimizedComplexBuildingVariableCompositionsItem* updateLastHandledVariableItemAssociation(CExpressionVariable* lastHandledVarExp, COptimizedComplexVariableCompositionItem* lastHandledItem);
-					COptimizedComplexBuildingVariableCompositionsItem* clearLastHandledVariableItemAssociation(CExpressionVariable* lastHandledVarExp);
-
-
-
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* getAbsorptionBasedHandlingExtensionItemPropagationList();
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorptionBasedHandlingExtensionPropagationItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem);
-
-
-
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*>* getAbsorptionBasedHandlingExtensionItemJoiningList();
-					COptimizedComplexBuildingVariableCompositionsItem* addAbsorptionBasedHandlingExtensionJoiningItem(COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem* absBasedExtItem);
+					CComplexQueryExpressionProcessingData* getQueryProcessingData();
 
 
 					bool isSatisfiable();
 					COptimizedComplexBuildingVariableCompositionsItem* setSatisfiability(bool satisfiable);
 
+					bool isWaitingSubVariableBuildingItems();
+					cint64 getWaitingSubVariableBuildingItemCount();
+					COptimizedComplexBuildingVariableCompositionsItem* incWaitingSubVariableBuildingItemCount(cint64 incCount = 1);
+					COptimizedComplexBuildingVariableCompositionsItem* decWaitingSubVariableBuildingItemCount(cint64 decCount = 1);
 
-					QSet<CExpressionVariable*>* getVariableSingleCardinalitySet();
-					bool hasVariableSingleCardinality(CExpressionVariable* varExp);
+					bool hasWaitingVariableCompositionItems();
+					cint64 getVariableCompositionItemWaitingCount();
+					COptimizedComplexBuildingVariableCompositionsItem* incVariableCompositionItemWaitingCount(cint64 incCount = 1);
+					COptimizedComplexBuildingVariableCompositionsItem* decVariableCompositionItemWaitingCount(cint64 decCount = 1);
+
+
+					bool isWaitingComputationStep();
+					COptimizedComplexBuildingVariableCompositionsItem* setComputationStepFinished(CComplexConceptStepComputationProcess* computationStep);
+					COptimizedComplexBuildingVariableCompositionsItem* setComputationStepWaiting(CComplexConceptStepComputationProcess* computationStep);
+
+					virtual bool isWaitingComputation() = 0;
+
+
+					COptimizedComplexBuildingVariableCompositionsItem* updateLastHandledVariableItemAssociation(CExpressionVariable* lastHandledVarExp, COptimizedComplexVariableCompositionItem* lastHandledItem);
+					COptimizedComplexBuildingVariableCompositionsItem* clearLastHandledVariableItemAssociation(CExpressionVariable* lastHandledVarExp);
+
+					COptimizedComplexVariableCompositionItem* getVariableLastCompositionItem(CExpressionVariable* variableExp);
+					CExpressionVariable* getVariableLastCompositionItemAssociatedVariableExpression(CExpressionVariable* variableExp);
+
+					CExpressionVariable* getLastHandledVariableExpression();
+					COptimizedComplexBuildingVariableCompositionsItem* setLastHandledVariableExpression(CExpressionVariable* varExp);
+
+
+					QHash<CExpressionVariable*, COptimizedComplexConceptItem*>* getVariableConceptItemHash();
+
+					QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*>* getVariableExpressionVariableCompositionItemHash();
 
 
 
-					bool isBindingsReducible();
-					COptimizedComplexBuildingVariableCompositionsItem* setBindingsReducible(bool reducible);
+					QSet<COptimizedComplexVariableCompositionItem*>* getUsedComplexVariableCompositionItemSet();
+					bool addUsedComplexVariableCompositionItem(COptimizedComplexVariableCompositionItem* item);
+					bool addUsedComplexConceptItem(COptimizedComplexConceptItem* item);
 
-
-					QList<COptimizedComplexVariableCompositionItem*>* getUsedComplexVariableCompositionItemList();
-					COptimizedComplexBuildingVariableCompositionsItem* addUsedComplexVariableCompositionItem(COptimizedComplexVariableCompositionItem* item);
-
-					QList<CExpressionVariable*>* getExtendibleQueryTransferringExtractionVariableList();
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
-
+					QList<COptimizedComplexVariableCompositionItem*> mComputeMappingItemList;
+					bool mProcessingQueued;
+					bool mSatisfiable;
+					QHash<CExpressionVariable*, COptimizedComplexVariableCompositionItemVariableExpressionMapping> mVarItemIndexMappingHash;
 					QHash<CExpressionVariable*, CBuildExpression*> mVariableClassTermExpressionHash;
+
+					CComplexQueryExpressionProcessingData* mQueryProcessingData;
 
 
 					QHash<CExpressionVariable*, QSet<COptimizedComplexVariableCompositionItem*>*> mVarVarCompItemHash;
 
-					QHash<CIndividualVariableExpression*, COptimizedComplexConceptItem*> mVarConItemHash;
-
-					QHash<CIndividualVariableExpression*, CObjectPropertyAssertionExpression*> mVarPropAssHash;
-
-					QHash<CExpressionVariable*, COptimizedComplexVariableCompositionItemVariableExpressionMapping> mVarItemIndexMappingHash;
-
-					QSet<CIndividualVariableExpression*> mRemainingVarExpSet;
-					QSet<CIndividualVariableExpression*> mReuseVarExpComputationsCheckSet;
-					QSet<CIndividualVariableExpression*> mHandledVarExpSet;
-					QSet<CObjectPropertyAssertionExpression*> mHandledPropAssSet;
-
-					cint64 mVarCompItemWaitingCount;
 					cint64 mSubVarBuildItemWaitingCount;
-					QList<COptimizedComplexVariableCompositionItem*> mComputeMappingItemList;
-
-					bool mAbsorptionBasedQueryPartsOrdinaryEvaluated;
-					COptimizedComplexBuildingVariableCompositionsItem* mAbsorptionBasedQueryPartsOrdinaryEvaluationSubVariableBuiltItem;
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*> mAbsorbingQueryPartsList;
-
-
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*> mAbsorptionBasedQueryPartItemExtensionHandlingList;
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData*> mAbsorptionBasedQueryPartEntailmentCheckingHandlingList;
-
-					bool mInitializedBaseConceptVariableItems;
-
-
+					cint64 mVarCompItemWaitingCount;
 					cint64 mWaitingComputationStepsCount;
-					cint64 mWaitingVariableBindingsPropagationCount;
-					cint64 mWaitingVariableBindingsConfirmationCount;
-
-					CComplexQueryExpressionProcessingData* mQueryProcessingData;
-
-					bool mProcessingQueued;
-
-					cint64 mWaitingRoleTargetsRealizationCount;
-
-					CExpressionVariable* mLastHandVarExp;
-
-
-					QSet<CExpressionVariable*> mAllVarExpSet;
-					QSet<CExpressionVariable*> mDistinguishedVarExpSet;
-					QSet<CExpressionVariable*> mReductionDeniedVariableSet;
-
-
-					QList<CDataPropertyAssertionExpression*> mBasicDataPropAssList;
-					QSet<CDataLiteralVariableExpression*> mBasicDataVarJoiningSet;
-					bool mInitializedBasicDataVariableItems;
-					bool mJoinedBasicDataVariableItems;
-
-
-
-					QHash<CIndividualVariableExpression*, CDataPropertyAssertionExpression*> mVarDataPropAssHash;
-					QHash<CDataLiteralVariableExpression*, CDataPropertyAssertionExpression*> mDataVarDataPropAssHash;
-					QSet<CDataPropertyAssertionExpression*> mHandledDataPropAssSet;
-
-
-					QHash<CDataLiteralVariableExpression*, CIndividualVariableExpression*> mDataVarIndiVarHash;
-					QHash<CIndividualVariableExpression*, QHash<CDataLiteralVariableExpression*, CDataPropertyTermExpression*>> mIndiVarDataVarHash;
-
-					bool mInitializedConceptDataVariableExtensionItems;
-					QSet<CIndividualVariableExpression*> mRemainingDataVarExpSet;
-
-
 
 					QHash<CExpressionVariable*, COptimizedComplexVariableCompositionItem*> mVarLastItemHash;
 					QHash<CExpressionVariable*, CExpressionVariable*> mVarLastItemAssociatedVariableHash;
+					CExpressionVariable* mLastHandVarExp;
 
+					QHash<CExpressionVariable*, COptimizedComplexConceptItem*> mVarConItemHash;
 
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*> mAbsorptionBasedHandlingExtensionItemPropagationList;
-					QList<COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem*> mAbsorptionBasedHandlingExtensionItemJoiningList;
-
-					bool mSatisfiable;
-					bool mBindingsReducible;
-
-					QSet<CExpressionVariable*> mVariableSingleCardinalitySet;
-
-					QList<COptimizedComplexVariableCompositionItem*> mUsedComplexVariableCompositionItemList;
-
-
-
-
-					CComplexQueryMaterializationData* mTemporaryMaterializationData;
-
-					CComplexQueryFinishingBuildingVariableCompositionsItemData* mBuildingFinishingData;
-
-					QList<CExpressionVariable*> mExtendibleQueryTransferringExtractionVariableList;
+					QSet<COptimizedComplexVariableCompositionItem*> mUsedComplexVariableCompositionItemSet;
+					QSet<COptimizedComplexConceptItem*> mUsedComplexConceptItemSet;
 
 				// private methods
 				private:
@@ -417,4 +185,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXBUILDINGVARIABLECOMPOSITIONSITEM_H
+#endif // KONCLUDE_REASONER_ANSWERER_COptimizedComplexBuildingVariableCompositionsItem_H

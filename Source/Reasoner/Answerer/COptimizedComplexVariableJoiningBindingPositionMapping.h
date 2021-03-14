@@ -60,8 +60,8 @@ namespace Konclude {
 					COptimizedComplexVariableJoiningBindingPositionMapping(COptimizedComplexVariableCompositionItem* joiningVarItem, cint64 leftSize, cint64 rightSize);
 					~COptimizedComplexVariableJoiningBindingPositionMapping();
 
-					COptimizedComplexVariableJoiningBindingPositionMapping(const COptimizedComplexVariableJoiningBindingPositionMapping& mapping);
 
+					COptimizedComplexVariableJoiningBindingPositionMapping(const COptimizedComplexVariableJoiningBindingPositionMapping& mapping);
 
 					COptimizedComplexVariableCompositionItem* getJoiningVariableItem();
 
@@ -86,12 +86,23 @@ namespace Konclude {
 					COptimizedComplexVariableJoiningBindingPositionMapping* setRightKeyBindingLinker(CXLinker<cint64>* linker);
 
 
+
+					CXLinker<cint64>* getLeftRemainingBindingLinker();
+					CXLinker<cint64>* getRightRemainingBindingLinker();
+
+					COptimizedComplexVariableJoiningBindingPositionMapping* setLeftRemainingBindingLinker(CXLinker<cint64>* linker);
+					COptimizedComplexVariableJoiningBindingPositionMapping* setRightRemainingBindingLinker(CXLinker<cint64>* linker);
+
+
+
 					cint64* getRightPosMapArray();
 					cint64* getLeftPosMapArray();
 
 
 				// protected methods
 				protected:
+					void deleteKeyBindingLinker(CXLinker<cint64>* keyBindingLinkerIt);
+					CXLinker<cint64>* copyKeyBindingLinker(CXLinker<cint64>* originalKeyBindingLinker);
 
 				// protected variables
 				protected:
@@ -102,6 +113,8 @@ namespace Konclude {
 					COptimizedComplexVariableCompositionItem* mJoiningVarItem;
 					CXLinker<cint64>* mLeftKeyBindingLinker;
 					CXLinker<cint64>* mRightKeyBindingLinker;
+					CXLinker<cint64>* mLeftRemainingBindingLinker;
+					CXLinker<cint64>* mRightRemainingBindingLinker;
 					cint64* mRightPosMapArray;
 					cint64* mLeftPosMapArray;
 					cint64 mLeftMapSize;

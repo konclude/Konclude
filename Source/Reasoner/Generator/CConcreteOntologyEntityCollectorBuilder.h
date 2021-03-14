@@ -341,6 +341,18 @@ namespace Konclude {
 					virtual CDataLiteralVariableExpression* getDataLiteralVariable(const QString &dataLiteralVariableName);
 
 
+
+					virtual CClassVariableExpression* getClassVariable(const QStringRef &classVariableName);
+					virtual CClassVariableExpression* getClassVariable(const QString &classVariableName);
+
+
+					virtual CObjectPropertyVariableExpression* getObjectPropertyVariable(const QStringRef &objectPropertyVariableName);
+					virtual CObjectPropertyVariableExpression* getObjectPropertyVariable(const QString &objectPropertyVariableName);
+
+					virtual CDataPropertyVariableExpression* getDataPropertyVariable(const QStringRef &dataPropertyVariableName);
+					virtual CDataPropertyVariableExpression* getDataPropertyVariable(const QString &dataPropertyVariableName);
+
+
 					virtual CClassAssertionExpression* getClassAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
 					virtual CClassAssertionExpression* getClassAssertion(CBuildExpression* expression1, CBuildExpression* expression2);
 					virtual CObjectPropertyAssertionExpression* getObjectPropertyAssertion(const CEXPRESSIONLIST<CBuildExpression*>& expressions);
@@ -379,6 +391,9 @@ namespace Konclude {
 					QSet<QString>* getDataValueVariableNameSet();
 					QSet<QString>* getDataLiteralVariableNameSet();
 
+					QSet<QString>* getClassVariableNameSet();
+					QSet<QString>* getObjectPropertyVariableNameSet();
+					QSet<QString>* getDataPropertyVariableNameSet();
 
 				// protected functions
 				protected:
@@ -395,6 +410,9 @@ namespace Konclude {
 					QSet<QString> mNamedIndividualVariableNameSet;
 					QSet<QString> mAnonymousIndividualVariableNameSet;
 					QSet<QString> mDataValueVariableNameSet;
+					QSet<QString> mClassVariableNameSet;
+					QSet<QString> mObjectPropertyVariableNameSet;
+					QSet<QString> mDataPropertyVariableNameSet;
 					QSet<QString> mDataLiteralVariableNameSet;
 					QHash<QString, QString> mAbbreviationsResolveHash;
 

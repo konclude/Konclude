@@ -122,6 +122,8 @@ namespace Konclude {
 					CComplexQueryExpressionProcessingData* setQueryExtendibleData(CComplexQueryExtendibleData* extData);
 
 
+
+
 				// protected methods
 				protected:
 
@@ -146,6 +148,7 @@ namespace Konclude {
 					cint64 mOffsetSkippedMappingCount;
 
 					CComplexQueryExtendibleData* mExtendibleData;
+
 
 
 				// private methods

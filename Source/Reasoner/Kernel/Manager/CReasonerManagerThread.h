@@ -68,6 +68,7 @@
 #include "Reasoner/Query/CComplexAnsweringQuery.h"
 #include "Reasoner/Query/CComplexConceptAnsweringQuery.h"
 #include "Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexAxiomsDataPropertyVariablesAnsweringQuery.h"
 
 #include "Reasoner/Kernel/Manager/Events/CJobCalculatedSatisfiableCallbackEvent.h"
 #include "Reasoner/Kernel/Manager/Events/CReasoningSatisfiableCalculationJobEvent.h"
@@ -267,9 +268,17 @@ namespace Konclude {
 						CRealizationManager* mRealizationManager;
 						CAnsweringManager* mAnswererManager;
 
+						bool mAnswererPrepared = false;
+						QList<CRequirementProcessedCallbackEvent*> mAnswererPreparedCallbackQueue;
+
+
 						COntologyProcessingRequirementExpander* mRequirementExpander;
 
 						cint64 mWorkControllerCount;
+						bool mConfgAdaptThreadPoolToWorkerCount;
+						cint64 mBlockThreadPoolThreadCount;
+						QSemaphore mBlockThreadPoolThreadsBlockingSemaphore;
+						QSemaphore mBlockThreadPoolThreadsReleasingSemaphore;
 
 					// private methods
 					private:

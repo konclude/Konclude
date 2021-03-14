@@ -62,6 +62,9 @@
 #include "CIndividualRepresentativeBackendCacheLoadedAssociationHash.h"
 #include "CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHash.h"
 #include "CIndividualDelayedBackendInitializationProcessingQueue.h"
+#include "CBackendNeighbourExpansionControllingData.h"
+#include "CBackendNeighbourExpansionQueue.h"
+#include "CIndividualLinkerRotationProcessingQueue.h"
 
 // Other includes
 #include "Reasoner/Ontology/CConcreteOntology.h"
@@ -136,6 +139,19 @@ namespace Konclude {
 
 						CIndividualUnsortedProcessingQueue* getBackendIndirectCompatibilityExpansionQueue(bool create = true);
 						CProcessingDataBox* clearBackendIndirectCompatibilityExpansionQueue();
+
+						CIndividualUnsortedProcessingQueue* getBackendIndividualReuseExpansionQueue(bool create = true);
+						CProcessingDataBox* clearBackendIndividualReuseExpansionQueue();
+
+						bool isBackendIndividualLateReuseExpansionActivated();
+						CProcessingDataBox* setBackendIndividualLateReuseExpansionActivated(bool activated);
+
+						CIndividualLinkerRotationProcessingQueue* getBackendIndividualNeighbourExpansionQueue(bool create = true);
+						CProcessingDataBox* clearBackendIndividualNeighbourExpansionQueue();
+
+						CIndividualUnsortedProcessingQueue* getBackendLateIndividualNeighbourExpansionQueue(bool create = true);
+						CProcessingDataBox* clearBackendLateIndividualNeighbourExpansionQueue();
+
 
 
 						CIndividualUnsortedProcessingQueue* getDelayingNominalProcessingQueue(bool create = true);
@@ -504,7 +520,11 @@ namespace Konclude {
 						CXLinker<CIndividualProcessNode*>* getLastBackendCacheIntegratedIndividualNodeLinker();
 						CProcessingDataBox* setLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker);
 						CProcessingDataBox* addLastBackendCacheIntegratedIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker);
+						cint64 getBackendCacheIntegratedIndividualNodeCount();
+						CProcessingDataBox* incBackendCacheIntegratedIndividualNodeCount(cint64 count);
 
+						cint64 getBackendCacheIntegratedSameIndividualNodeCount();
+						CProcessingDataBox* incBackendCacheIntegratedSameIndividualNodeCount(cint64 count = 1);
 
 						CProcessingDataBox* setBackendCacheLoadedAssociationHash(CIndividualRepresentativeBackendCacheLoadedAssociationHash* backendCacheLoadedAssociationHash);
 
@@ -514,6 +534,26 @@ namespace Konclude {
 
 						CIndividualDelayedBackendInitializationProcessingQueue* getDelayedBackendConceptSetLabelProcessingInitializationQueue(bool create = true);
 						CProcessingDataBox* clearDelayedBackendConceptSetLabelProcessingInitializationQueue();
+
+
+
+						CBackendNeighbourExpansionControllingData* getBackendNeighbourExpansionControllingData(bool createOrLocalize = true);
+
+
+
+						CBackendNeighbourExpansionQueue* getBackendNeighbourExpansionQueue(bool create = true);
+						CProcessingDataBox* clearBackendNeighbourExpansionQueue();
+
+
+						bool hasBackendCacheUpdateIndividualsInitialized();
+						CProcessingDataBox* setBackendCacheUpdateIndividualsInitialized(bool initialized);
+
+
+
+
+						CXLinker<CIndividualProcessNode*>* getRepresentativeNeighbourExpansionIndividualNodeLinker();
+						CProcessingDataBox* addRepresentativeNeighbourExpansionIndividualNodeLinker(CXLinker<CIndividualProcessNode*>* indiLinker);
+
 
 
 
@@ -559,6 +599,20 @@ namespace Konclude {
 						CIndividualUnsortedProcessingQueue* mBackendIndirectCompatibilityExpansionQueue;
 						CIndividualUnsortedProcessingQueue* mUseBackendIndirectCompatibilityExpansionQueue;
 						CIndividualUnsortedProcessingQueue* mPrevBackendIndirectCompatibilityExpansionQueue;
+
+
+						CIndividualUnsortedProcessingQueue* mBackendIndividualReuseExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mUseBackendIndividualReuseExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mPrevBackendIndividualReuseExpansionQueue;
+
+						bool mBackendIndividualLateReuseExpansionActivated;
+						CIndividualUnsortedProcessingQueue* mBackendLateIndividualReuseExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mUseBackendLateIndividualReuseExpansionQueue;
+						CIndividualUnsortedProcessingQueue* mPrevBackendLateIndividualReuseExpansionQueue;
+
+						CIndividualLinkerRotationProcessingQueue* mBackendIndividualNeighbourExpansionQueue;
+						CIndividualLinkerRotationProcessingQueue* mUseBackendIndividualNeighbourExpansionQueue;
+						CIndividualLinkerRotationProcessingQueue* mPrevBackendIndividualNeighbourExpansionQueue;
 
 
 						CIndividualUnsortedProcessingQueue* mBackendDirectInfluenceExpansionQueue;
@@ -796,6 +850,8 @@ namespace Konclude {
 
 
 						CXLinker<CIndividualProcessNode*>* mLastBackendCacheIntegratedIndiNodeLinker;
+						cint64 mBackendCacheIntegratedIndividualNodeCount;
+						cint64 mBackendCacheIntegratedSameIndividualNodeCount;
 						CIndividualRepresentativeBackendCacheLoadedAssociationHash* mUseBackendLoadedAssociationHash;
 						CIndividualRepresentativeBackendCacheLoadedAssociationHash* mLocBackendLoadedAssociationHash;
 
@@ -807,6 +863,16 @@ namespace Konclude {
 						CIndividualDelayedBackendInitializationProcessingQueue* mPrevDelayedBackendInitProcQueue;
 
 
+						CBackendNeighbourExpansionControllingData* mUseBackendNeighbourExpansionControllingData;
+						CBackendNeighbourExpansionControllingData* mLocBackendNeighbourExpansionControllingData;
+
+						CBackendNeighbourExpansionQueue* mBackendNeighbourExpansionQueue;
+						CBackendNeighbourExpansionQueue* mUseBackendNeighbourExpansion;
+						CBackendNeighbourExpansionQueue* mPrevBackendNeighbourExpansion;
+
+						bool mBackendCacheUpdateIndividualsInitialized;
+
+						CXLinker<CIndividualProcessNode*>* mRepresentativeNeighbourExpansionIndividualNodeLinker;
 
 
 					// private methods

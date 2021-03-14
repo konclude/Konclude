@@ -69,13 +69,15 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringManagerQueryData(CComplexAnsweringQuery* query, CCallbackData* callback);
+					CAnsweringManagerQueryData(CComplexAnsweringQuery* query, CCallbackData* callback, bool compositionQuery);
 
 
 					CComplexAnsweringQuery* getQuery();
 					CCallbackData* getCallback();
 					CAnswererThread* getThread();
 					CAnsweringManagerQueryData* setThread(CAnswererThread* thread);
+					bool isCompositionQuery();
+
 
 				// protected methods
 				protected:
@@ -85,6 +87,7 @@ namespace Konclude {
 					CAnswererThread* mThread;
 					CComplexAnsweringQuery* mQuery;
 					CCallbackData* mCallback;
+					bool mCompositionQuery;
 
 
 				// private methods

@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef KONCLUDE_REASONER_KERNEL_CACHE_CBackendRepresentativeMemoryCacheOntologyData_H
-#define KONCLUDE_REASONER_KERNEL_CACHE_CBackendRepresentativeMemoryCacheOntologyData_H
+#ifndef KONCLUDE_REASONER_KERNEL_CACHE_CBACKENDREPRESENTATIVEMEMORYCACHEONTOLOGYDATA_H
+#define KONCLUDE_REASONER_KERNEL_CACHE_CBACKENDREPRESENTATIVEMEMORYCACHEONTOLOGYDATA_H
 
 // Libraries includes
 
@@ -35,6 +35,8 @@
 #include "CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray.h"
 #include "CBackendRepresentativeMemoryCardinalitySignatureResolveCacheItem.h"
 #include "CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData.h"
+#include "CBackendRepresentativeMemoryCacheIndividualAssociationContext.h"
+#include "CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker.h"
 
 
 // Other includes
@@ -68,7 +70,8 @@ namespace Konclude {
 						//! Constructor
 						CBackendRepresentativeMemoryCacheOntologyData(CBackendRepresentativeMemoryCacheBaseContext* baseContext);
 
-						CBackendRepresentativeMemoryCacheOntologyData* initOntologyData(cint64 ontologyIdentifer);
+						CBackendRepresentativeMemoryCacheOntologyData* initOntologyData(cint64 ontologyIdentifer, bool directIndexing);
+						CBackendRepresentativeMemoryCacheOntologyData* copyOntologyData(CBackendRepresentativeMemoryCacheOntologyData* data);
 
 						cint64 getOntologyIdentifer();
 						cint64 getUsageCount();
@@ -96,6 +99,8 @@ namespace Konclude {
 						cint64 getNextEntryID(bool moveNext = true);
 						CBackendRepresentativeMemoryCacheOntologyData* setNextEntryID(cint64 nextEntryID);
 
+						cint64 getMaxStoredIndvidualiId();
+						CBackendRepresentativeMemoryCacheOntologyData* updateMaxStoredIndvidualiId(cint64 id);
 
 
 						cint64 getLastMinIncompletelyHandledIndvidualiId();
@@ -107,16 +112,107 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheOntologyData* incIncompletelyHandledIndividualIdCount(cint64 count = 1);
 						CBackendRepresentativeMemoryCacheOntologyData* decIncompletelyHandledIndividualIdCount(cint64 count = 1);
 
-						bool getZeroIncompletelyHandledIndividualIdCountDebugWritten();
-						CBackendRepresentativeMemoryCacheOntologyData* setZeroIncompletelyHandledIndividualIdCountDebugWritten(bool written);
+
+						cint64 getIndividualAssociationsCount();
+						CBackendRepresentativeMemoryCacheOntologyData* setIndividualAssociationsCount(cint64 count);
+						CBackendRepresentativeMemoryCacheOntologyData* incIndividualAssociationsCount(cint64 count = 1);
+
+
+						bool isAssociationCompleted();
+						CBackendRepresentativeMemoryCacheOntologyData* setAssociationCompleted(bool completed);
+
+
+						bool isFirstIncompletelyHandledIndividualsRetrieved();
+						CBackendRepresentativeMemoryCacheOntologyData* setFirstIncompletelyHandledIndividualsRetrieved(bool retrieved);
+
 
 						cint64 getMaxIndividualAssociationDataUpdateCount();
 						CBackendRepresentativeMemoryCacheOntologyData* setMaxIndividualAssociationDataUpdateCount(cint64 count);
+
+						CCACHINGSET<cint64>* getProblematicIncompletelyHandledIndividualSet();
+						CBackendRepresentativeMemoryCacheOntologyData* setProblematicIncompletelyHandledIndividualSet(CCACHINGSET<cint64>* indiSet);
 
 
 						CBackendRepresentativeMemoryCacheOntologyContext* getTemporaryContext();
 						CBackendRepresentativeMemoryCacheOntologyContext* getOntologyContext();
 						CBackendRepresentativeMemoryCacheOntologyData* setOntologyContext(CBackendRepresentativeMemoryCacheOntologyContext* ontContext);
+
+
+						CBackendRepresentativeMemoryLabelCacheItem* getPrioritizedPropagationMarkedNeighbourLabelItem();
+						CBackendRepresentativeMemoryCacheOntologyData* setPrioritizedPropagationMarkedNeighbourLabelItem(CBackendRepresentativeMemoryLabelCacheItem* labelItem);
+
+
+						bool isIndividualLabelAssociationIndexed();
+						CBackendRepresentativeMemoryCacheOntologyData* setIndividualLabelAssociationIndexed(bool indexed);
+						cint64 updateIndividualLabelAssociationIndexed(bool releaseWaiting, CMemoryPool* memoryPools);
+						CBackendRepresentativeMemoryCacheOntologyData* setIndividualLabelAssociationIndexingCount(cint64 count);
+
+						CBackendRepresentativeMemoryCacheOntologyData* waitIndividualLabelAssociationIndexed();
+
+
+						cint64 getNextSlotUpdateWaitingCount();
+						CBackendRepresentativeMemoryCacheOntologyData* setNextSlotUpdateWaitingCount(cint64 updateCount);
+						bool isSlotUpdateIntegrated();
+						CBackendRepresentativeMemoryCacheOntologyData* setSlotUpdateIntegrated(bool integrated);
+
+						bool isBasicPrecomputationMode();
+						CBackendRepresentativeMemoryCacheOntologyData* setBasicPrecomputationMode(bool basicPrecomputation);
+						CBackendRepresentativeMemoryCacheIndividualAssociationData** getBasicPrecomputationIndividualIdAssoiationDataVector();
+						CBackendRepresentativeMemoryCacheOntologyData* setBasicPrecomputationIndividualIdAssoiationDataVector(cint64 indiIdAssoDataVectorSize, CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector);
+						cint64 getBasicPrecomputationIndividualIdAssoiationDataVectorSize();
+
+
+						cint64 getBasicPrecompuationRetrievalIndividualIdPosition();
+						CBackendRepresentativeMemoryCacheOntologyData* setBasicPrecompuationRetrievalIndividualIdPosition(cint64 indiPos);
+
+
+						bool hasBasicPrecomputationModeActivation();
+						CBackendRepresentativeMemoryCacheOntologyData* setBasicPrecomputationModeActivation(bool basicPrecomputationActivation);
+
+
+
+						cint64 getIndividualAssociationDataUpdateCount();
+						CBackendRepresentativeMemoryCacheOntologyData* incIndividualAssociationDataUpdateCount(cint64 count = 1);
+
+						cint64 getIndividualAssociationDataDirectUpdateCount();
+						CBackendRepresentativeMemoryCacheOntologyData* incIndividualAssociationDataDirectUpdateCount(cint64 count = 1);
+
+
+						cint64 getIndividualAssociationMergingCount();
+						CBackendRepresentativeMemoryCacheOntologyData* incIndividualAssociationMergingCount(cint64 count = 1);
+
+						cint64 getInvolvedIndividualCount();
+						bool hasInvolvedIndividuals();
+						CBackendRepresentativeMemoryCacheOntologyData* incInvolvedIndividualCount(cint64 count = 1);
+
+
+
+						cint64 getIncompletelyHandledIndividualsRetrievalCount();
+						CBackendRepresentativeMemoryCacheOntologyData* incIncompletelyHandledIndividualsRetrievalCount(cint64 count = 1);
+
+						cint64 getCacheDataUpdateWritingCount();
+						CBackendRepresentativeMemoryCacheOntologyData* incCacheDataUpdateWritingCount(cint64 count = 1);
+
+
+
+						CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker* getLastActiveRecomputationReferenceLinker();
+
+						CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker* getRecomputationReferenceLinker();
+						CBackendRepresentativeMemoryCacheOntologyData* setRecomputationReferenceLinker(CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker* linker);
+
+
+						cint64 getOntologyDataUpdateId();
+						cint64 getMinimumValidRecomputationId();
+						cint64 getNextUpdateMinimumValidRecomputationId();
+
+						CBackendRepresentativeMemoryCacheOntologyData* setMinimumValidRecomputationId(cint64 recomputationId);
+						CBackendRepresentativeMemoryCacheOntologyData* setNextUpdateMinimumValidRecomputationId(cint64 recomputationId);
+
+						CCACHINGMAP<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationContext*>* getRecomputationIdReleasingIndividualAssociationContextMap();
+						CBackendRepresentativeMemoryCacheOntologyData* setRecomputationIdReleasingIndividualAssociationContextMap(CCACHINGMAP<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationContext*>* map);
+						CBackendRepresentativeMemoryCacheIndividualAssociationContext* getReleaseQueuedIndividualAssociationContextLinker();
+						CBackendRepresentativeMemoryCacheOntologyData* setReleaseQueuedIndividualAssociationContextLinker(CBackendRepresentativeMemoryCacheIndividualAssociationContext* linker);
+						CBackendRepresentativeMemoryCacheOntologyData* addReleaseQueuedIndividualAssociationContextLinker(CBackendRepresentativeMemoryCacheIndividualAssociationContext* linker);
 
 					// protected methods
 					protected:
@@ -134,13 +230,16 @@ namespace Konclude {
 						CCACHINGHASH<cint64, CBackendRepresentativeMemoryCacheNominalIndividualIndirectConnectionData* >* mNominalIndiIdIndirectConnectionDataHash;
 
 
+						cint64 mMaxStoredIndvidualiId;
 
 						cint64 mIndiIdAssoDataVectorSize;
 						CBackendRepresentativeMemoryCacheIndividualAssociationData** mIndiIdAssoDataVector;
 
 						cint64 mLastMinIncompletelyHandledIndiId;
 						cint64 mIncompletelyHandledIndiIdCount;
-						bool mZeroIncompletelyHandledIndiIdCountDebugWritten;
+						cint64 mIndividualAssociationsCount;
+						bool mAssociationCompleted;
+						bool mFirstIncompletelyHandledIndividualsRetrieved;
 
 						cint64 mMaxIndiAssocDataUpdateCount;
 
@@ -150,6 +249,45 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheOntologyContext mTemporaryContext;
 						CBackendRepresentativeMemoryCacheOntologyContext* mOntologyContext;
 
+						CCACHINGSET<cint64>* mProblematicIncompletelyHandledIndiSet;
+
+						CBackendRepresentativeMemoryLabelCacheItem* mPrioritizedPropagationMarkedNeighbourLabelItem;
+
+
+						bool mIndividualLabelAssociationIndexed;
+						QMutex mIndividualLabelAssociationIndexedWaitingMutex;
+						cint64 mIndividualLabelAssociationIndexedWaitingCount;
+						QAtomicInt mIndividualLabelAssociationIndexingCount;
+						QSemaphore mIndividualLabelAssociationIndexedWaitingSemaphore;
+
+						cint64 mNextSlotUpdateWaitingCount;
+						bool mSlotUpdateIntegrated;
+
+						bool mBasicPrecomputationMode;
+						CBackendRepresentativeMemoryCacheIndividualAssociationData** mBasicPrecompuationIndiIdAssoDataVector;
+						cint64 mBasicPrecompuationIndiIdAssoDataVectorSize;
+						cint64 mBasicPrecompuationRetrievalIndiIdPos;
+						bool mBasicPrecomputationModeActivation;
+
+
+						cint64 mInvolvedIndividualCount;
+
+						cint64 mIndividualAssociationDataUpdateCount;
+						cint64 mIndividualAssociationDataDirectUpdateCount;
+						cint64 mIndividualAssociationMergingCount;
+
+						cint64 mIncompletelyHandledIndividualsRetrievalCount;
+						cint64 mCacheDataUpdateWritingCount;
+
+
+						cint64 mMinimumValidRecomputationId;
+						cint64 mNextUpdateMinimumValidRecomputationId;
+
+						CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker* mRecomputationReferenceLinker;
+						CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker* mLastActiveRecomputationReferenceLinker;
+						cint64 mOntologyDataUpdateId;
+						CCACHINGMAP<cint64, CBackendRepresentativeMemoryCacheIndividualAssociationContext*>* mRecomputationIdReleasingIndividualAssociationMap;
+						CBackendRepresentativeMemoryCacheIndividualAssociationContext* mReleaseQueuedIndividualAssociationContextLinker;
 
 
 					// private methods
@@ -168,4 +306,4 @@ namespace Konclude {
 
 }; // end namespace Konclude
 
-#endif // KONCLUDE_REASONER_KERNEL_CACHE_CBackendRepresentativeMemoryCacheOntologyData_H
+#endif // KONCLUDE_REASONER_KERNEL_CACHE_CBACKENDREPRESENTATIVEMEMORYCACHEONTOLOGYDATA_H

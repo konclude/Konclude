@@ -28,6 +28,9 @@
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableIndividualMappings.h"
 #include "COptimizedComplexVariableJoiningBindingPositionMapping.h"
+#include "COptimizedComplexVariableCompositionItemRoleSamplingData.h"
+#include "CCacheAnswersWeightedUsageCostItem.h"
+#include "COptimizedComplexVariableCompositionItemUpdateData.h"
 
 
 
@@ -61,7 +64,7 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedComplexVariableCompositionItem {
+			class COptimizedComplexVariableCompositionItem : public CCacheAnswersWeightedUsageCostItem {
 				// public methods
 				public:
 					//! Constructor
@@ -69,7 +72,10 @@ namespace Konclude {
 					virtual ~COptimizedComplexVariableCompositionItem();
 
 					enum COMPOSITION_TYPE {
-						CONCEPT_BASE, ROLE_PROPAGATION, JOINING, DATA_LITERAL_BASE, DATA_LITERAL_EXTENSION, ABSOROPTION_BASED_EXTENSION, BINDING_REDUCTION, ROLE_PROPAGATION_JOIN, ROLE_PROPAGATION_REPLACEMENT, BINDING_EXTRACTION
+						CONCEPT_BASE, ROLE_PROPAGATION, JOINING, DATA_LITERAL_BASE, DATA_LITERAL_EXTENSION, ABSOROPTION_BASED_EXTENSION, BINDING_REDUCTION, ROLE_PROPAGATION_JOIN, ROLE_PROPAGATION_REPLACEMENT, BINDING_EXTRACTION, 
+						CONCEPT_SUB_SUPER_CLASSES, SUB_SUPER_CLASSES_PROPAGATION,
+						ROLE_SUB_SUPER_PROPERTIES, SUB_SUPER_PROPERTIES_PROPAGATION,
+						INDIVIDUAL_TYPE_EXTENSION, INDIVIDUAL_PROPERTY_EXTENSION
 					};
 
 
@@ -115,6 +121,14 @@ namespace Konclude {
 
 					COptimizedComplexVariableCompositionItem* setVariableMapping(COptimizedComplexVariableIndividualMappings* variableMapping);
 
+					COptimizedComplexVariableSubSuperClassesPropagationItem*& getSubSuperClassesPropagationItem(bool superClassesProp, cint64 varIdx);
+					COptimizedComplexVariableSubSuperPropertiesPropagationItem*& getSubSuperPropertiesPropagationItem(bool superPropertiesProp, cint64 varIdx);
+
+
+
+					COptimizedComplexVariableIndividualTypeExtensionItem*& getIndividualTypeExtensionItem(cint64 indiVarIdx, COptimizedComplexVariableCompositionItem* classVarCompItem, cint64 classVarIdx);
+					COptimizedComplexVariableIndividualNeighboringPropertyExtensionItem*& getIndividualNeighboringPropertyExtensionItem(cint64 indiVarIdx, COptimizedComplexVariableCompositionItem* propVarCompItem, cint64 classVarIdx);
+
 
 					COptimizedComplexVariableDataLiteralExtensionItem*& getDataLiteralExtensionItem(CRole* dataRole, cint64 varIdx);
 					COptimizedComplexVariableReductionItem*& getReductionItem(cint64 varIdx);
@@ -126,9 +140,10 @@ namespace Konclude {
 					COptimizedComplexVariableCompositionItem* setComputationDependentItemList(const QList<COptimizedComplexVariableCompositionItem*>& computationDependentItemList);
 
 
-					QList<COptimizedComplexVariableCompositionItem*>* getComputationUpdateItemList();
+					QList<COptimizedComplexVariableCompositionItemUpdateData>* getComputationUpdateItemList();
 					COptimizedComplexVariableCompositionItem* addComputationUpdateItem(COptimizedComplexVariableCompositionItem* updateCompItem);
-					COptimizedComplexVariableCompositionItem* setComputationUpdateItemList(const QList<COptimizedComplexVariableCompositionItem*>& computationUpdateItemList);
+					COptimizedComplexVariableCompositionItem* addComputationUpdateItem(COptimizedComplexVariableCompositionItem* updateCompItem, COptimizedComplexBuildingVariableCompositionsItem* buildingItem);
+					COptimizedComplexVariableCompositionItem* setComputationUpdateItemList(const QList<COptimizedComplexVariableCompositionItemUpdateData>& computationUpdateItemList);
 
 
 
@@ -155,12 +170,72 @@ namespace Konclude {
 					COptimizedComplexVariableCompositionItem* setComputationAttempt(cint64 attempt);
 
 
+					COptimizedComplexVariableCompositionItemRoleSamplingData& getRoleSamplingData(CRole* role);
+
+
+					bool isLastComputation();
+					COptimizedComplexVariableCompositionItem* setLastComputation(bool last);
+
+
+					bool hasSplitComputations();
+					COptimizedComplexVariableCompositionItem* setSplitComputations(bool splitComputations);
+					
+
+					bool isSplitComputationMode();
+					COptimizedComplexVariableCompositionItem* setSplitComputationMode(bool splitMode);
+					bool requiresSplitComputationActivation();
+					COptimizedComplexVariableCompositionItem* setRequiresSplitComputationActivation(bool splitActivation);
+
+					cint64 getCurrentSplitComputationPosition();
+					COptimizedComplexVariableCompositionItem* setCurrentSplitComputationPosition(cint64 pos);
+
+
+					cint64 getNextSplitComputationPosition();
+					COptimizedComplexVariableCompositionItem* setNextSplitComputationPosition(cint64 pos);
+					COptimizedComplexVariableCompositionItem* getCurrentSplitComputationItem();
+					COptimizedComplexVariableCompositionItem* setCurrentSplitComputationItem(COptimizedComplexVariableCompositionItem* splitItem);
+
+					cint64 getTotalSplitComputationCount();
+					COptimizedComplexVariableCompositionItem* setTotalSplitComputationCount(cint64 count);
+
+					cint64 getCompletedSplitComputationCount();
+					cint64 getRemainingSplitComputationCount();
+					COptimizedComplexVariableCompositionItem* setCompletedSplitComputationCount(cint64 count);
+					COptimizedComplexVariableCompositionItem* incCompletedSplitComputationCount(cint64 count = 1);
+
 
 #ifdef OPTIMIZED_ANSWERER_DEBUG_STRINGS
 					QStringList debugVariableNameStringList;
 					QString debugCreationString;
 					COptimizedComplexVariableCompositionItemVariableIndexMapping* debugVarItemIndexMapping;
 #endif
+
+
+					cint64 getLastVariableMappingCacheReportedCount();
+					cint64 getLastVariableMappingCacheReportedSize();
+
+					COptimizedComplexVariableCompositionItem* setLastVariableMappingCacheReportedCount(cint64 count);
+					COptimizedComplexVariableCompositionItem* setLastVariableMappingCacheReportedSize(cint64 size);
+
+
+
+
+					QSet<COptimizedComplexVariableCompositionItem*>* getComputationSuccessorItemSet();
+					COptimizedComplexVariableCompositionItem* addComputationSuccessorItem(COptimizedComplexVariableCompositionItem* succItem);
+
+					cint64 getComputationItemDepth();
+					COptimizedComplexVariableCompositionItem* setComputationItemDepth(cint64 depth);
+
+
+
+					double getCacheDescendantsIncompleteComputationCostSum();
+					COptimizedComplexVariableCompositionItem* setCacheDescendantsIncompleteComputationCostSum(double cost);
+
+					bool isVariableMappingsComputationStarted();
+					COptimizedComplexVariableCompositionItem* setVariableMappingsComputationStarted(bool started);
+
+					virtual bool clearComputation();
+
 
 				// protected methods
 				protected:
@@ -172,6 +247,7 @@ namespace Konclude {
 					bool mVariableMappingsComputed;
 					bool mVariableMappingsInitialized;
 					bool mComputationQueued;
+					bool mVariableMappingsComputationStarted;
 
 					double mRepeatedRequirementInsufficientDependencyComputationIncreaseFactor;
 
@@ -183,21 +259,51 @@ namespace Konclude {
 					QHash<CVariantTrible<CRole*, bool, cint64>, COptimizedComplexVariableRolePropagationItem*> mRoleInverseItemHash;
 					QHash<COptimizedComplexVariableJoiningBindingPositionMapping, COptimizedComplexVariableJoiningItem*> mJoiningItemHash;
 					QHash< QPair<CRole*, cint64>, COptimizedComplexVariableDataLiteralExtensionItem* > mDataLiteralExtensionItemHash;
+					QHash< QPair<bool, cint64>, COptimizedComplexVariableSubSuperClassesPropagationItem*> mSubSuperClassesPropagationItem;
+					QHash< QPair<bool, cint64>, COptimizedComplexVariableSubSuperPropertiesPropagationItem*> mSubSuperPropertiesPropagationItem;
+
+					QHash<CVariantTrible<cint64, COptimizedComplexVariableCompositionItem*, cint64>, COptimizedComplexVariableIndividualTypeExtensionItem*> mIndividualTypeExtensionItemHash;
+					QHash<CVariantTrible<cint64, COptimizedComplexVariableCompositionItem*, cint64>, COptimizedComplexVariableIndividualNeighboringPropertyExtensionItem*> mIndividualPropertyExtensionItemHash;
 
 					QHash< cint64, COptimizedComplexVariableReductionItem* > mReductionItemHash;
 					QHash< cint64, COptimizedComplexVariableExtractionItem* > mExtractionItemHash;
 
-
 					QList<COptimizedComplexVariableCompositionItem*> mComputationDependentItemList;
-					QList<COptimizedComplexVariableCompositionItem*> mComputationUpdateItemList;
+					QList<COptimizedComplexVariableCompositionItemUpdateData> mComputationUpdateItemList;
+					QSet<COptimizedComplexVariableCompositionItem*> mComputationSuccessorItemSet;
+					cint64 mComputationItemDepth;
+
 					cint64 mVariableMappingsComputationRequirement;
 
 					double mVariableMappingsExpectedCount;
+					double mComputedVariableMappingsCount;
 					cint64 mDependencyUpdatingCount;
 
 
 					cint64 mComputationStepId;
 					cint64 mComputationAttempt;
+
+					COptimizedComplexVariableCompositionItem* mSplitItem;
+					bool mLastComputation;
+					bool mSplitComputationMode;
+					bool mSplitComputations;
+					bool mRequiresSplitComputationActivation;
+					bool mHadSplitComputations;
+					cint64 mCurrentSplitComputationPos;
+					cint64 mNextSplitComputationPos;
+					cint64 mTotalSplitComputationCount;
+					cint64 mCompletedSplitComputationCount;
+
+					QHash<CRole*, COptimizedComplexVariableCompositionItemRoleSamplingData> mRoleSamplingDataHash;
+
+					cint64 mLastVariableMappingCacheReportedCount;
+					cint64 mLastVariableMappingCacheReportedSize;
+
+
+					double mCacheDescendantsIncompleteComputationCostSum;
+
+
+
 
 
 				// private methods

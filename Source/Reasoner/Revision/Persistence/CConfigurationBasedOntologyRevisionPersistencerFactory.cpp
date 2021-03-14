@@ -37,9 +37,8 @@ namespace Konclude {
 				COntologyRevisionPersistencer* CConfigurationBasedOntologyRevisionPersistencerFactory::createOntologyRevisionPersistencer() {
 					COntologyRevisionPersistencer* persistencer = nullptr;
 					QString persistencerName = CConfigDataReader::readConfigString(mConfig,"Konclude.Persistence.OntologyRevisionPersistencer");
-					if (persistencerName == "Konclude.Persistence.DirectoryOWL2XMLFilePersistencer") {
-						persistencer = new COntologyRevisionDirectoryOWL2XMLFilePersistencer(mConfig);
-					}
+					CNameBasedOntologyRevisionPersistencerFactory nameFactory(persistencerName, mConfig);
+					persistencer = nameFactory.createOntologyRevisionPersistencer();
 					return persistencer;
 				}
 

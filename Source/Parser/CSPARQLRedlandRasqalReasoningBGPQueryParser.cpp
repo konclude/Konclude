@@ -28,7 +28,7 @@ namespace Konclude {
 
 
 
-		CSPARQLRedlandRasqalReasoningBGPQueryParser::CSPARQLRedlandRasqalReasoningBGPQueryParser(CSPARQLQueryBuilder *queryBuilder, COntologyBuilder* ontoBuilder, CConcreteOntology* ontology, CConfigurationBase* config) : CSPARQLSimpleBuildingParser(ontoBuilder, ontology) {
+		CSPARQLRedlandRasqalReasoningBGPQueryParser::CSPARQLRedlandRasqalReasoningBGPQueryParser(CSPARQLQueryBuilder *queryBuilder, COntologyBuilder* ontoBuilder, CConcreteOntology* ontology, CConfigurationBase* config) : CSPARQLExtendedMappingBuildingParser(ontoBuilder, ontology) {
 			mQueryBuilder = queryBuilder;
 			mConfig = config;
 			mConfWriteQueryStructure = CConfigDataReader::readConfigBoolean(mConfig, "Konclude.Debugging.WriteRedlandRasqalQueryStructure", false);
@@ -97,6 +97,17 @@ namespace Konclude {
 		};
 
 
+		QString	getRasqalVariableString(rasqal_query *query, rasqal_variable* variable) {
+			QString string;
+			if (variable->type == RASQAL_VARIABLE_TYPE_ANONYMOUS) {
+				string = QString("_:") + QString::fromUtf8((const char*)variable->name);
+			} else {
+				string = QString("?") + QString::fromUtf8((const char*)variable->name);
+			}
+			return string;
+		}
+
+
 		QString	getRasqalLiteralString(rasqal_query *query, rasqal_literal* literal) {
 			QString string;
 			if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(literal)) {
@@ -110,6 +121,22 @@ namespace Konclude {
 				//string = QString::fromUtf8((const char*)rasqal_literal_as_string(literal));
 			} else if (RASQAL_LITERAL_URI == rasqal_literal_get_type(literal)) {
 				string = QString::fromUtf8((const char*)rasqal_literal_as_string(literal));
+			} else if (RASQAL_LITERAL_STRING == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal)));
+			} else if (RASQAL_LITERAL_XSD_STRING == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"^^xsd:string").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal)));
+			} else if (RASQAL_LITERAL_BOOLEAN == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_BOOLEAN_DATATYPE);
+			} else if (RASQAL_LITERAL_INTEGER == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_INTEGER_DATATYPE);
+			} else if (RASQAL_LITERAL_FLOAT == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_FLOAT_DATATYPE);
+			} else if (RASQAL_LITERAL_DOUBLE == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_DOUBLE_DATATYPE);
+			} else if (RASQAL_LITERAL_DECIMAL == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_DECIMAL_DATATYPE);
+			} else if (RASQAL_LITERAL_DATETIME == rasqal_literal_get_type(literal)) {
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_DATETIME_DATATYPE);
 			}
 			return string;
 		}
@@ -447,20 +474,20 @@ namespace Konclude {
 			// check if it can be processed by Konclude
 			bool supported = true;
 			int seqSize = raptor_sequence_size(tripleSeq);
-			for (int i = 0; i < seqSize; ++i) {
-				rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(tripleSeq, i);
-				if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->predicate)) {
-					supported = false;
-				} else if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->object)) {
-					if (RASQAL_LITERAL_URI == rasqal_literal_get_type(triple->predicate)) {
-						const char* predicateString = (const char*)rasqal_literal_as_string(triple->predicate);
-						if (strcmp(predicateString, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") == 0) {
-							supported = false;
-						}
-					}
-				}
+			//for (int i = 0; i < seqSize; ++i) {
+			//	rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(tripleSeq, i);
+			//	if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->predicate)) {
+			//		supported = false;
+			//	} else if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->object)) {
+			//		if (RASQAL_LITERAL_URI == rasqal_literal_get_type(triple->predicate)) {
+			//			const char* predicateString = (const char*)rasqal_literal_as_string(triple->predicate);
+			//			if (strcmp(predicateString, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") == 0) {
+			//				supported = false;
+			//			}
+			//		}
+			//	}
 
-			}
+			//}
 
 			if (supported) {
 				QList<CRDFStringTriple*> tripleStringList;
@@ -483,6 +510,14 @@ namespace Konclude {
 						varStringUsageCountHash[stringTriple->string[0]]++;
 						varStringLitHash.insert(stringTriple->string[0], triple->subject);
 						varLitStringHash.insert(triple->subject, stringTriple->string[0]);
+					}
+					if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->predicate)) {
+						if (!varStringLitHash.contains(stringTriple->string[1])) {
+							varStringList.append(stringTriple->string[1]);
+						}
+						varStringUsageCountHash[stringTriple->string[1]]++;
+						varStringLitHash.insert(stringTriple->string[1], triple->predicate);
+						varLitStringHash.insert(triple->predicate, stringTriple->string[1]);
 					}
 					if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->object)) {
 						if (!varStringLitHash.contains(stringTriple->string[2])) {
@@ -514,8 +549,11 @@ namespace Konclude {
 
 				QSet<QString> variableSet = varStringList.toSet();
 				QSet<QString> usedVariableSet;
+				QSet<QString> remainVariableSet = variableSet;
+
 				for (const QString& varString : varStringList) {
 					if (!usedVariableSet.contains(varString)) {
+						remainVariableSet.remove(varString);
 						QSet<QString> connectedVariableSet;
 						QList<CRDFStringTriple*> connectedTripleStringList;
 						for (cint64 i = 0; i < triplesCount; ++i) {
@@ -597,16 +635,19 @@ namespace Konclude {
 							QString varString = *varIt;
 
 							bool startTriplePos = true;
-							for (int i = 0; i < triplesCount && varIt != varItEnd; ++i) {
+							for (int i = 0; i < triplesCount && (varIt != varItEnd || !remainVariableSet.isEmpty()); ++i) {
 								if (connectedTripleStringList.at(i)) {
 									int triplePos = triplesStartColumn + i;
-									minUsedTriplesStartColumn = qMin(minUsedTriplesStartColumn, triplePos);
-									maxUsedTriplesEndColumn = qMax(maxUsedTriplesEndColumn, triplePos);
-
-									bgpData->tripleStartPos = qMin(bgpData->tripleStartPos, triplePos);
-									bgpData->tripleEndPos = qMax(bgpData->tripleEndPos, triplePos);
-
 									rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(queryTripleSeq, triplePos);
+									if (varIt != varItEnd) {
+										minUsedTriplesStartColumn = qMin(minUsedTriplesStartColumn, triplePos);
+										maxUsedTriplesEndColumn = qMax(maxUsedTriplesEndColumn, triplePos);
+									}
+									if (varIt != varItEnd || !remainVariableSet.isEmpty()) {
+										bgpData->tripleStartPos = qMin(bgpData->tripleStartPos, triplePos);
+										bgpData->tripleEndPos = qMax(bgpData->tripleEndPos, triplePos);
+									}
+
 
 									cint64 encodedSubQueryId = subQueryId + 1;
 									if (startTriplePos) {
@@ -614,6 +655,8 @@ namespace Konclude {
 										startTriplePos = false;
 									}
 									triple->origin = rasqal_new_integer_literal(mRasqalWorld, RASQAL_LITERAL_INTEGER, encodedSubQueryId);
+
+
 									//triple->origin = (rasqal_literal*)encodedSubQueryId;
 
 									rasqal_literal* lastVarLit = varStringLitHash.value(varString);
@@ -657,7 +700,7 @@ namespace Konclude {
 						} else {
 							bool hasTriple = false;
 							bool startTriplePos = true;
-							for (int i = 0; i < triplesCount && !hasTriple; ++i) {
+							for (int i = 0; i < triplesCount && (!hasTriple || !remainVariableSet.isEmpty()); ++i) {
 								if (connectedTripleStringList.at(i)) {
 									int triplePos = triplesStartColumn + i;
 									minUsedTriplesStartColumn = qMin(minUsedTriplesStartColumn, triplePos);
@@ -890,7 +933,7 @@ namespace Konclude {
 
 
 
-		bool CSPARQLRedlandRasqalReasoningBGPQueryParser::generateBGPBasedSubQueries() {
+		bool CSPARQLRedlandRasqalReasoningBGPQueryParser::generateBGPBasedSubQueries(const QStringList& projectedVarList) {
 			if (mConfWriteSubQueryTriples) {
 				QFile file("./Debugging/Answering/RASQAL-Sub-Query-Triples.txt");
 				if (file.open(QIODevice::WriteOnly)) {
@@ -925,19 +968,87 @@ namespace Konclude {
 					}
 				}
 
-				CEXPRESSIONLIST<COrderingTermExpression*> orderingList;
-				QList<CFilteringTermExpression*> filteringList;
-				QList<CExpressionVariable*> disVarList;
-				QList<CExpressionVariable*> ignoreCardVarExpList;
-				QHash<QString, CExpressionVariable*> disVarNameExpHash;
 
+				bool allIndiVars = true;
+				bool allClassVars = true;
+				bool allObjPropVars = true;
+				bool allDataPropVars = true;
 
-				bool distinctModifier = mConfForceDistinctSubQueries;
-				if (!distinctModifier) {
-					if (mDistinctSubBGPsSet.contains(bgpData->bgp)) {
-						distinctModifier = true;
+				bool hasIndiVars = false;
+				bool hasClassVars = false;
+				bool hasObjPropVars = false;
+				bool hasDataPropVars = false;
+
+				for (CExpressionVariable* var : varExpSet) {
+					if (dynamic_cast<CClassVariableExpression*>(var)) {
+						allIndiVars = false;
+						allObjPropVars = false;
+						allDataPropVars = false;
+						hasClassVars = true;
+					} else if (dynamic_cast<CIndividualVariableExpression*>(var)) {
+						allClassVars = false;
+						allObjPropVars = false;
+						allDataPropVars = false;
+						hasIndiVars = true;
+					} else if (dynamic_cast<CObjectPropertyVariableExpression*>(var)) {
+						allIndiVars = false;
+						allClassVars = false;
+						allDataPropVars = false;
+						hasObjPropVars = true;
+					} else if (dynamic_cast<CDataPropertyVariableExpression*>(var)) {
+						allIndiVars = false;
+						allClassVars = false;
+						allObjPropVars = false;
+						hasDataPropVars = true;
 					}
 				}
+
+
+				QHash<QString, CExpressionVariable*> disVarNameExpHash;
+				QList<CExpressionVariable*> ignoreCardVarExpList;
+
+				for (CExpressionVariable* var : varExpSet) {
+					if (subQueryGenData->distinguishedVariableSet.contains("?" + var->getName()) || subQueryGenData->distinguishedVariableSet.contains("$" + var->getName())) {
+						disVarNameExpHash.insert("?" + var->getName(), var);
+					} else if (subQueryGenData->additionalIntegratedVariableSet.contains("?" + var->getName()) || subQueryGenData->additionalIntegratedVariableSet.contains("$" + var->getName())) {
+						ignoreCardVarExpList.append(var);
+					}
+				}
+
+				QList<CExpressionVariable*> disVarList;
+				for (QStringList::iterator varIt = subQueryGenData->distinguishedVariableStringList.begin(); varIt != subQueryGenData->distinguishedVariableStringList.end(); ++varIt) {
+					QString varString(*varIt);
+					if (disVarNameExpHash.contains(varString)) {
+						disVarList.append(disVarNameExpHash.value(varString));
+					}
+				}
+
+				QList<CExpressionVariable*> sortedDisVarList;
+				sortedDisVarList.reserve(disVarList.size());
+				QHash<QString, cint64> projVarPosHash;
+				cint64 nextProjVarPos = 0;
+				for (CExpressionVariable* disVar : disVarList) {
+					projVarPosHash.insert("?" + disVar->getName(),-1);
+					sortedDisVarList.append(nullptr);
+				}
+				for (const QString& projVarString : projectedVarList) {
+					if (projVarPosHash.contains(projVarString)) {
+						projVarPosHash.insert(projVarString, nextProjVarPos++);
+					}
+				}
+				for (CExpressionVariable* disVar : disVarList) {
+					if (projVarPosHash.contains("?" + disVar->getName())) {
+						cint64 pos = projVarPosHash.value("?" + disVar->getName());
+						sortedDisVarList[pos] = disVar;
+					}
+				}
+				for (CExpressionVariable* disVar : disVarList) {
+					if (!projVarPosHash.contains("?" + disVar->getName())) {
+						sortedDisVarList[nextProjVarPos++] = disVar;
+					}
+				}
+
+
 				cint64 limit = -1;
 				cint64 offset = 0;
 				if (mSingleBGPResultsDirectlyUsable && mConfPropagateBGPSubQueryDistinct) {
@@ -947,31 +1058,87 @@ namespace Konclude {
 					offset = queryOffset;
 					bgpData->completelyHandledResultsTransfer = true;
 					rasqal_query_set_offset(mRasqalQuery, 0);
-					rasqal_query_set_limit(mRasqalQuery, 0);
-				}
-
-				for (CExpressionVariable* var : varExpSet) {
-					if (subQueryGenData->distinguishedVariableSet.contains("?" + var->getName()) || subQueryGenData->distinguishedVariableSet.contains("$" + var->getName())) {
-						disVarNameExpHash.insert("?" + var->getName(), var);
-					} else if (subQueryGenData->additionalIntegratedVariableSet.contains("?" + var->getName()) || subQueryGenData->additionalIntegratedVariableSet.contains("$" + var->getName())) {
-						ignoreCardVarExpList.append(var);
-					}
-				}
-				for (QStringList::iterator varIt = subQueryGenData->distinguishedVariableStringList.begin(); varIt != subQueryGenData->distinguishedVariableStringList.end(); ++varIt) {
-					QString varString(*varIt);
-					if (disVarNameExpHash.contains(varString)) {
-						disVarList.append(disVarNameExpHash.value(varString));
+					if (queryLimit != -1) {
+						rasqal_query_set_limit(mRasqalQuery, 0);
 					}
 				}
 
-				if (!disVarList.isEmpty()) {
-					QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-SELECT-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
-					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternSelectQuery(axiomList, disVarList, ignoreCardVarExpList, distinctModifier, limit, offset, subQueryName);
-					mBGPSubQueryNameHash.insert(subQueryName, bgpData);
-				} else {
-					QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-ASK-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
-					CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternAskQuery(axiomList, filteringList, subQueryName);
-					mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+
+
+				if (hasObjPropVars && allObjPropVars) {
+					if (!sortedDisVarList.isEmpty()) {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-SELECT-Object-Properties-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternObjectPropertiesSelectQuery(axiomList, sortedDisVarList, limit, offset, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					} else {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-ASK-Object-Properties-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternObjectPropertiesAskQuery(axiomList, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					}
+				} else if (hasDataPropVars && allDataPropVars) {
+					if (!sortedDisVarList.isEmpty()) {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-SELECT-Data-Properties-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternDataPropertiesSelectQuery(axiomList, sortedDisVarList, limit, offset, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					} else {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-ASK-Data-Properties-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternDataPropertiesAskQuery(axiomList, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					}
+				} else if (hasClassVars && allClassVars) {
+					if (!sortedDisVarList.isEmpty()) {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-SELECT-Classes-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternClassSelectQuery(axiomList, sortedDisVarList, limit, offset, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					} else {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-ASK-Classes-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternClassAskQuery(axiomList, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					}
+				} else if (hasIndiVars && allIndiVars || varExpSet.isEmpty()) {
+
+					CEXPRESSIONLIST<COrderingTermExpression*> orderingList;
+					QList<CFilteringTermExpression*> filteringList;
+
+					bool distinctModifier = mConfForceDistinctSubQueries;
+					if (!distinctModifier) {
+						if (mDistinctSubBGPsSet.contains(bgpData->bgp)) {
+							distinctModifier = true;
+						}
+					}
+
+
+					if (!sortedDisVarList.isEmpty()) {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-SELECT-Individuals-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternIndividualSelectQuery(axiomList, sortedDisVarList, ignoreCardVarExpList, distinctModifier, limit, offset, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					} else {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-ASK-Individuals-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternIndividualAskQuery(axiomList, filteringList, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					}
+				} else if (hasIndiVars && (hasObjPropVars || hasDataPropVars || hasClassVars) || varExpSet.isEmpty()) {
+
+					CEXPRESSIONLIST<COrderingTermExpression*> orderingList;
+					QList<CFilteringTermExpression*> filteringList;
+
+					bool distinctModifier = mConfForceDistinctSubQueries;
+					if (!distinctModifier) {
+						if (mDistinctSubBGPsSet.contains(bgpData->bgp)) {
+							distinctModifier = true;
+						}
+					}
+
+
+					if (!sortedDisVarList.isEmpty()) {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-SELECT-Individuals-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternIndividualMixedSelectQuery(axiomList, sortedDisVarList, ignoreCardVarExpList, distinctModifier, limit, offset, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					} else {
+						QString subQueryName = QString("Redland-Rasqal-BGP-Reasoning-ASK-Individuals-Sub-Query-%1").arg(subQueryGenData->bgpData->subQueryId);
+						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternIndividualAskQuery(axiomList, filteringList, subQueryName);
+						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
+					}
 				}
 
 
@@ -1158,6 +1325,22 @@ namespace Konclude {
 			if (queryDistinct && mConfPropagateBGPSubQueryDistinct && !hasProjectionAggregate(((rasqal_query_s*)rasqalQuery)->projection)) {
 				identifySubBGPsDistinctComputable(basicGrapPattern, mDistinctSubBGPsSet);
 			}
+
+			QStringList selectProjVarList;
+			raptor_sequence* projectVarSeq = rasqal_query_get_bound_variable_sequence(rasqalQuery);
+			if (projectVarSeq) {
+				int seqSize = raptor_sequence_size(projectVarSeq);
+				for (int i = 0; i < seqSize; ++i) {
+					rasqal_variable* v = (rasqal_variable*)raptor_sequence_get_at(projectVarSeq, i);
+
+					QString	varString = getRasqalVariableString(rasqalQuery, v);
+					if (!varString.isEmpty()) {
+						selectProjVarList.append(varString);
+					}
+				}
+			}
+
+
 			mQueryContainsSelectAll = queryText.contains("*");
 
 			mSingleBGPResultsDirectlyUsable = mConfAllowResultStreamingFromSingleSubQuery;
@@ -1167,7 +1350,7 @@ namespace Konclude {
 
 			identifyBGPBasedSubQueries(basicGrapPattern);
 
-			generateBGPBasedSubQueries();
+			generateBGPBasedSubQueries(selectProjVarList);
 
 			if (mConfWriteQueryStructure) {
 				raptor_iostream * raptorIoStream = raptor_new_iostream_to_filename(mRaptorWorld, "./Debugging/Answering/raptor-query.txt");

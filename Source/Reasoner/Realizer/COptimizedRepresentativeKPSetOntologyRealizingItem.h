@@ -50,6 +50,7 @@
 #include "COntologyRealizingDynamicIteratorRequirmentDataCallback.h"
 #include "COptimizedRepresentativeKPSetIndividualCandiatesIterator.h"
 #include "COptimizedRepresentativeKPSetCacheLabelExistentialDataRoleItemIterator.h"
+#include "COptimizedKPSetIndividualInstantiatedItemMultiHash.h"
 
 // Other includes
 #include "Reasoner/Kernel/Task/CCalculationConfigurationExtension.h"
@@ -103,6 +104,10 @@ namespace Konclude {
 					~COptimizedRepresentativeKPSetOntologyRealizingItem();
 
 					virtual COptimizedRepresentativeKPSetOntologyRealizingItem* initRequirementConfigRealizingItem(CConcreteOntology* ontology, CConfigurationBase* config, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader);
+
+
+					cint64 getConcurrentHandlingVectorSize();
+
 					
 					COptimizedRepresentativeKPSetOntologyRealizingItem* initConceptItemsFromHierarchy();
 					COptimizedRepresentativeKPSetOntologyRealizingItem* initRoleItemsFromHierarchy();
@@ -231,7 +236,7 @@ namespace Konclude {
 					QList<COptimizedKPSetRoleInstancesItem*>* getRoleInstancesItemList();
 					QList<COptimizedKPSetRoleInstancesItem*>* getComplexRoleInstancesItemList();
 
-					QHash<cint64,COptimizedKPSetIndividualItem*>* getIndividualInstantiatedItemHash();
+					COptimizedKPSetIndividualInstantiatedItemMultiHash* getIndividualInstantiatedItemHash();
 
 					COptimizedKPSetIndividualItem* getIndividualInstantiatedItem(CIndividual* individual, bool directCreate = true);
 					bool hasIndividualInstantiatedItem(CIndividual* individual);
@@ -313,7 +318,9 @@ namespace Konclude {
 					virtual CRealizationIndividualInstanceItemReference getInstanceItemReference(const CIndividualReference& indiRef, bool correctSameIndividualsMerging);
 					virtual CRealizationIndividualInstanceItemReference getInstanceItemReference(cint64 indiId, bool correctSameIndividualsMerging);
 
-					virtual bool isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConcept* concept);
+					virtual bool isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptInstantiatedItem* conItem);
+					virtual bool requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptInstantiatedItem* conItem);
+					virtual bool requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef);
 
 
 
@@ -339,6 +346,7 @@ namespace Konclude {
 
 					virtual bool visitIndividuals(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptRealizationIndividualVisitor* visitor);
 					virtual bool visitConcepts(CConceptInstantiatedItem* item, CConceptRealizationConceptVisitor* visitor);
+					virtual bool visitHierarchyNode(CConceptInstantiatedItem* item, CConceptRealizationHierarchyNodeVisitor* visitor);
 
 					virtual CConceptInstantiatedItem* getInstantiatedItem(CConcept* concept);
 
@@ -374,6 +382,8 @@ namespace Konclude {
 					virtual bool hasExistentiallyLinkedRoleInstances(CRole* role, bool inversed);
 
 
+					virtual bool requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, bool onlyOnePerRole);
+					virtual bool requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, CRoleInstantiatedItem* roleItem, bool onlyOne);
 
 
 					virtual bool isRoleInstance(CRole* role, const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, const CRealizationIndividualInstanceItemReference& targetIndiRealItemRef);
@@ -387,6 +397,15 @@ namespace Konclude {
 					bool visitSourceTargetIndividuals(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem, bool target, CRoleRealizationInstanceVisitor* visitor);
 					bool visitSourceTargetIndividualRoles(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool target, CRoleRealizationInstantiatedVisitor* visitor);
 
+					bool collectSourceTargetIndividualRoles(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool target, bool collectKnown, QSet<CRoleInstantiatedItem*>& roleSetCollection, QSet<CRoleInstantiatedItem*>* excludeRoleSet = nullptr);
+
+					bool checkHasSourceTargetIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetRoleInstancesItem* roleItem, bool target, bool& requiresRealization);
+					virtual bool isSourceIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetRoleInstancesItem* roleItem, bool inversed);
+					virtual bool requiresSourceIndividualRoleRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, COptimizedKPSetRoleInstancesItem* roleItem, bool inversed);
+					virtual bool isSourceIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem);
+					virtual bool requiresSourceIndividualRoleRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem);
+
+
 					virtual CRealizationIndividualInstanceItemReference getRoleInstanceItemReference(const CIndividualReference& indiRef);
 
 
@@ -395,6 +414,7 @@ namespace Konclude {
 
 
 					virtual bool visitRoles(CRoleInstantiatedItem* item, CRoleRealizationRoleVisitor* visitor);
+					virtual bool visitRoleHierarchyNode(CRoleInstantiatedItem* roleInstItem, CRoleRealizationHierarchyNodeVisitor* visitor);
 
 					virtual CRoleInstantiatedItem* getRoleInstantiatedItem(CRole* role);
 					virtual CRoleInstanceItem* getRoleInstanceItem(CIndividual* individual);
@@ -629,7 +649,7 @@ namespace Konclude {
 
 					QHash<CConcept*,COptimizedKPSetRoleInstancesItem*> mMarkerConceptInstancesItemHash;
 
-					QHash<cint64, COptimizedKPSetIndividualItem*> mIndividualInstantiatedItemHash;
+					COptimizedKPSetIndividualInstantiatedItemMultiHash* mIndividualInstantiatedItemHash;
 					QList<COptimizedKPSetIndividualItem*> mInstantiatedItemContainer;
 
 
@@ -721,6 +741,9 @@ namespace Konclude {
 					cint64 mModelMergingsSucessCount;
 					cint64 mModelMergingsInstanceFoundCount;
 					cint64 mModelMergingsNonInstanceFoundCount;
+
+
+					cint64 mConfConcurrentHandlingVectorSize;
 
 
 				// private methods

@@ -35,6 +35,7 @@
 
 #include "Reasoner/Kernel/Process/Dependency/CROLEASSERTIONDependencyNode.h"
 #include "Reasoner/Kernel/Process/Dependency/CVALUEDependencyNode.h"
+#include "Reasoner/Kernel/Process/Dependency/CMERGEDLINKDependencyNode.h"
 
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheReader.h"
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheWriter.h"
@@ -44,6 +45,8 @@
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker.h"
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheUtilities.h"
 #include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker.h"
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker.h"
+#include "Reasoner/Kernel/Cache/CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker.h"
 
 
 #include "Reasoner/Kernel/Task/CSatisfiableTaskRepresentativeBackendUpdatingAdapter.h"
@@ -107,14 +110,15 @@ namespace Konclude {
 						bool determineAssociationBackendCardinality(CIndividualProcessNode* indiNode, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CCalculationAlgorithmContext* calcAlgContext);
 
 
-						bool determineRoleInstantiatedSetLabelAssociationBackendItems(CIndividualProcessNode* extractionIndiNode, CIndividualProcessNode* indiNode, bool onlyNondeterministic, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, CCalculationAlgorithmContext* calcAlgContext);
+						bool determineRoleInstantiatedSetLabelAssociationBackendItems(CIndividualProcessNode* extractionIndiNode, CIndividualProcessNode* indiNode, bool onlyNondeterministic, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, QSet<cint64>* propCutIndiSet, CCalculationAlgorithmContext* calcAlgContext);
 
 
 						void collectRoleSuccessorData(CIndividualLinkEdge* link, bool inversed, cint64 maxDetBranchTag, bool isNominalNeighbour, bool isDataNeighbour, CPROCESSSET<TRoleInversionPair>* combinedNeighbourDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedNeighbourDetRoleInstantiatedLinker,
 							CPROCESSSET<TRoleInversionPair>* combinedNeighbourNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedNeighbourNonDetRoleInstantiatedLinker, CPROCESSSET<TRoleInversionPair>* combinedExistentialDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedExistentialDetRoleInstantiatedLinker, 
 							CPROCESSSET<TRoleInversionPair>* combinedExistentialNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedExistentialNonDetRoleInstantiatedLinker, CPROCESSSET<TRoleInversionPair>* combinedDataDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedDataDetRoleInstantiatedLinker,
 							CPROCESSSET<TRoleInversionPair>* combinedDataNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedDataNonDetRoleInstantiatedLinker, CRole* role, CCalculationAlgorithmContext* calcAlgContext, bool &collected, CIndividualProcessNode* indiNode, CIndividualProcessNode* connIndiNode,
-							cint64 connIndiMergedNominalId, bool connIndiNominalDeterministicallyMerged, CBackendRepresentativeMemoryCacheRoleAssertionLinker* &roleAssertionLinke, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash);
+							cint64 connIndiMergedNominalId, bool connIndiNominalDeterministicallyMerged, CBackendRepresentativeMemoryCacheRoleAssertionLinker* &roleAssertionLinke, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash,
+							CBackendRepresentativeMemoryLabelCacheItem* prevNeighbourRoleSetLabelRef);
 
 
 						CIndividualProcessNode* getSuccessorIndividual(CIndividualProcessNode*& indi, CIndividualLinkEdge* link, CCalculationAlgorithmContext* calcAlgContext);
@@ -129,6 +133,10 @@ namespace Konclude {
 
 
 						bool visitMergedIndividualNodesAssociationData(CIndividualProcessNode* baseIndiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* excludeIndiAssData, CBackendRepresentativeMemoryLabelCacheItem* excludeIndiSetLabel, bool visitBaseIndiAssoData, cint64 maxDetBranchTag, function<bool(cint64 mergedIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* mergedIndiAssData, bool deterministicallyMerged)> visitFunc, CCalculationAlgorithmContext* calcAlgContext);
+
+
+						CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* getInvolvedIndividualData(CCalculationAlgorithmContext* calcAlgContext);
+						CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* getPropagationCutIndividualData(QSet<cint64>*& propCutIndiSet, CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repbackUpdAdapter, CCalculationAlgorithmContext* calcAlgContext);
 
 
 					// protected variables

@@ -104,7 +104,7 @@ namespace Konclude {
 					QSet<CIndividual*>* getDirectlyChangedIndividuals(CConcreteOntology* lastOntologyVersion, CIncrementalOntologyPrecomputationItem* incPreCompItem);
 					QSet<CIndividual*>* getDirectlyChangedIndividualsFromLastConsistentlyTestedOntology(CIncrementalOntologyPrecomputationItem* incPreCompItem);
 					
-
+					virtual bool precomputationIndividualsRetrieved(COntologyPrecomputationItem* ontPreCompItem, CRetrievedPrecomputationIndividualsCallbackEvent* pcce);
 
 					bool logIncrementalReasoningInfos(CIncrementalOntologyPrecomputationItem* incPreCompItem);
 

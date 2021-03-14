@@ -53,6 +53,9 @@ namespace Konclude {
 				return *this;
 			}
 
+			librdf_node* CRedlandNodeHasher::getRedlandNode() const {
+				return mNode;
+			}
 
 			CRedlandNodeHasher::~CRedlandNodeHasher() {
 				librdf_free_node(mNode);

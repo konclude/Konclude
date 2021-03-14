@@ -33,6 +33,7 @@
 #include "CRealizationIndividualInstanceItemReference.h"
 #include "CRealizationIndividualInstanceItemReferenceIterator.h"
 #include "CRealizationIndividualSorting.h"
+#include "CRoleRealizationHierarchyNodeVisitor.h"
 
 // Other includes
 
@@ -86,9 +87,20 @@ namespace Konclude {
 					virtual bool visitTargetIndividualRoles(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleRealizationInstantiatedVisitor* visitor) = 0;
 					virtual bool visitBetweeenIndividualRoles(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, const CRealizationIndividualInstanceItemReference& targetIndiRealItemRef, CRoleRealizationInstantiatedVisitor* visitor) = 0;
 
-					
+
+					virtual bool requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, bool onlyOnePerRole = false) = 0;
+					virtual bool requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, CRoleInstantiatedItem* roleItem, bool onlyOne = false) = 0;
+					virtual bool requiresSourceIndividualRolesRealization(const CRealizationIndividualInstanceItemReference& sourceIndiRealItemRef, CRole* role, bool onlyOne = false);
+
+					virtual bool isSourceIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem) = 0;
+					virtual bool requiresSourceIndividualRoleRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem) = 0;
+					virtual bool isSourceIndividualRole(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRole* role);
+					virtual bool requiresSourceIndividualRoleRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRole* role);
+
+
 					virtual bool visitIndividuals(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleRealizationIndividualVisitor* visitor) = 0;
 					virtual bool visitRoles(CRoleInstantiatedItem* roleInstItem, CRoleRealizationRoleVisitor* visitor) = 0;
+					virtual bool visitRoleHierarchyNode(CRoleInstantiatedItem* roleInstItem, CRoleRealizationHierarchyNodeVisitor* visitor) = 0;
 
 					virtual CRealizationIndividualInstanceItemReference getRoleInstanceItemReference(const CIndividualReference& indiRef) = 0;
 					virtual CSameInstanceItem* getSameInstanceItem(const CRealizationIndividualInstanceItemReference& indiRealItemRef) = 0;

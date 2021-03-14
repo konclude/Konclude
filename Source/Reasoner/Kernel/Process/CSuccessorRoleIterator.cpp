@@ -30,24 +30,39 @@ namespace Konclude {
 			namespace Process {
 
 				CSuccessorRoleIterator::CSuccessorRoleIterator() {
+					mIterator1 = false;
+					mIterator2 = false;
 				}
 
 				CSuccessorRoleIterator::CSuccessorRoleIterator(cint64 indi, const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& beginIt, const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& endIt)
-						: mIndi(indi),mBeginIt(beginIt),mEndIt(endIt) {
+						: mIndi(indi),mBeginIt1(beginIt),mEndIt1(endIt) {
+					mIterator1 = true;
+					mIterator2 = false;
 				}
 
 
+				CSuccessorRoleIterator::CSuccessorRoleIterator(cint64 indi, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt2, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt2)
+					: mIndi(indi), mBeginIt1(beginIt1), mEndIt1(endIt1), mBeginIt2(beginIt2), mEndIt2(endIt2) {
+					mIterator1 = true;
+					mIterator2 = true;
+				}
+
 
 				bool CSuccessorRoleIterator::hasNext() {
-					return mBeginIt != mEndIt && mBeginIt.key() == mIndi && mBeginIt.value() != nullptr;
+					return mIterator1 && mBeginIt1 != mEndIt1 && mBeginIt1.key() == mIndi && mBeginIt1.value() != nullptr || mIterator2 && mBeginIt2 != mEndIt2 && mBeginIt2.key() == mIndi && mBeginIt2.value() != nullptr;
 				}
 
 				CIndividualLinkEdge* CSuccessorRoleIterator::next(bool moveNext) {
 					CIndividualLinkEdge* link = nullptr;
-					if (mBeginIt != mEndIt && mBeginIt.key() == mIndi) {
-						link = mBeginIt.value();
+					if (mIterator1 && mBeginIt1 != mEndIt1 && mBeginIt1.key() == mIndi) {
+						link = mBeginIt1.value();
 						if (moveNext) {
-							++mBeginIt;
+							++mBeginIt1;
+						}
+					} else if (mIterator2 && mBeginIt2 != mEndIt2 && mBeginIt2.key() == mIndi) {
+						link = mBeginIt2.value();
+						if (moveNext) {
+							++mBeginIt2;
 						}
 					}
 					return link;

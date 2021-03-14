@@ -29,20 +29,26 @@ namespace Konclude {
 
 
 
-			CReasonerExecutableEvaluationProvider::CReasonerExecutableEvaluationProvider() {
+			CReasonerExecutableEvaluationProvider::CReasonerExecutableEvaluationProvider() : CIntervalThread("ReasonerExecutionThread"), CLogIdentifier("::Konclude::Test::Evaluation::ReasonerExecutionThread", this) {
 				mProcess = nullptr;
 				mKillTimeout = 1000;
 				mReasonerPort = 8080;
+				mMemoryCheckingThread = nullptr;
+
+				mReasonerForcedTermination = false;
+				startThread();
 			}
 
 
 			CReasonerExecutableEvaluationProvider::~CReasonerExecutableEvaluationProvider() {
+				stopThread();
 			}
 
 
 			bool CReasonerExecutableEvaluationProvider::createReasoner(CConfiguration *config) {
+				mConfig = config;
 
-				mReasonerName = CConfigDataReader::readConfigString(config,"Konclude.Evaluation.Reasoner.Name");
+				mReasonerName = CConfigDataReader::readConfigString(config, "Konclude.Evaluation.Reasoner.Name");
 
 				mReasonerBinaryFile = CConfigDataReader::readConfigString(config,"Konclude.Evaluation.Reasoner.Execution.Binary.File");
 				mReasonerBinaryArguments = CConfigDataReader::readConfigString(config,"Konclude.Evaluation.Reasoner.Execution.Binary.Arguments");
@@ -51,19 +57,15 @@ namespace Konclude {
 				mKillScriptString = CConfigDataReader::readConfigString(config, "Konclude.Evaluation.TerminateAssistProgram");
 				mKillScriptArgumentsString = CConfigDataReader::readConfigString(config, "Konclude.Evaluation.TerminateAssistAdditionalArgument");
 
-				QString argString = QString("%1").arg(mReasonerBinaryArguments);
-				QString appString = QString("%1 %2").arg(mReasonerBinaryFile).arg(argString);
+				mCheckingMemoryUsage = CConfigDataReader::readConfigBoolean(config, "Konclude.Evaluation.CheckingMemoryUsage");
 
-				mProcess = new QProcess();
-
-				connect(mProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(processError(QProcess::ProcessError)),Qt::DirectConnection);
-				connect(mProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(processFinished(int,QProcess::ExitStatus)),Qt::DirectConnection);
+				mRestartSleepTime = CConfigDataReader::readConfigInteger(config, "Konclude.Evaluation.ReasonerRestartPausingTime");
+				mTerminationSleepTime = CConfigDataReader::readConfigInteger(config, "Konclude.Evaluation.ReasonerTerminationPausingTime");
 
 				mProcessFinished = false;
 				mProcessError = false;
 
-				mProcess->start(appString);
-
+				startReasoner();
 				return true;
 			}
 
@@ -73,34 +75,87 @@ namespace Konclude {
 			}
 
 
-			CReasonerEvaluationTerminationResult* CReasonerExecutableEvaluationProvider::destroyReasoner() {
-				CReasonerEvaluationTerminationResult* result = new CReasonerEvaluationTerminationResult();
 
-				QString stdOutText;
-				QString stdErrText;
-				QString errorString;
+			void CReasonerExecutableEvaluationProvider::startReasoner() {
+				CBlockingCallbackData blockCallBack;
+				postEvent(new CReasonerEvaluationReasonerStartEvent(&blockCallBack));
+				blockCallBack.waitForCallback();
+			}
+
+			void CReasonerExecutableEvaluationProvider::startReasonerThreaded() {
+				mMemoryCheckingThread = nullptr;
+
+				QString argString = QString("%1").arg(mReasonerBinaryArguments);
+				QString appString = QString("%1 %2").arg(mReasonerBinaryFile).arg(argString);
+
+				mProcess = new QProcess();
+
+				connect(mProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)), Qt::DirectConnection);
+				connect(mProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)), Qt::DirectConnection);
+
+
+				mProcess->start(appString);
+
+				if (mCheckingMemoryUsage) {
+					mMemoryCheckingThread = new CReasonerMemoryUsageCheckingThread(mConfig, QString::number((cint64)mProcess->pid()));
+				}
+			}
+
+
+			bool CReasonerExecutableEvaluationProvider::restartReasoner() {
+				CBlockingCallbackData blockCallBack;
+				postEvent(new CReasonerEvaluationReasonerRestartEvent(&blockCallBack));
+				blockCallBack.waitForCallback();
+				return true;
+			}
+
+			bool CReasonerExecutableEvaluationProvider::restartReasonerThreaded() {
+
+				terminateReasonerThreaded();
+				if (mRestartSleepTime > 0) {
+					QThread::msleep(mRestartSleepTime);
+				}
+				startReasonerThreaded();
+				return true;
+			}
+
+
+
+			void CReasonerExecutableEvaluationProvider::terminateReasoner() {
+				CBlockingCallbackData blockCallBack;
+				postEvent(new CReasonerEvaluationReasonerStopEvent(&blockCallBack));
+				blockCallBack.waitForCallback();
+			}
+
+			void CReasonerExecutableEvaluationProvider::terminateReasonerThreaded() {
+
+				if (mMemoryCheckingThread) {
+					mMaxMemoryUsage = qMax(mMaxMemoryUsage, mMemoryCheckingThread->getMemoryUsage());
+					delete mMemoryCheckingThread;
+					mMemoryCheckingThread = nullptr;
+				}
+
 				try {
 					QByteArray standOutput = mProcess->readAllStandardOutput();
 					QByteArray standError = mProcess->readAllStandardError();
-					stdOutText = QString(standOutput);
-					stdErrText = QString(standError);
-					errorString = mProcess->errorString();
+					mReasonerStdOutText += QString(standOutput);
+					mReasonerStdErrText += QString(standError);
+					mReasonerErrorString += mProcess->errorString();
 				} catch (std::bad_alloc& ba) {
-					stdErrText = "Reasoners outputs exceed size limitations\r\n";
+					mReasonerStdErrText = "Reasoners outputs exceed size limitations\r\n";
 					LOG(INFO, "::Konclude::Test::ReasonerEvaluationProvider", logTr("Failed to read reasoner output due to size limitations."), this);
 				}
 
-				bool forcedTermination = false;
-				bool finishedInTime = mProcessFinished;
 
-				disconnect(mProcess,SIGNAL(error(QProcess::ProcessError)),this,SLOT(processError(QProcess::ProcessError)));
-				disconnect(mProcess,SIGNAL(finished(int,QProcess::ExitStatus)),this,SLOT(processFinished(int,QProcess::ExitStatus)));
+				disconnect(mProcess, SIGNAL(error(QProcess::ProcessError)), this, SLOT(processError(QProcess::ProcessError)));
+				disconnect(mProcess, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(processFinished(int, QProcess::ExitStatus)));
 				disconnect(mProcess);
 				disconnect(this);
 				if (!mProcessFinished) {
 					assistTermination(mProcess->pid());
 					mProcessFinished = true;
-					forcedTermination = true;
+					mReasonerFinishedInTime = false;
+					mReasonerForcedTermination = true;
 					mProcess->terminate();
 					mProcess->waitForFinished(mKillTimeout);
 					mProcess->kill();
@@ -111,7 +166,29 @@ namespace Konclude {
 				mProcess->close();
 				delete mProcess;
 				mProcess = nullptr;
-				result->initResult(mProcessError,finishedInTime,forcedTermination,errorString,stdOutText,stdErrText);
+
+			}
+
+
+			CReasonerEvaluationTerminationResult* CReasonerExecutableEvaluationProvider::destroyReasoner() {
+				terminateReasoner();
+
+				CReasonerEvaluationTerminationResult* result = new CReasonerEvaluationTerminationResult();
+				result->initResult(mProcessError, mReasonerFinishedInTime, mReasonerForcedTermination, mReasonerErrorString, mReasonerStdOutText, mReasonerStdErrText, mMaxMemoryUsage);
+
+				mReasonerForcedTermination = false;
+				mMaxMemoryUsage = 0;
+				mReasonerFinishedInTime = true;
+				mReasonerStdOutText.clear();
+				mReasonerStdErrText.clear();
+				mReasonerErrorString.clear();
+				mProcessFinished = false;
+				mProcessError = false;
+
+				if (mTerminationSleepTime > 0) {
+					QThread::msleep(mTerminationSleepTime);
+				}
+
 				return result;
 			}
 
@@ -155,6 +232,44 @@ namespace Konclude {
 					}
 				}
 			}
+
+			bool CReasonerExecutableEvaluationProvider::processTimer(qint64 timerID) {
+				return false;
+			}
+
+			bool CReasonerExecutableEvaluationProvider::processCustomsEvents(QEvent::Type type, CCustomEvent* event) {
+				if (CThread::processCustomsEvents(type, event)) {
+					return true;
+				} else {
+					if (type == CReasonerEvaluationReasonerStartEvent::EVENTTYPE) {
+						CReasonerEvaluationReasonerStartEvent* rerse = (CReasonerEvaluationReasonerStartEvent*)event;
+						startReasonerThreaded();
+						CCallbackData* callback = rerse->getCallback();
+						if (callback) {
+							callback->doCallback();
+						}
+						return true;
+					} else if (type == CReasonerEvaluationReasonerRestartEvent::EVENTTYPE) {
+						CReasonerEvaluationReasonerRestartEvent* rerse = (CReasonerEvaluationReasonerRestartEvent*)event;
+						restartReasonerThreaded();
+						CCallbackData* callback = rerse->getCallback();
+						if (callback) {
+							callback->doCallback();
+						}
+						return true;
+					} else if (type == CReasonerEvaluationReasonerStopEvent::EVENTTYPE) {
+						CReasonerEvaluationReasonerStopEvent* rerse = (CReasonerEvaluationReasonerStopEvent*)event;
+						terminateReasonerThreaded();
+						CCallbackData* callback = rerse->getCallback();
+						if (callback) {
+							callback->doCallback();
+						}
+						return true;
+					}
+				}
+				return false;
+			}
+
 
 		}; // end namespace Evaluation
 

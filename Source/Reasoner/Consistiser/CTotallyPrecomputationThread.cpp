@@ -48,6 +48,7 @@ namespace Konclude {
 				if (backendCache) {
 					mBackendAssocCache = dynamic_cast<CBackendRepresentativeMemoryCache*>(backendCache);
 				}
+				mConfPrecomputationIndividualsRetrievalWhileSaturation = false;
 			}
 
 
@@ -91,8 +92,8 @@ namespace Konclude {
 				} else {
 					mConfMaxTestParallelCount = 1;
 				}
+				mConfMaxTestBatchCreationCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.MaximumBatchJobCreationCount", -1);
 
-				mIndividualSaturationCount = CConfigDataReader::readConfigInteger(config,"Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize",1000);
 				mConfForceFullCompletionGraphConstruction = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Precomputation.ForceFullCompletionGraphConstruction",false);
 
 
@@ -222,7 +223,7 @@ namespace Konclude {
 								}
 
 
-								if (!failDebug && !totallyPreCompItem->hasConsistenceCheckCreated() && !totallyPreCompItem->isSaturationComputationRunning() && !totallyPreCompItem->isIndividualComputationRunning()) {
+								if (!failDebug && !totallyPreCompItem->hasConsistenceCheckCreated() && !totallyPreCompItem->isSaturationComputationRunning() && !totallyPreCompItem->isIndividualComputationRunning() && !totallyPreCompItem->isPrecompuationRetrievingIncompletelyHandledIndividuals()) {
 									LOG(INFO,getLogDomain(),logTr("Precompute ontology consistency."),this);
 									totallyPreCompItem->setConsistenceCheckCreated(true);
 									workTestCreated = createConsistencePrecomputationCheck(totallyPreCompItem);
@@ -320,9 +321,41 @@ namespace Konclude {
 
 
 
+					if (!workTestCreated && totallyPreCompItem->isOccurrenceStatisticsStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->isSaturationStepRunning() && !totallyPreCompItem->isIndividualComputationRunning() && !totallyPreCompItem->isSaturationComputationRunning()) {
+						if (!totallyPreCompItem->isOccurrenceStatisticsStepFinished()) {
+							if (totallyPreCompItem->areOccurrenceStatisticsStepProcessingRequirementSatisfied()) {
+
+								if (!totallyPreCompItem->getCalculationConfiguration()->isOccurrenceStatisticsCollectionActivated()) {
+									totallyPreCompItem->setSaturationOccurrenceStatisticsCollectingInitialized(true);
+									totallyPreCompItem->setSaturationOccurrenceStatisticsCollected(true);
+								}
+
+								if (!totallyPreCompItem->hasSaturationOccurrenceStatisticsCollectingInitialized()) {
+									// determine concept and role occurrences in saturation graph
+									LOG(INFO, getLogDomain(), logTr("Collecting remaining occurrence statistics from saturation for ontology '%1'.").arg(ontPreCompItem->getOntology()->getTerminologyName()), getLogObject());
+									createOccurrenceStatisticsCollectingSaturationProcessingJob(totallyPreCompItem);
+									totallyPreCompItem->setSaturationOccurrenceStatisticsCollectingInitialized(true);
+								}
+
+								if (totallyPreCompItem->hasSaturationOccurrenceStatisticsCollected()) {
+									totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->setStepFinished(true);
+									totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL);
+								}
+							} else {
+								totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
+								totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->setStepFinished(true);
+							}
+						} else {
+							totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->submitRequirementsUpdate();
+						}
+					}
 
 
-					if (!workTestCreated && totallyPreCompItem->isSaturationStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->hasIndividualSaturationRunning() && !totallyPreCompItem->isIndividualStepRunning() && !totallyPreCompItem->isSaturationComputationRunning()) {
+
+
+
+
+					if (!workTestCreated && totallyPreCompItem->isSaturationStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->hasIndividualSaturationRunning() && !totallyPreCompItem->isIndividualStepRunning() && !totallyPreCompItem->isSaturationComputationRunning() && (!totallyPreCompItem->isOccurrenceStatisticsStepRequired() || totallyPreCompItem->isOccurrenceStatisticsStepFinished())) {
 						if (!totallyPreCompItem->isSaturationStepFinished()) {
 							if (totallyPreCompItem->areSaturationStepProcessingRequirementSatisfied()) {
 
@@ -377,38 +410,6 @@ namespace Konclude {
 					}
 
 
-
-
-
-
-					if (!workTestCreated && totallyPreCompItem->isOccurrenceStatisticsStepRequired() && totallyPreCompItem->isConsistenceStepFinished() && !totallyPreCompItem->isSaturationStepRunning() && !totallyPreCompItem->isIndividualComputationRunning() && !totallyPreCompItem->isSaturationComputationRunning()) {
-						if (!totallyPreCompItem->isOccurrenceStatisticsStepFinished()) {
-							if (totallyPreCompItem->areOccurrenceStatisticsStepProcessingRequirementSatisfied()) {
-
-								if (!totallyPreCompItem->getCalculationConfiguration()->isOccurrenceStatisticsCollectionActivated()) {
-									totallyPreCompItem->setSaturationOccurrenceStatisticsCollectingInitialized(true);
-									totallyPreCompItem->setSaturationOccurrenceStatisticsCollected(true);
-								}
-
-								if (!totallyPreCompItem->hasSaturationOccurrenceStatisticsCollectingInitialized()) {
-									// determine concept and role occurrences in saturation graph
-									LOG(INFO, getLogDomain(), logTr("Collecting remaining occurrence statistics from saturation for ontology '%1'.").arg(ontPreCompItem->getOntology()->getTerminologyName()), getLogObject());
-									createOccurrenceStatisticsCollectingSaturationProcessingJob(totallyPreCompItem);
-									totallyPreCompItem->setSaturationOccurrenceStatisticsCollectingInitialized(true);
-								}
-
-								if (totallyPreCompItem->hasSaturationOccurrenceStatisticsCollected()) {
-									totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->setStepFinished(true);
-									totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSSUCESSFULL);
-								}
-							} else {
-								totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->submitRequirementsUpdate(COntologyProcessingStatus::PSFAILED | COntologyProcessingStatus::PSFAILEDREQUIREMENT);
-								totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->setStepFinished(true);
-							}
-						} else {
-							totallyPreCompItem->getOccurrenceStatisticsPrecomputationStep()->submitRequirementsUpdate();
-						}
-					}
 
 
 
@@ -666,98 +667,110 @@ namespace Konclude {
 			}
 
 
-			bool CTotallyPrecomputationThread::decrementUsageFromIndividualPrecomputationCoordinationHash(CIndividualPrecomputationCoordinationHash* indiPrecompCoordHash, CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
-				indiPrecompCoordHash->detUsageCount();
-				if (indiPrecompCoordHash->getUsageCount() == 0) {
-					for (CIndividualPrecomputationCoordinationHash::iterator it = indiPrecompCoordHash->begin(), itEnd = indiPrecompCoordHash->end(); it != itEnd; ++it) {
-						CIndividualPrecomputationCoordinationHashData*& data = it.value();
-						data->decUsageCount();
-						if (data->getUsageCount() == 0) {
-							//delete data;
-							data = nullptr;
-						}
-					}
-					//delete indiPrecompCoordHash;
-					return true;
-				}
-				return false;
-			}
-
 
 
 			QList<CIndividualReference> CTotallyPrecomputationThread::getNextIndividualComputationPartList(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
 				QList<CIndividualReference> indiList;
-				QSet<CIndividualReference>* procReqIndiSet = procReqIndiSet = totallyPreCompItem->getIncompletelyHandledIndividualSet();
-				bool indisRetrieved = true;
-				bool newIndisRetrieved = true;
-				while (indiList.isEmpty() && !totallyPreCompItem->hasAllIncompletelyHandledIndividualsRetrieved() && indisRetrieved && newIndisRetrieved) {
-					indisRetrieved = false;
-					newIndisRetrieved = false;
-					if (procReqIndiSet->isEmpty() && !totallyPreCompItem->hasAllIncompletelyHandledIndividualsRetrieved()) {
-						cint64 limit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalLimit();
-						mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(totallyPreCompItem->getOntology()->getOntologyID(), procReqIndiSet, limit);
-						if (procReqIndiSet->size() > 0) {
-							indisRetrieved = true;
-							LOG(INFO, getLogDomain(), logTr("Retrieved %1 more insufficiently handled individuals from representative cache, scheduling processing.").arg(procReqIndiSet->size()), getLogObject());
+				CIndividualPrecomputationCoordinationHash* precomputationProcessingCoordinationHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
 
-							CIndividualPrecomputationCoordinationHash* lastIndiCompCoordHash = totallyPreCompItem->getCurrentIndividualComputationCoordinationHash();
-							QSet<CIndividualReference>* currentCompIndiSet = totallyPreCompItem->getCurrentIndividualComputationSet();
-							CIndividualPrecomputationCoordinationHash* newIndiCompCoordHash = new CIndividualPrecomputationCoordinationHash();
-							if (lastIndiCompCoordHash) {
-								for (CIndividualReference indiRef : *currentCompIndiSet) {
-									CIndividualPrecomputationCoordinationHashData* data = lastIndiCompCoordHash->value(indiRef.getIndividualID());
-									if (data) {
-										data->incUsageCount();
-										data->setNewlyRetrieved(false);
-										(*newIndiCompCoordHash)[indiRef.getIndividualID()] = data;
-									}
-								}
-								decrementUsageFromIndividualPrecomputationCoordinationHash(lastIndiCompCoordHash, totallyPreCompItem);
-							}
+				bool compuation = false;
+				bool forceCompuation = false;
+				cint64 computationLimit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualComputationLimit();
+				cint64 reducedComputationLimit = computationLimit * totallyPreCompItem->getBasicPrecompuationSubsequentIndividualLimitReductionFactor();
 
-							newIndiCompCoordHash->incUsageCount();
-							for (CIndividualReference indiRef : *procReqIndiSet) {
-								CIndividualPrecomputationCoordinationHashData*& data = (*newIndiCompCoordHash)[indiRef.getIndividualID()];
-								if (!data) {
-									newIndisRetrieved = true;
-									data = new CIndividualPrecomputationCoordinationHashData();
-									data->incUsageCount();
-								}
-								data->setNewlyRetrieved(true);
-							}
-							totallyPreCompItem->setCurrentIndividualComputationCoordinationHash(newIndiCompCoordHash);
+				if (totallyPreCompItem->hadBasicPrecompuationMode() && precomputationProcessingCoordinationHash->hasBasicPrecomputationFinished()) {
+					totallyPreCompItem->setBasicPrecompuationParallelizationReductionFactor(totallyPreCompItem->getBasicPrecompuationParallelizationInitializationFactor());
+					totallyPreCompItem->setBasicPrecompuationSubsequentIndividualLimitReductionFactor(totallyPreCompItem->getBasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor());
+					reducedComputationLimit = computationLimit * totallyPreCompItem->getBasicPrecompuationSubsequentIndividualLimitReductionFactor();
+					precomputationProcessingCoordinationHash->setBasicPrecomputationFinished(false);
+					totallyPreCompItem->setBasicPrecompuationMode(true);
+				}
 
-						} else {
-							LOG(INFO, getLogDomain(), logTr("Retrieved no more insufficiently handled individuals from representative cache, finishing processing."), getLogObject());
-							if (!totallyPreCompItem->isIndividualComputationRunning()) {
-								LOG(INFO, getLogDomain(), logTr("Finished insufficiently handled individual reprocessing with representative cache."), getLogObject());
-								totallyPreCompItem->setAllIncompletelyHandledIndividualsRetrieved(true);
-								CIndividualPrecomputationCoordinationHash* lastIndiCompCoordHash = totallyPreCompItem->getCurrentIndividualComputationCoordinationHash();
-								if (lastIndiCompCoordHash) {
-									decrementUsageFromIndividualPrecomputationCoordinationHash(lastIndiCompCoordHash, totallyPreCompItem);
-								}
-							}
-						}
+				if (totallyPreCompItem->getCurrentRecomputationExpansionPropagationCuttedReductionFactor() > 0) {
+					cint64 propCutReductionCount = computationLimit * totallyPreCompItem->getCurrentRecomputationExpansionPropagationCuttedReductionFactor();
+					reducedComputationLimit -= propCutReductionCount;
+					reducedComputationLimit = qMax(reducedComputationLimit, (cint64)1);
+				}
+
+				if (totallyPreCompItem->getBasicPrecompuationParallelizationReductionFactor() > 0) {
+					if (totallyPreCompItem->getIndividualComputationRunningCount() >= 1 && totallyPreCompItem->getIndividualComputationRunningCount() >= totallyPreCompItem->getBasicPrecompuationParallelizationReductionFactor()) {
+						return indiList;
 					}
+				}
 
-					if (!procReqIndiSet->isEmpty()) {
-						cint64 computationLimit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualComputationLimit();
-						CIndividualPrecomputationCoordinationHash* currentIndiCompCoordHash = totallyPreCompItem->getCurrentIndividualComputationCoordinationHash();
-						cint64 currentCount = 0;
-						for (QSet<CIndividualReference>::iterator it = procReqIndiSet->begin(); it != procReqIndiSet->end() && currentCount < computationLimit;) {
-							CIndividualPrecomputationCoordinationHashData* data = currentIndiCompCoordHash->value(it->getIndividualID());
-							if (!data->isComputationIntegrated() && !data->isComputationOrdered()) {
-								++currentCount;
-								indiList.append(*it);
-								data->setComputationOrdered(true);
-							}
-							it = procReqIndiSet->erase(it);
+
+				cint64 approxRemainingIncHandIndiCount = precomputationProcessingCoordinationHash->getApproximateRemainingIncompletelyHandledCount();
+				if (precomputationProcessingCoordinationHash->hasBasicPrecomputationMode()) {
+					compuation = true;
+					forceCompuation = true;
+					totallyPreCompItem->setBasicPrecompuationMode(true);
+				} else if (approxRemainingIncHandIndiCount > reducedComputationLimit) {
+					compuation = true;
+				} else {
+					if (!totallyPreCompItem->isPrecompuationRetrievingIncompletelyHandledIndividuals() && !totallyPreCompItem->isIndividualComputationRunning() && !totallyPreCompItem->isPrecompuationRetrievingIncompletelyHandledIndividuals()) {
+						retrieveIndividualsPrecomputation(totallyPreCompItem);
+						precomputationProcessingCoordinationHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
+						if (precomputationProcessingCoordinationHash->getHashRemainingCount() <= 0 && precomputationProcessingCoordinationHash->getApproximateTotalIncompletelyHandledCount() <= 0) {
+							QTime* indiPrecTimer = totallyPreCompItem->getIndividualPrecomputationTime();
+							LOG(INFO, getLogDomain(), logTr("Finished insufficiently handled individual reprocessing with representative cache in %1 ms.").arg(indiPrecTimer->elapsed()), getLogObject());
+							totallyPreCompItem->setAllIncompletelyHandledIndividualsRetrieved(true);
+							decrementUsageFromIndividualPrecomputationCoordinationHash(precomputationProcessingCoordinationHash, totallyPreCompItem);
+							precomputationProcessingCoordinationHash = nullptr;
+							totallyPreCompItem->setPrecomputationProcessingCoordinationHash(nullptr);
+						} else {
+							totallyPreCompItem->incNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize();
+							forceCompuation = true;
+							compuation = true;
 						}
 					}
 				}
+				
+
+
+				if (forceCompuation || (compuation && precomputationProcessingCoordinationHash && precomputationProcessingCoordinationHash->getHashRemainingCount() >= reducedComputationLimit || compuation && approxRemainingIncHandIndiCount > reducedComputationLimit && !totallyPreCompItem->isIndividualComputationRunning())) {
+					CIndividualPrecomputationCoordinationHash* precomputationProcessingCoordinationHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
+					CIndividualPrecomputationCoordinationHash::const_iterator itCurr = totallyPreCompItem->getPrecomputationProcessingCoordinationHashIteratorCurrent();
+					CIndividualPrecomputationCoordinationHash::const_iterator itEnd = totallyPreCompItem->getPrecomputationProcessingCoordinationHashIteratorEnd();
+					cint64 currentCount = 0;
+					while (currentCount < reducedComputationLimit && itCurr != itEnd && precomputationProcessingCoordinationHash->getHashRemainingCount() > 0) {
+						cint64 indiId = itCurr.key();
+						CBackendIndividualRetrievalComputationUpdateCoordinationHashData* data = itCurr.value();
+						if (!data->isProcessed()) {
+							if (!data->isComputationIntegrated() && !data->isComputationOrdered()) {
+								data->setComputationOrdered(true);
+								++currentCount;
+								indiList.append(indiId);
+								precomputationProcessingCoordinationHash->decHashRemainingCount();
+								precomputationProcessingCoordinationHash->incHashComputationCount();
+								totallyPreCompItem->setNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize(0);
+							} else if (data->isComputationIntegrated() && !data->isComputationOrdered()) {
+								data->setProcessed(true);
+								precomputationProcessingCoordinationHash->incHashProcessedCount();
+								precomputationProcessingCoordinationHash->decHashRemainingCount();
+							}
+						}
+						++itCurr;
+					}
+					if (itCurr == itEnd) {
+						precomputationProcessingCoordinationHash->setHashRemainingCount(0);
+					}
+				}
+
+
+				if ((indiList.isEmpty()
+					|| !forceCompuation && precomputationProcessingCoordinationHash->getHashRemainingCount() <= reducedComputationLimit && precomputationProcessingCoordinationHash->getApproximateRemainingIncompletelyHandledCount() > reducedComputationLimit
+					|| !forceCompuation && precomputationProcessingCoordinationHash->getHashRemainingCount() <= totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalThreshold() && !totallyPreCompItem->isPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested() && precomputationProcessingCoordinationHash->getApproximateRemainingIncompletelyHandledCount() > computationLimit)
+					&& !totallyPreCompItem->hasAllIncompletelyHandledIndividualsRetrieved()) {
+
+					if (precomputationProcessingCoordinationHash->getHashRemainingCount() <= totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalThreshold()) {
+						totallyPreCompItem->setPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested(true);
+					}
+
+					requestIndividualsPrecomputationRetrieval(totallyPreCompItem, true);
+				}
+
 				return indiList;
 			}
-
 
 
 			bool CTotallyPrecomputationThread::createIndividualPrecomputationCheck(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
@@ -769,51 +782,89 @@ namespace Konclude {
 					fullCompletionGraphConstruction = true;
 					totallyPreCompItem->setFullCompletionGraphConstruction(true);
 				}
-				if (totallyPreCompItem->hasIndividualsSaturated() && totallyPreCompItem->hasALLIndividualsSaturationOrderd() && totallyPreCompItem->hasInsufficientSaturationIndividuals()) {
+				if (totallyPreCompItem->hasIndividualsSaturationCacheSynchronisation() && totallyPreCompItem->hasIndividualsSaturated() && totallyPreCompItem->hasALLIndividualsSaturationOrderd() && totallyPreCompItem->hasInsufficientSaturationIndividuals()) {
 					if (!fullCompletionGraphConstruction) {
 						if (!totallyPreCompItem->hasIndividualPrecomputationChecked()) {
-							QSet<CIndividualReference>* procReqIndiSet = totallyPreCompItem->getIncompletelyHandledIndividualSet();
 
-							if (!procReqIndiSet->isEmpty() || !totallyPreCompItem->hasAllIncompletelyHandledIndividualsRetrieved()) {
-								QList<CIndividualReference> indiList;
-								indiList = getNextIndividualComputationPartList(totallyPreCompItem);
+							QList<CIndividualReference> indiList;
+							indiList = getNextIndividualComputationPartList(totallyPreCompItem);
 
-								if (!indiList.isEmpty()) {
+							if (!indiList.isEmpty()) {
+								CIndividualPrecomputationCoordinationHash* precomputationProcessingCoordinationHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
 
-									cint64 minIndiId = CINT64_MAX;
 
-									QList<CIndividualReference> filteredIndiList;
-									CIndividualPrecomputationCoordinationHash* currentIndiCompCoordHash = totallyPreCompItem->getCurrentIndividualComputationCoordinationHash();
-									QSet<CIndividualReference>* currentIndiComputationSet = totallyPreCompItem->getCurrentIndividualComputationSet();
-									for (CIndividualReference indiRef : indiList) {
-										minIndiId = qMin(minIndiId, indiRef.getIndividualID());
-										filteredIndiList.append(indiRef);
-										currentIndiComputationSet->insert(indiRef);
-									}
+								cint64 minIndiId = CINT64_MAX;
 
-									CSatisfiableCalculationJobGenerator satCalcJobGen(onto);
-									satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(filteredIndiList);
-
-									CIndividualPrecomputationTestingItem* indiTestItem = new CIndividualPrecomputationTestingItem(totallyPreCompItem, currentIndiCompCoordHash, totallyPreCompItem, totallyPreCompItem->getIndividualPrecomputationClashedPointer());
-									if (currentIndiCompCoordHash) {
-										currentIndiCompCoordHash->incUsageCount();
-									}
-									indiTestItem->addIndividualComputations(filteredIndiList);
-									CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
-									satCalcJob->setCalculationConfiguration(calcConfig);
-									CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repCacheUpdAdapter = indiTestItem->getRepresentativeCacheUpdatingAdapter();
-									repCacheUpdAdapter->setFirstIndividualRecomputationId(minIndiId);
-									repCacheUpdAdapter->setRepresentativeCacheRecomputationId(totallyPreCompItem->getNextRepresentativeCacheRecomputationId());
-									satCalcJob->setSatisfiableRepresentativeBackendCacheUpdatingAdapter(repCacheUpdAdapter);
-									CIndividual* allAssertionIndi = totallyPreCompItem->getAllAssertionIndividual();
-									if (allAssertionIndi) {
-										repCacheUpdAdapter->setAllAssertionIndividualId(allAssertionIndi->getIndividualID());
-									}
-
-									processCalculationJob(satCalcJob, totallyPreCompItem, indiTestItem);
-									return true;
+								QList<CIndividualReference> filteredIndiList = indiList;
+								QSet<CIndividualReference>* currentIndiComputationSet = totallyPreCompItem->getCurrentIndividualComputationSet();
+								for (CIndividualReference indiRef : indiList) {
+									minIndiId = qMin(minIndiId, indiRef.getIndividualID());
+									//filteredIndiList.append(indiRef);
+									//currentIndiComputationSet->insert(indiRef);
 								}
+
+								cint64 indiCompCount = filteredIndiList.size();
+								cint64 remainingLimitIncreasingIndiCompCount = totallyPreCompItem->getRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount();
+								remainingLimitIncreasingIndiCompCount -= indiCompCount;
+								cint64 currentIndiCompLimit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualComputationLimit();
+								if (totallyPreCompItem->getBasicPrecompuationSubsequentIndividualLimitReductionFactor() < 1.) {
+									totallyPreCompItem->setBasicPrecompuationSubsequentIndividualLimitReductionFactor(totallyPreCompItem->getBasicPrecompuationSubsequentIndividualLimitReductionFactor() * totallyPreCompItem->getBasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor());
+								} else if (remainingLimitIncreasingIndiCompCount < 0) {
+									remainingLimitIncreasingIndiCompCount = 0;
+
+									double limitIncreasingFactor = totallyPreCompItem->getIncompletelyHandlingIndividualComputationLimitIncreasingFactor();
+
+									currentIndiCompLimit *= limitIncreasingFactor;
+									if (currentIndiCompLimit < 0) {
+										currentIndiCompLimit = CINT64_MAX;
+									}
+									totallyPreCompItem->setCurrentIncompletelyHandledIndividualComputationLimit(currentIndiCompLimit);
+
+									cint64 currentRetrievalLimit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalLimit();
+									currentRetrievalLimit *= limitIncreasingFactor;
+									if (currentRetrievalLimit < 0) {
+										currentRetrievalLimit = CINT64_MAX;
+									}
+									totallyPreCompItem->setCurrentIncompletelyHandledIndividualRetrievalLimit(currentRetrievalLimit);
+
+								}
+								totallyPreCompItem->setRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount(remainingLimitIncreasingIndiCompCount);
+
+								if (totallyPreCompItem->getBasicPrecompuationParallelizationReductionFactor() > 0) {
+									totallyPreCompItem->setBasicPrecompuationParallelizationReductionFactor(totallyPreCompItem->getBasicPrecompuationParallelizationReductionFactor() * totallyPreCompItem->getBasicPrecompuationParallelizationIncreasingFactor());
+								}
+
+								CSatisfiableCalculationJobGenerator satCalcJobGen(onto);
+								satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(QList<CIndividual*>());
+
+								CIndividualPrecomputationTestingItem* indiTestItem = new CIndividualPrecomputationTestingItem(totallyPreCompItem, precomputationProcessingCoordinationHash, totallyPreCompItem, totallyPreCompItem->getIndividualPrecomputationClashedPointer(), totallyPreCompItem->getIndividualPrecomputationExpansionLimitedReachedPointer());
+								if (precomputationProcessingCoordinationHash) {
+									precomputationProcessingCoordinationHash->incUsageCount();
+								}
+								indiTestItem->addIndividualComputations(filteredIndiList);
+								CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
+								satCalcJob->setCalculationConfiguration(calcConfig);
+								CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repCacheUpdAdapter = indiTestItem->getRepresentativeCacheUpdatingAdapter();
+								if (filteredIndiList.size() < currentIndiCompLimit) {
+									repCacheUpdAdapter->setAdditionalIndividualComputationSize(currentIndiCompLimit - filteredIndiList.size());
+								}
+								repCacheUpdAdapter->setFirstIndividualRecomputationId(minIndiId);
+								repCacheUpdAdapter->setRepresentativeCacheRecomputationId(totallyPreCompItem->getNextRepresentativeCacheRecomputationId());
+								satCalcJob->setSatisfiableRepresentativeBackendCacheUpdatingAdapter(repCacheUpdAdapter);
+								CIndividual* allAssertionIndi = totallyPreCompItem->getAllAssertionIndividual();
+								if (allAssertionIndi) {
+									repCacheUpdAdapter->setAllAssertionIndividualId(allAssertionIndi->getIndividualID());
+								}
+								QMap<cint64, CIndividualPrecomputationTestingItem*>* recomIdTestingItemMap = totallyPreCompItem->getRecomputationIdTestingItemMap();
+								recomIdTestingItemMap->insert(repCacheUpdAdapter->getRepresentativeCacheRecomputationId(), indiTestItem);
+
+								
+								LOG(INFO, getLogDomain(), logTr("Scheduled precomputation of next %1 of approximately %2/%3 remaining insufficiently handled individuals (%4 batchs queued, %5 computing, %6 processed).").arg(filteredIndiList.size()).arg(filteredIndiList.size() + precomputationProcessingCoordinationHash->getHashRemainingCount()).arg(filteredIndiList.size() + precomputationProcessingCoordinationHash->getApproximateRemainingIncompletelyHandledCount()).arg(mCurrRunningTestParallelCount + 1).arg(precomputationProcessingCoordinationHash->getHashComputationCount()).arg(precomputationProcessingCoordinationHash->getHashProcessedCount()), getLogObject());
+
+								processCalculationJob(satCalcJob, totallyPreCompItem, indiTestItem);
+								return true;
 							}
+
 						}
 					}
 				}
@@ -1259,16 +1310,113 @@ namespace Konclude {
 				bool individualsAdded = false;
 				bool saturateConcepts = CConfigDataReader::readConfigBoolean(totallyPreCompItem->getCalculationConfiguration(),"Konclude.Calculation.Optimization.ConceptSaturation",true);
 				bool individualSaturation = CConfigDataReader::readConfigBoolean(totallyPreCompItem->getCalculationConfiguration(),"Konclude.Calculation.Optimization.IndividualSaturation",false);
+				cint64 maxId = totallyPreCompItem->getOntology()->getABox()->getNextIndividualId(false);
+				mBackendAssocCache->mDebugOntology = totallyPreCompItem->getOntology();
+				mBackendAssocCache->initializeIndividualsAssociationCaching(totallyPreCompItem->getOntology()->getOntologyID(), maxId);
 				if (saturateConcepts && individualSaturation) {
 					if (indiVec) {
-						QSet<TConceptNegPair> assConNegPairSet;
 						cint64 indiCount = indiVec->getItemCount();
-						for (cint64 indiId = 0; indiId < indiCount; ++indiId) {
-							CIndividual* indi = indiVec->getData(indiId);
-							if (indi && activeIndiSet->contains(indi)) {
-								totallyPreCompItem->addRequiredABoxSaturationIndividual(indi);
-								individualsAdded = true; 
+
+						cint64 indiBatchCount = 5000;
+						if (indiCount > indiBatchCount * 2) {
+
+							class CIndividualLinkerPair {
+							public:
+								CIndividualLinkerPair() {
+								}
+
+								CIndividualLinkerPair(CXLinker<CIndividual*>* firstlinker, CXLinker<CIndividual*>* lastlinker, CXLinker<CIndividual*>* linkerArray, cint64 indiLinkerCount) {
+									mFirstLinker = firstlinker;
+									mLastLinker = lastlinker;
+									mLinkerArray = linkerArray;
+									mIndiLinkerCount = indiLinkerCount;
+								}
+
+								CXLinker<CIndividual*>* mFirstLinker = nullptr;
+								CXLinker<CIndividual*>* mLastLinker = nullptr;
+
+								CXLinker<CIndividual*>* mLinkerArray = nullptr;
+								cint64 mIndiLinkerCount = 0;
+							};
+
+							function<CIndividualLinkerPair(const QPair<cint64, cint64>& indiPosPair)> individualMapFunc =
+								[&](const QPair<cint64, cint64>& indiPosPair) -> CIndividualLinkerPair {
+
+								cint64 indiStartPos = indiPosPair.first;
+								cint64 indiEndPos = indiPosPair.second;
+								CXLinker<CIndividual*>* firstlinker = nullptr;
+								CXLinker<CIndividual*>* lastlinker = nullptr;
+								CXLinker<CIndividual*>* linkerArray = new CXLinker<CIndividual *>[indiBatchCount];
+								cint64 nextLinkerPos = 0;
+
+								cint64 indiLinkerCount = 0;
+								for (cint64 indiId = indiStartPos; indiId < indiEndPos; ++indiId) {
+									CIndividual* indi = indiVec->getData(indiId);
+									if (indi && activeIndiSet->contains(indi)) {
+
+										CXLinker<CIndividual*>* linker = &linkerArray[nextLinkerPos++];
+										linker->initLinker(indi);
+										if (!firstlinker) {
+											firstlinker = linker;
+											lastlinker = linker;
+										} else {
+											linker->setNext(firstlinker);
+											firstlinker = linker;
+										}
+										indiLinkerCount++;
+										individualsAdded = true;
+									}
+								}
+
+								return CIndividualLinkerPair(firstlinker, lastlinker, linkerArray, indiLinkerCount);
+							};
+
+
+							function<void(CIndividualLinkerPair& reducePair, const CIndividualLinkerPair& pair)> individualReduceFunc = [&](CIndividualLinkerPair& reducePair, const CIndividualLinkerPair& pair) -> void {
+
+								CXLinker<CIndividual*>* firstIndiLinker = pair.mFirstLinker;
+								CXLinker<CIndividual*>* lastIndiLinker = pair.mLastLinker;
+
+								if (firstIndiLinker && lastIndiLinker) {
+									if (reducePair.mFirstLinker) {
+										lastIndiLinker->setNext(reducePair.mFirstLinker);
+										reducePair.mFirstLinker = firstIndiLinker;
+									} else {
+										reducePair.mFirstLinker = firstIndiLinker;
+										reducePair.mLastLinker = lastIndiLinker;
+									}
+									reducePair.mIndiLinkerCount += pair.mIndiLinkerCount;
+									totallyPreCompItem->addRequiredABoxSaturationIndividualLinkerArray(reducePair.mLinkerArray);
+								}
+							};
+
+							QList<QPair<cint64, cint64>> indiPosPairList;
+							for (cint64 nextIndiPos = 0; nextIndiPos < maxId; nextIndiPos += indiBatchCount) {
+								indiPosPairList.append(QPair<cint64, cint64>(nextIndiPos, nextIndiPos + indiBatchCount));
 							}
+
+
+							CIndividualLinkerPair indiLinkerPair = QtConcurrent::blockingMappedReduced<CIndividualLinkerPair>(indiPosPairList, individualMapFunc, individualReduceFunc);
+							if (indiLinkerPair.mFirstLinker) {
+								individualsAdded = true;
+							}
+							totallyPreCompItem->setRequiredABoxSaturationIndividualLinker(indiLinkerPair.mFirstLinker);
+							totallyPreCompItem->setRemainingRequiredABoxSaturationIndividualCount(indiLinkerPair.mIndiLinkerCount);
+
+						} else {
+
+							QSet<TConceptNegPair> assConNegPairSet;
+							cint64 collectedIndiCount = 0;
+							for (cint64 indiId = 0; indiId < indiCount; ++indiId) {
+								CIndividual* indi = indiVec->getData(indiId);
+								if (indi && activeIndiSet->contains(indi)) {
+									totallyPreCompItem->addRequiredABoxSaturationIndividual(indi);
+									individualsAdded = true;
+									++collectedIndiCount;
+								}
+							}
+							totallyPreCompItem->setRemainingRequiredABoxSaturationIndividualCount(collectedIndiCount);
+
 						}
 					}
 					totallyPreCompItem->setIndividualsSaturated(true);
@@ -1410,14 +1558,35 @@ namespace Konclude {
 
 			bool CTotallyPrecomputationThread::saturateRemainingRequiredSaturationIndividuals(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
 				cint64 saturatingIndividualCount = 0;
+
+				QTime*& satTimer = totallyPreCompItem->getIndividualSaturationTime();
+				if (!satTimer) {
+					satTimer = new QTime();
+					satTimer->start();
+				}
+
+				cint64 individualSaturationCount = totallyPreCompItem->getIndividualSaturationSizeLimit();
 				QList<CIndividual*> indiSatList;
 				QList<CIndividual*>* reqIndiSatList = totallyPreCompItem->getRemainingRequiredABoxSaturationIndividuals();
-				while (!reqIndiSatList->isEmpty() && saturatingIndividualCount < mIndividualSaturationCount) {
+				while (!reqIndiSatList->isEmpty() && saturatingIndividualCount < individualSaturationCount) {
 					CIndividual* individual = reqIndiSatList->takeFirst();
 					indiSatList.append(individual);
 					totallyPreCompItem->setHandledTriplesIndividualSaturatedId(qMax(individual->getIndividualID(), totallyPreCompItem->getHandledTriplesIndividualSaturatedId()));
 					++saturatingIndividualCount;
 				}
+
+				while (totallyPreCompItem->hasRequiredABoxSaturationIndividualLinker() && saturatingIndividualCount < individualSaturationCount) {
+					CIndividual* individual = totallyPreCompItem->getNextRequiredABoxSaturationIndividual();
+					indiSatList.append(individual);
+					totallyPreCompItem->setHandledTriplesIndividualSaturatedId(qMax(individual->getIndividualID(), totallyPreCompItem->getHandledTriplesIndividualSaturatedId()));
+					++saturatingIndividualCount;
+				}
+				if (!totallyPreCompItem->hasRequiredABoxSaturationIndividualLinker()) {
+					totallyPreCompItem->clearRequiredABoxSaturationIndividualLinkerArrays();
+				}
+
+				totallyPreCompItem->decRemainingRequiredABoxSaturationIndividualCount(saturatingIndividualCount);
+
 				cint64 maxTriplesIndexedIndiId = -1;
 				COntologyTriplesAssertionsAccessor* triplesAccessor = totallyPreCompItem->getOntology()->getOntologyTriplesData()->getTripleAssertionAccessor();
 				if (triplesAccessor) {
@@ -1428,7 +1597,7 @@ namespace Konclude {
 
 
 				if (saturatingIndividualCount <= 0 && remainingTripleIndexedIndis) {
-					cint64 newHandledCount = handledTriplesIndexedIndis + mIndividualSaturationCount;
+					cint64 newHandledCount = handledTriplesIndexedIndis + individualSaturationCount;
 					newHandledCount = qMin(newHandledCount, maxTriplesIndexedIndiId);
 
 					createTripleIndexedIndividualsSaturationProcessingJob(totallyPreCompItem, handledTriplesIndexedIndis + 1, newHandledCount);
@@ -1769,8 +1938,9 @@ namespace Konclude {
 					++saturationIndividualCount;
 				}
 				totallyPreCompItem->setSaturationIDIndividualDataItems(nextSaturationID,satIndiDataItemLinker);
+				cint64 remainingRequiredABoxSaturationIndividualCount = totallyPreCompItem->getRemainingRequiredABoxSaturationIndividualCount();
 
-				LOG(INFO,getLogDomain(),logTr("Scheduled %1 individuals for saturation for ontology '%2'.").arg(saturationIndividualCount).arg(totallyPreCompItem->getOntology()->getTerminologyName()),this);
+				LOG(INFO,getLogDomain(),logTr("Scheduled next %1 of %2 remaining individuals for saturation of ontology '%3' (%4 batchs queued).").arg(saturationIndividualCount).arg(saturationIndividualCount + remainingRequiredABoxSaturationIndividualCount).arg(totallyPreCompItem->getOntology()->getTerminologyName()).arg(mCurrRunningTestParallelCount + 1),this);
 
 				CSaturationPrecomputationTestingItem* satTestingItem = new CSaturationPrecomputationTestingItem(totallyPreCompItem,CPrecomputationTestingItem::INDIVIDUALSATURATIONPRECOMPUTATIONTYPE,nextSaturationID);
 				CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
@@ -1807,7 +1977,7 @@ namespace Konclude {
 				}
 				totallyPreCompItem->setSaturationIDIndividualDataItems(nextSaturationID,satIndiDataItemLinker);
 
-				LOG(INFO,getLogDomain(),logTr("Scheduled %1 triple indexed individuals for saturation for ontology '%2'.").arg(saturationIndividualCount).arg(totallyPreCompItem->getOntology()->getTerminologyName()),this);
+				LOG(INFO,getLogDomain(),logTr("Scheduled next %1 of %2 remaining triple-indexed individuals for saturation of ontology '%3' (%4 batchs queued).").arg(saturationIndividualCount).arg(saturationIndividualCount + totallyPreCompItem->getOntology()->getOntologyTriplesData()->getTripleAssertionAccessor()->getMaxIndexedIndividualId() - endIndiId).arg(totallyPreCompItem->getOntology()->getTerminologyName()).arg(mCurrRunningTestParallelCount + 1),this);
 
 				CSaturationPrecomputationTestingItem* satTestingItem = new CSaturationPrecomputationTestingItem(totallyPreCompItem,CPrecomputationTestingItem::INDIVIDUALSATURATIONPRECOMPUTATIONTYPE,nextSaturationID);
 				CCalculationConfigurationExtension* calcConfig = totallyPreCompItem->getCalculationConfiguration();
@@ -2105,39 +2275,42 @@ namespace Konclude {
 					cint64 saturationID = satPreTestItem->getSaturationID();
 					totallyPreCompItem->releaseSaturationIDIndividualDataItems(saturationID);
 					totallyPreCompItem->decIndividualSaturationRunningCount();
+
+
+
 					if (!totallyPreCompItem->hasIndividualSaturationRunning()) {
 						totallyPreCompItem->setSaturationComputationRunning(false);
 
 						if (totallyPreCompItem->hasIndividualsSaturated() && totallyPreCompItem->hasALLIndividualsSaturationOrderd()) {
 
 							if (!totallyPreCompItem->hasIndividualsSaturationCacheSynchronisation()) {
-								totallyPreCompItem->setIndividualsSaturationCacheSynchronisation(true);
-								QSet<CIndividualReference>* procReqIndiSet = totallyPreCompItem->getIncompletelyHandledIndividualSet();
-								cint64 limit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalLimit();
 
-								bool fullCompletionGraphConstruction = totallyPreCompItem->isFullCompletionGraphConstruction();
-								if (fullCompletionGraphConstruction) {
-									limit = -1;
-								}
-								mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(ontPreCompItem->getOntology()->getOntologyID(), procReqIndiSet, limit);
-								if (procReqIndiSet->size() > 0) {
-									LOG(INFO, getLogDomain(), logTr("Preparing processing of first %1 insufficiently saturated individuals.").arg(procReqIndiSet->size()), getLogObject());
 
-									CIndividualPrecomputationCoordinationHash* newIndiCompCoordHash = new CIndividualPrecomputationCoordinationHash();
-									newIndiCompCoordHash->incUsageCount();
-									for (CIndividualReference indiRef : *procReqIndiSet) {
-										CIndividualPrecomputationCoordinationHashData*& data = (*newIndiCompCoordHash)[indiRef.getIndividualID()];
-										if (!data) {
-											data = new CIndividualPrecomputationCoordinationHashData();
-											data->incUsageCount();
+								CIndividualPrecomputationCoordinationHash* procCoordHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
+								if (!totallyPreCompItem->isPrecompuationRetrievingIncompletelyHandledIndividuals()) {
+
+									if (!procCoordHash || procCoordHash->isEmpty()) {
+
+										synchronouslyRetrieveIndividualsPrecomputation(totallyPreCompItem, ontPreCompItem);
+
+									} else {
+
+										QTime*& indiPrecTimer = totallyPreCompItem->getIndividualPrecomputationTime();
+										if (!indiPrecTimer) {
+											indiPrecTimer = new QTime();
+											indiPrecTimer->start();
 										}
-										data->setNewlyRetrieved(true);
+										totallyPreCompItem->setIndividualsSaturationCacheSynchronisation(true);
+										QTime* indiSatTimer = totallyPreCompItem->getIndividualSaturationTime();
+										LOG(INFO, getLogDomain(), logTr("Individual saturation finished in %2, preparing processing of %1 previusly received insufficiently saturated individuals.").arg(procCoordHash->size()).arg(indiSatTimer->elapsed()), getLogObject());
+
 									}
-									totallyPreCompItem->setCurrentIndividualComputationCoordinationHash(newIndiCompCoordHash);
 
 								} else {
-									totallyPreCompItem->setAllIncompletelyHandledIndividualsRetrieved(true);
+									QTime* indiSatTimer = totallyPreCompItem->getIndividualSaturationTime();
+									LOG(INFO, getLogDomain(), logTr("Individual saturation finished in %1 ms, waiting first insufficient individuals retrieval.").arg(indiSatTimer->elapsed()), getLogObject());
 								}
+
 							}
 
 
@@ -2149,8 +2322,192 @@ namespace Konclude {
 								}
 							}
 						}
+					} 
+					
+					if (mConfPrecomputationIndividualsRetrievalWhileSaturation && !totallyPreCompItem->hasIndividualsSaturationCacheSynchronisation() && totallyPreCompItem->hasALLIndividualsSaturationOrderd() && !totallyPreCompItem->hasIndividualsSaturationAllOrderedCacheRetrieved() && totallyPreCompItem->hasInsufficientSaturationIndividuals()) {
+						bool fullCompletionGraphConstruction = totallyPreCompItem->isFullCompletionGraphConstruction();
+						if (!fullCompletionGraphConstruction) {
+							totallyPreCompItem->setIndividualsSaturationAllOrderedCacheRetrieved(true);
+							requestIndividualsPrecomputationRetrieval(totallyPreCompItem, false);
+						}
+					}
+
+					return true;
+				}
+				return false;
+			}
+
+
+
+			void CTotallyPrecomputationThread::synchronouslyRetrieveIndividualsPrecomputation(CTotallyOntologyPrecomputationItem* totallyPreCompItem, COntologyPrecomputationItem* ontPreCompItem) {
+				totallyPreCompItem->setIndividualsSaturationCacheSynchronisation(true);
+
+				cint64 limit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalLimit();
+
+
+				bool fullCompletionGraphConstruction = totallyPreCompItem->isFullCompletionGraphConstruction();
+				if (fullCompletionGraphConstruction) {
+					limit = -1;
+				}
+				totallyPreCompItem->setPrecompuationRetrievingIncompletelyHandledIndividuals(true);
+				totallyPreCompItem->setFirstIncompletelyHandledIndividualsRetrieved(true);
+				CIndividualPrecomputationCoordinationHash* newRetrievalCoordHash = new CIndividualPrecomputationCoordinationHash();
+				newRetrievalCoordHash->incUsageCount();
+				mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(ontPreCompItem->getOntology()->getOntologyID(), nullptr, newRetrievalCoordHash, true, false, limit);
+				totallyPreCompItem->setPrecompuationRetrievingIncompletelyHandledIndividuals(false);
+				if (newRetrievalCoordHash->size() > 0) {
+					totallyPreCompItem->setRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount(newRetrievalCoordHash->getApproximateTotalIncompletelyHandledCount());
+
+					QTime*& indiPrecTimer = totallyPreCompItem->getIndividualPrecomputationTime();
+					if (!indiPrecTimer) {
+						indiPrecTimer = new QTime();
+						indiPrecTimer->start();
+					}
+
+					QTime* indiSatTimer = totallyPreCompItem->getIndividualSaturationTime();
+					LOG(INFO, getLogDomain(), logTr("Individual saturation finished in %2, preparing processing of first %1 insufficiently saturated individuals.").arg(newRetrievalCoordHash->size()).arg(indiSatTimer->elapsed()), getLogObject());
+					totallyPreCompItem->setPrecomputationProcessingCoordinationHash(newRetrievalCoordHash);
+					totallyPreCompItem->setPrecomputationProcessingCoordinationHashIteratorCurrent(newRetrievalCoordHash->constBegin());
+					totallyPreCompItem->setPrecomputationProcessingCoordinationHashIteratorEnd(newRetrievalCoordHash->constEnd());
+					
+				} else {
+
+					QTime* indiSatTimer = totallyPreCompItem->getIndividualSaturationTime();
+					LOG(INFO, getLogDomain(), logTr("Individual saturation finished in %1 ms without insufficient individuals.").arg(indiSatTimer->elapsed()), getLogObject());
+
+					decrementUsageFromIndividualPrecomputationCoordinationHash(newRetrievalCoordHash, totallyPreCompItem);
+					totallyPreCompItem->setAllIncompletelyHandledIndividualsRetrieved(true);
+				}
+			}
+
+
+			bool CTotallyPrecomputationThread::retrieveIndividualsPrecomputation(CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
+				if (!totallyPreCompItem->isPrecompuationRetrievingIncompletelyHandledIndividuals()) {
+					totallyPreCompItem->setPrecompuationRetrievingIncompletelyHandledIndividuals(true);
+					cint64 limit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalLimit();
+					CIndividualPrecomputationCoordinationHash* newRetrievalCoordHash = new CIndividualPrecomputationCoordinationHash();
+					newRetrievalCoordHash->incUsageCount();
+					totallyPreCompItem->setPrecomputationRetrievalCoordinationHash(newRetrievalCoordHash);
+					bool refillRetrievalCoordHash = totallyPreCompItem->getNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize() > 1;
+					mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(totallyPreCompItem->getOntology()->getOntologyID(), totallyPreCompItem->getPrecomputationProcessingCoordinationHash(), newRetrievalCoordHash, true, refillRetrievalCoordHash, limit);
+					precomputationIndividualsRetrieved(totallyPreCompItem, true);
+					return true;
+				} else {
+					return false;
+				}
+			}
+
+
+
+			bool CTotallyPrecomputationThread::requestIndividualsPrecomputationRetrieval(CTotallyOntologyPrecomputationItem* totallyPreCompItem, bool allIndividualsSaturated) {
+				if (!totallyPreCompItem->isPrecompuationRetrievingIncompletelyHandledIndividuals()) {
+					totallyPreCompItem->setPrecompuationRetrievingIncompletelyHandledIndividuals(true);
+					cint64 limit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalLimit();
+					CIndividualPrecomputationCoordinationHash* newRetrievalCoordHash = new CIndividualPrecomputationCoordinationHash();
+					newRetrievalCoordHash->incUsageCount();
+					totallyPreCompItem->setPrecomputationRetrievalCoordinationHash(newRetrievalCoordHash);
+					CIndividualPrecomputationCoordinationHash* procCoordHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
+					mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(totallyPreCompItem->getOntology()->getOntologyID(), procCoordHash, newRetrievalCoordHash, allIndividualsSaturated, false, limit, new CRetrievedPrecomputationIndividualsCallbackEvent(this, totallyPreCompItem));
+					if (procCoordHash) {
+						LOG(INFO, getLogDomain(), logTr("Requesting more insufficiently handled individuals from representative cache, only %1 of appxoximately %2 remaining, %3 computing, %4 processed.").arg(totallyPreCompItem->getPrecomputationProcessingCoordinationHash()->getHashRemainingCount())
+							.arg(totallyPreCompItem->getPrecomputationProcessingCoordinationHash()->getApproximateRemainingIncompletelyHandledCount()).arg(totallyPreCompItem->getPrecomputationProcessingCoordinationHash()->getHashComputationCount()).arg(totallyPreCompItem->getPrecomputationProcessingCoordinationHash()->getHashProcessedCount()), getLogObject());
+					} else {
+						LOG(INFO, getLogDomain(), logTr("Requesting first insufficiently handled individuals from representative cache."), getLogObject());
 					}
 					return true;
+				} else {
+					return false;
+				}
+			}
+
+
+			bool CTotallyPrecomputationThread::precomputationIndividualsRetrieved(COntologyPrecomputationItem* ontPreCompItem, CRetrievedPrecomputationIndividualsCallbackEvent* pcce) {
+				CTotallyOntologyPrecomputationItem* totallyPreCompItem = (CTotallyOntologyPrecomputationItem*)ontPreCompItem;
+				precomputationIndividualsRetrieved(totallyPreCompItem, false);
+				CIndividualPrecomputationCoordinationHash* coordHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
+				cint64 computationLimit = totallyPreCompItem->getCurrentIncompletelyHandledIndividualComputationLimit();
+				if (coordHash && coordHash->getHashRemainingCount() >= computationLimit || !totallyPreCompItem->isIndividualComputationRunning()) {
+					doNextPendingTests();
+				}
+				return true;
+			}
+
+
+			bool CTotallyPrecomputationThread::precomputationIndividualsRetrieved(COntologyPrecomputationItem* ontPreCompItem, bool directly) {
+				CTotallyOntologyPrecomputationItem* totallyPreCompItem = (CTotallyOntologyPrecomputationItem*)ontPreCompItem;
+				CIndividualPrecomputationCoordinationHash* prevHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
+				CIndividualPrecomputationCoordinationHash* newHash = totallyPreCompItem->getPrecomputationRetrievalCoordinationHash();
+
+				totallyPreCompItem->setPrecomputationProcessingCoordinationHashIteratorCurrent(newHash->constBegin());
+				totallyPreCompItem->setPrecomputationProcessingCoordinationHashIteratorEnd(newHash->constEnd());
+
+				totallyPreCompItem->setPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested(false);
+				totallyPreCompItem->setCurrentIncompletelyHandledIndividualRetrievalThreshold(newHash->getHashRemainingCount() * totallyPreCompItem->getCurrentIncompletelyHandledIndividualRetrievalThresholdFactor());
+
+				if (prevHash) {
+#ifdef KONCLUDE_DEBUG_PRECOMPUTATION_SCHEDULING_LOGS
+					LOG(INFO, getLogDomain(), logTr("prev hash: %1 insufficiently handled individuals, now at %2 computation, %3 processed, %4 correction, %5 total insufficient, %6 approx remain insufficient.").arg(prevHash->getHashRemainingCount()).arg(prevHash->getHashComputationCount()).arg(prevHash->getHashProcessedCount()).arg(prevHash->getApproximateCorrectionIncompletelyHandledCount()).arg(prevHash->getApproximateTotalIncompletelyHandledCount()).arg(prevHash->getApproximateRemainingIncompletelyHandledCount()), getLogObject());
+#endif // KONCLUDE_DEBUG_PRECOMPUTATION_SCHEDULING_LOGS
+					newHash->incHashRemainingCount(prevHash->getHashRemainingCount());
+					newHash->incHashProcessedCount(prevHash->getHashProcessedCount());
+					newHash->incHashComputationCount(prevHash->getHashComputationCount());
+				}
+#ifdef KONCLUDE_DEBUG_PRECOMPUTATION_SCHEDULING_LOGS
+				LOG(INFO, getLogDomain(), logTr("new hash: %1 insufficiently handled individuals, now at %2 computation, %3 processed, %4 correction, %5 total insufficient, %6 approx remain insufficient.").arg(newHash->getHashRemainingCount()).arg(newHash->getHashComputationCount()).arg(newHash->getHashProcessedCount()).arg(newHash->getApproximateCorrectionIncompletelyHandledCount()).arg(newHash->getApproximateTotalIncompletelyHandledCount()).arg(newHash->getApproximateRemainingIncompletelyHandledCount()), getLogObject());
+#endif // KONCLUDE_DEBUG_PRECOMPUTATION_SCHEDULING_LOGS
+
+				totallyPreCompItem->setPrecomputationRetrievalCoordinationHash(nullptr);
+				totallyPreCompItem->setPrecomputationProcessingCoordinationHash(newHash);
+				totallyPreCompItem->setPrecompuationRetrievingIncompletelyHandledIndividuals(false);
+
+				if (!totallyPreCompItem->hasFirstIncompletelyHandledIndividualsRetrieved()) {
+					totallyPreCompItem->setFirstIncompletelyHandledIndividualsRetrieved(true);
+
+					totallyPreCompItem->setRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount(newHash->getApproximateTotalIncompletelyHandledCount());
+
+					if (!totallyPreCompItem->hasIndividualSaturationRunning()) {
+
+						if (newHash->getHashRemainingCount() <= 0) {
+							synchronouslyRetrieveIndividualsPrecomputation(totallyPreCompItem, ontPreCompItem);
+						} else {
+
+							QTime*& indiPrecTimer = totallyPreCompItem->getIndividualPrecomputationTime();
+							if (!indiPrecTimer) {
+								indiPrecTimer = new QTime();
+								indiPrecTimer->start();
+							}
+							totallyPreCompItem->setIndividualsSaturationCacheSynchronisation(true);
+							LOG(INFO, getLogDomain(), logTr("Retrieved first %1 insufficiently handled individuals from representative cache, scheduling processing.").arg(newHash->getHashRemainingCount()), getLogObject());
+						}
+					}
+				} else {
+					if (directly) {
+						LOG(INFO, getLogDomain(), logTr("Retrieved %1 insufficiently handled individuals directly from representative cache, scheduling processing.").arg(newHash->getHashRemainingCount()), getLogObject());
+					} else {
+						LOG(INFO, getLogDomain(), logTr("Retrieved %1 insufficiently handled individuals asynchronly from representative cache, scheduling processing.").arg(newHash->getHashRemainingCount()), getLogObject());
+					}
+				}
+				decrementUsageFromIndividualPrecomputationCoordinationHash(prevHash, totallyPreCompItem);
+				return true;
+			}
+
+
+
+			bool CTotallyPrecomputationThread::decrementUsageFromIndividualPrecomputationCoordinationHash(CIndividualPrecomputationCoordinationHash* indiPrecompCoordHash, CTotallyOntologyPrecomputationItem* totallyPreCompItem) {
+				if (indiPrecompCoordHash) {
+					indiPrecompCoordHash->decUsageCount();
+					if (indiPrecompCoordHash->getUsageCount() == 0) {
+						for (CIndividualPrecomputationCoordinationHash::iterator it = indiPrecompCoordHash->begin(), itEnd = indiPrecompCoordHash->end(); it != itEnd; ++it) {
+							CBackendIndividualRetrievalComputationUpdateCoordinationHashData*& data = it.value();
+							data->decUsageCount();
+							if (data->getUsageCount() == 0) {
+								delete data;
+								data = nullptr;
+							}
+						}
+						delete indiPrecompCoordHash;
+						return true;
+					}
 				}
 				return false;
 			}
@@ -2192,11 +2549,12 @@ namespace Konclude {
 						determineMinimumNextConceptID(consistence, ontPreCompItem);
 
 						if (consistence->isOntologyConsistent()) {
-							QSet<CIndividualReference> procReqIndiSet;
-							mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(totallyPreCompItem->getOntology()->getOntologyID(), &procReqIndiSet, -1);
-							if (!procReqIndiSet.isEmpty()) {
+							CIndividualPrecomputationCoordinationHash* newRetrievalCoordHash = new CIndividualPrecomputationCoordinationHash();
+							mBackendAssocCache->getIncompletlyAssociationCachedIndividuals(totallyPreCompItem->getOntology()->getOntologyID(), nullptr, newRetrievalCoordHash, true, false, -1);
+							if (!newRetrievalCoordHash->isEmpty()) {
 								LOG(WARN, getLogDomain(), logTr("Representative cache has incompletely processed individuals although individual computation finished and ontology is consistent."), getLogObject());
 							}
+							delete newRetrievalCoordHash;
 						}
 					}
 					return true;
@@ -2205,14 +2563,47 @@ namespace Konclude {
 					CIndividualPrecomputationTestingItem* indiPreTestItem = (CIndividualPrecomputationTestingItem*)preTestItem;
 					totallyPreCompItem->decIndividualComputationRunningCount();
 
-					if (indiPreTestItem->getIndividualComputationCoordinationHash()) {
-						decrementUsageFromIndividualPrecomputationCoordinationHash(indiPreTestItem->getIndividualComputationCoordinationHash(), totallyPreCompItem);
+					bool expansionPropagationCutted = indiPreTestItem->getRepresentativeCacheUpdatingAdapter()->isExpansionPropagationCutted();
+					if (expansionPropagationCutted) {
+						totallyPreCompItem->incRecomputationExpansionPropagationCuttedCount(1);
+						totallyPreCompItem->incCurrentRecomputationExpansionPropagationCuttedReductionFactor(totallyPreCompItem->getRecomputationExpansionPropagationCuttedReductionIncreaseFactor());
+					} else {
+						totallyPreCompItem->decCurrentRecomputationExpansionPropagationCuttedReductionFactor(totallyPreCompItem->getRecomputationExpansionPropagationCuttedReductionRecoveryFactor());
 					}
 
-					QSet<CIndividualReference>* currentIndiComputationSet = totallyPreCompItem->getCurrentIndividualComputationSet();
-					for (CIndividualReference indiRef : *indiPreTestItem->getIndividualComputationList()) {
-						currentIndiComputationSet->remove(indiRef);
+					QMap<cint64, CIndividualPrecomputationTestingItem*>* recomIdTestingItemMap = totallyPreCompItem->getRecomputationIdTestingItemMap();
+					recomIdTestingItemMap->remove(indiPreTestItem->getRepresentativeCacheUpdatingAdapter()->getRepresentativeCacheRecomputationId());
+					totallyPreCompItem->decMaxHandledRecomputationIdRemainingReporting();
+					if (totallyPreCompItem->getMaxHandledRecomputationIdRemainingReporting() <= 0 && !recomIdTestingItemMap->isEmpty()) {
+						cint64 firstRecomputationId = recomIdTestingItemMap->constBegin().key();
+						totallyPreCompItem->setMaxHandledRecomputationIdRemainingReporting(50);
+						mBackendAssocCache->reportMaximumHandledRecomputationId(totallyPreCompItem->getOntology()->getOntologyID(), firstRecomputationId-1);
 					}
+
+					CIndividualPrecomputationCoordinationHash* precomputationProcessingCoordinationHash = totallyPreCompItem->getPrecomputationProcessingCoordinationHash();
+					if (!precomputationProcessingCoordinationHash) {
+						precomputationProcessingCoordinationHash = indiPreTestItem->getIndividualComputationCoordinationHash();
+					}
+					QSet<CIndividualReference>* currentIndiComputationSet = totallyPreCompItem->getCurrentIndividualComputationSet();
+					QList<CIndividualReference>* computedIndiList = indiPreTestItem->getIndividualComputationList();
+					for (CIndividualReference indiRef : *indiPreTestItem->getIndividualComputationList()) {
+						//currentIndiComputationSet->remove(indiRef);
+						if (precomputationProcessingCoordinationHash) {
+							precomputationProcessingCoordinationHash->decHashComputationCount();
+							precomputationProcessingCoordinationHash->incHashProcessedCount();
+							CBackendIndividualRetrievalComputationUpdateCoordinationHashData* data = (*precomputationProcessingCoordinationHash)[indiRef.getIndividualID()];
+							if (data) {
+								data->setProcessed(true);
+							}
+						}
+					}
+					CIndividualPrecomputationCoordinationHash* testPrecomputationProcessingCoordinationHash = indiPreTestItem->getIndividualComputationCoordinationHash();
+					decrementUsageFromIndividualPrecomputationCoordinationHash(testPrecomputationProcessingCoordinationHash, totallyPreCompItem);
+
+#ifdef KONCLUDE_DEBUG_PRECOMPUTATION_SCHEDULING_LOGS
+					LOG(INFO, getLogDomain(), logTr("%7 individuals precomputed, remaining coordination hash: %1 insufficiently handled individuals, now at %2 computation, %3 processed, %4 correction, %5 total insufficient, %6 approx remain insufficient.").arg(precomputationProcessingCoordinationHash->getHashRemainingCount()).arg(precomputationProcessingCoordinationHash->getHashComputationCount()).arg(precomputationProcessingCoordinationHash->getHashProcessedCount()).arg(precomputationProcessingCoordinationHash->getApproximateCorrectionIncompletelyHandledCount()).arg(precomputationProcessingCoordinationHash->getApproximateTotalIncompletelyHandledCount()).arg(precomputationProcessingCoordinationHash->getApproximateRemainingIncompletelyHandledCount()).arg(computedIndiList->count()), getLogObject());
+#endif // KONCLUDE_DEBUG_PRECOMPUTATION_SCHEDULING_LOGS
+
 
 					if (!pcce->getTestResultSatisfiable()) {
 						totallyPreCompItem->setIndividualPrecomputationClashed(true);

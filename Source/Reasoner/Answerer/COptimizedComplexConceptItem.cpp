@@ -60,6 +60,9 @@ namespace Konclude {
 				mPossibleInstanceSet = nullptr;
 
 				mPossibleInstanceItemSet = nullptr;
+				mPossibleInstanceCandidatePropagationItemSet = nullptr;
+				mPossibleInstanceItemSetCandidatePropagationIteratorInitialized = false;
+				mPossibleInstanceCandidatePropagationBeginningKnownInstancesCount = 0;
 
 				mMaximumSubClassNodeSet = nullptr;
 
@@ -77,6 +80,8 @@ namespace Konclude {
 				mCandidateReceived = false;
 
 				mVarConBaseItem = nullptr;
+				mVarConSuperClassesItem = nullptr;
+				mVarConSubClassesItem = nullptr;
 
 				mRealizationRetrievingExpectedInstanceCandidateCount = 0;
 
@@ -98,6 +103,11 @@ namespace Konclude {
 				mKnownInstanceItems = nullptr;
 
 				mRealizationIteratorSamplingExpectedCount = -1;
+
+				mLastConceptInstancesCacheReportedCount = -1;
+				mLastConceptInstancesCacheReportedSize = -1;
+
+
 			}
 
 
@@ -384,6 +394,38 @@ namespace Konclude {
 				return mPossibleInstanceItemSet;
 			}
 
+
+			QSet<CRealizationIndividualInstanceItemReference>::const_iterator COptimizedComplexConceptItem::getPossibleInstanceItemSetCandidatePropagationIterator() {
+				return mPossibleInstanceItemSetCandidatePropagationIterator;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setPossibleInstanceItemSetCandidatePropagationIterator(QSet<CRealizationIndividualInstanceItemReference>::const_iterator it) {
+				mPossibleInstanceItemSetCandidatePropagationIterator = it;
+				return this;
+			}
+
+
+			bool COptimizedComplexConceptItem::hasPossibleInstanceItemSetCandidatePropagationIteratorInitialized() {
+				return mPossibleInstanceItemSetCandidatePropagationIteratorInitialized;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setPossibleInstanceItemSetCandidatePropagationIteratorInitialized(bool initialized) {
+				mPossibleInstanceItemSetCandidatePropagationIteratorInitialized = initialized;
+				return this;
+			}
+
+
+			cint64 COptimizedComplexConceptItem::getPossibleInstanceCandidatePropagationBeginningKnownInstancesCount() {
+				return mPossibleInstanceCandidatePropagationBeginningKnownInstancesCount;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setPossibleInstanceCandidatePropagationBeginningKnownInstancesCount(cint64 count) {
+				mPossibleInstanceCandidatePropagationBeginningKnownInstancesCount = count;
+				return this;
+			}
+
+
+
 			COptimizedComplexConceptInstanziatedIndividualItemHash* COptimizedComplexConceptItem::getKnownInstanceItems() {
 				return mKnownInstanceItems;
 			}
@@ -396,6 +438,16 @@ namespace Konclude {
 
 			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setPossibleInstanceItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet) {
 				mPossibleInstanceItemSet = instanceSet;
+				return this;
+			}
+
+
+			QSet<CRealizationIndividualInstanceItemReference>* COptimizedComplexConceptItem::getPossibleInstanceCandidatePropagationItemSet() {
+				return mPossibleInstanceCandidatePropagationItemSet;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setPossibleInstanceCandidatePropagationItemSet(QSet<CRealizationIndividualInstanceItemReference>* instanceSet) {
+				mPossibleInstanceCandidatePropagationItemSet = instanceSet;
 				return this;
 			}
 
@@ -544,6 +596,46 @@ namespace Konclude {
 			}
 
 
+			COptimizedComplexVariableConceptSubSuperItem* COptimizedComplexConceptItem::getVariableConceptSuperClassesItem() {
+				return mVarConSuperClassesItem;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setVariableConceptSuperClassesItem(COptimizedComplexVariableConceptSubSuperItem* superItem) {
+				mVarConSuperClassesItem = superItem;
+				return this;
+			}
+
+
+
+			COptimizedComplexVariableConceptSubSuperItem* COptimizedComplexConceptItem::getVariableConceptSubClassesItem() {
+				return mVarConSubClassesItem;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setVariableConceptSubClassesItem(COptimizedComplexVariableConceptSubSuperItem* superItem) {
+				mVarConSubClassesItem = superItem;
+				return this;
+			}
+
+
+
+			COptimizedComplexVariableConceptSubSuperItem* COptimizedComplexConceptItem::getVariableConceptSuperSubClassesItem(bool superClasses) {
+				if (superClasses) {
+					return mVarConSuperClassesItem;
+				} else {
+					return mVarConSubClassesItem;
+				}
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setVariableConceptSuperSubClassesItem(COptimizedComplexVariableConceptSubSuperItem* item, bool superClasses) {
+				if (superClasses) {
+					mVarConSuperClassesItem = item;
+				} else {
+					mVarConSubClassesItem = item;
+				}
+				return this;
+			}
+
+
 
 
 			bool COptimizedComplexConceptItem::isConceptAbsorbed() {
@@ -648,6 +740,118 @@ namespace Konclude {
 			}
 
 
+
+			cint64 COptimizedComplexConceptItem::getLastConceptInstancesCacheReportedCount() {
+				return mLastConceptInstancesCacheReportedCount;
+			}
+
+			cint64 COptimizedComplexConceptItem::getLastConceptInstancesCacheReportedSize() {
+				return mLastConceptInstancesCacheReportedSize;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setLastConceptInstancesCacheReportedCount(cint64 count) {
+				mLastConceptInstancesCacheReportedCount = count;
+				return this;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setLastConceptInstancesCacheReportedSize(cint64 size) {
+				mLastConceptInstancesCacheReportedSize = size;
+				return this;
+			}
+
+
+
+
+		
+			cint64 COptimizedComplexConceptItem::getMemoryConsumption() {
+				cint64 memoryConsumption = 0;
+				if (mKnownInstanceItems) {
+					memoryConsumption += mKnownInstanceItems->getMemoryConsumption();
+				}
+				if (mPossibleInstanceCandidatePropagationItemSet) {
+					cint64 bucketSize = sizeof(void*) + sizeof(uint);
+					cint64 itemSize = sizeof(CRealizationIndividualInstanceItemReference);
+					memoryConsumption += bucketSize * mPossibleInstanceCandidatePropagationItemSet->capacity();
+					memoryConsumption += itemSize * mPossibleInstanceCandidatePropagationItemSet->size();
+				}
+				if (mPossibleInstanceSet) {
+					cint64 bucketSize = sizeof(void*) + sizeof(uint);
+					cint64 itemSize = sizeof(CIndividualReference);
+					memoryConsumption += bucketSize * mPossibleInstanceSet->capacity();
+					memoryConsumption += itemSize * mPossibleInstanceSet->size();
+				}
+				if (mKnownInstanceSet) {
+					cint64 bucketSize = sizeof(void*) + sizeof(uint);
+					cint64 itemSize = sizeof(CIndividualReference);
+					memoryConsumption += bucketSize * mKnownInstanceSet->capacity();
+					memoryConsumption += itemSize * mKnownInstanceSet->size();
+				}
+				return memoryConsumption;
+			}
+
+
+
+
+			bool COptimizedComplexConceptItem::clearComputation() {
+				CCacheAnswersWeightedUsageCostItem::clearComputation();
+
+
+				CComplexConceptStepInstanceComputationProcess* instanceCompStep = getComputationProcess()->getInstancesComputationProcess(true);
+				instanceCompStep->clearComputedInstancesCount();
+
+
+				if (mKnownInstanceSet) {
+					delete mKnownInstanceSet;
+					mKnownInstanceSet = nullptr;
+				}
+				if (mPossibleInstanceSet) {
+					delete mPossibleInstanceSet;
+					mPossibleInstanceSet = nullptr;
+				}
+				if (mPossibleInstanceItemSet) {
+					delete mPossibleInstanceItemSet;
+					mPossibleInstanceItemSet = nullptr;
+				}
+				if (mPossibleInstanceCandidatePropagationItemSet) {
+					delete mPossibleInstanceCandidatePropagationItemSet;
+					mPossibleInstanceCandidatePropagationItemSet = nullptr;
+				}
+				mPossibleInstanceItemSetCandidatePropagationIteratorInitialized = false;
+				mPossibleInstanceCandidatePropagationBeginningKnownInstancesCount = 0;
+				mPossibleTestedNonInstanceCount = 0;
+				mRealizationRetrievedInstanceCandidateCount = 0;
+				mRealizationRetrievingExpectedInstanceCandidateCount = 0;
+				mRealizationIteratorSamplingExpectedCount = 0;
+
+
+				mLazyRealizationInitialized = false;
+				mLazyRealizationInitializationRequested = false;
+				mLazyNeighbourRealizationPruningRequired = false;
+				mLazyNeighbourRealizationRequested = false;
+				mLazyRealizationInstancesRetrieved = false;
+				mCompletelyHandledChecked = false;
+				mLazyRealizationProcessingCount = 0;
+
+				mCandidatePropagationProcessingCount = 0;
+				mCandidatePropagated = false;
+				mCandidateReceived = false;
+
+				if (mRealizationIterator) {
+					delete mRealizationIterator;
+					mRealizationIterator = nullptr;
+				}
+
+				mLastRetrievingCertainInstanceItemCount = 0;
+				mMinimalRetrievingInstanceItemSize = 0.1;
+
+				if (mKnownInstanceItems) {
+					delete mKnownInstanceItems;
+					mKnownInstanceItems = nullptr;
+				}
+
+
+				return true;
+			}
 
 		}; // end namespace Answerer
 

@@ -30,12 +30,12 @@ namespace Konclude {
 			namespace Cache {
 
 
-				CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData::CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData(CBackendRepresentativeMemoryCacheContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
+				CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData::CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData(CContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
 					mCacheItemExtensionType = CARDINALITY_HASH;
 				}
 
 				CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData* CBackendRepresentativeMemoryLabelCacheItemCardinalityExtensionData::initCardinalityExtensionData() {
-					mRoleCardinalityDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItemCardinalityData*>, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
+					mRoleCardinalityDataHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItemCardinalityData*>, CContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
 					return this;
 				}
 

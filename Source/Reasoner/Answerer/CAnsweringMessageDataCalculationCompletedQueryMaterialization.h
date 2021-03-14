@@ -28,7 +28,7 @@
 #include "AnswererSettings.h"
 #include "CAnsweringMessageDataCalculationCompleted.h"
 #include "CComplexQueryMaterializationData.h"
-#include "COptimizedComplexBuildingVariableCompositionsItem.h"
+#include "COptimizedComplexBuildingIndividualVariableCompositionsItem.h"
 
 
 // Other includes
@@ -57,10 +57,10 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringMessageDataCalculationCompletedQueryMaterialization(CSatisfiableCalculationJob* calcJob, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CComplexQueryMaterializationData* matData);
+					CAnsweringMessageDataCalculationCompletedQueryMaterialization(CSatisfiableCalculationJob* calcJob, COptimizedComplexBuildingIndividualVariableCompositionsItem* buildingVarItem, CComplexQueryMaterializationData* matData);
 
 
-					COptimizedComplexBuildingVariableCompositionsItem* getBuildingVariableCompositionItem();
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* getBuildingVariableCompositionItem();
 					CComplexQueryMaterializationData* getMaterializationData();
 
 
@@ -69,7 +69,7 @@ namespace Konclude {
 
 				// protected variables
 				protected:
-					COptimizedComplexBuildingVariableCompositionsItem* mBuildingVarItem;
+					COptimizedComplexBuildingIndividualVariableCompositionsItem* mBuildingVarItem;
 					CComplexQueryMaterializationData* mMatData;
 
 

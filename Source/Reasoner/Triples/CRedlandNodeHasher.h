@@ -66,6 +66,7 @@ namespace Konclude {
 
 					CRedlandNodeHasher& operator=(const CRedlandNodeHasher& hasher);
 
+					librdf_node* getRedlandNode() const;
 					cint64 getNodeHashValue() const {
 						return mHashValue;
 					}

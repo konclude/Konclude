@@ -28,8 +28,9 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem::CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem) : CAnsweringMessageDataCalculationCompleted(calcJob, ITEMINSTANCECANDIDATEPROPAGATIONCALCULATION) {
+			CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem::CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem, const QSet<CRealizationIndividualInstanceItemReference>& testingSet) : CAnsweringMessageDataCalculationCompleted(calcJob, ITEMINSTANCECANDIDATEPROPAGATIONCALCULATION) {
 				mConceptItem = conceptItem;
+				mTestingSet = testingSet;
 			}
 
 
@@ -38,6 +39,9 @@ namespace Konclude {
 				return mConceptItem;
 			}
 
+			QSet<CRealizationIndividualInstanceItemReference>* CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem::getTestingSet() {
+				return &mTestingSet;
+			}
 
 
 		}; // end namespace Answerer

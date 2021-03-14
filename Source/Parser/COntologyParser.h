@@ -54,7 +54,7 @@ namespace Konclude {
 		 *		\class		COntologyParser
 		 *		\author		Andreas Steigmiller
 		 *		\version	0.1
-		 *		\brief		Parser for OWL/XML Files
+		 *		\brief		Parser ontology files
 		 *
 		 */
 		class COntologyParser {
@@ -67,10 +67,6 @@ namespace Konclude {
 				virtual ~COntologyParser();
 
 				virtual bool parseOntologyFile(const QString& filename) = 0;
-				virtual bool parseTellOntologyAxiomNode(QDomElement *ontologyNode) = 0;
-				virtual bool parseRetractOntologyAxiomNode(QDomElement *ontologyNode) = 0;
-
-				virtual CBuildExpression *getParsedBuildNode(QDomElement *node) = 0;
 
 			// protected methods
 			protected:

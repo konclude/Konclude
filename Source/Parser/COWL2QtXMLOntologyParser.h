@@ -27,7 +27,7 @@
 #include <QMap>
 
 // Namespace includes
-#include "COntologyParser.h"
+#include "COntologyQtXMLDocumentParser.h"
 #include "COntologyBuilder.h"
 #include "CParseRuleAtom.h"
 
@@ -73,7 +73,7 @@ namespace Konclude {
 		 *		\brief		Parser for OWL/XML Files
 		 *
 		 */
-		class COWL2QtXMLOntologyParser : public COntologyParser, public CLogIdentifier {
+		class COWL2QtXMLOntologyParser : public COntologyQtXMLDocumentParser, public CLogIdentifier {
 			// public methods
 			public:
 				//! Constructor

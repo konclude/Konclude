@@ -60,6 +60,17 @@ namespace Konclude {
 				return mUpdateType;
 			}
 
+
+			CTriplesDataIterator* CRedlandStoredTriplesData::getTriplesDataIterator() {
+				if (mStatementLinker) {
+					return new CRedlandStoredTriplesDataLinkerIterator(mStatementLinker);
+				} else {
+					librdf_stream* stream = librdf_model_as_stream(mIndexedModel);
+					return new CRedlandStoredTriplesDataModelIterator(stream);
+				}
+			}
+
+
 			CRedlandStoredTriplesData* CRedlandStoredTriplesData::setRedlandModelStorageWorldData(librdf_world* world, librdf_storage* indexedStorage, librdf_model* indexedModel, CXLinker<librdf_statement*>* linker) {
 				mWorld = world;
 				mIndexedStorage = indexedStorage;

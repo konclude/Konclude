@@ -63,7 +63,8 @@ namespace Konclude {
 
 					virtual REALIZINGTESTINGTYPE getRealizingTestingType() = 0;
 
-					COntologyRealizingDynamicRequirmentProcessingData* getProcessingData();
+					QList<COntologyRealizingDynamicRequirmentProcessingData*> getProcessingDataList();
+					CRealizingTestingItem* addProcessingData(COntologyRealizingDynamicRequirmentProcessingData* procData);
 
 				// protected methods
 				protected:
@@ -71,7 +72,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COntologyRealizingItem* mOntologyPreproItem;
-					COntologyRealizingDynamicRequirmentProcessingData* mProcData;
+					QList<COntologyRealizingDynamicRequirmentProcessingData*> mProcDataList;
 
 				// private methods
 				private:

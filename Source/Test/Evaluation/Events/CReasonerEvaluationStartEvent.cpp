@@ -30,12 +30,12 @@ namespace Konclude {
 			namespace Events {
 
 
-				CReasonerEvaluationStartEvent::CReasonerEvaluationStartEvent(const QString& initFile, const QString& testFile, const QString& addressString, CConfiguration* configuration, CCallbackData* callbackData) 
+				CReasonerEvaluationStartEvent::CReasonerEvaluationStartEvent(const QString& initFile, const QString& testFile, CReasonerEvaluationProvider* reasonerProvider, CConfiguration* configuration, CCallbackData* callbackData)
 						: CCustomEvent(EVENTTYPE) {
 
 					mInitFileString = initFile;
 					mTestFileString = testFile;
-					mAddressString = addressString;
+					mReasonerProvider = reasonerProvider;
 					mConfiguration = configuration;
 					mCallbackData = callbackData;
 				}
@@ -56,9 +56,10 @@ namespace Konclude {
 					return mCallbackData;
 				}
 
-				QString CReasonerEvaluationStartEvent::getAddressString() {
-					return mAddressString;
+				CReasonerEvaluationProvider* CReasonerEvaluationStartEvent::getReasonerProvider() {
+					return mReasonerProvider;
 				}
+
 
 				CConfiguration* CReasonerEvaluationStartEvent::getConfiguration() {
 					return mConfiguration;

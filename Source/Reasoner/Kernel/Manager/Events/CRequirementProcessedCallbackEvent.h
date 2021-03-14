@@ -69,7 +69,7 @@ namespace Konclude {
 						// public methods
 						public:
 							//! Constructor
-							CRequirementProcessedCallbackEvent(CThread* receiverThread, CConcreteOntology* ontology, CRequirementPreparingData* reqPrepData);
+							CRequirementProcessedCallbackEvent(CThread* receiverThread, CConcreteOntology* ontology, CRequirementPreparingData* reqPrepData, cint64 procType);
 
 							//! Destructor
 							virtual ~CRequirementProcessedCallbackEvent();
@@ -82,6 +82,7 @@ namespace Konclude {
 
 							static const QEvent::Type EVENTTYPE = EVENTREQUIREMENTPROCESSEDCALLBACK;
 
+							cint64 mProcType;
 
 						// protected methods
 						protected:

@@ -59,7 +59,7 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemInstancesList, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector);
+					COptimizedRepresentativeKPSetCacheMultipleTypeLabelSetItemIterator(const QList<CBackendRepresentativeMemoryLabelCacheItem*>& labelCacheItemInstancesList, COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector);
 
 
 				// protected methods

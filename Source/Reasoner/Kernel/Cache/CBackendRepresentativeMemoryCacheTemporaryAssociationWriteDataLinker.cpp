@@ -55,8 +55,11 @@ namespace Konclude {
 					mAssociationUpdateId = 0;
 					mIntegratedIndirectlyConnectedIndividualsChangeId = 0;
 					mRepresentativeSameIndiId = mIndividualID;
+					mDeterministicSameIndiId = mIndividualID;
 					mIndirectlyConnectedNominalIndividual = false;
 					mIndirectlyConnectedIndividualIntegration = false;
+					mRequireSameAsNeighboursCompletion = false;
+					mScheduledIndividual = false;
 					return this;
 				}
 
@@ -72,11 +75,17 @@ namespace Konclude {
 
 
 				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setReferredTemporaryLabelData(cint64 labelType, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* referredTmpLabelData) {
+					if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL && referredTmpLabelData && referredTmpLabelData->getLabelType() != CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL) {
+						bool debug = true;
+					}
 					mReferredTmpLabelData[labelType] = referredTmpLabelData;
 					return this;
 				}
 
 				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setReferredLabelData(cint64 labelType, CBackendRepresentativeMemoryLabelCacheItem* referredLabelData) {
+					if (labelType == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL && referredLabelData && referredLabelData->getLabelType() != CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL) {
+						bool debug = true;
+					}
 					mReferredLabelData[labelType] = referredLabelData;
 					return this;
 				}
@@ -190,6 +199,34 @@ namespace Konclude {
 
 				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setRepresentativeSameIndividualId(cint64 indiId) {
 					mRepresentativeSameIndiId = indiId;
+					return this;
+				}
+
+
+				cint64 CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::getDeterministicSameIndividualId() {
+					return mDeterministicSameIndiId;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setDeterministicSameIndividualId(cint64 indiId) {
+					mDeterministicSameIndiId = indiId;
+					return this;
+				}
+
+				bool CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::requireSameAsNeighboursCompletion() {
+					return mRequireSameAsNeighboursCompletion;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setRequireSameAsNeighboursCompletion(bool requireCompletion) {
+					mRequireSameAsNeighboursCompletion = requireCompletion;
+					return this;
+				}
+
+				bool CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::isScheduledIndividual() {
+					return mScheduledIndividual;
+				}
+
+				CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::setScheduledIndividual(bool scheduled) {
+					mScheduledIndividual = scheduled;
 					return this;
 				}
 

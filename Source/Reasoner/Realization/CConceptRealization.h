@@ -34,6 +34,7 @@
 #include "CRealizationIndividualInstanceItemReference.h"
 #include "CRealizationIndividualInstanceItemReferenceIterator.h"
 #include "CRealizationIndividualSorting.h"
+#include "CConceptRealizationHierarchyNodeVisitor.h"
 
 // Other includes
 
@@ -65,6 +66,12 @@ namespace Konclude {
 
 					virtual CRealizationIndividualInstanceItemReference getInstanceItemReference(CIndividual* individual);
 					virtual bool isConceptInstance(CIndividual* individual, CConcept* concept);
+					virtual bool isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptInstantiatedItem* conItem) = 0;
+					virtual bool requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConcept* concept);
+					virtual bool requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptInstantiatedItem* conItem) = 0;
+					virtual bool requiresConceptInstanceRealization(const CRealizationIndividualInstanceItemReference& indiRealItemRef) = 0;
+
+
 					virtual bool visitSameIndividuals(CIndividual* individual, CConceptRealizationIndividualVisitor* visitor);
 					virtual bool visitDirectTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor);
 					virtual bool visitAllTypes(CIndividual* individual, CConceptRealizationInstantiatedVisitor* visitor);
@@ -88,10 +95,11 @@ namespace Konclude {
 					virtual bool visitDirectTypes(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptRealizationInstantiatedVisitor* visitor) = 0;
 					virtual bool visitAllTypes(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptRealizationInstantiatedVisitor* visitor) = 0;
 					virtual bool visitTypes(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool direct, CConceptRealizationInstantiatedVisitor* visitor);
-					virtual bool isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConcept* concept) = 0;
+					virtual bool isConceptInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConcept* concept);
 
 					virtual bool visitIndividuals(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CConceptRealizationIndividualVisitor* visitor) = 0;
 					virtual bool visitConcepts(CConceptInstantiatedItem* item, CConceptRealizationConceptVisitor* visitor) = 0;
+					virtual bool visitHierarchyNode(CConceptInstantiatedItem* item, CConceptRealizationHierarchyNodeVisitor* visitor) = 0;
 
 
 

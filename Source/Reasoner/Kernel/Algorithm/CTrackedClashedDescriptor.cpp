@@ -45,7 +45,9 @@ namespace Konclude {
 					mIndepenentFlag = false;
 					mBranchingLevelTag = -1;
 					mProcessingTag = -1;
+					mIndiNode = nullptr;
 					if (indiNode) {
+						mIndiNode = indiNode;
 						mIndiNodeID = indiNode->getIndividualNodeID();
 						mIndiNodeLevel = indiNode->getIndividualNominalLevelOrAncestorDepth();
 						mNominalIndiFlag = indiNode->isNominalIndividualNode();
@@ -79,6 +81,7 @@ namespace Konclude {
 					mBranchingLevelTag = trackedClashDes->mBranchingLevelTag;
 					mProcessingTag = trackedClashDes->mProcessingTag;
 					mVarBindPath = trackedClashDes->mVarBindPath;
+					mIndiNode = trackedClashDes->mIndiNode;
 					initClashedDependencyDescriptor(trackedClashDes->mDependencyTrackPoint);
 					return this;
 				}
@@ -89,6 +92,7 @@ namespace Konclude {
 					mIndiNodeID = trackedClashDesForIndiNode->mIndiNodeID;
 					mIndiNodeLevel = trackedClashDesForIndiNode->mIndiNodeLevel;
 					mNominalIndiFlag = trackedClashDesForIndiNode->mNominalIndiFlag;
+					mIndiNode = trackedClashDesForIndiNode->mIndiNode;
 					mVarBindPath = varBindPath;
 					initClashedDependencyDescriptor(depTrackPoint);
 					mConceptDescriptor = conDes;
@@ -106,9 +110,18 @@ namespace Konclude {
 					return this;
 				}
 
+
+
+
+
 				CTrackedClashedDescriptor* CTrackedClashedDescriptor::initTrackedClashedDescriptor(CTrackedClashedDescriptor* trackedClashDesForIndiNode, CConceptDescriptor* conDes, CDependencyTrackPoint* depTrackPoint) {
 					initTrackedClashedDescriptor(trackedClashDesForIndiNode,conDes,trackedClashDesForIndiNode->getVariableBindingPath(),depTrackPoint);
 					return this;
+				}
+
+
+				CIndividualProcessNode* CTrackedClashedDescriptor::getAppropriatedIndividual() {
+					return mIndiNode;
 				}
 
 

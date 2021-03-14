@@ -426,9 +426,6 @@ namespace Konclude {
 
 							completeSaturatedIndividualNodes(mProcessingDataBox,mCalcAlgContext);
 
-							if (mConfOccurrenceStatisticsCollection && satCalcTask->getOccurrenceStatisticsCollectingAdapter()) {
-								mSatTaskOccStatCollector->analyseSatisfiableTask(satCalcTask, calcAlgContext);
-							}
 
 
 							if (mConfDebuggingWriteData && mConfDebuggingWriteDataSaturationTasks) {
@@ -480,6 +477,12 @@ namespace Konclude {
 
 							satResult->installResult(true);
 							completed = true;
+						}
+
+						if (completed) {
+							if (mConfOccurrenceStatisticsCollection && satCalcTask->getOccurrenceStatisticsCollectingAdapter() || satCalcTask->getSaturationIndividualsAnalysationObserver()) {
+								mSatTaskOccStatCollector->analyseSatisfiableTask(satCalcTask, calcAlgContext);
+							}
 						}
 
 						if (error) {
@@ -604,6 +607,7 @@ namespace Konclude {
 					if (indiSaturationAnalysingNodeLinker && calcAlgContext->getSatisfiableCalculationTask()->getSaturationIndividualsAnalysationObserver()) {
 						for (CIndividualSaturationProcessNodeLinker* indiSaturationAnalysingNodeLinkerIt = indiSaturationAnalysingNodeLinker; indiSaturationAnalysingNodeLinkerIt; indiSaturationAnalysingNodeLinkerIt = indiSaturationAnalysingNodeLinkerIt->getNext()) {
 							CIndividualSaturationProcessNode* satIndiNode = indiSaturationAnalysingNodeLinkerIt->getProcessingIndividual();
+							satIndiNode->setOccurrenceStatisticsCollectingRequired(true);
 							CIndividualSaturationProcessNodeStatusFlags* indStatFlags = satIndiNode->getIndirectStatusFlags();
 							if (indStatFlags->hasClashedFlag()) {
 								return;
@@ -6632,6 +6636,18 @@ namespace Konclude {
 							}
 
 						} else {
+
+							for (CSortedNegLinker<CRole*>* superRoleIt = role->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
+								CRole* superRole = superRoleIt->getData();
+								bool inversedSuperRole = superRoleIt->isNegated();
+
+								for (CSortedNegLinker<CConcept*>* domainConLinkerIt = superRole->getDomainRangeConceptList(inversedSuperRole); domainConLinkerIt; domainConLinkerIt = domainConLinkerIt->getNext()) {
+									CConcept* domainConcept = domainConLinkerIt->getData();
+									bool domainConceptNegation = domainConLinkerIt->isNegated();
+									addConceptFilteredToIndividual(domainConcept, domainConceptNegation, processIndi, mCalcAlgContext);
+								}
+							}
+
 							delayNominalSaturationConceptProcessing(processIndi,conSatProLinker,nominalID,mCalcAlgContext);
 						}
 					} else {

@@ -49,7 +49,11 @@
 #include "Reasoner/Query/CComplexEquivalentClassesAnsweringQuery.h"
 #include "Reasoner/Query/CComplexIndividualInstancesAnsweringQuery.h"
 #include "Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexAxiomsIndividualMixedVariablesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexAxiomsClassVariablesAnsweringQuery.h"
 #include "Reasoner/Query/CVariableBindingFilteringLiteralComparison.h"
+#include "Reasoner/Query/CComplexAxiomsObjectPropertyVariablesAnsweringQuery.h"
+#include "Reasoner/Query/CComplexAxiomsDataPropertyVariablesAnsweringQuery.h"
 
 #include "Reasoner/Ontology/CConceptTextFormater.h"
 #include "Reasoner/Ontology/CIRIName.h"
@@ -101,6 +105,8 @@ namespace Konclude {
 
 
 
+
+
 					virtual CQueryIsEntailedExpression* getIsEntailedQuery(const CEXPRESSIONLIST<CAxiomExpression*>& axiomExpressions, const QString& queryName);
 
 
@@ -112,10 +118,22 @@ namespace Konclude {
 					virtual bool requiresPreprocessedOntology();
 
 
-					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const QList<CExpressionVariable*>& ignoreCardVarList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName = "");
-					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName = "");
-					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, const QString& queryName = "");
-					virtual CQuerySPARQLAskBasicGraphPatternExpression* getSPARQLBasicGraphPatternAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, const QString& queryName = "");
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternClassSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, cint64 limit, cint64 offset, const QString& queryName = "");
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternObjectPropertiesSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, cint64 limit, cint64 offset, const QString& queryName = "");
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternDataPropertiesSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, cint64 limit, cint64 offset, const QString& queryName = "");
+
+					virtual CQuerySPARQLAskBasicGraphPatternExpression* getSPARQLBasicGraphPatternClassAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QString& queryName = "");
+					virtual CQuerySPARQLAskBasicGraphPatternExpression* getSPARQLBasicGraphPatternObjectPropertiesAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QString& queryName = "");
+					virtual CQuerySPARQLAskBasicGraphPatternExpression* getSPARQLBasicGraphPatternDataPropertiesAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QString& queryName = "");
+
+
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternIndividualSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const QList<CExpressionVariable*>& ignoreCardVarList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName = "");
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternIndividualSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName = "");
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternIndividualSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const CEXPRESSIONLIST<COrderingTermExpression*>& orderingList, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, bool distinctModifier, const QString& queryName = "");
+					virtual CQuerySPARQLAskBasicGraphPatternExpression* getSPARQLBasicGraphPatternIndividualAskQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const CEXPRESSIONLIST<CFilteringTermExpression*>& filteringList, const QString& queryName = "");
+
+					virtual CQuerySPARQLSelectBasicGraphPatternExpression* getSPARQLBasicGraphPatternIndividualMixedSelectQuery(const QList<CAxiomExpression*>& basicGraphPatternAxiomExp, const QList<CExpressionVariable*>& disVarList, const QList<CExpressionVariable*>& ignoreCardVarList, bool distinctModifier, cint64 limit, cint64 offset, const QString& queryName = "");
+
 
 					virtual COrderingVariableExpression* getOrderingVariableExpression(CExpressionVariable* variable, bool ascOrdering);
 					virtual CFilteringComparisonDataLiteralExpression* getFilteringComparisonDataLiteralExpression(CDataLiteralVariableExpression* variable, CDataLiteralExpression* dataLiteralExp, CFilteringComparisonDataLiteralExpression::COMPARING_TYPE comparingType);
@@ -126,6 +144,8 @@ namespace Konclude {
 
 					CVariableBindingFiltering* createFilterFromExpression(CFilteringTermExpression* filteringTermExpression);
 
+					void createAskQueryFromBGPExpression(CQuerySPARQLAskBasicGraphPatternExpression* sparqlBgpExp, const QString& typeString, function<CComplexVariablesAnsweringQuery*(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName)> queryFunc, bool confBuildQueryStats, QList<CQuery *> &queryList);
+					void createSelectQueryFromBGPExpression(CQuerySPARQLSelectBasicGraphPatternExpression* sparqlBgpExp, const QString& typeString, function<CComplexVariablesAnsweringQuery*(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName)> queryFunc, bool confBuildQueryStats, QList<CQuery *> &queryList);
 
 				// protected variables
 				protected:		
@@ -136,8 +156,16 @@ namespace Konclude {
 
 
 					CEXPRESSIONLIST<CQueryIsEntailedExpression*> isEntailedExpList;
-					CEXPRESSIONLIST<CQuerySPARQLSelectBasicGraphPatternExpression*> mSparqlSelectExpList;
-					CEXPRESSIONLIST<CQuerySPARQLAskBasicGraphPatternExpression*> mSparqlAskExpList;
+					CEXPRESSIONLIST<CQuerySPARQLSelectBasicGraphPatternExpression*> mSparqlClassSelectExpList;
+					CEXPRESSIONLIST<CQuerySPARQLSelectBasicGraphPatternExpression*> mSparqlObjPropSelectExpList;
+					CEXPRESSIONLIST<CQuerySPARQLSelectBasicGraphPatternExpression*> mSparqlDataPropSelectExpList;
+					CEXPRESSIONLIST<CQuerySPARQLSelectBasicGraphPatternExpression*> mSparqlIndividualSelectExpList;
+					CEXPRESSIONLIST<CQuerySPARQLSelectBasicGraphPatternExpression*> mSparqlIndividualMixedSelectExpList;
+
+					CEXPRESSIONLIST<CQuerySPARQLAskBasicGraphPatternExpression*> mSparqlIndividualAskExpList;
+					CEXPRESSIONLIST<CQuerySPARQLAskBasicGraphPatternExpression*> mSparqlClassAskExpList;
+					CEXPRESSIONLIST<CQuerySPARQLAskBasicGraphPatternExpression*> mSparqlObjectPropAskExpList;
+					CEXPRESSIONLIST<CQuerySPARQLAskBasicGraphPatternExpression*> mSparqlDataPropAskExpList;
 
 					CEXPRESSIONLIST<CBuildExpression*> mExpContainer;
 

@@ -27,7 +27,7 @@
 // Namespace includes
 #include "PersistenceSettings.h"
 #include "COntologyRevisionPersistencerFactory.h"
-#include "COntologyRevisionDirectoryOWL2XMLFilePersistencer.h"
+#include "CNameBasedOntologyRevisionPersistencerFactory.h"
 
 
 // Other includes

@@ -110,7 +110,7 @@ namespace Konclude {
 		void CDynRefBucket<T>::clear() {
 			refBucket = 0;
 			if (refDataVec) {
-				delete refDataVec;
+				delete[] refDataVec;
 				refDataVec = 0;
 			}
 		}

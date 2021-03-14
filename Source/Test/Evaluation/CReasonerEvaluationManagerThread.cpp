@@ -785,6 +785,53 @@ namespace Konclude {
 
 
 
+							if (ananysingString == "ReasonerEvaluationMemoryUsageComparer") {
+
+								QString outputDirectory = getAnalyserOutputDirectory(analysingDirectoryString, evaluationProgramName, plattform, "MemoryUsageComparison");
+
+								CReasonerEvaluationAnalyserChecker analysingUpdateChecker;
+								if (analysingUpdateChecker.checkAnalysingUpdateNecessary(mReasonerOutputDirStringList, outputDirectory + "AnalysingUpdateCheckingData.dat", testCountCut)) {
+
+									LOG(INFO, getLogDomain(), logTr("Analysing memory usage for '%1' to '%2'.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory), this);
+
+									CReasonerEvaluationSpecifiedTimeExtractor* memoryUsageaExtractor = new CReasonerEvaluationSpecifiedTimeExtractor(CReasonerEvaluationExtractor::MEMORYUSAGEEXTRACTOR, timeoutCut, errorPunishmentTime, dataValueCacher);
+
+									CReasonerEvaluationAvaragerSummarizer* avarageSummarize = new CReasonerEvaluationAvaragerSummarizer();
+
+									CReasonerEvaluationAnalyseContext* reasonerEvaluationContext = new CReasonerEvaluationAnalyseContext(mConfig);
+
+									CReasonerEvaluationCollector* collector = new CReasonerEvaluationCollector(memoryUsageaExtractor, avarageSummarize, mFiltering);
+
+									CReasonerEvaluationDataValueGroupCollectionReasonerComparison* reasonerComp = new CReasonerEvaluationDataValueGroupCollectionReasonerComparison(mReasonerNameStringList);
+
+									for (QStringList::const_iterator it1 = mReasonerNameStringList.constBegin(), it2 = mReasonerOutputDirStringList.constBegin(), it1End = mReasonerNameStringList.constEnd(), it2End = mReasonerOutputDirStringList.constEnd(); it1 != it1End && it2 != it2End; ++it1, ++it2) {
+										QString reasonerName(*it1);
+										QString reasonerPath(*it2);
+										LOG(INFO, getLogDomain(), logTr("Collecting memory usage for '%1' reasoner in directory '%2'.").arg(reasonerName).arg(reasonerPath), this);
+										collector->collectReasonerEvaluationDataValues(reasonerComp, reasonerName, reasonerPath);
+									}
+
+
+									LOG(INFO, getLogDomain(), logTr("Comparing memory usage for '%1'.").arg(mReasonerNameStringList.join(", ")), this);
+
+									CReasonerEvaluationGroupRequestSelector* selectors = getSelectors(requestDirectory);
+
+
+									CReasonerEvaluationGroupRequestReasonerMemoryUsageAnalyser* analyser1 = new CReasonerEvaluationGroupRequestReasonerMemoryUsageAnalyser();
+									analyser1->analyseEvaluationData(reasonerComp, reasonerEvaluationContext, outputDirectory, selectors);
+
+
+									LOG(INFO, getLogDomain(), logTr("Memory usage for '%1' compared to '%2'.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory), this);
+									analysingUpdateChecker.saveAnalysingUpdateCheckFile(outputDirectory + "AnalysingUpdateCheckingData.dat");
+									analysed = true;
+								} else {
+									LOG(WARNING, getLogDomain(), logTr("Memory usage for '%1' in '%2' already up to date.").arg(mReasonerNameStringList.join(", ")).arg(outputDirectory), this);
+								}
+							}
+
+
+
+
 							if (ananysingString == "RequestStatisticsComparer") {
 
 								QString outputDirectory = getAnalyserOutputDirectory(analysingDirectoryString,evaluationProgramName,plattform,"RequestStatisticsComparison");

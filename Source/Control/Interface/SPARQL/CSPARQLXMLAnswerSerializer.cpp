@@ -273,7 +273,7 @@ namespace Konclude {
 								QDomElement bindingEl = document.createElement("binding");
 								bindingEl.setAttribute("name", varString);
 								if (varBin) {
-									if (varBin->isNamedIndividualBindingType()) {
+									if (varBin->isNamedIndividualBindingType() || varBin->isClassBindingType() || varBin->isPropertyBindingType()) {
 										QDomElement uriEl = document.createElement("uri");
 										uriEl.appendChild(document.createTextNode(varBin->getQueryResultString()));
 										bindingEl.appendChild(uriEl);

@@ -405,11 +405,8 @@ namespace Konclude {
 				bool succParsed = false;
 				*cardinality = cardinalityString.toString().toLongLong(&succParsed);
 				return succParsed;
-			} else {
-				bool succParsed = false;
-				*cardinality = cardinalityString.toString().toLongLong(&succParsed);
-				return succParsed;
 			}
+			return false;
 		}
 
 

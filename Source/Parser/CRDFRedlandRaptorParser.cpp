@@ -46,12 +46,12 @@ namespace Konclude {
 
 
 
-		CRedlandStoredTriplesData* CRDFRedlandRaptorParser::getUpdatingTripleData() {
+		CRedlandStoredTriplesData* CRDFRedlandRaptorParser::getUpdatingTripleData(bool forceNew) {
 
 			bool localTriplesDataFlag = false;
 			CRedlandStoredTriplesData* prevTripleData = (CRedlandStoredTriplesData*)mOntologyBuilder->getLatestTriplesData(false, &localTriplesDataFlag);
 			CRedlandStoredTriplesData* tripleData = nullptr;
-			if (localTriplesDataFlag && prevTripleData->getUpdateType() == mUpdateType) {
+			if (!forceNew && localTriplesDataFlag && prevTripleData->getUpdateType() == mUpdateType) {
 				return prevTripleData;
 			}
 
@@ -196,8 +196,10 @@ namespace Konclude {
 			qioDeviceIOStreamHandler.write_bytes = nullptr;
 			qioDeviceIOStreamHandler.write_end = nullptr;
 
-			CRedlandStoredTriplesData* tripleData = getUpdatingTripleData();
+			CRedlandStoredTriplesData* tripleData = getUpdatingTripleData(false);
 			raptor_world* raptor_world_ptr = librdf_world_get_raptor(tripleData->getRedlandWorld());
+
+			cint64 bytesAvailable = ioDevice->bytesAvailable();
 
 
 			QString* raptorParsingErrorString = nullptr;
@@ -231,11 +233,15 @@ namespace Konclude {
 					mParsingError = true;
 				}
 
-				librdf_node* critPredicate = librdf_new_node_from_uri_string(tripleData->getRedlandWorld(), (const unsigned char*)PREFIX_RDFS_SUBCLASS_OF);
+				librdf_node* critPredicate1 = librdf_new_node_from_uri_string(tripleData->getRedlandWorld(), (const unsigned char*)PREFIX_RDFS_SUBCLASS_OF);
+				librdf_node* critPredicate2 = librdf_new_node_from_uri_string(tripleData->getRedlandWorld(), (const unsigned char*)PREFIX_OWL_COMPLEMENT_OF);
 				bool warningNoStore = false;
 
-				CXLinker<librdf_statement*>* statementLinker = nullptr;
+				CXLinker<librdf_statement*>* statementLinker = tripleData->getRedlandStatementLinker();
 				CXLinker<librdf_statement*>* lastStatementLinker = nullptr;
+				if (statementLinker) {
+					lastStatementLinker = statementLinker->getLastListLink();
+				}
 				while (!librdf_stream_end(tripleStream)) {
 					librdf_statement* statement = librdf_stream_get_object(tripleStream);
 
@@ -253,7 +259,7 @@ namespace Konclude {
 						if (mConfLoadTriplesIntoStore) {
 							librdf_model_add_statement(tripleData->getRedlandIndexedModel(), statement);
 						} else {
-							if (!warningNoStore  && librdf_node_equals(critPredicate, librdf_statement_get_predicate(statementCopy))) {
+							if (!warningNoStore  && (librdf_node_equals(critPredicate1, librdf_statement_get_predicate(statementCopy)) || librdf_node_equals(critPredicate2, librdf_statement_get_predicate(statementCopy)))) {
 								warningNoStore = true;
 								LOG(WARN, getLogDomain(), logTr("(Nontrivial) OWL axioms and expressions cannot be extracted from triples since they are not loaded into the triple store."), this);
 							}
@@ -261,7 +267,8 @@ namespace Konclude {
 					}
 					librdf_stream_next(tripleStream);
 				}
-				librdf_free_node(critPredicate);
+				librdf_free_node(critPredicate1);
+				librdf_free_node(critPredicate2);
 				tripleData->setRedlandStatementLinker(statementLinker);
 			}
 

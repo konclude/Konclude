@@ -230,6 +230,8 @@ namespace Konclude {
 
 					CConcreteOntologyRedlandTriplesDataExpressionMapper* collectBuildExpressionsFromProcessingDataList(QList<CRedlandNodeProcessingData*>& processingDataList, QList<CBuildExpression*>& expressionList);
 
+					CConcreteOntologyRedlandTriplesDataExpressionMapper* loadExistingEntity(CBuildExpression* expression, const QString& entityUri, librdf_world* world, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, QList<CRedlandNodeProcessingData*>& nodeHandlingList);
+					CConcreteOntologyRedlandTriplesDataExpressionMapper* loadExistingEntities(COntologyBuildData* buildData, CRedlandStoredTriplesData* redlandTriplesData);
 					CConcreteOntologyRedlandTriplesDataExpressionMapper* buildDeclarations();
 
 					CConcreteOntologyRedlandTriplesDataExpressionMapper* buildDatatypeBasedAxioms();
@@ -390,6 +392,10 @@ namespace Konclude {
 					CConcreteOntologyRedlandTriplesDataExpressionMapper* clearPartialFilteringStatement(librdf_statement*& partialFilteringStatement);
 
 					librdf_node* initDatatypeMapping(CRedlandStoredTriplesData* redlandTriplesData, const char* datatypeIri);
+
+
+					virtual CConcreteOntologyRedlandTriplesDataExpressionMapper* handleParsedOntologyAxiomExpression(CAxiomExpression* axiomExpression);
+
 
 				// protected variables
 				protected:

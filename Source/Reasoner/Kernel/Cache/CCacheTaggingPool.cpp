@@ -42,7 +42,7 @@ namespace Konclude {
 
 
 				CCacheTaggingPool::~CCacheTaggingPool() {
-					delete mTagPool;
+					delete[] mTagPool;
 				}
 
 				cint64 CCacheTaggingPool::takeNextTag() {

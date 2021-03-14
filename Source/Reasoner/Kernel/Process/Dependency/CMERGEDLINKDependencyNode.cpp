@@ -47,6 +47,12 @@ namespace Konclude {
 					}
 
 
+					CDependency* CMERGEDLINKDependencyNode::getPreviousLinkDependency() {
+						return &mPrevLinkDep;
+					}
+
+
+
 				}; // end namespace Dependency
 
 			}; // end namespace Process

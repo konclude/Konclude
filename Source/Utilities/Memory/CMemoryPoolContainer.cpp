@@ -30,6 +30,14 @@ namespace Konclude {
 
 			CMemoryPoolContainer::CMemoryPoolContainer(CMemoryPool* memoryPool) {
 				mMemoryPool = memoryPool;
+				mMemoryPoolCount = 0;
+				mMemorySize = 0;
+				if (mMemoryPool) {
+					mMemoryPoolCount = mMemoryPool->getCount();
+					for (CMemoryPool* memoryPoolIt = mMemoryPool; memoryPoolIt; memoryPoolIt = memoryPoolIt->getNext()) {
+						mMemorySize += memoryPoolIt->getMemoryBlockSize();
+					}
+				}
 			}
 
 			CMemoryPoolContainer::~CMemoryPoolContainer() {
@@ -37,6 +45,10 @@ namespace Konclude {
 
 			CMemoryPoolContainer* CMemoryPoolContainer::appendMemoryPool(CMemoryPool* memoryPool) {
 				if (memoryPool) {
+					mMemoryPoolCount += memoryPool->getCount();
+					for (CMemoryPool* memoryPoolIt = memoryPool; memoryPoolIt; memoryPoolIt = memoryPoolIt->getNext()) {
+						mMemorySize += memoryPoolIt->getMemoryBlockSize();
+					}
 					memoryPool->getLastListLink()->setNextMemoryPool(mMemoryPool);
 					mMemoryPool = memoryPool;
 				}
@@ -50,9 +62,18 @@ namespace Konclude {
 			CMemoryPool* CMemoryPoolContainer::takeMemoryPools() {
 				CMemoryPool* tmpMemoryPool = mMemoryPool;
 				mMemoryPool = nullptr;
+				mMemoryPoolCount = 0;
+				mMemorySize = 0;
 				return tmpMemoryPool;
 			}
 
+			cint64 CMemoryPoolContainer::getMemoryPoolCount() {
+				return mMemoryPoolCount;
+			}
+
+			cint64 CMemoryPoolContainer::getMemorySize() {
+				return mMemorySize;
+			}
 
 		}; // end namespace Memory
 

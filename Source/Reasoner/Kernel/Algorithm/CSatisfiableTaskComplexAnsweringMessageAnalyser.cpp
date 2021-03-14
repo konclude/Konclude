@@ -443,7 +443,7 @@ namespace Konclude {
 								bool nondetMerged = false;
 								baseIndiNode = getCorrectedIndividualID(baseIndiNode, indiNodeVec, &nondetMerged);
 								if (nondetMerged) {
-									maxDetBranchTag = 0;
+									maxDetBranchTag = -1;
 								}
 
 								CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>* subsumerList = nullptr;
@@ -467,6 +467,9 @@ namespace Konclude {
 												}
 
 												if (deterministic) {
+													//if (concept->hasClassName() && CIRIName::getRecentIRIName(concept->getClassNameLinker()) == "http://krono.act.uji.es/people/Ernesto/qimage-ontology/OntologyQimage.owl#right_angle_point") {
+													//	bool debug = true;
+													//}
 													if (!subsumerList) {
 														subsumerList = CObjectParameterizingAllocator< CCLASSSUBSUMPTIONMESSAGELIST<CConcept*>, CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan, mTmpContext);
 													}

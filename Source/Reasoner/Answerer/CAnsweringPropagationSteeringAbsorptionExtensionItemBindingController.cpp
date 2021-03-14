@@ -60,6 +60,17 @@ namespace Konclude {
 				return containsIndiFlag;
 			}
 
+			bool CAnsweringPropagationSteeringAbsorptionExtensionItemBindingController::isPreparationBindingNominalIndividual(CVariable* variable, cint64 indiId) {
+				cint64 index = mAbsorptionPropagationItem->getVariableIndexHash()->value(variable);
+				TIndividualInstanceItemDataBinding sameItemInstance = mBinding.getBinding(index);
+
+				bool containsIndiFlag = false;
+				CInstanceBindingIndividualCheckingVisitor visitor(&containsIndiFlag, indiId);
+				mSameRealization->visitSameIndividuals(sameItemInstance.reference, &visitor);
+
+				return containsIndiFlag;
+			}
+
 			bool CAnsweringPropagationSteeringAbsorptionExtensionItemBindingController::isPreparationBindingAllIndividuals(CVariable* variable) {
 				COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* absorptionData = mAbsorptionPropagationItem->getAbsorptionBasedHandlingData();
 				CExpressionVariable* expVariable = absorptionData->getExpressionVariableVariableHash()->value(variable);
@@ -72,6 +83,9 @@ namespace Konclude {
 				return false;
 			}
 
+			bool CAnsweringPropagationSteeringAbsorptionExtensionItemBindingController::isRestrictedTopPropagation(CConcept* concept) {
+				return false;
+			}
 
 
 		}; // end namespace Answerer

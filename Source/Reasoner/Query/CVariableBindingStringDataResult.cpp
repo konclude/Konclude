@@ -72,6 +72,21 @@ namespace Konclude {
 				return this;
 			}
 
+
+			CVariableBindingResult* CVariableBindingStringDataResult::initVariableBinding(CConcept* concept) {
+				mBindingString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
+				mType = CVariableBindingResult::VBTCLASS;
+				mData = (void*)concept->getConceptTag();
+				return this;
+			}
+
+			CVariableBindingResult* CVariableBindingStringDataResult::initVariableBinding(CRole* role) {
+				mBindingString = CIRIName::getRecentIRIName(role->getPropertyNameLinker());
+				mType = CVariableBindingResult::VBTPROPERTY;
+				mData = (void*)role->getRoleTag();
+				return this;
+			}
+
 			CVariableBindingResult* CVariableBindingStringDataResult::initVariableBinding(CDataLiteral* dataLiteral) {
 				mType = CVariableBindingResult::VBTLITERAL;
 				mData = dataLiteral;

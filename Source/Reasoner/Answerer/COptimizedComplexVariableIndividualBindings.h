@@ -31,6 +31,8 @@
 
 // Other includes
 #include "Reasoner/Realization/CRealizationIndividualInstanceItemReference.h"
+#include "Reasoner/Taxonomy/CRolePropertiesHierarchyNode.h"
+#include "Reasoner/Taxonomy/CHierarchyNode.h"
 
 #include "Utilities/UtilitiesSettings.h"
 
@@ -46,6 +48,7 @@ namespace Konclude {
 	namespace Reasoner {
 
 		using namespace Realization;
+		using namespace Taxonomy;
 
 		namespace Answerer {
 
@@ -54,7 +57,7 @@ namespace Konclude {
 			public:
 
 				enum BindingType {
-					NONE, DATA_POINTER, REALIZATION_ITEM
+					NONE, DATA_POINTER, REALIZATION_ITEM, CLASS_HIERARCHY_ITEM, PROPERTY_HIERARCHY_ITEM
 				};
 
 				CIndividualInstanceItemDataBinding() {
@@ -72,6 +75,18 @@ namespace Konclude {
 				CIndividualInstanceItemDataBinding(CDataLiteral* dataLiteral) {
 					bindingType = DATA_POINTER;
 					pointer = dataLiteral;
+				}
+
+
+				CIndividualInstanceItemDataBinding(CHierarchyNode* hierNode) {
+					bindingType = CLASS_HIERARCHY_ITEM;
+					classHierNode = hierNode;
+				}
+
+
+				CIndividualInstanceItemDataBinding(CRolePropertiesHierarchyNode* hierNode) {
+					bindingType = PROPERTY_HIERARCHY_ITEM;
+					propertyHierNode = hierNode;
 				}
 
 				cint64 getHashValue() const {
@@ -98,6 +113,8 @@ namespace Konclude {
 				BindingType bindingType;
 
 				union {
+					CHierarchyNode* classHierNode;
+					CRolePropertiesHierarchyNode* propertyHierNode;
 					CRealizationIndividualInstanceItemReference reference;
 					void* pointer;
 				};

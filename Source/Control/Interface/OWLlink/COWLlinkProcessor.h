@@ -159,8 +159,10 @@
 #include "Parser/CSPARQLSimpleManagementParser.h"
 #include "Parser/COWL2RDFTurtleAssertionsSimpleParser.h"
 #include "Parser/CRDFRedlandRaptorParser.h"
+#include "Parser/CRDFRedlandRaptorSimpleConcurrentParser.h"
 #include "Parser/CSPARQLRedlandRasqalQueryParser.h"
 #include "Parser/CRDFRedlandExternalTriplesDSNConnectingParser.h"
+#include "Parser/COntologyMultiAutoParsingLoader.h"
 
 #include "Parser/FunctionalJAVACC/COWL2FunctionalJAVACCOntologyStreamParser.h"
 
@@ -252,7 +254,6 @@ namespace Konclude {
 
 						virtual CConfiguration *getConfiguration() = 0;
 
-						QStringList getParserOrderFromFileName(const QString& fileName);
 
 						CQtHttpTransactionManager* getNetworkTransactionManager();
 						
@@ -260,9 +261,6 @@ namespace Konclude {
 
 						bool parseOntology(QIODevice* device, const QString& ontoIRI, const QString& resolvedIRI, CConcreteOntology *ont, COntologyConfigurationExtension *ontConfig, QList<QString>& importOntologiesList, QStringList& parserErrorList, CCommandRecordRouter& commandRecordRouter);
 
-#ifdef KONCLUDE_REDLAND_INTEGRATION
-						bool parseOntologyWithRaptor(QIODevice* device, CConcreteOntologyUpdateCollectorBuilder *builder, const QString& format, const QString& formatName, const QString& resolvedIRI, QString& parsingTryLogString, QStringList& parserErrorList, CConfiguration* configuration, CCommandRecordRouter& commandRecordRouter);
-#endif // !KONCLUDE_REDLAND_INTEGRATION
 
 
 					// protected variables
@@ -281,6 +279,8 @@ namespace Konclude {
 
 						CQtHttpTransactionManager* mNetworkManager;
 
+						cint64 mQueryNumber = 0;
+						QString mQueryPrefix = "Unknown";
 
 					// private methods
 					private:

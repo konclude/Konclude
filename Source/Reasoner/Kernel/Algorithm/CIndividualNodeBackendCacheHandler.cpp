@@ -758,14 +758,41 @@ namespace Konclude {
 
 				void CIndividualNodeBackendCacheHandler::collectRoleSuccessorData(CIndividualLinkEdge* link, bool inversed, cint64 maxDetBranchTag, bool isNominalNeighbour, bool isDataNeighbour, CPROCESSSET<TRoleInversionPair>* combinedNeighbourDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedNeighbourDetRoleInstantiatedLinker,
 						CPROCESSSET<TRoleInversionPair>* combinedNeighbourNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedNeighbourNonDetRoleInstantiatedLinker, CPROCESSSET<TRoleInversionPair>* combinedExistentialDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedExistentialDetRoleInstantiatedLinker, 
-					CPROCESSSET<TRoleInversionPair>* combinedExistentialNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedExistentialNonDetRoleInstantiatedLinker, CPROCESSSET<TRoleInversionPair>* combinedDataDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedDataDetRoleInstantiatedLinker,
-					CPROCESSSET<TRoleInversionPair>* combinedDataNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedDataNonDetRoleInstantiatedLinker, CRole* role, CCalculationAlgorithmContext* calcAlgContext, bool &collected, CIndividualProcessNode* indiNode, CIndividualProcessNode* connIndiNode,
-						cint64 connIndiMergedNominalId, bool connIndiNominalDeterministicallyMerged, CBackendRepresentativeMemoryCacheRoleAssertionLinker* &roleAssertionLinker, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash) {
+						CPROCESSSET<TRoleInversionPair>* combinedExistentialNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedExistentialNonDetRoleInstantiatedLinker, CPROCESSSET<TRoleInversionPair>* combinedDataDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedDataDetRoleInstantiatedLinker,
+						CPROCESSSET<TRoleInversionPair>* combinedDataNonDetRoleInstantiatedSet, CSortedNegLinker<CRole *>*& combinedDataNonDetRoleInstantiatedLinker, CRole* role, CCalculationAlgorithmContext* calcAlgContext, bool &collected, CIndividualProcessNode* indiNode, CIndividualProcessNode* connIndiNode,
+						cint64 connIndiMergedNominalId, bool connIndiNominalDeterministicallyMerged, CBackendRepresentativeMemoryCacheRoleAssertionLinker* &roleAssertionLinker, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, 
+						CBackendRepresentativeMemoryLabelCacheItem* prevNeighbourRoleSetLabelRef) {
 
 					bool deterministicallyDerived = connIndiNominalDeterministicallyMerged;
 					CDependencyTrackPoint* lindDepTrackPoint = link->getDependencyTrackPoint();
 					if (!lindDepTrackPoint || lindDepTrackPoint->getBranchingTag() > maxDetBranchTag) {
 						deterministicallyDerived = false;
+					}
+
+
+
+
+					bool isAssertionBase = false;
+					bool nominalConnected = false;
+					bool prevLinkStatusUsage = false;
+					if (prevNeighbourRoleSetLabelRef) {
+
+						cint64 roleTag = role->getRoleTag();
+						if (inversed) {
+							roleTag = -roleTag;
+						}
+						CBackendRepresentativeMemoryLabelValueLinker* cachedValueLinker = prevNeighbourRoleSetLabelRef->getTagCacheValueHash()->value(roleTag);
+						if (cachedValueLinker) {
+							const CCacheValue& prevCacheValue = cachedValueLinker->getCacheValue();
+							bool prevNondeterministicallyDerived = mAssBackCacheReader->isCacheValueRoleNondeterministic(prevCacheValue);
+							if (!prevNondeterministicallyDerived || !deterministicallyDerived) {
+								deterministicallyDerived = !prevNondeterministicallyDerived;
+								isAssertionBase = mAssBackCacheReader->isCacheValueRoleAssertion(prevCacheValue);
+								nominalConnected = mAssBackCacheReader->isCacheValueRoleNominal(prevCacheValue);
+								prevLinkStatusUsage = true;
+							}
+						}
+
 					}
 
 					CPROCESSSET<TRoleInversionPair>** useRoleInstantiatedSet = nullptr;
@@ -790,6 +817,9 @@ namespace Konclude {
 						useRoleInstantiatedLinker = &combinedExistentialNonDetRoleInstantiatedLinker;
 					}
 
+
+
+
 					if (useRoleInstantiatedSet && !(*useRoleInstantiatedSet)->contains(TRoleInversionPair(role, inversed))) {
 						(*useRoleInstantiatedSet)->insert(TRoleInversionPair(role, inversed));
 						CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
@@ -799,8 +829,29 @@ namespace Konclude {
 
 
 					if (isNominalNeighbour) {
-						bool isAssertionBase = false;
-						if (lindDepTrackPoint && lindDepTrackPoint->getDependencyNode()->getDependencyType() == CDependencyNode::DNTROLEASSERTIONDEPENDENCY) {
+
+						if (lindDepTrackPoint && deterministicallyDerived && lindDepTrackPoint->getDependencyNode()->getDependencyType() == CDependencyNode::DNTMERGEDLINK) {
+
+							CMERGEDLINKDependencyNode* mergedLinkDep = (CMERGEDLINKDependencyNode*)lindDepTrackPoint->getDependencyNode();
+							CDependencyTrackPoint* prevLinkDepTrackPoint = mergedLinkDep->getPreviousDependencyTrackPoint();
+							while (prevLinkDepTrackPoint && prevLinkDepTrackPoint->getDependencyNode() && prevLinkDepTrackPoint->getDependencyNode()->getDependencyType() == CDependencyNode::DNTMERGEDLINK) {
+								mergedLinkDep = (CMERGEDLINKDependencyNode*)prevLinkDepTrackPoint->getDependencyNode();
+								prevLinkDepTrackPoint = mergedLinkDep->getPreviousDependencyTrackPoint();
+							}
+
+							if (prevLinkDepTrackPoint && prevLinkDepTrackPoint->getDependencyNode()->getDependencyType() == CDependencyNode::DNTROLEASSERTIONDEPENDENCY) {
+								lindDepTrackPoint = prevLinkDepTrackPoint;
+							}
+
+
+						}
+						if (prevLinkStatusUsage) {
+
+							CBackendRepresentativeMemoryCacheRoleAssertionLinker* linker = CObjectAllocator< CBackendRepresentativeMemoryCacheRoleAssertionLinker >::allocateAndConstruct(calcAlgContext->getMemoryAllocationManager());
+							linker->initRoleAssertionLinker(role, inversed, isAssertionBase, nominalConnected, !deterministicallyDerived);
+							roleAssertionLinker = (CBackendRepresentativeMemoryCacheRoleAssertionLinker*)linker->append(roleAssertionLinker);
+							
+						} else  if (lindDepTrackPoint && lindDepTrackPoint->getDependencyNode()->getDependencyType() == CDependencyNode::DNTROLEASSERTIONDEPENDENCY) {
 							isAssertionBase = true;
 
 							CROLEASSERTIONDependencyNode* assertionDepNode = (CROLEASSERTIONDependencyNode*)lindDepTrackPoint->getDependencyNode();
@@ -847,7 +898,6 @@ namespace Konclude {
 								linker->initRoleAssertionLinker(role, inversed, false, true, !deterministicallyDerived);
 								roleAssertionLinker = (CBackendRepresentativeMemoryCacheRoleAssertionLinker*)linker->append(roleAssertionLinker);
 							}
-
 						} else {
 							CBackendRepresentativeMemoryCacheRoleAssertionLinker* linker = CObjectAllocator< CBackendRepresentativeMemoryCacheRoleAssertionLinker >::allocateAndConstruct(calcAlgContext->getMemoryAllocationManager());
 							linker->initRoleAssertionLinker(role, inversed, false, true, !deterministicallyDerived);
@@ -927,7 +977,7 @@ namespace Konclude {
 
 
 
-				bool CIndividualNodeBackendCacheHandler::determineRoleInstantiatedSetLabelAssociationBackendItems(CIndividualProcessNode* extractionIndiNode, CIndividualProcessNode* indiNode, bool onlyNondeterministic, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, CCalculationAlgorithmContext* calcAlgContext) {
+				bool CIndividualNodeBackendCacheHandler::determineRoleInstantiatedSetLabelAssociationBackendItems(CIndividualProcessNode* extractionIndiNode, CIndividualProcessNode* indiNode, bool onlyNondeterministic, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CPROCESSSET<cint64>** existentialIndirectlyConnectedNominalIndividualSet, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, QSet<cint64>* propCutIndiSet, CCalculationAlgorithmContext* calcAlgContext) {
 
 					bool updated = false;
 
@@ -959,6 +1009,8 @@ namespace Konclude {
 
 					CPROCESSSET<cint64>* connIndiSet = CObjectParameterizingAllocator< CPROCESSSET<cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 
+
+
 					CSuccessorIterator succIt(extractionIndiNode->getSuccessorIterator());
 					cint64 lastIndiId = CINT64_MAX;
 					while (succIt.hasNext()) {
@@ -978,6 +1030,7 @@ namespace Konclude {
 
 					bool collected = false;
 					cint64 maxDetBranchTag = calcAlgContext->getProcessingDataBox()->getMaximumDeterministicBranchTag();
+					cint64 nonMergeConsideredMaxDetBranchTag = calcAlgContext->getProcessingDataBox()->getMaximumDeterministicBranchTag();
 					if (onlyNondeterministic) {
 						maxDetBranchTag = -1;
 					}
@@ -994,67 +1047,71 @@ namespace Konclude {
 						maxSameIndiSetLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
 					}
 
+
 					if (indiAssData && (indiAssData->isIndirectlyConnectedNominalIndividual() || extractionIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED | CIndividualProcessNode::PRFSATURATIONSUCCESSORCREATIONBLOCKINGCACHED))) {
 
 						visitMergedIndividualNodesAssociationData(extractionIndiNode, indiAssData, maxSameIndiSetLabel, true, maxDetBranchTag, [&](cint64 mergedIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* mergedIndiAssData, bool deterministicallyMerged)->bool {
 
-							// reuse roles of existing existential data role instantiation sets
-							visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
-								if (deterministicallyMerged && !onlyNondeterministic) {
-									if (!combinedDataDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
-										combinedDataDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
-										CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
-										combinedDataDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedDataDetRoleInstantiatedLinker);
+							if (!mergedIndiAssData->hasDeterministicSameIndividualMerging()) {
+								// reuse roles of existing existential data role instantiation sets
+								visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
+									if (deterministicallyMerged && !onlyNondeterministic) {
+										if (!combinedDataDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+											combinedDataDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+											CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+											combinedDataDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedDataDetRoleInstantiatedLinker);
+										}
+									} else {
+										if (!combinedDataNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+											combinedDataNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+											CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+											combinedDataNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedDataNonDetRoleInstantiatedLinker);
+										}
 									}
-								} else {
-									if (!combinedDataNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
-										combinedDataNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
-										CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
-										combinedDataNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedDataNonDetRoleInstantiatedLinker);
-									}
-								}
-								return true;
-							}, calcAlgContext);
+									return true;
+								}, calcAlgContext);
 
 
-							// reuse roles of existing existential role instantiation sets
-							visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
-								if (deterministicallyMerged && !onlyNondeterministic) {
-									if (!combinedExistentialDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
-										combinedExistentialDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
-										CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
-										combinedExistentialDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedExistentialDetRoleInstantiatedLinker);
+								// reuse roles of existing existential role instantiation sets
+								visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
+									if (deterministicallyMerged && !onlyNondeterministic) {
+										if (!combinedExistentialDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+											combinedExistentialDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+											CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+											combinedExistentialDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedExistentialDetRoleInstantiatedLinker);
+										}
+									} else {
+										if (!combinedExistentialNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+											combinedExistentialNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+											CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+											combinedExistentialNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedExistentialNonDetRoleInstantiatedLinker);
+										}
 									}
-								} else {
+									return true;
+								}, calcAlgContext);
+
+
+
+								visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
 									if (!combinedExistentialNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
 										combinedExistentialNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
 										CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
 										combinedExistentialNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedExistentialNonDetRoleInstantiatedLinker);
 									}
-								}
-								return true;
-							}, calcAlgContext);
+									return true;
+								}, calcAlgContext);
 
 
+								visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
+									if (!combinedDataNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+										combinedDataNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+										CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+										combinedDataNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedDataNonDetRoleInstantiatedLinker);
+									}
+									return true;
+								}, calcAlgContext);
 
-							visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
-								if (!combinedExistentialNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
-									combinedExistentialNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
-									CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
-									combinedExistentialNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedExistentialNonDetRoleInstantiatedLinker);
-								}
-								return true;
-							}, calcAlgContext);
-
-
-							visitRolesOfAssociatedCompinationRoleSetLabel(mergedIndiAssData, mergedIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL), [&](CRole* role, bool inversed)->bool {
-								if (!combinedDataNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
-									combinedDataNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
-									CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
-									combinedDataNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedDataNonDetRoleInstantiatedLinker);
-								}
-								return true;
-							}, calcAlgContext);
+							}
 
 							return true;
 						}, calcAlgContext);
@@ -1063,10 +1120,17 @@ namespace Konclude {
 
 
 					//TODO: detect removed non-deterministic neighbour connections (e.g., due to different merging), i.e., go through existing associated neighbour array and check for neighbours with only non-deterministic roles which are not instantiated in the current completion graph (although both individuals are present and fully handled)
+					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* extIndiBackSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)extractionIndiNode->getIndividualBackendCacheSynchronisationData(false);
+					bool propagationCut = false;
 					bool requiresAllLinksCollecting = false;
-					if (indiAssData && indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL)) {
+					if (indiAssData && indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL) && !extractionIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFBACKENDEXPANSIONREUSINGINDIVIDUAL) && extIndiBackSyncData->hasAllNeighbourExpansion()) {
 						tmpAssWriteDataLinker->setLinksUpdateType(CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::REPLACEMENT);
 						requiresAllLinksCollecting = true;
+					}
+					if (!requiresAllLinksCollecting && propCutIndiSet && propCutIndiSet->contains(indiNode->getNominalIndividual()->getIndividualID())) {
+						tmpAssWriteDataLinker->setLinksUpdateType(CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::REPLACEMENT);
+						requiresAllLinksCollecting = true;
+						propagationCut = true;
 					}
 
 
@@ -1094,6 +1158,15 @@ namespace Konclude {
 							while (!allConnIndiHandled) {
 
 
+								CBackendRepresentativeMemoryLabelCacheItem* prevNeighbourRoleSetLabelRef = nullptr;
+								if (indiAssData && connIndiMergedNominalId >= 0 && connIndiId <= 0) {
+									CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash = indiAssData->getNeighbourRoleSetHash();
+									if (neighbourRoleSetHash) {
+										prevNeighbourRoleSetLabelRef = neighbourRoleSetHash->getNeighbourRoleSetLabel(connIndiMergedNominalId);
+									}
+								}
+
+
 								CBackendRepresentativeMemoryCacheRoleAssertionLinker* roleAssertionLinker = nullptr;
 
 								CSuccessorRoleIterator roleIt(extractionIndiNode->getSuccessorRoleIterator(connIndiNode));
@@ -1103,7 +1176,7 @@ namespace Konclude {
 
 									if (role != topRole) {
 										collectRoleSuccessorData(link, false, maxDetBranchTag, isNominalNeighbour, isDataNeighbour, combinedNeighbourDetRoleInstantiatedSet, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, combinedNeighbourNonDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet,
-											combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash);
+											combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash, prevNeighbourRoleSetLabelRef);
 									}
 								}
 
@@ -1114,13 +1187,68 @@ namespace Konclude {
 
 									if (role != topRole) {
 										collectRoleSuccessorData(link, true, maxDetBranchTag, isNominalNeighbour, isDataNeighbour, combinedNeighbourDetRoleInstantiatedSet, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, combinedNeighbourNonDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet,
-											combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash);
+											combinedExistentialDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, combinedExistentialNonDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, combinedDataDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, combinedDataNonDetRoleInstantiatedLinker, role, calcAlgContext, collected, extractionIndiNode, connIndiNode, connIndiMergedNominalId, connIndiDetMerged, roleAssertionLinker, existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash, prevNeighbourRoleSetLabelRef);
 									}
 								}
 
 
 								if (roleAssertionLinker) {
+
+
+
 									CBackendRepresentativeMemoryCacheTemporaryLabelReference neighbourRoleSetLabelRef = getNeighbourRoleInstantiatedSetLabelAssociationBackendItem(nullptr, roleAssertionLinker, nullptr, calcAlgContext);
+
+
+									if (indiAssData && (neighbourRoleSetLabelRef.getReferredLabelData() || neighbourRoleSetLabelRef.getReferredTemporaryLabelData())) {
+										CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash = indiAssData->getNeighbourRoleSetHash();
+										CBackendRepresentativeMemoryLabelCacheItem* prevLabel = nullptr;  
+										if (neighbourRoleSetHash) {
+											prevLabel = neighbourRoleSetHash->getNeighbourRoleSetLabel(connIndiMergedNominalId);
+										}
+										CBackendRepresentativeMemoryLabelCacheItem* newLabel = neighbourRoleSetLabelRef.getReferredLabelData();
+										CBackendRepresentativeMemoryLabelValueLinker* valueLinker = nullptr;
+										if (prevLabel && newLabel && prevLabel != newLabel) {
+											if (prevLabel->getCacheValueCount() == newLabel->getCacheValueCount()) {
+												valueLinker = newLabel->getCacheValueLinker();
+											}
+										}
+										CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tmpLabel = neighbourRoleSetLabelRef.getReferredTemporaryLabelData();
+										if (tmpLabel && prevLabel) {
+											if (prevLabel->getCacheValueCount() == tmpLabel->getCacheValueCount()) {
+												valueLinker = tmpLabel->getCacheValueLinker();
+											}
+										}
+
+										if (valueLinker) {
+											
+
+											bool sameRolesCompatible = true;
+											for (CBackendRepresentativeMemoryLabelValueLinker* linkerIt = valueLinker; linkerIt && sameRolesCompatible; linkerIt = linkerIt->getNext()) {
+												cint64 tag = linkerIt->getCacheValue().getTag();												
+												if (!prevLabel->getTagCacheValueHash(false)->contains(tag)) {
+													sameRolesCompatible = false;
+												} else {
+													const CCacheValue& prevCacheValue = prevLabel->getTagCacheValueHash(false)->value(tag)->getCacheValue();
+													const CCacheValue& newCacheValue = linkerIt->getCacheValue();
+													if (mAssBackCacheReader->isCacheValueRoleInverse(prevCacheValue) != mAssBackCacheReader->isCacheValueRoleInverse(newCacheValue)) {
+														sameRolesCompatible = false;
+													}
+													bool prevNondeterministic = mAssBackCacheReader->isCacheValueRoleNondeterministic(prevCacheValue);
+													bool newNondeterministic = mAssBackCacheReader->isCacheValueRoleNondeterministic(newCacheValue);
+													if (prevNondeterministic && !newNondeterministic) {
+														sameRolesCompatible = false;
+													}
+													
+												}
+											}
+											if (sameRolesCompatible) {
+												neighbourRoleSetLabelRef.setReferredTemporaryLabelData(nullptr);
+												neighbourRoleSetLabelRef.setReferredLabelData(prevLabel);
+											}
+										}
+									}
+
+
 									neigbourRoleInstantiatedSetCompination->insert(neighbourRoleSetLabelRef);
 
 
@@ -1150,7 +1278,7 @@ namespace Konclude {
 									CIndividualMergingHashData mergingData = connIndiMergedHashIt.value();
 									allConnIndiHandled = false;
 									connIndiDetMerged = true;
-									if (!mergingData.getDependencyTrackPoint() || mergingData.getDependencyTrackPoint()->getBranchingTag() > maxDetBranchTag) {
+									if (!mergingData.getDependencyTrackPoint() || mergingData.getDependencyTrackPoint()->getBranchingTag() > nonMergeConsideredMaxDetBranchTag) {
 										connIndiDetMerged = false;
 									}
 									++connIndiMergedHashIt;
@@ -1160,6 +1288,68 @@ namespace Konclude {
 						}
 					}
 
+
+
+					if (extIndiBackSyncData && !extIndiBackSyncData->hasNonDeterministicallyMergedIndividuals() && !extIndiBackSyncData->hasNewlyMergedAllNeighbourExpansion() && extIndiBackSyncData->hasNewlyMergedIndividuals() && extIndiBackSyncData->hasNewlyMergedInferringNeighbourExpansion()) {
+						CBackendRepresentativeMemoryLabelCacheItem* detSameIndiSetLabel = indiAssData->getDeterministicConceptSetLabelCacheEntry();
+						visitMergedIndividualNodesAssociationData(extractionIndiNode, indiAssData, detSameIndiSetLabel, true, maxDetBranchTag, [&](cint64 mergedIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* mergedIndiAssData, bool deterministicallyMerged)->bool {
+
+							if (!mergedIndiAssData->hasDeterministicSameIndividualMerging()) {
+
+								CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash = indiAssData->getNeighbourRoleSetHash();
+
+								CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* mergedNeighbourRoleSetArray = mergedIndiAssData->getRoleSetNeighbourArray();
+								if (mergedNeighbourRoleSetArray) {
+									CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* neighbourRoleSetArrayIndexData = mergedNeighbourRoleSetArray->getIndexData();
+									for (cint64 i = 0; i < neighbourRoleSetArrayIndexData->getArraySize(); ++i) {
+										CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetlabel = neighbourRoleSetArrayIndexData->getNeighbourRoleSetLabel(i);
+
+										if (!neighbourRoleSetlabel->hasNondeterministicElements() && !neigbourRoleInstantiatedSetCompination->contains(neighbourRoleSetlabel)) {
+											mergedNeighbourRoleSetArray->at(i).visitNeighbourIndividualIds([&](cint64 neighbourIndiId)->bool {
+
+												bool neighbourNodeConnectionAvailable = true;
+												CIndividualProcessNode* neighbourIndiNode = indiProcNodeVec->getData(-neighbourIndiId);
+												if (!neighbourIndiNode) {
+													neighbourNodeConnectionAvailable = false;
+												} else if (!connIndiSet->contains(-neighbourIndiId)) {
+													neighbourIndiNode = getMergedIntoIndividualNode(neighbourIndiNode, false, calcAlgContext);
+													cint64 mergedIntoNeighbourId = neighbourIndiNode->getNominalIndividual()->getIndividualID();
+													if (!connIndiSet->contains(-mergedIntoNeighbourId)) {
+														neighbourNodeConnectionAvailable = false;
+													}
+												}
+
+
+												if (!neighbourNodeConnectionAvailable) {
+													neigbourRoleInstantiatedSetCompination->insert(neighbourRoleSetlabel);
+
+													visitRolesOfAssociatedNeigbourRoleSetLabel(mergedIndiAssData, neighbourRoleSetlabel, [&](CRole* role, bool inversed, bool assertionLinkBase, bool nominalLinkBase, bool nondeterministic)->bool {
+														if (!nondeterministic) {
+															neigbourRoleInstantiatedSetCompination->insert(CBackendRepresentativeMemoryCacheTemporaryLabelReference(neighbourRoleSetlabel));
+															if (!combinedNeighbourDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+																combinedNeighbourDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+																CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+																combinedNeighbourDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedNeighbourDetRoleInstantiatedLinker);
+															}
+														}
+														return true;
+													});
+
+													return false;
+												}
+
+												return true;
+											});
+										}
+									}
+								}
+							}
+
+							return true;
+
+						}, calcAlgContext);
+						tmpAssWriteDataLinker->setRequireSameAsNeighboursCompletion(true);
+					}
 
 
 					// not necessary at the moment since all neighbours are expanded if new nominal individuals are merged
@@ -1220,44 +1410,86 @@ namespace Konclude {
 
 
 
-					if (indiAssData && !requiresAllLinksCollecting) {
+					if (indiAssData && (!requiresAllLinksCollecting || propagationCut)) {
 						// add link data for not expanded neighbours from the previous data
-						if (combinedNeighbourDetRoleInstantiatedLinker || combinedNeighbourNonDetRoleInstantiatedLinker) {
+						if (combinedNeighbourDetRoleInstantiatedLinker || combinedNeighbourNonDetRoleInstantiatedLinker || propagationCut) {
 
 							CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* neighbourRoleSetArray = indiAssData->getRoleSetNeighbourArray();
 							if (neighbourRoleSetArray) {
 								CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData* neighbourRoleSetArrayIndexData = neighbourRoleSetArray->getIndexData();
 								for (cint64 i = 0; i < neighbourRoleSetArrayIndexData->getArraySize(); ++i) {
 									CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetlabel = neighbourRoleSetArrayIndexData->getNeighbourRoleSetLabel(i);
+									bool hasNonDetElems = neighbourRoleSetlabel->hasNondeterministicElements();
 
-									neighbourRoleSetArray->at(i).visitNeighbourIndividualIds([&](cint64 neighbourIndiId)->bool {
-										if (!connIndiSet->contains(-neighbourIndiId)) {
-											// neighbour node is not present/connected in completion graph, i.e., make sure previous neighbour connections are correctly considered
-											visitRolesOfAssociatedNeigbourRoleSetLabel(indiAssData, neighbourRoleSetlabel, [&](CRole* role, bool inversed, bool assertionLinkBase, bool nominalLinkBase, bool nondeterministic)->bool {
-												if (nondeterministic) {
-													// should never happen, since such non-deterministic neighbour links are considered in the completion graph
-													//CIndividualProcessNode* neighbourIndiNode = indiProcNodeVec->getData(-neighbourIndiId);
-													//if (!neighbourIndiNode && !combinedNeighbourNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
-													//	combinedNeighbourNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
-													//	CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
-													//	combinedNeighbourNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedNeighbourNonDetRoleInstantiatedLinker);
-													//	neigbourRoleInstantiatedSetCompination->insert(CBackendRepresentativeMemoryCacheTemporaryLabelReference(neighbourRoleSetlabel));
-													//}
-												} else {
-													neigbourRoleInstantiatedSetCompination->insert(CBackendRepresentativeMemoryCacheTemporaryLabelReference(neighbourRoleSetlabel));
-													if (!combinedNeighbourDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
-														combinedNeighbourDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
-														CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
-														combinedNeighbourDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedNeighbourDetRoleInstantiatedLinker);
-													}
+									if ((neighbourRoleSetlabel->getCacheValueCount() != 1 || neighbourRoleSetlabel->getCacheValueLinker()->getData().getTag() != 1)) {
+
+										neighbourRoleSetArray->at(i).visitNeighbourIndividualIds([&](cint64 neighbourIndiId)->bool {
+											bool neighbourNodeAvailable = true;
+											bool neighbourNodeConnectionAvailable = true;
+											CIndividualProcessNode* neighbourIndiNode = indiProcNodeVec->getData(-neighbourIndiId);
+											if (!neighbourIndiNode) {
+												neighbourNodeAvailable = false;
+												neighbourNodeConnectionAvailable = false;
+											} else if (!connIndiSet->contains(-neighbourIndiId)) {
+												neighbourIndiNode = getMergedIntoIndividualNode(neighbourIndiNode, false, calcAlgContext);
+												cint64 mergedIntoNeighbourId = neighbourIndiNode->getNominalIndividual()->getIndividualID();
+												if (!connIndiSet->contains(-mergedIntoNeighbourId)) {
+													neighbourNodeConnectionAvailable = false;
 												}
-												return true;
-											});
+											}
 
-											return false;
-										}
-										return true;
-									});
+											if ((!hasNonDetElems || !propagationCut) && (!neighbourNodeConnectionAvailable || !neighbourNodeAvailable && hasNonDetElems && extractionIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFBACKENDEXPANSIONREUSINGINDIVIDUAL))) {
+												neigbourRoleInstantiatedSetCompination->insert(CBackendRepresentativeMemoryCacheTemporaryLabelReference(neighbourRoleSetlabel));
+
+												// neighbour node is not present/connected in completion graph, i.e., make sure previous neighbour connections are correctly considered
+												visitRolesOfAssociatedNeigbourRoleSetLabel(indiAssData, neighbourRoleSetlabel, [&](CRole* role, bool inversed, bool assertionLinkBase, bool nominalLinkBase, bool nondeterministic)->bool {
+													if (nondeterministic) {
+														if (extractionIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFBACKENDEXPANSIONREUSINGINDIVIDUAL) && !combinedNeighbourNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+															combinedNeighbourNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+															CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+															combinedNeighbourNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedNeighbourNonDetRoleInstantiatedLinker);
+														}
+														// should never happen, since such non-deterministic neighbour links are considered in the completion graph
+														//CIndividualProcessNode* neighbourIndiNode = indiProcNodeVec->getData(-neighbourIndiId);
+														//if (!neighbourIndiNode && !combinedNeighbourNonDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+														//	combinedNeighbourNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+														//	CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+														//	combinedNeighbourNonDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedNeighbourNonDetRoleInstantiatedLinker);
+														//	neigbourRoleInstantiatedSetCompination->insert(CBackendRepresentativeMemoryCacheTemporaryLabelReference(neighbourRoleSetlabel));
+														//}
+													} else {
+														if (!combinedNeighbourDetRoleInstantiatedSet->contains(TRoleInversionPair(role, inversed))) {
+															combinedNeighbourDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+															CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getUsedTemporaryMemoryAllocationManager());
+															combinedNeighbourDetRoleInstantiatedLinker = newRoleLinker->init(role, inversed, combinedNeighbourDetRoleInstantiatedLinker);
+														}
+													}
+													return true;
+												});
+
+												// stop iterating through individuals as soon as the first unexpanded has been found
+												return false;
+											} else if (!neighbourNodeAvailable && propagationCut && hasNonDetElems) {
+												// deterministic neighbour label reduction for propagation cut
+												CBackendRepresentativeMemoryCacheRoleAssertionLinker* roleAssertionLinker = nullptr;
+												visitRolesOfAssociatedNeigbourRoleSetLabel(indiAssData, neighbourRoleSetlabel, [&](CRole* role, bool inversed, bool assertionLinkBase, bool nominalLinkBase, bool nondeterministic)->bool {
+													if (!nondeterministic) {
+														combinedNeighbourNonDetRoleInstantiatedSet->insert(TRoleInversionPair(role, inversed));
+														CBackendRepresentativeMemoryCacheRoleAssertionLinker* linker = CObjectAllocator< CBackendRepresentativeMemoryCacheRoleAssertionLinker >::allocateAndConstruct(calcAlgContext->getMemoryAllocationManager());
+														linker->initRoleAssertionLinker(role, inversed, assertionLinkBase, nominalLinkBase, false);
+														roleAssertionLinker = (CBackendRepresentativeMemoryCacheRoleAssertionLinker*)linker->append(roleAssertionLinker);
+													}
+													return true;
+												});
+												if (roleAssertionLinker) {
+													CBackendRepresentativeMemoryCacheTemporaryLabelReference neighbourRoleSetLabelRef = getNeighbourRoleInstantiatedSetLabelAssociationBackendItem(nullptr, roleAssertionLinker, nullptr, calcAlgContext);
+													neigbourRoleInstantiatedSetCompination->insert(CBackendRepresentativeMemoryCacheTemporaryLabelReference(neighbourRoleSetlabel));
+												}
+												return false;
+											}
+											return true;
+										});
+									}
 								}
 							}
 							
@@ -1271,7 +1503,7 @@ namespace Konclude {
 
 
 					if (combinedExistentialDetRoleInstantiatedLinker) {
-						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, combinedExistentialDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash, calcAlgContext);
+						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, combinedExistentialDetRoleInstantiatedLinker, combinedExistentialDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL], calcAlgContext);
 						tmpAssWriteDataLinker->setReferredLabel(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, labelRef);
 						updated = true;
 					} else if (!requiresAllLinksCollecting && indiAssData) {
@@ -1280,7 +1512,7 @@ namespace Konclude {
 					}
 
 					if (combinedExistentialNonDetRoleInstantiatedLinker) {
-						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, combinedExistentialNonDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash, calcAlgContext);
+						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, combinedExistentialNonDetRoleInstantiatedLinker, combinedExistentialNonDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL], calcAlgContext);
 						tmpAssWriteDataLinker->setReferredLabel(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL, labelRef);
 						updated = true;
 					} else if (!requiresAllLinksCollecting && indiAssData) {
@@ -1294,7 +1526,7 @@ namespace Konclude {
 
 
 					if (combinedDataDetRoleInstantiatedLinker) {
-						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, combinedDataDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash, calcAlgContext);
+						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, combinedDataDetRoleInstantiatedLinker, combinedDataDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL], calcAlgContext);
 						tmpAssWriteDataLinker->setReferredLabel(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, labelRef);
 						updated = true;
 					} else if (!requiresAllLinksCollecting && indiAssData) {
@@ -1303,7 +1535,7 @@ namespace Konclude {
 					}
 
 					if (combinedDataNonDetRoleInstantiatedLinker) {
-						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, combinedDataNonDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash, calcAlgContext);
+						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, combinedDataNonDetRoleInstantiatedLinker, combinedDataNonDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL], calcAlgContext);
 						tmpAssWriteDataLinker->setReferredLabel(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_DATA_INSTANTIATED_ROLE_SET_LABEL, labelRef);
 						updated = true;
 					} else if (!requiresAllLinksCollecting && indiAssData) {
@@ -1317,7 +1549,7 @@ namespace Konclude {
 
 
 					if (combinedNeighbourDetRoleInstantiatedLinker) {
-						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash, calcAlgContext);
+						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL, combinedNeighbourDetRoleInstantiatedLinker, combinedNeighbourDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL], calcAlgContext);
 						tmpAssWriteDataLinker->setReferredLabel(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL, labelRef);
 						updated = true;
 					} else if (!requiresAllLinksCollecting && indiAssData) {
@@ -1326,7 +1558,7 @@ namespace Konclude {
 					}
 
 					if (combinedNeighbourNonDetRoleInstantiatedLinker) {
-						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL, combinedNeighbourNonDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash, calcAlgContext);
+						CBackendRepresentativeMemoryCacheTemporaryLabelReference labelRef = getRoleInstantiatedSetLabelAssociationBackendItem(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL, combinedNeighbourNonDetRoleInstantiatedLinker, combinedNeighbourNonDetRoleInstantiatedSet, false, mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL], calcAlgContext);
 						tmpAssWriteDataLinker->setReferredLabel(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL, labelRef);
 						updated = true;
 					} else if (!requiresAllLinksCollecting && indiAssData) {
@@ -1388,6 +1620,7 @@ namespace Konclude {
 
 				bool CIndividualNodeBackendCacheHandler::tryAssociateNodesWithBackendCache(CXLinker<CIndividualProcessNode*>* indiNodeLinker, CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repbackUpdAdapter, CCalculationAlgorithmContext* calcAlgContext) {
 
+
 					mSignatureTmpDetConSetRefLabelHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker*>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(),calcAlgContext->getUsedTaskProcessorContext());
 					mSignatureTmpNonDetConSetRefLabelHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker*>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 					
@@ -1403,12 +1636,12 @@ namespace Konclude {
 
 					mSignatureTmpRefNeigbourRoleInstantiatedSetCombinationLabelHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker*>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 					mRoleInversionTmpRefNeighbourInstantiatedRoleSetLabelHash = CObjectParameterizingAllocator< CPROCESSHASH< TRoleInversionPair, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
-					mRoleInversionSetTmpRefNeighbourInstantiatedRoleSetLabelHash = CObjectParameterizingAllocator< CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 
 					mSuperRoleSignatureCacheValueTmpRefNeighbourInstantiatedRoleSetLabelPairHash = CObjectParameterizingAllocator< CPROCESSHASH< cint64, CCacheValueTmpLabelReferenceData* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 
-					mRoleInversionSetTmpRefCombinedExistentialRoleInstantiatedSetLabelHash = CObjectParameterizingAllocator< CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
-					mRoleInversionSetTmpRefCombinedNeighbourRoleInstantiatedSetLabelHash = CObjectParameterizingAllocator< CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
+					for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_TYPE_COUNT; ++i) {
+						mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[i] = CObjectParameterizingAllocator< CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
+					}
 
 					mNewTmpLabelList = CObjectParameterizingAllocator< CPROCESSLIST< CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 					mNewTmpCardList = CObjectParameterizingAllocator< CPROCESSLIST< CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* >, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
@@ -1426,10 +1659,14 @@ namespace Konclude {
 
 
 					CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tmpAssUseDataLinker = nullptr;
-					CIndividualRepresentativeBackendCacheLoadedAssociationHash* indiLoadedAssocHash = calcAlgContext->getUsedProcessingDataBox()->getBackendCacheLoadedAssociationHash(false);
+					CIndividualRepresentativeBackendCacheLoadedAssociationHash* indiLoadedAssocHash = calcAlgContext->getUsedProcessingDataBox()->getBackendCacheLoadedAssociationHash(true);
+					indiLoadedAssocHash->unshareAll();
 
 
 					CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+
+					QSet<cint64>* propCutIndiSet = nullptr;
+					CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* propCutData = getPropagationCutIndividualData(propCutIndiSet, repbackUpdAdapter, calcAlgContext);
 
 					for (CXLinker<CIndividualProcessNode*>* indiNodeLinkerIt = indiNodeLinker; indiNodeLinkerIt; indiNodeLinkerIt = indiNodeLinkerIt->getNext()) {
 						CIndividualProcessNode* indiNode = indiNodeLinkerIt->getData();
@@ -1438,12 +1675,9 @@ namespace Konclude {
 						if (nominalIndividual) {
 							indiNode = indiProcNodeVec->getData(indiNode->getIndividualNodeID());
 
-							
-
-							//if (CIRIName::getRecentIRIName(nominalIndividual->getIndividualNameLinker()) == "http://www.w3.org/TR/2003/CR-owl-guide-20030818/wine#Moderate") {
+							//if (CIRIName::getRecentIRIName(nominalIndividual->getIndividualNameLinker()) == "http://www.Department1.University0.edu/StudentWhoLikesTennisButDislikesBasketBallAndBaseBall") {
 							//	bool debug = true;
 							//}
-
 
 							CIndividualRepresentativeBackendCacheLoadedAssociationData& assoLoadingData = (*indiLoadedAssocHash)[nominalIndividual->getIndividualID()];
 
@@ -1453,11 +1687,17 @@ namespace Konclude {
 
 
 							CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* newAssWriteDataLinker = CObjectAllocator< CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker >::allocateAndConstruct(mMemAllocMan);
+
+
 							if (!nominalIndividual->isTemporaryIndividual()) {
 								newAssWriteDataLinker->initAccociationWriteData(nominalIndividual, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::REPLACEMENT, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::ADDITION);
 							} else {
 								newAssWriteDataLinker->initAccociationWriteData(nominalIndividual->getIndividualID(), CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::REPLACEMENT, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker::ADDITION);
 							}
+
+							CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* nonDetMergedIntoIndiNodeBackendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)nonDetMergedIntoIndiNode->getIndividualBackendCacheSynchronisationData(false);
+							newAssWriteDataLinker->setScheduledIndividual(nonDetMergedIntoIndiNodeBackendSyncData->isScheduledIndividual());
+
 							if (assoLoadingData.getLoadedIndividualAssociationData()) {
 								newAssWriteDataLinker->setUsedAssociationUpdateId(assoLoadingData.getLoadedIndividualAssociationData()->getAssociationDataUpdateId());
 							}
@@ -1474,99 +1714,105 @@ namespace Konclude {
 							} else {
 
 								newAssWriteDataLinker->setRepresentativeSameIndividualId(detMergedIntoIndiNode->getNominalIndividual()->getIndividualID());
+								newAssWriteDataLinker->setDeterministicSameIndividualId(detMergedIntoIndiNode->getNominalIndividual()->getIndividualID());
 
-								bool integratedAllMergingsFlag = false;
-								determineSameIndividualSetLabelAssociationBackendItem(detMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllMergingsFlag, calcAlgContext);
-								if (!integratedAllMergingsFlag || detMergedIntoIndiNode != nonDetMergedIntoIndiNode) {
-									determineSameIndividualSetLabelAssociationBackendItem(nonDetMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllMergingsFlag, calcAlgContext);
-								}
+								if (indiNode->getNominalIndividual()->getIndividualID() == detMergedIntoIndiNode->getNominalIndividual()->getIndividualID()) {
 
-								bool integratedAllDifferentFlag = false;
-								determineDifferentIndividualSetLabelAssociationBackendItem(detMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllDifferentFlag, calcAlgContext);
-								if (!integratedAllDifferentFlag || detMergedIntoIndiNode != nonDetMergedIntoIndiNode) {
-									determineDifferentIndividualSetLabelAssociationBackendItem(nonDetMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllDifferentFlag, calcAlgContext);
-								}
+									bool integratedAllMergingsFlag = false;
+									determineSameIndividualSetLabelAssociationBackendItem(detMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllMergingsFlag, calcAlgContext);
+									if (!integratedAllMergingsFlag || detMergedIntoIndiNode != nonDetMergedIntoIndiNode) {
+										determineSameIndividualSetLabelAssociationBackendItem(nonDetMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllMergingsFlag, calcAlgContext);
+									}
 
-								//determineConceptSetLabelAssociationBackendItem(detMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL, newAssWriteDataLinker, calcAlgContext);
-								//if (detMergedIntoIndiNode == nonDetMergedIntoIndiNode) {
-								//	determineConceptSetLabelAssociationBackendItem(nonDetMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_CONCEPT_SET_LABEL, newAssWriteDataLinker, calcAlgContext);
-								//} else {
-								//	determineNondeterministicConceptSetLabelAssociationBackendItemWithExcludedConceptsFromDeterministicLabel(nonDetMergedIntoIndiNode, indiNode, newAssWriteDataLinker, calcAlgContext);
-								//}
-								determineFullConceptSetLabelAssociationBackendItemWithSeparatedDeterministicNode(nonDetMergedIntoIndiNode, detMergedIntoIndiNode, indiNode, newAssWriteDataLinker, calcAlgContext);
+									bool integratedAllDifferentFlag = false;
+									determineDifferentIndividualSetLabelAssociationBackendItem(detMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllDifferentFlag, calcAlgContext);
+									if (!integratedAllDifferentFlag || detMergedIntoIndiNode != nonDetMergedIntoIndiNode) {
+										determineDifferentIndividualSetLabelAssociationBackendItem(nonDetMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_DIFFRENT_INDIVIDUAL_SET_LABEL, newAssWriteDataLinker, &integratedAllDifferentFlag, calcAlgContext);
+									}
 
-								CPROCESSHASH<CRole*, cint64>* roleUsedCardHash = nullptr;
-								if (nonDetMergedIntoIndiNode->getReapplyConceptLabelSet(false)->getConceptFlags()->containsATMOSTCardinalityFlags()) {
-									roleUsedCardHash = CObjectParameterizingAllocator< CPROCESSHASH<CRole*, cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
-								}
+									//determineConceptSetLabelAssociationBackendItem(detMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL, newAssWriteDataLinker, calcAlgContext);
+									//if (detMergedIntoIndiNode == nonDetMergedIntoIndiNode) {
+									//	determineConceptSetLabelAssociationBackendItem(nonDetMergedIntoIndiNode, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_CONCEPT_SET_LABEL, newAssWriteDataLinker, calcAlgContext);
+									//} else {
+									//	determineNondeterministicConceptSetLabelAssociationBackendItemWithExcludedConceptsFromDeterministicLabel(nonDetMergedIntoIndiNode, indiNode, newAssWriteDataLinker, calcAlgContext);
+									//}
+									determineFullConceptSetLabelAssociationBackendItemWithSeparatedDeterministicNode(nonDetMergedIntoIndiNode, detMergedIntoIndiNode, indiNode, newAssWriteDataLinker, calcAlgContext);
 
-								CPROCESSSET<cint64>* existentialIndirectlyConnectedNominalIndividualSet = nullptr;
-								determineRoleInstantiatedSetLabelAssociationBackendItems(nonDetMergedIntoIndiNode, indiNode, nonDetMergedIntoIndiNode != detMergedIntoIndiNode, newAssWriteDataLinker, &existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash, calcAlgContext);
+									CPROCESSHASH<CRole*, cint64>* roleUsedCardHash = nullptr;
+									if (nonDetMergedIntoIndiNode->getReapplyConceptLabelSet(false)->getConceptFlags()->containsATMOSTCardinalityFlags()) {
+										roleUsedCardHash = CObjectParameterizingAllocator< CPROCESSHASH<CRole*, cint64>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
+									}
 
-
-								if (roleUsedCardHash) {
-									determineAssociationBackendCardinality(nonDetMergedIntoIndiNode, roleUsedCardHash, newAssWriteDataLinker, calcAlgContext);
-								}
+									CPROCESSSET<cint64>* existentialIndirectlyConnectedNominalIndividualSet = nullptr;
+									determineRoleInstantiatedSetLabelAssociationBackendItems(nonDetMergedIntoIndiNode, indiNode, nonDetMergedIntoIndiNode != detMergedIntoIndiNode, newAssWriteDataLinker, &existentialIndirectlyConnectedNominalIndividualSet, roleUsedCardHash, propCutIndiSet, calcAlgContext);
 
 
-								CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = getIndividualAssociationDataFromIndividualNode(indiNode, calcAlgContext);
-								CBackendRepresentativeMemoryLabelCacheItem* indiConNomLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL);
-								if (!existentialIndirectlyConnectedNominalIndividualSet && indiConNomLabel && indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
-									newAssWriteDataLinker->setReferredLabelData(CBackendRepresentativeMemoryLabelCacheItem::INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL, indiConNomLabel);
-								}
+									if (roleUsedCardHash) {
+										determineAssociationBackendCardinality(nonDetMergedIntoIndiNode, roleUsedCardHash, newAssWriteDataLinker, calcAlgContext);
+									}
 
 
-								if (existentialIndirectlyConnectedNominalIndividualSet) {
-									existentialIndirectlyConnectedNominalIndividualSet->remove(indiNode->getNominalIndividual()->getIndividualID());
-									if (!existentialIndirectlyConnectedNominalIndividualSet->isEmpty()) {
-										determineIndirectlyConnectedNominalIndividualSetLabelAssociationBackendItem(existentialIndirectlyConnectedNominalIndividualSet, newAssWriteDataLinker, calcAlgContext);
+									CBackendRepresentativeMemoryCacheIndividualAssociationData* indiAssData = getIndividualAssociationDataFromIndividualNode(indiNode, calcAlgContext);
+									CBackendRepresentativeMemoryLabelCacheItem* indiConNomLabel = indiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL);
+									if (!existentialIndirectlyConnectedNominalIndividualSet && indiConNomLabel && indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+										newAssWriteDataLinker->setReferredLabelData(CBackendRepresentativeMemoryLabelCacheItem::INDIRECTLY_CONNECTED_NOMINAL_INDIVIDUAL_SET_LABEL, indiConNomLabel);
+									}
 
-										for (CPROCESSSET<cint64>::const_iterator it = existentialIndirectlyConnectedNominalIndividualSet->constBegin(), itEnd = existentialIndirectlyConnectedNominalIndividualSet->constEnd(); it != itEnd; ++it) {
-											cint64 nomIndiId = *it;
 
-											CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker*& nomIndiConnDataLinker = (*nominalIndirectConnectionUpdateDataLinkerHash)[nomIndiId];
-											if (!nomIndiConnDataLinker) {
-												nomIndiConnDataLinker = CObjectAllocator< CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker >::allocateAndConstruct(mMemAllocMan);
-												nomIndiConnDataLinker->initNominalIndirectConnectionData(nomIndiId);
-												if (assoLoadingData.getLoadedIndividualAssociationData()) {
-													nomIndiConnDataLinker->setLastChangeIntegrationId(assoLoadingData.getLoadedIndividualAssociationData()->getLastIntegratedIndirectlyConnectedIndividualsChangeId());
+									if (existentialIndirectlyConnectedNominalIndividualSet) {
+										existentialIndirectlyConnectedNominalIndividualSet->remove(indiNode->getNominalIndividual()->getIndividualID());
+										if (!existentialIndirectlyConnectedNominalIndividualSet->isEmpty()) {
+											determineIndirectlyConnectedNominalIndividualSetLabelAssociationBackendItem(existentialIndirectlyConnectedNominalIndividualSet, newAssWriteDataLinker, calcAlgContext);
+
+											for (CPROCESSSET<cint64>::const_iterator it = existentialIndirectlyConnectedNominalIndividualSet->constBegin(), itEnd = existentialIndirectlyConnectedNominalIndividualSet->constEnd(); it != itEnd; ++it) {
+												cint64 nomIndiId = *it;
+
+												CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker*& nomIndiConnDataLinker = (*nominalIndirectConnectionUpdateDataLinkerHash)[nomIndiId];
+												if (!nomIndiConnDataLinker) {
+													nomIndiConnDataLinker = CObjectAllocator< CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker >::allocateAndConstruct(mMemAllocMan);
+													nomIndiConnDataLinker->initNominalIndirectConnectionData(nomIndiId);
+													if (assoLoadingData.getLoadedIndividualAssociationData()) {
+														nomIndiConnDataLinker->setLastChangeIntegrationId(assoLoadingData.getLoadedIndividualAssociationData()->getLastIntegratedIndirectlyConnectedIndividualsChangeId());
+													}
 												}
-											}
 
-											// only add linker if the individual was not already connected to the nominal (based on the previous indirectly connected nominal individual set label)
-											if (!indiConNomLabel || !mAssBackCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(indiAssData, indiConNomLabel, nominalIndividual->getIndividualID())) {
-												CXLinker<cint64>* indiIdLinker = CObjectAllocator< CXLinker<cint64> >::allocateAndConstruct(mMemAllocMan);
-												indiIdLinker->initLinker(nominalIndividual->getIndividualID());
-												nomIndiConnDataLinker->addIndirectlyConnectedIndividualIdLinker(indiIdLinker);
+												// only add linker if the individual was not already connected to the nominal (based on the previous indirectly connected nominal individual set label)
+												if (!indiConNomLabel || !mAssBackCacheReader->hasIndividualIdsInAssociatedIndividualSetLabel(indiAssData, indiConNomLabel, nominalIndividual->getIndividualID())) {
+													CXLinker<cint64>* indiIdLinker = CObjectAllocator< CXLinker<cint64> >::allocateAndConstruct(mMemAllocMan);
+													indiIdLinker->initLinker(nominalIndividual->getIndividualID());
+													nomIndiConnDataLinker->addIndirectlyConnectedIndividualIdLinker(indiIdLinker);
+												}
 											}
 										}
 									}
-								}
 
-							
-								assoLoadingData.setIndividualIntegrated(true);
-								newAssWriteDataLinker->setCompletelyHandled(true);
-								newAssWriteDataLinker->setCompletelyPropagated(true);
 
-								if (assoLoadingData.hasIndirectlyConnectedIndividualsIntegration()) {
-									newAssWriteDataLinker->setIndirectlyConnectedIndividualIntegration(true);
-									if (assoLoadingData.getLoadedNominalIndirectConnectionData()) {
-										newAssWriteDataLinker->setIntegratedIndirectlyConnectedIndividualsChangeId(assoLoadingData.getLoadedNominalIndirectConnectionData()->getLastChangeId());
+									assoLoadingData.setIndividualIntegrated(true);
+									newAssWriteDataLinker->setCompletelyHandled(true);
+									newAssWriteDataLinker->setCompletelyPropagated(true);
+
+									if (assoLoadingData.hasIndirectlyConnectedIndividualsIntegration()) {
+										newAssWriteDataLinker->setIndirectlyConnectedIndividualIntegration(true);
+										if (assoLoadingData.getLoadedNominalIndirectConnectionData()) {
+											newAssWriteDataLinker->setIntegratedIndirectlyConnectedIndividualsChangeId(assoLoadingData.getLoadedNominalIndirectConnectionData()->getLastChangeId());
+										}
 									}
+
+
+									// TODO: check whether there is indeed some update
+									tmpAssWriteDataLinker = newAssWriteDataLinker->append(tmpAssWriteDataLinker);
+
+
+									CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
+									if (backSyncData && !backSyncData->hasNonConceptSetBackendLabelRelatedProcessing()) {
+										CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher hasher = getIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher(indiNode, calcAlgContext);
+										conceptSetLabelHasherWriteDataLinkerHasher->insert(hasher, newAssWriteDataLinker);
+									}
+
+								} else {
+									assoLoadingData.setIndividualIntegrated(true);
+									tmpAssWriteDataLinker = newAssWriteDataLinker->append(tmpAssWriteDataLinker);
 								}
-
-
-								// TODO: check whether there is indeed some update
-								tmpAssWriteDataLinker = newAssWriteDataLinker->append(tmpAssWriteDataLinker);
-
-
-								CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
-								if (backSyncData && !backSyncData->hasNonConceptSetBackendLabelRelatedProcessing()) {
-									CIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher hasher = getIndividualRepresentativeBackendCacheConceptSetLabelProcessingHasher(indiNode, calcAlgContext);
-									conceptSetLabelHasherWriteDataLinkerHasher->insert(hasher, newAssWriteDataLinker);
-								}
-
-
 
 							}
 						}
@@ -1692,9 +1938,15 @@ namespace Konclude {
 						tempCardWriteDataLinker = newTmpCardLinker->append(tempCardWriteDataLinker);
 					}
 
+					CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* involvedIndiData = getInvolvedIndividualData(calcAlgContext);
+
 					cint64 ontologyIdentifier = calcAlgContext->getProcessingDataBox()->getOntology()->getOntologyID();
+					cint64 repCompId = -1;
+					if (repbackUpdAdapter) {
+						repCompId = repbackUpdAdapter->getRepresentativeCacheRecomputationId();
+					}
 					CBackendRepresentativeMemoryCacheLabelAssociationWriteData* writeData = CObjectAllocator< CBackendRepresentativeMemoryCacheLabelAssociationWriteData >::allocateAndConstruct(mMemAllocMan);
-					writeData->initWriteData(ontologyIdentifier, tmpAssWriteDataLinker, tempNomIndirectConnDataLinker, tmpAssUseDataLinker, tempLabelWriteDataLinker,tempCardWriteDataLinker);
+					writeData->initWriteData(ontologyIdentifier, tmpAssWriteDataLinker, tempNomIndirectConnDataLinker, tmpAssUseDataLinker, tempLabelWriteDataLinker,tempCardWriteDataLinker, involvedIndiData, propCutData, repCompId);
 					addCacheMessages(writeData,calcAlgContext);
 					commitCacheMessages(calcAlgContext);
 
@@ -1702,8 +1954,97 @@ namespace Konclude {
 				}
 
 
+				CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* CIndividualNodeBackendCacheHandler::getPropagationCutIndividualData(QSet<cint64>*& propCutIndiSet, CSatisfiableTaskRepresentativeBackendUpdatingAdapter* repbackUpdAdapter, CCalculationAlgorithmContext* calcAlgContext) {
+					CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* propCutDataLinker = nullptr;
+					CBackendNeighbourExpansionControllingData* expContData = calcAlgContext->getUsedProcessingDataBox()->getBackendNeighbourExpansionControllingData(false);
+					if (expContData && expContData->getCutBackendNeighbourExpansionIndividualLinker()) {
+
+						repbackUpdAdapter->setExpansionPropagationCutted(true);
+
+						CCacheValue propMarkRoleValue = mAssBackCacheReader->getCacheValue(calcAlgContext->getProcessingDataBox()->getOntology()->getRBox()->getTopObjectRole(), false, false, false, true);
+
+						CXLinker<cint64>* expandedIndiLinker = nullptr;
+						CXLinker<CIndividualProcessNode*>* expandedIndiNodeLinker = calcAlgContext->getUsedProcessingDataBox()->getLastBackendCacheIntegratedIndividualNodeLinker();
+						for (CXLinker<CIndividualProcessNode*>* expandedIndiNodeLinkerIt = expandedIndiNodeLinker; expandedIndiNodeLinkerIt && expandedIndiNodeLinkerIt; expandedIndiNodeLinkerIt = expandedIndiNodeLinkerIt->getNext()) {
+							cint64 indiId = expandedIndiNodeLinkerIt->getData()->getNominalIndividual()->getIndividualID();
+							CXLinker<cint64>* tmpIndiLinker = CObjectAllocator< CXLinker<cint64> >::allocateAndConstruct(mMemAllocMan);
+							expandedIndiLinker = tmpIndiLinker->initLinker(indiId, expandedIndiLinker);
+						}
 
 
+
+						CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+						for (CXLinker<CIndividualProcessNode*>* propCutIndiNodeLinkerIt = expContData->getCutBackendNeighbourExpansionIndividualLinker(); propCutIndiNodeLinkerIt; propCutIndiNodeLinkerIt = propCutIndiNodeLinkerIt->getNext()) {
+							CIndividualProcessNode* propCutIndiNode = propCutIndiNodeLinkerIt->getData();
+							propCutIndiNode = indiProcNodeVec->getData(propCutIndiNode->getIndividualNodeID());
+							CIndividualProcessNode* mergedPropCutIndiNode = getMergedIntoIndividualNode(propCutIndiNode, false, calcAlgContext);
+							cint64 propCutIndiId = propCutIndiNode->getNominalIndividual()->getIndividualID();
+
+							if (!propCutIndiSet) {
+								propCutIndiSet = new QSet<cint64>();
+							}
+							propCutIndiSet->insert(propCutIndiId);
+
+							CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* propCutIndiBackendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)propCutIndiNode->getIndividualBackendCacheSynchronisationData(false);
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* propCutIndiAssocData = getIndividualAssociationDataFromIndividualNode(propCutIndiNode, calcAlgContext);
+							cint64 assocUpdateId = propCutIndiAssocData->getAssociationDataUpdateId();
+
+							CBackendNeighbourExpansionQueue* remainNeighExpQueue = propCutIndiBackendSyncData->getBackendNeighbourExpansionQueue(false);
+							if (remainNeighExpQueue) {
+								remainNeighExpQueue->visitNeighbourExpansionQueueDataLinkers([&](CBackendNeighbourExpansionQueueDataLinker* expQueuedLinker)->bool {
+									cint64 cursor = expQueuedLinker->getNeighbourVisitingCursor();
+									cint64 arrayIndex = expQueuedLinker->getNeighbourArrayId();
+									CConcept* concept = expQueuedLinker->getConcept();
+									bool conceptNegation = expQueuedLinker->getConceptNegation();
+									CCacheValue conCacheValue;
+									if (concept) {
+
+										CConcept* opConcept = concept->getOperandList()->getData();
+										bool opConceptNegation = concept->getOperandList()->isNegated();
+										bool opConceptTestingNegation = opConceptNegation;
+										if (conceptNegation && opConcept->getConceptOperator()->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE | CConceptOperator::CCFS_SOME_TYPE)) {
+											opConceptTestingNegation = !opConceptTestingNegation;
+										}
+
+										conCacheValue = getCacheValue(opConcept, opConceptTestingNegation);
+									}
+									CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* newPropCutDataLinker = CObjectAllocator< CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker >::allocateAndConstruct(mMemAllocMan);
+									newPropCutDataLinker->initPropagationCutData(propCutIndiId, arrayIndex, cursor, conCacheValue, assocUpdateId, expandedIndiLinker, propMarkRoleValue);
+									if (expQueuedLinker->isMissingNondeterministicExpansionPropagation()) {
+										newPropCutDataLinker->setMissingNondeterministicExpansionPropagation(true);
+									}
+									propCutDataLinker = newPropCutDataLinker->append(propCutDataLinker);
+									return true;
+								});
+							}
+						}
+
+					}
+					return propCutDataLinker;
+				}
+
+
+				CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* CIndividualNodeBackendCacheHandler::getInvolvedIndividualData(CCalculationAlgorithmContext* calcAlgContext) {
+					CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* involvedIndiDataLinker = nullptr;
+					CBackendNeighbourExpansionControllingData* expContData = calcAlgContext->getUsedProcessingDataBox()->getBackendNeighbourExpansionControllingData(false);
+					if (expContData && !expContData->isFixedReuseExpansionMode() && expContData->isPrioritizedReuseExpansionMode()) {
+						CREUSEBACKENDEXPANSIONMODESDependencyNode* modesDepNode = expContData->getReuseModesDependencyNode();
+						if (modesDepNode) {
+							CXLinker<cint64>* indiLinker = modesDepNode->getInvolvedIndividualIdLinker();
+							CXLinker<cint64>* copiedIndiLinker = nullptr;
+							for (CXLinker<cint64>* indiLinkerIt = indiLinker; indiLinkerIt; indiLinkerIt = indiLinkerIt->getNext()) {
+								cint64 indiId = indiLinkerIt->getData();
+								CXLinker<cint64>* tmpIndiLinker = CObjectAllocator< CXLinker<cint64> >::allocateAndConstruct(mMemAllocMan);
+								copiedIndiLinker = tmpIndiLinker->initLinker(indiId, copiedIndiLinker);
+							}
+							if (copiedIndiLinker) {
+								involvedIndiDataLinker = CObjectAllocator< CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker >::allocateAndConstruct(mMemAllocMan);
+								involvedIndiDataLinker->initInvolvedIndividualData(copiedIndiLinker);
+							}
+						}
+					}
+					return involvedIndiDataLinker;
+				}
 
 
 

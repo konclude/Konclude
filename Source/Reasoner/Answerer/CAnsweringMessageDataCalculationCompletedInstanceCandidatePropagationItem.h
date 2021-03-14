@@ -58,10 +58,11 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem);
+					CAnsweringMessageDataCalculationCompletedInstanceCandidatePropagationItem(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem, const QSet<CRealizationIndividualInstanceItemReference>& testingSet);
 
 
 					COptimizedComplexConceptItem* getConceptItem();
+					QSet<CRealizationIndividualInstanceItemReference>* getTestingSet();
 
 
 				// protected methods
@@ -70,7 +71,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					COptimizedComplexConceptItem* mConceptItem;
-
+					QSet<CRealizationIndividualInstanceItemReference> mTestingSet;
 
 				// private methods
 				private:

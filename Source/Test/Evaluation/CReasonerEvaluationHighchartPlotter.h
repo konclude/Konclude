@@ -69,6 +69,7 @@ namespace Konclude {
 					CReasonerEvaluationHighchartPlotter* createReasonerSubsumptionPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& selectionString, const QString& outputFile);
 					CReasonerEvaluationHighchartPlotter* createReasonerCountingPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& selectionString, const QString& outputFile);
 					CReasonerEvaluationHighchartPlotter* createReasonerErrorPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& selectionString, const QString& outputFile);
+					CReasonerEvaluationHighchartPlotter* createReasonerMemoryUsagePlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& selectionString, const QString& outputFile);
 					CReasonerEvaluationHighchartPlotter* createReasonerAccumulatedPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& selectionString, const QString& outputFile);
 					CReasonerEvaluationHighchartPlotter* createReasonerOverviewPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& selectionString, const QString& outputFile);
 					CReasonerEvaluationHighchartPlotter* createReasonerAccumulatedCountPlot(const QString& dataFileString, const QString& plotTitle, const QStringList& reasonerNameList, const QString& selectionString, const QString& outputFile);
@@ -118,7 +119,8 @@ namespace Konclude {
 					QHash<QString, QString> mReasDiffTemplateStringHash;
 					QHash<QString, QString> mReasSubsumptionTemplateStringHash;
 					QHash<QString, QString> mReasCountingTemplateStringHash;
-					QHash<QString,QString> mReasErrorTemplateStringHash;
+					QHash<QString, QString> mReasErrorTemplateStringHash;
+					QHash<QString, QString> mReasMemoryUsageTemplateStringHash;
 					QHash<QString,QString> mReasAccumTemplateStringHash;
 					QHash<QString,QString> mReasOverviewTemplateStringHash;
 					QHash<QString,QString> mReasWinnerTemplateStringHash;

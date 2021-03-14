@@ -163,10 +163,11 @@ namespace Konclude {
 					}
 				}
 
-
-				for (cint64 i = 0; i < reasonerCount; ++i) {
-					for (cint64 j = 0; j < reasonerCount; ++j) {
-						fasterTable[i][j] = fasterTable[i][j] / (double)requestCount;
+				if (requestCount > 0) {
+					for (cint64 i = 0; i < reasonerCount; ++i) {
+						for (cint64 j = 0; j < reasonerCount; ++j) {
+							fasterTable[i][j] = fasterTable[i][j] / (double)requestCount;
+						}
 					}
 				}
 

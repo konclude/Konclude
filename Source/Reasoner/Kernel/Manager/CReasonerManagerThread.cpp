@@ -75,6 +75,9 @@ namespace Konclude {
 					}
 					mWorkControllerCount = qMax(processorCount,mWorkControllerCount);
 
+					mConfgAdaptThreadPoolToWorkerCount = CConfigDataReader::readConfigBoolean(configProvider, "Konclude.Calculation.AdaptThreadPoolSizeProcessorCount", true);
+					mBlockThreadPoolThreadCount = CConfigDataReader::readConfigBoolean(configProvider, "Konclude.Calculation.BlockingThreadPoolThreadsCount", 1);
+
 
 					//if (!isRunning()) {
 					mWatchDog = 0;
@@ -224,8 +227,10 @@ namespace Konclude {
 						occStatsCacheHandler = new COccurrenceStatisticsCacheHandler(occStatsCacheWriter);
 					}
 					if (mBackendAssCache) {
-						backendAssCacheHandler = new CSaturationNodeBackendAssociationCacheHandler(mBackendAssCache->createCacheReader(),mBackendAssCache->createCacheWriter(), occStatsCacheWriter);
-						backendCacheHandler = new CIndividualNodeBackendCacheHandler(mBackendAssCache->createCacheReader(),mBackendAssCache->createCacheWriter());
+						CBackendRepresentativeMemoryCacheWriter* backAssCacheWriter = mBackendAssCache->createCacheWriter();
+						CBackendRepresentativeMemoryCacheReader* backAssCacheReader = mBackendAssCache->createCacheReader();
+						backendAssCacheHandler = new CSaturationNodeBackendAssociationCacheHandler(backAssCacheReader, backAssCacheWriter, occStatsCacheWriter);
+						backendCacheHandler = new CIndividualNodeBackendCacheHandler(backAssCacheReader, backAssCacheWriter);
 					}
 					CCalculationTableauApproximationSaturationTaskHandleAlgorithm* approxSatHandleAlg = new CCalculationTableauApproximationSaturationTaskHandleAlgorithm(backendAssCacheHandler, satTaskOccStatCollector);
 					CCalculationTableauCompletionTaskHandleAlgorithm* compTaskHandleAlg = new CCalculationTableauCompletionTaskHandleAlgorithm(unsatCacheHandler,satExpCacheHandler,reuseCompGraphCacheHandler,satNodeCacheHandler,compConsCachHandler,backendCacheHandler, occStatsCacheHandler);
@@ -238,6 +243,18 @@ namespace Konclude {
 					CIntervalThread::threadStarted();
 					// generate worker framework
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Initializing reasoner. Creating calculation context."),this);
+
+					if (mConfgAdaptThreadPoolToWorkerCount) {
+						QThreadPool::globalInstance()->setMaxThreadCount(mWorkControllerCount);
+					}
+					if (mBlockThreadPoolThreadCount > 0) {
+						for (cint64 i = 0; i < mBlockThreadPoolThreadCount; ++i) {
+							QtConcurrent::run(QThreadPool::globalInstance(), [&]() {
+								mBlockThreadPoolThreadsBlockingSemaphore.acquire(1);
+								mBlockThreadPoolThreadsReleasingSemaphore.release(1);
+							});
+						}
+					}
 
 					unsatCache = new COccurrenceUnsatisfiableCache(mWorkControllerCount+2);
 					mSatExpCache = new CSignatureSatisfiableExpanderCache(configProvider->getCurrentConfiguration());
@@ -285,6 +302,13 @@ namespace Konclude {
 						mSatNodeExpCache->stopThread(true);
 						delete mSatNodeExpCache;
 					}
+
+					if (mBlockThreadPoolThreadCount > 0) {
+						mBlockThreadPoolThreadsBlockingSemaphore.release(mBlockThreadPoolThreadCount);
+						mBlockThreadPoolThreadsReleasingSemaphore.acquire(mBlockThreadPoolThreadCount);
+					}
+
+
 
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Reasoner closed."),this);
 
@@ -416,10 +440,14 @@ namespace Konclude {
 								//reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
 							}
 						}
-						CComplexAssertionsIndividualVariablesAnsweringQuery* compAssIndVarAnsweringQuery = dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(complexAnsweringQuery);
-						if (compAssIndVarAnsweringQuery) {
+						CComplexVariablesAnsweringQuery* compVarAnsweringQuery = dynamic_cast<CComplexVariablesAnsweringQuery*>(complexAnsweringQuery);
+						if (compVarAnsweringQuery) {
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
+						}
+						CComplexAxiomsDataPropertyVariablesAnsweringQuery* compDataPropVarAnsweringQuery = dynamic_cast<CComplexAxiomsDataPropertyVariablesAnsweringQuery*>(complexAnsweringQuery);
+						if (compDataPropVarAnsweringQuery) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY));
 						}
 
 						//reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
@@ -506,7 +534,7 @@ namespace Konclude {
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
 							CPreprocessor* preprocessor = mPreprocessingManager->getPreprocessor(ontology,config);
-							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData, COntologyProcessingStep::OPPREPROCESSOR);
 							preprocessor->preprocess(ontology,config,ontReqPrepData->mPreprocessorReqList,reqProcCallbackEvent);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mPreprocessorReqList;
 							ontReqPrepData->mPreprocessorReqList.clear();
@@ -520,7 +548,7 @@ namespace Konclude {
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
 							CPrecomputator* precomputer = mPrecomputationManager->getPrecomputator(ontology,config);
-							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData, COntologyProcessingStep::OPPRECOMPUTER);
 							precomputer->precompute(ontology,config,ontReqPrepData->mPrecomputorReqList,reqProcCallbackEvent);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mPrecomputorReqList;
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPPRECOMPUTER;
@@ -534,7 +562,7 @@ namespace Konclude {
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
 							CSubsumptionClassifier* classClassifier = classificationMan->getClassClassifier(ontology,config);
-							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData, COntologyProcessingStep::OPCLASSCLASSIFIER);
 							classClassifier->classify(ontology,config,ontReqPrepData->mClassClassifierReqList,reqProcCallbackEvent);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mClassClassifierReqList;
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPCLASSCLASSIFIER;
@@ -548,7 +576,7 @@ namespace Konclude {
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
 							CSubsumptionClassifier* objectPropertyClassifier = classificationMan->getObjectPropertyClassifier(ontology,config);
-							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData, COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER);
 							objectPropertyClassifier->classify(ontology,config,ontReqPrepData->mObjectPropertyClassifierReqList,reqProcCallbackEvent);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mObjectPropertyClassifierReqList;
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPOBJECTPROPERTYCLASSIFIER;
@@ -562,7 +590,7 @@ namespace Konclude {
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
 							CSubsumptionClassifier* dataPropertyClassifier = classificationMan->getDataPropertyClassifier(ontology,config);
-							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData, COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER);
 							dataPropertyClassifier->classify(ontology,config,ontReqPrepData->mDataPropertyClassifierReqList,reqProcCallbackEvent);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mDataPropertyClassifierReqList;
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPDATAPROPERTYCLASSIFIER;
@@ -576,7 +604,7 @@ namespace Konclude {
 							}
 							CConfigurationBase* config = ontology->getConfiguration();
 							CRealizer* realizer = mRealizationManager->getRealizer(ontology,config);
-							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this,ontology,reqData, COntologyProcessingStep::OPREALIZER);
 							realizer->realize(ontology,config,ontReqPrepData->mRealizerReqList,reqProcCallbackEvent);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mRealizerReqList;
 							ontReqPrepData->mCheckingProcessorType = COntologyProcessingStep::OPREALIZER;
@@ -594,7 +622,7 @@ namespace Konclude {
 								mAnswererManager = new CAnsweringManagerThread(this, config);
 								created = true;
 							}
-							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this, ontology, reqData);
+							CRequirementProcessedCallbackEvent* reqProcCallbackEvent = new CRequirementProcessedCallbackEvent(this, ontology, reqData, COntologyProcessingStep::OPANSWERER);
 							ontology->getProcessingSteps()->getOntologyProcessingStepDataVector()->getProcessingStepData(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY)->getProcessingStatus()->setProcessingFlags(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED);
 							ontology->getProcessingSteps()->getOntologyProcessingStepDataVector()->getProcessingStepData(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY)->getProcessingStatus()->setErrorFlags(COntologyProcessingStatus::PSSUCESSFULL);
 							ontReqPrepData->mCheckingReqList = ontReqPrepData->mAnswererReqList;
@@ -603,6 +631,8 @@ namespace Konclude {
 							ontReqPrepData->mAnswererReqList.clear();
 							if (created) {
 								mAnswererManager->prepareAnswering(ontology, reqProcCallbackEvent);
+							} else if (!mAnswererPrepared) {
+								mAnswererPreparedCallbackQueue.append(reqProcCallbackEvent);
 							} else {
 								reqProcCallbackEvent->doCallback();
 							}
@@ -1204,7 +1234,17 @@ namespace Konclude {
 						CConcreteOntology* ontology = rpce->getOntology();
 						CRequirementPreparingData* reqPrepData = rpce->getRequirementPreparingData();
 
-						continueRequirementProcessing(reqPrepData,ontology);
+						continueRequirementProcessing(reqPrepData, ontology);
+
+
+						if (rpce->mProcType == COntologyProcessingStep::OPANSWERER && !mAnswererPrepared) {
+							mAnswererPrepared = true;
+							for (CRequirementProcessedCallbackEvent* prepReqData : mAnswererPreparedCallbackQueue) {
+								prepReqData->doCallback();
+							}
+							mAnswererPreparedCallbackQueue.clear();
+						}
+
 
 						return true;
 					}

@@ -39,17 +39,19 @@ namespace Konclude {
 			COntologyBuildData* buildDataBox = ontology->getBuildData();
 			mConceptClassTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getConceptClassTermMappingHash();
 			mClassTermExpClassAxiomHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getClassTermExpressionClassAxiomExpressionHash();
+			mRoleObjectPropertyTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
+			mRoleDataPropertyTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleDataPropertyTermMappingHash();
+			mDatatypeDatatypeExpHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
 
 			CRenderedItemLinker* renderedLinker = nullptr;
 			CRenderedItemLinker* lastRenderedLinker = nullptr;
 			mRenderer->beginRender();
-			foreach (CAxiomExpression* axiomExpression, axiomList) {
+			foreach(CAxiomExpression* axiomExpression, axiomList) {
 				CRenderedItemLinker* tmpRenderedLinker = getRenderedAxiomExpression(axiomExpression);
 				if (!renderedLinker) {
 					renderedLinker = tmpRenderedLinker;
 					lastRenderedLinker = renderedLinker->getLastListLink();
-				}
-				else {
+				} else {
 					lastRenderedLinker->append(tmpRenderedLinker);
 					lastRenderedLinker = tmpRenderedLinker->getLastListLink();
 				}
@@ -57,6 +59,191 @@ namespace Konclude {
 			mRenderer->endRender(renderedLinker);
 			return true;
 		}
+
+		bool COntologyAxiomExpressionsRenderVisitor::visitAndRender(COntologyTriplesData* ontTriplesData, CConcreteOntology* ontology, COntologyRenderer* renderer) {
+			mOntology = ontology;
+			mRenderer = renderer;
+			COntologyBuildData* buildDataBox = ontology->getBuildData();
+			mConceptClassTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getConceptClassTermMappingHash();
+			mClassTermExpClassAxiomHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getClassTermExpressionClassAxiomExpressionHash();
+			mRoleObjectPropertyTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
+			mRoleDataPropertyTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleDataPropertyTermMappingHash();
+			mDatatypeDatatypeExpHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
+			CRenderedItemLinker* renderedLinker = nullptr;
+			CRenderedItemLinker* lastRenderedLinker = nullptr;
+
+			mRenderer->beginRender();
+			if (ontTriplesData) {
+				COntologyTriplesAssertionsAccessor* accessor = ontTriplesData->getTripleAssertionAccessor();
+				if (accessor) {
+					cint64 maxIndiId = accessor->getMaxIndexedIndividualId();
+					mTriplesAssertionVisitingIndividualId = 0;
+					mTriplesAssertionVisitingIndividualName = "";
+					for (cint64 i = 0; i < maxIndiId; ++i) {
+						mVisitingTempRenderedLinker = nullptr;
+						mTriplesAssertionVisitingIndividualId = i;
+						mTriplesAssertionVisitingIndividualName = "";
+						accessor->visitIndividualName(i, this);
+						accessor->visitIndividualAssertions(i, this);
+
+						if (mVisitingTempRenderedLinker) {
+							if (!renderedLinker) {
+								renderedLinker = mVisitingTempRenderedLinker;
+								lastRenderedLinker = renderedLinker->getLastListLink();
+							} else {
+								lastRenderedLinker->append(mVisitingTempRenderedLinker);
+								lastRenderedLinker = mVisitingTempRenderedLinker->getLastListLink();
+							}
+						}
+					}
+				}
+			}
+			mRenderer->endRender(renderedLinker);
+			return true;
+		}
+
+
+		bool COntologyAxiomExpressionsRenderVisitor::visitAndRender(QList<CTriplesData*>* triplesDataList, CConcreteOntology* ontology, COntologyRenderer* renderer) {
+			mOntology = ontology;
+			mRenderer = renderer;
+			COntologyBuildData* buildDataBox = ontology->getBuildData();
+			mConceptClassTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getConceptClassTermMappingHash();
+			mClassTermExpClassAxiomHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getClassTermExpressionClassAxiomExpressionHash();
+			mRoleObjectPropertyTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleObjectPropertyTermMappingHash();
+			mRoleDataPropertyTermMapHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getRoleDataPropertyTermMappingHash();
+			mDatatypeDatatypeExpHash = ontology->getDataBoxes()->getExpressionDataBoxMapping()->getDatatypeDatatypeExpessionHash();
+			CRenderedItemLinker* renderedLinker = nullptr;
+			CRenderedItemLinker* lastRenderedLinker = nullptr;
+
+			CBUILDHASH<CStringRefStringHasher, CClassExpression*>* classNameExphash = ontology->getBuildData()->getClassEntityBuildHash();
+			CBUILDHASH<CStringRefStringHasher, CObjectPropertyExpression*>* objectPropertyNameExphash = ontology->getBuildData()->getObjectPropertyEntityBuildHash();
+			CBUILDHASH<CStringRefStringHasher, CDataPropertyExpression*>* dataPropertyNameExphash = ontology->getBuildData()->getDataPropertyEntityBuildHash();
+			CBUILDHASH<CStringRefStringHasher, CDatatypeExpression*>* datatypeNameExphash = ontology->getBuildData()->getDatatypeIRIBuildHash();
+			CDatatypeExpression* stringDatatypeNameExp = datatypeNameExphash->value(QString(PREFIX_XML_STRING_DATATYPE));
+
+			mRenderer->beginRender();
+			for (CTriplesData* triplesData : *triplesDataList) {
+				CTriplesDataIterator* triplesDatIt = triplesData->getTriplesDataIterator();
+				while (triplesDatIt->hasValue()) {
+					if (triplesDatIt->getNodeType(1) == CTriplesDataIterator::TRIPLE_URI_NODE_TYPE) {
+						QString predicateString = triplesDatIt->getNodeString(1);
+						QString objectString = triplesDatIt->getNodeString(2);
+						QString subjectString = triplesDatIt->getNodeString(0);
+						CRenderedItemLinker* tmpRenderedLinker = nullptr;
+						if (predicateString == PREFIX_RDF_TYPE) {
+							CNamedIndividualExpression namedIndiExp(subjectString);
+							CClassExpression* classExp = classNameExphash->value(objectString);
+							if (classExp) {
+								CClassAssertionExpression classAssExp(&namedIndiExp, classExp);
+								tmpRenderedLinker = getRenderedClassAssertionAxiom(&classAssExp);
+							}
+
+						} else if (objectPropertyNameExphash->contains(predicateString)) {
+							CNamedIndividualExpression namedIndiExp1(subjectString);
+							CNamedIndividualExpression namedIndiExp2(objectString);
+							CObjectPropertyExpression* objPropExp = objectPropertyNameExphash->value(predicateString);
+							CObjectPropertyAssertionExpression objPropAssExp(objPropExp, &namedIndiExp1, &namedIndiExp2);
+							tmpRenderedLinker = getRenderedObjectPropertyAssertionAxiom(&objPropAssExp);
+
+						} else if (dataPropertyNameExphash->contains(predicateString)) {
+							CNamedIndividualExpression namedIndiExp1(subjectString);
+
+							cint64 sepPos = objectString.lastIndexOf("^^");
+							QString literalString = objectString.mid(1, sepPos - 2);
+							QString datatypeString = objectString.mid(sepPos + 2);
+
+							CDataLexicalValueExpression dataLexicalValueExpression(literalString);
+							CDatatypeExpression* dataTypeExpression;
+							if (!datatypeString.isEmpty()) {
+								dataTypeExpression = datatypeNameExphash->value(datatypeString);
+							} else {
+								dataTypeExpression = stringDatatypeNameExp;
+							}
+							CDataLiteralExpression dataLitExp(&dataLexicalValueExpression, dataTypeExpression);
+
+							CNamedIndividualExpression namedIndiExp2(objectString);
+							CDataPropertyExpression* dataPropExp = dataPropertyNameExphash->value(predicateString);
+							CDataPropertyAssertionExpression dataPropAssExp(dataPropExp, &namedIndiExp1, &dataLitExp);
+							tmpRenderedLinker = getRenderedDataPropertyAssertionAxiom(&dataPropAssExp);
+						}
+
+						if (tmpRenderedLinker) {
+							if (!renderedLinker) {
+								renderedLinker = tmpRenderedLinker;
+								lastRenderedLinker = renderedLinker->getLastListLink();
+							} else {
+								lastRenderedLinker->append(tmpRenderedLinker);
+								lastRenderedLinker = tmpRenderedLinker->getLastListLink();
+							}
+						}
+					}
+					triplesDatIt->moveNext();
+				}
+				delete triplesDatIt;
+			}
+
+			mRenderer->endRender(renderedLinker);
+			return true;
+		}
+
+
+
+		bool COntologyAxiomExpressionsRenderVisitor::visitRoleAssertion(CRole* role, cint64 otherIndividualId, COntologyTriplesAssertionsAccessor* accessor) {
+			CNamedIndividualExpression namedIndiExp(mTriplesAssertionVisitingIndividualName);
+			QString otherNamedIndiName;
+			accessor->visitIndividualName(otherIndividualId, [&](const QString& name)->bool{
+				otherNamedIndiName = name;
+				return true;
+			});
+			
+			CNamedIndividualExpression otherNamedIndiExp(otherNamedIndiName);
+			CObjectPropertyTermExpression* propExp = mRoleObjectPropertyTermMapHash->value(role);
+			if (propExp) {
+				CObjectPropertyAssertionExpression objPropAssExp(propExp, &namedIndiExp, &otherNamedIndiExp);
+				CRenderedItemLinker* tmpRenderedLinker = getRenderedObjectPropertyAssertionAxiom(&objPropAssExp);
+				mVisitingTempRenderedLinker = tmpRenderedLinker;
+			}
+			return true;
+		}
+
+		bool COntologyAxiomExpressionsRenderVisitor::visitReverseRoleAssertion(CRole* role, cint64 otherIndividualId, COntologyTriplesAssertionsAccessor* accessor) {
+			return true;
+		}
+
+		bool COntologyAxiomExpressionsRenderVisitor::visitDataAssertion(CRole* role, CDataLiteral* dataLiteral, COntologyTriplesAssertionsAccessor* accessor) {
+			CNamedIndividualExpression namedIndiExp(mTriplesAssertionVisitingIndividualName);
+
+			CDataPropertyTermExpression* propExp = mRoleDataPropertyTermMapHash->value(role);
+			CDataLexicalValueExpression dataLexicalValueExpression(dataLiteral->getLexicalDataLiteralValueString());
+			CDatatypeExpression* dataTypeExpression = mDatatypeDatatypeExpHash->value(dataLiteral->getDatatype());
+			if (propExp && dataTypeExpression) {
+				CDataLiteralExpression dataLitExp(&dataLexicalValueExpression, dataTypeExpression);
+				CDataPropertyAssertionExpression dataPropAssExp(propExp, &namedIndiExp, &dataLitExp);
+				CRenderedItemLinker* tmpRenderedLinker = getRenderedDataPropertyAssertionAxiom(&dataPropAssExp);
+				mVisitingTempRenderedLinker = tmpRenderedLinker;
+			}
+			return true;
+		}
+
+		bool COntologyAxiomExpressionsRenderVisitor::visitConceptAssertion(CConcept* concept, COntologyTriplesAssertionsAccessor* accessor) {
+			CNamedIndividualExpression namedIndiExp(mTriplesAssertionVisitingIndividualName);
+			CIndividualTermExpression* indiExp = &namedIndiExp;
+			CClassTermExpression* classExp = mConceptClassTermMapHash->value(concept);
+			if (classExp) {
+				CClassAssertionExpression classAssExp(indiExp, classExp);
+				CRenderedItemLinker* tmpRenderedLinker = getRenderedClassAssertionAxiom(&classAssExp);
+				mVisitingTempRenderedLinker = tmpRenderedLinker;
+			}
+			return true;
+		}
+
+		bool COntologyAxiomExpressionsRenderVisitor::visitIndividualName(const QString& indiName, COntologyTriplesAssertionsAccessor* accessor) {
+			mTriplesAssertionVisitingIndividualName = indiName;
+			return true;
+		}
+
+
+
 
 
 

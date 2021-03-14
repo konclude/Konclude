@@ -31,6 +31,8 @@
 // Other includes
 #include "Utilities/UtilitiesSettings.h"
 
+#include "Reasoner/Kernel/Cache/CBackendIndividualRetrievalComputationUpdateCoordinationHash.h"
+
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -41,6 +43,8 @@ namespace Konclude {
 	using namespace Utilities;
 
 	namespace Reasoner {
+
+		using namespace Kernel::Cache;
 
 		namespace Consistiser {
 
@@ -53,23 +57,17 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class CIndividualPrecomputationCoordinationHash : public QHash<cint64, CIndividualPrecomputationCoordinationHashData*> {
+			class CIndividualPrecomputationCoordinationHash : public CBackendIndividualRetrievalComputationUpdateCoordinationHash {
 				// public methods
 				public:
 					//! Constructor
 					CIndividualPrecomputationCoordinationHash();
-
-					CIndividualPrecomputationCoordinationHash* incUsageCount(cint64 incCount = 1);
-					CIndividualPrecomputationCoordinationHash* detUsageCount(cint64 decCount = 1);
-					cint64 getUsageCount();
-
 
 				// protected methods
 				protected:
 
 				// protected variables
 				protected:
-					cint64 mUsageCount;
 
 				// private methods
 				private:

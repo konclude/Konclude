@@ -59,7 +59,7 @@ namespace Konclude {
 					//! Constructor
 					CReasonerEvaluationTerminationResult();
 
-					CReasonerEvaluationTerminationResult* initResult(bool processError, bool inTimeTerminated, bool forcedTermination, const QString& errorText, const QString& stnOutText, const QString& errOutText);
+					CReasonerEvaluationTerminationResult* initResult(bool processError, bool inTimeTerminated, bool forcedTermination, const QString& errorText, const QString& stnOutText, const QString& errOutText, cint64 maxMemoryUsage = 0);
 
 					bool isInTimeTerminated();
 					bool isTerminationForced();
@@ -69,6 +69,7 @@ namespace Konclude {
 					QString getErrorOutputText();
 					QString getErrorText();
 
+					cint64 getMaxMemoryUsage();
 
 				// protected methods
 				protected:
@@ -82,6 +83,8 @@ namespace Konclude {
 					QString mStandardOutputText;
 					QString mErrorOutputText;
 					QString mErrorText;
+
+					cint64 mMaxMemoryUsage;
 
 				// private methods
 				private:

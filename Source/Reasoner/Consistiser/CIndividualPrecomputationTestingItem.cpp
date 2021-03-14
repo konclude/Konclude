@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Consistiser {
 
 
-			CIndividualPrecomputationTestingItem::CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem, bool* unstatFlagPointer) : CPrecomputationTestingItem(preCompItem),mObserver(observer), mRepresentativeCacheUpdatingAdapter(indiComCoordHash, unstatFlagPointer) {
+			CIndividualPrecomputationTestingItem::CIndividualPrecomputationTestingItem(CConsistenceObserver* observer, CIndividualPrecomputationCoordinationHash* indiComCoordHash, COntologyPrecomputationItem* preCompItem, bool* unstatFlagPointer, bool* expLimitReachedFlag) : CPrecomputationTestingItem(preCompItem),mObserver(observer), mRepresentativeCacheUpdatingAdapter(indiComCoordHash, unstatFlagPointer, expLimitReachedFlag) {
 				mTaskPreyingAdapter.setConsitenceObserver(observer);
 				mIndiCompCoordHash = indiComCoordHash;
 			}
@@ -47,15 +47,11 @@ namespace Konclude {
 			}
 
 			QList<CIndividualReference>* CIndividualPrecomputationTestingItem::getIndividualComputationList() {
-				return &mIndiComputationList;
+				return mRepresentativeCacheUpdatingAdapter.getIndividualComputationList();
 			}
 
 			CIndividualPrecomputationTestingItem* CIndividualPrecomputationTestingItem::addIndividualComputations(QList<CIndividualReference>& indiRefList) {
-				if (mIndiComputationList.isEmpty()) {
-					mIndiComputationList = indiRefList;
-				} else {
-					mIndiComputationList.append(indiRefList);
-				}
+				mRepresentativeCacheUpdatingAdapter.addIndividualComputations(indiRefList);
 				return this;
 			}
 

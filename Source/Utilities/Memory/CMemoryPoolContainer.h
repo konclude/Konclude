@@ -65,6 +65,8 @@ namespace Konclude {
 					CMemoryPool* getMemoryPools() const;
 					CMemoryPool* takeMemoryPools();
 
+					cint64 getMemoryPoolCount();
+					cint64 getMemorySize();
 
 				// protected methods
 				protected:
@@ -72,6 +74,8 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CMemoryPool* mMemoryPool;
+					cint64 mMemoryPoolCount;
+					cint64 mMemorySize;
 
 				// private methods
 				private:

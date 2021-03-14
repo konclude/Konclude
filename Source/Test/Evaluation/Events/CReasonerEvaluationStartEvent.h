@@ -29,6 +29,7 @@
 // Namespace includes
 #include "../EvaluationSettings.h"
 #include "../CReasonerEvaluationTestsuite.h"
+#include "../CReasonerEvaluationProvider.h"
 
 
 // Other includes
@@ -66,7 +67,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CReasonerEvaluationStartEvent(const QString& initFile, const QString& testFile, const QString& addressString, CConfiguration* configuration, CCallbackData* callbackData);
+						CReasonerEvaluationStartEvent(const QString& initFile, const QString& testFile, CReasonerEvaluationProvider* reasonerProvider, CConfiguration* configuration, CCallbackData* callbackData);
 
 						//! Destructor
 						virtual ~CReasonerEvaluationStartEvent();
@@ -75,7 +76,7 @@ namespace Konclude {
 
 						QString getInitFileString();
 						QString getTestFileString();
-						QString getAddressString();
+						CReasonerEvaluationProvider* getReasonerProvider();
 						CConfiguration* getConfiguration();
 						CCallbackData* getCallback();
 
@@ -86,7 +87,7 @@ namespace Konclude {
 					protected:
 						QString mInitFileString;
 						QString mTestFileString;
-						QString mAddressString;
+						CReasonerEvaluationProvider* mReasonerProvider;
 						CConfiguration* mConfiguration;
 						CCallbackData* mCallbackData;
 

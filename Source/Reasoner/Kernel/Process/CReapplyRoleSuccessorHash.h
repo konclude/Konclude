@@ -70,8 +70,13 @@ namespace Konclude {
 						CReapplyRoleSuccessorHash* initRoleSuccessorHash(CReapplyRoleSuccessorHash* prevRoleSuccHash);
 
 						cint64 insertRoleSuccessorLink(CRole* role, CIndividualLinkEdge* link, CReapplyQueueIterator* reapplyQueueIterator = nullptr);
+
+						void ensureRoleSuccessorDataLocalated(CReapplyRoleSuccessorData &roleSuccData);
+
 						CReapplyRoleSuccessorHash* removeRoleSuccessorLink(CRole* role, CIndividualLinkEdge* link);
 						CReapplyRoleSuccessorHash* removeRoleSuccessorLink(CRole* role, cint64 sourceIndiID, cint64 destinationIndiID);
+
+						void eliminateRoleSuccessorPreviousShareData(CReapplyRoleSuccessorData &roleSuccData, cint64 coupId);
 
 						cint64 getRoleSuccessorCount(CRole* role);
 

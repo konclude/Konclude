@@ -72,6 +72,8 @@ namespace Konclude {
 				protected:
 
 
+					CConcept* createPropagationToVariableConcept(CConcept* followingTriggerConcept, CRole* role, CVariable* variable);
+					CConcept* createPropagationToPreparedVariableConcept(CConcept* followingTriggerConcept, CRole* role, CExpressionVariable* destVariable);
 					CConcept* createPropagationConcept(CConcept* followingTriggerConcept, CRole* role);
 					CConcept* createPropagationImplicationTriggeredConcept(CConcept* triggeredConcept, CConcept* impliedConcept);
 					CConcept* createPropagationImplicationTriggeredConcept(const QList<CConcept*>& triggeredConceptList, CConcept* impliedConcept);

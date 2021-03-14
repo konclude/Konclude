@@ -53,7 +53,7 @@ namespace Konclude {
 
 
 				QString CParseProcessSPARQLManageTextCommand::getBriefCommandDescription() {
-					return QString("Process-Parse-SPARQL-Update Command");
+					return QString("Process-Parse-SPARQL-Manage Command");
 				}
 
 				QString CParseProcessSPARQLManageTextCommand::getSPARQLUpdateText() {

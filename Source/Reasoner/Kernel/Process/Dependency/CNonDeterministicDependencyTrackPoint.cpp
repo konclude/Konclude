@@ -37,6 +37,7 @@ namespace Konclude {
 						mBranchNode = nullptr;
 						mClashes = nullptr;
 						mClashedIrelevant = false;
+						mInvolvedIndiLinker = nullptr;
 					}
 
 
@@ -76,6 +77,17 @@ namespace Konclude {
 
 					CNonDeterministicDependencyTrackPoint* CNonDeterministicDependencyTrackPoint::setClashedOrIrelevantBranch(bool clashedOrIrelevant) {
 						mClashedIrelevant = clashedOrIrelevant;
+						return this;
+					}
+
+
+					CXLinker<cint64>* CNonDeterministicDependencyTrackPoint::getInvolvedIndividualIdsLinker() {
+						return mInvolvedIndiLinker;
+					}
+
+
+					CNonDeterministicDependencyTrackPoint* CNonDeterministicDependencyTrackPoint::setInvolvedIndividualIdsLinker(CXLinker<cint64>* linker) {
+						mInvolvedIndiLinker = linker;
 						return this;
 					}
 

@@ -31,6 +31,7 @@
 // Other includes
 #include "Reasoner/Consistiser/CIndividualPrecomputationCoordinationHash.h"
 
+#include "Reasoner/Ontology/CIndividualReference.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -40,6 +41,7 @@ namespace Konclude {
 
 	namespace Reasoner {
 
+		using namespace Ontology;
 		using namespace Consistiser;
 
 		namespace Kernel {
@@ -59,7 +61,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CSatisfiableTaskRepresentativeBackendUpdatingAdapter(CIndividualPrecomputationCoordinationHash* indiComCoordHash = nullptr, bool *unstatFlagPointer = nullptr);
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter(CIndividualPrecomputationCoordinationHash* indiComCoordHash = nullptr, bool *unstatFlagPointer = nullptr, bool *expansionLimitReachedFlagPointer = nullptr);
 
 
 						CIndividualPrecomputationCoordinationHash* getIndividualComputationCoordinationHash();
@@ -68,14 +70,33 @@ namespace Konclude {
 						cint64 getFirstIndividualRecomputationId();
 						cint64 getRepresentativeCacheRecomputationId();
 
+
+						cint64 getIndividualComputationCount();
+						cint64 getAdditionalIndividualComputationSize();
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setAdditionalIndividualComputationSize(cint64 size);
+
 						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setFirstIndividualRecomputationId(cint64 id);
 						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setRepresentativeCacheRecomputationId(cint64 id);
+
+
+						QList<CIndividualReference>* getIndividualComputationList();
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* addIndividualComputations(QList<CIndividualReference>& indiRefList);
 
 
 						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setAllAssertionIndividualId(cint64 id);
 						cint64 getAllAssertionIndividualId();
 
 						bool hasUnsatisfiableComputed();
+						bool hasExpansionLimitReached();
+
+
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setExpansionLimitReached();
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setUnsatisfiableComputed();
+
+
+						bool isExpansionPropagationCutted();
+						CSatisfiableTaskRepresentativeBackendUpdatingAdapter* setExpansionPropagationCutted(bool cutted);
+
 
 					// protected methods
 					protected:
@@ -88,6 +109,12 @@ namespace Konclude {
 						cint64 mAllAssertionIndiID = -1;
 
 						bool* mUnstatFlagPointer;
+						bool* mExpansionLimitReachedFlagPointer;
+						QList<CIndividualReference> mIndiComputationList;
+						cint64 mAdditionalIndividualComputationCount = 0;
+
+						bool mExpansionPropagationCutted;
+
 
 						// private methods
 						private:

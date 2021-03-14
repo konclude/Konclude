@@ -32,6 +32,8 @@
 #include "CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker.h"
 #include "CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker.h"
 #include "CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker.h"
+#include "CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker.h"
+#include "CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker.h"
 
 
 // Other includes
@@ -64,7 +66,7 @@ namespace Konclude {
 						//! Constructor
 						CBackendRepresentativeMemoryCacheLabelAssociationWriteData();
 
-						CBackendRepresentativeMemoryCacheLabelAssociationWriteData* initWriteData(cint64 ontologyIdentifier, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker);
+						CBackendRepresentativeMemoryCacheLabelAssociationWriteData* initWriteData(cint64 ontologyIdentifier, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tempAssWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* tempNomIndirectConnDataLinker, CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* tempAssUseDataLinker, CBackendRepresentativeMemoryCacheTemporaryLabelWriteDataLinker* tempLabelWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* tempCardWriteDataLinker, CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* involvedIndiDataLinker, CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* propCutDataLinker, cint64 repCompId);
 
 
 						CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* getTemporaryAssociationWriteDataLinker();
@@ -72,7 +74,10 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* getTemporaryCardinaltyWriteDataLinker();
 						CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* getTemporaryAssociationUseDataLinker();
 						CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* getTemporaryNominalIndirectConnectionDataLinker();
+						CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* getTemporaryInvolvedIndividualIdDataLinker();
+						CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* getTemporaryPropagationCutDataLinker();
 
+						cint64 getRecompuationId();
 
 					// protected methods
 					protected:
@@ -84,6 +89,9 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheTemporaryCardinalityWriteDataLinker* mTempCardWriteDataLinker;
 						CBackendRepresentativeMemoryCacheTemporaryAssociationUseDataLinker* mTempAssUseDataLinker;
 						CBackendRepresentativeMemoryCacheTemporaryNominalIndirectConnectionDataLinker* mTempNomIndirectConnDataLinker;
+						CBackendRepresentativeMemoryCacheTemporaryInvolvedIndividualDataLinker* mInvolvedIndiDataLinker;
+						CBackendRepresentativeMemoryCacheTemporaryPropagationCutDataLinker* mPropCutDataLinker;
+						cint64 mRecompuationId;
 
 					// private methods
 					private:

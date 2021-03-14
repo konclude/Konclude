@@ -45,6 +45,11 @@ namespace Konclude {
 				}
 
 
+				CBackendRepresentativeMemoryCache* CBackendAssociationCacheHandler::getCache() {
+					return mAssBackCacheWriter->getCache();
+				}
+
+
 
 				CBackendAssociationCacheHandler* CBackendAssociationCacheHandler::setWorkingOntology(CConcreteOntology* ontology) {
 					mAssBackCacheReader->setWorkingOntology(ontology);
@@ -52,7 +57,28 @@ namespace Konclude {
 				}
 
 
+				CBackendAssociationCacheHandler* CBackendAssociationCacheHandler::checkRecomputationIdUsage(cint64 recomputationId) {
+					mAssBackCacheReader->checkRecomputationIdUsage(recomputationId);
+					return this;
+				}
+
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendAssociationCacheHandler::getIndividualRepresentativeIdResolvedAssociationData(cint64 indiId, CCalculationAlgorithmContext* calcAlgContext) {
+					CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = getIndividualAssociationData(indiId, calcAlgContext);
+					if (assocData->hasRepresentativeSameIndividualMerging()) {
+						assocData = getIndividualAssociationData(assocData->getRepresentativeSameIndividualId(), calcAlgContext);
+					}
+					return assocData;
+				}
+
+
 				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendAssociationCacheHandler::getIndividualAssociationData(cint64 indiId, CCalculationAlgorithmContext* calcAlgContext) {
+					return getIndividualAssociationData(indiId, true, calcAlgContext);
+				}
+
+
+
+				CBackendRepresentativeMemoryCacheIndividualAssociationData* CBackendAssociationCacheHandler::getIndividualAssociationData(cint64 indiId, bool recordAccess, CCalculationAlgorithmContext* calcAlgContext) {
 
 					CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = nullptr;
 
@@ -63,10 +89,12 @@ namespace Konclude {
 					}
 
 					if (!assData) {
-						CIndividualRepresentativeBackendCacheLoadedAssociationHash* locIndiLoadedAssocHash = calcAlgContext->getUsedProcessingDataBox()->getBackendCacheLoadedAssociationHash(true);
 						assData = mAssBackCacheReader->getIndividualAssociationData(indiId);
-						CIndividualRepresentativeBackendCacheLoadedAssociationData& loadedAssoData = (*locIndiLoadedAssocHash)[indiId];
-						loadedAssoData.setLoadedIndividualAssociationData(assData);
+						if (recordAccess) {
+							CIndividualRepresentativeBackendCacheLoadedAssociationHash* locIndiLoadedAssocHash = calcAlgContext->getUsedProcessingDataBox()->getBackendCacheLoadedAssociationHash(true);
+							CIndividualRepresentativeBackendCacheLoadedAssociationData& loadedAssoData = (*locIndiLoadedAssocHash)[indiId];
+							loadedAssoData.setLoadedIndividualAssociationData(assData);
+						}
 					}
 					return assData;
 				}
@@ -161,8 +189,6 @@ namespace Konclude {
 
 
 
-
-
 				bool CBackendAssociationCacheHandler::determineCardinalityAssociationBackendItem(function<void(CPROCESSHASH<cint64, CBackendAssociationCacheHandler::CRoleCardinalityCountData>* superRoleTagUsedCardCountHash)> initFunc, CPROCESSHASH<CRole*, cint64>* roleUsedCardHash, bool superRolePropagation, CBackendRepresentativeMemoryCacheTemporaryAssociationWriteDataLinker* tmpAssWriteDataLinker, CCalculationAlgorithmContext* calcAlgContext) {
 
 					CPROCESSHASH<cint64, CRoleCardinalityCountData>* superRoleTagUsedCardCountHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64, CRoleCardinalityCountData>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
@@ -244,6 +270,7 @@ namespace Konclude {
 
 				CBackendRepresentativeMemoryCacheTemporaryLabelReference CBackendAssociationCacheHandler::getRoleInstantiatedSetLabelAssociationBackendItem(cint64 labelType, CSortedNegLinker<CRole*>* roleLinker, CPROCESSSET<TRoleInversionPair>* roleInversionSet, bool extendBySuperRoles, CPROCESSHASH< CProcessSetHasher<TRoleInversionPair>, CBackendRepresentativeMemoryCacheTemporaryLabelReference* >* roleInstantiatedSetLabelHash, CCalculationAlgorithmContext* calcAlgContext) {
 
+					CRole* topRole = calcAlgContext->getProcessingDataBox()->getOntology()->getRBox()->getTopObjectRole();
 					if (roleLinker && !roleInversionSet) {
 						roleInversionSet = CObjectParameterizingAllocator< CPROCESSSET<TRoleInversionPair>, CContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedTemporaryMemoryAllocationManager(), calcAlgContext->getUsedTaskProcessorContext());
 						for (CSortedNegLinker<CRole*>* roleLinkerIt = roleLinker; roleLinkerIt; roleLinkerIt = roleLinkerIt->getNext()) {
@@ -283,7 +310,7 @@ namespace Konclude {
 								for (CSortedNegLinker<CRole*>* superRoleLinkerIt = role->getIndirectSuperRoleList(); superRoleLinkerIt; superRoleLinkerIt = superRoleLinkerIt->getNext()) {
 									CRole* superRole = superRoleLinkerIt->getData();
 									bool superRoleNegation = superRoleLinkerIt->isNegated() ^ inversed;
-									if (!superRoleInversionSet->contains(TRoleInversionPair(superRole, superRoleNegation))) {
+									if (superRole != topRole && !superRoleInversionSet->contains(TRoleInversionPair(superRole, superRoleNegation))) {
 										superRoleInversionSet->insert(TRoleInversionPair(superRole, superRoleNegation));
 										CSortedNegLinker<CRole*>* newRoleLinker = CObjectAllocator< CSortedNegLinker<CRole*> >::allocateAndConstruct(calcAlgContext->getMemoryAllocationManager());
 										newRoleLinker->init(superRole, superRoleNegation);
@@ -364,10 +391,21 @@ namespace Konclude {
 
 
 
+				bool CBackendAssociationCacheHandler::visitNeighbourArrayIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourArrayId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours, CCalculationAlgorithmContext* calcAlgContext) {
+					return mAssBackCacheReader->visitNeighbourArrayIdsForRole(assData, role, visitFunc, visitOnlyDeterministicNeighbours);
+				}
+
+
+
 				bool CBackendAssociationCacheHandler::visitNeighbourIndividualIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours, CCalculationAlgorithmContext* calcAlgContext) {
 					return mAssBackCacheReader->visitNeighbourIndividualIdsForRole(assData, role, visitFunc, visitOnlyDeterministicNeighbours);
 				}
 
+
+
+				bool CBackendAssociationCacheHandler::visitNeighbourIndividualIdsForNeighbourArrayIdFromCursor(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 id, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic, cint64 cursor)> visitFunc, bool visitOnlyDeterministicNeighbours, cint64 cursor, CCalculationAlgorithmContext* calcAlgContext) {
+					return mAssBackCacheReader->visitNeighbourIndividualIdsForNeighbourArrayIdFromCursor(assData, id, visitFunc, visitOnlyDeterministicNeighbours, cursor);
+				}
 
 
 
@@ -375,6 +413,13 @@ namespace Konclude {
 					return mAssBackCacheReader->getNeighbourCountForRole(assData, role);
 				}
 
+
+
+
+
+				cint64 CBackendAssociationCacheHandler::getNeighbourCountForArrayPos(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 pos, CCalculationAlgorithmContext* calcAlgContext) {
+					return mAssBackCacheReader->getNeighbourCountForArrayPos(assData, pos);
+				}
 
 
 
@@ -606,7 +651,7 @@ namespace Konclude {
 							roleInversionSet->insert(TRoleInversionPair(role, inversed));
 						}
 
-						CBackendRepresentativeMemoryCacheTemporaryLabelReference*& tmpLabelRefData = (*mRoleInversionSetTmpRefNeighbourInstantiatedRoleSetLabelHash)[CProcessSetHasher<TRoleInversionPair>(roleInversionSet)];
+						CBackendRepresentativeMemoryCacheTemporaryLabelReference*& tmpLabelRefData = (*(mRoleInversionSetTmpRefRoleInstantiatedSetLabelHashTypeArray[CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL]))[CProcessSetHasher<TRoleInversionPair>(roleInversionSet)];
 						if (tmpLabelRefData) {
 							return *tmpLabelRefData;
 						} else {
@@ -623,6 +668,7 @@ namespace Konclude {
 
 
 
+					CRole* topRole = calcAlgContext->getProcessingDataBox()->getOntology()->getRBox()->getTopObjectRole();
 					for (CLinkedNeighbourRoleAssertionLinker* linkedRoleAssertedLinkerIt = linkedRoleAssertedLinker; linkedRoleAssertedLinkerIt; linkedRoleAssertedLinkerIt = linkedRoleAssertedLinkerIt->getNext()) {
 						CRole* role = linkedRoleAssertedLinkerIt->getAssertedRole();
 						bool inversed = linkedRoleAssertedLinkerIt->isAssertedRoleInversed();
@@ -631,7 +677,7 @@ namespace Konclude {
 							for (CSortedNegLinker<CRole*>* superRoleLinkerIt = role->getIndirectSuperRoleList(); superRoleLinkerIt; superRoleLinkerIt = superRoleLinkerIt->getNext()) {
 								CRole* superRole = superRoleLinkerIt->getData();
 								bool superRoleNegation = superRoleLinkerIt->isNegated() ^ inversed;
-								if (superRoleInversionLinkerHash->value(TRoleInversionPair(superRole, superRoleNegation)) == nullptr) {
+								if (superRole != topRole && superRoleInversionLinkerHash->value(TRoleInversionPair(superRole, superRoleNegation)) == nullptr) {
 									CBackendRepresentativeMemoryCacheRoleAssertionLinker* newRoleLinker = CObjectAllocator< CBackendRepresentativeMemoryCacheRoleAssertionLinker >::allocateAndConstruct(calcAlgContext->getMemoryAllocationManager());
 									newRoleLinker->initRoleAssertionLinker(superRole, superRoleNegation, superRole == role && superRoleNegation == inversed, false, false);
 									superRoleInversionLinkerHash->insert(TRoleInversionPair(superRole, superRoleNegation), newRoleLinker);
@@ -668,7 +714,7 @@ namespace Konclude {
 							for (CSortedNegLinker<CRole*>* superRoleLinkerIt = role->getIndirectSuperRoleList(); superRoleLinkerIt; superRoleLinkerIt = superRoleLinkerIt->getNext()) {
 								CRole* superRole = superRoleLinkerIt->getData();
 								bool superRoleNegation = superRoleLinkerIt->isNegated() ^ inversed;
-								if (superRoleInversionLinkerHash->value(TRoleInversionPair(superRole, superRoleNegation)) == nullptr) {
+								if (superRole != topRole && superRoleInversionLinkerHash->value(TRoleInversionPair(superRole, superRoleNegation)) == nullptr) {
 									CBackendRepresentativeMemoryCacheRoleAssertionLinker* newRoleLinker = CObjectAllocator< CBackendRepresentativeMemoryCacheRoleAssertionLinker >::allocateAndConstruct(calcAlgContext->getMemoryAllocationManager());
 									newRoleLinker->initRoleAssertionLinker(superRole, superRoleNegation, false, true, false);
 									superRoleInversionLinkerHash->insert(TRoleInversionPair(superRole, superRoleNegation), newRoleLinker);

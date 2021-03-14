@@ -31,12 +31,14 @@
 #include "COptimizedComplexConceptStepAnsweringItem.h"
 #include "CComplexConceptStepComputationProcess.h"
 #include "COptimizedComplexVariableCompositionItem.h"
-#include "COptimizedComplexBuildingVariableCompositionsItem.h"
+#include "COptimizedComplexBuildingIndividualVariableCompositionsItem.h"
 #include "COptimizedComplexVariableAbsorptionBasedHandlingExtensionItem.h"
 #include "CAnsweringCalculationStatisticsCollectionStrings.h"
 #include "CAnsweringStatisticsCollectionStrings.h"
 #include "CAnsweringHandlingStatistics.h"
 #include "CComputedItemDataNotificationLinker.h"
+#include "CCacheAnswersWeightedUsageCostItemData.h"
+#include "COptimizedComplexVariableRoleSubSuperItem.h"
 
 
 // Other includes
@@ -61,7 +63,7 @@ namespace Konclude {
 
 
 			typedef QPair<CConcept*, bool> TConceptNegPair;
-
+			typedef QPair<CRole*, bool> TRoleInversePair;
 
 
 			/*! 
@@ -90,6 +92,10 @@ namespace Konclude {
 				COptimizedComplexExpressionOntologyAnsweringItem* takeTestingOntology(CConcreteOntology* ontology);
 
 
+				COptimizedComplexVariableRoleSubSuperItem* getRoleSubSuperItem(CRole* role, bool superPropItem);
+				COptimizedComplexExpressionOntologyAnsweringItem* setRoleSubSuperItem(CRole* role, bool superPropItem, COptimizedComplexVariableRoleSubSuperItem* item);
+
+
 				COptimizedComplexConceptItem* getComplexConceptItem(CConcept* concept, bool negation, bool create = true, bool* created = nullptr);
 				QHash< TConceptNegPair, COptimizedComplexConceptItem* >* getComplexConceptNegationItemHash();
 
@@ -99,8 +105,8 @@ namespace Konclude {
 				CXLinker<CComplexQueryExpressionProcessingData*>* createQueryProcessingLinker();
 				COptimizedComplexExpressionOntologyAnsweringItem* releaseQueryProcessingLinker(CXLinker<CComplexQueryExpressionProcessingData*>* queryLinker);
 
-				CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* createBuildingVariableItemProcessingLinker();
-				COptimizedComplexExpressionOntologyAnsweringItem* releaseBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* varBuildItemLinker);
+				CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>* createBuildingVariableItemProcessingLinker();
+				COptimizedComplexExpressionOntologyAnsweringItem* releaseBuildingVariableItemProcessingLinker(CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>* varBuildItemLinker);
 
 
 				CIndividual* takeTemporaryTestingIndividual();
@@ -126,6 +132,7 @@ namespace Konclude {
 
 
 				QList<COptimizedComplexConceptItem*>* getConceptClassItemReorderingList();
+				QSet<COptimizedComplexConceptItem*>* getComplexConceptItemContainer();
 
 				COptimizedComplexConceptItem* getTopConceptItem(bool create = true);
 
@@ -192,6 +199,34 @@ namespace Konclude {
 				cint64 getNextQueryExtensionId(bool moveNext = true);
 
 
+
+				cint64 getCacheAnswersCount();
+				cint64 getCacheAnswersSizeBytes();
+
+				COptimizedComplexExpressionOntologyAnsweringItem* setCacheAnswersCount(cint64 count);
+				COptimizedComplexExpressionOntologyAnsweringItem* setCacheAnswersSizeBytes(cint64 size);
+
+
+				QMap<double, CCacheAnswersWeightedUsageCostItemData>* getCacheAnswersWeightedUsageCostItemSetDataMap();
+
+				QMap<cint64, QList<COptimizedComplexVariableCompositionItem*>* >* getCacheAnswersUpdateDepthVariableCompositionItemsMap();
+
+				QSet<COptimizedComplexVariableCompositionItem*>* getVariableCompositionItemContainer();
+
+				double getNextUsageWeight();
+				COptimizedComplexExpressionOntologyAnsweringItem* setNextUsageWeight(double weight);
+
+
+				bool canDeleteMoreCacheEntriesWhileQueryProcessing();
+				COptimizedComplexExpressionOntologyAnsweringItem* setDeleteMoreCacheEntriesWhileQueryProcessing(bool deleteable);
+
+
+				QList<COptimizedComplexConceptItem*>* getCacheAnswersComplexConceptItemUpdateList();
+
+				QHash<CRole*, QSet<TConceptNegPair>*>* getRoleDomainImpliedConceptSetHash();
+
+				QHash<CConcept*, CConcept*>* getActivationPropagationSplitConceptHash();
+
 				// protected methods
 			protected:
 
@@ -203,11 +238,16 @@ namespace Konclude {
 
 				CComputedItemDataNotificationLinker* mItemNotificationLinker;
 				CXLinker<CComplexQueryExpressionProcessingData*>* mQueryProcessingLinker;
-				CXLinker<COptimizedComplexBuildingVariableCompositionsItem*>* mBuildingVarItemProcessingLinker;
+				CXLinker<COptimizedComplexBuildingIndividualVariableCompositionsItem*>* mBuildingVarItemProcessingLinker;
+
+
+				QHash< QPair<CRole*, bool>, COptimizedComplexVariableRoleSubSuperItem* > mRoleSubSuperItemHash;
+
 
 				QHash< TConceptNegPair, COptimizedComplexConceptItem* > mConceptNegItemHash;
 				COptimizedComplexConceptItem* mTopConceptItem;
 				QList<COptimizedComplexConceptItem*> mConceptClassItemReorderingList;
+				QSet<COptimizedComplexConceptItem*> mComplexConceptItemContainerSet;
 
 
 				QList<COptimizedComplexVariableCompositionItem*> mVarCompItemProcessingList;
@@ -253,6 +293,24 @@ namespace Konclude {
 				CMemoryPoolNewAllocationIncreasingContext mDataValueMemoryManagementContext;
 				QHash<cint64, CComplexQueryExpressionProcessingData*> mQueryExtensionProcessingDataHash;
 				cint64 mNextQueryExtensionId;
+
+
+				cint64 mCacheAnswersCount;
+				cint64 mCacheAnswersSizeBytes;
+
+				QSet<COptimizedComplexVariableCompositionItem*> mVarCompItemContainer;
+
+				QList<COptimizedComplexConceptItem*> mCacheAnswersComplexConceptItemUpdateList;
+				QMap<double, CCacheAnswersWeightedUsageCostItemData> mCacheAnswersWeightedUsageCostItemSetDataMap;
+				QMap<cint64, QList<COptimizedComplexVariableCompositionItem*>* > mCacheAnswersUpdateDepthVariableCompositionItemsMap;
+				double mNextUsageWeight;
+
+
+				bool mDeleteMoreCacheEntriesWhileQueryProcessing;
+
+				QHash<CRole*, QSet<TConceptNegPair>*> mRoleDomainImpliedConceptSetHash;
+
+				QHash<CConcept*, CConcept*> mActivationPropagationSplitConceptHash;
 
 				// private methods
 				private:

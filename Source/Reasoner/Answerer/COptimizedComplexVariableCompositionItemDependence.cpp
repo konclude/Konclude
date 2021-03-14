@@ -31,6 +31,15 @@ namespace Konclude {
 			COptimizedComplexVariableCompositionItemDependence::COptimizedComplexVariableCompositionItemDependence(COptimizedComplexVariableCompositionItem* baseItem) {
 				mDependentItem = baseItem;
 			
+				reset();
+			}
+
+
+			COptimizedComplexVariableCompositionItemDependence::~COptimizedComplexVariableCompositionItemDependence() {
+			}
+
+
+			bool COptimizedComplexVariableCompositionItemDependence::reset() {
 				mBatchStartBindingsCardinalityLinker = nullptr;
 				mBatchStartUpdatedCardinalityLinker = nullptr;
 				mBatchEndBindingsCardinalityLinker = nullptr;
@@ -48,13 +57,8 @@ namespace Konclude {
 				mCurrentLoadedBindingsCardinalityBatchLinker = nullptr;
 				mStartLoadedBindingsCardinalityBatchLinker = nullptr;
 				mEndLoadedBindingsCardinalityBatchLinker = nullptr;
+				return true;
 			}
-
-
-			COptimizedComplexVariableCompositionItemDependence::~COptimizedComplexVariableCompositionItemDependence() {
-			}
-
-
 
 
 			COptimizedComplexVariableCompositionItem* COptimizedComplexVariableCompositionItemDependence::getDependentItem() {

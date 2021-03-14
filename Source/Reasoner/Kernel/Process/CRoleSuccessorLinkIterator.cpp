@@ -31,19 +31,32 @@ namespace Konclude {
 
 				CRoleSuccessorLinkIterator::CRoleSuccessorLinkIterator()
 					: mLinkLinker(nullptr),mLastLink(nullptr) {
+					mIterator1 = false;
+					mIterator2 = false;
 				}
 
 				CRoleSuccessorLinkIterator::CRoleSuccessorLinkIterator(const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& beginIt, const CPROCESSHASH<cint64,CIndividualLinkEdge*>::iterator& endIt)
-						: mLinkLinker(nullptr),mBeginIt(beginIt),mEndIt(endIt),mLastLink(nullptr) {
+						: mLinkLinker(nullptr),mBeginIt1(beginIt),mEndIt1(endIt),mLastLink(nullptr) {
+					mIterator1 = true;
+					mIterator2 = false;
 				}
+
+				CRoleSuccessorLinkIterator::CRoleSuccessorLinkIterator(const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt1, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& beginIt2, const CPROCESSHASH<cint64, CIndividualLinkEdge*>::iterator& endIt2) 
+					: mLinkLinker(nullptr), mBeginIt1(beginIt1), mEndIt1(endIt1), mBeginIt2(beginIt2), mEndIt2(endIt2), mLastLink(nullptr) {
+					mIterator1 = true;
+					mIterator2 = true;
+				}
+
 
 				CRoleSuccessorLinkIterator::CRoleSuccessorLinkIterator(CIndividualLinkEdge* linkLinker, CIndividualLinkEdge* lastLink)
 						: mLinkLinker(linkLinker),mLastLink(lastLink) {
+					mIterator1 = false;
+					mIterator2 = false;
 				}
 
 
 				bool CRoleSuccessorLinkIterator::hasNext() {
-					return (mLinkLinker && mLinkLinker != mLastLink) || mBeginIt != mEndIt;
+					return (mLinkLinker && mLinkLinker != mLastLink) || mIterator1 && mBeginIt1 != mEndIt1 || mIterator2 && mBeginIt2 != mEndIt2;
 				}
 
 				CIndividualLinkEdge* CRoleSuccessorLinkIterator::next(bool moveNext) {
@@ -54,10 +67,15 @@ namespace Konclude {
 							mLinkLinker = mLinkLinker->getNext();
 						}
 					} else {
-						if (mBeginIt != mEndIt) {
-							link = mBeginIt.value();
+						if (mIterator1 && mBeginIt1 != mEndIt1) {
+							link = mBeginIt1.value();
 							if (moveNext) {
-								++mBeginIt;
+								++mBeginIt1;
+							}
+						} else if (mIterator2 && mBeginIt2 != mEndIt2) {
+							link = mBeginIt2.value();
+							if (moveNext) {
+								++mBeginIt2;
 							}
 						}
 					}

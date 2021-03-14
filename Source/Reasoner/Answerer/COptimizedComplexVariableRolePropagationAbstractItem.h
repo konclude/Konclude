@@ -22,14 +22,14 @@
 #define KONCLUDE_REASONER_ANSWERER_COPTIMIZEDCOMPLEXVARIABLEROLEPROPAGATIONABSTRACTITEM_H
 
 // Libraries includes
-
+#include <QVector>
 
 // Namespace includes
 #include "AnswererSettings.h"
 #include "COptimizedComplexVariableCompositionSingleDependenceItem.h"
 #include "COptimizedComplexConceptItem.h"
 #include "COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData.h"
-
+#include "COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataHashMemoryManaged.h"
 
 
 // Other includes
@@ -71,10 +71,14 @@ namespace Konclude {
 
 
 
-					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* getWaitingProcessedRealizationIteratorDataList();
+					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase*>* getWaitingProcessedRealizationIteratorDataList();
 					QHash<CRealizationIndividualInstanceItemReference, COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* getInstanceItemRolePropagationInstanceIterationDataHash();
 
-					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*>* getSchedulingRealizationIteratorDataList();
+					QVector<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataHashMemoryManaged*>* getInstanceItemRolePropagationInstanceIterationDataHashVector();
+
+
+
+					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase*>* getSchedulingRealizationIteratorDataList();
 					QList<COntologyProcessingRequirement*>* geSchedulingRealizationRequirementIteratorDataList();
 
 
@@ -91,6 +95,7 @@ namespace Konclude {
 					COptimizedComplexVariableRolePropagationAbstractItem* setRealizationFinishedFillerInstanceItemCount(cint64 count);
 					COptimizedComplexVariableRolePropagationAbstractItem* setPropagationHandledInstanceItemCount(cint64 count);
 					COptimizedComplexVariableRolePropagationAbstractItem* setScheduledRealizationCount(cint64 count);
+					COptimizedComplexVariableRolePropagationAbstractItem* setPropagatedInstanceItemCount(cint64 count);
 
 
 					COptimizedComplexVariableRolePropagationAbstractItem* incFillerInstanceItemCount(cint64 count = 1);
@@ -105,6 +110,8 @@ namespace Konclude {
 					double getExpectedFillerAllPropagationItemCount();
 					double getExpectedFillerPerPropagationItemCount();
 
+					virtual bool clearComputation();
+					virtual COptimizedComplexVariableRolePropagationAbstractItem* resetIterationHash();
 
 				// protected methods
 				protected:
@@ -116,9 +123,11 @@ namespace Konclude {
 					bool mInversed;
 					cint64 mPropagationVarIdx;
 
-					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*> mWaitingProcessedRealizationIteratorDataList;
-					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*> mSchedulingRealizationIteratorDataList;
+					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase*> mWaitingProcessedRealizationIteratorDataList;
+					QList<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataBase*> mSchedulingRealizationIteratorDataList;
 					QHash<CRealizationIndividualInstanceItemReference, COptimizedComplexVariableRolePropagationProcessingRealizationIteratorData*> mInstItemRolePropInstIterationDataHash;
+
+					QVector<COptimizedComplexVariableRolePropagationProcessingRealizationIteratorDataHashMemoryManaged*> mInstItemRolePropInstIterationDataHashVector;
 
 					QList<COntologyProcessingRequirement*> mSchedulingRealizationRequirementIteratorDataList;
 

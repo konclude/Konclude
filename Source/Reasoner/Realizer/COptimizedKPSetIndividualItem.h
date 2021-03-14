@@ -89,6 +89,8 @@ namespace Konclude {
 					QSet<COptimizedKPSetIndividualItem*>* getPossibleSameInstantiatedItemSet();
 					cint64 getPossibleSameInstantiatedItemCount();
 
+					QHash<cint64, CRealizingTestingItem*>* getPossibleSameIndividualTestingItemHash();
+
 
 					cint64 getTestingPossibleInstantiatedCount();
 					COptimizedKPSetIndividualItem* setTestingPossibleInstantiatedCount(cint64 testCount);
@@ -195,6 +197,7 @@ namespace Konclude {
 					CConcept* mTmpNominalConcept;
 					CIndividualDependenceTrackingCollector* mIndiDepTrackingCollector;
 
+					QHash<cint64, CRealizingTestingItem*> mPossibleSameIndividualTestingItemHash;
 
 
 

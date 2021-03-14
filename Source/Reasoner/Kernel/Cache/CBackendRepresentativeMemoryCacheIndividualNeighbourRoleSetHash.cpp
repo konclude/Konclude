@@ -33,22 +33,71 @@ namespace Konclude {
 				CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash::CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash(CBackendRepresentativeMemoryCacheContext* context) {
 					mContext = context;
 					mNeighbourRoleSetLabelHash = CObjectParameterizingAllocator< CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItem*>, CContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
+					mPrevNeighbourRoleSetLabelHash = nullptr;
 				}
 
-				CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash::initNeighbourRoleSetHash(CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash) {
+				CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash::initNeighbourRoleSetHash(CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash* neighbourRoleSetHash, bool detach) {
 					if (neighbourRoleSetHash) {
-						*mNeighbourRoleSetLabelHash = *neighbourRoleSetHash->mNeighbourRoleSetLabelHash;
+						if (detach) {
+
+							if (neighbourRoleSetHash->mPrevNeighbourRoleSetLabelHash) {
+								*mNeighbourRoleSetLabelHash = *neighbourRoleSetHash->mPrevNeighbourRoleSetLabelHash;
+								mNeighbourRoleSetLabelHash->detach();
+								for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItem*>::const_iterator it = neighbourRoleSetHash->mNeighbourRoleSetLabelHash->constBegin(), itEnd = neighbourRoleSetHash->mNeighbourRoleSetLabelHash->constEnd(); it != itEnd; ++it) {
+									cint64 neighbourId = it.key();
+									CBackendRepresentativeMemoryLabelCacheItem* item = it.value();
+									mNeighbourRoleSetLabelHash->insert(neighbourId, item);
+								}
+							} else {
+								*mNeighbourRoleSetLabelHash = *neighbourRoleSetHash->mNeighbourRoleSetLabelHash;
+								mNeighbourRoleSetLabelHash->detach();
+							}
+							mPrevNeighbourRoleSetLabelHash = nullptr;
+
+						} else {
+
+							if (!neighbourRoleSetHash->mPrevNeighbourRoleSetLabelHash && neighbourRoleSetHash->mNeighbourRoleSetLabelHash->size() <= 20) {
+								*mNeighbourRoleSetLabelHash = *neighbourRoleSetHash->mNeighbourRoleSetLabelHash;
+								mPrevNeighbourRoleSetLabelHash = nullptr;
+							} else if (!neighbourRoleSetHash->mPrevNeighbourRoleSetLabelHash && neighbourRoleSetHash->mNeighbourRoleSetLabelHash->size() > 20) {
+								mPrevNeighbourRoleSetLabelHash = neighbourRoleSetHash->mNeighbourRoleSetLabelHash;
+							} else {
+
+								if (neighbourRoleSetHash->mNeighbourRoleSetLabelHash->size() > neighbourRoleSetHash->mPrevNeighbourRoleSetLabelHash->size()) {
+									*mNeighbourRoleSetLabelHash = *neighbourRoleSetHash->mPrevNeighbourRoleSetLabelHash;
+
+									for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelCacheItem*>::const_iterator it = neighbourRoleSetHash->mNeighbourRoleSetLabelHash->constBegin(), itEnd = neighbourRoleSetHash->mNeighbourRoleSetLabelHash->constEnd(); it != itEnd; ++it) {
+										cint64 neighbourId = it.key();
+										CBackendRepresentativeMemoryLabelCacheItem* item = it.value();
+										mNeighbourRoleSetLabelHash->insert(neighbourId, item);
+									}
+									mPrevNeighbourRoleSetLabelHash = nullptr;
+								} else {
+									*mNeighbourRoleSetLabelHash = *neighbourRoleSetHash->mNeighbourRoleSetLabelHash;
+									mPrevNeighbourRoleSetLabelHash = neighbourRoleSetHash->mPrevNeighbourRoleSetLabelHash;
+								}
+
+							}
+						}
 					}
 					return this;
 				}
 
 
 				CBackendRepresentativeMemoryLabelCacheItem* CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash::getNeighbourRoleSetLabel(cint64 neighbourIndiId) {
-					return mNeighbourRoleSetLabelHash->value(neighbourIndiId);
+					CBackendRepresentativeMemoryLabelCacheItem* item =  mNeighbourRoleSetLabelHash->value(neighbourIndiId);
+					if (!item && mPrevNeighbourRoleSetLabelHash) {
+						item = mPrevNeighbourRoleSetLabelHash->value(neighbourIndiId);
+					}
+					return item;
 				}
 
 				cint64 CBackendRepresentativeMemoryCacheIndividualNeighbourRoleSetHash::getNeighbourCount() {
-					return mNeighbourRoleSetLabelHash->size();
+					cint64 count = mNeighbourRoleSetLabelHash->size();
+					if (mPrevNeighbourRoleSetLabelHash) {
+						count += mPrevNeighbourRoleSetLabelHash->size();
+					}
+					return count;
 				}
 
 

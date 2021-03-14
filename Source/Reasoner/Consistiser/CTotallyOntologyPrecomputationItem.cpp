@@ -47,6 +47,9 @@ namespace Konclude {
 				mIndividualPrecomputationCreated = false;
 				mIndividualPrecomputationChecked = false;
 				mIndividualPrecomputationClashed = false;
+				mIndividualPrecomputationExpansionLimitedReachedPointer = false;
+
+				mRemainingABoxIndiSatLinker = nullptr;
 
 				COntologyProcessingStepDataVector* ontProStepDataVec = mOntology->getProcessingSteps()->getOntologyProcessingStepDataVector();
 
@@ -82,18 +85,48 @@ namespace Konclude {
 				mAllIndividualSaturaturationOrderd = false;
 
 				mIndividualSaturationRunningCount = 0;
+				mRemainingRequiredABoxSaturationIndividualCount = 0;
 
 				mFreeItemLinker = nullptr;
 				mNextSaturationID = 1;
 				mIndividualTestRunning = false;
 				mIndividualsSaturationCacheSynchronisation = false;
+				mIndividualsSaturationAllOrderedCacheRetrieved = false;
 				mTriplesIndexedIndisSaturated = false;
 
 				mHandledTriplesIndiSaturatedId = -1;
 
+				mRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount = 0;
+
 				mAllIncompIndiRetrieved = false;
-				mCurrentIncompIndiRetrievalLimit = 100000;
-				mCurrentIncompIndiComputationLimit = 1000;
+				mFirstIncompletelyHandledIndividualsRetrieved = false;
+				mCurrentIncompIndiRetrievalLimit = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.PrecompuationRequiredIndividualRetrievalSize", 100000);
+				mCurrentIncompIndiRetrievalThresholdFactor = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.PrecompuationRequiredIndividualRetrievalThresholdPercent", 50) / 100.;
+				mIncompletelyHandlingIndividualComputationLimitIncreasingFactor = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsPrecompuationLimitIncreasingFactorPercent", 101) / 100.;
+				mCurrentIncompIndiRetrievalThreshold = mCurrentIncompIndiRetrievalLimit * mCurrentIncompIndiRetrievalThresholdFactor;
+				mCurrentIncompIndiComputationLimit = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsPrecompuationSize", 1500);
+				mIndividualSaturationCount = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize", 3000);
+				cint64 ontoSizeIncreaseFactor = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsHandlingCountOntologySizeIncreaseFactor", 500000);
+				cint64 ontoSizeMaxIncreaseFactor = CConfigDataReader::readConfigInteger(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsHandlingCountOntologySizeMaxIncreaseFactor", -1);
+
+				mRecomputationExpansionPropagationCuttedReductionIncreaseFactor = CConfigDataReader::readConfigDouble(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.ExpansionPropagationCutIndividualsPrecompuationSizeReductionFactor", 0.01);
+				mRecomputationExpansionPropagationCuttedReductionRecoveryFactor = CConfigDataReader::readConfigDouble(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.ExpansionPropagationCutIndividualsPrecompuationSizeReductionRecoveryFactor", 0.0005);
+				mMaximumRecomputationExpansionPropagationCuttedReductionFactor = CConfigDataReader::readConfigDouble(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.ExpansionPropagationCutIndividualsPrecompuationSizeMaximumReductionFactor", 0.90);
+				mCurrentRecomputationExpansionPropagationCuttedReductionFactor = 0;
+
+				cint64 indiCount = ontology->getABox()->getIndividualCount();
+				if (indiCount > ontoSizeIncreaseFactor) {
+					double factor = (double)indiCount / (double)ontoSizeIncreaseFactor;
+					if (ontoSizeMaxIncreaseFactor >= 0) {
+						factor = qMin((double)ontoSizeMaxIncreaseFactor, factor);
+					}
+					mIndividualSaturationCount *= factor;
+					mCurrentIncompIndiRetrievalThresholdFactor *= factor;
+					mCurrentIncompIndiRetrievalThreshold *= factor;
+					mCurrentIncompIndiComputationLimit *= factor;
+					mCurrentIncompIndiRetrievalLimit *= factor;
+				}
+				mIncompletelyHandledIndividualComputationPropagationCutReservedSize = 0;
 				mLastMinRetrievedIncompIndiId = -1;
 
 				mIndividualComputationRunningCount = 0;
@@ -107,10 +140,32 @@ namespace Konclude {
 				mSaturationOccurrenceStatisticsCollectingInitialized = false;
 				mSaturationOccurrenceStatisticsCollected = false;
 
+				mPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested = false;
+				mPrecompuationRetrievingIncompletelyHandledIndividuals = false;
+				mPrecomputationProcessingCoordinationHash = nullptr;
+				mPrecomputationRetrievalCoordinationHash = nullptr;
+
+				mIndividualSaturationTime = nullptr;
+				mIndividualPrecomputationTime = nullptr;
+
 				mFailAfterConsistencyConceptSaturation = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConsistencyConceptSaturation",false);
 				mFailAfterConsistencyChecking = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConsistencyCheck",false);
 				mFailAfterConceptSaturation = CConfigDataReader::readConfigBoolean(config,"Konclude.Debug.FailAfterConceptSaturation",false);
-				
+
+				mHadBasicPrecompuationMode = false;
+				mBasicPrecompuationSubsequentIndividualLimitReductionFactor = 1.;
+				mBasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor = CConfigDataReader::readConfigDouble(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor", 0.005);
+				mBasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor = CConfigDataReader::readConfigDouble(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor", 1.01);
+
+
+				mBasicPrecompuationParallelizationInitializationFactor = CConfigDataReader::readConfigDouble(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationParallelizationInitializationFactor", 1);
+				mBasicPrecompuationParallelizationIncreasingFactor = CConfigDataReader::readConfigDouble(config, "Konclude.Calculation.Precomputation.TotalPrecomputor.BasicPrecompuationParallelizationIncreasingFactor", 1.01);
+				mBasicPrecompuationParallelizationReductionFactor = -1;
+
+				mNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize = 0;
+
+				mMaxHandledRecomputationIdRemainingReporting = 50;
+
 				mInitTime.start();
 				return this;
 			}
@@ -160,6 +215,19 @@ namespace Konclude {
 			}
 
 
+			cint64 CTotallyOntologyPrecomputationItem::getNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize() {
+				return mNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize(bool straekSize) {
+				mNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize = straekSize;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::incNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize(bool incStreakSize) {
+				mNonPrecompuationDirectIncompletelyHandledIndividualsRetrievingStreakSize += incStreakSize;
+				return this;
+			}
 
 
 			COntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::addPrecomputationRequirement(COntologyProcessingRequirement* ontoRequirement) {	
@@ -393,12 +461,12 @@ namespace Konclude {
 
 
 			bool CTotallyOntologyPrecomputationItem::hasRemainingRequiredSaturationIndividuals() {
-				return !mRemainingABoxIndiSatList.isEmpty() || !mTriplesIndexedIndisSaturated;
+				return !mRemainingABoxIndiSatList.isEmpty() || !mTriplesIndexedIndisSaturated || mRemainingABoxIndiSatLinker;
 			}
 
 
 			bool CTotallyOntologyPrecomputationItem::hasRemainingRequiredABoxSaturationIndividuals() {
-				return !mRemainingABoxIndiSatList.isEmpty();
+				return !mRemainingABoxIndiSatList.isEmpty() || mRemainingABoxIndiSatLinker;
 			}
 
 			QList<CIndividual*>* CTotallyOntologyPrecomputationItem::getRemainingRequiredABoxSaturationIndividuals() {
@@ -410,6 +478,55 @@ namespace Konclude {
 				return this;
 			}
 
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setRequiredABoxSaturationIndividualLinker(CXLinker<CIndividual*>* individualLinker) {
+				mRemainingABoxIndiSatLinker = individualLinker;
+				return this;
+			}
+
+			bool CTotallyOntologyPrecomputationItem::hasRequiredABoxSaturationIndividualLinker() {
+				return mRemainingABoxIndiSatLinker;
+			}
+
+			cint64 CTotallyOntologyPrecomputationItem::getRemainingRequiredABoxSaturationIndividualCount() {
+				return mRemainingRequiredABoxSaturationIndividualCount;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setRemainingRequiredABoxSaturationIndividualCount(cint64 count) {
+				mRemainingRequiredABoxSaturationIndividualCount = count;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::decRemainingRequiredABoxSaturationIndividualCount(cint64 count) {
+				mRemainingRequiredABoxSaturationIndividualCount -= count;
+				return this;
+			}
+
+
+			CIndividual* CTotallyOntologyPrecomputationItem::getNextRequiredABoxSaturationIndividual(bool moveNext) {
+				CIndividual* indi = nullptr;
+				if (mRemainingABoxIndiSatLinker) {
+					indi = mRemainingABoxIndiSatLinker->getData();
+					if (moveNext) {
+						mRemainingABoxIndiSatLinker = mRemainingABoxIndiSatLinker->getNext();
+					}
+				}
+				return indi;
+			}
+
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::addRequiredABoxSaturationIndividualLinkerArray(CXLinker<CIndividual*>* individualLinkerArray) {
+				mRemainingABoxIndiSatLinkerArrayList.append(individualLinkerArray);
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::clearRequiredABoxSaturationIndividualLinkerArrays() {
+				for (CXLinker<CIndividual*>* individualLinkerArray : mRemainingABoxIndiSatLinkerArrayList) {
+					delete[] individualLinkerArray;
+				}
+				mRemainingABoxIndiSatLinkerArrayList.clear();
+				return this;
+			}
 
 
 			cint64 CTotallyOntologyPrecomputationItem::getHandledTriplesIndividualSaturatedId() {
@@ -819,6 +936,18 @@ namespace Konclude {
 				return this;
 			}
 
+
+
+			bool CTotallyOntologyPrecomputationItem::hasIndividualsSaturationAllOrderedCacheRetrieved() {
+				return mIndividualsSaturationAllOrderedCacheRetrieved;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setIndividualsSaturationAllOrderedCacheRetrieved(bool retrieved) {
+				mIndividualsSaturationAllOrderedCacheRetrieved = retrieved;
+				return this;
+			}
+
+
 			QSet<CIndividualReference>* CTotallyOntologyPrecomputationItem::getIncompletelyHandledIndividualSet() {
 				return &mIncompHandledIndiSet;
 			}
@@ -842,8 +971,21 @@ namespace Konclude {
 				return mCurrentIncompIndiRetrievalLimit;
 			}
 
+			double CTotallyOntologyPrecomputationItem::getCurrentIncompletelyHandledIndividualRetrievalThresholdFactor() {
+				return mCurrentIncompIndiRetrievalThresholdFactor;
+			}
+
+			cint64 CTotallyOntologyPrecomputationItem::getCurrentIncompletelyHandledIndividualRetrievalThreshold() {
+				return mCurrentIncompIndiRetrievalThreshold;
+			}
+
 			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setCurrentIncompletelyHandledIndividualRetrievalLimit(cint64 limit) {
 				mCurrentIncompIndiRetrievalLimit = limit;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setCurrentIncompletelyHandledIndividualRetrievalThreshold(cint64 threshold) {
+				mCurrentIncompIndiRetrievalThreshold = threshold;
 				return this;
 			}
 
@@ -855,6 +997,16 @@ namespace Konclude {
 				mAllIncompIndiRetrieved = allRetrieved;
 				return this;
 			}
+
+			bool CTotallyOntologyPrecomputationItem::hasFirstIncompletelyHandledIndividualsRetrieved() {
+				return mFirstIncompletelyHandledIndividualsRetrieved;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setFirstIncompletelyHandledIndividualsRetrieved(bool retrieved) {
+				mFirstIncompletelyHandledIndividualsRetrieved = retrieved;
+				return this;
+			}
+
 
 			cint64 CTotallyOntologyPrecomputationItem::getLastMinimumRetrievedIncompletelyHandledIndividualId() {
 				return mLastMinRetrievedIncompIndiId;
@@ -883,6 +1035,9 @@ namespace Konclude {
 			}
 
 
+			cint64 CTotallyOntologyPrecomputationItem::getIndividualComputationRunningCount() {
+				return mIndividualComputationRunningCount;
+			}
 
 			bool CTotallyOntologyPrecomputationItem::isIndividualComputationRunning() {
 				return mIndividualComputationRunningCount > 0;
@@ -941,6 +1096,10 @@ namespace Konclude {
 				return &mIndividualPrecomputationClashed;
 			}
 
+			bool* CTotallyOntologyPrecomputationItem::getIndividualPrecomputationExpansionLimitedReachedPointer() {
+				return &mIndividualPrecomputationExpansionLimitedReachedPointer;
+			}
+
 			bool CTotallyOntologyPrecomputationItem::isIndividualStepFinished() {
 				return mIndividualPrecomputationStep->isStepFinished();
 			}
@@ -957,6 +1116,14 @@ namespace Konclude {
 
 
 
+			QTime*& CTotallyOntologyPrecomputationItem::getIndividualSaturationTime() {
+				return mIndividualSaturationTime;
+			}
+
+			QTime*& CTotallyOntologyPrecomputationItem::getIndividualPrecomputationTime() {
+				return mIndividualPrecomputationTime;
+			}
+
 			cint64 CTotallyOntologyPrecomputationItem::getCurrentIncompletelyHandledIndividualComputationLimit() {
 				return mCurrentIncompIndiComputationLimit;
 			}
@@ -967,8 +1134,206 @@ namespace Konclude {
 			}
 
 
+
+			double CTotallyOntologyPrecomputationItem::getMaximumRecomputationExpansionPropagationCuttedReductionFactor() {
+				return mMaximumRecomputationExpansionPropagationCuttedReductionFactor;
+			}
+
+			double CTotallyOntologyPrecomputationItem::getCurrentRecomputationExpansionPropagationCuttedReductionFactor() {
+				return mCurrentRecomputationExpansionPropagationCuttedReductionFactor;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setCurrentRecomputationExpansionPropagationCuttedReductionFactor(double redFac) {
+				mCurrentRecomputationExpansionPropagationCuttedReductionFactor = redFac;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::incCurrentRecomputationExpansionPropagationCuttedReductionFactor(double redFac) {
+				mCurrentRecomputationExpansionPropagationCuttedReductionFactor += redFac;
+				if (mCurrentRecomputationExpansionPropagationCuttedReductionFactor > mMaximumRecomputationExpansionPropagationCuttedReductionFactor) {
+					mCurrentRecomputationExpansionPropagationCuttedReductionFactor = mMaximumRecomputationExpansionPropagationCuttedReductionFactor;
+				}
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::decCurrentRecomputationExpansionPropagationCuttedReductionFactor(double redFac) {
+				mCurrentRecomputationExpansionPropagationCuttedReductionFactor -= redFac;
+				if (mCurrentRecomputationExpansionPropagationCuttedReductionFactor < 0) {
+					mCurrentRecomputationExpansionPropagationCuttedReductionFactor = 0;
+				}
+				return this;
+			}
+
+
+			double CTotallyOntologyPrecomputationItem::getRecomputationExpansionPropagationCuttedReductionIncreaseFactor() {
+				return mRecomputationExpansionPropagationCuttedReductionIncreaseFactor;
+			}
+
+			double CTotallyOntologyPrecomputationItem::getRecomputationExpansionPropagationCuttedReductionRecoveryFactor() {
+				return mRecomputationExpansionPropagationCuttedReductionRecoveryFactor;
+			}
+
+
+
+			cint64 CTotallyOntologyPrecomputationItem::getRecomputationExpansionPropagationCuttedCount() {
+				return mIncompletelyHandledIndividualComputationPropagationCutReservedSize;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::incRecomputationExpansionPropagationCuttedCount(cint64 count) {
+				mIncompletelyHandledIndividualComputationPropagationCutReservedSize += count;
+				return this;
+			}
+
+
+			double CTotallyOntologyPrecomputationItem::getRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount() {
+				return mRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount;
+			}
+
+
+			double CTotallyOntologyPrecomputationItem::getIncompletelyHandlingIndividualComputationLimitIncreasingFactor() {
+				return mIncompletelyHandlingIndividualComputationLimitIncreasingFactor;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount(cint64 indiCount) {
+				mRemainingIncompletelyHandlingIndividualComputationLimitIncreasingCount = indiCount;
+				return this;
+			}
+
+
+			cint64 CTotallyOntologyPrecomputationItem::getIndividualSaturationSizeLimit() {
+				return mIndividualSaturationCount;
+			}
+
+
 			cint64 CTotallyOntologyPrecomputationItem::getNextRepresentativeCacheRecomputationId() {
 				return mNextRepresentativeCacheRecomputationId++;
+			}
+
+
+
+			bool CTotallyOntologyPrecomputationItem::isPrecompuationRetrievingIncompletelyHandledIndividuals() {
+				return mPrecompuationRetrievingIncompletelyHandledIndividuals;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setPrecompuationRetrievingIncompletelyHandledIndividuals(bool retrievingIndividuals) {
+				mPrecompuationRetrievingIncompletelyHandledIndividuals = retrievingIndividuals;
+				return this;
+			}
+
+
+			bool CTotallyOntologyPrecomputationItem::isPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested() {
+				return mPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested(bool retrievingIndividuals) {
+				mPrecompuationIncompletelyHandledIndividualsRetrievalThresholdRequested = retrievingIndividuals;
+				return this;
+			}
+
+			CIndividualPrecomputationCoordinationHash* CTotallyOntologyPrecomputationItem::getPrecomputationProcessingCoordinationHash() {
+				return mPrecomputationProcessingCoordinationHash;
+			}
+
+			CIndividualPrecomputationCoordinationHash* CTotallyOntologyPrecomputationItem::getPrecomputationRetrievalCoordinationHash() {
+				return mPrecomputationRetrievalCoordinationHash;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setPrecomputationProcessingCoordinationHash(CIndividualPrecomputationCoordinationHash* coordHash) {
+				mPrecomputationProcessingCoordinationHash = coordHash;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setPrecomputationRetrievalCoordinationHash(CIndividualPrecomputationCoordinationHash* coordHash) {
+				mPrecomputationRetrievalCoordinationHash = coordHash;
+				return this;
+			}
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setPrecomputationProcessingCoordinationHashIteratorCurrent(CBackendIndividualRetrievalComputationUpdateCoordinationHash::const_iterator coordHashIt) {
+				mPrecomputationProcessingCoordinationHashIteratorCurrent = coordHashIt;
+				return this;
+			}
+
+			CBackendIndividualRetrievalComputationUpdateCoordinationHash::const_iterator CTotallyOntologyPrecomputationItem::getPrecomputationProcessingCoordinationHashIteratorCurrent() {
+				return mPrecomputationProcessingCoordinationHashIteratorCurrent;
+			}
+
+
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setPrecomputationProcessingCoordinationHashIteratorEnd(CBackendIndividualRetrievalComputationUpdateCoordinationHash::const_iterator coordHashIt) {
+				mPrecomputationProcessingCoordinationHashIteratorEnd = coordHashIt;
+				return this;
+			}
+
+			CBackendIndividualRetrievalComputationUpdateCoordinationHash::const_iterator CTotallyOntologyPrecomputationItem::getPrecomputationProcessingCoordinationHashIteratorEnd() {
+				return mPrecomputationProcessingCoordinationHashIteratorEnd;
+			}
+
+
+
+			bool CTotallyOntologyPrecomputationItem::hadBasicPrecompuationMode() {
+				return mHadBasicPrecompuationMode;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setBasicPrecompuationMode(bool basicMode) {
+				mHadBasicPrecompuationMode = basicMode;
+				return this;
+			}
+
+			double CTotallyOntologyPrecomputationItem::getBasicPrecompuationSubsequentIndividualLimitReductionFactor() {
+				return mBasicPrecompuationSubsequentIndividualLimitReductionFactor;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setBasicPrecompuationSubsequentIndividualLimitReductionFactor(double factor) {
+				mBasicPrecompuationSubsequentIndividualLimitReductionFactor = factor;
+				return this;
+			}
+
+
+
+			double CTotallyOntologyPrecomputationItem::getBasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor() {
+				return mBasicPrecompuationSubsequentIndividualLimitReductionInitializationFactor;
+			}
+
+			double CTotallyOntologyPrecomputationItem::getBasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor() {
+				return mBasicPrecompuationSubsequentIndividualLimitReductionIncreasingFactor;
+			}
+
+
+			QMap<cint64, CIndividualPrecomputationTestingItem*>* CTotallyOntologyPrecomputationItem::getRecomputationIdTestingItemMap() {
+				return &mRecomputationIdTestingItemMap;
+			}
+
+			cint64 CTotallyOntologyPrecomputationItem::getMaxHandledRecomputationIdRemainingReporting() {
+				return mMaxHandledRecomputationIdRemainingReporting;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setMaxHandledRecomputationIdRemainingReporting(cint64 remainingCount) {
+				mMaxHandledRecomputationIdRemainingReporting = remainingCount;
+				return this;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::decMaxHandledRecomputationIdRemainingReporting(cint64 count) {
+				mMaxHandledRecomputationIdRemainingReporting -= count;
+				return this;
+			}
+
+
+			double CTotallyOntologyPrecomputationItem::getBasicPrecompuationParallelizationReductionFactor() {
+				return mBasicPrecompuationParallelizationReductionFactor;
+			}
+
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setBasicPrecompuationParallelizationReductionFactor(double factor) {
+				mBasicPrecompuationParallelizationReductionFactor = factor;
+				return this;
+			}
+
+			double CTotallyOntologyPrecomputationItem::getBasicPrecompuationParallelizationInitializationFactor() {
+				return mBasicPrecompuationParallelizationInitializationFactor;
+			}
+
+			double CTotallyOntologyPrecomputationItem::getBasicPrecompuationParallelizationIncreasingFactor() {
+				return mBasicPrecompuationParallelizationIncreasingFactor;
 			}
 
 

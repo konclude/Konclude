@@ -161,6 +161,15 @@ namespace Konclude {
 			}
 
 
+			qint64 CAnsweringHandlingStatistics::getComplexConceptSubClassAxiomEntailmentTestingCount() {
+				return mComplexConceptSubClassAxiomEntailmentTestingCount;
+			}
+
+			CAnsweringHandlingStatistics *CAnsweringHandlingStatistics::incComplexConceptSubClassAxiomEntailmentTestingCount(qint64 incCount) {
+				mComplexConceptSubClassAxiomEntailmentTestingCount += incCount;
+				return this;
+			}
+
 			CAnsweringHandlingStatistics *CAnsweringHandlingStatistics::resetValues() {
 				mTotalAnsweredQueries = 0;
 				mAbsorbedExistentialQueryPartCount = 0;
@@ -175,6 +184,7 @@ namespace Konclude {
 				mExistentialQueryPartVariableBindingPropagationCount = 0;
 				mExistentialQueryPartVariableBindingConfirmationCount = 0;
 				mComplexConceptAssertionEntailmentTestingCount = 0;
+				mComplexConceptSubClassAxiomEntailmentTestingCount = 0;
 				return this;
 			}
 
@@ -193,6 +203,7 @@ namespace Konclude {
 				mExistentialQueryPartVariableBindingPropagationCount += statistics->getExistentialQueryPartVariableBindingPropagationCount();
 				mExistentialQueryPartVariableBindingConfirmationCount += statistics->getExistentialQueryPartVariableBindingConfirmationCount();
 				mComplexConceptAssertionEntailmentTestingCount += statistics->getComplexConceptAssertionEntailmentTestingCount();
+				mComplexConceptSubClassAxiomEntailmentTestingCount += statistics->getComplexConceptSubClassAxiomEntailmentTestingCount();
 				return this;
 			}
 

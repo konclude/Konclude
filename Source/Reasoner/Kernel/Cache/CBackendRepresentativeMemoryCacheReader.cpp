@@ -34,6 +34,7 @@ namespace Konclude {
 					mCurrentSlot = nullptr;
 					mFixedOntologyData = nullptr;
 					mOntologyData = nullptr;
+					mRecomputationId = 0;
 				}
 
 
@@ -41,6 +42,27 @@ namespace Konclude {
 					CBackendRepresentativeMemoryCacheSlotItem* prevSlot = mUpdatedSlot.fetchAndStoreOrdered(updatedSlot);
 					if (prevSlot != nullptr) {
 						prevSlot->decReader();
+					}
+					return this;
+				}
+
+
+				CBackendRepresentativeMemoryCacheReader* CBackendRepresentativeMemoryCacheReader::checkRecomputationIdUsage(cint64 recomputationId) {
+					mRecomputationId = recomputationId;
+					if (hasUpdatedSlotItem()) {
+						switchToUpdatedSlotItem();
+					}
+					if (!mOntologyData && mCurrentSlot) {
+						mOntologyData = mCurrentSlot->getOntologyData(mOntologyIdentifier);
+					}
+					if (mOntologyData) {
+						if (recomputationId < mOntologyData->getMinimumValidRecomputationId()) {
+							throw CCalculationErrorProcessingException(CCalculationErrorProcessingException::ECINVALIDRECOMPUATIONID);
+						}
+						CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker* recRefLinker = mOntologyData->getRecomputationReferenceLinker();
+						if (recRefLinker) {
+							recRefLinker->updateUsedRecomputationId(recomputationId);
+						}
 					}
 					return this;
 				}
@@ -69,6 +91,12 @@ namespace Konclude {
 						mOntologyData = nullptr;
 						if (mCurrentSlot) {
 							mOntologyData = mCurrentSlot->getOntologyData(mOntologyIdentifier);
+						}
+						if (mOntologyData && mRecomputationId != 0) {
+							CBackendRepresentativeMemoryCacheOntologyDataRecomputationReferenceLinker* recRefLinker = mOntologyData->getRecomputationReferenceLinker();
+							if (recRefLinker) {
+								recRefLinker->updateUsedRecomputationId(mRecomputationId);
+							}
 						}
 						return true;
 					}
@@ -185,6 +213,12 @@ namespace Konclude {
 					if (mOntologyData) {
 						cint64 indiIdAssoDataVectorSize = mOntologyData->getIndividualIdAssoiationDataVectorSize();
 						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = mOntologyData->getIndividualIdAssoiationDataVector();
+
+						if (mOntologyData->isBasicPrecomputationMode()) {
+							indiIdAssoDataVectorSize = mOntologyData->getBasicPrecomputationIndividualIdAssoiationDataVectorSize();
+							indiIdAssoDataVector = mOntologyData->getBasicPrecomputationIndividualIdAssoiationDataVector();
+						}
+
 						if (indiIdAssoDataVector && indiId < indiIdAssoDataVectorSize) {
 							assData = indiIdAssoDataVector[indiId];
 						}
@@ -209,6 +243,12 @@ namespace Konclude {
 						CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = nullptr;
 						cint64 indiIdAssoDataVectorSize = mOntologyData->getIndividualIdAssoiationDataVectorSize();
 						CBackendRepresentativeMemoryCacheIndividualAssociationData** indiIdAssoDataVector = mOntologyData->getIndividualIdAssoiationDataVector();
+
+						if (mOntologyData->isBasicPrecomputationMode()) {
+							indiIdAssoDataVectorSize = mOntologyData->getBasicPrecomputationIndividualIdAssoiationDataVectorSize();
+							indiIdAssoDataVector = mOntologyData->getBasicPrecomputationIndividualIdAssoiationDataVector();
+						}
+
 						if (indiIdAssoDataVector && indiId < indiIdAssoDataVectorSize) {
 							assData = indiIdAssoDataVector[indiId];
 						}
@@ -277,6 +317,32 @@ namespace Konclude {
 					CCacheValue cacheValue;
 					cacheValue.initCacheValue(roleTag,(cint64)role,cacheValueIdentifier);
 					return cacheValue;
+				}
+
+
+				bool CBackendRepresentativeMemoryCacheReader::isCacheValueRoleInverse(const CCacheValue& cacheValue) {
+					CCacheValue::CACHEVALUEIDENTIFIER cacheValueIdentifier = cacheValue.getCacheValueIdentifier();
+					return cacheValueIdentifier == CCacheValue::CACHEVALTAGANDINVERSEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGANDINVERSEDASSERTEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGANDINVERSED_NOMINAL_CONNECTED_ROLE
+						|| cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDASSERTEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSED_NOMINAL_CONNECTED_ROLE;
+				}
+
+
+				bool CBackendRepresentativeMemoryCacheReader::isCacheValueRoleNondeterministic(const CCacheValue& cacheValue) {
+					CCacheValue::CACHEVALUEIDENTIFIER cacheValueIdentifier = cacheValue.getCacheValueIdentifier();
+					return cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_ROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_ASSERTEDROLE
+						|| cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDASSERTEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_NOMINAL_CONNECTED_ROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSED_NOMINAL_CONNECTED_ROLE;
+				}
+
+				bool CBackendRepresentativeMemoryCacheReader::isCacheValueRoleNominal(const CCacheValue& cacheValue) {
+					CCacheValue::CACHEVALUEIDENTIFIER cacheValueIdentifier = cacheValue.getCacheValueIdentifier();
+					return cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NOMINAL_CONNECTED_ROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGANDINVERSED_NOMINAL_CONNECTED_ROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_NOMINAL_CONNECTED_ROLE
+						|| cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSED_NOMINAL_CONNECTED_ROLE;
+				}
+
+				bool CBackendRepresentativeMemoryCacheReader::isCacheValueRoleAssertion(const CCacheValue& cacheValue) {
+					CCacheValue::CACHEVALUEIDENTIFIER cacheValueIdentifier = cacheValue.getCacheValueIdentifier();
+					return cacheValueIdentifier == CCacheValue::CACHEVALTAGANDASSERTEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGANDINVERSEDASSERTEDROLE || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_ASSERTEDROLE
+						|| cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDASSERTEDROLE;
 				}
 
 				const CCacheValue CBackendRepresentativeMemoryCacheReader::getCacheValue(CRole* role, bool inversed, bool assertionLinkBase, bool nominalConnected, bool nondeterministc) {
@@ -380,6 +446,15 @@ namespace Konclude {
 				}
 
 
+				cint64 CBackendRepresentativeMemoryCacheReader::getNeighbourCountForArrayPos(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 pos) {
+					cint64 count = 0;
+					CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* neighbourArray = assData->getRoleSetNeighbourArray();
+					CBackendRepresentativeMemoryLabelCacheItem* neighbourCombLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+					if (neighbourCombLabelItem && neighbourArray) {
+						count += neighbourArray->at(pos).getIndividualCount();
+					}
+					return count;
+				}
 
 
 				cint64 CBackendRepresentativeMemoryCacheReader::getNeighbourCountForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role) {
@@ -396,6 +471,23 @@ namespace Konclude {
 						}
 					}
 					return count;
+				}
+
+
+
+				bool CBackendRepresentativeMemoryCacheReader::visitNeighbourIndividualIdsForNeighbourArrayIdFromCursor(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, cint64 arrayId, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic, cint64 nextCursor)> visitFunc, bool visitOnlyDeterministicNeighbours, cint64 cursor) {
+					CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* neighbourArray = assData->getRoleSetNeighbourArray();
+					CBackendRepresentativeMemoryLabelCacheItem* neighbourCombLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+					if (neighbourCombLabelItem && neighbourArray) {
+						CBackendRepresentativeMemoryLabelCacheItem* neighbourLabel = neighbourArray->getIndexData()->getNeighbourRoleSetLabel(arrayId);
+						bool continueVisiting = true;
+						neighbourArray->at(arrayId).visitNeighbourIndividualIdsFromCursor([&](cint64 neighbourIndiId, cint64 cursor)->bool {
+							continueVisiting = visitFunc(neighbourIndiId, neighbourLabel, neighbourLabel->hasNondeterministicElements(), cursor);
+							return continueVisiting;
+						}, cursor);
+						return true;
+					}
+					return false;
 				}
 
 
@@ -423,6 +515,26 @@ namespace Konclude {
 				}
 
 
+
+
+				bool CBackendRepresentativeMemoryCacheReader::visitNeighbourArrayIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours) {
+					CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* neighbourArray = assData->getRoleSetNeighbourArray();
+					CBackendRepresentativeMemoryLabelCacheItem* neighbourCombLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+					if (neighbourCombLabelItem && neighbourArray) {
+						CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData* extensionData = (CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData*)neighbourCombLabelItem->getExtensionData(CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingExtensionData::TAG_RESOLVING_HASH);
+						if (extensionData) {
+							bool continueVisiting = true;
+							for (CBackendRepresentativeMemoryLabelCacheItemTagLabelResolvingDataLinker* linkerIt = extensionData->getTagLabelResolvingDataLinker(role->getRoleTag()); linkerIt && continueVisiting; linkerIt = linkerIt->getNext()) {
+								cint64 index = linkerIt->getIndex();
+								if (!visitOnlyDeterministicNeighbours || linkerIt->isDeterministic()) {
+									continueVisiting = visitFunc(index, linkerIt->getLabelCacheItem(), !linkerIt->isDeterministic());
+								}
+							}
+							return true;
+						}
+					}
+					return false;
+				}
 
 
 
@@ -511,8 +623,8 @@ namespace Konclude {
 							CBackendRepresentativeMemoryLabelValueLinker* labelLinker = labelValueHash->value(tag);
 							if (labelLinker) {
 								CCacheValue::CACHEVALUEIDENTIFIER identifier = labelLinker->getCacheValue().getCacheValueIdentifier();
-								bool nondeterministcCached = identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_ROLE || identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDROLE || CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_ASSERTEDROLE ||
-									identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDASSERTEDROLE || CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_NOMINAL_CONNECTED_ROLE || identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSED_NOMINAL_CONNECTED_ROLE;
+								bool nondeterministcCached = identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_ROLE || identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDROLE || identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_ASSERTEDROLE ||
+									identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSEDASSERTEDROLE || identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_NOMINAL_CONNECTED_ROLE || identifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_INVERSED_NOMINAL_CONNECTED_ROLE;
 
 								return nondeterministcCached == nondeterministic;
 							}

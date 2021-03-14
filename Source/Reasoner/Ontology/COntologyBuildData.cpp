@@ -94,6 +94,9 @@ namespace Konclude {
 
 				mNamedIndividualVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>, CContext* >::allocateAndConstructAndParameterize(memAllocMan, mOntoContext);
 				mAnonymousIndividualVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>, CContext* >::allocateAndConstructAndParameterize(memAllocMan, mOntoContext);
+				mClassVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher, CClassVariableExpression*>, CContext* >::allocateAndConstructAndParameterize(memAllocMan, mOntoContext);
+				mObjectPropertyVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher, CObjectPropertyVariableExpression*>, CContext* >::allocateAndConstructAndParameterize(memAllocMan, mOntoContext);
+				mDataPropertyVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher, CDataPropertyVariableExpression*>, CContext* >::allocateAndConstructAndParameterize(memAllocMan, mOntoContext);
 
 				mDataValueVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher, CDataValueVariableExpression*>, CContext* >::allocateAndConstructAndParameterize(memAllocMan, mOntoContext);
 				mDataLiteralVariableBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher, CDataLiteralVariableExpression*>, CContext* >::allocateAndConstructAndParameterize(memAllocMan, mOntoContext);
@@ -136,6 +139,9 @@ namespace Konclude {
 				COPADestroyAndRelease(mNominalIndividualVariableBuildHash, memAllocMan);
 				COPADestroyAndRelease(mNamedIndividualVariableBuildHash, memAllocMan);
 				COPADestroyAndRelease(mAnonymousIndividualVariableBuildHash, memAllocMan);
+				COPADestroyAndRelease(mClassVariableBuildHash, memAllocMan);
+				COPADestroyAndRelease(mObjectPropertyVariableBuildHash, memAllocMan);
+				COPADestroyAndRelease(mDataPropertyVariableBuildHash, memAllocMan);
 
 				COPADestroyAndRelease(mBuildConceptSet,memAllocMan);
 				COPADestroyAndRelease(mBuildObjectRoleSet,memAllocMan);
@@ -207,6 +213,9 @@ namespace Konclude {
 				*mAnonymousIndividualVariableBuildHash = *buildData->mAnonymousIndividualVariableBuildHash;
 				*mDataValueVariableBuildHash = *buildData->mDataValueVariableBuildHash;
 				*mDataLiteralVariableBuildHash = *buildData->mDataLiteralVariableBuildHash;
+				*mClassVariableBuildHash = *buildData->mClassVariableBuildHash;
+				*mObjectPropertyVariableBuildHash = *buildData->mObjectPropertyVariableBuildHash;
+				*mDataPropertyVariableBuildHash = *buildData->mDataPropertyVariableBuildHash;
 
 				*mBuildIndividualList = *buildData->mBuildIndividualList;
 				*mBuildConceptList = *buildData->mBuildConceptList;
@@ -433,6 +442,21 @@ namespace Konclude {
 			CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* COntologyBuildData::getAnonymousIndividualVariableBuildHash() {
 				return mAnonymousIndividualVariableBuildHash;
 			}
+
+
+
+			CBUILDHASH<CStringRefStringHasher, CClassVariableExpression*>* COntologyBuildData::getClassVariableBuildHash() {
+				return mClassVariableBuildHash;
+			}
+
+			CBUILDHASH<CStringRefStringHasher, CObjectPropertyVariableExpression*>* COntologyBuildData::getObjectPropertyVariableBuildHash() {
+				return mObjectPropertyVariableBuildHash;
+			}
+
+			CBUILDHASH<CStringRefStringHasher, CDataPropertyVariableExpression*>* COntologyBuildData::getDataPropertyVariableBuildHash() {
+				return mDataPropertyVariableBuildHash;
+			}
+
 
 
 

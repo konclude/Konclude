@@ -28,7 +28,7 @@ namespace Konclude {
 		namespace Realizer {
 
 
-			COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator::COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(const CRealizationIndividualInstanceItemReference& indiInstItemRef, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, QHash<cint64, COptimizedKPSetIndividualItem*>* individualInstantiatedItemHash, CIndividualVector* individualVector, bool considerSameMergedIndis) {
+			COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator::COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator(const CRealizationIndividualInstanceItemReference& indiInstItemRef, CBackendRepresentativeMemoryCacheReader* backendAssocCacheReader, COptimizedKPSetRoleInstancesItem* roleInstancesItem, bool inversed, COptimizedKPSetIndividualInstantiatedItemMultiHash* individualInstantiatedItemHash, CIndividualVector* individualVector, bool considerSameMergedIndis) {
 				mIndiInstItemRef = indiInstItemRef;
 				mRoleInstancesItem = roleInstancesItem;
 				mInversed = inversed;
@@ -51,11 +51,20 @@ namespace Konclude {
 				mNeighbourComplexDataIteratorsFinished = false;
 				mCurrentNeighbourArrayVisitingPositionCursor = 0;
 
+				mNeighbourPossibleInstanceDataIterationNewlyInitialized = false;
+				mNeighbourComplexDataIterationNewlyInitialized = false;
+
 				mBackendAssocCacheReader = backendAssocCacheReader;
 				mSameMergedIndisInCache = mBackendAssocCacheReader->hasSameIndividualsMergings();
 
 				mComplexRoleDataPointer = nullptr;
 				mIndiAssData = nullptr;
+
+				mNeighbourArrayIndiVisitedCount = 0;
+				mNeighbourArrayIndiMergedCount = 0;
+				mNeighbourArrayVisistedCount = 0;
+				mNeighbourArrayCount = 0;
+				mNeighbourArrayVisitedPosIndiCount = 0;
 
 				moveToNextPossiblePosition(false);
 			}
@@ -79,23 +88,7 @@ namespace Konclude {
 						mInitializationRequired = true;
 					} else {
 						if (!mNeighbourArrayIteratorsInitialized) {
-							mCurrentNeighbourArrayVisitingPositionCursor = 0;
-							mNeighbourArrayIteratorsInitialized = true;
-							CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = mIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
-							CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = mIndiAssData->getRoleSetNeighbourArray();
-
-							COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* roleItemCompNeighLabelData = mRoleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(mInversed)->value(combinedNeigRoleSetLabel);
-							if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasKnownInstancesLabelItems()) {
-								QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelDetDataHash = roleItemCompNeighLabelData->getKnownInstancesLabelItemDataHash();
-								mSingleNeighLabelDetDataHashIt = singleNeighLabelDetDataHash->constBegin();
-								mSingleNeighLabelDetDataHashItEnd = singleNeighLabelDetDataHash->constEnd();
-							}
-
-							//if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasPossibleInstancesLabelItems()) {
-							//	QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelNonDetDataHash = roleItemCompNeighLabelData->getPossibleInstancesLabelItemDataHash();
-							//	mSingleNeighLabelNonDetDataHashIt = singleNeighLabelNonDetDataHash->constBegin();
-							//	mSingleNeighLabelNonDetDataHashItEnd = singleNeighLabelNonDetDataHash->constEnd();
-							//}
+							initializeNeighbourArrayIteration();
 						}
 
 						if (mNeighbourArrayIteratorsInitialized && !mNeighbourArrayIteratorsFinished) {
@@ -109,7 +102,7 @@ namespace Konclude {
 									mHasCurrentIndiId = true;
 									mCurrentIndiId = neighbourId;
 
-									COptimizedKPSetIndividualItem* currentIndividualItem = mIndividualInstantiatedItemHash->value(mCurrentIndiId);
+									COptimizedKPSetIndividualItem* currentIndividualItem = mIndividualInstantiatedItemHash->getIndividualInstantiatedItem(mCurrentIndiId);
 									CIndividual* curentIndividual = nullptr;
 									if (!currentIndividualItem) {
 										curentIndividual = mIndividualVector->getData(mCurrentIndiId);
@@ -122,11 +115,21 @@ namespace Konclude {
 										isSameMerged = true;
 									}
 
+									++mNeighbourArrayIndiVisitedCount;
+									if (isSameMerged) {
+										++mNeighbourArrayIndiMergedCount;
+									}
 									mCurrentNeighbourArrayVisitingPositionCursor = cursor;
 									return false;
 								}, mCurrentNeighbourArrayVisitingPositionCursor)) {
 									mCurrentNeighbourArrayVisitingPositionCursor = 0;
 									++mSingleNeighLabelDetDataHashIt;
+
+									if (mSingleNeighLabelDetDataHashIt != mSingleNeighLabelDetDataHashItEnd) {
+										cint64 arrayPosIndiCount = roleSetNeighbourArray->at(mSingleNeighLabelDetDataHashIt.value()->getLabelArrayIndex()).getIndividualCount();
+										mNeighbourArrayVisitedPosIndiCount += arrayPosIndiCount;
+										mNeighbourArrayVisistedCount++;
+									}
 								}
 
 							}
@@ -147,26 +150,17 @@ namespace Konclude {
 
 
 				if (!mHasCurrentIndiId && (!mNeighbourPossibleInstanceDataIteratorsInitialized || !mNeighbourPossibleInstanceDataIteratorsFinished)) {
-					bool justInitialized = false;
 					if (!mNeighbourPossibleInstanceDataIteratorsInitialized) {
-						COptimizedKPSetIndividualItem* indiInstItem = (COptimizedKPSetIndividualItem*)mIndiInstItemRef.getRealizationInstanceItem();
-						mNeighbourPossibleInstanceDataIteratorsInitialized = true;
-						justInitialized = true;
-						if (indiInstItem && indiInstItem->getKnownPossibleRoleNeighboursInstancesHash()->contains(mRoleInstancesItem)) {
-							COptimizedKPSetRoleNeighbourInstancesHashData& neighbourPossibleInstanceHashData = indiInstItem->getKnownPossibleRoleNeighboursInstancesHash()->operator[](mRoleInstancesItem);
-							COptimizedKPSetRoleInstancesHash* neighbourPossibleInstanceHash = neighbourPossibleInstanceHashData.getRoleNeighbourInstancesHash(mInversed, false);
-							if (neighbourPossibleInstanceHash) {
-								mNeighbourPossibleInstanceDataIt = neighbourPossibleInstanceHash->constBegin();
-								mNeighbourPossibleInstanceDataItEnd = neighbourPossibleInstanceHash->constEnd();
-							}
-						}
+						initializePossibleInstanceDataIteration();
+
 					}
 
 
 					if (!mNeighbourPossibleInstanceDataIteratorsFinished) {
-						if (!justInitialized && forceNextPosition && mNeighbourPossibleInstanceDataIt != mNeighbourPossibleInstanceDataItEnd) {
+						if (!mNeighbourPossibleInstanceDataIterationNewlyInitialized && forceNextPosition && mNeighbourPossibleInstanceDataIt != mNeighbourPossibleInstanceDataItEnd) {
 							++mNeighbourPossibleInstanceDataIt;
 						}
+						mNeighbourPossibleInstanceDataIterationNewlyInitialized = false;
 						while (!mHasCurrentIndiId && mNeighbourPossibleInstanceDataIt != mNeighbourPossibleInstanceDataItEnd) {
 							mCurrentIndiId = mNeighbourPossibleInstanceDataIt.key();
 							COptimizedKPSetIndividualItem* currentIndividualItem = mNeighbourPossibleInstanceDataIt->mNeighbourIndividualItem;
@@ -196,43 +190,23 @@ namespace Konclude {
 
 
 				if (!mHasCurrentIndiId && (!mNeighbourComplexDataIteratorsInitialized || !mNeighbourComplexDataIteratorsFinished)) {
-					bool justInitialized = false;
 					if (!mNeighbourComplexDataIteratorsInitialized) {
-						if (mRoleInstancesItem->hasComplexRoleData() && mRoleInstancesItem->getIndividualIdComplexRoleDataHash()->contains(mIndiInstItemRef.getIndividualID())) {
-							if (!mComplexRoleDataPointer) {
-								mComplexRoleDataPointer = &mRoleInstancesItem->getIndividualIdComplexRoleDataHash()->operator[](mIndiInstItemRef.getIndividualID());
-							}
-							if (*mComplexRoleDataPointer == nullptr) {
-								mInitializationRequired = true;
-							} else if (!(*mComplexRoleDataPointer)->isInitialized(mInversed)) {
-								mInitializationRequired = true;
-							} else {
-								justInitialized = true;
-								mNeighbourComplexDataIteratorsInitialized = true;
-								COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)(*mComplexRoleDataPointer);
-								COptimizedKPSetRoleInstancesHash* neighbourHash = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(mInversed, false);
-								if (neighbourHash) {
-									mNeighbourComplexInstanceDataIt = neighbourHash->constBegin();
-									mNeighbourComplexInstanceDataItEnd = neighbourHash->constEnd();
-								}
-							}
-						} else {
-							mNeighbourComplexDataIteratorsInitialized = true;
-						}
+						initializeComplexDataIteration();
 					}
 
 					if (mNeighbourComplexDataIteratorsInitialized && !mNeighbourComplexDataIteratorsFinished) {
 
-						if (!justInitialized && forceNextPosition && mNeighbourComplexInstanceDataIt != mNeighbourComplexInstanceDataItEnd) {
+						if (!mNeighbourComplexDataIterationNewlyInitialized && forceNextPosition && mNeighbourComplexInstanceDataIt != mNeighbourComplexInstanceDataItEnd) {
 							++mNeighbourComplexInstanceDataIt;
 						}
+						mNeighbourComplexDataIterationNewlyInitialized = false;
 						while (!mHasCurrentIndiId && mNeighbourComplexInstanceDataIt != mNeighbourComplexInstanceDataItEnd) {
 
 							mCurrentIndiId = mNeighbourComplexInstanceDataIt.key();
 							COptimizedKPSetIndividualItem* currentIndividualItem = mNeighbourComplexInstanceDataIt->mNeighbourIndividualItem;
 							CIndividual* curentIndividual = nullptr;
 							if (!currentIndividualItem) {
-								currentIndividualItem = mIndividualInstantiatedItemHash->value(mCurrentIndiId);
+								currentIndividualItem = mIndividualInstantiatedItemHash->getIndividualInstantiatedItem(mCurrentIndiId);
 							}
 							if (!currentIndividualItem) {
 								curentIndividual = mIndividualVector->getData(mCurrentIndiId);
@@ -265,6 +239,76 @@ namespace Konclude {
 
 				return mHasCurrentIndiId && !mInitializationRequired;
 
+			}
+
+
+
+			bool COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator::initializeComplexDataIteration() {
+				if (mRoleInstancesItem->hasComplexRoleData() && mRoleInstancesItem->getIndividualIdComplexRoleDataHash()->contains(mIndiInstItemRef.getIndividualID())) {
+					if (!mComplexRoleDataPointer) {
+						mComplexRoleDataPointer = &mRoleInstancesItem->getIndividualIdComplexRoleDataHash()->operator[](mIndiInstItemRef.getIndividualID());
+					}
+					if (*mComplexRoleDataPointer == nullptr) {
+						mInitializationRequired = true;
+					} else if (!(*mComplexRoleDataPointer)->isInitialized(mInversed)) {
+						mInitializationRequired = true;
+					} else {
+						mNeighbourComplexDataIterationNewlyInitialized = true;
+						mNeighbourComplexDataIteratorsInitialized = true;
+						COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData* indiExplicitIndirectLinkComplexRepresentationData = (COptimizedKPSetIndividualComplexRoleExplicitIndirectLinksData*)(*mComplexRoleDataPointer);
+						COptimizedKPSetRoleInstancesHash* neighbourHash = indiExplicitIndirectLinkComplexRepresentationData->getRoleNeighbourInstancesHash(mInversed, false);
+						if (neighbourHash) {
+							mNeighbourComplexInstanceDataIt = neighbourHash->constBegin();
+							mNeighbourComplexInstanceDataItEnd = neighbourHash->constEnd();
+						}
+					}
+				} else {
+					mNeighbourComplexDataIteratorsInitialized = true;
+				}
+				return mNeighbourComplexDataIterationNewlyInitialized;
+			}
+
+
+			void COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator::initializePossibleInstanceDataIteration() {
+				COptimizedKPSetIndividualItem* indiInstItem = (COptimizedKPSetIndividualItem*)mIndiInstItemRef.getRealizationInstanceItem();
+				mNeighbourPossibleInstanceDataIteratorsInitialized = true;
+				mNeighbourPossibleInstanceDataIterationNewlyInitialized = true;
+				if (indiInstItem && indiInstItem->getKnownPossibleRoleNeighboursInstancesHash()->contains(mRoleInstancesItem)) {
+					COptimizedKPSetRoleNeighbourInstancesHashData& neighbourPossibleInstanceHashData = indiInstItem->getKnownPossibleRoleNeighboursInstancesHash()->operator[](mRoleInstancesItem);
+					COptimizedKPSetRoleInstancesHash* neighbourPossibleInstanceHash = neighbourPossibleInstanceHashData.getRoleNeighbourInstancesHash(mInversed, false);
+					if (neighbourPossibleInstanceHash) {
+						mNeighbourPossibleInstanceDataIt = neighbourPossibleInstanceHash->constBegin();
+						mNeighbourPossibleInstanceDataItEnd = neighbourPossibleInstanceHash->constEnd();
+					}
+				}
+			}
+
+			void COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator::initializeNeighbourArrayIteration() {
+				mCurrentNeighbourArrayVisitingPositionCursor = 0;
+				mNeighbourArrayIteratorsInitialized = true;
+				CBackendRepresentativeMemoryLabelCacheItem* combinedNeigRoleSetLabel = mIndiAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL);
+				CBackendRepresentativeMemoryCacheIndividualRoleSetNeighbourArray* roleSetNeighbourArray = mIndiAssData->getRoleSetNeighbourArray();
+
+				COptimizedKPSetRoleInstancesCombinedNeighbourRoleSetCacheLabelData* roleItemCompNeighLabelData = mRoleInstancesItem->getCombinedNeighbourCacheLabelItemDataHash(mInversed)->value(combinedNeigRoleSetLabel);
+				if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasKnownInstancesLabelItems()) {
+					QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelDetDataHash = roleItemCompNeighLabelData->getKnownInstancesLabelItemDataHash();
+					mSingleNeighLabelDetDataHashIt = singleNeighLabelDetDataHash->constBegin();
+					mSingleNeighLabelDetDataHashItEnd = singleNeighLabelDetDataHash->constEnd();
+					mNeighbourArrayCount = singleNeighLabelDetDataHash->size();
+				}
+
+				if (mSingleNeighLabelDetDataHashIt != mSingleNeighLabelDetDataHashItEnd) {
+					cint64 arrayPosIndiCount = roleSetNeighbourArray->at(mSingleNeighLabelDetDataHashIt.value()->getLabelArrayIndex()).getIndividualCount();
+					mNeighbourArrayVisitedPosIndiCount += arrayPosIndiCount;
+					mNeighbourArrayVisistedCount++;
+				}
+
+
+				//if (roleItemCompNeighLabelData && roleItemCompNeighLabelData->hasPossibleInstancesLabelItems()) {
+				//	QHash<CBackendRepresentativeMemoryLabelCacheItem*, COptimizedKPSetRoleInstancesSingleNeighbourRoleSetCacheLabelData*>* singleNeighLabelNonDetDataHash = roleItemCompNeighLabelData->getPossibleInstancesLabelItemDataHash();
+				//	mSingleNeighLabelNonDetDataHashIt = singleNeighLabelNonDetDataHash->constBegin();
+				//	mSingleNeighLabelNonDetDataHashItEnd = singleNeighLabelNonDetDataHash->constEnd();
+				//}
 			}
 
 
@@ -308,6 +352,28 @@ namespace Konclude {
 
 			CRealizationRemainingInstancesEstimation COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator::remainingInstancesEstimation() {
 				CRealizationRemainingInstancesEstimation estimation;
+				if (!mNeighbourArrayIteratorsInitialized) {
+					initializeNeighbourArrayIteration();
+				}
+				double remainingIndiCount = 0;
+				if (!mNeighbourArrayIteratorsFinished) {
+					remainingIndiCount = mNeighbourArrayVisitedPosIndiCount - mNeighbourArrayIndiVisitedCount;
+					double remainingNeighbourArrayCount = mNeighbourArrayCount - mNeighbourArrayVisistedCount;
+					double remainingNeighbourArrayIndiCount = (double)mNeighbourArrayVisitedPosIndiCount / (double)mNeighbourArrayVisistedCount * remainingNeighbourArrayCount;
+					remainingIndiCount += remainingNeighbourArrayIndiCount;
+					if (mNeighbourArrayIndiMergedCount > 0) {
+						remainingIndiCount = remainingIndiCount * (double)(mNeighbourArrayIndiVisitedCount - mNeighbourArrayIndiMergedCount) / (double)(mNeighbourArrayIndiVisitedCount);
+					}
+				}
+				if (!mNeighbourPossibleInstanceDataIteratorsFinished) {
+					// TODO: make more precise
+					remainingIndiCount += 1.;
+				}
+				if (!mNeighbourComplexDataIteratorsFinished) {
+					// TODO: make more precise
+					remainingIndiCount += 1.;
+				}
+				estimation.setEstimatedCount(remainingIndiCount);
 				return estimation;
 			}
 
@@ -366,6 +432,15 @@ namespace Konclude {
 				copiedIterator->mCurrentIndiInstItemRef = mCurrentIndiInstItemRef;
 				copiedIterator->mCurrentIndiInstanceOnlyPossible = mCurrentIndiInstanceOnlyPossible;
 
+				copiedIterator->mNeighbourPossibleInstanceDataIterationNewlyInitialized = mNeighbourPossibleInstanceDataIterationNewlyInitialized;
+				copiedIterator->mNeighbourComplexDataIterationNewlyInitialized = mNeighbourComplexDataIterationNewlyInitialized;
+
+				copiedIterator->mNeighbourArrayIndiVisitedCount = mNeighbourArrayIndiVisitedCount;
+				copiedIterator->mNeighbourArrayIndiMergedCount = mNeighbourArrayIndiMergedCount;
+				copiedIterator->mNeighbourArrayVisistedCount = mNeighbourArrayVisistedCount;
+				copiedIterator->mNeighbourArrayCount = mNeighbourArrayCount;
+				copiedIterator->mNeighbourArrayVisitedPosIndiCount = mNeighbourArrayVisitedPosIndiCount;
+
 				return copiedIterator;
 			}
 
@@ -386,7 +461,6 @@ namespace Konclude {
 			bool COptimizedRepresentativeKPSetUnsortedIndividualRoleFillerItemIterator::getQueryingRoleInstancesItemInversion() {
 				return mInversed;
 			}
-
 
 
 		}; // end namespace Realizer

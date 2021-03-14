@@ -63,7 +63,7 @@ namespace Konclude {
 					public:
 
 						//! Constructor
-						CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData(CBackendRepresentativeMemoryCacheContext* context);
+						CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData(CContext* context);
 
 						CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* addIndividualIdAssociation(cint64 indiId, bool sameIndividualMerged);
 						CBackendRepresentativeMemoryLabelCacheItemIndividualAssociationMapExtensionData* removeIndividualIdAssociation(cint64 indiId, bool sameIndividualMerged);

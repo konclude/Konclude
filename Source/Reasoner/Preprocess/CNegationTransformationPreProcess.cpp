@@ -31,6 +31,7 @@ namespace Konclude {
 			CNegationTransformationPreProcess::CNegationTransformationPreProcess() {
 				mLastConceptId = 0;
 				mLastRoleId = 0;
+				mLastIndiId = 0;
 			}
 
 
@@ -43,6 +44,7 @@ namespace Konclude {
 				mOntology = ontology;
 				mLastConceptId = 0;
 				mLastRoleId = 0;
+				mLastIndiId = 0;
 
 			
 
@@ -106,6 +108,23 @@ namespace Konclude {
 						}
 					}
 					mLastRoleId = itemRolCounts;
+
+					CIndividualVector *indis = abox->getIndividualVector();
+					qint64 itemIndiCounts = indis->getItemCount();
+					for (qint64 i = mLastIndiId; i < itemIndiCounts; ++i) {
+						CIndividual *indi = indis->getLocalData(i);
+
+						if (indi) {
+							for (CConceptAssertionLinker* conAssLinkerIt = indi->getAssertionConceptLinker(); conAssLinkerIt; conAssLinkerIt = conAssLinkerIt->getNext()) {
+								CConcept *compConcept = conAssLinkerIt->getData();
+								if (compConcept->getDefinitionOperatorTag() == CCNOT) {
+									conAssLinkerIt->setData(compConcept->getOperandList()->getData());
+									conAssLinkerIt->setNegation(!conAssLinkerIt->getNegation());
+								}
+							}
+						}
+					}
+					mLastIndiId = itemIndiCounts;
 				}
 				return mOntology;
 			}

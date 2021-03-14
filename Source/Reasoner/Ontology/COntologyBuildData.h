@@ -58,6 +58,9 @@
 #include "Parser/Expressions/CAnonymousIndividualVariableExpression.h"
 #include "Parser/Expressions/CDataValueVariableExpression.h"
 #include "Parser/Expressions/CDataLiteralVariableExpression.h"
+#include "Parser/Expressions/CDataPropertyVariableExpression.h"
+#include "Parser/Expressions/CObjectPropertyVariableExpression.h"
+#include "Parser/Expressions/CClassVariableExpression.h"
 
 #include "Reasoner/Generator/CExpressionHasher.h"
 
@@ -150,6 +153,12 @@ namespace Konclude {
 
 					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* getNamedIndividualVariableBuildHash();
 					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* getAnonymousIndividualVariableBuildHash();
+
+
+					CBUILDHASH<CStringRefStringHasher, CClassVariableExpression*>* getClassVariableBuildHash();
+					CBUILDHASH<CStringRefStringHasher, CObjectPropertyVariableExpression*>* getObjectPropertyVariableBuildHash();
+					CBUILDHASH<CStringRefStringHasher, CDataPropertyVariableExpression*>* getDataPropertyVariableBuildHash();
+
 
 
 					CBUILDHASH<CStringRefStringHasher,CDatatypeExpression*>* getDatatypeIRIBuildHash();
@@ -252,6 +261,12 @@ namespace Konclude {
 					CBUILDHASH<QPair<CStringRefStringHasher,cint64>,CObjectIndividualVariableExpression*>* mNominalIndividualVariableBuildHash;
 					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* mNamedIndividualVariableBuildHash;
 					CBUILDHASH<CStringRefStringHasher, CIndividualVariableExpression*>* mAnonymousIndividualVariableBuildHash;
+
+					CBUILDHASH<CStringRefStringHasher, CClassVariableExpression*>* mClassVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CObjectPropertyVariableExpression*>* mObjectPropertyVariableBuildHash;
+					CBUILDHASH<CStringRefStringHasher, CDataPropertyVariableExpression*>* mDataPropertyVariableBuildHash;
+
+
 					CBUILDHASH<CStringRefStringHasher, CDatatypeExpression*>* mDatatypeIRIDatatypeBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CDataPropertyExpression*>* mDataPropertyBuildHash;
 					CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>* mDataLexicalValueBuildHash;

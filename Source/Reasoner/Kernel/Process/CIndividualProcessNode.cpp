@@ -120,6 +120,7 @@ namespace Konclude {
 					mAdditionalDataAssertionsLinker = nullptr;
 					mLastProcessedAdditionalDataAssertionsLinker = nullptr;
 					mBaseConceptsInitialized = false;
+					mUniversallyConnectionIndividualInitialized = false;
 					mRoleAssertionsInitialized = false;
 					mReverseRoleAssertionsInitialized = false;
 					mNominalIndiTriplesAssertions = false;
@@ -164,6 +165,8 @@ namespace Konclude {
 					mBackendSynchronRetestProcessingQueued = false;
 					mBackendIndirectCompatibilityExpansionQueued = false;
 					mBackendDirectInfluenceExpansionQueued = false;
+					mBackendReuseExpansionQueued = false;
+					mBackendNeighbourExpansionQueued = false;
 					mIncrementalCompatibilityCheckingQueued = false;
 					mIncrementalExpansionQueued = false;
 
@@ -262,6 +265,7 @@ namespace Konclude {
 					mAdditionalDataAssertionsLinker = prevIndividual->mAdditionalDataAssertionsLinker;
 					mLastProcessedAdditionalDataAssertionsLinker = prevIndividual->mLastProcessedAdditionalDataAssertionsLinker;
 					mBaseConceptsInitialized = prevIndividual->mBaseConceptsInitialized;
+					mUniversallyConnectionIndividualInitialized = prevIndividual->mUniversallyConnectionIndividualInitialized;
 					mRoleAssertionsInitialized = prevIndividual->mRoleAssertionsInitialized;
 					mReverseRoleAssertionsInitialized = prevIndividual->mReverseRoleAssertionsInitialized;
 					mLoadedNominalIndiTriplesAssertions = prevIndividual->mLoadedNominalIndiTriplesAssertions;
@@ -306,6 +310,8 @@ namespace Konclude {
 					mBackendSynchronRetestProcessingQueued = prevIndividual->mBackendSynchronRetestProcessingQueued;
 					mBackendDirectInfluenceExpansionQueued = prevIndividual->mBackendDirectInfluenceExpansionQueued;
 					mBackendIndirectCompatibilityExpansionQueued = prevIndividual->mBackendIndirectCompatibilityExpansionQueued;
+					mBackendReuseExpansionQueued = prevIndividual->mBackendReuseExpansionQueued;
+					mBackendNeighbourExpansionQueued = prevIndividual->mBackendNeighbourExpansionQueued;
 					mIncrementalCompatibilityCheckingQueued = prevIndividual->mIncrementalCompatibilityCheckingQueued;
 					mIncrementalExpansionQueued = prevIndividual->mIncrementalExpansionQueued;
 					mDelayedNominalProcessingQueued = prevIndividual->mDelayedNominalProcessingQueued;
@@ -412,6 +418,7 @@ namespace Konclude {
 						mAdditionalDataAssertionsLinker = prevIndividual->mAdditionalDataAssertionsLinker;
 						mLastProcessedAdditionalDataAssertionsLinker = prevIndividual->mLastProcessedAdditionalDataAssertionsLinker;
 						mBaseConceptsInitialized = prevIndividual->mBaseConceptsInitialized;
+						mUniversallyConnectionIndividualInitialized = prevIndividual->mUniversallyConnectionIndividualInitialized;
 						mRoleAssertionsInitialized = prevIndividual->mRoleAssertionsInitialized;
 						mReverseRoleAssertionsInitialized = prevIndividual->mReverseRoleAssertionsInitialized;
 						mNominalIndiTriplesAssertions = prevIndividual->mNominalIndiTriplesAssertions;
@@ -461,6 +468,8 @@ namespace Konclude {
 						mBackendSynchronRetestProcessingQueued = prevIndividual->mBackendSynchronRetestProcessingQueued;
 						mBackendIndirectCompatibilityExpansionQueued = prevIndividual->mBackendIndirectCompatibilityExpansionQueued;
 						mBackendDirectInfluenceExpansionQueued = prevIndividual->mBackendDirectInfluenceExpansionQueued;
+						mBackendReuseExpansionQueued = prevIndividual->mBackendReuseExpansionQueued;
+						mBackendNeighbourExpansionQueued = prevIndividual->mBackendNeighbourExpansionQueued;
 						mIncrementalCompatibilityCheckingQueued = prevIndividual->mIncrementalCompatibilityCheckingQueued;
 						mIncrementalExpansionQueued = prevIndividual->mIncrementalExpansionQueued;
 						mDelayedNominalProcessingQueued = prevIndividual->mDelayedNominalProcessingQueued;
@@ -739,6 +748,17 @@ namespace Konclude {
 
 				CIndividualProcessNode* CIndividualProcessNode::setBaseConceptsInitialized(bool initialized) {
 					mBaseConceptsInitialized = initialized;
+					return this;
+				}
+
+
+
+				bool CIndividualProcessNode::hasUniversallyConnectionIndividualInitialized() {
+					return mUniversallyConnectionIndividualInitialized;
+				}
+
+				CIndividualProcessNode* CIndividualProcessNode::setUniversallyConnectionIndividualInitialized(bool initialized) {
+					mUniversallyConnectionIndividualInitialized = initialized;
 					return this;
 				}
 
@@ -1884,6 +1904,49 @@ namespace Konclude {
 				bool CIndividualProcessNode::isIncrementalExpansionQueued() {
 					return mIncrementalExpansionQueued;
 				}
+
+
+
+
+
+
+
+
+
+				CIndividualProcessNode* CIndividualProcessNode::setBackendReuseExpansionQueued(bool queued) {
+					mBackendReuseExpansionQueued = queued;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isBackendReuseExpansionQueued() {
+					return mBackendReuseExpansionQueued;
+				}
+
+
+
+
+				CIndividualProcessNode* CIndividualProcessNode::setBackendNeighbourExpansionQueued(bool queued) {
+					mBackendNeighbourExpansionQueued = queued;
+					return this;
+				}
+
+
+				bool CIndividualProcessNode::isBackendNeighbourExpansionQueued() {
+					return mBackendNeighbourExpansionQueued;
+				}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 				CIndividualProcessNode* CIndividualProcessNode::clearProcessingQueued() {

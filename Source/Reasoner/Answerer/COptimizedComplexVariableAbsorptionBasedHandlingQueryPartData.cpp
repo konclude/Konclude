@@ -39,7 +39,11 @@ namespace Konclude {
 				mBindingPropagationStartVariableExpression = nullptr;
 				mIndiVariables = false;
 				mTopObjectPropertyUsed = false;
+				mTopObjectPropertyAbsorptionPropagation = false;
+				mTopObjectPropertyInitializationPropagation = false;
 				mNonTrivialAbsorptionPropagation = false;
+				mRestrictedTopPropagationConceptChecked = false;
+				mRestrictedTopPropagationConcept = nullptr;
 			}
 
 
@@ -370,6 +374,35 @@ namespace Konclude {
 				return this;
 			}
 
+
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::isTopObjectPropertyAbsorptionPropagation() {
+				return mTopObjectPropertyAbsorptionPropagation;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::setTopObjectPropertyAbsorptionPropagation(bool topObjectPropertyAbsorptionPropagation) {
+				mTopObjectPropertyAbsorptionPropagation = topObjectPropertyAbsorptionPropagation;
+				if (mTopObjectPropertyAbsorptionPropagation) {
+					setTopObjectPropertyUsage(true);
+				}
+				return this;
+			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::isTopObjectPropertyInitializationPropagation() {
+				return mTopObjectPropertyInitializationPropagation;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::setTopObjectPropertyInitializationPropagation(bool topObjectPropertyInitializationPropagation) {
+				mTopObjectPropertyInitializationPropagation = topObjectPropertyInitializationPropagation;
+				if (mTopObjectPropertyInitializationPropagation) {
+					setTopObjectPropertyUsage(true);
+				}
+				return this;
+			}
+
+
 			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::resetAbsorption() {
 				mRemovedPropAssSet.clear();
 				mHandledVariableSet.clear();
@@ -386,6 +419,27 @@ namespace Konclude {
 
 			CConcept* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::getInitialObjectPropertyPropagatedTriggerConcept(CObjectPropertyTermExpression* objectPropertyExp, bool inversion) {
 				return mInitialObjectPropertyPropagatedTriggerConceptHash.value(QPair<CObjectPropertyTermExpression*, bool>(objectPropertyExp, inversion));
+			}
+
+
+
+			CConcept* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::getRestrictedTopPropagationConcept() {
+				return mRestrictedTopPropagationConcept;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::setRestrictedTopPropagationConcept(CConcept* concept) {
+				mRestrictedTopPropagationConcept = concept;
+				return this;
+			}
+
+
+			bool COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::hasRestrictedTopPropagationConceptChecked() {
+				return mRestrictedTopPropagationConceptChecked;
+			}
+
+			COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData* COptimizedComplexVariableAbsorptionBasedHandlingQueryPartData::setRestrictedTopPropagationConceptChecked(bool checked) {
+				mRestrictedTopPropagationConceptChecked = checked;
+				return this;
 			}
 
 

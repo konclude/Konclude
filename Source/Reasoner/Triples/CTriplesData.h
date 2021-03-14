@@ -26,6 +26,7 @@
 
 // Namespace includes
 #include "TriplesSettings.h"
+#include "CTriplesDataIterator.h"
 
 
 // Other includes
@@ -49,7 +50,8 @@ namespace Konclude {
 				TRIPLES_DATA_NOTHING,
 				TRIPLES_DATA_ADDITION,
 				TRIPLES_DATA_REMOVAL,
-				TRIPLES_DATA_NEW
+				TRIPLES_DATA_NEW,
+				TRIPLES_DATA_QUERYING
 			};
 
 
@@ -69,6 +71,7 @@ namespace Konclude {
 
 					virtual CTRIPLES_DATA_UPDATE_TYPE getUpdateType() = 0;
 
+					virtual CTriplesDataIterator* getTriplesDataIterator() = 0;
 
 				// protected methods
 				protected:

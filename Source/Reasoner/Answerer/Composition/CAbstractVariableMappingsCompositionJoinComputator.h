@@ -27,13 +27,15 @@
 // Namespace includes
 #include "CompositionSettings.h"
 #include "CAbstractVariableMappingsCompositionComputator.h"
-
+#include <math.h> 
 
 // Other includes
 #include "Reasoner/Answerer/COptimizedComplexVariableIndividualMappings.h"
 #include "Reasoner/Answerer/COptimizedComplexVariableJoiningItem.h"
 #include "Reasoner/Answerer/COptimizedComplexBuildingVariableCompositionsItem.h"
 #include "Reasoner/Answerer/CAnswererContext.h"
+#include "Reasoner/Answerer/COptimizedComplexVariableIndividualMappingsMultiHash.h"
+#include "Reasoner/Answerer/COptimizedComplexVariableIndividualMappingsHash.h"
 
 
 
@@ -69,7 +71,7 @@ namespace Konclude {
 						CAbstractVariableMappingsCompositionJoinComputator();
 
 
-						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAnswererContext* answererContext);
+						virtual CAbstractVariableMappingsCompositionComputator* configureComputator(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem, CAbstractVariableMappingsCompositionItemRequirementProcessor* reqProcessor, CAnswererContext* answererContext);
 						virtual CAbstractVariableMappingsCompositionJoinComputator* computeVariableMappingsComposition(COptimizedComplexVariableCompositionItem* compVarItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing);
 
 
@@ -79,13 +81,34 @@ namespace Konclude {
 						virtual bool computeVariableMappingsJoinComposition(COptimizedComplexVariableJoiningItem* joiningItem, COptimizedComplexBuildingVariableCompositionsItem* buildingVarItem, CAnswererContext* answererContext, bool& processing) = 0;
 						bool isSamplingLeftInsertionDecision(COptimizedComplexVariableJoiningItem* joiningItem);
 
+						bool requiresMoreVariableMappingComputation(COptimizedComplexVariableJoiningItem* joiningItem, bool sampling);
+						cint64 getUpdatedExpectedVariableMappingsCount(COptimizedComplexVariableJoiningItem* joiningItem);
+
+
+						bool splitComputationReset(COptimizedComplexVariableJoiningItem* joiningItem, bool resetJoiningHash);
+						bool initSplitComputation(COptimizedComplexVariableJoiningItem* joiningItem);
+						bool nextSplitComputation(COptimizedComplexVariableJoiningItem* joiningItem);
+
+
 
 					// protected variables
 					protected:
+						QString mComputerName;
 
 						cint64 mConfMappingsComputationUnlimitedInterpretationSize;
 						cint64 mConfSamplingBasedJoinMappingSize;
 						bool mConfExtendedLogging;
+
+
+						bool mConfAllowSplitModeActivation = true;
+						double mConfMappingCountExpectedFactorSplitModeActivation = 10;
+						double mConfMappingCountSplitModeActivation = 5000000;
+						double mConfExpectedInputMappingCountDirectSplitModeActivation = 5000000;
+
+						double mConfMappingSplitCount = 10000000;
+						double mConfMappingComputationMinSplitCount = 10;
+						double mConfMappingComputationMaxSplitCount = 100;
+
 
 					// private methods
 					private:

@@ -80,6 +80,7 @@ namespace Konclude {
 
 					COptimizedComplexVariableJoiningHash*& getJoiningHash();
 					QVector<COptimizedComplexVariableJoiningHashMemoryManaged*>& getJoiningHashVector();
+					COptimizedComplexVariableJoiningItem* resetJoiningHash();
 
 
 					cint64& getLeftSampleKeyCount();
@@ -91,6 +92,7 @@ namespace Konclude {
 
 					bool isSamplingCompleted();
 					COptimizedComplexVariableJoiningItem* setSamplingCompleted(bool completed);
+					COptimizedComplexVariableJoiningItem* resetSampling();
 
 					bool isInsertionSideDecided();
 					bool isInsertionSideLeft();
@@ -99,6 +101,21 @@ namespace Konclude {
 					COptimizedComplexVariableJoiningItem* setInsertionSideLeft(bool left);
 
 					//QHash<QString, cint64> debugVarBindStringCardHash;
+
+
+					COptimizedComplexVariableJoiningItem* createSplitComputationItem();
+
+
+
+					cint64& getLeftSplitPosition();
+					cint64& getRightSplitPosition();
+
+					cint64& getLeftSplitCount();
+					cint64& getRightSplitCount();
+
+
+					virtual bool clearComputation();
+
 
 				// protected methods
 				protected:
@@ -128,6 +145,11 @@ namespace Konclude {
 					bool mInsertionSideDecided;
 					bool mInsertionSideLeft;
 
+					cint64 mLeftSplitPosition;
+					cint64 mRightSplitPosition;
+
+					cint64 mLeftSplitCount;
+					cint64 mRightSplitCount;
 
 				// private methods
 				private:

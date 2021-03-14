@@ -76,6 +76,13 @@ namespace Konclude {
 			}
 
 
+			bool COptimizedComplexVariableConceptBaseItem::clearComputation() {
+				COptimizedComplexVariableCompositionItem::clearComputation();
+				mInstanceItemProcessingLinker = nullptr;
+				mInstanceItemProcessedLinker = nullptr;
+				mInstanceItemRetrievedLinker = nullptr;
+				return true;
+			}
 
 		}; // end namespace Answerer
 

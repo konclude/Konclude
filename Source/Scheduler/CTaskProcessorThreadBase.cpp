@@ -446,7 +446,7 @@ namespace Konclude {
 
 
 		void CTaskProcessorThreadBase::organizeDispenseTasks(bool forceUpdate) {
-			if (!mMinimalPriorityTaskInvalidated || forceUpdate) {
+			if (mMinimalPriorityTaskInvalidated || forceUpdate) {
 				// count dispense task and find minimal priority
 				CTask* taskIt = mTaskProcessingQueue;
 				double minPriority = 0.;

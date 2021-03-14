@@ -30,7 +30,9 @@
 #include "CConfigDescription.h"
 #include "CConfigType.h"
 #include "CIntegerConfigType.h"
+#include "CDoubleConfigType.h"
 #include "CStringConfigType.h"
+#include "CStringListConfigType.h"
 
 
 // Other includes
@@ -68,6 +70,10 @@ namespace Konclude {
 				virtual bool readFromString(const QString &string);
 				virtual QString getString();
 
+				virtual bool supportsStringListConvertion();
+				virtual bool readFromStringList(const QStringList &string);
+				virtual QStringList getStringList();
+
 				virtual bool supportsIntegerConvertion();
 				virtual bool readFromInteger(qint64 integer);
 				virtual qint64 getInteger();
@@ -75,6 +81,11 @@ namespace Konclude {
 				virtual bool supportsBooleanConvertion();
 				virtual bool readFromBoolean(bool boolean);
 				virtual bool getBoolean();
+
+				virtual bool supportsDoubleConvertion();
+				virtual bool readFromDouble(double value);
+				virtual double getDouble();
+
 
 				virtual CConfigDescription *getConfigDescription();
 				virtual CConfigType *getConfigType();

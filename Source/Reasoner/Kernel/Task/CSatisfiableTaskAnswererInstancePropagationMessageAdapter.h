@@ -63,7 +63,7 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CSatisfiableTaskAnswererInstancePropagationMessageAdapter(CConcept* testingConcept, bool testingNegation, bool candidatePropagation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology = nullptr, CAnsweringMessageDataObserver* observer = nullptr);
+						CSatisfiableTaskAnswererInstancePropagationMessageAdapter(CConcept* testingConcept, bool testingNegation, bool candidatePropagation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology = nullptr, CAnsweringMessageDataObserver* observer = nullptr, CAnsweringPropagationSteeringController* propagationSteering = nullptr);
 
 						CConcept* getTestingConcept();
 						bool getTestingConceptNegation();
@@ -73,6 +73,8 @@ namespace Konclude {
 						CAnsweringMessageDataObserver* getAnswererMessageDataObserver();
 
 						bool isCandidatePropagation();
+
+						CAnsweringPropagationSteeringController* getAnswererPropagationSteeringController();
 
 					// protected methods
 					protected:
@@ -85,6 +87,7 @@ namespace Konclude {
 						CConcreteOntology* mOntology;
 						CAnsweringHandler* mAnsweringHandler;
 						CAnsweringMessageDataObserver* mMessageObserver;
+						CAnsweringPropagationSteeringController* mPropSteeringController;
 
 					// private methods
 					private:

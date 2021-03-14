@@ -31,7 +31,6 @@ namespace Konclude {
 			COptimizedComplexVariableExtractionItem::COptimizedComplexVariableExtractionItem(COptimizedComplexVariableCompositionItem* baseItem, cint64 extractionVarIdx) : COptimizedComplexVariableCompositionSingleDependenceItem(baseItem) {
 				mBaseItem = baseItem;
 				mExtractionVarIdx = extractionVarIdx;
-				mComputationDependentItemList.append(mBaseItem);
 			}
 
 

@@ -29,6 +29,8 @@
 // Namespace includes
 #include "CTriplesData.h"
 #include "TriplesSettings.h"
+#include "CRedlandStoredTriplesDataModelIterator.h"
+#include "CRedlandStoredTriplesDataLinkerIterator.h"
 
 
 // Other includes
@@ -76,6 +78,7 @@ namespace Konclude {
 
 					virtual CTRIPLES_DATA_UPDATE_TYPE getUpdateType() override;
 
+					virtual CTriplesDataIterator* getTriplesDataIterator() override;
 
 				// protected methods
 				protected:

@@ -32,13 +32,14 @@ namespace Konclude {
 				namespace Events {
 
 
-					CRequirementProcessedCallbackEvent::CRequirementProcessedCallbackEvent(CThread* receiverThread, CConcreteOntology* ontology, CRequirementPreparingData* reqPrepData) 
+					CRequirementProcessedCallbackEvent::CRequirementProcessedCallbackEvent(CThread* receiverThread, CConcreteOntology* ontology, CRequirementPreparingData* reqPrepData, cint64 procType) 
 							: CCustomEvent(EVENTTYPE) {
 
 						
 						mOntology = ontology;
 						recThread = receiverThread;
 						mReqPrepData = reqPrepData;
+						mProcType = procType;
 					}
 
 

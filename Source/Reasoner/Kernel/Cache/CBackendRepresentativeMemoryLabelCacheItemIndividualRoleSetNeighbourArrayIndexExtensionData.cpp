@@ -30,7 +30,7 @@ namespace Konclude {
 			namespace Cache {
 
 
-				CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData::CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData(CBackendRepresentativeMemoryCacheContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
+				CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData::CBackendRepresentativeMemoryLabelCacheItemIndividualRoleSetNeighbourArrayIndexExtensionData(CContext* context) : CBackendRepresentativeMemoryLabelCacheItemExtensionData(context) {
 					mCacheItemExtensionType = INDIVIDUAL_NEIGHBOUR_ARRAY_INDEX;
 				}
 
@@ -39,7 +39,7 @@ namespace Konclude {
 					mCombinedNeighbourRoleSetLabel = combinedNeighbourRoleSetLabel;
 					mArraySize = mCombinedNeighbourRoleSetLabel->getCacheValueCount();
 					mIndexNeighbourRoleSetLabelArray = CObjectAllocator<CBackendRepresentativeMemoryLabelCacheItem*>::allocateAndConstructArray(mContext->getMemoryAllocationManager(), mArraySize);
-					mNeighbourRoleSetLabelIndexHash = CObjectParameterizingAllocator< CCACHINGHASH<CBackendRepresentativeMemoryLabelCacheItem*, cint64>, CBackendRepresentativeMemoryCacheContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
+					mNeighbourRoleSetLabelIndexHash = CObjectParameterizingAllocator< CCACHINGHASH<CBackendRepresentativeMemoryLabelCacheItem*, cint64>, CContext* >::allocateAndConstructAndParameterize(mContext->getMemoryAllocationManager(), mContext);
 					CBackendRepresentativeMemoryLabelValueLinker* cacheValueLinker = mCombinedNeighbourRoleSetLabel->getCacheValueLinker();
 					for (cint64 i = 0; i < mArraySize; ++i) {
 						if (cacheValueLinker) {

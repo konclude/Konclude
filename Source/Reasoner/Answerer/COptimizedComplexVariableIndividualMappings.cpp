@@ -43,6 +43,9 @@ namespace Konclude {
 
 				mLinkerBatchingSizeIncreasingFactor = 1.25;
 				mCurrentLinkerBatchingSize = 100;
+
+				mBindingsMemoryUsage = 0;
+				mComputationCost = 0;
 			}
 
 
@@ -152,6 +155,54 @@ namespace Konclude {
 				return this;
 			}
 
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappings::clearComputedMappings() {
+				mLastAddedBindingsCardinalityLinker = nullptr;
+				mLastAddedBindingsCardinalityBatchLinker = nullptr;
+				mFirstAddedBindingsCardinalityBatchLinker = nullptr;
+				mLastUpdateCardinalityLinker = nullptr;
+
+				mBindingCount = 0;
+				mBindingsMemoryUsage = 0;
+
+				mLinkerBatchingSizeIncreasingFactor = 1.25;
+				mCurrentLinkerBatchingSize = 100;
+				mComputationCost = 0;
+				return this;
+			}
+
+
+			cint64 COptimizedComplexVariableIndividualMappings::getBindingsMemoryUsage() {
+				return mBindingsMemoryUsage;
+			}
+
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappings::setBindingsMemoryUsage(cint64 usage) {
+				if (usage > 10000000) {
+					bool debug = true;
+				}
+				mBindingsMemoryUsage = usage;
+				return this;
+			}
+
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappings::incBindingsMemoryUsage(cint64 usageInc) {
+				if (usageInc > 10000000) {
+					bool debug = true;
+				}
+				mBindingsMemoryUsage += usageInc;
+				if (mBindingsMemoryUsage > 10000000) {
+					bool debug = true;
+				}
+				return this;
+			}
+
+
+			double COptimizedComplexVariableIndividualMappings::getComputationCost() {
+				return mComputationCost;
+			}
+
+			COptimizedComplexVariableIndividualMappings* COptimizedComplexVariableIndividualMappings::setComputationCost(double cost) {
+				mComputationCost = cost;
+				return this;
+			}
 
 
 		}; // end namespace Answerer

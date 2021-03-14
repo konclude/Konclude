@@ -57,8 +57,21 @@ namespace Konclude {
 					} else {
 						newTriplesMapped = true;
 
+						//unsigned char* modelString = librdf_model_to_string(redlandTriplesData->getRedlandIndexedModel(), nullptr, "turtle", nullptr, nullptr);
+						//QFile file("temp.ttl");
+						//file.open(QIODevice::WriteOnly);
+						//file.write((const char*)modelString);
+
+
 						initTripleDataProcessing(redlandTriplesData);
 
+						cint64 count = 0;
+						getOWLClassInstanceNodesStream()->forEach([&](librdf_node* node) {
+							count++;
+						});
+
+
+						loadExistingEntities(updateConcreteOntology->getBuildData(), redlandTriplesData);
 						buildDeclarations();
 
 						buildObjectPropertyExpressions();
@@ -79,7 +92,7 @@ namespace Konclude {
 						}
 
 						// do clean up
-						clearTripleDataProcessing();
+						//clearTripleDataProcessing();
 
 					}
 				}
@@ -87,6 +100,12 @@ namespace Konclude {
 				return newTriplesMapped;
 			}
 
+
+
+			CConcreteOntologyRedlandTriplesDataExpressionMapper* CConcreteOntologyRedlandTriplesDataExpressionMapper::handleParsedOntologyAxiomExpression(CAxiomExpression* axiomExpression) {
+				mOntologyBuilder->tellOntologyAxiom(axiomExpression);
+				return this;
+			}
 
 
 
@@ -155,7 +174,7 @@ namespace Konclude {
 				}
 
 				for (CAxiomExpression* axiomExpression : axiomExpressionList) {
-					mOntologyBuilder->tellOntologyAxiom(axiomExpression);
+					handleParsedOntologyAxiomExpression(axiomExpression);
 				}
 
 				return this;
@@ -226,13 +245,14 @@ namespace Konclude {
 				for (CRedlandNodeProcessingData* nextProcessingData : mClassNodeHandlingList) {
 					if (nextProcessingData->mExpression) {
 						if (librdf_node_is_blank(nextProcessingData->mRedlandNode)) {
-							QList<CRedlandNodeProcessingData*>* processingDataList = getNodeProcessingDataListFromNodeStreamWithNewHandling(createRedlandNodeStreamWrapper()->init(getPartialStatementFilteredTripleStream(getAdaptedPartialFilteringStatement(nullptr, nullptr, nextProcessingData->mRedlandNode, mPartialFilteringStatementForOWLAllRDFTypePredecessors)), 0), mNamedIndividualNodeIdentifierDataHash, [&](librdf_node* node)->CRedlandNodeProcessingData* { return createNamedIndividualProcessingData(node); });
+							QList<CRedlandNodeProcessingData*>* processingDataList = getNodeProcessingDataListFromNodeStreamWithNewHandling(createRedlandNodeStreamWrapper()->init(getPartialStatementFilteredTripleStream(getAdaptedPartialFilteringStatement(nullptr, nullptr, nextProcessingData->mRedlandNode, mPartialFilteringStatementForOWLAllRDFTypePredecessors)), 0), mNamedIndividualNodeIdentifierDataHash, [&](librdf_node* node)->CRedlandNodeProcessingData* { 
+								return createNamedIndividualProcessingData(node); 
+							});
 							if (processingDataList && !processingDataList->isEmpty()) {
 								for (CRedlandNodeProcessingData* processingData : *processingDataList) {
 									QList<CBuildExpression*> expressionList;
 									expressionList.append(nextProcessingData->mExpression);
 									expressionList.append(processingData->mExpression);
-									collectBuildExpressionsFromProcessingDataList(*processingDataList, expressionList);
 									CAxiomExpression* axiomExpression = mOntologyBuilder->getClassAssertion(expressionList);
 									if (axiomExpression) {
 										axiomExpressionList.append(axiomExpression);
@@ -275,11 +295,56 @@ namespace Konclude {
 
 
 				for (CAxiomExpression* axiomExpression : axiomExpressionList) {
-					mOntologyBuilder->tellOntologyAxiom(axiomExpression);
+					handleParsedOntologyAxiomExpression(axiomExpression);
 				}
 
 				return this;
 			}
+
+
+
+
+
+
+			CConcreteOntologyRedlandTriplesDataExpressionMapper* CConcreteOntologyRedlandTriplesDataExpressionMapper::loadExistingEntities(COntologyBuildData* buildData, CRedlandStoredTriplesData* redlandTriplesData) {
+				CBUILDHASH<CStringRefStringHasher, CClassExpression*>* classExpHash = buildData->getClassEntityBuildHash();
+				for (CBUILDHASH<CStringRefStringHasher, CClassExpression*>::const_iterator it = classExpHash->constBegin(), itEnd = classExpHash->constEnd(); it != itEnd; ++it) {
+					CClassExpression* classExp = it.value();
+					loadExistingEntity(classExp, classExp->getName(), redlandTriplesData->getRedlandWorld(), mClassNodeIdentifierDataHash, mClassNodeHandlingList);
+				}
+				CBUILDHASH<CStringRefStringHasher, CObjectPropertyExpression*>* objPropExpHash = buildData->getObjectPropertyEntityBuildHash();
+				for (CBUILDHASH<CStringRefStringHasher, CObjectPropertyExpression*>::const_iterator it = objPropExpHash->constBegin(), itEnd = objPropExpHash->constEnd(); it != itEnd; ++it) {
+					CObjectPropertyExpression* objPropExp = it.value();
+					loadExistingEntity(objPropExp, objPropExp->getName(), redlandTriplesData->getRedlandWorld(), mObjectPropertyNodeIdentifierDataHash, mObjectPropertyNodeHandlingList);
+				}
+				CBUILDHASH<CStringRefStringHasher, CDataPropertyExpression*>* dataPropExpHash = buildData->getDataPropertyEntityBuildHash();
+				for (CBUILDHASH<CStringRefStringHasher, CDataPropertyExpression*>::const_iterator it = dataPropExpHash->constBegin(), itEnd = dataPropExpHash->constEnd(); it != itEnd; ++it) {
+					CDataPropertyExpression* dataPropExp = it.value();
+					loadExistingEntity(dataPropExp, dataPropExp->getName(), redlandTriplesData->getRedlandWorld(), mDataPropertyNodeIdentifierDataHash, mDataPropertyNodeHandlingList);
+				}
+				return this;
+			}
+
+
+
+
+
+
+
+			CConcreteOntologyRedlandTriplesDataExpressionMapper* CConcreteOntologyRedlandTriplesDataExpressionMapper::loadExistingEntity(CBuildExpression* expression, const QString& entityUri, librdf_world* world, QHash<CRedlandNodeHasher, CRedlandNodeProcessingData*>& nodeIdentifierDataHash, QList<CRedlandNodeProcessingData*>& nodeHandlingList) {
+				QByteArray uriData = entityUri.toUtf8();
+				librdf_uri* uri = librdf_new_uri(world, (const unsigned char*)uriData.constData());
+				librdf_node* classNode = librdf_new_node_from_uri(world, uri);
+
+				CRedlandNodeProcessingData*& processingData = nodeIdentifierDataHash[CRedlandNodeHasher(classNode)];
+				if (!processingData) {
+					processingData = new CRedlandNodeProcessingData(classNode, expression);
+					nodeHandlingList.append(processingData);
+					processingData->mExpression = expression;
+				}
+				return this;
+			}
+
 
 
 
@@ -427,7 +492,7 @@ namespace Konclude {
 
 				}));
 				for (CAxiomExpression* axiomExpression : axiomExpressionList) {
-					mOntologyBuilder->tellOntologyAxiom(axiomExpression);
+					handleParsedOntologyAxiomExpression(axiomExpression);
 				}
 				return this;
 			}
@@ -544,7 +609,7 @@ namespace Konclude {
 					QList<CAxiomExpression*> axiomExpressions;
 					collectObjectPropertyTypesAxiomExpressionsBySuccessorRetrieval(axiomExpressions);
 					for (CAxiomExpression* axiomExpression : axiomExpressions) {
-						mOntologyBuilder->tellOntologyAxiom(axiomExpression);
+						handleParsedOntologyAxiomExpression(axiomExpression);
 					}
 				} else {
 					buildAxioms(&mObjectPropertyNodeHandlingList, [&](CRedlandNodeProcessingData* processingData, QList<CAxiomExpression*>& axiomExpressions) { collectObjectPropertyBasedAxiomExpressions(processingData, axiomExpressions); });
@@ -558,7 +623,7 @@ namespace Konclude {
 					QList<CAxiomExpression*> axiomExpressions;
 					collectDataPropertyTypesAxiomExpressionsBySuccessorRetrieval(axiomExpressions);
 					for (CAxiomExpression* axiomExpression : axiomExpressions) {
-						mOntologyBuilder->tellOntologyAxiom(axiomExpression);
+						handleParsedOntologyAxiomExpression(axiomExpression);
 					}
 
 				} else {
@@ -579,7 +644,7 @@ namespace Konclude {
 				}
 
 				for (CAxiomExpression* axiomExpression : axiomExpressionList) {
-					mOntologyBuilder->tellOntologyAxiom(axiomExpression);
+					handleParsedOntologyAxiomExpression(axiomExpression);
 				}
 				return this;
 			}
@@ -2234,7 +2299,7 @@ namespace Konclude {
 					const char* uriString = (const char*)librdf_uri_as_string(uri);
 					expression = buildEntityFunc(QString::fromUtf8(uriString));
 					CAxiomExpression* declExpression = mOntologyBuilder->getDeclaration(expression);
-					mOntologyBuilder->tellOntologyAxiom(declExpression);
+					handleParsedOntologyAxiomExpression(declExpression);
 				} else {
 					expression = expression;
 				}

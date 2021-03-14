@@ -76,6 +76,9 @@ namespace Konclude {
 
 					virtual cint64 getFreeMemoryPoolCount();
 
+					virtual CMemoryTemporaryAllocationManager* addUsedMemoryPools(CMemoryPool* memoryPools);
+
+
 				// protected methods
 				protected:
 					char* getMemoryBlock(cint64 memoryBlockSize);
