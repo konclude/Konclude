@@ -1,0 +1,115 @@
+name: Build
+
+# Run this workflow every time a new commit pushed to your repository
+on: [push]
+
+jobs:
+
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++"
+          }
+        - {
+            name: "Ubuntu 16.04 GCC",
+            os: ubuntu-16.04,
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++"
+          }
+        - {
+            name: "Windows Latest MSVC",
+            os: windows-latest,
+            build_type: "Release",
+            cc: "cl",
+            cxx: "cl"
+          }
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            build_type: "Release",
+            cc: "clang",
+            cxx: "clang++",
+          }          
+
+
+    steps:
+      # Checks out a copy of your repository on the machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+          
+      - name: Compile Ubuntu
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: | 
+          sudo apt-get install gdb
+          echo `gcc --version`
+          echo `qmake --version`
+          qmake KoncludeWithoutRedland.pro
+          make -j 2        
+          
+      - name: Compile macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: | 
+          echo `clang --version`
+          echo `qmake --version`
+          qmake KoncludeWithoutRedland.pro
+          make -j 2            
+
+      - name: Prepare Visual Studio
+        if: startsWith(matrix.config.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Compile Windows
+        if: startsWith(matrix.config.os, 'windows')
+        run: |
+          qmake KoncludeWithoutRedland.pro
+          nmake         
+          
+          
+      - name: Run Examples Ubuntu
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          Release/Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          Release/Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          Release/Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          Release/Konclude owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          Release/Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          Release/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          Release/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+
+
+      - name: Run Examples Windows
+        if: startsWith(matrix.config.os, 'windows')  
+        run: | 
+          Release\Konclude.exe classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          Release\Konclude.exe satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          Release\Konclude.exe owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          Release\Konclude.exe owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          Release\Konclude.exe owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          Release\Konclude.exe sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          Release\Konclude.exe sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+
+
+      - name: Run Examples MacOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: | 
+          Release/Konclude.app/Contents/MacOS/Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          Release/Konclude.app/Contents/MacOS/Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+

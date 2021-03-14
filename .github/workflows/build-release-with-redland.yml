@@ -1,0 +1,1428 @@
+name: Build Releases (with Redland)
+
+# Run this workflow every time a new commit pushed to your repository
+on:
+  push:
+    tags: releases/v*
+    branches: master
+
+jobs:
+
+
+  tags:
+    name: Identify tags
+    runs-on: ubuntu-latest
+    outputs:
+      git_tag: ${{ steps.get_tags.outputs.git_tag }}
+      revision_hash: ${{ steps.get_tags.outputs.revision_hash }}
+      revision_tag: ${{ steps.get_tags.outputs.revision_tag }}      
+      revision_build: ${{ steps.get_tags.outputs.revision_build }}      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2    
+    
+      - name: Identify git tags
+        id: get_tags
+        run: |
+          git fetch --prune --unshallow --tags
+          git_tag=`git describe --tags --abbrev=0`
+          echo $git_tag
+          echo "::set-output name=git_tag::$git_tag"
+          revision_hash=`grep KONCLUDE_VERSION_GIT_REVISION_HASH_STRING revision-git.h | cut -d'"' -f 2`
+          echo $revision_hash
+          echo "::set-output name=revision_hash::$revision_hash"
+          IFS='-'
+          read -ra ADDR <<< "$git_tag"
+          revision_tag=${ADDR[0]}
+          revision_build=${ADDR[1]}
+          echo "::set-output name=revision_tag::$revision_tag"
+          echo "::set-output name=revision_build::$revision_build"
+
+          
+
+
+
+
+
+  release:
+    name: Draft build release
+    runs-on: ubuntu-latest
+    needs: tags
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{needs.tags.outputs.git_tag}}
+          release_name: Konclude Release ${{needs.tags.outputs.git_tag}} 
+          body: ${{needs.tags.outputs.git_tag}}
+          draft: true
+          prerelease: true
+
+
+
+
+
+
+
+
+  build_windows:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 600
+    needs: [release, tags]
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Windows 2016 MSVC 2017 Dynamic",
+            os: windows-2016,
+            build_type: "Release",
+            cc: "cl",
+            cxx: "cl",
+            qt: "5.15.2"
+          }   
+
+
+    steps:
+      # Checks out a copy of your repository on the ubuntu-latest machine
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+        
+      - name: Update Revision Information
+        run: |
+          echo '#define KONCLUDE_VERSION_GIT_REVISION_NUMBER ${{needs.tags.outputs.revision_build}}' > "revision-git.h"
+          echo '#define KONCLUDE_VERSION_GIT_TAG_NAME_STRING "${{needs.tags.outputs.revision_tag}}"' >> "revision-git.h"
+          echo '#define KONCLUDE_VERSION_GIT_REVISION_HASH_STRING "${{needs.tags.outputs.revision_hash}}"' >> "revision-git.h"
+        
+        
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2   
+        with:
+          version: ${{ matrix.config.qt }}
+
+      - name: Prepare Visual Studio
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          sdk: 10.0.10240.0
+          
+      - name: Environment Checking
+        shell: powershell
+        run: |
+          Get-ChildItem Env:PATH          
+          echo $PSScriptRoot
+          $Env:PATH = $Env:PATH + ';D:\a\Konclude\Qt\${{ matrix.config.qt }}\msvc2019_64\bin'
+          $Env:PATH = $Env:PATH + ';$PSScriptRoot\External\vcpkg\Windows\x64\bin'
+          $Env:PATH = $Env:PATH + ';.\External\vcpkg\Windows\x64\bin'
+          Get-ChildItem Env:PATH
+          
+      - name: Install Windows 8.1 SDK
+        shell: powershell
+        run: |
+          Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
+          Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"    
+
+      - name: Compile Windows        
+        run: |
+          msbuild Konclude-VS15.sln /p:Configuration=Release /p:Platform="Win64"
+                    
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude Windows Compilation
+          path: .          
+
+      - name: Prepare Windows Execution
+        run: |
+          Copy-Item ".\External\vcpkg\Windows\x64\bin\*" -Destination "."
+
+      - name: Create Konclude Release
+        run: | 
+          $ROOT="$(pwd)"             
+          mkdir Release          
+          
+          $BUILD_DIR=$ROOT
+          $PROJ=$ROOT
+          $RELEA="$ROOT\Release\Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}"
+          
+          mkdir $RELEA
+          mkdir "$RELEA/Configs"
+          mkdir "$RELEA/Tests"
+          mkdir "$RELEA/Binaries"
+          
+          cd $BUILD_DIR
+          copy "$BUILD_DIR\x64\Release\VS2015\Konclude.exe" "$RELEA/Binaries"
+          
+          copy "$PROJ\LGPL-3.0.txt" "$RELEA"
+          copy "$PROJ\GPL.txt" "$RELEA"
+          copy "$PROJ\Readme.md" "$RELEA"
+          copy "$PROJ\Tests\1b-satisfiability-request.xml" "$RELEA/Tests"
+          copy "$PROJ\Tests\galen.owl.xml" "$RELEA/Tests"
+          copy "$PROJ\Tests\galen-classify-request.xml" "$RELEA/Tests"
+          copy "$PROJ\Tests\galen-ALEHIF+-classify-request.xml" "$RELEA/Tests"
+          copy "$PROJ\Tests\roberts-family-full-D.owl.xml" "$RELEA/Tests"
+          copy "$PROJ\Tests\roberts-family-full-D-classify-realize-request.xml" "$RELEA/Tests"
+          copy "$PROJ\Tests\lubm-univ-bench.owl.xml" "$RELEA/Tests"
+          copy "$PROJ\Tests\lubm-univ-bench-data-1.ttl" "$RELEA/Tests"
+          copy "$PROJ\Tests\lubm-univ-bench-sparql-load-and-query-test.sparql" "$RELEA/Tests"
+          copy "$PROJ\Tests\lubm-univ-bench-sparql-load-and-complex-query-rasqal-test.sparql" "$RELEA/Tests"
+          copy "$PROJ\Tests\roberts-family-full-sparql-existential-variables-query-test.sparql" "$RELEA/Tests"
+          copy "$PROJ\Tests\test-request.xml" "$RELEA/Tests"
+          copy "$PROJ\Scripts\Konclude.bat" "$RELEA"
+          copy "$PROJ\Configs\default-config.xml" "$RELEA/Configs"
+          copy "$PROJ\Configs\querying-config.xml" "$RELEA/Configs"          
+          
+          copy ".\External\vcpkg\Windows\x64\bin\*.dll" "$RELEA/Binaries" 
+          copy "D:\a\Konclude\Qt\${{ matrix.config.qt }}\msvc2019_64\bin\Qt5Core.dll" "$RELEA/Binaries" 
+          copy "D:\a\Konclude\Qt\${{ matrix.config.qt }}\msvc2019_64\bin\Qt5Gui.dll" "$RELEA/Binaries" 
+          copy "D:\a\Konclude\Qt\${{ matrix.config.qt }}\msvc2019_64\bin\Qt5Network.dll" "$RELEA/Binaries" 
+          copy "D:\a\Konclude\Qt\${{ matrix.config.qt }}\msvc2019_64\bin\Qt5Concurrent.dll" "$RELEA/Binaries" 
+          copy "D:\a\Konclude\Qt\${{ matrix.config.qt }}\msvc2019_64\bin\Qt5Xml.dll" "$RELEA/Binaries" 
+                    
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude Windows Prepared Release Directory
+          path: .
+
+      - name: Zip the asset into a zip file
+        id: zip_asset
+        run: |
+          cd Release
+          7z a -tzip Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}.zip Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}*
+
+      - name: Run Examples Windows
+        if: startsWith(matrix.config.os, 'windows')  
+        run: | 
+          $ROOT="$(pwd)"          
+          $RELEA="$ROOT/Release/Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}"
+          cd $RELEA
+          .\Konclude.bat classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          .\Konclude.bat satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          .\Konclude.bat owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          .\Konclude.bat owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          .\Konclude.bat owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          .\Konclude.bat sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          .\Konclude.bat sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+     
+      - name: Upload release assets
+        id: upload_assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: Release/Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}.zip
+          asset_name: Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}.zip
+          asset_content_type: application/octet-stream     
+          
+          
+          
+          
+          
+          
+          
+          
+
+
+  prebuild_qt_macosx:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 600
+    needs: [release, tags]
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "MacOS Latest Clang Qt Prebuild",
+            os: macos-latest,
+            build_type: "Release", 
+            cc: "clang", 
+            cxx: "clang++",
+            qt: 5.12.10,
+            qt_major: 5.12
+          }
+
+    steps:
+   
+    
+      - name: Install Dependencies
+        run: |          
+          brew install autoconf automake libtool gtk-doc bison mpfr libgcrypt libiconv 
+                 
+      - name: Prepare Environment
+        run: |
+          ROOT="$(pwd)"
+          mkdir src
+          mkdir lib
+          
+      - name: Download Qt
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install qt
+          cd $ROOT/src \
+          && wget -q https://download.qt.io/official_releases/qt/${{ matrix.config.qt_major }}/${{ matrix.config.qt }}/single/qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && tar -xJf qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && mv qt-everywhere-src-${{ matrix.config.qt }} qt-static
+          
+      - name: Prepare Qt
+        run: |
+          ROOT="$(pwd)"          
+          cd $ROOT/src/qt-static \
+          && export MAKE=/usr/bin/make \
+          && ./configure -static -prefix $ROOT/qt-static -extprefix $ROOT/lib/qt-static -no-opengl -nomake examples -nomake tests -nomake tools -skip webview -skip webchannel -skip 3d -skip script -skip webengine  -opensource -platform macx-clang -no-icu -confirm-license -opensource
+          
+          
+      - name: Cache Qt Compilation
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-qt-compilation
+        with:
+          path: src/qt-static
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.config.qt }}-${{ hashFiles('src/qt-static/**/makefile') }}
+          
+      - name: Compile Qt
+        run: |
+          ROOT="$(pwd)"
+          cd $ROOT/src/qt-static
+          make           
+
+          
+          
+          
+
+  build_macosx:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 600
+    needs: [prebuild_qt_macosx, release, tags]
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "MacOS Latest Clang Static",
+            os: macos-latest,
+            build_type: "Release", 
+            cc: "clang", 
+            cxx: "clang++",
+            qt: 5.12.10,
+            qt_major: 5.12
+          }
+
+    steps:
+          
+      - name: Checkout Konclude code
+        uses: actions/checkout@v2       
+        with:
+          path: "konclude-static"    
+
+
+      - name: Update Revision Information
+        run: |
+          echo "#define KONCLUDE_VERSION_GIT_REVISION_NUMBER ${{needs.tags.outputs.revision_build}}" > "konclude-static/revision-git.h"
+          echo "#define KONCLUDE_VERSION_GIT_TAG_NAME_STRING \"${{needs.tags.outputs.revision_tag}}\"" >> "konclude-static/revision-git.h"
+          echo "#define KONCLUDE_VERSION_GIT_REVISION_HASH_STRING \"${{needs.tags.outputs.revision_hash}}\"" >> "konclude-static/revision-git.h"
+          
+    
+      - name: Install Dependencies
+        run: |          
+          brew install autoconf automake libtool gtk-doc bison mpfr libgcrypt libiconv 
+          echo "checking bison version"  
+          brew unlink bison
+          brew link bison --force
+          echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile     
+          cp /usr/local/opt/bison/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
+          source ~/.bash_profile 
+        
+      - name: Prepare Environment
+        run: |
+          ROOT="$(pwd)"
+          mkdir src
+          mkdir lib
+          
+      - name: Install Libxml2
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install libxml2
+          cd $ROOT/src \
+          && wget ftp://xmlsoft.org/libxml2/libxml2-2.9.9.tar.gz \
+          && tar -xvzf libxml2-2.9.9.tar.gz \
+          && mv libxml2-2.9.9 libxml2-static \
+          && cd libxml2-static \
+          && ./configure --without-python --prefix=$ROOT/lib/libxml2-static \
+          && make \
+          && make install
+          
+      - name: Install Redland Raptor
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install raptor          
+          echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile 
+          cd $ROOT/src \
+          && wget http://download.librdf.org/source/raptor2-2.0.15.tar.gz \
+          && tar -xvzf raptor2-2.0.15.tar.gz \
+          && mv raptor2-2.0.15 raptor2-static \
+          && cd raptor2-static \
+          && export LIBS="-L$ROOT/lib/libxml2-static/lib -lxml2" \
+          && export LIBXML_LIBS="-L$ROOT/lib/libxml2-static/lib -lxml2" \
+          && export LIBXML_LIBS="$ROOT/lib/libxml2-static/libxml2.a" \
+          && ./configure --prefix=$ROOT/lib/raptor2-static --with-xml2-config=$ROOT/lib/libxml2-static/bin/xml2-config \
+          && make \
+          && make install
+          
+      - name: Install Redland Rasqal
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install rasqal
+          cd $ROOT/src \
+          && git clone git://github.com/konclude/rasqal.git \
+          && mv rasqal rasqal-static \
+          && cd rasqal-static \
+          \
+          && export RAPTOR2_CFLAGS="-I $ROOT/lib/raptor2-static/include/raptor2" \
+          && export RAPTOR2_LIBS="-L$ROOT/lib/raptor2-static/lib -lraptor2 -L$ROOT/lib/libxml2-static/lib -lxml2 -lm -ldl" \
+          && export RAPTOR_VERSION=2.0.15 \
+          && sed -i -e 's#RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`#if test -n "$RAPTOR_VERSION"; then echo "Assuming raptor version $RAPTOR_VERSION"; else RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`; fi#g' configure.ac \
+          && git log --oneline | grep -q 0c42ebc \
+          \
+          && ./autogen.sh --prefix=$ROOT/lib/rasqal-static --disable-gtk-doc \
+          && ls \
+          && make \
+          && make install       
+          
+      - name: Install Redland RDFlib
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install redland rdflib
+          cd $ROOT \
+          && wget http://download.librdf.org/source/redland-1.0.17.tar.gz \
+          && tar -xvzf redland-1.0.17.tar.gz \
+          && mv redland-1.0.17 redland-static \
+          && cd redland-static \
+          \
+          && export RAPTOR2_CFLAGS="-I $ROOT/lib/raptor2-static/include/raptor2" \
+          && export RAPTOR2_LIBS="-L$ROOT/lib/raptor2-static/lib -lraptor2 -L$ROOT/lib/libxml2-static/lib -lxml2 -lm -ldl" \
+          && export RAPTOR_VERSION=2.0.15 \
+          && sed -i -e 's#RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`#if test -n "$RAPTOR_VERSION"; then echo "Assuming raptor version $RAPTOR_VERSION"; else RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`; fi#g' configure \
+          \
+          && export RASQAL_CFLAGS="-I $ROOT/lib/rasqal-static/include/rasqal" \
+          && export RASQAL_LIBS="-L$ROOT/lib/rasqal-static/lib -lrasqal -L$ROOT/lib/raptor-static/lib -lraptor2 -L$ROOT/lib/libxml2-static/lib -lxml2 -lm -ldl -lm" \
+          && export RASQAL_VERSION=0.9.33 \
+          && sed -i -e 's#RASQAL_VERSION=`$PKG_CONFIG rasqal --modversion 2>/dev/null`#if test -n "$RASQAL_VERSION"; then echo "Assuming rasqal version $RASQAL_VERSION"; else RASQAL_VERSION=`$PKG_CONFIG rasqal --modversion 2>/dev/null`; fi#g' configure \
+          \
+          && ./configure --prefix=$ROOT/lib/redland-static \
+          && sed -i -e 's#librdf_storage_virtuoso_la_LIBADD = -lodbc librdf.la -lrasqal#librdf_storage_virtuoso_la_LIBADD = -lodbc librdf.la#g' src/Makefile \
+          && make \
+          && make install          
+          
+          
+          
+   
+      - name: Install Jemalloc
+        run: |
+          ROOT="$(pwd)" 
+          wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+          tar -xjf jemalloc-5.2.1.tar.bz2
+          mv jemalloc-5.2.1 jemalloc-static
+          cd jemalloc-static
+          ./configure --prefix=$ROOT/lib/jemalloc-static
+          make
+          make install
+                    
+          
+      - name: Download Qt
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install qt
+          cd $ROOT/src \
+          && wget -q https://download.qt.io/official_releases/qt/${{ matrix.config.qt_major }}/${{ matrix.config.qt }}/single/qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && tar -xJf qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && mv qt-everywhere-src-${{ matrix.config.qt }} qt-static
+          
+      - name: Prepare Qt
+        run: |
+          ROOT="$(pwd)"          
+          cd $ROOT/src/qt-static \
+          && export MAKE=/usr/bin/make \
+          && ./configure -static -prefix $ROOT/qt-static -extprefix $ROOT/lib/qt-static -no-opengl -nomake examples -nomake tests -nomake tools -skip webview -skip webchannel -skip 3d -skip script -skip webengine  -opensource -platform macx-clang -no-icu -confirm-license -opensource
+          
+          
+      - name: Cache Qt Compilation
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-qt-compilation
+        with:
+          path: src/qt-static
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.config.qt }}-${{ hashFiles('src/qt-static/**/makefile') }}
+          
+      - name: Compile Qt
+        run: |
+          ROOT="$(pwd)"
+          cd $ROOT/src/qt-static
+          make           
+          
+      - name: Install Qt
+        run: |
+          ROOT="$(pwd)"          
+          cd $ROOT/src/qt-static \
+          && make install
+          
+        
+      - name: Prepare Konclude Sources
+        run: |
+          ROOT="$(pwd)"
+          # remove intermediate files (to ensure a clean build later)
+          cd $ROOT \
+          && rm -rf konclude-static/Release \
+          && rm -rf konclude-static/release \
+          && rm -rf konclude-static/GeneratedFiles
+          
+          mkdir -p $ROOT/konclude-static/External/librdf/Linux/x64/lib/release          
+          mkdir -p $ROOT/konclude-static/External/jemalloc/Linux/x64/lib/release   
+          cp $ROOT/lib/libxml2-static/lib/libxml2.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/libxml2.a \
+          && cp $ROOT/lib/raptor2-static/lib/libraptor2.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/libraptor2.a \
+          && cp $ROOT/lib/rasqal-static/lib/librasqal.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/librasqal.a \
+          && cp $ROOT/lib/redland-static/lib/librdf.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/librdf.a \
+          && cp $ROOT/lib/jemalloc-static/lib/libjemalloc.a $ROOT/konclude-static/External/jemalloc/Linux/x64/lib/release/libjemalloc.a 
+          
+        
+      - name: Prepare Konclude Compilation
+        run: | 
+          ROOT="$(pwd)"          
+          BUILD_DIR=$ROOT/konclude-static
+          cd $BUILD_DIR
+          export PATH=$ROOT/lib/qt-static/bin:$PATH
+          export QTDIR=$ROOT/lib/qt-static
+          export QTINC=$ROOT/lib/qt-static/include
+          export QTLIB=$ROOT/lib/qt-static/lib
+          sed -i -e 's#unix: LIBS += -lz -lltdl -lgmp -ldl -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc#unix:macx: LIBS += -lz -ldl /usr/local/opt/xz/lib/liblzma.a -lcurl -lxslt -L/usr/local/lib /usr/local/lib/../Cellar/libgcrypt/1.9.2/lib/libgcrypt.a  /usr/local/lib/libmpfr.a /usr/local/opt/gmp/lib/libgmp.a /usr/local/opt/libgpg-error/lib/libgpg-error.a /usr/local/opt/libtool/lib/libltdl.a /usr/local/opt/pcre/lib/libpcre.a -liconv -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc -ldb#g' Konclude.pro
+          qmake -r CONFIG+=release CONFIG+=x86_64 CONFIG-=debug CONFIG+=static -spec $ROOT/lib/qt-static/mkspecs/macx-clang Konclude.pro
+          
+          
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude MacOS Sources
+          path: konclude-static  
+          
+      - name: Compile Konclude
+        run: | 
+          ROOT="$(pwd)"          
+          BUILD_DIR=$ROOT/konclude-static
+          cd $BUILD_DIR          
+          make
+          otool -L ./Release/Konclude.app/Contents/MacOS/Konclude
+          ./Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -c Configs/default-config.xml -v -e -r Tests/Test-response.xml -q Tests/galen-ALEHIF+-classify-request.xml -w 1
+                    
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude MacOS Compilation
+          path: konclude-static             
+               
+           
+      - name: Create Konclude Release
+        run: | 
+          ROOT="$(pwd)" 
+          mkdir Release          
+          
+          BUILD_DIR=$ROOT/konclude-static
+          PROJ=$ROOT/konclude-static
+          RELEA="$ROOT/Release/Konclude-${{needs.tags.outputs.git_tag}}-OSX-x64-Clang-Static-Qt${{ matrix.config.qt }}"
+          
+          mkdir $RELEA
+          mkdir "$RELEA/Configs"
+          mkdir "$RELEA/Tests"
+          mkdir "$RELEA/Binaries"
+          
+          cd $BUILD_DIR
+          cp "$BUILD_DIR/Release/Konclude.app/Contents/MacOS/Konclude" "$RELEA/Binaries"
+          
+          cp "$PROJ/LGPL-3.0.txt" "$RELEA"
+          cp "$PROJ/GPL.txt" "$RELEA"
+          cp "$PROJ/Readme.md" "$RELEA"
+          cp "$PROJ/Tests/1b-satisfiability-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/galen.owl.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/galen-classify-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/galen-ALEHIF+-classify-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/roberts-family-full-D.owl.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/roberts-family-full-D-classify-realize-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench.owl.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench-data-1.ttl" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench-sparql-load-and-query-test.sparql" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench-sparql-load-and-complex-query-rasqal-test.sparql" "$RELEA/Tests"
+          cp "$PROJ/Tests/roberts-family-full-sparql-existential-variables-query-test.sparql" "$RELEA/Tests"
+          cp "$PROJ/Tests/test-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Scripts/Konclude" "$RELEA"
+          cp "$PROJ/Scripts/Konclude.sh" "$RELEA"
+          cp "$PROJ/Configs/default-config.xml" "$RELEA/Configs"
+          cp "$PROJ/Configs/querying-config.xml" "$RELEA/Configs"
+          
+          chmod 777 $RELEA/Binaries/Konclude
+          chmod 777 $RELEA/Konclude
+          chmod 777 $RELEA/Konclude.sh
+          
+                    
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude MacOS Prepared Release Directory  
+          path: Release/Konclude-${{needs.tags.outputs.git_tag}}-OSX-x64-Clang-Static-Qt${{ matrix.config.qt }}        
+
+
+      - name: Zip the asset into a zip file
+        id: zip_asset
+        run: |
+          cd Release
+          7z a -tzip Konclude-${{needs.tags.outputs.git_tag}}-OSX-x64-Clang-Static-Qt${{ matrix.config.qt }}.zip Konclude-${{needs.tags.outputs.git_tag}}-OSX-x64-Clang-Static-Qt${{ matrix.config.qt }}*          
+          
+          
+      - name: Konclude Examples Test
+        run: | 
+          ROOT="$(pwd)"  
+          cd Release/Konclude-${{needs.tags.outputs.git_tag}}-OSX-x64-Clang-Static-Qt${{ matrix.config.qt }}
+          
+          ./Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          ./Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          ./Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          ./Konclude owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          ./Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          ./Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          ./Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+     
+     
+      - name: Upload release assets
+        id: upload_assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: Release/Konclude-${{needs.tags.outputs.git_tag}}-OSX-x64-Clang-Static-Qt${{ matrix.config.qt }}.zip
+          asset_name: Konclude-${{needs.tags.outputs.git_tag}}-OSX-x64-Clang-Static-Qt${{ matrix.config.qt }}.zip
+          asset_content_type: application/octet-stream     
+          
+                      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  prebuild_qt_linux:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 600
+    needs: [release, tags]    
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu 16.04 GCC Qt Prebuild",
+            os: ubuntu-16.04,
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++",
+            qt: 5.12.10,
+            qt_major: 5.12
+          }
+
+
+    steps:
+          
+      - name: Checkout Konclude code
+        uses: actions/checkout@v2       
+        with:
+          path: "konclude-static"
+        
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install -y \
+          apt-utils \
+          git \
+          build-essential \
+          make \
+          wget \
+          xz-utils \
+          python \
+          flex \
+          bison \
+          gperf \
+          python-dev \
+          autotools-dev \
+          automake \
+          autoconf \
+          libtool \
+          gtk-doc-tools \
+          libgmp3-dev \
+          zlib1g-dev \
+          libxcb-xfixes0-dev \
+          liblzma-dev \
+          libpcre3-dev \
+          libjasper1 \
+          libjasper-dev
+       
+      - name: Prepare Environment
+        run: |
+          ROOT="$(pwd)"
+          mkdir src
+          mkdir lib
+          
+
+
+      - name: Download Qt
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install qt
+          cd $ROOT/src \
+          && wget -q https://download.qt.io/official_releases/qt/${{ matrix.config.qt_major }}/${{ matrix.config.qt }}/single/qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && tar -xJf qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && mv qt-everywhere-src-${{ matrix.config.qt }} qt-static
+          
+          
+      - name: Prepare Qt
+        run: |
+          ROOT="$(pwd)"          
+          cd $ROOT/src/qt-static \
+          && export MAKE=/usr/bin/make \
+          && ./configure -static -prefix $ROOT/qt-static -extprefix $ROOT/lib/qt-static -no-opengl -nomake examples -nomake tests -nomake tools -skip webview -skip webchannel -skip 3d -skip script -skip webengine  -opensource -platform linux-g++-64 -no-icu -no-jasper -no-libpng -no-libjpeg -no-tiff -qt-pcre -confirm-license -opensource
+          
+          
+      - name: Cache Qt Compilation
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-qt-compilation
+        with:
+          path: src/qt-static
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.config.qt }}-${{ hashFiles('src/qt-static/**/makefile') }}
+                    
+          
+      - name: Compile Qt
+        run: |
+          ROOT="$(pwd)"
+          cd $ROOT/src/qt-static
+          make           
+          
+
+
+
+  build_linux:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 600
+    needs: [prebuild_qt_linux, release, tags]    
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu 16.04 GCC Static",
+            os: ubuntu-16.04,
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++",
+            qt: 5.12.10,
+            qt_major: 5.12
+          }
+
+
+    steps:
+          
+      - name: Checkout Konclude code
+        uses: actions/checkout@v2       
+        with:
+          path: "konclude-static"
+          
+          
+      - name: Update Revision Information
+        run: |
+          echo "#define KONCLUDE_VERSION_GIT_REVISION_NUMBER ${{needs.tags.outputs.revision_build}}" > "konclude-static/revision-git.h"
+          echo "#define KONCLUDE_VERSION_GIT_TAG_NAME_STRING \"${{needs.tags.outputs.revision_tag}}\"" >> "konclude-static/revision-git.h"
+          echo "#define KONCLUDE_VERSION_GIT_REVISION_HASH_STRING \"${{needs.tags.outputs.revision_hash}}\"" >> "konclude-static/revision-git.h"
+          
+        
+      - name: Install Dependencies
+        run: |
+          sudo apt-get install -y \
+          apt-utils \
+          git \
+          build-essential \
+          make \
+          wget \
+          xz-utils \
+          python \
+          flex \
+          gperf \
+          python-dev \
+          autotools-dev \
+          automake \
+          autoconf \
+          libtool \
+          gtk-doc-tools \
+          libgmp3-dev \
+          zlib1g-dev \
+          libxcb-xfixes0-dev \
+          liblzma-dev \
+          libpcre3-dev \
+          libjasper1 \
+          libjasper-dev
+       
+      - name: Prepare Environment
+        run: |
+          ROOT="$(pwd)"
+          mkdir src
+          mkdir lib
+          
+      - name: Update bison
+        run: |
+          ROOT="$(pwd)"
+          sudo apt-get remove bison
+          wget http://ftp.gnu.org/gnu/bison/bison-3.7.6.tar.gz
+          tar -zxvf bison-3.7.6.tar.gz
+          cd bison-3.7.6
+          ./configure
+          make
+          sudo make install    
+          bison -V
+          
+      - name: Install Libxml2
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install libxml2
+          cd $ROOT/src \
+          && wget ftp://xmlsoft.org/libxml2/libxml2-2.9.9.tar.gz \
+          && tar -xvzf libxml2-2.9.9.tar.gz \
+          && mv libxml2-2.9.9 libxml2-static \
+          && cd libxml2-static \
+          && ./configure --without-python --prefix=$ROOT/lib/libxml2-static \
+          && make \
+          && make install
+          
+      - name: Install Redland Raptor
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install raptor
+          cd $ROOT/src \
+          && wget http://download.librdf.org/source/raptor2-2.0.15.tar.gz \
+          && tar -xvzf raptor2-2.0.15.tar.gz \
+          && mv raptor2-2.0.15 raptor2-static \
+          && cd raptor2-static \
+          && export LIBS="-L$ROOT/lib/libxml2-static/lib -lxml2" \
+          && export LIBXML_LIBS="-L$ROOT/lib/libxml2-static/lib -lxml2" \
+          && export LIBXML_LIBS="$ROOT/lib/libxml2-static/libxml2.a" \
+          && ./configure --prefix=$ROOT/lib/raptor2-static --with-xml2-config=$ROOT/lib/libxml2-static/bin/xml2-config \
+          && make \
+          && make install
+          
+      - name: Install Redland Rasqal
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install rasqal
+          cd $ROOT/src \
+          && git clone git://github.com/konclude/rasqal.git \
+          && mv rasqal rasqal-static \
+          && cd rasqal-static \
+          \
+          && export RAPTOR2_CFLAGS="-I $ROOT/lib/raptor2-static/include/raptor2" \
+          && export RAPTOR2_LIBS="-L$ROOT/lib/raptor2-static/lib -lraptor2 -L$ROOT/lib/libxml2-static/lib -lxml2 -lm -ldl" \
+          && export RAPTOR_VERSION=2.0.15 \
+          && sed -i -e 's#RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`#if test -n "$RAPTOR_VERSION"; then echo "Assuming raptor version $RAPTOR_VERSION"; else RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`; fi#g' configure.ac \
+          && git log --oneline | grep -q 0c42ebc \
+          \
+          && ./autogen.sh --prefix=$ROOT/lib/rasqal-static \
+          && make \
+          && make install
+          
+      - name: Install Redland RDFlib
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install redland rdflib
+          cd $ROOT \
+          && wget http://download.librdf.org/source/redland-1.0.17.tar.gz \
+          && tar -xvzf redland-1.0.17.tar.gz \
+          && mv redland-1.0.17 redland-static \
+          && cd redland-static \
+          \
+          && export RAPTOR2_CFLAGS="-I $ROOT/lib/raptor2-static/include/raptor2" \
+          && export RAPTOR2_LIBS="-L$ROOT/lib/raptor2-static/lib -lraptor2 -L$ROOT/lib/libxml2-static/lib -lxml2 -lm -ldl" \
+          && export RAPTOR_VERSION=2.0.15 \
+          && sed -i -e 's#RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`#if test -n "$RAPTOR_VERSION"; then echo "Assuming raptor version $RAPTOR_VERSION"; else RAPTOR_VERSION=`$PKG_CONFIG raptor2 --modversion 2>/dev/null`; fi#g' configure \
+          \
+          && export RASQAL_CFLAGS="-I $ROOT/lib/rasqal-static/include/rasqal" \
+          && export RASQAL_LIBS="-L$ROOT/lib/rasqal-static/lib -lrasqal -L$ROOT/lib/raptor-static/lib -lraptor2 -L$ROOT/lib/libxml2-static/lib -lxml2 -lm -ldl -lm" \
+          && export RASQAL_VERSION=0.9.33 \
+          && sed -i -e 's#RASQAL_VERSION=`$PKG_CONFIG rasqal --modversion 2>/dev/null`#if test -n "$RASQAL_VERSION"; then echo "Assuming rasqal version $RASQAL_VERSION"; else RASQAL_VERSION=`$PKG_CONFIG rasqal --modversion 2>/dev/null`; fi#g' configure \
+          \
+          && ./configure --prefix=$ROOT/lib/redland-static \
+          && sed -i -e 's#librdf_storage_virtuoso_la_LIBADD = -lodbc librdf.la -lrasqal#librdf_storage_virtuoso_la_LIBADD = -lodbc librdf.la#g' src/Makefile \
+          && make \
+          && make install
+          
+          
+   
+      - name: Install Jemalloc
+        run: |
+          ROOT="$(pwd)" 
+          wget https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+          tar -xjf jemalloc-5.2.1.tar.bz2
+          mv jemalloc-5.2.1 jemalloc-static
+          cd jemalloc-static
+          ./configure --prefix=$ROOT/lib/jemalloc-static
+          make
+          make install
+          
+
+      - name: Download Qt
+        run: |
+          ROOT="$(pwd)"
+          # download, build and install qt
+          cd $ROOT/src \
+          && wget -q https://download.qt.io/official_releases/qt/${{ matrix.config.qt_major }}/${{ matrix.config.qt }}/single/qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && tar -xJf qt-everywhere-src-${{ matrix.config.qt }}.tar.xz \
+          && mv qt-everywhere-src-${{ matrix.config.qt }} qt-static
+          
+          
+      - name: Prepare Qt
+        run: |
+          ROOT="$(pwd)"          
+          cd $ROOT/src/qt-static \
+          && export MAKE=/usr/bin/make \
+          && ./configure -static -prefix $ROOT/qt-static -extprefix $ROOT/lib/qt-static -no-opengl -nomake examples -nomake tests -nomake tools -skip webview -skip webchannel -skip 3d -skip script -skip webengine  -opensource -platform linux-g++-64 -no-icu -no-jasper -no-libpng -no-libjpeg -no-tiff -qt-pcre -confirm-license -opensource
+          
+          
+      - name: Cache Qt Compilation
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-qt-compilation
+        with:
+          path: src/qt-static
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.config.qt }}-${{ hashFiles('src/qt-static/**/makefile') }}
+                    
+          
+      - name: Compile Qt
+        run: |
+          ROOT="$(pwd)"
+          cd $ROOT/src/qt-static
+          make           
+          
+          
+      - name: Install Qt
+        run: |
+          ROOT="$(pwd)"          
+          cd $ROOT/src/qt-static \
+          && make install
+          
+          
+      - name: Prepare Konclude Sources
+        run: |
+          ROOT="$(pwd)"
+          # remove intermediate files (to ensure a clean build later)
+          cd $ROOT \
+          && rm -rf konclude-static/Release \
+          && rm -rf konclude-static/release \
+          && rm -rf konclude-static/GeneratedFiles
+          
+          mkdir -p $ROOT/konclude-static/External/librdf/Linux/x64/lib/release
+          mkdir -p $ROOT/konclude-static/External/jemalloc/Linux/x64/lib/release
+          cp $ROOT/lib/libxml2-static/lib/libxml2.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/libxml2.a 
+          cp $ROOT/lib/raptor2-static/lib/libraptor2.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/libraptor2.a
+          cp $ROOT/lib/rasqal-static/lib/librasqal.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/librasqal.a
+          cp $ROOT/lib/redland-static/lib/librdf.a $ROOT/konclude-static/External/librdf/Linux/x64/lib/release/librdf.a          
+          cp $ROOT/lib/jemalloc-static/lib/libjemalloc.a $ROOT/konclude-static/External/jemalloc/Linux/x64/lib/release/libjemalloc.a      
+          
+        
+      - name: Prepare Konclude Compilation
+        run: | 
+          ROOT="$(pwd)"          
+          BUILD_DIR=$ROOT/konclude-static
+          cd $BUILD_DIR
+          export PATH=$ROOT/lib/qt-static/bin:$PATH
+          export QTDIR=$ROOT/lib/qt-static
+          export QTINC=$ROOT/lib/qt-static/include
+          export QTLIB=$ROOT/lib/qt-static/lib
+          sed -i -e 's\unix: LIBS += -lz -lltdl -lgmp -ldl -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc\unix:!macx: LIBS += -lz -ldl -llzma -lpcre /usr/lib/x86_64-linux-gnu/libgmp.a /usr/lib/x86_64-linux-gnu/libjasper.a /usr/lib/x86_64-linux-gnu/libltdl.a -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc\g' Konclude.pro
+          qmake -r CONFIG+=release CONFIG+=x86_64 CONFIG-=debug CONFIG+=static -spec $ROOT/lib/qt-static/mkspecs/linux-g++-64 Konclude.pro
+          
+          
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude Linux Sources
+          path: konclude-static            
+          
+      - name: Compile Konclude
+        run: | 
+          ROOT="$(pwd)"          
+          BUILD_DIR=$ROOT/konclude-static
+          cd $BUILD_DIR          
+          make
+          ldd ./Release/Konclude
+          ./Release/Konclude owllinkfile -c Configs/default-config.xml -v -e -r Tests/Test-response.xml -q Tests/galen-ALEHIF+-classify-request.xml -w 1
+                    
+                    
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude Linux Compilation
+          path: konclude-static   
+          
+
+      - name: Create Konclude Release
+        run: | 
+          ROOT="$(pwd)"   
+          revisionCount="966"
+          revisionTagName="v0.6.2"
+          revisionHashName="fa20b125"
+          mkdir Release          
+          
+          BUILD_DIR=$ROOT/konclude-static
+          PROJ=$ROOT/konclude-static
+          RELEA="$ROOT/Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-x64-GCC-Static-Qt${{ matrix.config.qt }}"
+          
+          mkdir $RELEA
+          mkdir "$RELEA/Configs"
+          mkdir "$RELEA/Tests"
+          mkdir "$RELEA/Binaries"
+          
+          cd $BUILD_DIR
+          cp "$BUILD_DIR/Release/Konclude" "$RELEA/Binaries"
+          
+          cp "$PROJ/LGPL-3.0.txt" "$RELEA"
+          cp "$PROJ/GPL.txt" "$RELEA"
+          cp "$PROJ/Readme.md" "$RELEA"
+          cp "$PROJ/Tests/1b-satisfiability-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/galen.owl.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/galen-classify-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/galen-ALEHIF+-classify-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/roberts-family-full-D.owl.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/roberts-family-full-D-classify-realize-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench.owl.xml" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench-data-1.ttl" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench-sparql-load-and-query-test.sparql" "$RELEA/Tests"
+          cp "$PROJ/Tests/lubm-univ-bench-sparql-load-and-complex-query-rasqal-test.sparql" "$RELEA/Tests"
+          cp "$PROJ/Tests/roberts-family-full-sparql-existential-variables-query-test.sparql" "$RELEA/Tests"
+          cp "$PROJ/Tests/test-request.xml" "$RELEA/Tests"
+          cp "$PROJ/Scripts/Konclude" "$RELEA"
+          cp "$PROJ/Scripts/Konclude.sh" "$RELEA"
+          cp "$PROJ/Configs/default-config.xml" "$RELEA/Configs"
+          cp "$PROJ/Configs/querying-config.xml" "$RELEA/Configs"
+          
+          chmod 777 $RELEA/Binaries/Konclude
+          chmod 777 $RELEA/Konclude
+          chmod 777 $RELEA/Konclude.sh
+                    
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude Linux Prepared Release Directory
+          path: Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-x64-GCC-Static-Qt${{ matrix.config.qt }}
+
+
+
+      - name: Zip the asset into a zip file
+        id: zip_asset
+        run: |
+          cd Release
+          7z a -tzip Konclude-${{needs.tags.outputs.git_tag}}-Linux-x64-GCC-Static-Qt${{ matrix.config.qt }}.zip Konclude-${{needs.tags.outputs.git_tag}}-Linux-x64-GCC-Static-Qt${{ matrix.config.qt }}*          
+          
+          
+      - name: Konclude Examples Test
+        run: | 
+          ROOT="$(pwd)"  
+          cd Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-x64-GCC-Static-Qt${{ matrix.config.qt }}
+          
+          ./Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          ./Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          ./Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          ./Konclude owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          ./Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          ./Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          ./Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+     
+     
+      - name: Upload release assets
+        id: upload_assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-x64-GCC-Static-Qt${{ matrix.config.qt }}.zip
+          asset_name: Konclude-${{needs.tags.outputs.git_tag}}-Linux-x64-GCC-Static-Qt${{ matrix.config.qt }}.zip
+          asset_content_type: application/octet-stream     
+          
+                    
+
+
+
+
+
+
+
+
+
+  prebuild_qt_docker:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 600
+    needs: [release, tags]    
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu Latest Docker Qt Prebuild",
+            os: ubuntu-latest,
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++",
+            qt: 5.12.10,
+            qt_major: 5.12
+          }
+
+
+    steps:
+          
+
+      - name: Prepare Directories
+        run: |
+          mkdir Konclude
+          mkdir KoncludeDocker
+
+          
+      - name: Checkout Konclude code
+        uses: actions/checkout@v2
+        with:
+          path: Konclude
+          
+
+      - name: Checkout Konclude Docker
+        uses: actions/checkout@v2
+        with:
+          repository: konclude/KoncludeDocker
+          path: KoncludeDocker
+
+
+
+      - name: Cache Docker Konclude Run Image
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-konclude-docker-0-run-Image
+        with:
+          path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
+   
+                        
+            
+      - name: Build Run Image
+        working-directory: KoncludeDocker
+        run: |           
+          mkdir -p ../DockerCacheDirectory
+          DOCKERIMAGE="koncluderun:latest"
+          FILEIMAGE="../DockerCacheDirectory/KoncludeDockerRunImage.tar.gz"
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
+          fi
+          echo "DockerCacheDirectory/" >> .dockerignore
+          ./run/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE  
+         
+        
+          
+        
+        
+
+      - name: Cache Docker Konclude Develop Image
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-konclude-docker-0-develop-Image
+        with:
+          path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
+            
+                        
+            
+            
+      - name: Build Develop Image
+        working-directory: KoncludeDocker
+        run: | 
+          mkdir -p ../DockerCacheDirectory
+          DOCKERIMAGE="koncludedev:latest"
+          FILEIMAGE="../DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz"
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
+          fi
+          echo "DockerCacheDirectory/" >> .dockerignore
+          (while true; do 
+          df -h
+          sleep 15
+          done) &          
+          ./develop/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE  
+  
+          
+          
+          
+          
+
+
+  build_docker:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 600
+    needs: [release, tags, prebuild_qt_docker]    
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu Latest Docker Static",
+            os: ubuntu-latest,
+            build_type: "Release", 
+            cc: "gcc", 
+            cxx: "g++",
+            qt: 5.12.10,
+            qt_major: 5.12
+          }
+
+
+    steps:
+          
+
+      - name: Prepare Directories
+        run: |
+          mkdir Konclude
+          mkdir KoncludeDocker
+
+          
+      - name: Checkout Konclude code
+        uses: actions/checkout@v2
+        with:
+          path: Konclude
+          
+
+      - name: Checkout Konclude Docker
+        uses: actions/checkout@v2
+        with:
+          repository: konclude/KoncludeDocker
+          path: KoncludeDocker
+
+
+          
+          
+      - name: Update Revision Information
+        run: |
+          echo "#define KONCLUDE_VERSION_GIT_REVISION_NUMBER ${{needs.tags.outputs.revision_build}}" > "Konclude/revision-git.h"
+          echo "#define KONCLUDE_VERSION_GIT_TAG_NAME_STRING \"${{needs.tags.outputs.revision_tag}}\"" >> "Konclude/revision-git.h"
+          echo "#define KONCLUDE_VERSION_GIT_REVISION_HASH_STRING \"${{needs.tags.outputs.revision_hash}}\"" >> "Konclude/revision-git.h"
+
+
+
+      - name: Cache Docker Konclude Run Image
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-konclude-docker-0-run-Image
+        with:
+          path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
+                        
+            
+      - name: Build Run Image
+        working-directory: KoncludeDocker
+        run: |           
+          mkdir -p ../DockerCacheDirectory
+          DOCKERIMAGE="koncluderun:latest"
+          FILEIMAGE="../DockerCacheDirectory/KoncludeDockerRunImage.tar.gz"
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
+          fi
+          echo "DockerCacheDirectory/" >> .dockerignore
+          ./run/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE  
+         
+        
+          
+        
+        
+
+      - name: Cache Docker Konclude Develop Image
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-konclude-docker-0-develop-Image
+        with:
+          path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
+           
+                        
+            
+            
+      - name: Build Develop Image
+        working-directory: KoncludeDocker
+        run: | 
+          mkdir -p ../DockerCacheDirectory
+          DOCKERIMAGE="koncludedev:latest"
+          FILEIMAGE="../DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz"
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
+          fi
+          echo "DockerCacheDirectory/" >> .dockerignore
+          (while true; do 
+          df -h
+          sleep 15
+          done) &          
+          ./develop/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE  
+  
+                    
+                      
+      - name: Build Build Image
+        working-directory: KoncludeDocker
+        run: |
+          DOCKERIMAGE="koncludebuild:latest"
+          echo "DockerCacheDirectory/" >> .dockerignore
+          (while true; do 
+          df -h
+          sleep 15
+          done) &          
+          ./build/snap.sh
+        
+    
+          
+      - name: Build Deploy Image
+        working-directory: KoncludeDocker
+        run: | 
+          DOCKERIMAGE="konclude:latest"
+          FILEIMAGE="../DockerCacheDirectory/Konclude-${{needs.tags.outputs.git_tag}}-Docker-Image.tar.gz"
+          echo "DockerCacheDirectory/" >> .dockerignore
+          (while true; do 
+          df -h
+          sleep 15
+          done) &          
+          ./deploy/snap.sh
+          docker tag konclude konclude/konclude:latest
+          docker tag konclude konclude/konclude:${{needs.tags.outputs.git_tag}}
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE  
+          
+  
+         
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude Docker Image
+          path: DockerCacheDirectory/Konclude-${{needs.tags.outputs.git_tag}}-Docker-Image.tar.gz
+          
+  
+  
+      - name: Build
+        working-directory: KoncludeDocker
+        run: | 
+          (while true; do 
+          df -h
+          sleep 15
+          done) & 
+          pwd
+          echo "DockerCacheDirectory/" >> .dockerignore
+          ./build_release_parameterized.sh ${{needs.tags.outputs.revision_build}}  ${{needs.tags.outputs.revision_tag}} ${{needs.tags.outputs.revision_hash}}
+          df -h
+          pwd
+          ls -al 
+          ls -al ../Release
+          
+          
+
+          
+                  
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude-${{needs.tags.outputs.git_tag}}-Linux-Docker-Compiled-x64-GCC4.8.4-Static-Qt${{ matrix.config.qt }}
+          path: Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-Docker-Compiled-x64-GCC4.8.4-Static-Qt${{ matrix.config.qt }}.zip
+          
+                    
+                  
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Konclude-${{needs.tags.outputs.git_tag}}-Sources
+          path: Release/Konclude-${{needs.tags.outputs.git_tag}}-Sources.zip
+
+          
+          
+          
+      - name: Konclude Docker Test
+        run: | 
+          ROOT="$(pwd)"  
+          cd Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-Docker-Compiled-x64-GCC4.8.4-Static-Qt${{ matrix.config.qt }}
+          docker run -v $(pwd)/Tests:/data --rm konclude owllinkfile -i /data/galen-ALEHIF+-classify-request.xml -o /data/test-response.xml
+          
+          
+      - name: Konclude Examples Test
+        run: | 
+          ROOT="$(pwd)"  
+          cd Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-Docker-Compiled-x64-GCC4.8.4-Static-Qt${{ matrix.config.qt }}
+          
+          ./Konclude classification -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-class-hierarchy.owl.xml
+          ./Konclude satisfiability -i Tests/roberts-family-full-D.owl.xml -x http://www.co-ode.org/roberts/family-tree.owl#Aunt
+          ./Konclude owllinkfile -i Tests/galen-classify-request.xml -o response.xml
+          ./Konclude owllinkfile -i Tests/roberts-family-full-D-classify-realize-request.xml
+          ./Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
+          ./Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
+          ./Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+     
+     
+
+      - name: Upload image assets
+        id: upload_assets_image
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: DockerCacheDirectory/Konclude-${{needs.tags.outputs.git_tag}}-Docker-Image.tar.gz
+          asset_name: Konclude-${{needs.tags.outputs.git_tag}}-Docker-Image.zip
+          asset_content_type: application/octet-stream     
+               
+     
+      - name: Upload release assets
+        id: upload_assets_release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: Release/Konclude-${{needs.tags.outputs.git_tag}}-Linux-Docker-Compiled-x64-GCC4.8.4-Static-Qt${{ matrix.config.qt }}.zip
+          asset_name: Konclude-${{needs.tags.outputs.git_tag}}-Linux-Docker-Compiled-x64-GCC4.8.4-Static-Qt${{ matrix.config.qt }}.zip
+          asset_content_type: application/octet-stream     
+          
+      - name: Upload sources assets
+        id: upload_assets_sources
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: Release/Konclude-${{needs.tags.outputs.git_tag}}-Sources.zip
+          asset_name: Konclude-${{needs.tags.outputs.git_tag}}-Sources.zip
+          asset_content_type: application/octet-stream     
+          
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Push image
+        run: |
+          docker push konclude/konclude:latest
+          docker push konclude/konclude:${{needs.tags.outputs.git_tag}}         
+
+
+
+
+
+
