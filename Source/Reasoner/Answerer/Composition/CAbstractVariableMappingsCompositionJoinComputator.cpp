@@ -306,7 +306,7 @@ namespace Konclude {
 						bool splitBothSides = variablePositionMapping->getRightRemainingBindingLinker() && variablePositionMapping->getLeftRemainingBindingLinker();
 						if (splitBothSides) {
 
-							cint64 insertionSplitCount = (cint64)(std::sqrt((double)splits) / 2.0) + 1;
+							cint64 insertionSplitCount = (cint64)(sqrt((double)splits) / 2.0) + 1;
 							cint64 checkingSplitCount = splits / insertionSplitCount;
 							splits = insertionSplitCount * checkingSplitCount;
 
