@@ -69,8 +69,8 @@ install:
       sudo apt-get install -qq libgl1-mesa-dev qt512base; source /opt/qt512/bin/qt512-env.sh;
       CMAKE_OPTS="";
     else
-      brew install cppcheck qt;
-      brew link --force qt;
+      brew install cppcheck qt5;
+      brew link --force qt5;
       export PATH="/usr/local/opt/qt/bin:$PATH" # missing mkspecs fix
       QT5_CMAKE_PREFIX=$(ls -d $(brew --cellar)/qt/*/lib/cmake);
       CMAKE_OPTS="-DCMAKE_PREFIX_PATH=${QT5_CMAKE_PREFIX}";
