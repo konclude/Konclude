@@ -6,6 +6,7 @@ on:
     tags: releases/v*
     branches: master
 
+
 jobs:
 
 
@@ -37,13 +38,7 @@ jobs:
           revision_build=${ADDR[1]}
           echo "::set-output name=revision_tag::$revision_tag"
           echo "::set-output name=revision_build::$revision_build"
-
           
-
-
-
-
-
   release:
     name: Draft build release
     runs-on: ubuntu-latest
@@ -127,7 +122,6 @@ jobs:
         run: |
           Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
           Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"    
-
       - name: Compile Windows        
         run: |
           msbuild Konclude-VS15.sln /p:Configuration=Release /p:Platform="Win64"
@@ -140,7 +134,6 @@ jobs:
       - name: Prepare Windows Execution
         run: |
           Copy-Item ".\External\vcpkg\Windows\x64\bin\*" -Destination "."
-
       - name: Create Konclude Release
         run: | 
           $ROOT="$(pwd)"             
@@ -194,7 +187,6 @@ jobs:
         run: |
           cd Release
           7z a -tzip Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}.zip Konclude-${{needs.tags.outputs.git_tag}}-Windows-x64-MSVC-Dynamic-Qt${{ matrix.config.qt }}*
-
       - name: Run Examples Windows
         if: startsWith(matrix.config.os, 'windows')  
         run: | 
@@ -261,6 +253,7 @@ jobs:
           mkdir src
           mkdir lib
           
+ 
       - name: Download Qt
         run: |
           ROOT="$(pwd)"
@@ -291,11 +284,9 @@ jobs:
           ROOT="$(pwd)"
           cd $ROOT/src/qt-static
           make           
-
           
           
           
-
   build_macosx:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -329,7 +320,7 @@ jobs:
           echo "#define KONCLUDE_VERSION_GIT_TAG_NAME_STRING \"${{needs.tags.outputs.revision_tag}}\"" >> "konclude-static/revision-git.h"
           echo "#define KONCLUDE_VERSION_GIT_REVISION_HASH_STRING \"${{needs.tags.outputs.revision_hash}}\"" >> "konclude-static/revision-git.h"
           
-    
+
       - name: Install Dependencies
         run: |          
           brew install autoconf automake libtool gtk-doc bison mpfr libgcrypt libiconv 
@@ -339,7 +330,14 @@ jobs:
           echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile     
           cp /usr/local/opt/bison/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
           source ~/.bash_profile 
-        
+          
+          
+      - name: Deinstall Berkeley-DB
+        run: |    
+          brew uninstall --ignore-dependencies berkeley-db
+          ls -al /usr/local/opt/
+          
+          
       - name: Prepare Environment
         run: |
           ROOT="$(pwd)"
@@ -501,7 +499,7 @@ jobs:
           export QTDIR=$ROOT/lib/qt-static
           export QTINC=$ROOT/lib/qt-static/include
           export QTLIB=$ROOT/lib/qt-static/lib
-          sed -i -e 's#unix: LIBS += -lz -lltdl -lgmp -ldl -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc#unix:macx: LIBS += -lz -ldl /usr/local/opt/xz/lib/liblzma.a -lcurl -lxslt -L/usr/local/lib /usr/local/lib/../Cellar/libgcrypt/1.9.2/lib/libgcrypt.a  /usr/local/lib/libmpfr.a /usr/local/opt/gmp/lib/libgmp.a /usr/local/opt/libgpg-error/lib/libgpg-error.a /usr/local/opt/libtool/lib/libltdl.a /usr/local/opt/pcre/lib/libpcre.a -liconv -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc -ldb#g' Konclude.pro
+          sed -i -e 's#unix: LIBS += -lz -lltdl -lgmp -ldl -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc#unix:macx: LIBS += -lz -ldl /usr/local/opt/xz/lib/liblzma.a -lcurl -lxslt -L/usr/local/lib /usr/local/lib/../Cellar/libgcrypt/1.9.2/lib/libgcrypt.a  /usr/local/lib/libmpfr.a /usr/local/opt/gmp/lib/libgmp.a /usr/local/opt/libgpg-error/lib/libgpg-error.a /usr/local/opt/libtool/lib/libltdl.a /usr/local/opt/pcre/lib/libpcre.a -liconv External/jemalloc/Linux/x64/lib/release/libjemalloc.a#g' Konclude.pro
           qmake -r CONFIG+=release CONFIG+=x86_64 CONFIG-=debug CONFIG+=static -spec $ROOT/lib/qt-static/mkspecs/macx-clang Konclude.pro
           
           
@@ -681,8 +679,6 @@ jobs:
           mkdir src
           mkdir lib
           
-
-
       - name: Download Qt
         run: |
           ROOT="$(pwd)"
@@ -716,9 +712,6 @@ jobs:
           cd $ROOT/src/qt-static
           make           
           
-
-
-
   build_linux:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -884,7 +877,6 @@ jobs:
           make
           make install
           
-
       - name: Download Qt
         run: |
           ROOT="$(pwd)"
@@ -1098,7 +1090,6 @@ jobs:
         run: |
           mkdir Konclude
           mkdir KoncludeDocker
-
           
       - name: Checkout Konclude code
         uses: actions/checkout@v2
@@ -1117,7 +1108,7 @@ jobs:
       - name: Cache Docker Konclude Run Image
         uses: actions/cache@v2
         env:
-          cache-name: cache-konclude-docker-0-run-Image
+          cache-name: cache-konclude-docker-run-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
@@ -1141,11 +1132,10 @@ jobs:
           
         
         
-
       - name: Cache Docker Konclude Develop Image
         uses: actions/cache@v2
         env:
-          cache-name: cache-konclude-docker-0-develop-Image
+          cache-name: cache-konclude-docker-develop-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
@@ -1203,7 +1193,6 @@ jobs:
         run: |
           mkdir Konclude
           mkdir KoncludeDocker
-
           
       - name: Checkout Konclude code
         uses: actions/checkout@v2
@@ -1225,13 +1214,10 @@ jobs:
           echo "#define KONCLUDE_VERSION_GIT_REVISION_NUMBER ${{needs.tags.outputs.revision_build}}" > "Konclude/revision-git.h"
           echo "#define KONCLUDE_VERSION_GIT_TAG_NAME_STRING \"${{needs.tags.outputs.revision_tag}}\"" >> "Konclude/revision-git.h"
           echo "#define KONCLUDE_VERSION_GIT_REVISION_HASH_STRING \"${{needs.tags.outputs.revision_hash}}\"" >> "Konclude/revision-git.h"
-
-
-
       - name: Cache Docker Konclude Run Image
         uses: actions/cache@v2
         env:
-          cache-name: cache-konclude-docker-0-run-Image
+          cache-name: cache-konclude-docker-run-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
@@ -1254,11 +1240,10 @@ jobs:
           
         
         
-
       - name: Cache Docker Konclude Develop Image
         uses: actions/cache@v2
         env:
-          cache-name: cache-konclude-docker-0-develop-Image
+          cache-name: cache-konclude-docker-develop-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
@@ -1338,7 +1323,6 @@ jobs:
           ls -al ../Release
           
           
-
           
                   
       - uses: actions/upload-artifact@v2
@@ -1420,9 +1404,5 @@ jobs:
         run: |
           docker push konclude/konclude:latest
           docker push konclude/konclude:${{needs.tags.outputs.git_tag}}         
-
-
-
-
 
 

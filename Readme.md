@@ -115,10 +115,13 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
 
 # REQUIREMENTS, INSTALLATION, BUILD
 
-Konclude requires Qt 5.11 libraries or above [6]. If they are not included in the release (or integrated in the binary), then you should install them manually on your system. 
+On GitHub, there is an up-to-date Docker image of Konclude available (`docker pull konclude/konclude`, cf. https://hub.docker.com/r/konclude/konclude), which should run on most platforms with Docker installed.
 
+In principle, Konclude requires Qt 5.11 libraries or above [6], but they are included (or statically integrated/linked into the binary) for the released versions for most platfroms. If this is not the case, then you should install them manually on your system.
 
-On Windows-based platforms it may further be necessary to install the .Net Framework [7] and the Microsoft Visual C++ Redistributable Package [8] for executing Konclude.
+On Mac, you may be required to deactivate the 'Unidentified Developer' warning dialogue for Konclude (cf. [10]).
+
+On Windows-based platforms, it may further be necessary to install the .Net Framework [7] and the Microsoft Visual C++ Redistributable Package [8] for executing Konclude.
 
 
 Konclude can be built by running qmake (which is part of the Qt Framework) for `Konclude.pro` or `KoncludeWithoutRedland.pro`, e.g., 
@@ -129,7 +132,7 @@ and then by compiling the sources with the generated makefile, i.e., the command
 ```
 make
 ```
-has to be executed/called. Note that you may have to adapt the paths to the Redland libraries in the `Konclude.pro` file. If you have docker installed, then you may simply use the provided docker images [9] for building Konclude (which download/install all dependent libraries, compile Konclude and create a statically linked binary). For this, go into the KoncludeDocker' directory and run the following command:
+has to be executed/called. Note that you may have to adapt the paths to the Redland libraries in the `Konclude.pro` file. If you have docker installed, then you may simply use the provided Dockerfiles [9] for building Konclude (which download/install all dependent libraries, compile Konclude and create a statically linked binary). For this, go into the KoncludeDocker' directory and run the following command:
 ```
 ./build_release.sh
 ```
@@ -207,3 +210,5 @@ Setting up Konclude for building/compiling with Visual Studio 2015/2017:
 [8] https://www.microsoft.com/en-us/download/details.aspx?id=48145
 
 [9] https://github.com/konclude/KoncludeDocker
+
+[10] https://support.apple.com/en-gb/guide/mac-help/mh40616/mac
