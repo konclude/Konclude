@@ -1039,11 +1039,13 @@ namespace Konclude {
 				for (CExpressionVariable* disVar : disVarList) {
 					if (projVarPosHash.contains("?" + disVar->getName())) {
 						cint64 pos = projVarPosHash.value("?" + disVar->getName());
-						sortedDisVarList[pos] = disVar;
+						if (pos >= 0) {
+							sortedDisVarList[pos] = disVar;
+						}
 					}
 				}
 				for (CExpressionVariable* disVar : disVarList) {
-					if (!projVarPosHash.contains("?" + disVar->getName())) {
+					if (projVarPosHash.value("?" + disVar->getName(), -1) < 0) {
 						sortedDisVarList[nextProjVarPos++] = disVar;
 					}
 				}

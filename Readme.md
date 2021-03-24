@@ -149,7 +149,8 @@ Setting up Konclude for building/compiling with Visual Studio 2015/2017:
 
 # CHANGELOG
 
-
+- Konclude v0.7.0-1137:
+    - Fixed crashes for SPARQL FILTER expressions in combination with Redland Rasqal.
 
 - Konclude v0.7.0-1135:
     - (Limited) SPARQL and query answering support with Redland Rasqal.
