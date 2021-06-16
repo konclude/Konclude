@@ -1,4 +1,3 @@
-
 message("Updating Konclude version from Git Revision.")
 
 # Create our custom gitbuild target.
@@ -24,6 +23,7 @@ MOC_DIR += ./GeneratedFiles/release
 OBJECTS_DIR += release
 UI_DIR += ./GeneratedFiles
 RCC_DIR += ./GeneratedFiles
+QMAKE_CXXFLAGS += -ggdb
 
 #Include file(s)
 include(Konclude.pri)
@@ -47,4 +47,3 @@ win32: LIBS += $$PWD/External/librdf/Windows/x64/lib/Release/libsv.lib
 
 win32: INCLUDEPATH += $$PWD/External/librdf/Windows/x64/include
 win32: DEPENDPATH += $$PWD/External/librdf/Windows/x64/include
-
