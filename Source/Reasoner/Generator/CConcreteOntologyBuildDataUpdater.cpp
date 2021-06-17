@@ -3036,9 +3036,10 @@ namespace Konclude {
 				QPair<CStringRefStringHasher,CStringRefStringHasher> namePair(ontologyName, useIndividualName);
 				expression = mAnoIndividualBuildHash->value(namePair);
 				if (!expression) {
-					expression = new CAnonymousIndividualExpression(ontologyName, useIndividualName.toString());
+					QString individualNameString(useIndividualName.toString());
+					expression = new CAnonymousIndividualExpression(ontologyName, individualNameString);
 					expression->setEntityID(mNextEntityNumber++);
-					mAnoIndividualBuildHash->insert(namePair,expression);
+					mAnoIndividualBuildHash->insert(QPair<CStringRefStringHasher, CStringRefStringHasher>(ontologyName, individualNameString),expression);
 					mBuildIndividualSet->insert(expression);
 					mBuildIndividualList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETANONYMOUSINDIVIDUAL);

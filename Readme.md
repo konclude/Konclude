@@ -149,6 +149,9 @@ Setting up Konclude for building/compiling with Visual Studio 2015/2017:
 
 # CHANGELOG
 
+- Konclude v0.7.0-1138:
+    - Fixed crash for parsing anonymous individuals.
+
 - Konclude v0.7.0-1137:
     - Fixed crashes for SPARQL FILTER expressions in combination with Redland Rasqal.
 

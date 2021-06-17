@@ -23,7 +23,7 @@ MOC_DIR += ./GeneratedFiles/release
 OBJECTS_DIR += release
 UI_DIR += ./GeneratedFiles
 RCC_DIR += ./GeneratedFiles
-QMAKE_CXXFLAGS += -ggdb
+# QMAKE_CXXFLAGS += -ggdb
 
 #Include file(s)
 include(Konclude.pri)
