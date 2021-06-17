@@ -337,6 +337,9 @@ jobs:
           echo "checking bison version"  
           brew unlink bison@3.7.6
           brew link bison@3.7.6 --force
+          
+          ls /usr/local/opt/
+          
           echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile     
           cp /usr/local/opt/bison/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
           source ~/.bash_profile 
