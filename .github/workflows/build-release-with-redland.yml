@@ -1,10 +1,7 @@
 name: Build Releases (with Redland)
 
 # Run this workflow every time a new commit pushed to your repository
-on:
-  push:
-    tags: releases/v*
-    branches: master
+on: [push]
 
 
 jobs:
