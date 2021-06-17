@@ -332,9 +332,11 @@ jobs:
           brew extract --version='3.7.6' bison $USER/local-tap
           brew install bison@3.7.6
           
+          /usr/local/Cellar/bison@3.7.6/3.7.6
+          
           echo "checking bison version"  
-          brew unlink bison
-          brew link bison --force
+          brew unlink bison@3.7.6
+          brew link bison@3.7.6 --force
           echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile     
           cp /usr/local/opt/bison/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
           source ~/.bash_profile 
