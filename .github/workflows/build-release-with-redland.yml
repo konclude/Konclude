@@ -244,7 +244,10 @@ jobs:
         run: |          
           brew install autoconf automake libtool gtk-doc mpfr libgcrypt libiconv 
           # new bison (https://ghcr.io/v2/homebrew/core/bison/manifests/3.7.6-1) causes error for building rasqal: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/bison.m4: No such file or directory
-          brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/11d3369762a7eccf2349eefc732ffe183cb0ba13/Formula/bison.rb
+          brew tap-new $USER/local-tap
+          brew extract --version='3.7.6' bison $USER/local-tap
+          brew install bison@3.7.6
+          # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/11d3369762a7eccf2349eefc732ffe183cb0ba13/Formula/bison.rb
           
                  
       - name: Prepare Environment
@@ -323,7 +326,12 @@ jobs:
 
       - name: Install Dependencies
         run: |          
-          brew install autoconf automake libtool gtk-doc bison mpfr libgcrypt libiconv 
+          brew install autoconf automake libtool gtk-doc mpfr libgcrypt libiconv 
+          
+          brew tap-new $USER/local-tap
+          brew extract --version='3.7.6' bison $USER/local-tap
+          brew install bison@3.7.6
+          
           echo "checking bison version"  
           brew unlink bison
           brew link bison --force
