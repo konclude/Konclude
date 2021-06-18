@@ -252,7 +252,22 @@ jobs:
           brew unlink bison@3.7.6
           brew link bison@3.7.6 --force
           
+          echo "/usr/local/opt/"
           ls /usr/local/opt/
+          
+          echo "/Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/"
+          ls /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/
+          
+          echo "/usr/local/opt/bison@3.7.6/bin"
+          ls /usr/local/opt/bison@3.7.6/bin
+          
+          echo "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison"
+          ls /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison 
+          
+          
+          #/Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/m4: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/bison.m4: No such file or directory
+          #/Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/m4: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/c-skel.m4: No such file or directory
+
           
           echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
           cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
