@@ -248,8 +248,6 @@ jobs:
           brew extract --version='3.7.6' bison $USER/local-tap
           brew install bison@3.7.6
           
-          /usr/local/Cellar/bison@3.7.6/3.7.6
-          
           echo "checking bison version"  
           brew unlink bison@3.7.6
           brew link bison@3.7.6 --force
@@ -341,9 +339,7 @@ jobs:
           
           brew tap-new $USER/local-tap
           brew extract --version='3.7.6' bison $USER/local-tap
-          brew install bison@3.7.6
-          
-          /usr/local/Cellar/bison@3.7.6/3.7.6
+          brew install bison@3.7.6         
           
           echo "checking bison version"  
           brew unlink bison@3.7.6
