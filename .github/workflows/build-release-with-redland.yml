@@ -245,7 +245,20 @@ jobs:
     
       - name: Install Dependencies
         run: |          
-          brew install autoconf automake libtool gtk-doc bison mpfr libgcrypt libiconv 
+          brew install autoconf automake libtool gtk-doc mpfr libgcrypt libiconv 
+          # new bison (https://ghcr.io/v2/homebrew/core/bison/manifests/3.7.6-1) causes error for building rasqal: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/bison.m4: No such file or directory
+          brew tap-new $USER/local-tap
+          brew extract --version='3.7.6' bison $USER/local-tap
+          brew install bison@3.7.6
+          
+          echo "checking bison version"  
+          brew unlink bison@3.7.6
+          brew link bison@3.7.6 --force
+          
+          
+          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
+          source ~/.bash_profile 
+          
                  
       - name: Prepare Environment
         run: |
@@ -320,17 +333,23 @@ jobs:
           echo "#define KONCLUDE_VERSION_GIT_TAG_NAME_STRING \"${{needs.tags.outputs.revision_tag}}\"" >> "konclude-static/revision-git.h"
           echo "#define KONCLUDE_VERSION_GIT_REVISION_HASH_STRING \"${{needs.tags.outputs.revision_hash}}\"" >> "konclude-static/revision-git.h"
           
-
       - name: Install Dependencies
         run: |          
-          brew install autoconf automake libtool gtk-doc bison mpfr libgcrypt libiconv 
-          echo "checking bison version"  
-          brew unlink bison
-          brew link bison --force
-          echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile     
-          cp /usr/local/opt/bison/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
-          source ~/.bash_profile 
+          brew install autoconf automake libtool gtk-doc mpfr libgcrypt libiconv 
           
+          brew tap-new $USER/local-tap
+          brew extract --version='3.7.6' bison $USER/local-tap
+          brew install bison@3.7.6         
+          
+          echo "checking bison version"  
+          brew unlink bison@3.7.6
+          brew link bison@3.7.6 --force
+          
+          
+          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile      
+          cp -r /usr/local/opt/bison@3.7.6/bin/ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/
+          source ~/.bash_profile 
+          bison --version          
           
       - name: Deinstall Berkeley-DB
         run: |    
@@ -377,6 +396,9 @@ jobs:
       - name: Install Redland Rasqal
         run: |
           ROOT="$(pwd)"
+          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
+          source ~/.bash_profile
+          bison --version
           # download, build and install rasqal
           cd $ROOT/src \
           && git clone git://github.com/konclude/rasqal.git \
@@ -499,7 +521,7 @@ jobs:
           export QTDIR=$ROOT/lib/qt-static
           export QTINC=$ROOT/lib/qt-static/include
           export QTLIB=$ROOT/lib/qt-static/lib
-          sed -i -e 's#unix: LIBS += -lz -lltdl -lgmp -ldl -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc#unix:macx: LIBS += -lz -ldl /usr/local/opt/xz/lib/liblzma.a -lcurl -lxslt -L/usr/local/lib /usr/local/lib/../Cellar/libgcrypt/1.9.2/lib/libgcrypt.a  /usr/local/lib/libmpfr.a /usr/local/opt/gmp/lib/libgmp.a /usr/local/opt/libgpg-error/lib/libgpg-error.a /usr/local/opt/libtool/lib/libltdl.a /usr/local/opt/pcre/lib/libpcre.a -liconv External/jemalloc/Linux/x64/lib/release/libjemalloc.a#g' Konclude.pro
+          sed -i -e 's#unix: LIBS += -lz -lltdl -lgmp -ldl -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc#unix:macx: LIBS += -lz -ldl /usr/local/opt/xz/lib/liblzma.a -lcurl -lxslt -L/usr/local/lib /usr/local/lib/../Cellar/libgcrypt/1.9.3/lib/libgcrypt.a  /usr/local/lib/libmpfr.a /usr/local/opt/gmp/lib/libgmp.a /usr/local/opt/libgpg-error/lib/libgpg-error.a /usr/local/opt/libtool/lib/libltdl.a /usr/local/opt/pcre/lib/libpcre.a -liconv External/jemalloc/Linux/x64/lib/release/libjemalloc.a#g' Konclude.pro
           qmake -r CONFIG+=release CONFIG+=x86_64 CONFIG-=debug CONFIG+=static -spec $ROOT/lib/qt-static/mkspecs/macx-clang Konclude.pro
           
           
@@ -1403,6 +1425,4 @@ jobs:
       - name: Push image
         run: |
           docker push konclude/konclude:latest
-          docker push konclude/konclude:${{needs.tags.outputs.git_tag}}         
-
-
+          docker push konclude/konclude:${{needs.tags.outputs.git_tag}}     
