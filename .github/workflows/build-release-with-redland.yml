@@ -270,7 +270,7 @@ jobs:
 
           
           echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
-          cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
+          #cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
           source ~/.bash_profile 
           
                  
@@ -363,7 +363,7 @@ jobs:
           ls /usr/local/opt/
           
           echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
-          cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
+          #cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
           source ~/.bash_profile 
           
           
