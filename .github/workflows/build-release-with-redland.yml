@@ -247,7 +247,18 @@ jobs:
           brew tap-new $USER/local-tap
           brew extract --version='3.7.6' bison $USER/local-tap
           brew install bison@3.7.6
-          # brew install https://raw.githubusercontent.com/Homebrew/homebrew-core/11d3369762a7eccf2349eefc732ffe183cb0ba13/Formula/bison.rb
+          
+          /usr/local/Cellar/bison@3.7.6/3.7.6
+          
+          echo "checking bison version"  
+          brew unlink bison@3.7.6
+          brew link bison@3.7.6 --force
+          
+          ls /usr/local/opt/
+          
+          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
+          cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
+          source ~/.bash_profile 
           
                  
       - name: Prepare Environment
@@ -340,8 +351,8 @@ jobs:
           
           ls /usr/local/opt/
           
-          echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> /Users/runner/.bash_profile     
-          cp /usr/local/opt/bison/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
+          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
+          cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
           source ~/.bash_profile 
           
           
