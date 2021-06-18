@@ -362,10 +362,17 @@ jobs:
           
           ls /usr/local/opt/
           
-          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
-          #cp /usr/local/opt/bison@3.7.6/bin/bison /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bison            
-          source ~/.bash_profile 
           
+          #/Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/m4: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/bison.m4: No such file or directory
+          #/Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/m4: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/c-skel.m4: No such file or directory
+
+          bison --version
+          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile      
+          bison --version          
+          cp -r /usr/local/opt/bison@3.7.6/bin/ /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/
+          bison --version          
+          source ~/.bash_profile 
+          bison --version          
           
       - name: Deinstall Berkeley-DB
         run: |    
@@ -412,6 +419,10 @@ jobs:
       - name: Install Redland Rasqal
         run: |
           ROOT="$(pwd)"
+          echo 'export PATH="/usr/local/opt/bison@3.7.6/bin:$PATH"' >> /Users/runner/.bash_profile          
+          source ~/.bash_profile
+          bison --version
+
           # download, build and install rasqal
           cd $ROOT/src \
           && git clone git://github.com/konclude/rasqal.git \
