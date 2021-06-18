@@ -360,8 +360,7 @@ jobs:
           brew unlink bison@3.7.6
           brew link bison@3.7.6 --force
           
-          ls /usr/local/opt/
-          
+          ls /usr/local/opt/          
           
           #/Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/m4: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/bison.m4: No such file or directory
           #/Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/m4: /Applications/Xcode_12.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/share/bison/skeletons/c-skel.m4: No such file or directory
