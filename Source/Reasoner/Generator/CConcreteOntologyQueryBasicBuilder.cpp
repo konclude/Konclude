@@ -1087,20 +1087,22 @@ namespace Konclude {
 					if (classExp) {
 						CConcept* concept = getConceptFromBuildExpression(classExp);
 
-						QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-						QString classString = iriClassNameString;
-
-						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
-						CSubClassesQuery *query = new CSubClassesQuery(mOntology,calcConfig,concept,subClassesExp->isDirect(),classString,queryName);
-
-						CQueryStatisticsCollectionStrings* queryStats = nullptr;
-						if (confBuildQueryStats) {
-							queryStats = new CQueryStatisticsCollectionStrings();
+						if concept {
+							QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
+							QString classString = iriClassNameString;
+	
+							CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
+							CSubClassesQuery *query = new CSubClassesQuery(mOntology,calcConfig,concept,subClassesExp->isDirect(),classString,queryName);
+	
+							CQueryStatisticsCollectionStrings* queryStats = nullptr;
+							if (confBuildQueryStats) {
+								queryStats = new CQueryStatisticsCollectionStrings();
+							}
+							query->setQueryStatistics(queryStats);
+	
+							queryList.append(query);
+							LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated GetSubClasses-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 						}
-						query->setQueryStatistics(queryStats);
-
-						queryList.append(query);
-						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated GetSubClasses-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
 					}
 					delete subClassesExp;
 				}
