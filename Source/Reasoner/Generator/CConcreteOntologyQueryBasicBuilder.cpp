@@ -1087,7 +1087,7 @@ namespace Konclude {
 					if (classExp) {
 						CConcept* concept = getConceptFromBuildExpression(classExp);
 
-						if concept {
+						if (concept) {
 							QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
 							QString classString = iriClassNameString;
 	
