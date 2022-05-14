@@ -286,6 +286,7 @@ namespace Konclude {
 
 						bool isIndividualNodeCompletionGraphCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool detectIndividualNodeCompletionGraphCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						void clearCompletionGraphCaching(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						bool isIndividualNodeValidBlocker(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);

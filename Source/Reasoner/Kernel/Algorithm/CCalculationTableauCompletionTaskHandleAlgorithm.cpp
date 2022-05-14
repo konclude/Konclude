@@ -4280,6 +4280,40 @@ namespace Konclude {
 				}
 
 
+
+				void CCalculationTableauCompletionTaskHandleAlgorithm::clearCompletionGraphCaching(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+					trackIndividualExtendedDependence(individualNode->getIndividualNodeID(), calcAlgContext);
+
+					if (mConfCollectCachingUpdatedBlockableIndiNodes && individualNode->isBlockableIndividual()) {
+						CXLinker<CIndividualProcessNode*>* updatedCachedIndiNodeLinker = CObjectAllocator< CXLinker<CIndividualProcessNode*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+						updatedCachedIndiNodeLinker->initLinker(individualNode);
+						calcAlgContext->getUsedProcessingDataBox()->addBlockableIndividualNodeUpdatedLinker(updatedCachedIndiNodeLinker);
+					}
+
+					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
+						individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
+						reapplySatisfiableCachedAbsorbedDisjunctionConcepts(individualNode, calcAlgContext);
+						reapplySatisfiableCachedAbsorbedGeneratingConcepts(individualNode, calcAlgContext);
+					}
+					individualNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
+
+					if (individualNode->isCachingLossNodeReactivationInstalled()) {
+						checkIndividualNodesReactivationDueToNominalCachingLoss(individualNode, calcAlgContext);
+					}
+
+
+					CProcessingDataBox* processingDataBox = calcAlgContext->getProcessingDataBox();
+					CIndividualReactivationProcessingQueue* reactProcQueue = nullptr;
+					if (mConfDelayCompletionGraphCachingReactivation) {
+						reactProcQueue = processingDataBox->getLateIndividualReactivationProcessingQueue(true);
+					} else {
+						reactProcQueue = processingDataBox->getEarlyIndividualReactivationProcessingQueue(true);
+					}
+					bool reactivatedIndis = mCompGraphCacheHandler->getReactivationIndividuals(individualNode, reactProcQueue, calcAlgContext);
+				}
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::detectIndividualNodeCompletionGraphCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 					bool indiNodeCompGraphCached = false;
 					if (mCompGraphCacheHandler && mConfCompletionGraphCaching) {
@@ -4298,34 +4332,8 @@ namespace Konclude {
 								}
 							}
 							if (!indiNodeCompGraphCached) {
-								trackIndividualExtendedDependence(individualNode->getIndividualNodeID(),calcAlgContext);
 
-								if (mConfCollectCachingUpdatedBlockableIndiNodes && individualNode->isBlockableIndividual()) {
-									CXLinker<CIndividualProcessNode*>* updatedCachedIndiNodeLinker = CObjectAllocator< CXLinker<CIndividualProcessNode*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
-									updatedCachedIndiNodeLinker->initLinker(individualNode);
-									calcAlgContext->getUsedProcessingDataBox()->addBlockableIndividualNodeUpdatedLinker(updatedCachedIndiNodeLinker);
-								}
-
-								if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
-									individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
-									reapplySatisfiableCachedAbsorbedDisjunctionConcepts(individualNode,calcAlgContext);
-									reapplySatisfiableCachedAbsorbedGeneratingConcepts(individualNode,calcAlgContext);
-								}
-								individualNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
-
-								if (individualNode->isCachingLossNodeReactivationInstalled()) {
-									checkIndividualNodesReactivationDueToNominalCachingLoss(individualNode,calcAlgContext);
-								}
-
-
-								CProcessingDataBox* processingDataBox = calcAlgContext->getProcessingDataBox();
-								CIndividualReactivationProcessingQueue* reactProcQueue = nullptr;
-								if (mConfDelayCompletionGraphCachingReactivation) {
-									reactProcQueue = processingDataBox->getLateIndividualReactivationProcessingQueue(true);
-								} else {
-									reactProcQueue = processingDataBox->getEarlyIndividualReactivationProcessingQueue(true);
-								}
-								bool reactivatedIndis = mCompGraphCacheHandler->getReactivationIndividuals(individualNode,reactProcQueue,calcAlgContext);
+								clearCompletionGraphCaching(individualNode, calcAlgContext);
 
 							} else {
 								individualNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
@@ -21033,6 +21041,25 @@ namespace Konclude {
 					markIndividualNodeBackendNonConceptSetRelatedAndNeighbourLabelRelatedProcessing(mergeIntoIndividualNode, calcAlgContext);
 					markIndividualNodeBackendNonConceptSetRelatedAndNeighbourLabelRelatedProcessing(individual, calcAlgContext);
 
+
+
+
+					if (mCompGraphCacheHandler && mConfCompletionGraphCaching && individual->isNominalIndividualNode() && !mergeIntoIndividualNode->isNominalIndividualNode()) {
+						if (!individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED) && individual->getIndividualNodeID() <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
+							individual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHEDNODELOCATED);
+
+							if (individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED)) {
+								individual->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED);
+							}
+
+							clearCompletionGraphCaching(individual, calcAlgContext);
+
+						}
+					}
+
+
+
+
 					mergeIntoIndividualNode->setLastMergedIntoIndividualNode(individual);
 					individual->setMergedDependencyTrackPoint(mergeDepTrackPoint);
 
@@ -21513,9 +21540,10 @@ namespace Konclude {
 
 					if (individual->getIndividualBackendCacheSynchronisationData(false) && !mergeIntoIndividualNode->getIndividualBackendCacheSynchronisationData(false)) {
 						CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = CObjectParameterizingAllocator< CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData, CProcessContext* >::allocateAndConstructAndParameterize(calcAlgContext->getUsedProcessTaskMemoryAllocationManager(), calcAlgContext->getUsedProcessContext());
-						backendSyncData->initSynchronisationData((CBackendRepresentativeMemoryCacheIndividualAssociationData*)nullptr);
+						backendSyncData->initSynchronisationData((CBackendRepresentativeMemoryCacheIndividualAssociationData*)((CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)individual->getIndividualBackendCacheSynchronisationData(false))->getAssocitaionData());
 						backendSyncData->setBackendCacheSynchron(false);
 						mergeIntoIndividualNode->setIndividualBackendCacheSynchronisationData(backendSyncData);
+						addIndividualToBackendIndirectCompatibilityExpansionQueue(mergeIntoIndividualNode, calcAlgContext);
 					}
 
 
@@ -26156,7 +26184,7 @@ namespace Konclude {
 					} else if (!conNegation && conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_ALL_AQALL_TYPE | CConceptOperator::CCF_ATMOST) || conNegation && conOperator->hasPartialOperatorCodeFlag(CConceptOperator::CCFS_SOME_TYPE | CConceptOperator::CCF_ATLEAST | CConceptOperator::CCF_VALUE)) {
 						CRole* role = concept->getRole();
 						if (assocData->isCompletelyPropagated()) {
-							if (!mBackendCacheHandler || !nondeterministic && !mBackendCacheHandler->hasConceptInAssociatedFullConceptSetLabel(assocData, assocData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL), concept, conNegation, !nondeterministic, calcAlgContext)) {
+							if (!mBackendCacheHandler || !mBackendCacheHandler->hasConceptInAssociatedFullConceptSetLabel(assocData, assocData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL), concept, conNegation, !nondeterministic, calcAlgContext)) {
 								expansionBlockingCritical = true;
 							}
 						} else {
