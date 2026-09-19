@@ -24,7 +24,7 @@ env:
   # module is built, since Konclude does not require any other module.
   QT_STATIC_VERSION: 5.15.17
   # Increase whenever the configuration of the static Qt build changes, to invalidate the cache.
-  QT_STATIC_CACHE_REVISION: 1
+  QT_STATIC_CACHE_REVISION: 2
   # Qt version that is dynamically linked for the Windows package.
   QT_WINDOWS_VERSION: 5.15.2
 
@@ -211,7 +211,7 @@ jobs:
           tar -xJf qtbase.tar.xz
           cd "qtbase-everywhere-src-$QT_STATIC_VERSION"
           ./configure -static -release -opensource -confirm-license -prefix "$ROOT/qt-static" -platform macx-clang \
-            -no-gui -no-widgets -no-opengl -no-icu -no-dbus -no-feature-gssapi -qt-pcre \
+            -no-gui -no-widgets -no-opengl -no-icu -no-dbus -no-feature-gssapi -no-zstd -qt-pcre \
             -no-sql-mysql -no-sql-psql -no-sql-odbc -nomake examples -nomake tests \
             QMAKE_APPLE_DEVICE_ARCHS=arm64
           make -j"$(sysctl -n hw.ncpu)"
@@ -334,7 +334,7 @@ jobs:
           tar -xJf qtbase.tar.xz
           cd "qtbase-everywhere-src-$QT_STATIC_VERSION"
           ./configure -static -release -opensource -confirm-license -prefix "$ROOT/qt-static" -platform linux-g++ \
-            -no-gui -no-widgets -no-opengl -no-icu -no-dbus -no-feature-gssapi -no-glib -no-libproxy -qt-pcre \
+            -no-gui -no-widgets -no-opengl -no-icu -no-dbus -no-feature-gssapi -no-zstd -no-glib -no-libproxy -qt-pcre \
             -no-sql-mysql -no-sql-psql -no-sql-odbc -nomake examples -nomake tests
           make -j"$(nproc)"
           make install
