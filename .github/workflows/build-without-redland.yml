@@ -15,15 +15,8 @@ jobs:
         - {
             name: "Ubuntu Latest GCC",
             os: ubuntu-latest,
-            build_type: "Release", 
-            cc: "gcc", 
-            cxx: "g++"
-          }
-        - {
-            name: "Ubuntu 16.04 GCC",
-            os: ubuntu-16.04,
-            build_type: "Release", 
-            cc: "gcc", 
+            build_type: "Release",
+            cc: "gcc",
             cxx: "g++"
           }
         - {
@@ -45,15 +38,28 @@ jobs:
     steps:
       # Checks out a copy of your repository on the machine
       - name: Checkout code
-        uses: actions/checkout@v2
-        
+        uses: actions/checkout@v4
+
+      # Qt 5.15.2 is only available for x86_64 on macOS, whereas the macOS runners are
+      # arm64, so Qt is installed with Homebrew there and with aqtinstall elsewhere.
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-          
+        if: ${{ !startsWith(matrix.config.os, 'macos') }}
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          cache: true
+
+      - name: Install Qt macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          brew install qt@5
+          echo "$(brew --prefix qt@5)/bin" >> "$GITHUB_PATH"
+
       - name: Compile Ubuntu
         if: startsWith(matrix.config.os, 'ubuntu')
-        run: | 
-          sudo apt-get install gdb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gdb
           echo `gcc --version`
           echo `qmake --version`
           qmake KoncludeWithoutRedland.pro
