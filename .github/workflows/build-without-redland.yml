@@ -73,9 +73,21 @@ jobs:
           qmake KoncludeWithoutRedland.pro
           make -j 2            
 
+      - name: List available MSVC toolsets
+        if: startsWith(matrix.config.os, 'windows')
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path "C:\Program Files*\Microsoft Visual Studio\*\*\VC\Tools\MSVC" -Directory -ErrorAction SilentlyContinue |
+            ForEach-Object { Write-Output $_.FullName }
+
+      # Qt 5.15.2 uses stdext::make_checked_array_iterator in QtCore/qlist.h, which has been
+      # removed from the standard library of Visual Studio 2022 17.10 and above, so an older
+      # tool set is required to compile against Qt 5.15.
       - name: Prepare Visual Studio
         if: startsWith(matrix.config.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: '14.39'
 
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
