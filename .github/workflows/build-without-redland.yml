@@ -77,17 +77,23 @@ jobs:
         if: startsWith(matrix.config.os, 'windows')
         shell: pwsh
         run: |
-          Get-ChildItem -Path "C:\Program Files*\Microsoft Visual Studio\*\*\VC\Tools\MSVC" -Directory -ErrorAction SilentlyContinue |
-            ForEach-Object { Write-Output $_.FullName }
+          Get-ChildItem -Path "C:\Program Files*\Microsoft Visual Studio\*\*\VC\Tools\MSVC\*" -Directory -ErrorAction SilentlyContinue |
+            ForEach-Object { Write-Output $_.Name }
 
-      # Qt 5.15.2 uses stdext::make_checked_array_iterator in QtCore/qlist.h, which has been
-      # removed from the standard library of Visual Studio 2022 17.10 and above, so an older
-      # tool set is required to compile against Qt 5.15.
+      # ATTENTION: the Windows build currently fails, because Qt 5.15.2 uses
+      # stdext::make_checked_array_iterator in QtCore/qlist.h, which has been removed from the
+      # standard library of Visual Studio 2022 17.10 and above:
+      #
+      #   QtCore/qlist.h(915): error C2653: 'stdext': is not a class or namespace name
+      #
+      # Pinning an older tool set does not help, the runner images only provide the tool set of
+      # their Visual Studio version, 14.51 for the current windows-2025-vs2026 image, and none
+      # of them provides one below 14.40 for x64. The remaining possibilities are to install an
+      # older tool set with the Visual Studio installer, to build with MinGW instead, or to
+      # raise the required Qt version.
       - name: Prepare Visual Studio
         if: startsWith(matrix.config.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1
-        with:
-          toolset: '14.39'
 
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
