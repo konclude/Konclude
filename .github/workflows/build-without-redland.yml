@@ -40,6 +40,28 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # sccache keeps the objects of earlier runs in a local directory, which actions/cache saves
+      # under the commit and restores from the most recent run of the same job and platform, so
+      # that only the translation units a change touches are compiled again. qmake is handed
+      # 'sccache <compiler>' as QMAKE_CC and QMAKE_CXX, which leaves linking and moc as they are.
+      # The directory is used rather than the GitHub Actions backend of sccache, which stores
+      # every object as a cache entry of its own, several thousand per job.
+      - name: Install sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Prepare sccache
+        shell: bash
+        run: |
+          echo "SCCACHE_DIR=$RUNNER_TEMP/sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_CACHE_SIZE=2G" >> "$GITHUB_ENV"
+
+      - name: Restore the compiler cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/sccache
+          key: sccache-${{ github.job }}-${{ matrix.config.os }}-${{ github.sha }}
+          restore-keys: sccache-${{ github.job }}-${{ matrix.config.os }}-
+
       # Qt 5.15.2 is only available for x86_64 on macOS, whereas the macOS runners are
       # arm64, so Qt is installed with Homebrew there and with aqtinstall elsewhere.
       - name: Install Qt
@@ -62,7 +84,7 @@ jobs:
           sudo apt-get install -y gdb
           echo `gcc --version`
           echo `qmake --version`
-          qmake KoncludeWithoutRedland.pro
+          qmake KoncludeWithoutRedland.pro "QMAKE_CC=sccache ${{ matrix.config.cc }}" "QMAKE_CXX=sccache ${{ matrix.config.cxx }}"
           make -j "$(nproc)"
 
       - name: Compile macOS
@@ -70,7 +92,7 @@ jobs:
         run: | 
           echo `clang --version`
           echo `qmake --version`
-          qmake KoncludeWithoutRedland.pro
+          qmake KoncludeWithoutRedland.pro "QMAKE_CC=sccache ${{ matrix.config.cc }}" "QMAKE_CXX=sccache ${{ matrix.config.cxx }}"
           make -j "$(sysctl -n hw.ncpu)"
 
       - name: List available MSVC toolsets
@@ -96,13 +118,19 @@ jobs:
 
       # nmake builds one translation unit at a time, which took 30 minutes for the 2 600 of
       # Konclude while the other jobs took 10; jom is Qt's parallel drop-in for nmake, so the
-      # Makefiles qmake writes for MSVC need no change
+      # Makefiles qmake writes for MSVC need no change. qmake compiles many files with one call of
+      # cl by default, which sccache cannot cache, so no_batch gives each file a call of its own.
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
           choco install jom --no-progress -y
-          qmake KoncludeWithoutRedland.pro
+          qmake KoncludeWithoutRedland.pro "QMAKE_CC=sccache cl" "QMAKE_CXX=sccache cl" "CONFIG+=no_batch"
           jom -j "$env:NUMBER_OF_PROCESSORS"
+
+      - name: Compiler cache statistics
+        if: always()
+        shell: bash
+        run: sccache --show-stats || true
 
 
       - name: Run Examples Ubuntu
