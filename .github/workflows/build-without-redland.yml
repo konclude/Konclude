@@ -120,12 +120,14 @@ jobs:
       # Konclude while the other jobs took 10; jom is Qt's parallel drop-in for nmake, so the
       # Makefiles qmake writes for MSVC need no change. qmake compiles many files with one call of
       # cl by default, which sccache cannot cache, so no_batch gives each file a call of its own.
+      # jom.ps1 retries the install of jom and falls back to nmake without it.
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
-          choco install jom --no-progress -y
+          . .github/scripts/jom.ps1
+          Install-Jom
           qmake KoncludeWithoutRedland.pro "QMAKE_CC=sccache cl" "QMAKE_CXX=sccache cl" "CONFIG+=no_batch"
-          jom -j "$env:NUMBER_OF_PROCESSORS"
+          Invoke-Make
 
       - name: Compiler cache statistics
         if: always()

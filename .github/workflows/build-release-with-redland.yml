@@ -167,10 +167,6 @@ jobs:
           name: release-windows
           path: Release/${{ env.RELEASE_NAME }}.zip
           if-no-files-found: error
-
-
-
-
   build_macosx:
     name: macOS arm64 Clang Static
     runs-on: macos-latest
