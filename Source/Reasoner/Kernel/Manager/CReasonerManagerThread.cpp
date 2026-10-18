@@ -245,7 +245,15 @@ namespace Konclude {
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Initializing reasoner. Creating calculation context."),this);
 
 					if (mConfgAdaptThreadPoolToWorkerCount) {
-						QThreadPool::globalInstance()->setMaxThreadCount(mWorkControllerCount);
+						// The global pool must have at least one free slot BEYOND the
+						// parked blocking placeholder tasks below, otherwise a calculation
+						// task the precompute thread blocks on can never be scheduled and
+						// classification deadlocks on machines with only one core.
+						cint64 poolThreadCount = mWorkControllerCount;
+						if (mBlockThreadPoolThreadCount > 0) {
+							poolThreadCount = qMax(poolThreadCount, mBlockThreadPoolThreadCount + 1);
+						}
+						QThreadPool::globalInstance()->setMaxThreadCount(poolThreadCount);
 					}
 					if (mBlockThreadPoolThreadCount > 0) {
 						for (cint64 i = 0; i < mBlockThreadPoolThreadCount; ++i) {
