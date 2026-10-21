@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/simple-consistent">
+
+  <Declaration><Class IRI="#Animal"/></Declaration>
+  <Declaration><Class IRI="#Dog"/></Declaration>
+  <Declaration><NamedIndividual IRI="#rex"/></Declaration>
+  <SubClassOf><Class IRI="#Dog"/><Class IRI="#Animal"/></SubClassOf>
+  <ClassAssertion><Class IRI="#Dog"/><NamedIndividual IRI="#rex"/></ClassAssertion>
+</Ontology>

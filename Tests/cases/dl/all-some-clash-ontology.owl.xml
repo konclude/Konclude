@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/all-some-clash">
+
+  <Declaration><Class IRI="#A"/></Declaration>
+  <Declaration><Class IRI="#B"/></Declaration>
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <DisjointClasses><Class IRI="#B"/><Class IRI="#C"/></DisjointClasses>
+  <SubClassOf><Class IRI="#A"/><ObjectAllValuesFrom><ObjectProperty IRI="#r"/><Class IRI="#B"/></ObjectAllValuesFrom></SubClassOf>
+  <SubClassOf><Class IRI="#A"/><ObjectSomeValuesFrom><ObjectProperty IRI="#r"/><Class IRI="#C"/></ObjectSomeValuesFrom></SubClassOf>
+  <ClassAssertion><Class IRI="#A"/><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>

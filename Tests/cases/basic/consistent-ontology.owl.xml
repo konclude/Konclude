@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Consistent small ontology: Aunt is Woman is Person. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/ontology/basic-consistent">
+  <Declaration><Class IRI="#Person"/></Declaration>
+  <Declaration><Class IRI="#Woman"/></Declaration>
+  <Declaration><Class IRI="#Aunt"/></Declaration>
+  <Declaration><NamedIndividual IRI="#anna"/></Declaration>
+  <SubClassOf><Class IRI="#Woman"/><Class IRI="#Person"/></SubClassOf>
+  <SubClassOf><Class IRI="#Aunt"/><Class IRI="#Woman"/></SubClassOf>
+  <ClassAssertion><Class IRI="#Aunt"/><NamedIndividual IRI="#anna"/></ClassAssertion>
+</Ontology>

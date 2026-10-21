@@ -3193,6 +3193,43 @@ namespace Konclude {
 						new CStringConfigType("Evaluation/Responses/R-000/"));
 
 
+				// Conformance test runner (conformance subcommand).
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.InputDirectory",
+						"Input directory that is recursively searched for *.kt.owl.xml control ontologies.",
+						new CStringConfigType("Tests/cases")),
+						new CStringConfigType("Tests/cases"));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.OutputFile",
+						"Output file for the OWL/XML test result ontology (empty = no file).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.BinaryFile",
+						"Konclude binary used as subprocess for the test cases (empty = this binary).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.KnownIssuesFile",
+						"Separate OWL/XML file with kt:Issue individuals (empty = none).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.Jobs",
+						"Number of parallel test workers.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.Repeat",
+						"Repetitions per test case for flaky detection.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.TimeoutSeconds",
+						"Per-test timeout in seconds.",
+						new CIntegerConfigType(60)),
+						new CIntegerConfigType(60));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ReasonerRestartPausingTime",
 						"Waiting time after restarting the reasoner.",
 						new CIntegerConfigType(10000)),

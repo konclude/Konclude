@@ -52,6 +52,7 @@ namespace Konclude {
 				infoDomainList<<QString("::Konclude::Test");
 				infoDomainList<<QString("::Konclude::Test::ReasonerTestfileTester");
 				infoDomainList<<QString("::Konclude::Test::ReasonerTestsuiteTester");
+				infoDomainList << QString("::Konclude::Test::ConformanceRunner");
 				infoDomainList<<QString("::Konclude::Control::Interface::OWLlink::OWLlinkProcessor");
 				infoDomainList<<QString("::Konclude::Reasoner::Classifier::Factory");
 				infoDomainList<<QString("::Konclude::Test::ReasonerTestfileErrorEvaluator");

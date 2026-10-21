@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/complement-clash">
+
+  <Declaration><Class IRI="#A"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <ClassAssertion><Class IRI="#A"/><NamedIndividual IRI="#x"/></ClassAssertion>
+  <ClassAssertion><ObjectComplementOf><Class IRI="#A"/></ObjectComplementOf><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>

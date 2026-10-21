@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- OWLlink-Datei-Kanal: erste IsClassSatisfiable-Antwort wird vom Runner geprueft. -->
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#B"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#Bad"/></owl:Declaration>
+    <owl:DisjointClasses><owl:Class IRI="#A"/><owl:Class IRI="#B"/></owl:DisjointClasses>
+    <owl:EquivalentClasses>
+      <owl:Class IRI="#Bad"/>
+      <owl:ObjectIntersectionOf><owl:Class IRI="#A"/><owl:Class IRI="#B"/></owl:ObjectIntersectionOf>
+    </owl:EquivalentClasses>
+  </Tell>
+  <IsClassSatisfiable kb="http://ex.test/kb"><owl:Class IRI="#Bad"/></IsClassSatisfiable>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

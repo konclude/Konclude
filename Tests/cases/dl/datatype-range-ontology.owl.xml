@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/datatype-range">
+
+  <Declaration><Class IRI="#Adult"/></Declaration>
+  <Declaration><DataProperty IRI="#age"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <SubClassOf><Class IRI="#Adult"/>
+    <DataSomeValuesFrom><DataProperty IRI="#age"/>
+      <DatatypeRestriction><Datatype IRI="http://www.w3.org/2001/XMLSchema#integer"/>
+        <FacetRestriction facet="http://www.w3.org/2001/XMLSchema#minInclusive"><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">18</Literal></FacetRestriction>
+      </DatatypeRestriction>
+    </DataSomeValuesFrom>
+  </SubClassOf>
+  <ClassAssertion><Class IRI="#Adult"/><NamedIndividual IRI="#x"/></ClassAssertion>
+  <FunctionalDataProperty><DataProperty IRI="#age"/></FunctionalDataProperty>
+  <DataPropertyAssertion><DataProperty IRI="#age"/><NamedIndividual IRI="#x"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">10</Literal></DataPropertyAssertion>
+</Ontology>

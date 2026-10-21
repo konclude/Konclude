@@ -35,6 +35,7 @@
 
 #include "Control/Loader/CCommandLineLoader.h"
 #include "Control/Loader/CDefaultLoaderFactory.h"
+#include "Control/Loader/CConformanceLoader.h"
 
 #include "Control/Interface/CommandLine/CCommandLinePreparationTranslatorSelector.h"
 
@@ -89,7 +90,9 @@ int main(int argc, char *argv[])
 
 	logger->shutdownLogger();
 
-	return 0;
+	// Return the exit code recorded by the conformance test runner (0 when green,
+	// non-zero when there were failing/unstable tests) so CI can react to it.
+	return CConformanceLoader::getLastTestExitCode();
 }
 
 

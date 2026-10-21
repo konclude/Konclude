@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  kt-vocabulary.owl.xml - the vocabulary of the Konclude test control ontologies.
+  Declares the classes and properties used in the *.kt.owl.xml files.
+  No domain reasoning runs over this ontology; it only documents the
+  vocabulary (the runner reads the assertions directly).
+  Namespace: http://konclude.test/vocabulary#   (prefix kt:)
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/vocabulary">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+  <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+
+  <!-- ===== Test kinds (classes) ===== -->
+  <Declaration><Class abbreviatedIRI="kt:Test"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:ConsistencyTest"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:ClassificationTest"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:SatisfiabilityTest"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:RealizationTest"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:EntailmentTest"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:SparqlTest"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:FlakyTest"/></Declaration>
+  <SubClassOf><Class abbreviatedIRI="kt:ConsistencyTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI="kt:ClassificationTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI="kt:SatisfiabilityTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI="kt:RealizationTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI="kt:EntailmentTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI="kt:SparqlTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI="kt:FlakyTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
+
+  <!-- Issue (known failure) and test result -->
+  <Declaration><Class abbreviatedIRI="kt:Issue"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:TestResult"/></Declaration>
+  <!-- Default config declaration (used in configs.kt.owl.xml) -->
+  <Declaration><Class abbreviatedIRI="kt:ConfigSet"/></Declaration>
+
+  <!-- ===== Object Properties ===== -->
+  <Declaration><ObjectProperty abbreviatedIRI="kt:usesConfig"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:onChannel"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:expectedEntailment"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:knownFailure"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:defaultConfig"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:resultOf"/></Declaration>
+
+  <!-- ===== Data Properties ===== -->
+  <Declaration><DataProperty abbreviatedIRI="kt:usesOntology"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:task"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:expectedResult"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:testClass"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:expectedFile"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:inspiredBy"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:timeoutSeconds"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:flaky"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:divergingResultByReasonerOnVersion"/></Declaration>
+  <!-- on the issue -->
+  <Declaration><DataProperty abbreviatedIRI="kt:tracker"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:affectsConfig"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:affectsOS"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:status"/></Declaration>
+  <!-- on the test result -->
+  <Declaration><DataProperty abbreviatedIRI="kt:outcome"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:runOutcome"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:underConfig"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:onOS"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:durationMs"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:reasonerVersion"/></Declaration>
+
+</Ontology>
