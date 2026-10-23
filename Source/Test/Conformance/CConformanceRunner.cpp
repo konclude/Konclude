@@ -277,7 +277,7 @@ namespace Konclude {
 			}
 
 
-			QString CConformanceRunner::runTask(const CConformanceTestCase& testCase, qint64 timeoutMs) {
+			QString CConformanceRunner::runTask(const CConformanceTestCase& testCase, qint64 timeoutMs, const QString& logFilePath) {
 				QProcess process;
 				QStringList args;
 				QString responseFile;
@@ -295,17 +295,43 @@ namespace Konclude {
 				} else {
 					args << "consistency" << "-i" << testCase.mOntologyFile;
 				}
+
+				if (!logFilePath.isEmpty()) {
+					// Capture the subprocess' output directly into the log file: the math is
+					// done by QProcess itself (merged stdout+stderr), no in-memory buffering.
+					process.setProcessChannelMode(QProcess::MergedChannels);
+					process.setStandardOutputFile(logFilePath);
+				}
+
 				process.start(resolveBinaryFile(), args);
 				if (!process.waitForStarted(10000)) {
 					return QString("error");
 				}
+				bool timedOut = false;
 				if (!process.waitForFinished(static_cast<int>(timeoutMs))) {
+					timedOut = true;
 					process.kill();
 					process.waitForFinished(2000);
+				}
+
+				// Read the executed Konclude output for the verdict parsing: either from
+				// the log file the subprocess wrote directly into, or, when logging is
+				// disabled, from the in-memory channel buffers.
+				QString out;
+				if (!logFilePath.isEmpty()) {
+					QFile logFile(logFilePath);
+					if (logFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+						out = QString::fromUtf8(logFile.readAll());
+						logFile.close();
+					}
+				} else {
+					out = QString::fromUtf8(process.readAllStandardOutput());
+					out += QString::fromUtf8(process.readAllStandardError());
+				}
+
+				if (timedOut) {
 					return QString("timeout");
 				}
-				QString out = QString::fromUtf8(process.readAllStandardOutput());
-				out += QString::fromUtf8(process.readAllStandardError());
 
 				if (testCase.mTask == "classification") {
 					// Compare the produced taxonomy against the expected result file.
@@ -367,6 +393,40 @@ namespace Konclude {
 			}
 
 
+			QString CConformanceRunner::sanitizeFileName(const QString& name) const {
+				QString cleaned = name;
+				for (int i = 0; i < cleaned.size(); ++i) {
+					const QChar c = cleaned.at(i);
+					if (!c.isLetterOrNumber() && c != '.' && c != '_' && c != '-') {
+						cleaned[i] = QChar('_');
+					}
+				}
+				return cleaned;
+			}
+
+
+			QString CConformanceRunner::resolveOutputLogFilePath(const CConformanceTestCase& testCase, qint64 runIndex) {
+				// The logs are a companion of the result ontology: they live in a
+				// 'test-outputs' subfolder next to the output file, which the ontology
+				// references via kt:outputFile. No output file -> no output logging.
+				if (mOutputFile.isEmpty()) {
+					return QString();
+				}
+				QString logDir = QDir::cleanPath(QFileInfo(mOutputFile).absolutePath() + "/test-outputs");
+				QDir dir(logDir);
+				if (!dir.exists() && !dir.mkpath(logDir)) {
+					LOG(ERROR, getLogDomain(), logTr("Cannot create output log directory '%1'.").arg(logDir), this);
+					return QString();
+				}
+				QString fileName = sanitizeFileName(testCase.mId);
+				if (mRepeatCount > 1) {
+					fileName += QString("-r%1").arg(runIndex);
+				}
+				fileName += ".log";
+				return dir.absoluteFilePath(fileName);
+			}
+
+
 			CConformanceTestResult CConformanceRunner::executeTestCase(const CConformanceTestCase& testCase) {
 				CConformanceTestResult result;
 				result.mId = testCase.mId;
@@ -384,8 +444,15 @@ namespace Konclude {
 				bool sawTimeout = false;
 				bool allEqual = true;
 				QString actual;
+				QString outputLogFile;
 				for (qint64 r = 0; r < mRepeatCount; ++r) {
-					actual = runTask(testCase, timeoutMs);
+					// The per-run log file (into which QProcess captures the subprocess
+					// output directly) or an empty path when output logging is disabled.
+					QString runLogFile = resolveOutputLogFilePath(testCase, r);
+					actual = runTask(testCase, timeoutMs, runLogFile);
+					if (!runLogFile.isEmpty()) {
+						outputLogFile = runLogFile;
+					}
 					if (actual == "timeout") {
 						sawTimeout = true;
 					}
@@ -397,6 +464,7 @@ namespace Konclude {
 				}
 				result.mDurationMs = timer.elapsed();
 				result.mActual = actual;
+				result.mOutputLogFile = outputLogFile;
 
 				// Flaky: repeated runs with diverging outcome.
 				if (!allEqual) {
@@ -467,6 +535,14 @@ namespace Konclude {
 					ts << "  <DataPropertyAssertion><DataProperty abbreviatedIRI=\"kt:durationMs\"/>"
 					   << "<NamedIndividual abbreviatedIRI=\"" << resId << "\"/>"
 					   << "<Literal>" << res.mDurationMs << "</Literal></DataPropertyAssertion>\n";
+					if (!res.mOutputLogFile.isEmpty()) {
+						// Reference to the file containing the raw output of the executed
+						// Konclude run for this test (a 'test-outputs' subfolder next to
+						// the output ontology file).
+						ts << "  <DataPropertyAssertion><DataProperty abbreviatedIRI=\"kt:outputFile\"/>"
+						   << "<NamedIndividual abbreviatedIRI=\"" << resId << "\"/>"
+						   << "<Literal>" << res.mOutputLogFile << "</Literal></DataPropertyAssertion>\n";
+					}
 				}
 				ts << "</Ontology>\n";
 				file.close();

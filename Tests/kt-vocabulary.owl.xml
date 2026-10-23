@@ -66,5 +66,7 @@
   <Declaration><DataProperty abbreviatedIRI="kt:onOS"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:durationMs"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:reasonerVersion"/></Declaration>
+  <!-- absolute path of the file with the logged output of the executed Konclude run -->
+  <Declaration><DataProperty abbreviatedIRI="kt:outputFile"/></Declaration>
 
 </Ontology>

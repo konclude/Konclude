@@ -97,7 +97,10 @@ namespace Konclude {
 					//! Starts the Konclude binary as a subprocess for one test.
 					//! Returns consistent/inconsistent or satisfiable/unsatisfiable,
 					//! or "match"/"mismatch" for classification, otherwise "timeout"/"error".
-					QString runTask(const CConformanceTestCase& testCase, qint64 timeoutMs);
+					//! When logFilePath is non-empty, the subprocess' standard output
+					//! and error (merged) are captured directly into that file by
+					//! QProcess; otherwise they stay in the in-memory channel buffers.
+					QString runTask(const CConformanceTestCase& testCase, qint64 timeoutMs, const QString& logFilePath);
 
 					//! Parses an OWL/XML classification result file into a semantic,
 					//! order-independent class hierarchy (equivalence classes become synsets).
@@ -115,6 +118,14 @@ namespace Konclude {
 
 					//! Determines the path to this binary (for subprocess calls).
 					QString resolveBinaryFile();
+
+					//! Replaces characters that are unsafe in file names with underscores.
+					QString sanitizeFileName(const QString& name) const;
+
+					//! Resolves the log file path for one run of a test case under the
+					//! output log directory (creating the directory if needed). Returns
+					//! an empty string when output logging is disabled.
+					QString resolveOutputLogFilePath(const CConformanceTestCase& testCase, qint64 runIndex);
 
 					//! Writes the OWL/XML result ontology if an output path is set.
 					void writeResultOntology(const QList<CConformanceTestResult>& results);

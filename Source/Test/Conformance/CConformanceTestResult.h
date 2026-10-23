@@ -44,6 +44,7 @@ namespace Konclude {
 					QString mOutcome;        // PASS/FAIL/KNOWN/FIXED/TIMEOUT/FLAKY
 					QString mExpected;       // expected result
 					QString mActual;         // actual result
+					QString mOutputLogFile;  // absolute path to the logged output of the executed Konclude run
 					qint64 mDurationMs;      // run time
 					bool mFailing;           // counts as a red run?
 			};
