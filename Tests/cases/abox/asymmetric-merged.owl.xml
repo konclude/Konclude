@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Asymmetric + functional role, so that the two fillers of "a" are merged:
+  FunctionalObjectProperty(r), r(a,b), r(a,c), DifferentIndividuals(b c),
+  r(c,a). The merge of b and c turns r(c,a) into r(b,a) and r(a,b)/r(b,a)
+  violate the asymmetry on the merged representative.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/asymmetric-merged">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <Declaration><NamedIndividual IRI="#c"/></Declaration>
+  <AsymmetricObjectProperty><ObjectProperty IRI="#r"/></AsymmetricObjectProperty>
+  <FunctionalObjectProperty><ObjectProperty IRI="#r"/></FunctionalObjectProperty>
+  <DifferentIndividuals><NamedIndividual IRI="#b"/><NamedIndividual IRI="#c"/></DifferentIndividuals>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#c"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#c"/><NamedIndividual IRI="#a"/></ObjectPropertyAssertion>
+</Ontology>

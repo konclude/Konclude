@@ -86,9 +86,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <!-- Known discrepancies (see ../../known-issues.owl.xml): treated as KNOWN, not FAIL -->
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><NamedIndividual abbreviatedIRI="kt:issue-asymmetric"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><NamedIndividual abbreviatedIRI="kt:issue-irreflexive"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><NamedIndividual abbreviatedIRI="kt:issue-disjoint-roles"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><NamedIndividual abbreviatedIRI="kt:issue-mincard-maxcard"/></ObjectPropertyAssertion>
 
 </Ontology>

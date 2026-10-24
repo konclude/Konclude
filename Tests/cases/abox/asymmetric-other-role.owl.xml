@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Negative case (overshoot guard): only r is asymmetric. r(a,b) and q(b,a) with
+  an unrelated q do not form an r/r^- pair, so the ontology is consistent.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/asymmetric-other-role">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#q"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <AsymmetricObjectProperty><ObjectProperty IRI="#r"/></AsymmetricObjectProperty>
+  <DifferentIndividuals><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></DifferentIndividuals>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#q"/><NamedIndividual IRI="#b"/><NamedIndividual IRI="#a"/></ObjectPropertyAssertion>
+</Ontology>

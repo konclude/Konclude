@@ -962,6 +962,14 @@ namespace Konclude {
 						bool testIndividualNodeBackendCacheConceptsSynchronization(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeBackendCacheNeighbourExpansionBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeBackendCacheSameMergedBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool testIndividualNodeBackendCacheRoleCharacteristicsBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool testIndividualNodeAssociationRoleSetsBlockingCritical(CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool testIndividualNodeAssociationNeighbourRoleSetBlockingCritical(CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, cint64 selfIndiId, cint64 neighbourIndiId, bool mirroredDirection, bool& characteristicRoleFound, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool testIndividualLocalRoleAssertionsBlockingCritical(CIndividualProcessNode* indi);
+						bool testIndividualRoleAssertionPairBlockingCritical(CIndividual* nominalIndi, CIndividualProcessNode* indi, CIndividual* otherIndi);
+						bool testRoleSetBlockingCritical(CRole** roleSet, cint64 roleSetSize, bool selfLoop);
+						bool addRoleToRoleSet(CRole** roleSet, cint64& roleSetSize, CRole* role, bool inversed);
+						bool hasRoleCharacteristic(CRole* role);
 
 						bool testIndividualNodeBackendCacheNewMergings(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeConceptBackendCacheNeighbourExpansionBlockingCritical(CConcept* concept, bool conNegation, bool nondeterministic, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CCalculationAlgorithmContextBase* calcAlgContext);

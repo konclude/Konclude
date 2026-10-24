@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Functional and asymmetric role with a direct 2-cycle:
+  r(a,b), r(b,a). Each subject has exactly one r filler (so the functional
+  cardinality test does not fire) and the asymmetry is violated directly.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/functional-asymmetric">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <AsymmetricObjectProperty><ObjectProperty IRI="#r"/></AsymmetricObjectProperty>
+  <FunctionalObjectProperty><ObjectProperty IRI="#r"/></FunctionalObjectProperty>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#b"/><NamedIndividual IRI="#a"/></ObjectPropertyAssertion>
+</Ontology>

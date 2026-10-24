@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Negative case (overshoot guard): r is irreflexive, but r(a,b) connects two
+  different individuals, so no self loop exists and the ontology is consistent.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/irreflexive-non-loop">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <IrreflexiveObjectProperty><ObjectProperty IRI="#r"/></IrreflexiveObjectProperty>
+  <DifferentIndividuals><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></DifferentIndividuals>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+</Ontology>

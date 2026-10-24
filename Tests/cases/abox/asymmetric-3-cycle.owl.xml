@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Asymmetric role with a 3-individual cycle that contains a 2-cycle:
+  r(a,b), r(b,a), r(b,c) and AsymmetricObjectProperty(r).
+  r(a,b) and r(b,a) are the same pair in opposite directions -> inconsistent.
+  The third edge r(b,c) only makes the "role appears more than once" trap explicit:
+  the clash must be decided per pair, not by counting occurrences.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/asymmetric-3-cycle">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <Declaration><NamedIndividual IRI="#c"/></Declaration>
+  <AsymmetricObjectProperty><ObjectProperty IRI="#r"/></AsymmetricObjectProperty>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#b"/><NamedIndividual IRI="#a"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#b"/><NamedIndividual IRI="#c"/></ObjectPropertyAssertion>
+</Ontology>

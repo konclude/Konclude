@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Disjointness only visible after super-role closure:
+  r is a sub role of both s and t, s and t are disjoint, r(a,b) is asserted.
+  r(a,b) implies s(a,b) and t(a,b) -> the cached role set must expose the
+  super roles, otherwise the clash is missed.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/disjoint-super-roles">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#s"/></Declaration>
+  <Declaration><ObjectProperty IRI="#t"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <SubObjectPropertyOf><ObjectProperty IRI="#r"/><ObjectProperty IRI="#s"/></SubObjectPropertyOf>
+  <SubObjectPropertyOf><ObjectProperty IRI="#r"/><ObjectProperty IRI="#t"/></SubObjectPropertyOf>
+  <DisjointObjectProperties><ObjectProperty IRI="#s"/><ObjectProperty IRI="#t"/></DisjointObjectProperties>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+</Ontology>
