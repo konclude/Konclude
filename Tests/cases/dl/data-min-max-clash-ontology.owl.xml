@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/data-min-max-clash">
+
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><DataProperty IRI="#dp"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <SubClassOf><Class IRI="#C"/><DataMinCardinality cardinality="2"><DataProperty IRI="#dp"/><TopDataRange/></DataMinCardinality></SubClassOf>
+  <SubClassOf><Class IRI="#C"/><DataMaxCardinality cardinality="1"><DataProperty IRI="#dp"/><TopDataRange/></DataMaxCardinality></SubClassOf>
+  <ClassAssertion><Class IRI="#C"/><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>

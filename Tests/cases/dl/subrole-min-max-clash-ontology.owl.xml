@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/subrole-min-max-clash">
+
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#s"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <SubObjectPropertyOf><ObjectProperty IRI="#s"/><ObjectProperty IRI="#r"/></SubObjectPropertyOf>
+  <SubClassOf><Class IRI="#C"/><ObjectMinCardinality cardinality="2"><ObjectProperty IRI="#s"/></ObjectMinCardinality></SubClassOf>
+  <SubClassOf><Class IRI="#C"/><ObjectMaxCardinality cardinality="1"><ObjectProperty IRI="#r"/></ObjectMaxCardinality></SubClassOf>
+  <ClassAssertion><Class IRI="#C"/><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>

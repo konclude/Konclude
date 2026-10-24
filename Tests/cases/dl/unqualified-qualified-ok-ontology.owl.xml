@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/unqualified-qualified-ok">
+
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><Class IRI="#A"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <!-- the at-least successors need not be A successors: satisfiable -->
+  <SubClassOf><Class IRI="#C"/><ObjectMinCardinality cardinality="2"><ObjectProperty IRI="#r"/></ObjectMinCardinality></SubClassOf>
+  <SubClassOf><Class IRI="#C"/><ObjectMaxCardinality cardinality="1"><ObjectProperty IRI="#r"/><Class IRI="#A"/></ObjectMaxCardinality></SubClassOf>
+  <ClassAssertion><Class IRI="#C"/><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>
