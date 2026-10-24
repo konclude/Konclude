@@ -73,6 +73,10 @@ namespace Konclude {
 					void setOutputFile(const QString& file);
 					void setBinaryFile(const QString& file);
 					void setKnownIssuesFile(const QString& file);
+					//! Sets the default reasoner configuration file that is passed as
+					//! '-c <file>' to every executed test case for which the control
+					//! ontology does not specify its own kt:usesConfig file.
+					void setConfigFile(const QString& file);
 					void setJobCount(qint64 jobs);
 					void setRepeatCount(qint64 repeat);
 					void setTimeoutSeconds(qint64 seconds);
@@ -136,6 +140,7 @@ namespace Konclude {
 					QString mOutputFile;
 					QString mBinaryFile;
 					QString mKnownIssuesFile;
+					QString mConfigFile;             // default reasoner config file ('-c'), may be empty
 					qint64 mJobCount;
 					qint64 mRepeatCount;
 					qint64 mTimeoutSeconds;

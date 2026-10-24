@@ -44,6 +44,7 @@ namespace Konclude {
 			void CConformanceRunner::setOutputFile(const QString& file) { mOutputFile = file; }
 			void CConformanceRunner::setBinaryFile(const QString& file) { mBinaryFile = file; }
 			void CConformanceRunner::setKnownIssuesFile(const QString& file) { mKnownIssuesFile = file; }
+			void CConformanceRunner::setConfigFile(const QString& file) { mConfigFile = file; }
 			void CConformanceRunner::setJobCount(qint64 jobs) { mJobCount = jobs > 0 ? jobs : 1; }
 			void CConformanceRunner::setRepeatCount(qint64 repeat) { mRepeatCount = repeat > 0 ? repeat : 1; }
 			void CConformanceRunner::setTimeoutSeconds(qint64 seconds) { mTimeoutSeconds = seconds > 0 ? seconds : 60; }
@@ -229,6 +230,27 @@ namespace Konclude {
 					}
 					if (propName.endsWith("knownFailure") && caseById.contains(indName)) {
 						caseById[indName].mKnownFailure = true;
+					} else if (propName.endsWith("usesConfig")) {
+						// Additional reasoner configuration file for this test case only
+						// (e.g. a config with AllowBackendNeighbourExpansionBlocking=false).
+						QDomElement target = ind.nextSiblingElement("NamedIndividual");
+						if (!target.isNull()) {
+							QString configPath = target.attribute("IRI");
+							if (configPath.isEmpty()) {
+								configPath = target.attribute("abbreviatedIRI");
+							}
+							if (!configPath.isEmpty()) {
+								// Relative filename -> resolve to absolute against the case directory.
+								QString resolved = QDir::isAbsolutePath(configPath) ? configPath : caseDir.absoluteFilePath(configPath);
+								if (!caseById.contains(indName)) {
+									CConformanceTestCase tc;
+									tc.mId = indName;
+									tc.mControlFile = filePath;
+									caseById.insert(indName, tc);
+								}
+								caseById[indName].mConfigFile = QDir::cleanPath(resolved);
+							}
+						}
 					} else if (propName.endsWith("onChannel") && caseById.contains(indName)) {
 						// Interface the test runs on, e.g. kt:CommandLine, kt:OWLlink.
 						QDomElement target = ind.nextSiblingElement("NamedIndividual");
@@ -294,6 +316,13 @@ namespace Konclude {
 					args << "classification" << "-i" << testCase.mOntologyFile << "-o" << responseFile;
 				} else {
 					args << "consistency" << "-i" << testCase.mOntologyFile;
+				}
+
+				// The configuration file of the test case takes precedence over the
+				// suite-wide default configuration file (Konclude.Conformance.ConfigFile).
+				QString configFile = !testCase.mConfigFile.isEmpty() ? testCase.mConfigFile : mConfigFile;
+				if (!configFile.isEmpty()) {
+					args << "-c" << configFile;
 				}
 
 				if (!logFilePath.isEmpty()) {

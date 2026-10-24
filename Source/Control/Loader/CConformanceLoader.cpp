@@ -55,6 +55,10 @@ namespace Konclude {
 				QString outputFile = CConfigDataReader::readConfigString(mLoaderConfig, "Konclude.Conformance.OutputFile", "");
 				QString binaryFile = CConfigDataReader::readConfigString(mLoaderConfig, "Konclude.Conformance.BinaryFile", "");
 				QString knownIssuesFile = CConfigDataReader::readConfigString(mLoaderConfig, "Konclude.Conformance.KnownIssuesFile", "");
+				// Default reasoner configuration file for all test cases (e.g. one that switches
+				// Konclude.Calculation.Optimization.AllowBackendNeighbourExpansionBlocking off).
+				// A test-specific kt:usesConfig assertion in the control ontology takes precedence.
+				QString configFile = CConfigDataReader::readConfigString(mLoaderConfig, "Konclude.Conformance.ConfigFile", "");
 				cint64 jobCount = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.Conformance.Jobs", 1);
 				cint64 repeatCount = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.Conformance.Repeat", 1);
 				cint64 timeoutSeconds = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.Conformance.TimeoutSeconds", 60);
@@ -65,6 +69,7 @@ namespace Konclude {
 				runner.setOutputFile(outputFile);
 				runner.setBinaryFile(binaryFile);
 				runner.setKnownIssuesFile(knownIssuesFile);
+				runner.setConfigFile(configFile);
 				runner.setJobCount(jobCount);
 				runner.setRepeatCount(repeatCount);
 				runner.setTimeoutSeconds(timeoutSeconds);

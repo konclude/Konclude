@@ -28,6 +28,8 @@
 # ---------- Logs ---------------------------------------------------------
 # Local build, test and conformance logs.
 /logs/
+# Local debug data dumps (./Debugging from -c Configs/debugging-config.xml runs).
+/Debugging/
 *.log
 
 # ---------- qmake generated files ---------------------------------------

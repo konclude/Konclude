@@ -46,6 +46,7 @@ namespace Konclude {
 					QString mExpectedFile;       // absolute path to an expected OWL/XML classification result (task "classification")
 					QString mTestClass;          // class IRI for satisfiability (exactly as declared in the ontology)
 					QString mControlFile;        // originating *.kt.owl.xml (for messages)
+					QString mConfigFile;         // additional reasoner config file (kt:usesConfig), may be empty
 					bool mKnownFailure;          // marked via kt:knownFailure or kt:flaky
 					qint64 mTimeoutSeconds;      // 0 => runner default
 			};

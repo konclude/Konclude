@@ -91,6 +91,12 @@ namespace Konclude {
 							// Progress / estimated-remaining-time report interval in seconds (0 disables it).
 							mConformanceConfList.append(QString("+Konclude.Conformance.ProgressInterval=%1").arg(takeValue("3")));
 							argumentTranslated = true;
+						} else if (opt.compare("c", Qt::CaseInsensitive) == 0 || opt.compare("config", Qt::CaseInsensitive) == 0) {
+							// Additional configuration file that is passed to every executed test case
+							// (e.g. AllowBackendNeighbourExpansionBlocking=false). Test-specific
+							// kt:usesConfig assertions take precedence over this default.
+							mConformanceConfList.append(QString("+Konclude.Conformance.ConfigFile=%1").arg(takeValue("")));
+							argumentTranslated = true;
 						} else if (opt.compare("binary", Qt::CaseInsensitive) == 0) {
 							mConformanceConfList.append(QString("+Konclude.Conformance.BinaryFile=%1").arg(takeValue("")));
 							argumentTranslated = true;
