@@ -15,15 +15,8 @@ jobs:
         - {
             name: "Ubuntu Latest GCC",
             os: ubuntu-latest,
-            build_type: "Release", 
-            cc: "gcc", 
-            cxx: "g++"
-          }
-        - {
-            name: "Ubuntu 16.04 GCC",
-            os: ubuntu-16.04,
-            build_type: "Release", 
-            cc: "gcc", 
+            build_type: "Release",
+            cc: "gcc",
             cxx: "g++"
           }
         - {
@@ -45,39 +38,103 @@ jobs:
     steps:
       # Checks out a copy of your repository on the machine
       - name: Checkout code
-        uses: actions/checkout@v2
-        
+        uses: actions/checkout@v4
+
+      # sccache keeps the objects of earlier runs in a local directory, which actions/cache saves
+      # under the commit and restores from the most recent run of the same job and platform, so
+      # that only the translation units a change touches are compiled again. qmake is handed
+      # 'sccache <compiler>' as QMAKE_CC and QMAKE_CXX, which leaves linking and moc as they are.
+      # The directory is used rather than the GitHub Actions backend of sccache, which stores
+      # every object as a cache entry of its own, several thousand per job.
+      - name: Install sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Prepare sccache
+        shell: bash
+        run: |
+          echo "SCCACHE_DIR=$RUNNER_TEMP/sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_CACHE_SIZE=2G" >> "$GITHUB_ENV"
+
+      - name: Restore the compiler cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/sccache
+          key: sccache-${{ github.job }}-${{ matrix.config.os }}-${{ github.sha }}
+          restore-keys: sccache-${{ github.job }}-${{ matrix.config.os }}-
+
+      # Qt 5.15.2 is only available for x86_64 on macOS, whereas the macOS runners are
+      # arm64, so Qt is installed with Homebrew there and with aqtinstall elsewhere.
       - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-          
+        if: ${{ !startsWith(matrix.config.os, 'macos') }}
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          cache: true
+
+      - name: Install Qt macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          brew install qt@5
+          echo "$(brew --prefix qt@5)/bin" >> "$GITHUB_PATH"
+
       - name: Compile Ubuntu
         if: startsWith(matrix.config.os, 'ubuntu')
-        run: | 
-          sudo apt-get install gdb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gdb
           echo `gcc --version`
           echo `qmake --version`
-          qmake KoncludeWithoutRedland.pro
-          make -j 2        
-          
+          qmake KoncludeWithoutRedland.pro "QMAKE_CC=sccache ${{ matrix.config.cc }}" "QMAKE_CXX=sccache ${{ matrix.config.cxx }}"
+          make -j "$(nproc)"
+
       - name: Compile macOS
         if: startsWith(matrix.config.os, 'macos')
         run: | 
           echo `clang --version`
           echo `qmake --version`
-          qmake KoncludeWithoutRedland.pro
-          make -j 2            
+          qmake KoncludeWithoutRedland.pro "QMAKE_CC=sccache ${{ matrix.config.cc }}" "QMAKE_CXX=sccache ${{ matrix.config.cxx }}"
+          make -j "$(sysctl -n hw.ncpu)"
 
+      - name: List available MSVC toolsets
+        if: startsWith(matrix.config.os, 'windows')
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path "C:\Program Files*\Microsoft Visual Studio\*\*\VC\Tools\MSVC\*" -Directory -ErrorAction SilentlyContinue |
+            ForEach-Object { Write-Output $_.Name }
+
+      # Qt 5.15.2 uses stdext::make_checked_array_iterator in QtCore/qlist.h, which has been
+      # removed from the standard library of Visual Studio 2022 17.10 (tool set 14.40) and
+      # above, so the build fails with the current default tool set:
+      #
+      #   QtCore/qlist.h(915): error C2653: 'stdext': is not a class or namespace name
+      #
+      # The Visual Studio 2019 tool set 14.29 is still installed on the runner image and is the
+      # one the msvc2019_64 build of Qt has been made with, so it is selected explicitly.
       - name: Prepare Visual Studio
         if: startsWith(matrix.config.os, 'windows')
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: '14.29'
 
+      # nmake builds one translation unit at a time, which took 30 minutes for the 2 600 of
+      # Konclude while the other jobs took 10; jom is Qt's parallel drop-in for nmake, so the
+      # Makefiles qmake writes for MSVC need no change. qmake compiles many files with one call of
+      # cl by default, which sccache cannot cache, so no_batch gives each file a call of its own.
+      # jom.ps1 retries the install of jom and falls back to nmake without it.
       - name: Compile Windows
         if: startsWith(matrix.config.os, 'windows')
         run: |
-          qmake KoncludeWithoutRedland.pro
-          nmake         
-          
-          
+          . .github/scripts/jom.ps1
+          Install-Jom
+          qmake KoncludeWithoutRedland.pro "QMAKE_CC=sccache cl" "QMAKE_CXX=sccache cl" "CONFIG+=no_batch"
+          Invoke-Make
+
+      - name: Compiler cache statistics
+        if: always()
+        shell: bash
+        run: sccache --show-stats || true
+
+
       - name: Run Examples Ubuntu
         if: startsWith(matrix.config.os, 'ubuntu')
         run: |
@@ -113,3 +170,35 @@ jobs:
           Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
           Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
 
+      # The conformance runner drives the built binary as a subprocess and compares the answers
+      # with the expected result files in Tests/cases. It runs on every platform, so a regression
+      # of one build does not hide behind the other platforms.
+      - name: Run Conformance Tests
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          mkdir -p conformance-results
+          Release/Konclude conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(nproc)"
+
+      - name: Run Conformance Tests macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          mkdir -p conformance-results
+          Release/Konclude.app/Contents/MacOS/Konclude conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
+
+      - name: Run Conformance Tests Windows
+        if: startsWith(matrix.config.os, 'windows')
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path conformance-results | Out-Null
+          & .\Release\Konclude.exe conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$env:NUMBER_OF_PROCESSORS"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload Conformance Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-results-${{ runner.os }}
+          path: |
+            conformance-results/result.owl.xml
+            conformance-results/test-outputs/
+          if-no-files-found: ignore

@@ -59,6 +59,9 @@ namespace Konclude {
 					//! depending on the shape of the given identifier.
 					void writeIndividual(QTextStream& stream, const QString& individualIRI);
 
+					//! Writes an ObjectPropertyAssertion between two named individuals.
+					void writeObjectPropertyAssertion(QTextStream& stream, const QString& objectPropertyIRI, const QString& subjectIRI, const QString& objectIRI);
+
 					//! Writes a DataPropertyAssertion with a plain literal value.
 					void writeLiteralAssertion(QTextStream& stream, const QString& dataPropertyIRI, const QString& subjectIRI, const QString& value);
 			};
