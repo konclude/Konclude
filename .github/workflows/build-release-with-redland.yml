@@ -4,11 +4,14 @@ name: Build Releases (with Redland)
 # draft GitHub release. The workflow runs for tags that match releases/v*, where the name of
 # the release is the tag without the releases/ prefix, and it can be started manually, where
 # the release is named after the most recent tag and its creation can be switched off to only
-# build and test the packages.
+# build and test the packages. Pushes to master also build and test the packages, but do not
+# create a release, so the Redland-enabled builds are checked on every integration.
 on:
   push:
     tags:
       - 'releases/v*'
+    branches:
+      - master
   workflow_dispatch:
     inputs:
       create_release:
