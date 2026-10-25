@@ -145,6 +145,25 @@ jobs:
             Copy-Item "Tests\$test" "$RELEA\Tests"
           }
 
+      # The conformance runner checks the binary that was copied into the package.
+      - name: Konclude Conformance Test
+        working-directory: Release/${{ env.RELEASE_NAME }}
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path conformance-results | Out-Null
+          & .\Binaries\Konclude.exe conformance -i ..\..\Tests\cases -o conformance-results\result.owl.xml -j "$env:NUMBER_OF_PROCESSORS"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload Conformance Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-results-windows-release
+          path: |
+            Release/${{ env.RELEASE_NAME }}/conformance-results/result.owl.xml
+            Release/${{ env.RELEASE_NAME }}/conformance-results/test-outputs/
+          if-no-files-found: ignore
+
       - name: Run Examples Windows
         working-directory: Release/${{ env.RELEASE_NAME }}
         run: |
@@ -260,6 +279,22 @@ jobs:
             cp "$PROJ/Tests/$test" "$RELEA/Tests"
           done
           chmod 755 "$RELEA/Binaries/Konclude" "$RELEA/Konclude" "$RELEA/Konclude.sh"
+
+      # The conformance runner checks the binary that was copied into the package.
+      - name: Konclude Conformance Test
+        run: |
+          mkdir -p conformance-results
+          ./Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
+
+      - name: Upload Conformance Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-results-macos-release
+          path: |
+            conformance-results/result.owl.xml
+            conformance-results/test-outputs/
+          if-no-files-found: ignore
 
       - name: Konclude Examples Test
         working-directory: Release/${{ env.RELEASE_NAME }}

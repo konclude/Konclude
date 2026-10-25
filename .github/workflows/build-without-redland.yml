@@ -171,19 +171,33 @@ jobs:
           Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
 
       # The conformance runner drives the built binary as a subprocess and compares the answers
-      # with the expected result files in Tests/cases. It runs once, on Linux, so that the
-      # results are independent of the runner platform; the runner itself is platform-neutral.
+      # with the expected result files in Tests/cases. It runs on every platform, so a regression
+      # of one build does not hide behind the other platforms.
       - name: Run Conformance Tests
         if: startsWith(matrix.config.os, 'ubuntu')
         run: |
           mkdir -p conformance-results
           Release/Konclude conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(nproc)"
 
+      - name: Run Conformance Tests macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          mkdir -p conformance-results
+          Release/Konclude.app/Contents/MacOS/Konclude conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
+
+      - name: Run Conformance Tests Windows
+        if: startsWith(matrix.config.os, 'windows')
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path conformance-results | Out-Null
+          & .\Release\Konclude.exe conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$env:NUMBER_OF_PROCESSORS"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Upload Conformance Results
-        if: always() && startsWith(matrix.config.os, 'ubuntu')
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: conformance-results
+          name: conformance-results-${{ runner.os }}
           path: |
             conformance-results/result.owl.xml
             conformance-results/test-outputs/
