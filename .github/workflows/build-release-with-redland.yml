@@ -364,6 +364,24 @@ jobs:
             exit 1
           fi
 
+      # The conformance runner exercises the release binary against the answers in Tests/cases
+      # before the binary is packaged, so a release cannot be built from a regressed reasoner.
+      - name: Konclude Conformance Test
+        working-directory: konclude-static
+        run: |
+          mkdir -p ../conformance-results
+          Release/Konclude conformance -i Tests/cases -o ../conformance-results/result.owl.xml -j "$(nproc)"
+
+      - name: Upload Conformance Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-results-release-linux
+          path: |
+            conformance-results/result.owl.xml
+            conformance-results/test-outputs/
+          if-no-files-found: ignore
+
       - name: Create Konclude Release
         run: |
           ROOT="$(pwd)"
