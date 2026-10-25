@@ -519,7 +519,11 @@ jobs:
             fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./run/snap.sh
+          bash -eo pipefail ./run/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
           docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
           mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
@@ -547,7 +551,11 @@ jobs:
             fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./develop/snap.sh
+          bash -eo pipefail ./develop/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
           docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
           mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
@@ -610,7 +618,11 @@ jobs:
             fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./run/snap.sh
+          bash -eo pipefail ./run/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
           docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
           mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
@@ -638,7 +650,11 @@ jobs:
             fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./develop/snap.sh
+          bash -eo pipefail ./develop/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
           docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
           mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
@@ -646,7 +662,11 @@ jobs:
         working-directory: KoncludeDocker
         run: |
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./build/snap.sh
+          bash -eo pipefail ./build/snap.sh
+          if ! docker image inspect koncludebuild:latest >/dev/null 2>&1; then
+            echo "::error::Docker image 'koncludebuild:latest' was not built; see the build output above."
+            exit 1
+          fi
 
       - name: Build Deploy Image
         working-directory: KoncludeDocker
@@ -655,7 +675,11 @@ jobs:
           DOCKERIMAGE="konclude:latest"
           FILEIMAGE="../DockerCacheDirectory/Konclude-${{needs.tags.outputs.git_tag}}-Docker-Image.tar.gz"
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./deploy/snap.sh
+          bash -eo pipefail ./deploy/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
           docker tag konclude konclude/konclude:latest
           docker tag konclude konclude/konclude:${{needs.tags.outputs.git_tag}}
           docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
@@ -665,7 +689,7 @@ jobs:
         working-directory: KoncludeDocker
         run: |
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./build_release_parameterized.sh ${{needs.tags.outputs.revision_build}}  ${{needs.tags.outputs.revision_tag}} ${{needs.tags.outputs.revision_hash}}
+          bash -eo pipefail ./build_release_parameterized.sh ${{needs.tags.outputs.revision_build}}  ${{needs.tags.outputs.revision_tag}} ${{needs.tags.outputs.revision_hash}}
           ls -al ../Release
 
       - name: Konclude Docker Test
