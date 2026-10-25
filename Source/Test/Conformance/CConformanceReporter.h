@@ -28,6 +28,7 @@
 #include <QMap>
 
 // Namespace includes
+#include "CConformanceExecution.h"
 #include "CConformanceTestResult.h"
 
 
@@ -64,6 +65,16 @@ namespace Konclude {
 					//! Builds the configuration label of one execution, e.g.
 					//! "[configs: run-default + system-default]".
 					static QString formatConfigLabel(const QString& runConfigName, const QString& systemConfigName);
+
+					//! Builds the worker label of one execution, e.g.
+					//! "[worker 1, thread 0x7f2a1c0b3740]".
+					static QString formatWorkerLabel(int workerIndex, const QString& threadId);
+
+					//! Builds the line logged when a test execution starts, e.g.
+					//! "[START  ]  (DL suite)  --  kt:foo  [CommandLine]  --  [configs: ...]
+					//!  --  [worker 1, thread 0x...]  (2/54)". Makes a hanging test visible.
+					static QString formatStartLine(const CConformanceExecution& execution, int workerIndex,
+							const QString& threadId, int executionIndex, int executionCount);
 
 					//! Builds one result line, e.g.
 					//! "[PASS   ]  (DL-corner-cases suite)  --  kt:foo  --  [configs: run-default + system-default]  (53ms)".

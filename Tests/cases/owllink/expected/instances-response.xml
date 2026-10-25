@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Expected answer for instances-request.xml. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <KB kb="http://ex.test/kb"/>
+  <OK/>
+  <SetOfIndividualSynsets>
+    <IndividualSynset>
+      <owl:NamedIndividual IRI="#alice"/>
+    </IndividualSynset>
+  </SetOfIndividualSynsets>
+  <OK/>
+</ResponseMessage>

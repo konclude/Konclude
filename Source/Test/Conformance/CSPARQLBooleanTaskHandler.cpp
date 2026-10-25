@@ -42,7 +42,7 @@ namespace Konclude {
 
 
 			CConformanceTask::TYPE CSPARQLBooleanTaskHandler::getTaskType() const {
-				return CConformanceTask::TYPE::SPARQL_BOOLEAN;
+				return CConformanceTask::TYPE::SPARQL;
 			}
 
 
@@ -72,6 +72,12 @@ namespace Konclude {
 			CConformanceTaskResult CSPARQLBooleanTaskHandler::interpretResponse(const QString& responseFilePath, const QString& logOutput) {
 				Q_UNUSED(logOutput);
 
+				// With kt:expectedFile the complete result document is compared, which
+				// also covers SELECT queries with variable bindings.
+				if (!mTestCase.mExpectedFile.isEmpty()) {
+					return compareWithExpectedFile(responseFilePath);
+				}
+
 				CConformanceTaskResult result;
 				QString responseText;
 				if (!readTextFile(responseFilePath, responseText)) {
@@ -79,12 +85,6 @@ namespace Konclude {
 					result.mExplanation = QString("no SPARQL response written to '%1'").arg(QFileInfo(responseFilePath).fileName());
 					return result;
 				}
-				return interpretAnswer(responseText);
-			}
-
-
-			CConformanceTaskResult CSPARQLBooleanTaskHandler::interpretServerResponse(const QString& responseText, const QString& logOutput) {
-				Q_UNUSED(logOutput);
 				return interpretAnswer(responseText);
 			}
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Expected answer for subclasses-request.xml. Namespace declarations and
+     xml:base are ignored by the comparison; set members are compared as a set. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <KB kb="http://ex.test/kb"/>
+  <OK/>
+  <!-- Deliberately not in the order the reasoner returns them: set members
+       are compared order-independently. -->
+  <SetOfClassSynsets>
+    <ClassSynset>
+      <owl:Class IRI="#C"/>
+    </ClassSynset>
+    <ClassSynset>
+      <owl:Class IRI="http://www.w3.org/2002/07/owl#Nothing"/>
+    </ClassSynset>
+    <ClassSynset>
+      <owl:Class IRI="#B"/>
+    </ClassSynset>
+  </SetOfClassSynsets>
+  <OK/>
+</ResponseMessage>

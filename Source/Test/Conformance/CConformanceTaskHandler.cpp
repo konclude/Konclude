@@ -27,8 +27,9 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QThread>
+#include <QUrl>
 
-#include "Network/HTTP/CQtHttpTransactionManager.h"
+#include "CConformanceXMLResultComparator.h"
 
 
 namespace Konclude {
@@ -50,7 +51,7 @@ namespace Konclude {
 
 			CConformanceTaskResult CConformanceTaskHandler::run(qint64 timeoutMs, const QString& outputLogFilePath, const QString& responseFilePath) {
 				if (CConformanceChannel::typeIsServer(mTestCase.mChannel)) {
-					return runServerChannel(timeoutMs, outputLogFilePath);
+					return runServerChannel(timeoutMs, outputLogFilePath, responseFilePath);
 				}
 				return runFileChannel(timeoutMs, outputLogFilePath, responseFilePath);
 			}
@@ -89,7 +90,7 @@ namespace Konclude {
 			}
 
 
-			CConformanceTaskResult CConformanceTaskHandler::runServerChannel(qint64 timeoutMs, const QString& outputLogFilePath) {
+			CConformanceTaskResult CConformanceTaskHandler::runServerChannel(qint64 timeoutMs, const QString& outputLogFilePath, const QString& responseFilePath) {
 				CConformanceTaskResult result;
 
 				quint16 port = findFreeTcpPort();
@@ -139,11 +140,21 @@ namespace Konclude {
 						QString url = QString("http://127.0.0.1:%1/").arg(port);
 						QString responseText;
 						QString errorText;
-						if (postHttpRequest(url, requestText.toUtf8(), contentType, timeoutMs, responseText, errorText)) {
-							taskResult = interpretServerResponse(responseText, readLogOutput(outputLogFilePath, server));
-						} else {
+						if (!postHttpRequest(url, requestText.toUtf8(), contentType, timeoutMs, responseText, errorText)) {
 							taskResult.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
 							taskResult.mExplanation = QString("HTTP request to '%1' failed: %2").arg(url).arg(errorText);
+						} else {
+							// The answer is stored like the '-o' file of a file channel, so
+							// both channels are interpreted and archived identically.
+							QFile responseFile(responseFilePath);
+							if (responseFilePath.isEmpty() || !responseFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+								taskResult.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
+								taskResult.mExplanation = QString("cannot write the server answer to '%1'").arg(QFileInfo(responseFilePath).fileName());
+							} else {
+								responseFile.write(responseText.toUtf8());
+								responseFile.close();
+								taskResult = interpretResponse(responseFilePath, readLogOutput(outputLogFilePath, server));
+							}
 						}
 					}
 				}
@@ -160,14 +171,20 @@ namespace Konclude {
 			}
 
 
-			CConformanceTaskResult CConformanceTaskHandler::interpretServerResponse(const QString& responseText, const QString& logOutput) {
-				Q_UNUSED(responseText);
-				Q_UNUSED(logOutput);
-
+			CConformanceTaskResult CConformanceTaskHandler::compareWithExpectedFile(const QString& responseFilePath) const {
 				CConformanceTaskResult result;
-				result.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
-				result.mExplanation = QString("channel '%1' is not supported for task '%2'").arg(
-						CConformanceChannel::typeToString(mTestCase.mChannel), CConformanceTask::typeToString(mTestCase.mTask));
+				if (mTestCase.mExpectedFile.isEmpty()) {
+					result.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
+					result.mExplanation = QString("no expected result file declared");
+					return result;
+				}
+
+				QString detailMessage;
+				bool equivalent = CConformanceXMLResultComparator::compareXMLFiles(responseFilePath, mTestCase.mExpectedFile, detailMessage);
+				result.mStatus = CConformanceTaskResult::STATUS::COMPLETED;
+				result.mVerdict = equivalent ? CConformanceTask::VERDICT::POSITIVE : CConformanceTask::VERDICT::NEGATIVE;
+				result.mMatched = equivalent;
+				result.mExplanation = detailMessage;
 				return result;
 			}
 
@@ -238,39 +255,158 @@ namespace Konclude {
 
 
 			bool CConformanceTaskHandler::postHttpRequest(const QString& url, const QByteArray& requestBody, const QString& contentType, qint64 timeoutMs, QString& responseText, QString& errorText) {
-				Network::HTTP::CQtHttpTransactionManager transactionManager(timeoutMs);
-
-				Network::HTTP::CHttpRequest* request = transactionManager.createRequest(url, requestBody);
-				if (!request) {
-					errorText = QString("cannot create the HTTP request");
-					return false;
-				}
-				transactionManager.setRequestHeader(request, QString("Content-Type"), contentType);
-
-				Network::HTTP::CHttpResponse* response = transactionManager.getResponse(request);
-				if (!response) {
-					errorText = QString("cannot send the HTTP request");
-					return false;
+				// A blocking POST over QTcpSocket: the answers are small and the runner
+				// is a batch tool, so no thread-bound HTTP stack is needed here (which
+				// would also complicate shutdown, since Qt timers must be stopped from
+				// the thread that created them).
+				QUrl requestUrl(url);
+				QString host = requestUrl.host();
+				int port = requestUrl.port(80);
+				QString path = requestUrl.path();
+				if (path.isEmpty()) {
+					path = QString("/");
 				}
 
-				QString* text = transactionManager.getExtractedText(response);
-				bool success = false;
-				if (text && !text->isEmpty()) {
-					responseText = *text;
-					success = true;
-				} else {
-					QString* transactionError = transactionManager.getErrorString(response);
-					if (transactionError) {
-						errorText = *transactionError;
+				QByteArray requestData = QString("POST %1 HTTP/1.1\r\nHost: %2:%3\r\nContent-Type: %4\r\nContent-Length: %5\r\nConnection: close\r\n\r\n")
+						.arg(path).arg(host).arg(port).arg(contentType).arg(requestBody.size()).toUtf8();
+				requestData.append(requestBody);
+
+				QTcpSocket socket;
+				socket.connectToHost(host, static_cast<quint16>(port));
+				if (!socket.waitForConnected(timeoutMs)) {
+					errorText = QString("cannot connect to '%1:%2': %3").arg(host).arg(port).arg(socket.errorString());
+					return false;
+				}
+				socket.write(requestData);
+				if (!socket.waitForBytesWritten(timeoutMs)) {
+					errorText = QString("cannot send the request to '%1:%2': %3").arg(host).arg(port).arg(socket.errorString());
+					socket.abort();
+					return false;
+				}
+
+				QByteArray receivedData;
+				int headerEnd = -1;
+				while ((headerEnd = receivedData.indexOf("\r\n\r\n")) < 0) {
+					if (!socket.waitForReadyRead(timeoutMs)) {
+						errorText = QString("no HTTP response from '%1:%2'").arg(host).arg(port);
+						socket.abort();
+						return false;
+					}
+					receivedData.append(socket.readAll());
+				}
+
+				QByteArray headerData = receivedData.left(headerEnd);
+				int statusCode = 0;
+				bool statusParsed = false;
+				int contentLength = -1;
+				bool chunkedTransfer = false;
+				QList<QByteArray> headerLines = headerData.split('\n');
+				for (const QByteArray& rawLine : headerLines) {
+					QByteArray line = rawLine.trimmed();
+					if (line.isEmpty()) {
+						continue;
+					}
+					if (!statusParsed) {
+						// e.g. "HTTP/1.1 200 OK"
+						QList<QByteArray> statusParts = line.split(' ');
+						if (statusParts.count() >= 2) {
+							statusCode = statusParts.at(1).toInt();
+							statusParsed = true;
+						}
+						continue;
+					}
+					int colonIndex = line.indexOf(':');
+					if (colonIndex > 0) {
+						QByteArray name = line.left(colonIndex).trimmed().toLower();
+						QByteArray value = line.mid(colonIndex + 1).trimmed();
+						if (name == "content-length") {
+							contentLength = value.toInt();
+						} else if (name == "transfer-encoding" && value.toLower().contains("chunked")) {
+							// The SPARQL server streams its result in chunks.
+							chunkedTransfer = true;
+						}
 					}
 				}
-				delete text;
-				transactionManager.releaseResponse(response);
 
-				if (!success && errorText.isEmpty()) {
-					errorText = QString("empty HTTP response");
+				int bodyStart = headerEnd + 4;
+				auto readMore = [&]() -> bool {
+					if (!socket.waitForReadyRead(timeoutMs)) {
+						return false;
+					}
+					receivedData.append(socket.readAll());
+					return true;
+				};
+
+				QByteArray body;
+				if (contentLength >= 0) {
+					while (receivedData.size() - bodyStart < contentLength) {
+						if (!readMore()) {
+							errorText = QString("incomplete HTTP response from '%1:%2'").arg(host).arg(port);
+							socket.abort();
+							return false;
+						}
+					}
+					body = receivedData.mid(bodyStart, contentLength);
+				} else if (chunkedTransfer) {
+					int readPosition = bodyStart;
+					while (true) {
+						int sizeLineEnd = receivedData.indexOf("\r\n", readPosition);
+						while (sizeLineEnd < 0) {
+							if (!readMore()) {
+								errorText = QString("incomplete chunked HTTP response from '%1:%2'").arg(host).arg(port);
+								socket.abort();
+								return false;
+							}
+							sizeLineEnd = receivedData.indexOf("\r\n", readPosition);
+						}
+						QByteArray sizeLine = receivedData.mid(readPosition, sizeLineEnd - readPosition).trimmed();
+						int extensionIndex = sizeLine.indexOf(';');
+						if (extensionIndex >= 0) {
+							sizeLine = sizeLine.left(extensionIndex).trimmed();
+						}
+						bool sizeParsed = false;
+						int chunkSize = sizeLine.toInt(&sizeParsed, 16);
+						if (!sizeParsed) {
+							errorText = QString("invalid chunked HTTP response from '%1:%2'").arg(host).arg(port);
+							socket.abort();
+							return false;
+						}
+						readPosition = sizeLineEnd + 2;
+						if (chunkSize == 0) {
+							break;
+						}
+						while (receivedData.size() < readPosition + chunkSize + 2) {
+							if (!readMore()) {
+								errorText = QString("incomplete chunked HTTP response from '%1:%2'").arg(host).arg(port);
+								socket.abort();
+								return false;
+							}
+						}
+						body.append(receivedData.mid(readPosition, chunkSize));
+						readPosition += chunkSize + 2;
+					}
+				} else {
+					while (socket.state() != QAbstractSocket::UnconnectedState || socket.bytesAvailable() > 0) {
+						if (socket.bytesAvailable() > 0) {
+							receivedData.append(socket.readAll());
+						} else if (!readMore()) {
+							break;
+						}
+					}
+					body = receivedData.mid(bodyStart);
 				}
-				return success;
+				socket.disconnectFromHost();
+
+				if (statusCode != 200) {
+					errorText = QString("HTTP status %1").arg(statusCode);
+					return false;
+				}
+				if (body.isEmpty()) {
+					errorText = QString("empty HTTP response");
+					return false;
+				}
+				responseText = QString::fromUtf8(body);
+				return true;
 			}
 
 		}; // end namespace Conformance

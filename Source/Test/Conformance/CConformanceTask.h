@@ -37,8 +37,13 @@ namespace Konclude {
 			 *		\brief		Description of the reasoner tasks a conformance test can
 			 *					ask for: the task kinds, their canonical names as used in
 			 *					control ontologies and reports, the control ontology marker
-			 *					class, the default interface and the boolean verdict
-			 *					vocabulary of each task.
+			 *					class and the verdict vocabulary of each task.
+			 *
+			 *					A task says WHAT is checked (consistency, classification, an
+			 *					OWLlink answer, ...). HOW the reasoner is reached is the
+			 *					interface, described separately by CConformanceChannel (file or
+			 *					live server). A test case carries both values and
+			 *					CConformanceTaskHandlerFactory maps the pair to a handler.
 			 *
 			 *					This class is the single source of truth for the textual form
 			 *					of a task. All other code works with TYPE and VERDICT; strings
@@ -52,8 +57,8 @@ namespace Konclude {
 						CONSISTENCY,			//!< Is the ontology consistent?
 						SATISFIABILITY,			//!< Is the requested class satisfiable?
 						CLASSIFICATION,			//!< Does the computed taxonomy match the expected one?
-						OWLLINK_BOOLEAN,		//!< Does the OWLlink BooleanResponse match the expectation?
-						SPARQL_BOOLEAN			//!< Does the SPARQL ASK result match the expectation?
+						OWLLINK,		//!< Does the OWLlink BooleanResponse match the expectation?
+						SPARQL			//!< Does the SPARQL ASK result match the expectation?
 					};
 
 					//! Boolean answer a task can produce. POSITIVE means
@@ -71,7 +76,7 @@ namespace Konclude {
 					static QList<TYPE> allTypes();
 
 					//! Canonical lower-case name of a task (e.g. "consistency",
-					//! "owllink-boolean"), as used in control ontologies and reports.
+					//! "owllink", "sparql"), as used in control ontologies and reports.
 					static QString typeToString(TYPE type);
 
 					//! Parses a canonical task name. Returns false for unknown names.

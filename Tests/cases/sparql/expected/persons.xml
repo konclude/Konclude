@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for persons.sparql. Rows are deliberately in a different
+     order than the server returns them: result rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="person"/>
+  </head>
+  <results>
+    <result>
+      <binding name="person"><uri>http://konclude.test/sparql#bob</uri></binding>
+    </result>
+    <result>
+      <binding name="person"><uri>http://konclude.test/sparql#alice</uri></binding>
+    </result>
+  </results>
+</sparql>

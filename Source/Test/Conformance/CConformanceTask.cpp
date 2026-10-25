@@ -31,7 +31,7 @@ namespace Konclude {
 			QList<CConformanceTask::TYPE> CConformanceTask::allTypes() {
 				QList<TYPE> types;
 				types << TYPE::CONSISTENCY << TYPE::SATISFIABILITY << TYPE::CLASSIFICATION
-					  << TYPE::OWLLINK_BOOLEAN << TYPE::SPARQL_BOOLEAN;
+					  << TYPE::OWLLINK << TYPE::SPARQL;
 				return types;
 			}
 
@@ -41,16 +41,17 @@ namespace Konclude {
 					case TYPE::CONSISTENCY: return QString("consistency");
 					case TYPE::SATISFIABILITY: return QString("satisfiability");
 					case TYPE::CLASSIFICATION: return QString("classification");
-					case TYPE::OWLLINK_BOOLEAN: return QString("owllink-boolean");
-					case TYPE::SPARQL_BOOLEAN: return QString("sparql-boolean");
+					case TYPE::OWLLINK: return QString("owllink");
+					case TYPE::SPARQL: return QString("sparql");
 				}
 				return QString();
 			}
 
 
 			bool CConformanceTask::typeFromString(const QString& text, TYPE& type) {
+				QString normalizedText = text.trimmed().toLower();
 				for (TYPE availableType : allTypes()) {
-					if (QString::compare(text.trimmed(), typeToString(availableType), Qt::CaseInsensitive) == 0) {
+					if (QString::compare(normalizedText, typeToString(availableType), Qt::CaseInsensitive) == 0) {
 						type = availableType;
 						return true;
 					}
@@ -64,8 +65,8 @@ namespace Konclude {
 					case TYPE::CONSISTENCY: return QString("kt:ConsistencyTest");
 					case TYPE::SATISFIABILITY: return QString("kt:SatisfiabilityTest");
 					case TYPE::CLASSIFICATION: return QString("kt:ClassificationTest");
-					case TYPE::OWLLINK_BOOLEAN: return QString();
-					case TYPE::SPARQL_BOOLEAN: return QString("kt:SparqlTest");
+					case TYPE::OWLLINK: return QString();
+					case TYPE::SPARQL: return QString("kt:SparqlTest");
 				}
 				return QString();
 			}
@@ -93,8 +94,8 @@ namespace Konclude {
 					case TYPE::CONSISTENCY: return positive ? QString("consistent") : QString("inconsistent");
 					case TYPE::SATISFIABILITY: return positive ? QString("satisfiable") : QString("unsatisfiable");
 					case TYPE::CLASSIFICATION: return positive ? QString("match") : QString("mismatch");
-					case TYPE::OWLLINK_BOOLEAN: return positive ? QString("true") : QString("false");
-					case TYPE::SPARQL_BOOLEAN: return positive ? QString("true") : QString("false");
+					case TYPE::OWLLINK: return positive ? QString("true") : QString("false");
+					case TYPE::SPARQL: return positive ? QString("true") : QString("false");
 				}
 				return QString();
 			}

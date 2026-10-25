@@ -48,12 +48,12 @@ namespace Konclude {
 					case CConformanceTask::TYPE::CLASSIFICATION:
 						return new CClassificationTaskHandler(testCase, binaryFile, configFile);
 
-					case CConformanceTask::TYPE::OWLLINK_BOOLEAN:
+					case CConformanceTask::TYPE::OWLLINK:
 						// One handler for the file and the live-server channel; the base
 						// class decides how the request is transported.
 						return new COWLLinkBooleanTaskHandler(testCase, binaryFile, configFile);
 
-					case CConformanceTask::TYPE::SPARQL_BOOLEAN:
+					case CConformanceTask::TYPE::SPARQL:
 						return new CSPARQLBooleanTaskHandler(testCase, binaryFile, configFile);
 				}
 				return nullptr;

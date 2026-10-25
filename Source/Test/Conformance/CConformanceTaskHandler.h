@@ -90,12 +90,12 @@ namespace Konclude {
 					//! file channels.
 					virtual QStringList buildServerArguments(quint16 port);
 
-					//! Interprets the HTTP response body of a server channel. The default
-					//! reports that the channel is not supported by this handler.
-					virtual CConformanceTaskResult interpretServerResponse(const QString& responseText, const QString& logOutput);
-
 					//! Appends '-c <file>' when a reasoner configuration is configured.
 					void appendConfigArgument(QStringList& arguments) const;
+
+					//! Compares the actual answer file with the expected result file
+					//! (kt:expectedFile) using the semantic XML comparator.
+					CConformanceTaskResult compareWithExpectedFile(const QString& responseFilePath) const;
 
 					//! Reads the complete text file. Returns false when it cannot be read.
 					static bool readTextFile(const QString& filePath, QString& text);
@@ -115,9 +115,9 @@ namespace Konclude {
 					//! Executes the task through the command line and reads '-o'.
 					CConformanceTaskResult runFileChannel(qint64 timeoutMs, const QString& outputLogFilePath, const QString& responseFilePath);
 
-					//! Starts the server, waits for the port, posts the request and stops
-					//! the server again.
-					CConformanceTaskResult runServerChannel(qint64 timeoutMs, const QString& outputLogFilePath);
+					//! Starts the server, waits for the port, posts the request, writes the
+					//! answer to responseFilePath and stops the server again.
+					CConformanceTaskResult runServerChannel(qint64 timeoutMs, const QString& outputLogFilePath, const QString& responseFilePath);
 
 					//! Asks the operating system for a currently unused TCP port.
 					static quint16 findFreeTcpPort();

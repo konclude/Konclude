@@ -142,8 +142,9 @@ namespace Konclude {
 					QStringList effectiveSystemConfigPaths(const CConformanceTestCase& testCase) const;
 
 					//! Runs one execution (with repetitions) and classifies the result
-					//! against the expectation and the known-issue marker.
-					CConformanceTestResult executeTestRun(const CConformanceExecution& execution);
+					//! against the expectation and the known-issue marker. The worker
+					//! index and thread id are only recorded for the report.
+					CConformanceTestResult executeTestRun(const CConformanceExecution& execution, int workerIndex, const QString& threadId);
 
 					//! Determines the path to this binary (for subprocess calls).
 					QString resolveBinaryFile();

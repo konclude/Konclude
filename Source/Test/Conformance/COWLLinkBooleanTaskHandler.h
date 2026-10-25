@@ -61,7 +61,6 @@ namespace Konclude {
 
 					//! Live channel: 'owllinkserver -p <port>'.
 					virtual QStringList buildServerArguments(quint16 port);
-					virtual CConformanceTaskResult interpretServerResponse(const QString& responseText, const QString& logOutput);
 
 					//! Reads the result attribute of every BooleanResponse element, in
 					//! document order. Returns false when the text is not parseable or

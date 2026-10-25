@@ -124,9 +124,9 @@ namespace Konclude {
 					case CConformanceTask::TYPE::SATISFIABILITY:
 					case CConformanceTask::TYPE::CLASSIFICATION:
 						return TYPE::COMMAND_LINE;
-					case CConformanceTask::TYPE::OWLLINK_BOOLEAN:
+					case CConformanceTask::TYPE::OWLLINK:
 						return TYPE::OWLLINK_FILE;
-					case CConformanceTask::TYPE::SPARQL_BOOLEAN:
+					case CConformanceTask::TYPE::SPARQL:
 						return TYPE::SPARQL_FILE;
 				}
 				return TYPE::COMMAND_LINE;
@@ -141,10 +141,10 @@ namespace Konclude {
 								|| task == CConformanceTask::TYPE::CLASSIFICATION;
 					case TYPE::OWLLINK_FILE:
 					case TYPE::OWLLINK_SERVER:
-						return task == CConformanceTask::TYPE::OWLLINK_BOOLEAN;
+						return task == CConformanceTask::TYPE::OWLLINK;
 					case TYPE::SPARQL_FILE:
 					case TYPE::SPARQL_SERVER:
-						return task == CConformanceTask::TYPE::SPARQL_BOOLEAN;
+						return task == CConformanceTask::TYPE::SPARQL;
 				}
 				return false;
 			}

@@ -21,6 +21,7 @@
 #include "CConformanceRunner.h"
 
 #include <QScopedPointer>
+#include <QThread>
 
 #include "CConformanceTaskHandler.h"
 #include "CConformanceTaskHandlerFactory.h"
@@ -407,9 +408,13 @@ namespace Konclude {
 				}
 
 				testCase.mExpectedVerdicts.clear();
-				if (testCase.mTask == CConformanceTask::TYPE::CLASSIFICATION) {
-					// Classification compares against an expected taxonomy: matching the
-					// expected file is the positive answer.
+				// Classification always compares result files; OWLlink and SPARQL do so
+				// when the description declares kt:expectedFile. Otherwise those tasks
+				// compare the boolean answer(s) declared with kt:expectedResult.
+				bool fileComparison = (testCase.mTask == CConformanceTask::TYPE::CLASSIFICATION)
+						|| ((testCase.mTask == CConformanceTask::TYPE::OWLLINK || testCase.mTask == CConformanceTask::TYPE::SPARQL)
+							&& !testCase.mExpectedFile.isEmpty());
+				if (fileComparison) {
 					if (testCase.mExpectedFile.isEmpty()) {
 						return false;
 					}
@@ -425,7 +430,7 @@ namespace Konclude {
 					if (testCase.mExpectedVerdicts.isEmpty()) {
 						return false;
 					}
-					if (testCase.mTask != CConformanceTask::TYPE::OWLLINK_BOOLEAN && testCase.mExpectedVerdicts.count() > 1) {
+					if (testCase.mTask != CConformanceTask::TYPE::OWLLINK && testCase.mExpectedVerdicts.count() > 1) {
 						LOG(WARN, getLogDomain(), logTr("Test '%1' in '%2' declares %3 expected results; task '%4' uses only the first.")
 								.arg(testCase.mId).arg(testCase.mControlFile).arg(testCase.mExpectedVerdicts.count())
 								.arg(CConformanceTask::typeToString(testCase.mTask)), this);
@@ -613,7 +618,7 @@ namespace Konclude {
 					case CConformanceTask::TYPE::CLASSIFICATION:
 						fileName += "-classification.owl.xml";
 						break;
-					case CConformanceTask::TYPE::OWLLINK_BOOLEAN:
+					case CConformanceTask::TYPE::OWLLINK:
 						fileName += "-response.xml";
 						break;
 					default:
@@ -623,8 +628,10 @@ namespace Konclude {
 				return QDir(directoryPath).absoluteFilePath(fileName);
 			}
 
-			CConformanceTestResult CConformanceRunner::executeTestRun(const CConformanceExecution& execution) {
+			CConformanceTestResult CConformanceRunner::executeTestRun(const CConformanceExecution& execution, int workerIndex, const QString& threadId) {
 				CConformanceTestResult result;
+				result.mWorkerIndex = workerIndex;
+				result.mThreadId = threadId;
 				result.mId = execution.mTestCase.mId;
 				result.mTask = execution.mTestCase.mTask;
 				result.mInterface = execution.mTestCase.mInterface;
@@ -658,10 +665,12 @@ namespace Konclude {
 					QString responseFilePath = resolveResponseFilePath(execution, runIndex);
 
 					CConformanceTaskResult taskResult = handler->run(timeoutMs, logFilePath, responseFilePath);
-					QFile::remove(responseFilePath);
 
 					if (!logFilePath.isEmpty()) {
 						result.mOutputLogFile = logFilePath;
+					}
+					if (!responseFilePath.isEmpty()) {
+						result.mResponseFile = responseFilePath;
 					}
 					if (taskResult.mStatus == CConformanceTaskResult::STATUS::TIMEOUT) {
 						sawTimeout = true;
@@ -748,7 +757,10 @@ namespace Konclude {
 				buildExecutionPlan();
 				LOG(INFO, getLogDomain(), logTr("Collected %1 test case(s) in %2 suite(s), scheduled %3 test execution(s).")
 						.arg(mTestCases.count()).arg(mSuites.count()).arg(mExecutions.count()), this);
-				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatWorkersLine((int)mJobCount, mExecutions.count())), this);
+				// Executions currently run one after another, so exactly one worker is
+				// active even when more jobs were requested.
+				const int effectiveWorkerCount = 1;
+				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatWorkersLine(effectiveWorkerCount, mExecutions.count())), this);
 
 				// Which suite is executed with which configuration combinations.
 				QMap<QString, QString> suiteNames;
@@ -775,8 +787,16 @@ namespace Konclude {
 				qint64 lastProgressMSecs = runStartMSecs;
 				qint64 maxDurationMSecs = 0;
 
+				QString threadId = QString("0x%1").arg((quintptr)QThread::currentThreadId(), 0, 16);
+				int executionIndex = 0;
 				for (const CConformanceExecution& execution : mExecutions) {
-					CConformanceTestResult result = executeTestRun(execution);
+					++executionIndex;
+					// Logged before the run so a hanging test is identifiable, including
+					// the interface it uses and the worker/thread that runs it.
+					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatStartLine(
+							execution, effectiveWorkerCount, threadId, executionIndex, mExecutions.count())), this);
+
+					CConformanceTestResult result = executeTestRun(execution, effectiveWorkerCount, threadId);
 					results.append(result);
 					totalOutcomeCounts[result.mOutcome]++;
 					typeOutcomeCounts[result.mTask][result.mOutcome]++;

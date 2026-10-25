@@ -58,7 +58,6 @@ namespace Konclude {
 
 					//! Live channel: 'sparqlserver -p <port>'.
 					virtual QStringList buildServerArguments(quint16 port);
-					virtual CConformanceTaskResult interpretServerResponse(const QString& responseText, const QString& logOutput);
 
 					//! Reads the boolean element of a SPARQL Results XML document.
 					static bool parseBooleanAnswer(const QString& responseText, CConformanceTask::VERDICT& verdict, QString& errorMessage);

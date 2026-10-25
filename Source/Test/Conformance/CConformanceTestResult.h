@@ -64,6 +64,9 @@ namespace Konclude {
 					CConformanceTask::VERDICT mActualVerdict;   // observed answer, UNSET when none was obtained
 					QString mExplanation;                   // why the run failed or mismatched
 					QString mOutputLogFile;                 // absolute path to the logged output of the executed run
+					QString mResponseFile;                  // absolute path to the answer written by the run
+					int mWorkerIndex;                       // 1-based test worker that executed the test
+					QString mThreadId;                      // id of the thread the worker ran the test in
 					qint64 mDurationMs;                     // run time
 					QString mSuiteId;                       // suite of the test
 					QString mSuiteName;                     // suite name used in reports
@@ -77,7 +80,7 @@ namespace Konclude {
 			inline CConformanceTestResult::CConformanceTestResult()
 					: mTask(CConformanceTask::TYPE::CONSISTENCY), mOutcome(CConformanceOutcome::TYPE::FAIL),
 					  mExpectedVerdict(CConformanceTask::VERDICT::UNSET),
-					  mActualVerdict(CConformanceTask::VERDICT::UNSET), mDurationMs(0) {
+					  mActualVerdict(CConformanceTask::VERDICT::UNSET), mWorkerIndex(1), mDurationMs(0) {
 			}
 
 

@@ -2921,6 +2921,7 @@ SOURCES += \
    ./Source/Test/Conformance/CConformanceResultWriterFactory.cpp \
    ./Source/Test/Conformance/CConformanceOWLXMLResultWriter.cpp \
    ./Source/Test/Conformance/CClassificationResultComparator.cpp \
+   ./Source/Test/Conformance/CConformanceXMLResultComparator.cpp \
    ./Source/Test/Conformance/CConformanceReporter.cpp \
    ./Source/Control/Interface/CommandLine/CHelpComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CCommandLinePreparationTranslatorSelector.cpp \

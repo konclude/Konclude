@@ -45,7 +45,7 @@ namespace Konclude {
 
 
 			CConformanceTask::TYPE COWLLinkBooleanTaskHandler::getTaskType() const {
-				return CConformanceTask::TYPE::OWLLINK_BOOLEAN;
+				return CConformanceTask::TYPE::OWLLINK;
 			}
 
 
@@ -68,6 +68,11 @@ namespace Konclude {
 			CConformanceTaskResult COWLLinkBooleanTaskHandler::interpretResponse(const QString& responseFilePath, const QString& logOutput) {
 				Q_UNUSED(logOutput);
 
+				// With kt:expectedFile the complete answer document is compared.
+				if (!mTestCase.mExpectedFile.isEmpty()) {
+					return compareWithExpectedFile(responseFilePath);
+				}
+
 				CConformanceTaskResult result;
 				QString responseText;
 				if (!readTextFile(responseFilePath, responseText)) {
@@ -76,21 +81,6 @@ namespace Konclude {
 					return result;
 				}
 
-				QList<CConformanceTask::VERDICT> actualVerdicts;
-				QString errorMessage;
-				if (!parseBooleanResponses(responseText, actualVerdicts, errorMessage)) {
-					result.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
-					result.mExplanation = errorMessage;
-					return result;
-				}
-				return compareVerdicts(actualVerdicts);
-			}
-
-
-			CConformanceTaskResult COWLLinkBooleanTaskHandler::interpretServerResponse(const QString& responseText, const QString& logOutput) {
-				Q_UNUSED(logOutput);
-
-				CConformanceTaskResult result;
 				QList<CConformanceTask::VERDICT> actualVerdicts;
 				QString errorMessage;
 				if (!parseBooleanResponses(responseText, actualVerdicts, errorMessage)) {
@@ -130,8 +120,8 @@ namespace Konclude {
 						mismatchVerdict = actualVerdicts.at(i);
 						mismatchText = QString("answer %1 of %2: %3, expected %4")
 								.arg(i + 1).arg(actualVerdicts.count())
-								.arg(CConformanceTask::verdictToString(CConformanceTask::TYPE::OWLLINK_BOOLEAN, actualVerdicts.at(i)))
-								.arg(CConformanceTask::verdictToString(CConformanceTask::TYPE::OWLLINK_BOOLEAN, expectedVerdict));
+								.arg(CConformanceTask::verdictToString(CConformanceTask::TYPE::OWLLINK, actualVerdicts.at(i)))
+								.arg(CConformanceTask::verdictToString(CConformanceTask::TYPE::OWLLINK, expectedVerdict));
 						break;
 					}
 				}

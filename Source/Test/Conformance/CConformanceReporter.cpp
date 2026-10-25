@@ -119,12 +119,17 @@ namespace Konclude {
 				QString suiteName = result.mSuiteName.isEmpty() ? result.mSuiteId : result.mSuiteName;
 				QString runConfigName = result.mRunConfigName.isEmpty() ? result.mRunConfigId : result.mRunConfigName;
 				QString systemConfigName = result.mSystemConfigName.isEmpty() ? QString("system-default") : result.mSystemConfigName;
+				QString interfaceSuffix = result.mInterface.isEmpty() ? QString() : QString("  [%1]").arg(result.mInterface);
+				QString workerSuffix = result.mWorkerIndex > 0
+						? QString("  --  %1").arg(formatWorkerLabel(result.mWorkerIndex, result.mThreadId)) : QString();
 
-				QString line = QString("[%1]  %2  --  %3  --  %4  (%5ms)")
+				QString line = QString("[%1]  %2  --  %3%4  --  %5%6  (%7ms)")
 						.arg(CConformanceOutcome::typeToString(result.mOutcome), -7)
 						.arg(formatSuiteLabel(suiteName))
 						.arg(result.mId)
+						.arg(interfaceSuffix)
 						.arg(formatConfigLabel(runConfigName, systemConfigName))
+						.arg(workerSuffix)
 						.arg(result.mDurationMs);
 
 				if (result.isFailing()) {
@@ -141,6 +146,30 @@ namespace Konclude {
 				return line;
 			}
 
+
+
+			QString CConformanceReporter::formatWorkerLabel(int workerIndex, const QString& threadId) {
+				if (threadId.isEmpty()) {
+					return QString("[worker %1]").arg(workerIndex);
+				}
+				return QString("[worker %1, thread %2]").arg(workerIndex).arg(threadId);
+			}
+
+
+			QString CConformanceReporter::formatStartLine(const CConformanceExecution& execution, int workerIndex,
+					const QString& threadId, int executionIndex, int executionCount) {
+				QString suiteName = execution.mSuiteName.isEmpty() ? execution.mSuiteId : execution.mSuiteName;
+				QString interfaceName = execution.mTestCase.mInterface.isEmpty()
+						? CConformanceChannel::typeToString(execution.mTestCase.mChannel) : execution.mTestCase.mInterface;
+				return QString("[START  ]  %1  --  %2  [%3]  --  %4  --  %5  (%6/%7)")
+						.arg(formatSuiteLabel(suiteName))
+						.arg(execution.mTestCase.mId)
+						.arg(interfaceName)
+						.arg(formatConfigLabel(execution.mRunConfig.getDisplayName(), execution.getSystemConfigName()))
+						.arg(formatWorkerLabel(workerIndex, threadId))
+						.arg(executionIndex)
+						.arg(executionCount);
+			}
 
 		}; // end namespace Conformance
 

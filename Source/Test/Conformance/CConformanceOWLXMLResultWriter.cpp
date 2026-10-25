@@ -103,6 +103,11 @@ namespace Konclude {
 					// run for this test (a 'test-outputs' folder next to the output file).
 					writeLiteralAssertion(stream, "kt:outputFile", resultIRI, result.mOutputLogFile);
 				}
+				if (!result.mResponseFile.isEmpty()) {
+					// Path of the answer file: the '-o' response of a file channel or the
+					// body of the HTTP response of a live channel.
+					writeLiteralAssertion(stream, "kt:responseFile", resultIRI, result.mResponseFile);
+				}
 			}
 
 

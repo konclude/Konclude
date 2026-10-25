@@ -88,5 +88,7 @@
   <Declaration><DataProperty abbreviatedIRI="kt:explanation"/></Declaration>
   <!-- absolute path of the file with the logged output of the executed Konclude run -->
   <Declaration><DataProperty abbreviatedIRI="kt:outputFile"/></Declaration>
+  <!-- absolute path of the answer file written for one execution -->
+  <Declaration><DataProperty abbreviatedIRI="kt:responseFile"/></Declaration>
 
 </Ontology>

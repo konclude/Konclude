@@ -1,0 +1,3 @@
+# Instance retrieval: all persons of the loaded dataset (two rows).
+PREFIX sp: <http://konclude.test/sparql#>
+SELECT ?person WHERE { ?person a sp:Person }

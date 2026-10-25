@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Instance retrieval: alice is a Woman, hence a Person. -->
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#Person"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#Woman"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#alice"/></owl:Declaration>
+    <owl:SubClassOf><owl:Class IRI="#Woman"/><owl:Class IRI="#Person"/></owl:SubClassOf>
+    <owl:ClassAssertion><owl:Class IRI="#Woman"/><owl:NamedIndividual IRI="#alice"/></owl:ClassAssertion>
+  </Tell>
+  <GetInstances kb="http://ex.test/kb"><owl:Class IRI="#Person"/></GetInstances>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>
