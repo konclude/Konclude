@@ -169,3 +169,22 @@ jobs:
           Release/Konclude.app/Contents/MacOS/Konclude owllinkfile -c Configs/default-config.xml -i Tests/1b-satisfiability-request.xml
           Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
           Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
+
+      # The conformance runner drives the built binary as a subprocess and compares the answers
+      # with the expected result files in Tests/cases. It runs once, on Linux, so that the
+      # results are independent of the runner platform; the runner itself is platform-neutral.
+      - name: Run Conformance Tests
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          mkdir -p conformance-results
+          Release/Konclude conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(nproc)"
+
+      - name: Upload Conformance Results
+        if: always() && startsWith(matrix.config.os, 'ubuntu')
+        uses: actions/upload-artifact@v4
+        with:
+          name: conformance-results
+          path: |
+            conformance-results/result.owl.xml
+            conformance-results/test-outputs/
+          if-no-files-found: ignore
