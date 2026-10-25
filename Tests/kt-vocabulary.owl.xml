@@ -48,6 +48,8 @@
   <Declaration><ObjectProperty abbreviatedIRI="kt:knownFailure"/></Declaration>
   <Declaration><ObjectProperty abbreviatedIRI="kt:defaultConfig"/></Declaration>
   <Declaration><ObjectProperty abbreviatedIRI="kt:resultOf"/></Declaration>
+  <!-- on a test result: the suite individual the result belongs to -->
+  <Declaration><ObjectProperty abbreviatedIRI="kt:suite"/></Declaration>
 
   <!-- ===== Data Properties ===== -->
   <Declaration><DataProperty abbreviatedIRI="kt:usesOntology"/></Declaration>
@@ -80,7 +82,6 @@
   <Declaration><DataProperty abbreviatedIRI="kt:durationMs"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:reasonerVersion"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:interface"/></Declaration>
-  <Declaration><DataProperty abbreviatedIRI="kt:suite"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:runConfig"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:systemConfig"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:expected"/></Declaration>

@@ -21,6 +21,7 @@
 #include "CConformanceOWLXMLResultWriter.h"
 
 #include <QFile>
+#include <QMap>
 
 
 namespace Konclude {
@@ -52,6 +53,23 @@ namespace Konclude {
 				stream << "  <Prefix name=\"kt\" IRI=\"http://konclude.test/vocabulary#\"/>\n";
 				stream << "  <Prefix name=\"res\" IRI=\"http://konclude.test/results/vocabulary#\"/>\n";
 
+				// Declare every suite once and keep its readable name on the suite
+				// individual; each result then points at that individual.
+				QMap<QString, QString> suiteNames;
+				for (const CConformanceTestResult& result : results) {
+					if (!result.mSuiteId.isEmpty()) {
+						suiteNames.insert(result.mSuiteId, result.mSuiteName);
+					}
+				}
+				for (auto suiteIt = suiteNames.constBegin(); suiteIt != suiteNames.constEnd(); ++suiteIt) {
+					stream << "  <ClassAssertion><Class abbreviatedIRI=\"kt:TestSuite\"/>";
+					writeIndividual(stream, suiteIt.key());
+					stream << "</ClassAssertion>\n";
+					if (!suiteIt.value().isEmpty()) {
+						writeLiteralAssertion(stream, "kt:suiteName", suiteIt.key(), suiteIt.value());
+					}
+				}
+
 				int resultIndex = 0;
 				for (const CConformanceTestResult& result : results) {
 					writeResult(stream, result, resultIndex++);
@@ -70,16 +88,13 @@ namespace Konclude {
 				writeIndividual(stream, resultIRI);
 				stream << "</ClassAssertion>\n";
 
-				stream << "  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=\"kt:resultOf\"/>";
-				writeIndividual(stream, resultIRI);
-				writeIndividual(stream, result.mId);
-				stream << "</ObjectPropertyAssertion>\n";
+				writeObjectPropertyAssertion(stream, "kt:resultOf", resultIRI, result.mId);
+				if (!result.mSuiteId.isEmpty()) {
+					writeObjectPropertyAssertion(stream, "kt:suite", resultIRI, result.mSuiteId);
+				}
 
 				writeLiteralAssertion(stream, "kt:task", resultIRI, CConformanceTask::typeToString(result.mTask));
 				writeLiteralAssertion(stream, "kt:interface", resultIRI, result.mInterface);
-				if (!result.mSuiteName.isEmpty()) {
-					writeLiteralAssertion(stream, "kt:suite", resultIRI, result.mSuiteName);
-				}
 				if (!result.mRunConfigName.isEmpty()) {
 					writeLiteralAssertion(stream, "kt:runConfig", resultIRI, result.mRunConfigName);
 				}
@@ -118,6 +133,14 @@ namespace Konclude {
 				} else {
 					stream << "<NamedIndividual IRI=\"" << individualIRI.toHtmlEscaped() << "\"/>";
 				}
+			}
+
+
+			void CConformanceOWLXMLResultWriter::writeObjectPropertyAssertion(QTextStream& stream, const QString& objectPropertyIRI, const QString& subjectIRI, const QString& objectIRI) {
+				stream << "  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=\"" << objectPropertyIRI << "\"/>";
+				writeIndividual(stream, subjectIRI);
+				writeIndividual(stream, objectIRI);
+				stream << "</ObjectPropertyAssertion>\n";
 			}
 
 
