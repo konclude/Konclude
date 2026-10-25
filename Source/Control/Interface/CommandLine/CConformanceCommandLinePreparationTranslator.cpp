@@ -94,7 +94,7 @@ namespace Konclude {
 						} else if (opt.compare("c", Qt::CaseInsensitive) == 0 || opt.compare("config", Qt::CaseInsensitive) == 0) {
 							// Additional configuration file that is passed to every executed test case
 							// (e.g. AllowBackendNeighbourExpansionBlocking=false). Test-specific
-							// kt:usesConfig assertions take precedence over this default.
+							// kt:usesTestSystemConfig assertions take precedence over this default.
 							mConformanceConfList.append(QString("+Konclude.Conformance.ConfigFile=%1").arg(takeValue("")));
 							argumentTranslated = true;
 						} else if (opt.compare("binary", Qt::CaseInsensitive) == 0) {

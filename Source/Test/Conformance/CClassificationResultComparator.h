@@ -55,28 +55,25 @@ namespace Konclude {
 			 *					Reusable for any OWL/XML taxonomy difference check.
 			 */
 			class CClassificationResultComparator {
-
 				// public methods
 				public:
-
-				//! Compares two OWL/XML classification result files. Returns true when the
-				//! taxonomies are equivalent (same classes, same equivalences, same subsumptions),
-				//! independent of the order of assertions. On mismatch, detailMessage receives a
-				//! short human-readable hint. Returns false (with a message) if either file is
-				//! unreadable or does not contain a parseable taxonomy.
-				static bool compareClassificationFiles(const QString& actualFile, const QString& expectedFile, QString& detailMessage);
+					//! Compares two OWL/XML classification result files. Returns true when the
+					//! taxonomies are equivalent (same classes, same equivalences, same subsumptions),
+					//! independent of the order of assertions. On mismatch, detailMessage receives a
+					//! short human-readable hint. Returns false (with a message) if either file is
+					//! unreadable or does not contain a parseable taxonomy.
+					static bool compareClassificationFiles(const QString& actualFile, const QString& expectedFile, QString& detailMessage);
 
 				// protected methods
 				protected:
+					//! Parses an OWL/XML classification result file into a semantic,
+					//! order-independent class hierarchy (equivalence classes become synsets).
+					//! Returns null if the file cannot be read or contains no taxonomy.
+					static CClassHierarchyResult* loadClassificationHierarchy(const QString& filePath);
 
-				//! Parses an OWL/XML classification result file into a semantic,
-				//! order-independent class hierarchy (equivalence classes become synsets).
-				/*! Returns null if the file cannot be read or contains no taxonomy. */
-				static CClassHierarchyResult* loadClassificationHierarchy(const QString& filePath);
-
-				//! Resolves the IRI of a <Class> element, expanding abbreviatedIRI against the
-				//! declared prefixes and falling back to the built-in OWL/RDF/RDFS/XSD/XML prefixes.
-				static QString resolveClassIRI(const QDomElement& classElement, const QHash<QString, QString>& prefixIRIHash);
+					//! Resolves the IRI of a <Class> element, expanding abbreviatedIRI against the
+					//! declared prefixes and falling back to the built-in OWL/RDF/RDFS/XSD/XML prefixes.
+					static QString resolveClassIRI(const QDomElement& classElement, const QHash<QString, QString>& prefixIRIHash);
 
 			};
 

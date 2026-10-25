@@ -11,6 +11,22 @@
           ontologyIRI="http://konclude.test/suite/galen">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:TestSuite"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-galen"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteName"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-galen"/>
+    <Literal>GALEN-classification</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteDirectory"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-galen"/>
+    <Literal>galen</Literal>
+  </DataPropertyAssertion>
+
   <ClassAssertion>
     <Class abbreviatedIRI="kt:ClassificationTest"/>
     <NamedIndividual abbreviatedIRI="kt:galen-classification"/>

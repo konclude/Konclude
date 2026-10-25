@@ -8,6 +8,13 @@
           ontologyIRI="http://konclude.test/suite/dl">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
+  <!-- Suite: the folder containing this control ontology. Run configurations
+       (kt:usesTestRunConfig) and reasoner configurations (kt:usesTestSystemConfig) may be
+       assigned to the suite and apply to all of its tests. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>DL-corner-cases</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>dl</Literal></DataPropertyAssertion>
+
   <!-- Per test: ClassAssertion(ConsistencyTest) + task + usesOntology + expectedResult -->
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/></ClassAssertion>

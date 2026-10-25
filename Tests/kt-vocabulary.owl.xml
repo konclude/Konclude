@@ -29,6 +29,10 @@
   <SubClassOf><Class abbreviatedIRI="kt:SparqlTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
   <SubClassOf><Class abbreviatedIRI="kt:FlakyTest"/><Class abbreviatedIRI="kt:Test"/></SubClassOf>
 
+  <!-- Groups of tests and their execution configurations -->
+  <Declaration><Class abbreviatedIRI="kt:TestSuite"/></Declaration>
+  <Declaration><Class abbreviatedIRI="kt:RunConfig"/></Declaration>
+
   <!-- Issue (known failure) and test result -->
   <Declaration><Class abbreviatedIRI="kt:Issue"/></Declaration>
   <Declaration><Class abbreviatedIRI="kt:TestResult"/></Declaration>
@@ -36,7 +40,9 @@
   <Declaration><Class abbreviatedIRI="kt:ConfigSet"/></Declaration>
 
   <!-- ===== Object Properties ===== -->
-  <Declaration><ObjectProperty abbreviatedIRI="kt:usesConfig"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:memberOfSuite"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/></Declaration>
   <Declaration><ObjectProperty abbreviatedIRI="kt:onChannel"/></Declaration>
   <Declaration><ObjectProperty abbreviatedIRI="kt:expectedEntailment"/></Declaration>
   <Declaration><ObjectProperty abbreviatedIRI="kt:knownFailure"/></Declaration>
@@ -50,7 +56,13 @@
   <Declaration><DataProperty abbreviatedIRI="kt:testClass"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:expectedFile"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:inspiredBy"/></Declaration>
+  <!-- on a suite -->
+  <Declaration><DataProperty abbreviatedIRI="kt:suiteName"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:suiteDirectory"/></Declaration>
+  <!-- on a run configuration -->
+  <Declaration><DataProperty abbreviatedIRI="kt:runConfigName"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:timeoutSeconds"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:repeatCount"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:flaky"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:divergingResultByReasonerOnVersion"/></Declaration>
@@ -66,6 +78,13 @@
   <Declaration><DataProperty abbreviatedIRI="kt:onOS"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:durationMs"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:reasonerVersion"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:interface"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:suite"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:runConfig"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:systemConfig"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:expected"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:actual"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:explanation"/></Declaration>
   <!-- absolute path of the file with the logged output of the executed Konclude run -->
   <Declaration><DataProperty abbreviatedIRI="kt:outputFile"/></Declaration>
 

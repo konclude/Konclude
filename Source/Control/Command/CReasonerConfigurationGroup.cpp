@@ -3219,15 +3219,25 @@ namespace Konclude {
 						new CIntegerConfigType(1)),
 						new CIntegerConfigType(1));
 
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.ConfigFile",
+						"Default reasoner configuration file ('-c') for test cases without a kt:usesTestSystemConfig assignment (empty = none).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
 				addConfigProperty(new CConfigDescription("Konclude.Conformance.Repeat",
-						"Repetitions per test case for flaky detection.",
+						"Default repetitions of the built-in run configuration, used when no kt:RunConfig is assigned.",
 						new CIntegerConfigType(1)),
 						new CIntegerConfigType(1));
 
 				addConfigProperty(new CConfigDescription("Konclude.Conformance.TimeoutSeconds",
-						"Per-test timeout in seconds.",
+						"Default timeout in seconds of the built-in run configuration, used when no kt:RunConfig is assigned.",
 						new CIntegerConfigType(60)),
 						new CIntegerConfigType(60));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.ProgressInterval",
+						"Interval in seconds between progress/estimated-remaining-time reports (0 disables them).",
+						new CIntegerConfigType(3)),
+						new CIntegerConfigType(3));
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ReasonerRestartPausingTime",

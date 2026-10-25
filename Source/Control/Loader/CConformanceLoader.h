@@ -64,7 +64,7 @@ namespace Konclude {
 					virtual CLoader *init(CLoaderFactory *loaderFactory = 0, CConfiguration *config = 0);
 					virtual CLoader *load();
 					virtual CLoader *exit();
-//! Records the exit code (0 = green, non-zero = failing/unstable test run)
+					//! Records the exit code (0 = green, non-zero = failing/unstable test run)
 					//! so that main() can return it after a normal, logger-flushing shutdown.
 					static void setLastTestExitCode(int code) { sLastTestExitCode = code; }
 					static int getLastTestExitCode() { return sLastTestExitCode; }
@@ -72,7 +72,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CConfiguration* mLoaderConfig;
-// private variables
+				// private variables
 				private:
 					static int sLastTestExitCode;
 

@@ -9,6 +9,11 @@
           ontologyIRI="http://konclude.test/suite/owllink">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-owllink"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-owllink"/><Literal>OWLlink-interface</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-owllink"/><Literal>owllink</Literal></DataPropertyAssertion>
+
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:owllink-unsat"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:owllink-unsat"/><Literal>owllink-boolean</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:owllink-unsat"/><Literal>unsat-request.xml</Literal></DataPropertyAssertion>
@@ -18,5 +23,13 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:owllink-sat"/><Literal>owllink-boolean</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:owllink-sat"/><Literal>sat-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-sat"/><Literal>true</Literal></DataPropertyAssertion>
+
+  <!-- One message with two IsClassSatisfiable requests: one expected result per
+       BooleanResponse, matched in response order. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:owllink-two-requests"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:owllink-two-requests"/><Literal>owllink-boolean</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:owllink-two-requests"/><Literal>two-requests.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-two-requests"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-two-requests"/><Literal>false</Literal></DataPropertyAssertion>
 
 </Ontology>

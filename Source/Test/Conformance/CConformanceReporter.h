@@ -25,7 +25,10 @@
 #include <QtGlobal>
 #include <QString>
 #include <QStringList>
-#include <QHash>
+#include <QMap>
+
+// Namespace includes
+#include "CConformanceTestResult.h"
 
 
 namespace Konclude {
@@ -43,44 +46,59 @@ namespace Konclude {
 			 *					collection of CConformanceTestResult outcomes.
 			 */
 			class CConformanceReporter {
-
 				// public methods
 				public:
+					//! Builds the overall header line, e.g.
+					//! "The run discovered 6 test description files containing 26 tests in
+					//! 6 suites; 30 test executions:".
+					static QString formatSummaryHeader(int descriptionFileCount, int testCount, int suiteCount, int executionCount);
 
-				//! Builds the overall header line, e.g.
-				//! "The run discovered 6 test description files containing 26 tests:".
-				static QString formatSummaryHeader(int descriptionFileCount, int testCount);
+					//! Builds the line that lists the configuration combinations of a suite,
+					//! e.g. "Suite DL corner cases: run configurations: default; system
+					//! configurations: default".
+					static QString formatSuiteConfigurationLine(const QString& suiteName, const QStringList& runConfigNames, const QStringList& systemConfigNames);
 
-				//! Builds the list of per-outcome lines, each on its own string, e.g.
-				//! ["22 passed (PASS)", "4 with known issues (KNOWN)", "0 failed (FAIL)", ...].
-				//! When includeZeroOutcomes is true every outcome is listed (including zeros);
-				//! otherwise only outcomes with a non-zero count are produced.
-				static QStringList formatOutcomeLines(const QHash<QString, int>& outcomeCounts, bool includeZeroOutcomes);
+					//! Builds the suite label of one execution, e.g. "(DL-corner-cases suite)".
+					static QString formatSuiteLabel(const QString& suiteName);
 
-				//! Builds a per-category header line, e.g.
-				//! "test type classification (2 tests):" or "interface CommandLine (24 tests):".
-				static QString formatCategoryHeader(const QString& label, const QString& name, const QHash<QString, int>& outcomeCounts);
+					//! Builds the configuration label of one execution, e.g.
+					//! "[configs: run-default + system-default]".
+					static QString formatConfigLabel(const QString& runConfigName, const QString& systemConfigName);
 
-				//! Builds the overall timing line, e.g.
-				//! "Total run time taken for 26 tests: 0.920 s (920 ms), maximum per-test time: 0.410 s (410 ms).".
-				static QString formatTotalTimeLine(qint64 totalMilliseconds, int testCount, qint64 maximumPerTestMilliseconds);
+					//! Builds one result line, e.g.
+					//! "[PASS   ]  (DL-corner-cases suite)  --  kt:foo  --  [configs: run-default + system-default]  (53ms)".
+					//! Failing results additionally carry "-- expected: …, got: …" and the
+					//! explanation.
+					static QString formatResultLine(const CConformanceTestResult& result);
 
-				//! Builds the line reporting how many test workers are used, e.g.
-				//! "Using 1 test worker to run 26 test cases.".
-				static QString formatWorkersLine(int workerCount, int testCount);
+					//! Builds the list of per-outcome lines, each on its own string, e.g.
+					//! ["22 passed (PASS)", "4 with known issues (KNOWN)", "0 failed (FAIL)", ...].
+					//! When includeZeroOutcomes is true every outcome is listed (including zeros);
+					//! otherwise only outcomes with a non-zero count are produced.
+					static QStringList formatOutcomeLines(const QMap<CConformanceOutcome::TYPE, int>& outcomeCounts, bool includeZeroOutcomes);
 
-				//! Builds a periodic progress/ETA line, e.g.
-				//! "Progress: 5 of 26 tests completed (19%), elapsed 1.2 s, estimated remaining time 4.1 s".
-				static QString formatProgressLine(int completedCount, int totalCount, qint64 elapsedMilliseconds, qint64 estimatedRemainingMilliseconds);
+					//! Builds a per-category header line, e.g.
+					//! "test type classification (2 tests):" or "interface CommandLine (24 tests):".
+					static QString formatCategoryHeader(const QString& label, const QString& name, const QMap<CConformanceOutcome::TYPE, int>& outcomeCounts);
 
-				//! Builds the clear "run finished" line, e.g.
-				//! "Conformance run finished: all 26 tests passed successfully." or
-				//! "Conformance run finished: 1 failing test out of 26 tests.".
-				static QString formatFinishedLine(int failingCount, int totalCount);
+					//! Builds the overall timing line, e.g.
+					//! "Total run time taken for 26 tests: 0.920 s (920 ms), maximum per-test time: 0.410 s (410 ms).".
+					static QString formatTotalTimeLine(qint64 totalMilliseconds, int testCount, qint64 maximumPerTestMilliseconds);
 
-				//! Builds one line for a failing test for the final failure summary, e.g.
-				//! "[FAIL] kt:galen-classification  -- expected: match, got: mismatch (subsumption hierarchies differ)".
-				static QString formatFailureLine(const QString& testId, const QString& outcome, const QString& expected, const QString& actual);
+					//! Builds the line reporting how many test workers are used, e.g.
+					//! "Using 1 test worker to run 26 test cases.".
+					static QString formatWorkersLine(int workerCount, int testCount);
+
+					//! Builds a periodic progress/ETA line, e.g.
+					//! "Progress: 5 of 26 tests completed (19%), elapsed 1.2 s, estimated remaining time 4.1 s".
+					static QString formatProgressLine(int completedCount, int totalCount, qint64 elapsedMilliseconds, qint64 estimatedRemainingMilliseconds);
+
+					//! Builds the clear "run finished" line, e.g.
+					//! "Conformance run finished: all 26 tests passed successfully." or
+					//! "Conformance run finished: 1 failing test out of 26 tests.".
+					static QString formatFinishedLine(int failingCount, int totalCount);
+
+
 
 			};
 

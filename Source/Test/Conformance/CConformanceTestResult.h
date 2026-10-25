@@ -21,7 +21,13 @@
 #ifndef KONCLUDE_TEST_CONFORMANCE_CCONFORMANCETESTRESULT_H
 #define KONCLUDE_TEST_CONFORMANCE_CCONFORMANCETESTRESULT_H
 
+// Libraries includes
 #include <QString>
+
+// Namespace includes
+#include "CConformanceTask.h"
+#include "CConformanceOutcome.h"
+
 
 namespace Konclude {
 
@@ -31,23 +37,53 @@ namespace Konclude {
 
 			/*!
 			 *		\class		CConformanceTestResult
-			 *		\brief		Result of an executed test case.
-			 *					outcome: PASS | FAIL | KNOWN | FIXED | TIMEOUT | FLAKY
+			 *		\brief		Result of one execution of a test case: the typed outcome,
+			 *					the expected and observed verdicts, the duration, the
+			 *					explanation of a failure, the per-test output log file and
+			 *					the suite / run configuration / system configuration the
+			 *					execution belonged to.
+			 *
+			 *					Whether the result turns a run red is derived from the
+			 *					outcome; it is not stored separately.
 			 */
 			class CConformanceTestResult {
+				// public methods
 				public:
-					CConformanceTestResult() : mDurationMs(0), mFailing(false) {}
+					CConformanceTestResult();
 
-					QString mId;             // test individual
-					QString mTask;           // test task type ("consistency" | "satisfiability" | ...)
-					QString mInterface;      // interface the test ran on ("CommandLine" | "OWLlink" | ...)
-					QString mOutcome;        // PASS/FAIL/KNOWN/FIXED/TIMEOUT/FLAKY
-					QString mExpected;       // expected result
-					QString mActual;         // actual result
-					QString mOutputLogFile;  // absolute path to the logged output of the executed Konclude run
-					qint64 mDurationMs;      // run time
-					bool mFailing;           // counts as a red run?
+					//! True when the outcome turns a test run red.
+					bool isFailing() const;
+
+				// public variables
+				public:
+					QString mId;                            // test individual
+					CConformanceTask::TYPE mTask;           // task kind the test asked for
+					QString mInterface;                     // interface the test ran on ("CommandLine" | "OWLlink" | ...)
+					CConformanceOutcome::TYPE mOutcome;     // PASS/KNOWN/FAIL/FIXED/TIMEOUT/FLAKY
+					CConformanceTask::VERDICT mExpectedVerdict; // expected answer
+					CConformanceTask::VERDICT mActualVerdict;   // observed answer, UNSET when none was obtained
+					QString mExplanation;                   // why the run failed or mismatched
+					QString mOutputLogFile;                 // absolute path to the logged output of the executed run
+					qint64 mDurationMs;                     // run time
+					QString mSuiteId;                       // suite of the test
+					QString mSuiteName;                     // suite name used in reports
+					QString mRunConfigId;                   // run configuration of this execution
+					QString mRunConfigName;                 // run configuration name used in reports
+					QString mSystemConfigPath;              // '-c' file of this execution, may be empty
+					QString mSystemConfigName;              // system configuration name used in reports
 			};
+
+
+			inline CConformanceTestResult::CConformanceTestResult()
+					: mTask(CConformanceTask::TYPE::CONSISTENCY), mOutcome(CConformanceOutcome::TYPE::FAIL),
+					  mExpectedVerdict(CConformanceTask::VERDICT::UNSET),
+					  mActualVerdict(CConformanceTask::VERDICT::UNSET), mDurationMs(0) {
+			}
+
+
+			inline bool CConformanceTestResult::isFailing() const {
+				return CConformanceOutcome::typeIsFailing(mOutcome);
+			}
 
 		}; // end namespace Conformance
 

@@ -20,7 +20,12 @@
 
 #include "CConformanceRunner.h"
 
-#include <QHash>
+#include <QScopedPointer>
+
+#include "CConformanceTaskHandler.h"
+#include "CConformanceTaskHandlerFactory.h"
+#include "CConformanceResultWriter.h"
+#include "CConformanceResultWriterFactory.h"
 
 
 namespace Konclude {
@@ -56,9 +61,9 @@ namespace Konclude {
 					return mBinaryFile;
 				}
 				// Default: the currently running binary itself.
-				QString appFile = QCoreApplication::applicationFilePath();
-				if (!appFile.isEmpty()) {
-					return appFile;
+				QString applicationFile = QCoreApplication::applicationFilePath();
+				if (!applicationFile.isEmpty()) {
+					return applicationFile;
 				}
 				return QString("Konclude");
 			}
@@ -71,28 +76,59 @@ namespace Konclude {
 					LOG(ERROR, getLogDomain(), logTr("Conformance input directory '%1' does not exist.").arg(mInputDirectory), this);
 					return controlFiles;
 				}
-				QStringList pendingDirs;
-				pendingDirs.append(baseDir.absolutePath());
-				while (!pendingDirs.isEmpty()) {
-					QString dirPath = pendingDirs.takeFirst();
-					QDir dir(dirPath);
-					// Files: all *.kt.owl.xml
+
+				QStringList pendingDirectories;
+				pendingDirectories.append(baseDir.absolutePath());
+				while (!pendingDirectories.isEmpty()) {
+					QDir directory(pendingDirectories.takeFirst());
+
 					QStringList nameFilters;
 					nameFilters << "*.kt.owl.xml";
-					QFileInfoList fileInfos = dir.entryInfoList(nameFilters, QDir::Files, QDir::Name);
-					for (const QFileInfo& fi : fileInfos) {
-						controlFiles.append(fi.absoluteFilePath());
+					QFileInfoList fileInfos = directory.entryInfoList(nameFilters, QDir::Files, QDir::Name);
+					for (const QFileInfo& fileInfo : fileInfos) {
+						controlFiles.append(fileInfo.absoluteFilePath());
 					}
-					// Subdirectories recursively.
-					QFileInfoList subDirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
-					for (const QFileInfo& di : subDirs) {
-						pendingDirs.append(di.absoluteFilePath());
+
+					QFileInfoList subDirectories = directory.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+					for (const QFileInfo& subDirectory : subDirectories) {
+						pendingDirectories.append(subDirectory.absoluteFilePath());
 					}
 				}
+
 				controlFiles.sort();
 				return controlFiles;
 			}
 
+
+			QString CConformanceRunner::elementIRI(const QDomElement& element) {
+				if (element.isNull()) {
+					return QString();
+				}
+				QString abbreviatedIRI = element.attribute("abbreviatedIRI");
+				if (!abbreviatedIRI.isEmpty()) {
+					return abbreviatedIRI;
+				}
+				return element.attribute("IRI");
+			}
+
+
+			CConformanceTestCase& CConformanceRunner::testCaseFor(QHash<QString, CConformanceTestCase>& caseById, const QString& id, const QString& controlFile, const QString& suiteId) {
+				if (!caseById.contains(id)) {
+					CConformanceTestCase testCase;
+					testCase.mId = id;
+					testCase.mControlFile = controlFile;
+					testCase.mSuiteId = suiteId;
+					caseById.insert(id, testCase);
+				}
+				return caseById[id];
+			}
+
+
+			void CConformanceRunner::appendUnique(QStringList& values, const QString& value) {
+				if (!values.contains(value)) {
+					values.append(value);
+				}
+			}
 
 			void CConformanceRunner::parseControlOntology(const QString& filePath) {
 				QFile file(filePath);
@@ -100,481 +136,587 @@ namespace Konclude {
 					LOG(ERROR, getLogDomain(), logTr("Cannot open control ontology '%1'.").arg(filePath), this);
 					return;
 				}
-				QDomDocument doc;
-				QString errMsg;
-				int errLine = 0, errCol = 0;
-				if (!doc.setContent(&file, &errMsg, &errLine, &errCol)) {
+
+				QDomDocument document;
+				QString errorMessage;
+				int errorLine = 0;
+				int errorColumn = 0;
+				if (!document.setContent(&file, &errorMessage, &errorLine, &errorColumn)) {
 					file.close();
-					LOG(ERROR, getLogDomain(), logTr("Cannot parse control ontology '%1' (%2 at line %3).").arg(filePath).arg(errMsg).arg(errLine), this);
+					LOG(ERROR, getLogDomain(), logTr("Cannot parse control ontology '%1' (%2 at line %3).").arg(filePath).arg(errorMessage).arg(errorLine), this);
 					return;
 				}
 				file.close();
 
-				QFileInfo controlInfo(filePath);
-				QDir caseDir = controlInfo.absoluteDir();
+				// The directory of the control ontology relative to the input root is
+				// the suite "folder"; the ontology may name the suite explicitly.
+				QDir inputDirectory(QFileInfo(mInputDirectory).absoluteFilePath());
+				QString relativeDirectory = QDir::cleanPath(inputDirectory.relativeFilePath(QFileInfo(filePath).absolutePath()));
+				if (relativeDirectory == ".") {
+					relativeDirectory = QString();
+				}
 
-				// Collect the data for each test individual.
+				QDir caseDirectory = QFileInfo(filePath).absoluteDir();
+				QDomElement root = document.documentElement();
+
+				QString suiteId;
+				parseSuiteDeclaration(root, filePath, relativeDirectory, suiteId);
+				parseRunConfigDeclarations(root);
+
 				QHash<QString, CConformanceTestCase> caseById;
+				parseTaskClassAssertions(root, filePath, suiteId, caseById);
+				parseDataPropertyAssertions(root, filePath, caseDirectory, suiteId, caseById);
+				parseObjectPropertyAssertions(root, filePath, caseDirectory, suiteId, caseById);
 
-				QDomElement root = doc.documentElement();
+				for (CConformanceTestCase& testCase : caseById) {
+					if (finalizeTestCase(testCase)) {
+						mTestCases.append(testCase);
+					} else {
+						LOG(INFO, getLogDomain(), logTr("Skipping incomplete or unsupported test '%1' in '%2'.").arg(testCase.mId).arg(filePath), this);
+					}
+				}
+			}
 
-				// 1) ClassAssertion(kt:ConsistencyTest, individual) -> test kind.
+
+			void CConformanceRunner::parseSuiteDeclaration(const QDomElement& root, const QString& filePath, const QString& relativeDirectory, QString& suiteId) {
+				QString directoryPart = relativeDirectory.isEmpty() ? QString("root") : relativeDirectory;
+				QString derivedSuiteId = QString("kt:suite-%1").arg(sanitizeFileName(directoryPart));
+
+				// ClassAssertion(kt:TestSuite, kt:suite-...) declares the suite of this file.
+				QString declaredSuiteId;
 				QDomNodeList classAssertions = root.elementsByTagName("ClassAssertion");
 				for (int i = 0; i < classAssertions.count(); ++i) {
-					QDomElement ca = classAssertions.at(i).toElement();
-					QDomElement cls = ca.firstChildElement("Class");
-					QDomElement ind = ca.firstChildElement("NamedIndividual");
-					if (cls.isNull() || ind.isNull()) {
+					QDomElement assertion = classAssertions.at(i).toElement();
+					QString className = elementIRI(assertion.firstChildElement("Class"));
+					QString individualName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					if (individualName.isEmpty() || QString::compare(CConformanceTask::localName(className), "TestSuite", Qt::CaseInsensitive) != 0) {
 						continue;
 					}
-					QString className = cls.attribute("abbreviatedIRI");
-					if (className.isEmpty()) {
-						className = cls.attribute("IRI");
+					if (!declaredSuiteId.isEmpty() && declaredSuiteId != individualName) {
+						LOG(WARN, getLogDomain(), logTr("Control ontology '%1' declares more than one suite; using '%2'.").arg(filePath).arg(declaredSuiteId), this);
+						continue;
 					}
-					QString indName = ind.attribute("abbreviatedIRI");
-					if (indName.isEmpty()) {
-						indName = ind.attribute("IRI");
-					}
-					if (className.endsWith("ConsistencyTest")) {
-						CConformanceTestCase& tc = caseById[indName];
-						tc.mId = indName;
-						tc.mControlFile = filePath;
-						if (tc.mTask.isEmpty()) {
-							tc.mTask = "consistency";
-						}
-					} else if (className.endsWith("SatisfiabilityTest")) {
-						CConformanceTestCase& tc = caseById[indName];
-						tc.mId = indName;
-						tc.mControlFile = filePath;
-						if (tc.mTask.isEmpty()) {
-							tc.mTask = "satisfiability";
-						}
-					} else if (className.endsWith("ClassificationTest")) {
-						CConformanceTestCase& tc = caseById[indName];
-						tc.mId = indName;
-						tc.mControlFile = filePath;
-						if (tc.mTask.isEmpty()) {
-							tc.mTask = "classification";
-						}
-					}
+					declaredSuiteId = individualName;
 				}
+				suiteId = declaredSuiteId.isEmpty() ? derivedSuiteId : declaredSuiteId;
 
-				// 2) DataPropertyAssertion(kt:xxx, individual, literal) -> fields.
+				// Suite metadata: kt:suiteName and kt:suiteDirectory.
+				QString suiteName;
+				QString declaredDirectory;
 				QDomNodeList dataAssertions = root.elementsByTagName("DataPropertyAssertion");
 				for (int i = 0; i < dataAssertions.count(); ++i) {
-					QDomElement da = dataAssertions.at(i).toElement();
-					QDomElement prop = da.firstChildElement("DataProperty");
-					QDomElement ind = da.firstChildElement("NamedIndividual");
-					QDomElement lit = da.firstChildElement("Literal");
-					if (prop.isNull() || ind.isNull() || lit.isNull()) {
+					QDomElement assertion = dataAssertions.at(i).toElement();
+					QString propertyName = elementIRI(assertion.firstChildElement("DataProperty"));
+					QString individualName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					QDomElement literal = assertion.firstChildElement("Literal");
+					if (individualName != suiteId || literal.isNull()) {
 						continue;
 					}
-					QString propName = prop.attribute("abbreviatedIRI");
-					if (propName.isEmpty()) {
-						propName = prop.attribute("IRI");
-					}
-					QString indName = ind.attribute("abbreviatedIRI");
-					if (indName.isEmpty()) {
-						indName = ind.attribute("IRI");
-					}
-					QString value = lit.text().trimmed();
-
-					if (!caseById.contains(indName)) {
-						// Data for an individual whose test kind was not seen yet -> create it.
-						CConformanceTestCase tc;
-						tc.mId = indName;
-						tc.mControlFile = filePath;
-						caseById.insert(indName, tc);
-					}
-					CConformanceTestCase& tc = caseById[indName];
-
-					if (propName.endsWith("task")) {
-						tc.mTask = value;
-					} else if (propName.endsWith("usesOntology")) {
-						// Relative filename -> resolve to absolute against the case directory.
-						QString resolved = QDir::isAbsolutePath(value) ? value : caseDir.absoluteFilePath(value);
-						tc.mOntologyFile = QDir::cleanPath(resolved);
-					} else if (propName.endsWith("expectedFile")) {
-						// Relative filename -> resolve to absolute against the case directory.
-						QString resolved = QDir::isAbsolutePath(value) ? value : caseDir.absoluteFilePath(value);
-						tc.mExpectedFile = QDir::cleanPath(resolved);
-					} else if (propName.endsWith("expectedResult")) {
-						tc.mExpectedResult = value;
-					} else if (propName.endsWith("testClass")) {
-						tc.mTestClass = value;
-					} else if (propName.endsWith("timeoutSeconds")) {
-						tc.mTimeoutSeconds = value.toLongLong();
-					} else if (propName.endsWith("flaky")) {
-						if (value.compare("true", Qt::CaseInsensitive) == 0) {
-							tc.mKnownFailure = true;
-						}
+					QString value = literal.text().trimmed();
+					if (propertyName.endsWith("suiteName")) {
+						suiteName = value;
+					} else if (propertyName.endsWith("suiteDirectory")) {
+						declaredDirectory = QDir::cleanPath(value);
 					}
 				}
 
-				// 3) ObjectPropertyAssertion(kt:knownFailure, individual, issue) -> KNOWN.
-				QDomNodeList objAssertions = root.elementsByTagName("ObjectPropertyAssertion");
-				for (int i = 0; i < objAssertions.count(); ++i) {
-					QDomElement oa = objAssertions.at(i).toElement();
-					QDomElement prop = oa.firstChildElement("ObjectProperty");
-					QDomElement ind = oa.firstChildElement("NamedIndividual");
-					if (prop.isNull() || ind.isNull()) {
-						continue;
-					}
-					QString propName = prop.attribute("abbreviatedIRI");
-					if (propName.isEmpty()) {
-						propName = prop.attribute("IRI");
-					}
-					QString indName = ind.attribute("abbreviatedIRI");
-					if (indName.isEmpty()) {
-						indName = ind.attribute("IRI");
-					}
-					if (propName.endsWith("knownFailure") && caseById.contains(indName)) {
-						caseById[indName].mKnownFailure = true;
-					} else if (propName.endsWith("usesConfig")) {
-						// Additional reasoner configuration file for this test case only
-						// (e.g. a config with AllowBackendNeighbourExpansionBlocking=false).
-						QDomElement target = ind.nextSiblingElement("NamedIndividual");
-						if (!target.isNull()) {
-							QString configPath = target.attribute("IRI");
-							if (configPath.isEmpty()) {
-								configPath = target.attribute("abbreviatedIRI");
-							}
-							if (!configPath.isEmpty()) {
-								// Relative filename -> resolve to absolute against the case directory.
-								QString resolved = QDir::isAbsolutePath(configPath) ? configPath : caseDir.absoluteFilePath(configPath);
-								if (!caseById.contains(indName)) {
-									CConformanceTestCase tc;
-									tc.mId = indName;
-									tc.mControlFile = filePath;
-									caseById.insert(indName, tc);
-								}
-								caseById[indName].mConfigFile = QDir::cleanPath(resolved);
-							}
-						}
-					} else if (propName.endsWith("onChannel") && caseById.contains(indName)) {
-						// Interface the test runs on, e.g. kt:CommandLine, kt:OWLlink.
-						QDomElement target = ind.nextSiblingElement("NamedIndividual");
-						if (!target.isNull()) {
-							QString channel = target.attribute("abbreviatedIRI");
-							if (channel.isEmpty()) {
-								channel = target.attribute("IRI");
-							}
-							if (!channel.isEmpty()) {
-								int colon = channel.indexOf(':');
-								if (colon >= 0) {
-									channel = channel.mid(colon + 1);
-								}
-								caseById[indName].mInterface = channel;
-							}
-						}
-					}
+				if (!declaredDirectory.isEmpty() && declaredDirectory != QDir::cleanPath(directoryPart)) {
+					LOG(WARN, getLogDomain(), logTr("Suite '%1' declares directory '%2' but its control ontology is in '%3'; using the file location.").arg(suiteId).arg(declaredDirectory).arg(directoryPart), this);
 				}
 
-				// Keep complete test cases (consistency and satisfiability tests).
-				for (CConformanceTestCase& tc : caseById) {
-					bool ok = false;
-					if (tc.mTask == "classification" && !tc.mOntologyFile.isEmpty() && !tc.mExpectedFile.isEmpty()) {
-						// Classification compares against an expected taxonomy file ("match").
-						tc.mExpectedResult = "match";
-						ok = true;
-					} else if (tc.mTask == "consistency" && !tc.mOntologyFile.isEmpty() && !tc.mExpectedResult.isEmpty()) {
-						ok = true;
-					} else if (tc.mTask == "satisfiability" && !tc.mOntologyFile.isEmpty()
-							&& !tc.mExpectedResult.isEmpty() && !tc.mTestClass.isEmpty()) {
-						ok = true;
-					} else if (tc.mTask == "owllink-boolean" && !tc.mOntologyFile.isEmpty()
-							&& !tc.mExpectedResult.isEmpty()) {
-						ok = true;
+				CConformanceTestSuite suite = mSuites.value(suiteId);
+				suite.mId = suiteId;
+				suite.mDirectory = directoryPart;
+				if (!suiteName.isEmpty()) {
+					suite.mName = suiteName;
+				}
+				if (suite.mName.isEmpty()) {
+					suite.mName = directoryPart;
+				}
+				mSuites.insert(suiteId, suite);
+				mSuiteIdByDirectory.insert(directoryPart, suiteId);
+			}
+
+			void CConformanceRunner::parseRunConfigDeclarations(const QDomElement& root) {
+				// ClassAssertion(kt:RunConfig, kt:run-...) declares an execution configuration.
+				QDomNodeList classAssertions = root.elementsByTagName("ClassAssertion");
+				for (int i = 0; i < classAssertions.count(); ++i) {
+					QDomElement assertion = classAssertions.at(i).toElement();
+					QString className = elementIRI(assertion.firstChildElement("Class"));
+					QString individualName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					if (individualName.isEmpty() || QString::compare(CConformanceTask::localName(className), "RunConfig", Qt::CaseInsensitive) != 0) {
+						continue;
 					}
-					if (ok) {
-						if (tc.mInterface.isEmpty()) {
-							// Default interface derived from the task/command used to run it.
-							tc.mInterface = (tc.mTask == "owllink-boolean") ? QString("OWLlink") : QString("CommandLine");
+					CConformanceRunConfig runConfig = mRunConfigs.value(individualName);
+					runConfig.mId = individualName;
+					mRunConfigs.insert(individualName, runConfig);
+				}
+
+				// kt:timeoutSeconds / kt:repeatCount / kt:runConfigName on those individuals.
+				QDomNodeList dataAssertions = root.elementsByTagName("DataPropertyAssertion");
+				for (int i = 0; i < dataAssertions.count(); ++i) {
+					QDomElement assertion = dataAssertions.at(i).toElement();
+					QString propertyName = elementIRI(assertion.firstChildElement("DataProperty"));
+					QString individualName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					QDomElement literal = assertion.firstChildElement("Literal");
+					if (individualName.isEmpty() || literal.isNull() || !mRunConfigs.contains(individualName)) {
+						continue;
+					}
+
+					CConformanceRunConfig runConfig = mRunConfigs.value(individualName);
+					QString value = literal.text().trimmed();
+					if (propertyName.endsWith("timeoutSeconds")) {
+						runConfig.mTimeoutSeconds = value.toLongLong();
+					} else if (propertyName.endsWith("repeatCount")) {
+						runConfig.mRepeatCount = value.toLongLong();
+					} else if (propertyName.endsWith("runConfigName")) {
+						runConfig.mName = value;
+					}
+					mRunConfigs.insert(individualName, runConfig);
+				}
+			}
+
+			void CConformanceRunner::parseTaskClassAssertions(const QDomElement& root, const QString& filePath, const QString& suiteId, QHash<QString, CConformanceTestCase>& caseById) {
+				// ClassAssertion(kt:ConsistencyTest, individual) and the sibling markers
+				// declare the task kind of a test individual.
+				QDomNodeList classAssertions = root.elementsByTagName("ClassAssertion");
+				for (int i = 0; i < classAssertions.count(); ++i) {
+					QDomElement assertion = classAssertions.at(i).toElement();
+					QString className = elementIRI(assertion.firstChildElement("Class"));
+					QString individualName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					if (className.isEmpty() || individualName.isEmpty()) {
+						continue;
+					}
+
+					CConformanceTask::TYPE taskType;
+					if (!CConformanceTask::typeFromTestClassName(className, taskType)) {
+						continue;
+					}
+
+					CConformanceTestCase& testCase = testCaseFor(caseById, individualName, filePath, suiteId);
+					testCase.mTask = taskType;
+					testCase.mHasTask = true;
+				}
+			}
+
+
+			void CConformanceRunner::parseDataPropertyAssertions(const QDomElement& root, const QString& filePath, const QDir& caseDir, const QString& suiteId, QHash<QString, CConformanceTestCase>& caseById) {
+				// DataPropertyAssertion(kt:<name>, individual, literal) carries the test data.
+				QDomNodeList dataAssertions = root.elementsByTagName("DataPropertyAssertion");
+				for (int i = 0; i < dataAssertions.count(); ++i) {
+					QDomElement assertion = dataAssertions.at(i).toElement();
+					QString propertyName = elementIRI(assertion.firstChildElement("DataProperty"));
+					QString individualName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					QDomElement literal = assertion.firstChildElement("Literal");
+					if (propertyName.isEmpty() || individualName.isEmpty() || literal.isNull()) {
+						continue;
+					}
+					// Suite and run configuration individuals have their own properties.
+					if (mSuites.contains(individualName) || mRunConfigs.contains(individualName)) {
+						continue;
+					}
+
+					QString value = literal.text().trimmed();
+					CConformanceTestCase& testCase = testCaseFor(caseById, individualName, filePath, suiteId);
+
+					if (propertyName.endsWith("task")) {
+						CConformanceTask::TYPE taskType;
+						if (CConformanceTask::typeFromString(value, taskType)) {
+							testCase.mTask = taskType;
+							testCase.mHasTask = true;
+						} else {
+							LOG(WARN, getLogDomain(), logTr("Unknown task '%1' in '%2'; test '%3' is skipped.").arg(value).arg(filePath).arg(individualName), this);
 						}
-						mTestCases.append(tc);
-					} else {
-						LOG(INFO, getLogDomain(), logTr("Skipping incomplete/unsupported test '%1' in '%2' (supported: consistency, satisfiability, classification, owllink-boolean).").arg(tc.mId).arg(filePath), this);
+					} else if (propertyName.endsWith("usesOntology")) {
+						testCase.mOntologyFile = resolveCaseFilePath(caseDir, value);
+					} else if (propertyName.endsWith("expectedFile")) {
+						testCase.mExpectedFile = resolveCaseFilePath(caseDir, value);
+					} else if (propertyName.endsWith("expectedResult")) {
+						// Repeated assertions describe one expected answer per response;
+						// OWLlink requests may produce several responses.
+						testCase.mExpectedResultTexts.append(value);
+					} else if (propertyName.endsWith("testClass")) {
+						testCase.mTestClass = value;
+					} else if (propertyName.endsWith("timeoutSeconds")) {
+						LOG(WARN, getLogDomain(), logTr("kt:timeoutSeconds on test '%1' in '%2' is ignored; declare a kt:RunConfig and assign it with kt:usesTestRunConfig.").arg(individualName).arg(filePath), this);
+					} else if (propertyName.endsWith("flaky")) {
+						testCase.mKnownFailure = (QString::compare(value, "true", Qt::CaseInsensitive) == 0);
 					}
 				}
 			}
 
 
-			QString CConformanceRunner::runTask(const CConformanceTestCase& testCase, qint64 timeoutMs, const QString& logFilePath) {
-				QProcess process;
-				QStringList args;
-				QString responseFile;
-				if (testCase.mTask == "satisfiability") {
-					args << "satisfiability" << "-i" << testCase.mOntologyFile << "-x" << testCase.mTestClass;
-				} else if (testCase.mTask == "owllink-boolean") {
-					// OWLlink file channel: run the request, write the response to a temp file.
-					responseFile = testCase.mOntologyFile + ".response.xml";
-					args << "owllinkfile" << "-i" << testCase.mOntologyFile << "-o" << responseFile;
-				} else if (testCase.mTask == "classification") {
-					// Run classification and write the taxonomy to a temp file that is then
-					// compared semantically (order-independent) against the expected result.
-					responseFile = testCase.mOntologyFile + ".classification-result.owl.xml";
-					args << "classification" << "-i" << testCase.mOntologyFile << "-o" << responseFile;
-				} else {
-					args << "consistency" << "-i" << testCase.mOntologyFile;
-				}
-
-				// The configuration file of the test case takes precedence over the
-				// suite-wide default configuration file (Konclude.Conformance.ConfigFile).
-				QString configFile = !testCase.mConfigFile.isEmpty() ? testCase.mConfigFile : mConfigFile;
-				if (!configFile.isEmpty()) {
-					args << "-c" << configFile;
-				}
-
-				if (!logFilePath.isEmpty()) {
-					// Capture the subprocess' output directly into the log file: the math is
-					// done by QProcess itself (merged stdout+stderr), no in-memory buffering.
-					process.setProcessChannelMode(QProcess::MergedChannels);
-					process.setStandardOutputFile(logFilePath);
-				}
-
-				process.start(resolveBinaryFile(), args);
-				if (!process.waitForStarted(10000)) {
-					return QString("error");
-				}
-				bool timedOut = false;
-				if (!process.waitForFinished(static_cast<int>(timeoutMs))) {
-					timedOut = true;
-					process.kill();
-					process.waitForFinished(2000);
-				}
-
-				// Read the executed Konclude output for the verdict parsing: either from
-				// the log file the subprocess wrote directly into, or, when logging is
-				// disabled, from the in-memory channel buffers.
-				QString out;
-				if (!logFilePath.isEmpty()) {
-					QFile logFile(logFilePath);
-					if (logFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-						out = QString::fromUtf8(logFile.readAll());
-						logFile.close();
+			void CConformanceRunner::parseObjectPropertyAssertions(const QDomElement& root, const QString& filePath, const QDir& caseDir, const QString& suiteId, QHash<QString, CConformanceTestCase>& caseById) {
+				// ObjectPropertyAssertion(kt:<name>, individual, <target individual>)
+				QDomNodeList objectAssertions = root.elementsByTagName("ObjectPropertyAssertion");
+				for (int i = 0; i < objectAssertions.count(); ++i) {
+					QDomElement assertion = objectAssertions.at(i).toElement();
+					QString propertyName = elementIRI(assertion.firstChildElement("ObjectProperty"));
+					QString individualName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					if (propertyName.isEmpty() || individualName.isEmpty()) {
+						continue;
 					}
-				} else {
-					out = QString::fromUtf8(process.readAllStandardOutput());
-					out += QString::fromUtf8(process.readAllStandardError());
-				}
 
-				if (timedOut) {
-					return QString("timeout");
-				}
-
-				if (testCase.mTask == "classification") {
-					// Compare the produced taxonomy against the expected result file.
-					if (QFile::exists(responseFile) && QFile::exists(testCase.mExpectedFile)) {
-						QString detail;
-						bool equivalent = CClassificationResultComparator::compareClassificationFiles(responseFile, testCase.mExpectedFile, detail);
-						QFile::remove(responseFile);
-						if (equivalent) {
-							return QString("match");
+					QDomElement target = assertion.firstChildElement("NamedIndividual").nextSiblingElement("NamedIndividual");
+					if (propertyName.endsWith("knownFailure")) {
+						if (caseById.contains(individualName)) {
+							caseById[individualName].mKnownFailure = true;
 						}
-						return QString("mismatch") + (detail.isEmpty() ? QString() : QString(" (") + detail + QString(")"));
+					} else if (propertyName.endsWith("memberOfSuite") && !target.isNull()) {
+						// Suites are first-class individuals with their own description and
+						// configuration links; a test points at its suite with an object
+						// property instead of being bound to the folder implicitly.
+						CConformanceTestCase& testCase = testCaseFor(caseById, individualName, filePath, suiteId);
+						testCase.mSuiteId = elementIRI(target);
+					} else if (propertyName.endsWith("usesTestRunConfig") && !target.isNull()) {
+						// Execution configuration for a test or for a whole suite.
+						appendUnique(mRunConfigAssignments[individualName], elementIRI(target));
+					} else if (propertyName.endsWith("usesTestSystemConfig") && !target.isNull()) {
+						// Reasoner configuration ('-c') for a test or for a whole suite.
+						appendUnique(mSystemConfigAssignments[individualName], resolveCaseFilePath(caseDir, elementIRI(target)));
+					} else if (propertyName.endsWith("onChannel") && !target.isNull()) {
+						// Interface the test runs on, e.g. kt:CommandLine or kt:OWLlink.
+						QString channel = elementIRI(target);
+						int colonIndex = channel.lastIndexOf(':');
+						if (colonIndex >= 0) {
+							channel = channel.mid(colonIndex + 1);
+						}
+						if (!channel.isEmpty() && caseById.contains(individualName)) {
+							caseById[individualName].mInterface = channel;
+						}
 					}
-					QFile::remove(responseFile);
-					return QString("error");
 				}
-
-				if (testCase.mTask == "owllink-boolean") {
-					// Read the first BooleanResponse from the response file.
-					QFile rf(responseFile);
-					QString resp;
-					if (rf.open(QIODevice::ReadOnly | QIODevice::Text)) {
-						resp = QString::fromUtf8(rf.readAll());
-						rf.close();
-					}
-					QFile::remove(responseFile);
-					int idx = resp.indexOf("<BooleanResponse");
-					if (idx < 0) {
-						return QString("error");
-					}
-					QString frag = resp.mid(idx, 60);
-					if (frag.contains("result=\"true\"")) {
-						return QString("true");
-					}
-					if (frag.contains("result=\"false\"")) {
-						return QString("false");
-					}
-					return QString("error");
-				}
-
-				if (testCase.mTask == "satisfiability") {
-					// Order matters: "not satisfiable" contains "satisfiable".
-					if (out.contains("is not satisfiable")) {
-						return QString("unsatisfiable");
-					}
-					if (out.contains("is satisfiable")) {
-						return QString("satisfiable");
-					}
-					return QString("error");
-				}
-
-				// consistency: "inconsistent" contains "consistent" as a substring.
-				if (out.contains("is inconsistent")) {
-					return QString("inconsistent");
-				}
-				if (out.contains("is consistent")) {
-					return QString("consistent");
-				}
-				return QString("error");
 			}
 
+
+			QString CConformanceRunner::resolveCaseFilePath(const QDir& caseDir, const QString& path) {
+				if (path.isEmpty() || QDir::isAbsolutePath(path)) {
+					return path;
+				}
+				return QDir::cleanPath(caseDir.absoluteFilePath(path));
+			}
+
+
+			bool CConformanceRunner::finalizeTestCase(CConformanceTestCase& testCase) {
+				if (!testCase.mHasTask || testCase.mOntologyFile.isEmpty()) {
+					return false;
+				}
+
+				testCase.mExpectedVerdicts.clear();
+				if (testCase.mTask == CConformanceTask::TYPE::CLASSIFICATION) {
+					// Classification compares against an expected taxonomy: matching the
+					// expected file is the positive answer.
+					if (testCase.mExpectedFile.isEmpty()) {
+						return false;
+					}
+					testCase.mExpectedVerdicts.append(CConformanceTask::VERDICT::POSITIVE);
+				} else {
+					for (const QString& expectedText : testCase.mExpectedResultTexts) {
+						CConformanceTask::VERDICT expectedVerdict;
+						if (!CConformanceTask::verdictFromString(testCase.mTask, expectedText, expectedVerdict)) {
+							return false;
+						}
+						testCase.mExpectedVerdicts.append(expectedVerdict);
+					}
+					if (testCase.mExpectedVerdicts.isEmpty()) {
+						return false;
+					}
+					if (testCase.mTask != CConformanceTask::TYPE::OWLLINK_BOOLEAN && testCase.mExpectedVerdicts.count() > 1) {
+						LOG(WARN, getLogDomain(), logTr("Test '%1' in '%2' declares %3 expected results; task '%4' uses only the first.")
+								.arg(testCase.mId).arg(testCase.mControlFile).arg(testCase.mExpectedVerdicts.count())
+								.arg(CConformanceTask::typeToString(testCase.mTask)), this);
+						testCase.mExpectedVerdicts = testCase.mExpectedVerdicts.mid(0, 1);
+					}
+				}
+				testCase.mExpectedVerdict = testCase.mExpectedVerdicts.first();
+
+				if (testCase.mTask == CConformanceTask::TYPE::SATISFIABILITY && testCase.mTestClass.isEmpty()) {
+					return false;
+				}
+
+				if (testCase.mInterface.isEmpty()) {
+					testCase.mInterface = CConformanceTask::typeToDefaultInterface(testCase.mTask);
+				}
+				return true;
+			}
+
+
+			CConformanceTestSuite CConformanceRunner::suiteFor(const QString& suiteId) const {
+				if (mSuites.contains(suiteId)) {
+					return mSuites.value(suiteId);
+				}
+				CConformanceTestSuite suite;
+				suite.mId = suiteId;
+				suite.mName = CConformanceTask::localName(suiteId);
+				return suite;
+			}
+
+
+			CConformanceRunConfig CConformanceRunner::resolveRunConfig(const QString& runConfigId) {
+				CConformanceRunConfig runConfig;
+				if (mRunConfigs.contains(runConfigId)) {
+					runConfig = mRunConfigs.value(runConfigId);
+				} else if (runConfigId != QString("default")) {
+					LOG(WARN, getLogDomain(), logTr("Unknown run configuration '%1'; using the built-in default.").arg(runConfigId), this);
+				}
+
+				if (runConfig.mId.isEmpty()) {
+					runConfig.mId = QString("default");
+					runConfig.mName = QString("default");
+				}
+				if (runConfig.mTimeoutSeconds <= 0) {
+					runConfig.mTimeoutSeconds = mTimeoutSeconds;
+				}
+				if (runConfig.mRepeatCount <= 0) {
+					runConfig.mRepeatCount = mRepeatCount;
+				}
+				return runConfig;
+			}
+
+
+			QStringList CConformanceRunner::effectiveRunConfigIds(const CConformanceTestCase& testCase) const {
+				// Test-level assignments first, then the suite's, without duplicates.
+				QStringList runConfigIds;
+				for (const QString& runConfigId : mRunConfigAssignments.value(testCase.mId)) {
+					appendUnique(runConfigIds, runConfigId);
+				}
+				for (const QString& runConfigId : mRunConfigAssignments.value(testCase.mSuiteId)) {
+					appendUnique(runConfigIds, runConfigId);
+				}
+				if (runConfigIds.isEmpty()) {
+					runConfigIds.append(QString("default"));
+				}
+				return runConfigIds;
+			}
+
+
+			QStringList CConformanceRunner::effectiveSystemConfigPaths(const CConformanceTestCase& testCase) const {
+				// Test-level assignments first, then the suite's, without duplicates.
+				QStringList systemConfigPaths;
+				for (const QString& configPath : mSystemConfigAssignments.value(testCase.mId)) {
+					appendUnique(systemConfigPaths, configPath);
+				}
+				for (const QString& configPath : mSystemConfigAssignments.value(testCase.mSuiteId)) {
+					appendUnique(systemConfigPaths, configPath);
+				}
+				if (systemConfigPaths.isEmpty()) {
+					// Suite-wide default of the runner, or "no -c" when none is configured.
+					systemConfigPaths.append(mConfigFile);
+				}
+				return systemConfigPaths;
+			}
+
+
+			void CConformanceRunner::buildExecutionPlan() {
+				mExecutions.clear();
+				for (const CConformanceTestCase& testCase : mTestCases) {
+					CConformanceTestSuite suite = suiteFor(testCase.mSuiteId);
+					QStringList runConfigIds = effectiveRunConfigIds(testCase);
+					QStringList systemConfigPaths = effectiveSystemConfigPaths(testCase);
+
+					for (const QString& runConfigId : runConfigIds) {
+						CConformanceRunConfig runConfig = resolveRunConfig(runConfigId);
+						for (const QString& systemConfigPath : systemConfigPaths) {
+							CConformanceExecution execution;
+							execution.mTestCase = testCase;
+							execution.mRunConfig = runConfig;
+							execution.mSystemConfigPath = systemConfigPath;
+							execution.mSuiteId = suite.mId;
+							execution.mSuiteName = suite.getDisplayName();
+							mExecutions.append(execution);
+						}
+					}
+				}
+			}
 
 			QString CConformanceRunner::sanitizeFileName(const QString& name) const {
-				QString cleaned = name;
-				for (int i = 0; i < cleaned.size(); ++i) {
-					const QChar c = cleaned.at(i);
+				QString cleanedName = name;
+				for (int i = 0; i < cleanedName.size(); ++i) {
+					const QChar c = cleanedName.at(i);
 					if (!c.isLetterOrNumber() && c != '.' && c != '_' && c != '-') {
-						cleaned[i] = QChar('_');
+						cleanedName[i] = QChar('_');
 					}
 				}
-				return cleaned;
+				return cleanedName;
 			}
 
 
-			QString CConformanceRunner::resolveOutputLogFilePath(const CConformanceTestCase& testCase, qint64 runIndex) {
-				// The logs are a companion of the result ontology: they live in a
-				// 'test-outputs' subfolder next to the output file, which the ontology
-				// references via kt:outputFile. No output file -> no output logging.
+			QString CConformanceRunner::resolveOutputDirectory() {
+				// The per-test output files are companions of the result ontology and
+				// live in a 'test-outputs' folder next to it. Without a result ontology
+				// they go to a temporary directory instead of polluting the input tree.
+				QString directoryPath;
+				if (!mOutputFile.isEmpty()) {
+					directoryPath = QDir::cleanPath(QFileInfo(mOutputFile).absolutePath() + "/test-outputs");
+				} else {
+					directoryPath = QDir::cleanPath(QDir::tempPath() + "/konclude-conformance");
+				}
+
+				QDir directory(directoryPath);
+				if (!directory.exists() && !directory.mkpath(directoryPath)) {
+					LOG(ERROR, getLogDomain(), logTr("Cannot create output directory '%1'.").arg(directoryPath), this);
+					return QString();
+				}
+				return directoryPath;
+			}
+
+
+			QString CConformanceRunner::resolveExecutionFileBase(const CConformanceExecution& execution, qint64 runIndex) const {
+				// The configuration combination is part of the name, so different
+				// configurations of the same test do not overwrite each other's logs.
+				QString fileName = sanitizeFileName(execution.mTestCase.mId);
+				fileName += QString("-%1").arg(sanitizeFileName(execution.mRunConfig.getDisplayName()));
+				fileName += QString("-%1").arg(sanitizeFileName(execution.getSystemConfigName()));
+				if (execution.mRunConfig.mRepeatCount > 1) {
+					fileName += QString("-r%1").arg(runIndex);
+				}
+				return fileName;
+			}
+
+
+			QString CConformanceRunner::resolveOutputLogFilePath(const CConformanceExecution& execution, qint64 runIndex) {
 				if (mOutputFile.isEmpty()) {
 					return QString();
 				}
-				QString logDir = QDir::cleanPath(QFileInfo(mOutputFile).absolutePath() + "/test-outputs");
-				QDir dir(logDir);
-				if (!dir.exists() && !dir.mkpath(logDir)) {
-					LOG(ERROR, getLogDomain(), logTr("Cannot create output log directory '%1'.").arg(logDir), this);
+				QString directoryPath = resolveOutputDirectory();
+				if (directoryPath.isEmpty()) {
 					return QString();
 				}
-				QString fileName = sanitizeFileName(testCase.mId);
-				if (mRepeatCount > 1) {
-					fileName += QString("-r%1").arg(runIndex);
-				}
-				fileName += ".log";
-				return dir.absoluteFilePath(fileName);
+				return QDir(directoryPath).absoluteFilePath(resolveExecutionFileBase(execution, runIndex) + ".log");
 			}
 
 
-			CConformanceTestResult CConformanceRunner::executeTestCase(const CConformanceTestCase& testCase) {
-				CConformanceTestResult result;
-				result.mId = testCase.mId;
-				result.mTask = testCase.mTask;
-				result.mInterface = testCase.mInterface;
-				result.mExpected = testCase.mExpectedResult;
+			QString CConformanceRunner::resolveResponseFilePath(const CConformanceExecution& execution, qint64 runIndex) {
+				QString directoryPath = resolveOutputDirectory();
+				if (directoryPath.isEmpty()) {
+					return QString();
+				}
 
-				qint64 timeoutSec = testCase.mTimeoutSeconds > 0 ? testCase.mTimeoutSeconds : mTimeoutSeconds;
-				qint64 timeoutMs = timeoutSec * 1000;
+				QString fileName = resolveExecutionFileBase(execution, runIndex);
+				switch (execution.mTestCase.mTask) {
+					case CConformanceTask::TYPE::CLASSIFICATION:
+						fileName += "-classification.owl.xml";
+						break;
+					case CConformanceTask::TYPE::OWLLINK_BOOLEAN:
+						fileName += "-response.xml";
+						break;
+					default:
+						fileName += "-response.txt";
+						break;
+				}
+				return QDir(directoryPath).absoluteFilePath(fileName);
+			}
+
+			CConformanceTestResult CConformanceRunner::executeTestRun(const CConformanceExecution& execution) {
+				CConformanceTestResult result;
+				result.mId = execution.mTestCase.mId;
+				result.mTask = execution.mTestCase.mTask;
+				result.mInterface = execution.mTestCase.mInterface;
+				result.mExpectedVerdict = execution.mTestCase.mExpectedVerdict;
+				result.mSuiteId = execution.mSuiteId;
+				result.mSuiteName = execution.mSuiteName;
+				result.mRunConfigId = execution.mRunConfig.mId;
+				result.mRunConfigName = execution.mRunConfig.getDisplayName();
+				result.mSystemConfigPath = execution.mSystemConfigPath;
+				result.mSystemConfigName = execution.getSystemConfigName();
+
+				qint64 timeoutMs = execution.mRunConfig.mTimeoutSeconds * 1000;
+
+				QScopedPointer<CConformanceTaskHandler> handler(
+						CConformanceTaskHandlerFactory::createHandler(execution.mTestCase.mTask, execution.mTestCase, resolveBinaryFile(), execution.mSystemConfigPath));
+				if (handler.isNull()) {
+					result.mOutcome = CConformanceOutcome::TYPE::FAIL;
+					result.mExplanation = QString("no handler for task '%1'").arg(CConformanceTask::typeToString(execution.mTestCase.mTask));
+					return result;
+				}
 
 				QElapsedTimer timer;
 				timer.start();
 
-				QString firstOutcome;
+				CConformanceTaskResult lastTaskResult;
+				bool isFirstRun = true;
+				bool sameObservation = true;
 				bool sawTimeout = false;
-				bool allEqual = true;
-				QString actual;
-				QString outputLogFile;
-				for (qint64 r = 0; r < mRepeatCount; ++r) {
-					// The per-run log file (into which QProcess captures the subprocess
-					// output directly) or an empty path when output logging is disabled.
-					QString runLogFile = resolveOutputLogFilePath(testCase, r);
-					actual = runTask(testCase, timeoutMs, runLogFile);
-					if (!runLogFile.isEmpty()) {
-						outputLogFile = runLogFile;
+				for (qint64 runIndex = 0; runIndex < execution.mRunConfig.mRepeatCount; ++runIndex) {
+					QString logFilePath = resolveOutputLogFilePath(execution, runIndex);
+					QString responseFilePath = resolveResponseFilePath(execution, runIndex);
+
+					CConformanceTaskResult taskResult = handler->run(timeoutMs, logFilePath, responseFilePath);
+					QFile::remove(responseFilePath);
+
+					if (!logFilePath.isEmpty()) {
+						result.mOutputLogFile = logFilePath;
 					}
-					if (actual == "timeout") {
+					if (taskResult.mStatus == CConformanceTaskResult::STATUS::TIMEOUT) {
 						sawTimeout = true;
 					}
-					if (r == 0) {
-						firstOutcome = actual;
-					} else if (actual != firstOutcome) {
-						allEqual = false;
+					if (!isFirstRun && !taskResult.isSameObservationAs(lastTaskResult)) {
+						sameObservation = false;
 					}
+					lastTaskResult = taskResult;
+					isFirstRun = false;
 				}
+
 				result.mDurationMs = timer.elapsed();
-				result.mActual = actual;
-				result.mOutputLogFile = outputLogFile;
+				result.mActualVerdict = lastTaskResult.mVerdict;
+				result.mExplanation = lastTaskResult.mExplanation;
 
-				// Flaky: repeated runs with diverging outcome.
-				if (!allEqual) {
-					if (testCase.mKnownFailure) {
-						result.mOutcome = "KNOWN";
-						result.mFailing = false;
-					} else {
-						result.mOutcome = "FLAKY";
-						result.mFailing = true;
-					}
+				if (!sameObservation) {
+					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::FLAKY;
 					return result;
 				}
-
 				if (sawTimeout) {
-					if (testCase.mKnownFailure) {
-						result.mOutcome = "KNOWN";
-						result.mFailing = false;
-					} else {
-						result.mOutcome = "TIMEOUT";
-						result.mFailing = true;
-					}
+					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::TIMEOUT;
+					return result;
+				}
+				if (lastTaskResult.mStatus == CConformanceTaskResult::STATUS::EXECUTION_ERROR) {
+					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::FAIL;
 					return result;
 				}
 
-				bool correct = (actual == testCase.mExpectedResult);
-				if (correct && !testCase.mKnownFailure) {
-					result.mOutcome = "PASS";
-					result.mFailing = false;
-				} else if (!correct && !testCase.mKnownFailure) {
-					result.mOutcome = "FAIL";
-					result.mFailing = true;
-				} else if (!correct && testCase.mKnownFailure) {
-					result.mOutcome = "KNOWN";
-					result.mFailing = false;
-				} else { // correct && knownFailure -> fixed, needs cleanup
-					result.mOutcome = "FIXED";
-					result.mFailing = true;
+				if (lastTaskResult.isMatched()) {
+					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::FIXED : CConformanceOutcome::TYPE::PASS;
+				} else {
+					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::FAIL;
 				}
 				return result;
 			}
 
 
-			void CConformanceRunner::writeResultOntology(const QList<CConformanceTestResult>& results) {
+			void CConformanceRunner::writeResults(const QList<CConformanceTestResult>& results) {
 				if (mOutputFile.isEmpty()) {
 					return;
 				}
-				QFile file(mOutputFile);
-				if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-					LOG(ERROR, getLogDomain(), logTr("Cannot write result ontology '%1'.").arg(mOutputFile), this);
+
+				QScopedPointer<CConformanceResultWriter> writer(CConformanceResultWriterFactory::createWriter(mOutputFile));
+				if (writer.isNull()) {
+					LOG(ERROR, getLogDomain(), logTr("Unsupported result ontology format for '%1'.").arg(mOutputFile), this);
 					return;
 				}
-				QTextStream ts(&file);
-				ts << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-				ts << "<Ontology xmlns=\"http://www.w3.org/2002/07/owl#\"\n";
-				ts << "          ontologyIRI=\"http://konclude.test/results\">\n";
-				ts << "  <Prefix name=\"kt\" IRI=\"http://konclude.test/vocabulary#\"/>\n";
-				int n = 0;
-				for (const CConformanceTestResult& res : results) {
-					QString resId = QString("res:r-%1").arg(n++, 4, 10, QChar('0'));
-					ts << "  <ClassAssertion><Class abbreviatedIRI=\"kt:TestResult\"/>"
-					   << "<NamedIndividual abbreviatedIRI=\"" << resId << "\"/></ClassAssertion>\n";
-					ts << "  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=\"kt:resultOf\"/>"
-					   << "<NamedIndividual abbreviatedIRI=\"" << resId << "\"/>"
-					   << "<NamedIndividual abbreviatedIRI=\"" << res.mId << "\"/></ObjectPropertyAssertion>\n";
-					ts << "  <DataPropertyAssertion><DataProperty abbreviatedIRI=\"kt:outcome\"/>"
-					   << "<NamedIndividual abbreviatedIRI=\"" << resId << "\"/>"
-					   << "<Literal>" << res.mOutcome << "</Literal></DataPropertyAssertion>\n";
-					ts << "  <DataPropertyAssertion><DataProperty abbreviatedIRI=\"kt:durationMs\"/>"
-					   << "<NamedIndividual abbreviatedIRI=\"" << resId << "\"/>"
-					   << "<Literal>" << res.mDurationMs << "</Literal></DataPropertyAssertion>\n";
-					if (!res.mOutputLogFile.isEmpty()) {
-						// Reference to the file containing the raw output of the executed
-						// Konclude run for this test (a 'test-outputs' subfolder next to
-						// the output ontology file).
-						ts << "  <DataPropertyAssertion><DataProperty abbreviatedIRI=\"kt:outputFile\"/>"
-						   << "<NamedIndividual abbreviatedIRI=\"" << resId << "\"/>"
-						   << "<Literal>" << res.mOutputLogFile << "</Literal></DataPropertyAssertion>\n";
-					}
+				writer->writeResults(mOutputFile, results);
+			}
+
+			void CConformanceRunner::reportProgress(int completedCount, qint64 runStartMSecs, qint64& lastProgressMSecs) {
+				if (mProgressIntervalSeconds <= 0) {
+					return;
 				}
-				ts << "</Ontology>\n";
-				file.close();
+				qint64 nowMSecs = QDateTime::currentMSecsSinceEpoch();
+				if (nowMSecs - lastProgressMSecs < mProgressIntervalSeconds * 1000) {
+					return;
+				}
+				lastProgressMSecs = nowMSecs;
+
+				qint64 elapsedMSecs = nowMSecs - runStartMSecs;
+				qint64 averageMSecsPerTest = completedCount > 0 ? elapsedMSecs / completedCount : 0;
+				qint64 remainingMSecs = averageMSecsPerTest * (mExecutions.count() - completedCount);
+				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatProgressLine(completedCount, mExecutions.count(), elapsedMSecs, remainingMSecs)), this);
+			}
+
+
+			void CConformanceRunner::logOutcomeLines(const QMap<CConformanceOutcome::TYPE, int>& outcomeCounts, bool includeZeroOutcomes) {
+				for (const QString& outcomeLine : CConformanceReporter::formatOutcomeLines(outcomeCounts, includeZeroOutcomes)) {
+					LOG(INFO, getLogDomain(), logTr("%1").arg(QString("  ") + outcomeLine), this);
+				}
 			}
 
 			int CConformanceRunner::run() {
@@ -583,53 +725,56 @@ namespace Konclude {
 
 				QStringList controlFiles = discoverControlOntologies();
 				LOG(INFO, getLogDomain(), logTr("Discovered %1 control ontologies (*.kt.owl.xml).").arg(controlFiles.count()), this);
-				for (const QString& cf : controlFiles) {
-					parseControlOntology(cf);
+				for (const QString& controlFile : controlFiles) {
+					parseControlOntology(controlFile);
 				}
 
-				LOG(INFO, getLogDomain(), logTr("Collected %1 executable test case(s).").arg(mTestCases.count()), this);
+				buildExecutionPlan();
+				LOG(INFO, getLogDomain(), logTr("Collected %1 test case(s) in %2 suite(s), scheduled %3 test execution(s).")
+						.arg(mTestCases.count()).arg(mSuites.count()).arg(mExecutions.count()), this);
+				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatWorkersLine((int)mJobCount, mExecutions.count())), this);
 
-				// Report how many test workers will run the suite.
-				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatWorkersLine((int)mJobCount, mTestCases.count())), this);
+				// Which suite is executed with which configuration combinations.
+				QMap<QString, QString> suiteNames;
+				QMap<QString, QStringList> suiteRunConfigNames;
+				QMap<QString, QStringList> suiteSystemConfigNames;
+				for (const CConformanceExecution& execution : mExecutions) {
+					suiteNames[execution.mSuiteId] = execution.mSuiteName;
+					appendUnique(suiteRunConfigNames[execution.mSuiteId], execution.mRunConfig.getDisplayName());
+					appendUnique(suiteSystemConfigNames[execution.mSuiteId], execution.getSystemConfigName());
+				}
+				for (const QString& suiteId : suiteNames.keys()) {
+					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatSuiteConfigurationLine(
+							suiteNames.value(suiteId), suiteRunConfigNames.value(suiteId), suiteSystemConfigNames.value(suiteId))), this);
+				}
 
 				QList<CConformanceTestResult> results;
 				QList<CConformanceTestResult> failingResults;
-				QHash<QString, int> totalOutcomeHash;
-				QHash<QString, QHash<QString, int> > typeOutcomeHash;
-				QHash<QString, QHash<QString, int> > interfaceOutcomeHash;
+				QMap<CConformanceOutcome::TYPE, int> totalOutcomeCounts;
+				QMap<CConformanceTask::TYPE, QMap<CConformanceOutcome::TYPE, int> > typeOutcomeCounts;
+				QMap<QString, QMap<CConformanceOutcome::TYPE, int> > interfaceOutcomeCounts;
+				QMap<QString, QMap<CConformanceOutcome::TYPE, int> > suiteOutcomeCounts;
 
 				qint64 runStartMSecs = QDateTime::currentMSecsSinceEpoch();
 				qint64 lastProgressMSecs = runStartMSecs;
 				qint64 maxDurationMSecs = 0;
-				for (const CConformanceTestCase& tc : mTestCases) {
-					CConformanceTestResult res = executeTestCase(tc);
-					results.append(res);
-					totalOutcomeHash[res.mOutcome]++;
-					typeOutcomeHash[res.mTask][res.mOutcome]++;
-					interfaceOutcomeHash[res.mInterface][res.mOutcome]++;
-					if (res.mDurationMs > maxDurationMSecs) {
-						maxDurationMSecs = res.mDurationMs;
+
+				for (const CConformanceExecution& execution : mExecutions) {
+					CConformanceTestResult result = executeTestRun(execution);
+					results.append(result);
+					totalOutcomeCounts[result.mOutcome]++;
+					typeOutcomeCounts[result.mTask][result.mOutcome]++;
+					interfaceOutcomeCounts[result.mInterface][result.mOutcome]++;
+					suiteOutcomeCounts[result.mSuiteId][result.mOutcome]++;
+					if (result.mDurationMs > maxDurationMSecs) {
+						maxDurationMSecs = result.mDurationMs;
 					}
 
-					// Periodic progress/estimated-remaining-time report (configurable via the
-					// progress interval; a value of 0 disables it).
-					if (mProgressIntervalSeconds > 0) {
-						qint64 nowMSecs = QDateTime::currentMSecsSinceEpoch();
-						if (nowMSecs - lastProgressMSecs >= mProgressIntervalSeconds * 1000) {
-							lastProgressMSecs = nowMSecs;
-							qint64 elapsedMSecs = nowMSecs - runStartMSecs;
-							int completedCount = results.count();
-							qint64 avgMSecsPerTest = completedCount > 0 ? elapsedMSecs / completedCount : 0;
-							qint64 remainingMSecs = avgMSecsPerTest * (mTestCases.count() - completedCount);
-							LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatProgressLine(completedCount, mTestCases.count(), elapsedMSecs, remainingMSecs)), this);
-						}
-					}
+					reportProgress(results.count(), runStartMSecs, lastProgressMSecs);
 
-					QString line = QString("[%1] %2  (%3ms)")
-						.arg(res.mOutcome, -7).arg(res.mId).arg(res.mDurationMs);
-					if (res.mFailing) {
-						line += QString("  -- expected: %1, got: %2").arg(res.mExpected).arg(res.mActual);
-						failingResults.append(res);
+					QString line = CConformanceReporter::formatResultLine(result);
+					if (result.isFailing()) {
+						failingResults.append(result);
 						// Failing tests are reported as log errors so they stand out.
 						LOG(ERROR, getLogDomain(), logTr("%1").arg(line), this);
 					} else {
@@ -637,55 +782,52 @@ namespace Konclude {
 					}
 				}
 
-				// Timing directly after the last test and before the evaluation breakdown.
+				// Timing directly after the last execution and before the breakdown.
 				qint64 totalMSecs = QDateTime::currentMSecsSinceEpoch() - runStartMSecs;
-				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatTotalTimeLine(totalMSecs, mTestCases.count(), maxDurationMSecs)), this);
+				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatTotalTimeLine(totalMSecs, mExecutions.count(), maxDurationMSecs)), this);
 
 				// Overall summary: header line, then each outcome count on its own line.
-				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatSummaryHeader(controlFiles.count(), mTestCases.count())), this);
-				for (const QString& outcomeLine : CConformanceReporter::formatOutcomeLines(totalOutcomeHash, true)) {
-					LOG(INFO, getLogDomain(), logTr("%1").arg(QString("  ") + outcomeLine), this);
-				}
+				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatSummaryHeader(controlFiles.count(), mTestCases.count(), mSuites.count(), mExecutions.count())), this);
+				logOutcomeLines(totalOutcomeCounts, true);
 
-				// Per-test-type breakdown: one header + outcome lines per test type.
-				QStringList taskNames = typeOutcomeHash.keys();
-				taskNames.sort();
-				for (const QString& taskName : taskNames) {
-					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("test type", taskName, typeOutcomeHash.value(taskName))), this);
-					for (const QString& outcomeLine : CConformanceReporter::formatOutcomeLines(typeOutcomeHash.value(taskName), false)) {
-						LOG(INFO, getLogDomain(), logTr("%1").arg(QString("  ") + outcomeLine), this);
-					}
+				// Per-suite, per-task and per-interface breakdown.
+				for (const QString& suiteId : suiteOutcomeCounts.keys()) {
+					QMap<CConformanceOutcome::TYPE, int> singleSuiteOutcomeCounts = suiteOutcomeCounts.value(suiteId);
+					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("suite", suiteNames.value(suiteId), singleSuiteOutcomeCounts)), this);
+					logOutcomeLines(singleSuiteOutcomeCounts, false);
 				}
-
-				// Per-interface breakdown: one header + outcome lines per interface.
-				QStringList interfaceNames = interfaceOutcomeHash.keys();
-				interfaceNames.sort();
-				for (const QString& interfaceName : interfaceNames) {
-					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("interface", interfaceName, interfaceOutcomeHash.value(interfaceName))), this);
-					for (const QString& outcomeLine : CConformanceReporter::formatOutcomeLines(interfaceOutcomeHash.value(interfaceName), false)) {
-						LOG(INFO, getLogDomain(), logTr("%1").arg(QString("  ") + outcomeLine), this);
-					}
+				for (CConformanceTask::TYPE taskType : typeOutcomeCounts.keys()) {
+					QMap<CConformanceOutcome::TYPE, int> taskOutcomeCounts = typeOutcomeCounts.value(taskType);
+					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("test type", CConformanceTask::typeToString(taskType), taskOutcomeCounts)), this);
+					logOutcomeLines(taskOutcomeCounts, false);
+				}
+				for (const QString& interfaceName : interfaceOutcomeCounts.keys()) {
+					QMap<CConformanceOutcome::TYPE, int> interfaceTaskOutcomeCounts = interfaceOutcomeCounts.value(interfaceName);
+					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("interface", interfaceName, interfaceTaskOutcomeCounts)), this);
+					logOutcomeLines(interfaceTaskOutcomeCounts, false);
 				}
 
 				// Clear completion message (also covers the case with no failures).
-				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatFinishedLine(failingResults.count(), mTestCases.count())), this);
+				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatFinishedLine(failingResults.count(), mExecutions.count())), this);
 
 				// List all failing tests again at the end, as errors.
 				if (!failingResults.isEmpty()) {
 					LOG(ERROR, getLogDomain(), logTr("The following tests failed:"), this);
-					for (const CConformanceTestResult& failedRes : failingResults) {
-						LOG(ERROR, getLogDomain(), logTr("%1").arg(QString("  ") + CConformanceReporter::formatFailureLine(failedRes.mId, failedRes.mOutcome, failedRes.mExpected, failedRes.mActual)), this);
+					for (const CConformanceTestResult& failedResult : failingResults) {
+						LOG(ERROR, getLogDomain(), logTr("%1").arg(QString("  ") + CConformanceReporter::formatResultLine(failedResult)), this);
 					}
 				}
 
-				writeResultOntology(results);
+				writeResults(results);
 
-				// An individual test counts as a red run if it FAILed, FIXED, TIMEOUT, or FLAKY.
-				int failures = totalOutcomeHash.value("FAIL", 0) + totalOutcomeHash.value("FIXED", 0)
-								+ totalOutcomeHash.value("TIMEOUT", 0) + totalOutcomeHash.value("FLAKY", 0);
-				return failures;
+				int failureCount = 0;
+				for (CConformanceOutcome::TYPE outcome : CConformanceOutcome::allTypes()) {
+					if (CConformanceOutcome::typeIsFailing(outcome)) {
+						failureCount += totalOutcomeCounts.value(outcome, 0);
+					}
+				}
+				return failureCount;
 			}
-
 
 		}; // end namespace Conformance
 

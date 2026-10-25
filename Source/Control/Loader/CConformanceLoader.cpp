@@ -57,7 +57,7 @@ namespace Konclude {
 				QString knownIssuesFile = CConfigDataReader::readConfigString(mLoaderConfig, "Konclude.Conformance.KnownIssuesFile", "");
 				// Default reasoner configuration file for all test cases (e.g. one that switches
 				// Konclude.Calculation.Optimization.AllowBackendNeighbourExpansionBlocking off).
-				// A test-specific kt:usesConfig assertion in the control ontology takes precedence.
+				// A test-specific kt:usesTestSystemConfig assertion in the control ontology takes precedence.
 				QString configFile = CConfigDataReader::readConfigString(mLoaderConfig, "Konclude.Conformance.ConfigFile", "");
 				cint64 jobCount = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.Conformance.Jobs", 1);
 				cint64 repeatCount = CConfigDataReader::readConfigInteger(mLoaderConfig, "Konclude.Conformance.Repeat", 1);

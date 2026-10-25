@@ -21,7 +21,14 @@
 #ifndef KONCLUDE_TEST_CONFORMANCE_CCONFORMANCETESTCASE_H
 #define KONCLUDE_TEST_CONFORMANCE_CCONFORMANCETESTCASE_H
 
+// Libraries includes
 #include <QString>
+#include <QStringList>
+#include <QList>
+
+// Namespace includes
+#include "CConformanceTask.h"
+
 
 namespace Konclude {
 
@@ -32,24 +39,39 @@ namespace Konclude {
 			/*!
 			 *		\class		CConformanceTestCase
 			 *		\brief		A test case read from a *.kt.owl.xml control ontology.
-			 *					Supported tasks: consistency, satisfiability, owllink-boolean.
+			 *
+			 *					The task kind and the expected answer are stored as typed
+			 *					values; the literal text of the expected result is kept only
+			 *					until the task kind is known, because it can only be
+			 *					interpreted in the vocabulary of its task.
 			 */
 			class CConformanceTestCase {
+				// public methods
 				public:
-					CConformanceTestCase() : mKnownFailure(false), mTimeoutSeconds(0) {}
+					CConformanceTestCase();
 
-					QString mId;                 // IRI/name of the test individual
-					QString mTask;               // "consistency" | "satisfiability" | "owllink-boolean" | "classification"
-					QString mInterface;          // interface the test runs on ("CommandLine" | "OWLlink" | ...)
-					QString mOntologyFile;       // absolute path to the input ontology / request file
-					QString mExpectedResult;     // consistent/inconsistent | satisfiable/unsatisfiable | true/false
-					QString mExpectedFile;       // absolute path to an expected OWL/XML classification result (task "classification")
-					QString mTestClass;          // class IRI for satisfiability (exactly as declared in the ontology)
-					QString mControlFile;        // originating *.kt.owl.xml (for messages)
-					QString mConfigFile;         // additional reasoner config file (kt:usesConfig), may be empty
-					bool mKnownFailure;          // marked via kt:knownFailure or kt:flaky
-					qint64 mTimeoutSeconds;      // 0 => runner default
+				// public variables
+				public:
+					QString mId;                             // IRI/name of the test individual
+					CConformanceTask::TYPE mTask;            // task kind, valid only when mHasTask is true
+					bool mHasTask;                           // whether the ontology declared a task
+					QString mInterface;                      // interface the test runs on ("CommandLine" | "OWLlink" | ...)
+					QString mOntologyFile;                   // absolute path to the input ontology / request file
+					QStringList mExpectedResultTexts;        // expected result literals as read from the ontology
+					QList<CConformanceTask::VERDICT> mExpectedVerdicts; // typed expectations, one per answer
+					CConformanceTask::VERDICT mExpectedVerdict; // first expectation, used in reports
+					QString mExpectedFile;                   // absolute path to an expected OWL/XML classification result
+					QString mTestClass;                      // class IRI for satisfiability (as declared in the ontology)
+					QString mControlFile;                    // originating *.kt.owl.xml (for messages)
+					QString mSuiteId;                        // suite the control ontology declares/derives
+					bool mKnownFailure;                      // marked via kt:knownFailure or kt:flaky
 			};
+
+
+			inline CConformanceTestCase::CConformanceTestCase()
+					: mTask(CConformanceTask::TYPE::CONSISTENCY), mHasTask(false),
+					  mExpectedVerdict(CConformanceTask::VERDICT::UNSET), mKnownFailure(false) {
+			}
 
 		}; // end namespace Conformance
 

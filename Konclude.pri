@@ -2909,6 +2909,16 @@ SOURCES += \
    ./Source/Control/Interface/CommandLine/CConformanceCommandLinePreparationTranslator.cpp \
    ./Source/Control/Loader/CConformanceLoader.cpp \
    ./Source/Test/Conformance/CConformanceRunner.cpp \
+   ./Source/Test/Conformance/CConformanceTask.cpp \
+   ./Source/Test/Conformance/CConformanceOutcome.cpp \
+   ./Source/Test/Conformance/CConformanceTaskHandler.cpp \
+   ./Source/Test/Conformance/CConformanceTaskHandlerFactory.cpp \
+   ./Source/Test/Conformance/CConformanceCliBooleanTaskHandler.cpp \
+   ./Source/Test/Conformance/CClassificationTaskHandler.cpp \
+   ./Source/Test/Conformance/COWLLinkBooleanTaskHandler.cpp \
+   ./Source/Test/Conformance/CConformanceResultWriter.cpp \
+   ./Source/Test/Conformance/CConformanceResultWriterFactory.cpp \
+   ./Source/Test/Conformance/CConformanceOWLXMLResultWriter.cpp \
    ./Source/Test/Conformance/CClassificationResultComparator.cpp \
    ./Source/Test/Conformance/CConformanceReporter.cpp \
    ./Source/Control/Interface/CommandLine/CHelpComandLinePreparationTranslator.cpp \
