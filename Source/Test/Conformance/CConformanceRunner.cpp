@@ -329,6 +329,9 @@ namespace Konclude {
 						}
 					} else if (propertyName.endsWith("usesOntology")) {
 						testCase.mOntologyFile = resolveCaseFilePath(caseDir, value);
+					} else if (propertyName.endsWith("usesDataset")) {
+						// Ontology a SPARQL test loads before the query is answered.
+						testCase.mDatasetFile = resolveCaseFilePath(caseDir, value);
 					} else if (propertyName.endsWith("expectedFile")) {
 						testCase.mExpectedFile = resolveCaseFilePath(caseDir, value);
 					} else if (propertyName.endsWith("expectedResult")) {
@@ -375,14 +378,15 @@ namespace Konclude {
 						// Reasoner configuration ('-c') for a test or for a whole suite.
 						appendUnique(mSystemConfigAssignments[individualName], resolveCaseFilePath(caseDir, elementIRI(target)));
 					} else if (propertyName.endsWith("onChannel") && !target.isNull()) {
-						// Interface the test runs on, e.g. kt:CommandLine or kt:OWLlink.
-						QString channel = elementIRI(target);
-						int colonIndex = channel.lastIndexOf(':');
-						if (colonIndex >= 0) {
-							channel = channel.mid(colonIndex + 1);
-						}
-						if (!channel.isEmpty() && caseById.contains(individualName)) {
-							caseById[individualName].mInterface = channel;
+						// Transport the test runs on: kt:CommandLine, kt:OWLlink,
+						// kt:OWLlinkServer, kt:SPARQL or kt:SPARQLServer.
+						CConformanceChannel::TYPE channel;
+						if (CConformanceChannel::typeFromOntologyName(elementIRI(target), channel)) {
+							CConformanceTestCase& testCase = testCaseFor(caseById, individualName, filePath, suiteId);
+							testCase.mChannel = channel;
+							testCase.mHasChannel = true;
+						} else {
+							LOG(WARN, getLogDomain(), logTr("Unknown channel '%1' for test '%2' in '%3'.").arg(elementIRI(target)).arg(individualName).arg(filePath), this);
 						}
 					}
 				}
@@ -434,9 +438,21 @@ namespace Konclude {
 					return false;
 				}
 
-				if (testCase.mInterface.isEmpty()) {
-					testCase.mInterface = CConformanceTask::typeToDefaultInterface(testCase.mTask);
+				if (!testCase.mHasChannel) {
+					testCase.mChannel = CConformanceChannel::typeDefaultForTask(testCase.mTask);
 				}
+				if (!CConformanceChannel::typeIsSupportedForTask(testCase.mChannel, testCase.mTask)) {
+					LOG(WARN, getLogDomain(), logTr("Channel '%1' cannot execute task '%2' (test '%3' in '%4').")
+							.arg(CConformanceChannel::typeToString(testCase.mChannel))
+							.arg(CConformanceTask::typeToString(testCase.mTask))
+							.arg(testCase.mId).arg(testCase.mControlFile), this);
+					return false;
+				}
+				if (testCase.mChannel == CConformanceChannel::TYPE::SPARQL_SERVER && testCase.mDatasetFile.isEmpty()) {
+					LOG(WARN, getLogDomain(), logTr("SPARQL server test '%1' in '%2' requires kt:usesDataset.").arg(testCase.mId).arg(testCase.mControlFile), this);
+					return false;
+				}
+				testCase.mInterface = CConformanceChannel::typeToString(testCase.mChannel);
 				return true;
 			}
 
@@ -623,7 +639,7 @@ namespace Konclude {
 				qint64 timeoutMs = execution.mRunConfig.mTimeoutSeconds * 1000;
 
 				QScopedPointer<CConformanceTaskHandler> handler(
-						CConformanceTaskHandlerFactory::createHandler(execution.mTestCase.mTask, execution.mTestCase, resolveBinaryFile(), execution.mSystemConfigPath));
+						CConformanceTaskHandlerFactory::createHandler(execution.mTestCase.mTask, execution.mTestCase.mChannel, execution.mTestCase, resolveBinaryFile(), execution.mSystemConfigPath));
 				if (handler.isNull()) {
 					result.mOutcome = CConformanceOutcome::TYPE::FAIL;
 					result.mExplanation = QString("no handler for task '%1'").arg(CConformanceTask::typeToString(execution.mTestCase.mTask));

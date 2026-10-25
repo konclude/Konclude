@@ -57,17 +57,53 @@ namespace Konclude {
 			}
 
 
+			QStringList COWLLinkBooleanTaskHandler::buildServerArguments(quint16 port) {
+				QStringList arguments;
+				arguments << "owllinkserver" << "-p" << QString::number(port);
+				appendConfigArgument(arguments);
+				return arguments;
+			}
+
+
 			CConformanceTaskResult COWLLinkBooleanTaskHandler::interpretResponse(const QString& responseFilePath, const QString& logOutput) {
+				Q_UNUSED(logOutput);
+
+				CConformanceTaskResult result;
+				QString responseText;
+				if (!readTextFile(responseFilePath, responseText)) {
+					result.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
+					result.mExplanation = QString("no OWLlink response written to '%1'").arg(QFileInfo(responseFilePath).fileName());
+					return result;
+				}
+
+				QList<CConformanceTask::VERDICT> actualVerdicts;
+				QString errorMessage;
+				if (!parseBooleanResponses(responseText, actualVerdicts, errorMessage)) {
+					result.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
+					result.mExplanation = errorMessage;
+					return result;
+				}
+				return compareVerdicts(actualVerdicts);
+			}
+
+
+			CConformanceTaskResult COWLLinkBooleanTaskHandler::interpretServerResponse(const QString& responseText, const QString& logOutput) {
 				Q_UNUSED(logOutput);
 
 				CConformanceTaskResult result;
 				QList<CConformanceTask::VERDICT> actualVerdicts;
 				QString errorMessage;
-				if (!parseBooleanResponseFile(responseFilePath, actualVerdicts, errorMessage)) {
+				if (!parseBooleanResponses(responseText, actualVerdicts, errorMessage)) {
 					result.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
 					result.mExplanation = errorMessage;
 					return result;
 				}
+				return compareVerdicts(actualVerdicts);
+			}
+
+
+			CConformanceTaskResult COWLLinkBooleanTaskHandler::compareVerdicts(const QList<CConformanceTask::VERDICT>& actualVerdicts) const {
+				CConformanceTaskResult result;
 
 				const QList<CConformanceTask::VERDICT>& expectedVerdicts = mTestCase.mExpectedVerdicts;
 				if (expectedVerdicts.isEmpty()) {
@@ -108,24 +144,15 @@ namespace Konclude {
 			}
 
 
-			bool COWLLinkBooleanTaskHandler::parseBooleanResponseFile(const QString& responseFilePath, QList<CConformanceTask::VERDICT>& verdicts, QString& errorMessage) {
+			bool COWLLinkBooleanTaskHandler::parseBooleanResponses(const QString& responseText, QList<CConformanceTask::VERDICT>& verdicts, QString& errorMessage) {
 				verdicts.clear();
-
-				QString responseFileName = QFileInfo(responseFilePath).fileName();
-				QFile file(responseFilePath);
-				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-					errorMessage = QString("no OWLlink response written to '%1'").arg(responseFileName);
-					return false;
-				}
 
 				QDomDocument document;
 				QString parseError;
 				int errorLine = 0;
 				int errorColumn = 0;
-				bool parsed = document.setContent(&file, &parseError, &errorLine, &errorColumn);
-				file.close();
-				if (!parsed) {
-					errorMessage = QString("cannot parse OWLlink response '%1' (%2 at line %3)").arg(responseFileName).arg(parseError).arg(errorLine);
+				if (!document.setContent(responseText, &parseError, &errorLine, &errorColumn)) {
+					errorMessage = QString("cannot parse OWLlink response (%1 at line %2)").arg(parseError).arg(errorLine);
 					return false;
 				}
 
@@ -147,7 +174,7 @@ namespace Konclude {
 				}
 
 				if (verdicts.isEmpty()) {
-					errorMessage = QString("no BooleanResponse in OWLlink response '%1'").arg(responseFileName);
+					errorMessage = QString("no BooleanResponse in the OWLlink response");
 					return false;
 				}
 				return true;

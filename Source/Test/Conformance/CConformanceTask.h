@@ -52,7 +52,8 @@ namespace Konclude {
 						CONSISTENCY,			//!< Is the ontology consistent?
 						SATISFIABILITY,			//!< Is the requested class satisfiable?
 						CLASSIFICATION,			//!< Does the computed taxonomy match the expected one?
-						OWLLINK_BOOLEAN			//!< Does the OWLlink BooleanResponse match the expectation?
+						OWLLINK_BOOLEAN,		//!< Does the OWLlink BooleanResponse match the expectation?
+						SPARQL_BOOLEAN			//!< Does the SPARQL ASK result match the expectation?
 					};
 
 					//! Boolean answer a task can produce. POSITIVE means
@@ -84,9 +85,6 @@ namespace Konclude {
 					//! e.g. "kt:SatisfiabilityTest") to a task kind. Returns false when the
 					//! class is not a task marker.
 					static bool typeFromTestClassName(const QString& className, TYPE& type);
-
-					//! Interface a task runs on unless the test case specifies another one.
-					static QString typeToDefaultInterface(TYPE type);
 
 					//! Renders a verdict in the vocabulary of the task ("consistent",
 					//! "satisfiable", "true", "match", ...). Returns an empty string for UNSET.

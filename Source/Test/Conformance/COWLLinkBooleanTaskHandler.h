@@ -59,10 +59,17 @@ namespace Konclude {
 					virtual QStringList buildArguments(const QString& responseFilePath);
 					virtual CConformanceTaskResult interpretResponse(const QString& responseFilePath, const QString& logOutput);
 
+					//! Live channel: 'owllinkserver -p <port>'.
+					virtual QStringList buildServerArguments(quint16 port);
+					virtual CConformanceTaskResult interpretServerResponse(const QString& responseText, const QString& logOutput);
+
 					//! Reads the result attribute of every BooleanResponse element, in
-					//! document order. Returns false when the file is not parseable or
+					//! document order. Returns false when the text is not parseable or
 					//! contains no BooleanResponse.
-					static bool parseBooleanResponseFile(const QString& responseFilePath, QList<CConformanceTask::VERDICT>& verdicts, QString& errorMessage);
+					static bool parseBooleanResponses(const QString& responseText, QList<CConformanceTask::VERDICT>& verdicts, QString& errorMessage);
+
+					//! Compares the observed answers with the declared expectations.
+					CConformanceTaskResult compareVerdicts(const QList<CConformanceTask::VERDICT>& actualVerdicts) const;
 			};
 
 		}; // end namespace Conformance

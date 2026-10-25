@@ -30,7 +30,8 @@ namespace Konclude {
 
 			QList<CConformanceTask::TYPE> CConformanceTask::allTypes() {
 				QList<TYPE> types;
-				types << TYPE::CONSISTENCY << TYPE::SATISFIABILITY << TYPE::CLASSIFICATION << TYPE::OWLLINK_BOOLEAN;
+				types << TYPE::CONSISTENCY << TYPE::SATISFIABILITY << TYPE::CLASSIFICATION
+					  << TYPE::OWLLINK_BOOLEAN << TYPE::SPARQL_BOOLEAN;
 				return types;
 			}
 
@@ -41,6 +42,7 @@ namespace Konclude {
 					case TYPE::SATISFIABILITY: return QString("satisfiability");
 					case TYPE::CLASSIFICATION: return QString("classification");
 					case TYPE::OWLLINK_BOOLEAN: return QString("owllink-boolean");
+					case TYPE::SPARQL_BOOLEAN: return QString("sparql-boolean");
 				}
 				return QString();
 			}
@@ -63,6 +65,7 @@ namespace Konclude {
 					case TYPE::SATISFIABILITY: return QString("kt:SatisfiabilityTest");
 					case TYPE::CLASSIFICATION: return QString("kt:ClassificationTest");
 					case TYPE::OWLLINK_BOOLEAN: return QString();
+					case TYPE::SPARQL_BOOLEAN: return QString("kt:SparqlTest");
 				}
 				return QString();
 			}
@@ -81,14 +84,6 @@ namespace Konclude {
 			}
 
 
-			QString CConformanceTask::typeToDefaultInterface(TYPE type) {
-				if (type == TYPE::OWLLINK_BOOLEAN) {
-					return QString("OWLlink");
-				}
-				return QString("CommandLine");
-			}
-
-
 			QString CConformanceTask::verdictToString(TYPE type, VERDICT verdict) {
 				if (verdict == VERDICT::UNSET) {
 					return QString();
@@ -99,6 +94,7 @@ namespace Konclude {
 					case TYPE::SATISFIABILITY: return positive ? QString("satisfiable") : QString("unsatisfiable");
 					case TYPE::CLASSIFICATION: return positive ? QString("match") : QString("mismatch");
 					case TYPE::OWLLINK_BOOLEAN: return positive ? QString("true") : QString("false");
+					case TYPE::SPARQL_BOOLEAN: return positive ? QString("true") : QString("false");
 				}
 				return QString();
 			}

@@ -27,6 +27,7 @@
 #include <QList>
 
 // Namespace includes
+#include "CConformanceChannel.h"
 #include "CConformanceTask.h"
 
 
@@ -55,8 +56,11 @@ namespace Konclude {
 					QString mId;                             // IRI/name of the test individual
 					CConformanceTask::TYPE mTask;            // task kind, valid only when mHasTask is true
 					bool mHasTask;                           // whether the ontology declared a task
-					QString mInterface;                      // interface the test runs on ("CommandLine" | "OWLlink" | ...)
+					CConformanceChannel::TYPE mChannel;      // transport the test runs on (file or live server)
+					bool mHasChannel;                        // whether the ontology declared kt:onChannel
+					QString mInterface;                      // report label derived from mChannel
 					QString mOntologyFile;                   // absolute path to the input ontology / request file
+					QString mDatasetFile;                    // absolute path to the ontology a SPARQL test loads
 					QStringList mExpectedResultTexts;        // expected result literals as read from the ontology
 					QList<CConformanceTask::VERDICT> mExpectedVerdicts; // typed expectations, one per answer
 					CConformanceTask::VERDICT mExpectedVerdict; // first expectation, used in reports
@@ -70,6 +74,7 @@ namespace Konclude {
 
 			inline CConformanceTestCase::CConformanceTestCase()
 					: mTask(CConformanceTask::TYPE::CONSISTENCY), mHasTask(false),
+					  mChannel(CConformanceChannel::TYPE::COMMAND_LINE), mHasChannel(false),
 					  mExpectedVerdict(CConformanceTask::VERDICT::UNSET), mKnownFailure(false) {
 			}
 

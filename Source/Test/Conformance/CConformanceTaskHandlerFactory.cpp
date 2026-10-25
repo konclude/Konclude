@@ -23,6 +23,7 @@
 #include "CConformanceCliBooleanTaskHandler.h"
 #include "CClassificationTaskHandler.h"
 #include "COWLLinkBooleanTaskHandler.h"
+#include "CSPARQLBooleanTaskHandler.h"
 
 
 namespace Konclude {
@@ -32,7 +33,11 @@ namespace Konclude {
 		namespace Conformance {
 
 
-			CConformanceTaskHandler* CConformanceTaskHandlerFactory::createHandler(CConformanceTask::TYPE taskType, const CConformanceTestCase& testCase, const QString& binaryFile, const QString& configFile) {
+			CConformanceTaskHandler* CConformanceTaskHandlerFactory::createHandler(CConformanceTask::TYPE taskType, CConformanceChannel::TYPE channel, const CConformanceTestCase& testCase, const QString& binaryFile, const QString& configFile) {
+				if (!CConformanceChannel::typeIsSupportedForTask(channel, taskType)) {
+					return nullptr;
+				}
+
 				switch (taskType) {
 					case CConformanceTask::TYPE::CONSISTENCY:
 					case CConformanceTask::TYPE::SATISFIABILITY:
@@ -44,7 +49,12 @@ namespace Konclude {
 						return new CClassificationTaskHandler(testCase, binaryFile, configFile);
 
 					case CConformanceTask::TYPE::OWLLINK_BOOLEAN:
+						// One handler for the file and the live-server channel; the base
+						// class decides how the request is transported.
 						return new COWLLinkBooleanTaskHandler(testCase, binaryFile, configFile);
+
+					case CConformanceTask::TYPE::SPARQL_BOOLEAN:
+						return new CSPARQLBooleanTaskHandler(testCase, binaryFile, configFile);
 				}
 				return nullptr;
 			}

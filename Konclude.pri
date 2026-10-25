@@ -2916,6 +2916,7 @@ SOURCES += \
    ./Source/Test/Conformance/CConformanceCliBooleanTaskHandler.cpp \
    ./Source/Test/Conformance/CClassificationTaskHandler.cpp \
    ./Source/Test/Conformance/COWLLinkBooleanTaskHandler.cpp \
+   ./Source/Test/Conformance/CSPARQLBooleanTaskHandler.cpp \
    ./Source/Test/Conformance/CConformanceResultWriter.cpp \
    ./Source/Test/Conformance/CConformanceResultWriterFactory.cpp \
    ./Source/Test/Conformance/CConformanceOWLXMLResultWriter.cpp \

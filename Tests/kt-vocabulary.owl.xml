@@ -51,6 +51,7 @@
 
   <!-- ===== Data Properties ===== -->
   <Declaration><DataProperty abbreviatedIRI="kt:usesOntology"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:usesDataset"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:task"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:expectedResult"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:testClass"/></Declaration>

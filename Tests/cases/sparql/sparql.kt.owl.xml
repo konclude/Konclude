@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPARQL ASK tests. kt:usesDataset is the ontology loaded before the query is
+  answered, kt:usesOntology the query file. The file channel runs 'sparqlfile',
+  the live channel starts 'sparqlserver' and posts the query to it.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/sparql">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-sparql"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-sparql"/><Literal>SPARQL</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-sparql"/><Literal>sparql</Literal></DataPropertyAssertion>
+
+  <!-- File channel: true -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>sparql-boolean</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>ask-true.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>true</Literal></DataPropertyAssertion>
+
+  <!-- File channel: false -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>sparql-boolean</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>ask-false.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <!-- Live SPARQL server: the runner starts 'sparqlserver' with the dataset on a
+       free port and posts the query. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>sparql-boolean</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>ask-true.sparql</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:onChannel"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><NamedIndividual abbreviatedIRI="kt:SPARQLServer"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>true</Literal></DataPropertyAssertion>
+
+</Ontology>

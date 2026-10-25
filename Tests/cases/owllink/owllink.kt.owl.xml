@@ -32,4 +32,12 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-two-requests"/><Literal>true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-two-requests"/><Literal>false</Literal></DataPropertyAssertion>
 
+  <!-- Live OWLlink server: the runner starts 'owllinkserver' on a free port,
+       posts the request file and evaluates the HTTP response. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:owllink-server-sat"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:owllink-server-sat"/><Literal>owllink-boolean</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:owllink-server-sat"/><Literal>sat-request.xml</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:onChannel"/><NamedIndividual abbreviatedIRI="kt:owllink-server-sat"/><NamedIndividual abbreviatedIRI="kt:OWLlinkServer"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-server-sat"/><Literal>true</Literal></DataPropertyAssertion>
+
 </Ontology>

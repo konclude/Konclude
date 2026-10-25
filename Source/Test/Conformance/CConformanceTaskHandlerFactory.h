@@ -34,19 +34,22 @@ namespace Konclude {
 
 			/*!
 			 *		\class		CConformanceTaskHandlerFactory
-			 *		\brief		Creates the handler that executes a given task kind.
+			 *		\brief		Creates the handler that executes a given task kind over a given
+			 *					channel.
 			 *
 			 *					This is the single place that maps a
-			 *					%ConformanceTask::TYPE to a concrete handler class. Supporting
-			 *					a new task means adding one case here and one handler
-			 *					subclass; existing handlers stay untouched.
+			 *					%ConformanceTask::TYPE plus a %ConformanceChannel::TYPE to a
+			 *					concrete handler class. Supporting a new task means adding one
+			 *					case here and one handler subclass; existing handlers stay
+			 *					untouched.
 			 */
 			class CConformanceTaskHandlerFactory {
 				// public methods
 				public:
-					//! Creates the handler for taskType. The caller owns the returned
-					//! object. Returns nullptr for an unsupported task kind.
-					static CConformanceTaskHandler* createHandler(CConformanceTask::TYPE taskType, const CConformanceTestCase& testCase, const QString& binaryFile, const QString& configFile);
+					//! Creates the handler for the task/channel combination. The caller
+					//! owns the returned object. Returns nullptr when the combination is
+					//! not supported.
+					static CConformanceTaskHandler* createHandler(CConformanceTask::TYPE taskType, CConformanceChannel::TYPE channel, const CConformanceTestCase& testCase, const QString& binaryFile, const QString& configFile);
 			};
 
 		}; // end namespace Conformance
