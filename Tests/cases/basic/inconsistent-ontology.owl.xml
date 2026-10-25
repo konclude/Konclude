@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Inconsistent small ontology: anna is both Woman and Man (disjoint). -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/ontology/basic-inconsistent">
+  <Declaration><Class IRI="#Woman"/></Declaration>
+  <Declaration><Class IRI="#Man"/></Declaration>
+  <Declaration><NamedIndividual IRI="#anna"/></Declaration>
+  <DisjointClasses><Class IRI="#Woman"/><Class IRI="#Man"/></DisjointClasses>
+  <ClassAssertion><Class IRI="#Woman"/><NamedIndividual IRI="#anna"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Man"/><NamedIndividual IRI="#anna"/></ClassAssertion>
+</Ontology>

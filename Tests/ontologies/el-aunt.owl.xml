@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Shared test ontology (EL): small aunt hierarchy.
+  Lives in the shared pool Tests/ontologies/ so that several test cases
+  (classification, consistency, ...) can reference it without duplication.
+  Content = domain axioms the reasoner reasons over.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/ontology/el-aunt">
+
+  <Declaration><Class IRI="#Woman"/></Declaration>
+  <Declaration><Class IRI="#Parent"/></Declaration>
+  <Declaration><Class IRI="#Aunt"/></Declaration>
+  <Declaration><Class IRI="#Person"/></Declaration>
+
+  <!-- Aunt is a woman -> Aunt ⊑ Woman ⊑ Person -->
+  <SubClassOf><Class IRI="#Woman"/><Class IRI="#Person"/></SubClassOf>
+  <SubClassOf><Class IRI="#Parent"/><Class IRI="#Person"/></SubClassOf>
+  <SubClassOf><Class IRI="#Aunt"/><Class IRI="#Woman"/></SubClassOf>
+
+</Ontology>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/datatype-conflict">
+
+  <Declaration><DataProperty IRI="#age"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <FunctionalDataProperty><DataProperty IRI="#age"/></FunctionalDataProperty>
+  <DataPropertyAssertion><DataProperty IRI="#age"/><NamedIndividual IRI="#x"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">5</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty IRI="#age"/><NamedIndividual IRI="#x"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">6</Literal></DataPropertyAssertion>
+</Ontology>

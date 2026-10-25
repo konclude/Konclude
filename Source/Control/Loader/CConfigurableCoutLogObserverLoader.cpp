@@ -52,6 +52,7 @@ namespace Konclude {
 				infoDomainList<<QString("::Konclude::Test");
 				infoDomainList<<QString("::Konclude::Test::ReasonerTestfileTester");
 				infoDomainList<<QString("::Konclude::Test::ReasonerTestsuiteTester");
+				infoDomainList<<QString("::Konclude::Test::ConformanceRunner");
 				infoDomainList<<QString("::Konclude::Control::Interface::OWLlink::OWLlinkProcessor");
 				infoDomainList<<QString("::Konclude::Reasoner::Classifier::Factory");
 				infoDomainList<<QString("::Konclude::Test::ReasonerTestfileErrorEvaluator");
@@ -60,9 +61,9 @@ namespace Konclude {
 				infoDomainList<<QString("::Konclude::Loader::OWLlinkTranslationHelpLoader");
 				infoDomainList<<QString("::Konclude::Loader::CommandLineTranslator");
 				infoDomainList<<QString("::Konclude::CLIBatchProcessor");
-				infoDomainList << QString("::Konclude::Reasoner::Kernel::ComplexExpressionQueryAnswerer");
-				infoDomainList << QString("::Konclude::Reasoner::Kernel::ComplexComposedQueryAnswerer");
-				infoDomainList << QString("::Konclude::Loader::SPARQLResultComparer");
+				infoDomainList<<QString("::Konclude::Reasoner::Kernel::ComplexExpressionQueryAnswerer");
+				infoDomainList<<QString("::Konclude::Reasoner::Kernel::ComplexComposedQueryAnswerer");
+				infoDomainList<<QString("::Konclude::Loader::SPARQLResultComparer");
 
 				consoleSingletonLogObserver = new CConsolePrintConfigurableLogObserver(infoDomainList,60.,true,false,true,true);
 				CLogger::getInstance()->addLogObserver(consoleSingletonLogObserver);

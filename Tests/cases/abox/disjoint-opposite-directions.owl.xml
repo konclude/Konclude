@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Negative case (overshoot guard): disjoint(r,s) with r(a,b) and s(b,a).
+  The two assertions sit on opposite directed edges (a->b versus b->a), so the
+  ontology is consistent. A fix that treats "s(b,a)" as "s^-(a,b)" and tests it
+  against r on the same edge would wrongly report inconsistent here.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/disjoint-opposite-directions">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#s"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <DisjointObjectProperties><ObjectProperty IRI="#r"/><ObjectProperty IRI="#s"/></DisjointObjectProperties>
+  <DifferentIndividuals><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></DifferentIndividuals>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#s"/><NamedIndividual IRI="#b"/><NamedIndividual IRI="#a"/></ObjectPropertyAssertion>
+</Ontology>

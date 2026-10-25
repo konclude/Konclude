@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/disjoint-roles">
+
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#s"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <Declaration><NamedIndividual IRI="#y"/></Declaration>
+  <DisjointObjectProperties><ObjectProperty IRI="#r"/><ObjectProperty IRI="#s"/></DisjointObjectProperties>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#x"/><NamedIndividual IRI="#y"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#s"/><NamedIndividual IRI="#x"/><NamedIndividual IRI="#y"/></ObjectPropertyAssertion>
+</Ontology>

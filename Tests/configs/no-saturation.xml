@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration used by kt:usesTestSystemConfig in Tests/cases/el/aunt-family.kt.owl.xml:
+  switches the saturation-based approximations off so that the test really
+  exercises the completion algorithm.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.EquivalentAlternativesSaturationMerging'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Classification.SaturationSubsumerExtraction'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.ConceptSaturation'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SuccessorConceptSaturationExpansion'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SaturationCaching'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SaturationSuccessorExtension'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.NominalSaturationCachingByNodeReactivation'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.NominalSaturation'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

@@ -68,6 +68,7 @@
 #include "CCLILoadingBatchProcessingLoader.h"
 #include "CSPARQLHttpServerLoader.h"
 #include "CSPARQLResultsComparisonLoader.h"
+#include "CConformanceLoader.h"
 
 
 // Other includes

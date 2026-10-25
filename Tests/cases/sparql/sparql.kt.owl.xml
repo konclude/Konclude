@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SPARQL tests (ASK and SELECT). kt:usesDataset is the ontology loaded before
+  the query is answered, kt:usesOntology the query file. The file channel runs
+  'sparqlfile', the live channel starts 'sparqlserver' and posts the query to
+  it. Tests with kt:expectedFile compare the whole SPARQL Results XML document,
+  otherwise the <boolean> of an ASK answer is checked.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/sparql">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-sparql"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-sparql"/><Literal>SPARQL</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-sparql"/><Literal>sparql</Literal></DataPropertyAssertion>
+
+  <!-- File channel: true -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>ask-true.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>true</Literal></DataPropertyAssertion>
+
+  <!-- File channel: false -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>ask-false.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-false"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <!-- Live SPARQL server: the runner starts 'sparqlserver' with the dataset on a
+       free port and posts the query. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>ask-true.sparql</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:onChannel"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><NamedIndividual abbreviatedIRI="kt:SPARQLServer"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>true</Literal></DataPropertyAssertion>
+
+  <!-- SELECT over the ABox (two rows, expected file in another order): rows are compared as a set. -->
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-persons"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-persons"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-persons"/><Literal>persons.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-persons"/><Literal>expected/persons.xml</Literal></DataPropertyAssertion>
+
+  <!-- Same SELECT over the live SPARQL server. -->
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-persons-server"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-persons-server"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-persons-server"/><Literal>persons.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-persons-server"/><Literal>expected/persons.xml</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:onChannel"/><NamedIndividual abbreviatedIRI="kt:sparql-persons-server"/><NamedIndividual abbreviatedIRI="kt:SPARQLServer"/></ObjectPropertyAssertion>
+
+</Ontology>

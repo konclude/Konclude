@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The reverse direction r(b,a) is only derivable at b (B(b) and B subClassOf
+  ObjectHasValue(r a)), while only r(a,b) is materialised at a. This is the
+  "local linker" hole: the clash becomes visible only when b's cache
+  association is inspected as well.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/asymmetric-cache-only-reverse">
+  <Declaration><Class IRI="#B"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <AsymmetricObjectProperty><ObjectProperty IRI="#r"/></AsymmetricObjectProperty>
+  <SubClassOf><Class IRI="#B"/><ObjectHasValue><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/></ObjectHasValue></SubClassOf>
+  <ClassAssertion><Class IRI="#B"/><NamedIndividual IRI="#b"/></ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+</Ontology>

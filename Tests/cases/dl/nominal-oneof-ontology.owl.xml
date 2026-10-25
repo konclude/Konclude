@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/nominal-oneof">
+
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <EquivalentClasses><Class IRI="#C"/><ObjectOneOf><NamedIndividual IRI="#a"/></ObjectOneOf></EquivalentClasses>
+  <ClassAssertion><Class IRI="#C"/><NamedIndividual IRI="#b"/></ClassAssertion>
+  <DifferentIndividuals><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></DifferentIndividuals>
+</Ontology>

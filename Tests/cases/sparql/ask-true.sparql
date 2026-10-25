@@ -1,0 +1,3 @@
+# True for any loaded ontology that declares at least one class.
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+ASK { ?class a owl:Class }

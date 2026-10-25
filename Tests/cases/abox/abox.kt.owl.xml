@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Control ontology for the ABox role-characteristic conformance cases
+  (see Docs/Fix-Options-BackendNeighbourExpansionBlocking.md, section 7.B).
+
+  Cases 1-5, 9 and 10 expect INCONSISTENT; cases 6-8 expect CONSISTENT
+  the blocking optimisation is still unfixed; remove the markers once the fix
+  has been verified (stage 5 of the fix plan).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/abox">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:TestSuite"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-abox"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteName"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-abox"/>
+    <Literal>ABox-reasoning</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteDirectory"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-abox"/>
+    <Literal>abox</Literal>
+  </DataPropertyAssertion>
+
+  <!-- 1) asymmetric-3-cycle -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:asymmetric-3-cycle"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:asymmetric-3-cycle"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:asymmetric-3-cycle"/><Literal>asymmetric-3-cycle.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:asymmetric-3-cycle"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+  <!-- 2) asymmetric-merged -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:asymmetric-merged"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:asymmetric-merged"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:asymmetric-merged"/><Literal>asymmetric-merged.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:asymmetric-merged"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+  <!-- 3) irreflexive-via-inverse -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:irreflexive-via-inverse"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:irreflexive-via-inverse"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:irreflexive-via-inverse"/><Literal>irreflexive-via-inverse.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:irreflexive-via-inverse"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+  <!-- 4) disjoint-super-roles -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-super-roles"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-super-roles"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-super-roles"/><Literal>disjoint-super-roles.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-super-roles"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+  <!-- 5) asymmetric-cache-only-reverse -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:asymmetric-cache-only-reverse"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:asymmetric-cache-only-reverse"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:asymmetric-cache-only-reverse"/><Literal>asymmetric-cache-only-reverse.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:asymmetric-cache-only-reverse"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+  <!-- 6) disjoint-opposite-directions: CONSISTENT overshoot guard -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-opposite-directions"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-opposite-directions"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-opposite-directions"/><Literal>disjoint-opposite-directions.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-opposite-directions"/><Literal>consistent</Literal></DataPropertyAssertion>
+
+  <!-- 7) asymmetric-other-role: CONSISTENT overshoot guard -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:asymmetric-other-role"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:asymmetric-other-role"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:asymmetric-other-role"/><Literal>asymmetric-other-role.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:asymmetric-other-role"/><Literal>consistent</Literal></DataPropertyAssertion>
+
+  <!-- 8) irreflexive-non-loop: CONSISTENT overshoot guard -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:irreflexive-non-loop"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:irreflexive-non-loop"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:irreflexive-non-loop"/><Literal>irreflexive-non-loop.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:irreflexive-non-loop"/><Literal>consistent</Literal></DataPropertyAssertion>
+
+  <!-- 9) functional-asymmetric -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:functional-asymmetric"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:functional-asymmetric"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:functional-asymmetric"/><Literal>functional-asymmetric.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:functional-asymmetric"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+  <!-- 10) abox-500-asymmetric-violation -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:abox-500-asymmetric-violation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:abox-500-asymmetric-violation"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:abox-500-asymmetric-violation"/><Literal>abox-500-asymmetric-violation.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:abox-500-asymmetric-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+</Ontology>

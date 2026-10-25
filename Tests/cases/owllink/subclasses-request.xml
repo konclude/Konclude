@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Subclass retrieval: the answer is a SetOfClassSynsets with B, C and
+     owl:Nothing (Nothing is a subclass of every class). -->
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#B"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#C"/></owl:Declaration>
+    <owl:SubClassOf><owl:Class IRI="#B"/><owl:Class IRI="#A"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#C"/><owl:Class IRI="#B"/></owl:SubClassOf>
+  </Tell>
+  <GetSubClasses kb="http://ex.test/kb"><owl:Class IRI="#A"/></GetSubClasses>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

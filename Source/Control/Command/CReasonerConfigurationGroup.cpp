@@ -3193,6 +3193,53 @@ namespace Konclude {
 						new CStringConfigType("Evaluation/Responses/R-000/"));
 
 
+				// Conformance test runner (conformance subcommand).
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.InputDirectory",
+						"Input directory that is recursively searched for *.kt.owl.xml control ontologies.",
+						new CStringConfigType("Tests/cases")),
+						new CStringConfigType("Tests/cases"));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.OutputFile",
+						"Output file for the OWL/XML test result ontology (empty = no file).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.BinaryFile",
+						"Konclude binary used as subprocess for the test cases (empty = this binary).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.KnownIssuesFile",
+						"Separate OWL/XML file with kt:Issue individuals (empty = none).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.Jobs",
+						"Number of parallel test workers.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.ConfigFile",
+						"Default reasoner configuration file ('-c') for test cases without a kt:usesTestSystemConfig assignment (empty = none).",
+						new CStringConfigType("")),
+						new CStringConfigType(""));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.Repeat",
+						"Default repetitions of the built-in run configuration, used when no kt:RunConfig is assigned.",
+						new CIntegerConfigType(1)),
+						new CIntegerConfigType(1));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.TimeoutSeconds",
+						"Default timeout in seconds of the built-in run configuration, used when no kt:RunConfig is assigned.",
+						new CIntegerConfigType(60)),
+						new CIntegerConfigType(60));
+
+				addConfigProperty(new CConfigDescription("Konclude.Conformance.ProgressInterval",
+						"Interval in seconds between progress/estimated-remaining-time reports (0 disables them).",
+						new CIntegerConfigType(3)),
+						new CIntegerConfigType(3));
+
+
 				addConfigProperty(new CConfigDescription("Konclude.Evaluation.ReasonerRestartPausingTime",
 						"Waiting time after restarting the reasoner.",
 						new CIntegerConfigType(10000)),

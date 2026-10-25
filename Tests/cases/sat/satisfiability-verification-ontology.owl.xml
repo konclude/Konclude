@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Satisfiability fixture with FULL IRIs (no relative #-IRIs) so the test
+  description can address the classes by their full IRI.
+  Contains satisfiable and unsatisfiable classes.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/ontology/sat-basic">
+  <Declaration><Class IRI="http://konclude.test/sat#A"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/sat#B"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/sat#C"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/sat#Unsat"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/sat#EmptyInter"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/sat#r"/></Declaration>
+
+  <!-- A, B disjoint -->
+  <DisjointClasses>
+    <Class IRI="http://konclude.test/sat#A"/>
+    <Class IRI="http://konclude.test/sat#B"/>
+  </DisjointClasses>
+
+  <!-- Unsat = A and B  -> unsatisfiable -->
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/sat#Unsat"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/sat#A"/>
+      <Class IRI="http://konclude.test/sat#B"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+
+  <!-- EmptyInter = A and (not A)  -> unsatisfiable -->
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/sat#EmptyInter"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/sat#A"/>
+      <ObjectComplementOf><Class IRI="http://konclude.test/sat#A"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+
+  <!-- C = something with an r-successor -> satisfiable -->
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/sat#C"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty IRI="http://konclude.test/sat#r"/>
+      <Class IRI="http://konclude.test/sat#A"/>
+    </ObjectSomeValuesFrom>
+  </EquivalentClasses>
+</Ontology>

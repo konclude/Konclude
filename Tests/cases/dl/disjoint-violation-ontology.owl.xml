@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/disjoint-violation">
+
+  <Declaration><Class IRI="#A"/></Declaration>
+  <Declaration><Class IRI="#B"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <DisjointClasses><Class IRI="#A"/><Class IRI="#B"/></DisjointClasses>
+  <ClassAssertion><Class IRI="#A"/><NamedIndividual IRI="#x"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#B"/><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>

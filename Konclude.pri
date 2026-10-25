@@ -250,6 +250,13 @@ HEADERS += \
    ./Source\Control\Interface\CommandLine\CSPARQLFileComandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\COWLLinkServerComandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\COWLLinkFileComandLinePreparationTranslator.h \
+   ./Source\Control\Interface\CommandLine\CConformanceCommandLinePreparationTranslator.h \
+   ./Source\Control\Loader\CConformanceLoader.h \
+   ./Source\Test\Conformance\CConformanceRunner.h \
+   ./Source\Test\Conformance\CClassificationResultComparator.h \
+   ./Source\Test\Conformance\CConformanceReporter.h \
+   ./Source\Test\Conformance\CConformanceTestCase.h \
+   ./Source\Test\Conformance\CConformanceTestResult.h \
    ./Source\Control\Interface\CommandLine\CHelpComandLinePreparationTranslator.h \
    ./Source\Control\Interface\CommandLine\CCommandLinePreparationTranslatorSelector.h \
    ./Source\Control\Interface\CommandLine\CCommandLinePreparationTranslator.h \
@@ -2899,6 +2906,23 @@ SOURCES += \
    ./Source/Control/Interface/CommandLine/CSPARQLServerComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/COWLLinkServerComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/COWLLinkFileComandLinePreparationTranslator.cpp \
+   ./Source/Control/Interface/CommandLine/CConformanceCommandLinePreparationTranslator.cpp \
+   ./Source/Control/Loader/CConformanceLoader.cpp \
+   ./Source/Test/Conformance/CConformanceRunner.cpp \
+   ./Source/Test/Conformance/CConformanceTask.cpp \
+   ./Source/Test/Conformance/CConformanceOutcome.cpp \
+   ./Source/Test/Conformance/CConformanceTaskHandler.cpp \
+   ./Source/Test/Conformance/CConformanceTaskHandlerFactory.cpp \
+   ./Source/Test/Conformance/CConformanceCliBooleanTaskHandler.cpp \
+   ./Source/Test/Conformance/CClassificationTaskHandler.cpp \
+   ./Source/Test/Conformance/COWLLinkBooleanTaskHandler.cpp \
+   ./Source/Test/Conformance/CSPARQLBooleanTaskHandler.cpp \
+   ./Source/Test/Conformance/CConformanceResultWriter.cpp \
+   ./Source/Test/Conformance/CConformanceResultWriterFactory.cpp \
+   ./Source/Test/Conformance/CConformanceOWLXMLResultWriter.cpp \
+   ./Source/Test/Conformance/CClassificationResultComparator.cpp \
+   ./Source/Test/Conformance/CConformanceXMLResultComparator.cpp \
+   ./Source/Test/Conformance/CConformanceReporter.cpp \
    ./Source/Control/Interface/CommandLine/CHelpComandLinePreparationTranslator.cpp \
    ./Source/Control/Interface/CommandLine/CCommandLinePreparationTranslatorSelector.cpp \
    ./Source/Control/Interface/CommandLine/CCommandLinePreparationTranslator.cpp \

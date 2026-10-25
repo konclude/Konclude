@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/transitive">
+
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <TransitiveObjectProperty><ObjectProperty IRI="#r"/></TransitiveObjectProperty>
+  <SubClassOf><Class IRI="#C"/><ObjectSomeValuesFrom><ObjectProperty IRI="#r"/><Class IRI="#C"/></ObjectSomeValuesFrom></SubClassOf>
+  <ClassAssertion><Class IRI="#C"/><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Example control ontology (*.kt.owl.xml). Describes TWO tests on the same
+  shared ontology Tests/ontologies/el-aunt.owl.xml. Contains REAL assertions
+  over the kt: vocabulary (no domain reasoning runs over this; this file only
+  drives the runner). Picked up by discovery because it is a *.kt.owl.xml
+  under Tests/cases/.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/el/aunt">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:TestSuite"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-el"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteName"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-el"/>
+    <Literal>EL-family-examples</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteDirectory"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-el"/>
+    <Literal>el</Literal>
+  </DataPropertyAssertion>
+
+  <!-- ============ Test 1: classification (default matrix) ============ -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ClassificationTest"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
+  </ClassAssertion>
+  <!-- shared ontology from the pool, stored once, referenced relatively -->
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:usesOntology"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
+    <Literal>../../ontologies/el-aunt.owl.xml</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:onChannel"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
+    <NamedIndividual abbreviatedIRI="kt:CommandLine"/>
+  </ObjectPropertyAssertion>
+  <!-- large expectation (whole hierarchy) as a file -->
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:expectedFile"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
+    <Literal>expected/aunt-family-classification.owl.xml</Literal>
+  </DataPropertyAssertion>
+  <!-- provenance/attribution -->
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:inspiredBy"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
+    <Literal>ELK el-reasoner family example</Literal>
+  </DataPropertyAssertion>
+  <!-- cross-confirmation by other reasoners -->
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
+    <Literal>ELK 0.5.0</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
+    <Literal>HermiT 1.4.5</Literal>
+  </DataPropertyAssertion>
+
+  <!-- ============ Test 2: consistency, additionally without saturation ============ -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ConsistencyTest"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:usesOntology"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/>
+    <Literal>../../ontologies/el-aunt.owl.xml</Literal>
+  </DataPropertyAssertion>
+  <!-- additional, test-specific config besides the default matrix -->
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/>
+    <NamedIndividual IRI="../../configs/no-saturation.xml"/>
+  </ObjectPropertyAssertion>
+  <!-- small result: inline, no file needed -->
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:expectedResult"/>
+    <NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/>
+    <Literal>consistent</Literal>
+  </DataPropertyAssertion>
+
+</Ontology>

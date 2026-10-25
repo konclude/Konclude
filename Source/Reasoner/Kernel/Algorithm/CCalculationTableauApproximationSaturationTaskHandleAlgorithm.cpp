@@ -29,6 +29,117 @@ namespace Konclude {
 
 			namespace Algorithm {
 
+				namespace {
+
+					bool isDirectCardinalityRoleCovered(CRole* requiredRole, CRole* allowedRole) {
+						if (requiredRole == allowedRole) {
+							return true;
+						}
+						// every successor of the required role is also a successor of each (non-negated) super role
+						for (CSortedNegLinker<CRole*>* superRoleIt = requiredRole->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
+							if (!superRoleIt->isNegated() && superRoleIt->getData() == allowedRole) {
+								return true;
+							}
+						}
+						return false;
+					}
+
+
+					bool isDirectCardinalityQualifierCovered(CSortedNegLinker<CConcept*>* requiredQualifier, CSortedNegLinker<CConcept*>* allowedQualifier, CConcept* topConcept) {
+						if (!allowedQualifier || (!allowedQualifier->getNext() && !allowedQualifier->isNegated() && allowedQualifier->getData() == topConcept)) {
+							// the at-most restriction is unqualified (resp. over the top concept) and covers every successor
+							return true;
+						}
+						if (!requiredQualifier || (!requiredQualifier->getNext() && !requiredQualifier->isNegated() && requiredQualifier->getData() == topConcept)) {
+							// the at-least restriction is unqualified, the at-most restriction is not
+							return false;
+						}
+						CSortedNegLinker<CConcept*>* requiredQualifierIt = requiredQualifier;
+						CSortedNegLinker<CConcept*>* allowedQualifierIt = allowedQualifier;
+						while (requiredQualifierIt && allowedQualifierIt) {
+							if (requiredQualifierIt->getData() != allowedQualifierIt->getData() || requiredQualifierIt->isNegated() != allowedQualifierIt->isNegated()) {
+								return false;
+							}
+							requiredQualifierIt = requiredQualifierIt->getNext();
+							allowedQualifierIt = allowedQualifierIt->getNext();
+						}
+						return !requiredQualifierIt && !allowedQualifierIt;
+					}
+
+
+					bool hasDirectCardinalityClash(CIndividualSaturationProcessNode* processIndi, CConceptSaturationDescriptor* conDes, CCalculationAlgorithmContextBase* calcAlgContext) {
+						CConcept* concept = conDes->getConcept();
+						bool conNegation = conDes->isNegated();
+						cint64 conCode = concept->getOperatorCode();
+						bool atleastDescriptor = !conNegation && conCode == CCATLEAST || conNegation && conCode == CCATMOST;
+						bool atmostDescriptor = !conNegation && conCode == CCATMOST || conNegation && conCode == CCATLEAST;
+						if (!atleastDescriptor && !atmostDescriptor) {
+							return false;
+						}
+						CRole* role = concept->getRole();
+						if (!role || role->isDataRole()) {
+							// data value cardinalities depend on the value space semantics (e.g. equal values
+							// in different lexical forms) and remain on the conservative escalation path
+							return false;
+						}
+						CReapplyConceptSaturationLabelSet* conSet = processIndi->getReapplyConceptSaturationLabelSet(false);
+						if (!conSet) {
+							return false;
+						}
+						CConcept* topConcept = calcAlgContext->getUsedProcessingDataBox()->getOntologyTopConcept();
+						cint64 directCardinality = atleastDescriptor ? concept->getParameter() + 1*conNegation : concept->getParameter() - 1*conNegation;
+						CSortedNegLinker<CConcept*>* directQualifier = concept->getOperandList();
+						for (CConceptSaturationDescriptor* otherConDesIt = conSet->getConceptSaturationDescriptionLinker(); otherConDesIt; otherConDesIt = otherConDesIt->getNext()) {
+							CConcept* otherConcept = otherConDesIt->getConcept();
+							if (otherConcept == concept && otherConDesIt->isNegated() == conNegation) {
+								continue;
+							}
+							bool otherNegation = otherConDesIt->isNegated();
+							cint64 otherCode = otherConcept->getOperatorCode();
+							cint64 requiredCardinality = 0;
+							cint64 allowedCardinality = 0;
+							CSortedNegLinker<CConcept*>* requiredQualifier = nullptr;
+							CSortedNegLinker<CConcept*>* allowedQualifier = nullptr;
+							CRole* requiredRole = nullptr;
+							CRole* allowedRole = nullptr;
+							if (atleastDescriptor) {
+								if (!((!otherNegation && otherCode == CCATMOST) || (otherNegation && otherCode == CCATLEAST))) {
+									continue;
+								}
+								requiredCardinality = directCardinality;
+								requiredQualifier = directQualifier;
+								requiredRole = role;
+								allowedCardinality = otherConcept->getParameter() - 1*otherNegation;
+								allowedQualifier = otherConcept->getOperandList();
+								allowedRole = otherConcept->getRole();
+							} else {
+								if (!((!otherNegation && otherCode == CCATLEAST) || (otherNegation && otherCode == CCATMOST))) {
+									continue;
+								}
+								requiredCardinality = otherConcept->getParameter() + 1*otherNegation;
+								requiredQualifier = otherConcept->getOperandList();
+								requiredRole = otherConcept->getRole();
+								allowedCardinality = directCardinality;
+								allowedQualifier = directQualifier;
+								allowedRole = role;
+							}
+							if (requiredCardinality < 1 || requiredCardinality <= allowedCardinality) {
+								continue;
+							}
+							if (!requiredRole || !allowedRole || requiredRole->isDataRole() || allowedRole->isDataRole() || !isDirectCardinalityRoleCovered(requiredRole, allowedRole)) {
+								continue;
+							}
+							if (!isDirectCardinalityQualifierCovered(requiredQualifier, allowedQualifier, topConcept)) {
+								continue;
+							}
+							return true;
+						}
+						return false;
+					}
+
+				}
+
+
 				CCalculationTableauApproximationSaturationTaskHandleAlgorithm::CCalculationTableauApproximationSaturationTaskHandleAlgorithm(CSaturationNodeBackendAssociationCacheHandler* backendAssCaceHandler, CSatisfiableTaskSaturationOccurrenceStatisticsCollector* satTaskOccStatCollector) {
 					mProcessingDataBox = nullptr;
 					mCalcAlgContext = nullptr;
@@ -3731,6 +3842,12 @@ namespace Konclude {
 									}
 
 
+									if (minCardinality > allowedCardinality) {
+										// the saturation already has a lower bound of successors that exceeds the
+										// at-most restriction; this cannot be decided by the approximation and must
+										// be handed over to the complete algorithm
+										return true;
+									}
 									if (foundCardinality-mergeableCardinality == allowedCardinality || minCardinality >= allowedCardinality) {
 										ancestorPossiblyCriticalFlag = true;
 										if (allowedCardinality == 1) {
@@ -4429,6 +4546,11 @@ namespace Konclude {
 										}
 									}
 									if (foundCardinality-mergeableCardinality > allowedCardinality) {
+										nodeInsufficient = true;
+									}
+									if (minCardinality > allowedCardinality) {
+										// a lower bound on the number of successors already exceeds the
+										// at-most restriction; the approximation cannot decide this
 										nodeInsufficient = true;
 									}
 
@@ -6114,6 +6236,10 @@ namespace Konclude {
 							}
 						}
 						addCriticalConceptDescriptor(conDes,CCriticalSaturationConceptTypeQueues::CCT_ATMOST,processIndi,mCalcAlgContext);
+						if (hasDirectCardinalityClash(processIndi,conDes,mCalcAlgContext)) {
+							// the label requires more distinct successors than the at-most restriction allows
+							updateDirectAddingIndividualStatusFlags(processIndi,CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,mCalcAlgContext);
+						}
 					}
 				}
 
@@ -6128,8 +6254,13 @@ namespace Konclude {
 					if (cardinality > 0) {
 						updateMaxCardinalityCandidates(processIndi,cardinality,0,mCalcAlgContext);
 						createSuccessorForConcept(processIndi,conSatProLinker,cardinality,mCalcAlgContext);
+						if (hasDirectCardinalityClash(processIndi,conDes,mCalcAlgContext)) {
+							// the label requires more distinct successors than the at-most restriction allows
+							updateDirectAddingIndividualStatusFlags(processIndi,CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,mCalcAlgContext);
+						}
 					}
 				}
+
 
 				void CCalculationTableauApproximationSaturationTaskHandleAlgorithm::applyEQCANDRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conSatProLinker) {
 					CConceptSaturationDescriptor* conDes = conSatProLinker->getConceptSaturationDescriptor();

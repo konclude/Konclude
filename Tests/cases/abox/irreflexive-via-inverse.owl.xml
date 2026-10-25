@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Irreflexivity reachable only through an inverse role:
+  InverseObjectProperties(r s), IrreflexiveObjectProperty(s), r(a,a).
+  The inverse of r(a,a) is s(a,a), which clashes with the irreflexivity of s.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/irreflexive-via-inverse">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#s"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <InverseObjectProperties><ObjectProperty IRI="#r"/><ObjectProperty IRI="#s"/></InverseObjectProperties>
+  <IrreflexiveObjectProperty><ObjectProperty IRI="#s"/></IrreflexiveObjectProperty>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#a"/></ObjectPropertyAssertion>
+</Ontology>

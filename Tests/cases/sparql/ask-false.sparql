@@ -1,0 +1,2 @@
+# False: the loaded ontology does not use this property anywhere.
+ASK { ?subject <http://konclude.test/sparql#doesNotExist> ?object }

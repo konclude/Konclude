@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  known-issues.owl.xml - known discrepancies the runner treats as KNOWN
+  (green, reported) instead of FAIL (red). Deliberately NOT a *.kt.owl.xml and
+  outside cases/, so discovery does not treat it as a test case; the runner
+  loads it separately via --known-issues.
+
+  Finding (2026-10-21, Konclude v0.7.0-1138): Konclude reports several clearly
+  inconsistent ontologies incorrectly as consistent. Common pattern: violations
+  the reasoner must detect only through FORCED structure (generated role
+  successors; negative role characteristics asymmetry/irreflexivity/role
+  disjointness solely via property assertions) are not found - while directly
+  present clashes (max cardinality with explicit distinct fillers,
+  NegativeObjectPropertyAssertion, DisjointClasses, datatype conflicts,
+  complement) are detected correctly.
+  Not yet confirmed as an upstream bug - for assessment by the developers.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/known-issues">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <!-- Issue 1: asymmetry is not enforced -->
+  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-asymmetric"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-asymmetric"/><Literal>open</Literal></DataPropertyAssertion>
+  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-asymmetric</IRI><Literal>AsymmetricObjectProperty(r) with r(x,y),r(y,x) or r(x,x) is reported consistent; expected inconsistent. Also not detected via ObjectHasSelf.</Literal></AnnotationAssertion>
+
+  <!-- Issue 2: irreflexivity via property assertion is not enforced -->
+  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-irreflexive"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-irreflexive"/><Literal>open</Literal></DataPropertyAssertion>
+  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-irreflexive</IRI><Literal>IrreflexiveObjectProperty(r) with a direct assertion r(x,x) is reported consistent; expected inconsistent. (The same violation via ObjectHasSelf is detected correctly.)</Literal></AnnotationAssertion>
+
+  <!-- Issue 3: role disjointness is not enforced -->
+  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-disjoint-roles"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-disjoint-roles"/><Literal>open</Literal></DataPropertyAssertion>
+  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-disjoint-roles</IRI><Literal>DisjointObjectProperties(r,s) with r(x,y),s(x,y) is reported consistent; expected inconsistent.</Literal></AnnotationAssertion>
+
+  <!-- Issue 4: min/max cardinality clash over generated successors -->
+  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-mincard-maxcard"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-mincard-maxcard"/><Literal>open</Literal></DataPropertyAssertion>
+  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-mincard-maxcard</IRI><Literal>min 2 r AND max 1 r on x (without explicit successors) is reported consistent; expected inconsistent. With explicit distinct fillers max 1 is violated correctly.</Literal></AnnotationAssertion>
+
+</Ontology>

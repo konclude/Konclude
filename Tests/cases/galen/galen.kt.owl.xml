@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Control ontology: GALEN classification regression test. The shared ontology
+  lives once in Tests/galen.owl.xml (referenced relatively as ../../galen.owl.xml)
+  and the whole computed subsumption hierarchy is compared semantically against
+  the golden file expected/galen-classification.owl.xml. The comparison is
+  order-independent: equivalence classes become synsets and the immediate
+  subsumption relations are matched as sets.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/galen">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:TestSuite"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-galen"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteName"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-galen"/>
+    <Literal>GALEN-classification</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:suiteDirectory"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-galen"/>
+    <Literal>galen</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ClassificationTest"/>
+    <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:usesOntology"/>
+    <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
+    <Literal>../../galen.owl.xml</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:onChannel"/>
+    <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
+    <NamedIndividual abbreviatedIRI="kt:CommandLine"/>
+  </ObjectPropertyAssertion>
+  <!-- Large expectation (whole hierarchy) as a file -->
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:expectedFile"/>
+    <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
+    <Literal>expected/galen-classification.owl.xml</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:inspiredBy"/>
+    <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
+    <Literal>GALEN medical ontology</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+    <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
+    <Literal>ELK 0.5.0</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+    <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
+    <Literal>HermiT 1.4.5</Literal>
+  </DataPropertyAssertion>
+
+</Ontology>

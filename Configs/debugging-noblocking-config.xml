@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<!-- Debug data ON + AllowBackendNeighbourExpansionBlocking OFF -->
+	<Set key='Konclude.Debugging.WriteDebuggingData'>
+		<Literal>true</Literal>
+	</Set>
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasks'>
+		<Literal>true</Literal>
+	</Set>
+	<Set key='Konclude.Debugging.WriteDebuggingDataSaturationTasks'>
+		<Literal>true</Literal>
+	</Set>
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksOnlyOnSatisfiability'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksForConsistencyTests'>
+		<Literal>true</Literal>
+	</Set>
+	<Set key='Konclude.Debugging.WriteDebuggingDataForAllTests'>
+		<Literal>true</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.AllowBackendNeighbourExpansionBlocking'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<!-- Enable Konclude's built-in debugging data writers (completion graph models, saturation models, etc.) -->
+
+	<!-- Master switch for debugging data writing. -->
+	<Set key='Konclude.Debugging.WriteDebuggingData'>
+		<Literal>true</Literal>
+	</Set>
+
+	<!-- Write completion-task model dumps (the exact tableau completion graphs). -->
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasks'>
+		<Literal>true</Literal>
+	</Set>
+
+	<!-- Write saturation-task model dumps (the saturation graphs). -->
+	<Set key='Konclude.Debugging.WriteDebuggingDataSaturationTasks'>
+		<Literal>true</Literal>
+	</Set>
+
+	<!-- Only write on satisfiable results (false = always write, incl. clashes/unsatisfiable). -->
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksOnlyOnSatisfiability'>
+		<Literal>false</Literal>
+	</Set>
+
+	<!-- Write for consistency tests. -->
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksForConsistencyTests'>
+		<Literal>true</Literal>
+	</Set>
+
+	<!-- Write for all test types (safety net). -->
+	<Set key='Konclude.Debugging.WriteDebuggingDataForAllTests'>
+		<Literal>true</Literal>
+	</Set>
+</RequestMessage>

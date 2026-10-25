@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/maxcard-violation">
+
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <SubClassOf><Class IRI="#C"/><ObjectMaxCardinality cardinality="1"><ObjectProperty IRI="#r"/></ObjectMaxCardinality></SubClassOf>
+  <ClassAssertion><Class IRI="#C"/><NamedIndividual IRI="#x"/></ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#x"/><NamedIndividual IRI="#a"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#x"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+  <DifferentIndividuals><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></DifferentIndividuals>
+</Ontology>

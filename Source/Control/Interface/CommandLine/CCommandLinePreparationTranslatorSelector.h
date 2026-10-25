@@ -39,6 +39,7 @@
 #include "CSPARQLFileComandLinePreparationTranslator.h"
 #include "CSPARQLServerComandLinePreparationTranslator.h"
 #include "CHelpComandLinePreparationTranslator.h"
+#include "CConformanceCommandLinePreparationTranslator.h"
 
 // Other includes
 #include "Control/Loader/CLoaderFactory.h"
