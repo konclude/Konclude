@@ -501,20 +501,31 @@ jobs:
           cache-name: cache-konclude-docker-run-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
 
       - name: Build Run Image
         working-directory: KoncludeDocker
         run: |
+          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncluderun:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerRunImage.tar.gz"
-          if test -f "$FILEIMAGE"; then
-            docker load -i $FILEIMAGE
+          if [ -f "$FILEIMAGE" ]; then
+            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
+              echo "Loaded cached image '$DOCKERIMAGE'."
+            else
+              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
+              rm -f "$FILEIMAGE"
+            fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./run/snap.sh
-          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
+          bash -eo pipefail ./run/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
+          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
+          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
       - name: Cache Docker Konclude Develop Image
         uses: actions/cache@v4
@@ -522,20 +533,31 @@ jobs:
           cache-name: cache-konclude-docker-develop-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
 
       - name: Build Develop Image
         working-directory: KoncludeDocker
         run: |
+          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncludedev:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz"
-          if test -f "$FILEIMAGE"; then
-            docker load -i $FILEIMAGE
+          if [ -f "$FILEIMAGE" ]; then
+            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
+              echo "Loaded cached image '$DOCKERIMAGE'."
+            else
+              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
+              rm -f "$FILEIMAGE"
+            fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./develop/snap.sh
-          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
+          bash -eo pipefail ./develop/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
+          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
+          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
 
 
@@ -578,20 +600,31 @@ jobs:
           cache-name: cache-konclude-docker-run-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
 
       - name: Build Run Image
         working-directory: KoncludeDocker
         run: |
+          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncluderun:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerRunImage.tar.gz"
-          if test -f "$FILEIMAGE"; then
-            docker load -i $FILEIMAGE
+          if [ -f "$FILEIMAGE" ]; then
+            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
+              echo "Loaded cached image '$DOCKERIMAGE'."
+            else
+              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
+              rm -f "$FILEIMAGE"
+            fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./run/snap.sh
-          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
+          bash -eo pipefail ./run/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
+          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
+          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
       - name: Cache Docker Konclude Develop Image
         uses: actions/cache@v4
@@ -599,43 +632,64 @@ jobs:
           cache-name: cache-konclude-docker-develop-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
 
       - name: Build Develop Image
         working-directory: KoncludeDocker
         run: |
+          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncludedev:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz"
-          if test -f "$FILEIMAGE"; then
-            docker load -i $FILEIMAGE
+          if [ -f "$FILEIMAGE" ]; then
+            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
+              echo "Loaded cached image '$DOCKERIMAGE'."
+            else
+              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
+              rm -f "$FILEIMAGE"
+            fi
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./develop/snap.sh
-          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
+          bash -eo pipefail ./develop/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
+          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
+          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
       - name: Build Build Image
         working-directory: KoncludeDocker
         run: |
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./build/snap.sh
+          bash -eo pipefail ./build/snap.sh
+          if ! docker image inspect koncludebuild:latest >/dev/null 2>&1; then
+            echo "::error::Docker image 'koncludebuild:latest' was not built; see the build output above."
+            exit 1
+          fi
 
       - name: Build Deploy Image
         working-directory: KoncludeDocker
         run: |
+          set -o pipefail
           DOCKERIMAGE="konclude:latest"
           FILEIMAGE="../DockerCacheDirectory/Konclude-${{needs.tags.outputs.git_tag}}-Docker-Image.tar.gz"
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./deploy/snap.sh
+          bash -eo pipefail ./deploy/snap.sh
+          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
+            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
+            exit 1
+          fi
           docker tag konclude konclude/konclude:latest
           docker tag konclude konclude/konclude:${{needs.tags.outputs.git_tag}}
-          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
+          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
+          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
 
       - name: Build
         working-directory: KoncludeDocker
         run: |
           echo "DockerCacheDirectory/" >> .dockerignore
-          ./build_release_parameterized.sh ${{needs.tags.outputs.revision_build}}  ${{needs.tags.outputs.revision_tag}} ${{needs.tags.outputs.revision_hash}}
+          bash -eo pipefail ./build_release_parameterized.sh ${{needs.tags.outputs.revision_build}}  ${{needs.tags.outputs.revision_tag}} ${{needs.tags.outputs.revision_hash}}
           ls -al ../Release
 
       - name: Konclude Docker Test
