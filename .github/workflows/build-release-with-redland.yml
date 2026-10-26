@@ -157,6 +157,13 @@ jobs:
           & .\Binaries\Konclude.exe conformance -i ..\..\Tests\cases -o conformance-results\result.owl.xml -j "$env:NUMBER_OF_PROCESSORS"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: Konclude Redland Conformance Test
+        working-directory: Release/${{ env.RELEASE_NAME }}
+        shell: pwsh
+        run: |
+          & .\Binaries\Konclude.exe conformance -i ..\..\Tests\redland-cases -o conformance-results\redland-result.owl.xml -j "$env:NUMBER_OF_PROCESSORS"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Upload Conformance Results
         if: always()
         uses: actions/upload-artifact@v4
@@ -164,6 +171,7 @@ jobs:
           name: conformance-results-windows-release
           path: |
             Release/${{ env.RELEASE_NAME }}/conformance-results/result.owl.xml
+            Release/${{ env.RELEASE_NAME }}/conformance-results/redland-result.owl.xml
             Release/${{ env.RELEASE_NAME }}/conformance-results/test-outputs/
           if-no-files-found: ignore
 
@@ -285,9 +293,15 @@ jobs:
 
       # The conformance runner checks the binary that was copied into the package.
       - name: Konclude Conformance Test
+        working-directory: konclude-static
         run: |
-          mkdir -p conformance-results
-          ./Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i konclude-static/Tests/cases -o conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
+          mkdir -p ../conformance-results
+          ../Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i Tests/cases -o ../conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
+
+      - name: Konclude Redland Conformance Test
+        working-directory: konclude-static
+        run: |
+          ../Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i Tests/redland-cases -o ../conformance-results/redland-result.owl.xml -j "$(sysctl -n hw.ncpu)"
 
       - name: Upload Conformance Results
         if: always()
@@ -296,6 +310,7 @@ jobs:
           name: conformance-results-macos-release
           path: |
             conformance-results/result.owl.xml
+            conformance-results/redland-result.owl.xml
             conformance-results/test-outputs/
           if-no-files-found: ignore
 
@@ -410,6 +425,11 @@ jobs:
           mkdir -p ../conformance-results
           Release/Konclude conformance -i Tests/cases -o ../conformance-results/result.owl.xml -j "$(nproc)"
 
+      - name: Konclude Redland Conformance Test
+        working-directory: konclude-static
+        run: |
+          Release/Konclude conformance -i Tests/redland-cases -o ../conformance-results/redland-result.owl.xml -j "$(nproc)"
+
       - name: Upload Conformance Results
         if: always()
         uses: actions/upload-artifact@v4
@@ -417,6 +437,7 @@ jobs:
           name: conformance-results-release-linux
           path: |
             conformance-results/result.owl.xml
+            conformance-results/redland-result.owl.xml
             conformance-results/test-outputs/
           if-no-files-found: ignore
 

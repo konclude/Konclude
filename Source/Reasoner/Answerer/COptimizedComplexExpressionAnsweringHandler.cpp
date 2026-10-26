@@ -57,7 +57,16 @@ namespace Konclude {
 
 				cint64 computationThreadCount = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ConcurrentComputationThreadPoolSize", 0);
 				if (computationThreadCount != 0) {
-					QThreadPool::globalInstance()->setMaxThreadCount(computationThreadCount);
+					// a negative number means that threads for all available computer cores are used
+					if (computationThreadCount < 0) {
+						computationThreadCount = qMax(1, QThread::idealThreadCount());
+					}
+					// The reasoner manager permanently blocks some threads of the default thread pool, see
+					// CReasonerManagerThread::threadStarted(), which must not reduce the threads that are
+					// available for the computation. Otherwise, QtConcurrent tasks are no longer scheduled
+					// and waiting for them blocks forever.
+					cint64 blockedThreadCount = qMax<cint64>(0, CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Calculation.BlockingThreadPoolThreadsCount", 1));
+					QThreadPool::globalInstance()->setMaxThreadCount(computationThreadCount + blockedThreadCount);
 				}
 
 
