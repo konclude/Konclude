@@ -285,9 +285,10 @@ jobs:
 
       # The conformance runner checks the binary that was copied into the package.
       - name: Konclude Conformance Test
+        working-directory: konclude-static
         run: |
-          mkdir -p conformance-results
-          ./Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i konclude-static/Tests/cases -o conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
+          mkdir -p ../conformance-results
+          ../Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i Tests/cases -o ../conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
 
       - name: Upload Conformance Results
         if: always()
