@@ -1,3 +1,4 @@
-# True for any loaded ontology that declares at least one class.
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-ASK { ?class a owl:Class }
+# True: alice is a Woman in family.owl.xml and Woman is a subclass of Person,
+# so this also exercises OWL subclass reasoning rather than an RDF meta query.
+PREFIX : <http://konclude.test/sparql#>
+ASK { :alice a :Person }

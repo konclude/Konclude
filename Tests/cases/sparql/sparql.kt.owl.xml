@@ -18,7 +18,7 @@
   <!-- File channel: true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>ask-true.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-true"/><Literal>true</Literal></DataPropertyAssertion>
 
@@ -33,7 +33,7 @@
        free port and posts the query. -->
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>../../ontologies/el-aunt.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>ask-true.sparql</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:onChannel"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><NamedIndividual abbreviatedIRI="kt:SPARQLServer"/></ObjectPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-server-ask-true"/><Literal>true</Literal></DataPropertyAssertion>

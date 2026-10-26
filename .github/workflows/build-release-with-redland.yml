@@ -287,7 +287,7 @@ jobs:
       - name: Konclude Conformance Test
         run: |
           mkdir -p conformance-results
-          ./Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
+          ./Release/${{ env.RELEASE_NAME }}/Binaries/Konclude conformance -i konclude-static/Tests/cases -o conformance-results/result.owl.xml -j "$(sysctl -n hw.ncpu)"
 
       - name: Upload Conformance Results
         if: always()
