@@ -495,6 +495,19 @@ jobs:
           repository: konclude/KoncludeDocker
           path: KoncludeDocker
 
+      # KoncludeDocker still points at download locations that were taken down.
+      # Patch the checkout until that repository is updated.
+      - name: Patch Dockerfile download locations
+        working-directory: KoncludeDocker
+        run: |
+          sed -i \
+            -e 's#https://download.qt.io/official_releases/qt/#https://download.qt.io/archive/qt/#g' \
+            -e 's#ftp://xmlsoft.org/libxml2/libxml2-2.9.9.tar.gz#https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.9.tar.xz#' \
+            -e 's#tar -xvzf libxml2-2.9.9.tar.gz#tar -xJf libxml2-2.9.9.tar.xz#' \
+            -e 's#git://github.com/#https://github.com/#g' \
+            develop/Dockerfile
+          git --no-pager diff -- develop/Dockerfile
+
       - name: Cache Docker Konclude Run Image
         uses: actions/cache@v4
         env:
@@ -587,6 +600,19 @@ jobs:
         with:
           repository: konclude/KoncludeDocker
           path: KoncludeDocker
+
+      # KoncludeDocker still points at download locations that were taken down.
+      # Patch the checkout until that repository is updated.
+      - name: Patch Dockerfile download locations
+        working-directory: KoncludeDocker
+        run: |
+          sed -i \
+            -e 's#https://download.qt.io/official_releases/qt/#https://download.qt.io/archive/qt/#g' \
+            -e 's#ftp://xmlsoft.org/libxml2/libxml2-2.9.9.tar.gz#https://download.gnome.org/sources/libxml2/2.9/libxml2-2.9.9.tar.xz#' \
+            -e 's#tar -xvzf libxml2-2.9.9.tar.gz#tar -xJf libxml2-2.9.9.tar.xz#' \
+            -e 's#git://github.com/#https://github.com/#g' \
+            develop/Dockerfile
+          git --no-pager diff -- develop/Dockerfile
 
       - name: Update Revision Information
         run: |
