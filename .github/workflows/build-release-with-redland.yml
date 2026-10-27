@@ -527,6 +527,7 @@ jobs:
             -e 's#tar -xvzf libxml2-2.9.9.tar.gz#tar -xJf libxml2-2.9.9.tar.xz#' \
             -e 's#git://github.com/#https://github.com/#g' \
             -e 's#git clone https://github.com/konclude/rasqal.git#git -c url.https://github.com/.insteadOf=git://github.com/ clone --recursive https://github.com/konclude/rasqal.git#' \
+            -e '/# download, build and install rasqal/i RUN git config --global url."https://github.com/".insteadOf "git://github.com/"' \
             develop/Dockerfile
           git --no-pager diff -- develop/Dockerfile
 
@@ -634,6 +635,7 @@ jobs:
             -e 's#tar -xvzf libxml2-2.9.9.tar.gz#tar -xJf libxml2-2.9.9.tar.xz#' \
             -e 's#git://github.com/#https://github.com/#g' \
             -e 's#git clone https://github.com/konclude/rasqal.git#git -c url.https://github.com/.insteadOf=git://github.com/ clone --recursive https://github.com/konclude/rasqal.git#' \
+            -e '/# download, build and install rasqal/i RUN git config --global url."https://github.com/".insteadOf "git://github.com/"' \
             develop/Dockerfile
           git --no-pager diff -- develop/Dockerfile
 
