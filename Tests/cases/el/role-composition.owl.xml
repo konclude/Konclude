@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  EL classification with role composition and a role hierarchy.
-  Inspired by ELK's PropertyCompositionsWithHierarchy example, re-formulated
-  for Konclude and given an independent expected taxonomy.
+  EL classification through a property chain (role composition) r o s -> t.
+  A is subsumed by X because X is defined as an existential over t and the
+  chain composes r and s into t.
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
-          ontologyIRI="http://konclude.test/inspired/elk-roles">
-  <Prefix name="" IRI="http://konclude.test/inspired/elk-roles#"/>
+          ontologyIRI="http://konclude.test/el/role-composition">
+  <Prefix name="" IRI="http://konclude.test/el/role-composition#"/>
 
   <Declaration><Class abbreviatedIRI=":A"/></Declaration>
   <Declaration><Class abbreviatedIRI=":B"/></Declaration>

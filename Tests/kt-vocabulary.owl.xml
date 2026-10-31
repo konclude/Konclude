@@ -71,7 +71,6 @@
   <Declaration><DataProperty abbreviatedIRI="kt:testClass"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:testIndividual"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:expectedFile"/></Declaration>
-  <Declaration><DataProperty abbreviatedIRI="kt:inspiredBy"/></Declaration>
   <!-- provenance of a generated corpus case (e.g. the W3C test identifier) -->
   <Declaration><DataProperty abbreviatedIRI="kt:sourceCase"/></Declaration>
   <!-- on a suite -->

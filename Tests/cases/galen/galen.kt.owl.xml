@@ -48,7 +48,7 @@
     <Literal>expected/galen-classification.owl.xml</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
-    <DataProperty abbreviatedIRI="kt:inspiredBy"/>
+    <DataProperty abbreviatedIRI="kt:sourceCase"/>
     <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
     <Literal>GALEN medical ontology</Literal>
   </DataPropertyAssertion>

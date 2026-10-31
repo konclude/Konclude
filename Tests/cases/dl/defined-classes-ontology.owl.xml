@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Pizza classification fragment.
-  Inspired by the HermiT distribution's pizza example, re-formulated for
-  Konclude with a small, independently reviewed expected taxonomy.
+  Defined classes with all-values restrictions and a disjointness axiom:
+  Margherita is subsumed by VegetarianPizza through the all-values
+  restriction over hasTopping, and vegetarian and meat toppings are disjoint.
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
-          ontologyIRI="http://konclude.test/inspired/pizza">
-  <Prefix name="" IRI="http://konclude.test/inspired/pizza#"/>
+          ontologyIRI="http://konclude.test/dl/defined-classes">
+  <Prefix name="" IRI="http://konclude.test/dl/defined-classes#"/>
 
   <Declaration><Class abbreviatedIRI=":Food"/></Declaration>
   <Declaration><Class abbreviatedIRI=":Pizza"/></Declaration>

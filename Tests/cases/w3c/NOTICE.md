@@ -12,5 +12,8 @@ OWL/XML) of the premise ontologies; the test identifiers and expected answers
 come from the export's metadata. See the copyright notice in the original
 export for the full terms.
 
-The control ontology, `known-failures.txt`, `excluded.txt` and this notice are
-part of the Konclude test harness.
+The control ontology and this notice are part of the Konclude test harness.
+Known divergences are recorded in `Tests/known-issues.owl.xml` (with
+`kt:knownFailure` links in the control ontology), not in separate lists.
+Approved tests whose RDF premises the RDF-to-OWL mapping rejects are not
+imported into the corpus.

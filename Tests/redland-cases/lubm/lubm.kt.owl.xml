@@ -17,5 +17,5 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:lubm-query9"/><Literal>sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:lubm-query9"/><Literal>../../lubm-univ-bench-sparql-load-and-query-test.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:lubm-query9"/><Literal>expected/lubm-query9.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:inspiredBy"/><NamedIndividual abbreviatedIRI="kt:lubm-query9"/><Literal>LUBM Query9</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:sourceCase"/><NamedIndividual abbreviatedIRI="kt:lubm-query9"/><Literal>LUBM Query9</Literal></DataPropertyAssertion>
 </Ontology>

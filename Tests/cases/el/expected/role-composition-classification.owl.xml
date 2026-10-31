@@ -13,38 +13,38 @@
         <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
     </Declaration>
     <Declaration>
-        <Class IRI="http://konclude.test/inspired/elk-roles#X"/>
+        <Class IRI="http://konclude.test/el/role-composition#X"/>
     </Declaration>
     <SubClassOf>
-        <Class IRI="http://konclude.test/inspired/elk-roles#X"/>
+        <Class IRI="http://konclude.test/el/role-composition#X"/>
         <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
     </SubClassOf>
     <Declaration>
-        <Class IRI="http://konclude.test/inspired/elk-roles#D"/>
+        <Class IRI="http://konclude.test/el/role-composition#D"/>
     </Declaration>
     <SubClassOf>
-        <Class IRI="http://konclude.test/inspired/elk-roles#D"/>
+        <Class IRI="http://konclude.test/el/role-composition#D"/>
         <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
     </SubClassOf>
     <Declaration>
-        <Class IRI="http://konclude.test/inspired/elk-roles#B"/>
+        <Class IRI="http://konclude.test/el/role-composition#B"/>
     </Declaration>
     <SubClassOf>
-        <Class IRI="http://konclude.test/inspired/elk-roles#B"/>
+        <Class IRI="http://konclude.test/el/role-composition#B"/>
         <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
     </SubClassOf>
     <Declaration>
-        <Class IRI="http://konclude.test/inspired/elk-roles#A"/>
+        <Class IRI="http://konclude.test/el/role-composition#A"/>
     </Declaration>
     <SubClassOf>
-        <Class IRI="http://konclude.test/inspired/elk-roles#A"/>
-        <Class IRI="http://konclude.test/inspired/elk-roles#X"/>
+        <Class IRI="http://konclude.test/el/role-composition#A"/>
+        <Class IRI="http://konclude.test/el/role-composition#X"/>
     </SubClassOf>
     <Declaration>
-        <Class IRI="http://konclude.test/inspired/elk-roles#C"/>
+        <Class IRI="http://konclude.test/el/role-composition#C"/>
     </Declaration>
     <SubClassOf>
-        <Class IRI="http://konclude.test/inspired/elk-roles#C"/>
-        <Class IRI="http://konclude.test/inspired/elk-roles#D"/>
+        <Class IRI="http://konclude.test/el/role-composition#C"/>
+        <Class IRI="http://konclude.test/el/role-composition#D"/>
     </SubClassOf>
 </Ontology>
