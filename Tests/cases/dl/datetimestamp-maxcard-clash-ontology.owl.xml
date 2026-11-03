@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/datetimestamp-maxcard-clash">
+
+  <!-- Two distinct dateTimeStamp values against a maximum of one. -->
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><Class IRI="#D"/></Declaration>
+  <Declaration><Class IRI="#E"/></Declaration>
+  <Declaration><DataProperty IRI="#p"/></Declaration>
+  <Declaration><ObjectProperty IRI="#q"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+  <SubClassOf><Class IRI="#C"/><DataMaxCardinality cardinality="1"><DataProperty IRI="#p"/><Datatype IRI="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/></DataMaxCardinality></SubClassOf>
+  <SubClassOf><Class IRI="#D"/><ObjectMaxCardinality cardinality="1"><ObjectProperty IRI="#q"/><Class IRI="#E"/></ObjectMaxCardinality></SubClassOf>
+  <ClassAssertion><Class IRI="#C"/><NamedIndividual IRI="#x"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty IRI="#p"/><NamedIndividual IRI="#x"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#dateTimeStamp">2026-11-02T10:00:00Z</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty IRI="#p"/><NamedIndividual IRI="#x"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#dateTimeStamp">2026-11-03T10:00:00Z</Literal></DataPropertyAssertion>
+</Ontology>
