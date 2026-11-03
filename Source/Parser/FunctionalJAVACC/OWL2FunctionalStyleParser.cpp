@@ -555,7 +555,12 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::declaration() {CBuildExpressionPt
     
     jj_consume_token(CLOSE_BRACKET);
     }
-    
+
+if (!x) {
+      // an annotation property (entity() builds nothing for one, as annotations are not
+      // reasoned with): its declaration is skipped like any other annotation axiom
+      return nullptr;
+    }
 return getBuilder()->getDeclaration(x);
 assert(false);
   }
