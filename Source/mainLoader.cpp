@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 	QCoreApplication a(argc, argv);
 
 	CLogger *logger = CLogger::getInstance();
+	int exitCode = 0;
 
 	try {
 
@@ -75,7 +76,7 @@ int main(int argc, char *argv[])
 		cmdLineLoader->init(loaderFactory);
 
 		cmdLineLoader->load();
-		a.exec();
+		exitCode = a.exec();
 		cmdLineLoader->exit();
 		delete cmdLineLoader;
 		delete loaderFactory;
@@ -92,7 +93,9 @@ int main(int argc, char *argv[])
 
 	// Return the exit code recorded by the conformance test runner (0 when green,
 	// non-zero when there were failing/unstable tests) so CI can react to it.
-	return CConformanceLoader::getLastTestExitCode();
+	// The exit code an interface set (non-zero when, e.g., an ontology could not be read) takes
+	// precedence.
+	return exitCode != 0 ? exitCode : CConformanceLoader::getLastTestExitCode();
 }
 
 

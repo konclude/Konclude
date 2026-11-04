@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/datetimestamp-maxcard-ok">
+
+  <!-- A data max cardinality on xsd:dateTimeStamp beside any object max cardinality crashed
+       the preprocessing: the dateTimeStamp restriction was built on dateTimeStamp itself. -->
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><Class IRI="#D"/></Declaration>
+  <Declaration><Class IRI="#E"/></Declaration>
+  <Declaration><DataProperty IRI="#p"/></Declaration>
+  <Declaration><ObjectProperty IRI="#q"/></Declaration>
+  <SubClassOf><Class IRI="#C"/><DataMaxCardinality cardinality="1"><DataProperty IRI="#p"/><Datatype IRI="http://www.w3.org/2001/XMLSchema#dateTimeStamp"/></DataMaxCardinality></SubClassOf>
+  <SubClassOf><Class IRI="#D"/><ObjectMaxCardinality cardinality="1"><ObjectProperty IRI="#q"/><Class IRI="#E"/></ObjectMaxCardinality></SubClassOf>
+</Ontology>

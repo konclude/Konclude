@@ -261,6 +261,10 @@ namespace Konclude {
 
 						bool parseOntology(QIODevice* device, const QString& ontoIRI, const QString& resolvedIRI, CConcreteOntology *ont, COntologyConfigurationExtension *ontConfig, QList<QString>& importOntologiesList, QStringList& parserErrorList, CCommandRecordRouter& commandRecordRouter);
 
+						// Called when an ontology of a knowledge base could not be read (its file was not found or no
+						// parser read it), in which case the knowledge base is not installed. Does nothing by default.
+						virtual void ontologyLoadingFailed(CCommand* command);
+
 
 
 					// protected variables

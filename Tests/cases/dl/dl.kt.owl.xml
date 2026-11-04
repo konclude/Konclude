@@ -127,5 +127,15 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>all-some-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>datetimestamp-maxcard-ok-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>consistent</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>datetimestamp-maxcard-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
 
 </Ontology>
