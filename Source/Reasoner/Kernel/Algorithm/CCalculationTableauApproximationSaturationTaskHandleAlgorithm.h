@@ -240,6 +240,8 @@ namespace Konclude {
 						void applySOMERule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applySELFRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyALLRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
+						bool isRoleSubRoleOf(CRole* subRole, bool subRoleNegation, CRole* superRole, CCalculationAlgorithmContextBase* calcAlgContext);
+						void markInsufficientForOutsideBatchUniversalSuccessor(CIndividualSaturationProcessNode* processIndi, CConcept* allConcept, bool allNegation, CRole* allRole, CCalculationAlgorithmContextBase* calcAlgContext);
 						void applyATMOSTRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyATLEASTRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyIMPLICATIONRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);

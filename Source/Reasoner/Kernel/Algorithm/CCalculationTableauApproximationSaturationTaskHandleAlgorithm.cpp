@@ -6656,6 +6656,72 @@ namespace Konclude {
 					updateDirectAddingIndividualStatusFlags(processIndi,CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,mCalcAlgContext);
 				}
 
+				bool CCalculationTableauApproximationSaturationTaskHandleAlgorithm::isRoleSubRoleOf(CRole* subRole, bool subRoleNegation, CRole* superRole, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CRole* effectiveSubRole = subRoleNegation ? subRole->getInverseRole() : subRole;
+					if (!effectiveSubRole) {
+						return false;
+					}
+					if (effectiveSubRole == superRole) {
+						return true;
+					}
+					for (CSortedNegLinker<CRole*>* superRoleIt = effectiveSubRole->getIndirectSuperRoleList(); superRoleIt; superRoleIt = superRoleIt->getNext()) {
+						CRole* superRoleCandidate = superRoleIt->getData();
+						bool superRoleNegation = superRoleIt->isNegated();
+						CRole* effectiveSuperRole = superRoleNegation ? superRoleCandidate->getInverseRole() : superRoleCandidate;
+						if (effectiveSuperRole == superRole) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+
+				void CCalculationTableauApproximationSaturationTaskHandleAlgorithm::markInsufficientForOutsideBatchUniversalSuccessor(CIndividualSaturationProcessNode* processIndi, CConcept* allConcept, bool allNegation, CRole* allRole, CCalculationAlgorithmContextBase* calcAlgContext) {
+					for (CSaturationSuccessorRoleAssertionLinker* assLinkerIt = processIndi->getRoleAssertionLinker(); assLinkerIt; assLinkerIt = assLinkerIt->getNext()) {
+						CRole* assRole = assLinkerIt->getAssertionRole();
+						bool assNegation = assLinkerIt->getAssertionRoleNegation();
+						if (!isRoleSubRoleOf(assRole, assNegation, allRole, calcAlgContext)) {
+							continue;
+						}
+						CIndividualSaturationProcessNode* destNode = assLinkerIt->getAssertionDestinationNode();
+						if (!destNode || destNode->getNominalIndividual()) {
+							// a real successor node inside the graph is handled by the normal propagation; only a representative
+							// proxy (no nominal individual) stands for an out-of-round successor
+							continue;
+						}
+
+						// The proxy is saturated locally from the partner's asserted and range concepts, so it may already
+						// carry the filler (e.g. the successor's type follows from its own assertions). Only when the proxy
+						// is missing an operand of the universal restriction is the cross-round delivery actually needed.
+						CReapplyConceptSaturationLabelSet* destLabelSet = destNode->getReapplyConceptSaturationLabelSet(false);
+						bool fillerMissing = false;
+						for (CSortedNegLinker<CConcept*>* opIt = allConcept->getOperandList(); opIt && !fillerMissing; opIt = opIt->getNext()) {
+							CConcept* opConcept = opIt->getData();
+							bool opNegation = opIt->isNegated() ^ allNegation;
+							if (!destLabelSet || !destLabelSet->hasConcept(opConcept, opNegation)) {
+								fillerMissing = true;
+							}
+						}
+						if (!fillerMissing) {
+							continue;
+						}
+
+						// The successor is only a representative proxy of an out-of-round individual and is missing the
+						// filler: the universal restriction cannot be propagated to the real successor in the saturation.
+						// Two flags are needed so the completion both reprocesses this individual AND expands its neighbours:
+						//  - INSUFFICIENT makes the cache association not completely handled, so the precomputation
+						//    schedules a tableau completion graph for it (completelyPropagated alone does not schedule);
+						//  - PROPAGATIONINCOMPLETE makes the association not completely propagated, so inside that
+						//    completion graph the universal-restriction neighbour expansion is not suppressed and the
+						//    filler reaches the real successor.
+						updateDirectAddingIndividualStatusFlags(processIndi, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT, calcAlgContext);
+						updateDirectAddingIndividualStatusFlags(processIndi, CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGPROPAGATIONINCOMPLETE, calcAlgContext);
+						setInsufficientNodeOccured(calcAlgContext);
+						return;
+					}
+				}
+
+
 				void CCalculationTableauApproximationSaturationTaskHandleAlgorithm::applyALLRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conSatProLinker) {
 					STATINC(ALLRULEAPPLICATIONCOUNT,mCalcAlgContext);
 					CConceptSaturationDescriptor* conDes = conSatProLinker->getConceptSaturationDescriptor();
@@ -6676,7 +6742,17 @@ namespace Konclude {
 					if (mParallelMode) {
 						processIndi->unlockParallel();
 					}
-					
+
+					if (!conNegation && processIndi->getNominalIndividual() && processIndi->getNominalIndividual()->hasIndividualName()) {
+						// Only a real named ABox individual can have an out-of-round role successor that the saturation
+						// replaced by a representative proxy, so the cross-round check is restricted to those (it is useless
+						// on anonymous or proxy nodes). It is NOT gated on an empty backward-propagation target list: a node
+						// may have registered in-graph targets for this role and additionally an unregistered proxy successor,
+						// and that proxy must still be checked. If a proxy successor is missing the filler, the saturation
+						// cannot deliver it soundly, so the individual is handed to the tableau completion second pass (which
+						// materialises the real neighbour from the cache); see markInsufficientForOutsideBatchUniversalSuccessor.
+						markInsufficientForOutsideBatchUniversalSuccessor(processIndi, concept, conNegation, role, mCalcAlgContext);
+					}
 
 					if (backPropLinkIt) {
 						while (backPropLinkIt) {
