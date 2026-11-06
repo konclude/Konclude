@@ -37,6 +37,8 @@ namespace Konclude {
 					writeOperationsCount = 0;
 					mCachingTag = 0;
 					lastUpdateSlot = nullptr;
+					mBatchUpdateSlot = nullptr;
+					mBatchWriteCount = 0;
 
 					startThread();
 				}
@@ -91,6 +93,7 @@ namespace Konclude {
 
 				void COccurrenceUnsatisfiableCache::addUnsatisfiableCacheEntry(QList<CCacheValue> &itemList) {
 					// item list is and has to be copied in event constructor!
+					mQueuedWriteCount.fetchAndAddOrdered(1);
 					CThread::postEvent(new CWriteUnsatisfiableCacheEntryEvent(itemList));
 				}
 
@@ -100,6 +103,7 @@ namespace Konclude {
 				void COccurrenceUnsatisfiableCache::threadStarted() {
 					primarCacheEntry = new COccurrenceUnsatisfiableCacheEntry(CCacheValue(0,0,CCacheValue::CACHEVALCONCEPTONTOLOGYTAG),0,updateSlotCount,0);
 					container.append(primarCacheEntry);
+					mSlotOutdatedEntries.resize(updateSlotCount);
 
 					for (qint64 idx = 0; idx < updateSlotCount; ++idx) {
 						updatesSlotItemVector[idx] = new COccurrenceUnsatisfiableCacheUpdateSlotItem(idx);
@@ -111,6 +115,19 @@ namespace Konclude {
 					for (qint64 idx = 0; idx < updateSlotCount; ++idx) {
 						delete updatesSlotItemVector[idx];
 					}
+					// the update slots release the entries hashes they replaced; the ones the entries still
+					// refer to in their slots hold a reference each that nothing releases, so they are
+					// deleted here, each once, before the entries (issue #45)
+					QSet<COccurrenceUnsatisfiableCacheEntriesHash*> entriesHashSet;
+					foreach (COccurrenceUnsatisfiableCacheEntry* entry, container) {
+						for (qint64 idx = 0; idx < updateSlotCount; ++idx) {
+							COccurrenceUnsatisfiableCacheEntriesHash* entriesHash = entry->getSlotCacheEntriesHash(idx);
+							if (entriesHash) {
+								entriesHashSet.insert(entriesHash);
+							}
+						}
+					}
+					qDeleteAll(entriesHashSet);
 					primarCacheEntry = 0;
 					qDeleteAll(container);
 					container.clear();
@@ -152,12 +169,17 @@ namespace Konclude {
 					updateSlot->activateSlotUpdateItems();
 					usedUpdatesSlotsList.append(updateSlot);
 
-					foreach (COccurrenceUnsatisfiableCacheEntry *entry, container) {
+					// only the entries changed since this slot was last activated have an outdated hash in it
+					QSet<COccurrenceUnsatisfiableCacheEntry*>& outdatedEntries = mSlotOutdatedEntries[slotIndex];
+					foreach (COccurrenceUnsatisfiableCacheEntry *entry, outdatedEntries) {
 						COccurrenceUnsatisfiableCacheEntriesHash *prevDelHash = entry->updateSlotCacheHashGetPrevious(slotIndex);
 						if (prevDelHash) {
 							updateSlot->addCacheEntriesHash(prevDelHash);
 						}
 					}
+					outdatedEntries.clear();
+					// the hashes of the batch are now visible to readers and have to be copied before further changes
+					mBatchCreatedHashes.clear();
 
 					lastUpdateSlot = updateSlot;
 
@@ -217,13 +239,20 @@ namespace Konclude {
 						if (!cacheHash || !cacheHash->contains(cacheValue)) {
 
 							COccurrenceUnsatisfiableCacheEntriesHash *updatedCacheHash = 0;
-							if (!updatedCacheHash) {
+							bool hashCreated = false;
+							if (cacheHash && mBatchCreatedHashes.contains(cacheHash)) {
+								// created by an earlier write of the open batch and only referenced by its update slot,
+								// which no reader uses yet, so it is extended in place instead of being copied again
+								updatedCacheHash = cacheHash;
+							} else {
 								if (cacheHash) {
 									updatedCacheHash = new COccurrenceUnsatisfiableCacheEntriesHash(*cacheHash);
 								} else {
 									updatedCacheHash = new COccurrenceUnsatisfiableCacheEntriesHash();
 								}
 								updateSlot->addCacheEntry(cache);
+								mBatchCreatedHashes.insert(updatedCacheHash);
+								hashCreated = true;
 							}
 
 							COccurrenceUnsatisfiableCacheEntry *nextCache = new COccurrenceUnsatisfiableCacheEntry(cacheValue,0,updateSlotCount,slotIndex);
@@ -234,9 +263,17 @@ namespace Konclude {
 							cache->setMinimumCandidate(tag);
 							cache->setMaximumCandidate(tag);
 
-							COccurrenceUnsatisfiableCacheEntriesHash *prevDelHash = cache->setCacheEntriesHashSlotGetPrevious(slotIndex,updatedCacheHash);
-							if (prevDelHash) {
-								updateSlot->addCacheEntriesHash(prevDelHash);
+							if (hashCreated) {
+								COccurrenceUnsatisfiableCacheEntriesHash *prevDelHash = cache->setCacheEntriesHashSlotGetPrevious(slotIndex,updatedCacheHash);
+								if (prevDelHash) {
+									updateSlot->addCacheEntriesHash(prevDelHash);
+								}
+								// the other slots still have an older hash of this entry
+								for (qint64 otherSlotIndex = 0; otherSlotIndex < updateSlotCount; ++otherSlotIndex) {
+									if (otherSlotIndex != slotIndex) {
+										mSlotOutdatedEntries[otherSlotIndex].insert(cache);
+									}
+								}
 							}
 
 							cache = nextCache;
@@ -312,20 +349,35 @@ namespace Konclude {
 						QList<CCacheValue> *cEL = wuc->getCacheEntryList();
 
 
-						if (!lastUpdateSlot || !testAlreadyCached(lastUpdateSlot,cEL)) {
+						mQueuedWriteCount.fetchAndAddOrdered(-1);
+
+						COccurrenceUnsatisfiableCacheUpdateSlotItem* testSlot = mBatchUpdateSlot ? mBatchUpdateSlot : lastUpdateSlot;
+						if (!testSlot || !testAlreadyCached(testSlot,cEL)) {
 							cacheWritingRequested = true;
 
-							if (waitCacheWritePrepared()) {
-								COccurrenceUnsatisfiableCacheUpdateSlotItem *updateSlot = notusedUpdatesSlotsList.takeFirst();
-
+							if (!mBatchUpdateSlot && waitCacheWritePrepared()) {
+								mBatchUpdateSlot = notusedUpdatesSlotsList.takeFirst();
+							}
+							if (mBatchUpdateSlot) {
 								writeOperationsCount++;
 
-								writeCacheValues(updateSlot,cEL);
+								writeCacheValues(mBatchUpdateSlot,cEL);
 								mCachStat.incCacheEntriesCount();
+								++mBatchWriteCount;
+							}
 
+							cacheWritingRequested = false;
+						}
+
+						// the writes are collected in one update slot while more are queued and activated together once
+						// none is left (or after a maximum number), so that a backlog costs one slot switch and one copy
+						// of each changed hash instead of one per write
+						if (mBatchUpdateSlot && (mQueuedWriteCount.loadAcquire() <= 0 || mBatchWriteCount >= 1000)) {
+							COccurrenceUnsatisfiableCacheUpdateSlotItem *updateSlot = mBatchUpdateSlot;
+							mBatchUpdateSlot = nullptr;
+							mBatchWriteCount = 0;
+							{
 								activateCacheUpdate(updateSlot);
-
-
 
 								for (qint64 i = usedUpdatesSlotsList.count(); i > 0; --i) {
 									COccurrenceUnsatisfiableCacheUpdateSlotItem *slotItem = usedUpdatesSlotsList.takeFirst();
@@ -343,8 +395,6 @@ namespace Konclude {
 								//KONCLUCE_OCCURUNSATCACHE_CACHING_STRING_INSTRUCTION(LOG(WARNING,"::Konclude::Reasoner::Cache::OccurenceUnsatisfiableCache",logTr("Unsatisfiable cached concepts: %1").arg(mCachingString),this));
 
 							}
-
-							cacheWritingRequested = false;
 						}
 
 

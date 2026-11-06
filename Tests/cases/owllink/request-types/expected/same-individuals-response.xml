@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+ <!-- Expected response for same-individuals-request.xml; response statistics removed. Set order and namespace prefixes are ignored by the comparator. --><KB kb="http://ex.test/kb"/>
+ <OK/>
+ <IndividualSynonyms>
+  <owl:NamedIndividual IRI="#s1"/>
+  <owl:NamedIndividual IRI="#s2"/>
+ </IndividualSynonyms>
+ <OK/>
+</ResponseMessage>

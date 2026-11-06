@@ -229,6 +229,7 @@ namespace Konclude {
 
 				CBuildExpression* jumpFunctionParseIgnoredNode(QDomElement* node);
 				CBuildExpression* jumpFunctionParseImportNode(QDomElement* node);
+				CBuildExpression* jumpFunctionUnsupportedAnnotationNode(QDomElement* node);
 
 
 				CBuildExpression* jumpFunctionParseDatatypeNode(QDomElement* node);
@@ -301,6 +302,8 @@ namespace Konclude {
 
 
 				cint64 mReportErrorCount;
+
+				bool mUnsupportedAnnotationError;
 
 
 				CCommandRecordRouter recordRouter;

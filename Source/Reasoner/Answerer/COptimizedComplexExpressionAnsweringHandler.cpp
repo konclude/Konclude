@@ -83,6 +83,14 @@ namespace Konclude {
 
 				mConfFailOnUnknownEntity = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.FailOnUnknownEntity", false);
 				mConfExtendedLogging = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ExtendedLogging", false);
+				mConfSaturationSubClassDecision = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.SaturationBasedSubClassDecision", true);
+				mConfSaturationSubClassLabelCompletion = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.SaturationBasedSubClassLabelCompletion", true);
+				mConfLabelCompletionSampleSize = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.SaturationBasedSubClassLabelCompletionSampleSize", 0);
+				mConfLabelCompletionMinimumDecisivePercent = CConfigDataReader::readConfigInteger(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.SaturationBasedSubClassLabelCompletionMinimumDecisivePercent", 30);
+				mConfLabelCompletionSuccessors = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.SaturationBasedSubClassLabelCompletionSuccessors", true);
+				mLabelCompletionStopped = false;
+				mLabelCompletionTestCount = 0;
+				mSaturationSubsumptionDecider = nullptr;
 				mConfVariablePreAbsorption = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.QueryAbsorption.Preabsorption", true);
 				mConfRedundantTermReduction = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.RedundantTermElimination", true);
 
@@ -259,6 +267,7 @@ namespace Konclude {
 
 
 			COptimizedComplexExpressionAnsweringHandler::~COptimizedComplexExpressionAnsweringHandler() {
+				delete mSaturationSubsumptionDecider;
 				delete mOntoAnsweringItem;
 				delete mTestingOntologyPreprocessor;
 				delete mTestingOntologyBuilder;
@@ -389,8 +398,10 @@ namespace Konclude {
 
 
 				bool requiresProcessing = false;
-				subClassNodesComputationRequired |= equivalentClassNodesComputationRequired || subClassRealizationRequired;
-				superClassNodesComputationRequired |= subClassNodesComputationRequired || !instancesDirectResolveable;
+				// the equivalent classes step decides the equivalence from the direct super classes, with at most one
+				// subsumption test, instead of from the sub classes (issue #12)
+				subClassNodesComputationRequired |= subClassRealizationRequired;
+				superClassNodesComputationRequired |= subClassNodesComputationRequired || equivalentClassNodesComputationRequired || !instancesDirectResolveable;
 				satisfiableComputationRequired |= superClassNodesComputationRequired;
 				if (satisfiableComputationRequired) {
 					requiresProcessing |= initializeQueryProcessingStep(computationProcess->getSatisfiableClassNodesComputationProcess(true), conceptItem, queryProcessingData, buildingVarItem);
@@ -1178,8 +1189,14 @@ namespace Konclude {
 								bool superClassNodesComputationRequired = compConQuery->isSuperClassNodesComputationRequired();
 								bool satisfiableComputationRequired = compConQuery->isSatisfiableComputationRequired();
 								bool direct = compConQuery->isDirect();
+								// the realization of the direct sub classes is only needed to subtract their instances
+								// for the direct instances, a direct sub/super classes query does not need it
+								bool subClassRealizationRequired = direct && instanceComputationRequired;
+								// the super classes are answered strictly, without a class that is equivalent to the
+								// expression, which the equivalent classes step decides (issue #12)
+								equivalentClassNodesComputationRequired |= superClassNodesComputationRequired;
 
-								queryProcessing |= initializeComplexConceptQueryProcessing(queryProcessingData, nullptr, classTermExpOfInt, satisfiableComputationRequired, superClassNodesComputationRequired, subClassNodesComputationRequired, equivalentClassNodesComputationRequired, direct, instanceComputationRequired? -1 : 0, nullptr);
+								queryProcessing |= initializeComplexConceptQueryProcessing(queryProcessingData, nullptr, classTermExpOfInt, satisfiableComputationRequired, superClassNodesComputationRequired, subClassNodesComputationRequired, equivalentClassNodesComputationRequired, subClassRealizationRequired, instanceComputationRequired? -1 : 0, nullptr);
 							}
 						}
 						CComplexAxiomsClassVariablesAnsweringQuery* compAxClassVarQuery = dynamic_cast<CComplexAxiomsClassVariablesAnsweringQuery*>(query);
@@ -4200,16 +4217,20 @@ namespace Konclude {
 						if (!direct) {
 							visitedHierNodeSet = new QSet<CHierarchyNode*>();
 						}
+						// The sub and super classes of the item include a class that is equivalent to the expression, the
+						// equivalence is found through that, while the answers are the strict sub and super classes, as for
+						// a named class: those of an equivalent class start from its children and its parents (issue #12).
+						CHierarchyNode* equivalentNode = getEquivalentClassNode(conceptItem);
 						QList<CHierarchyNode*> visitHierNodetList;
 						if (subClasses) {
-							QSet<CHierarchyNode*>* childNodeSet = conceptItem->getDirectSubClassNodeSet();
+							QSet<CHierarchyNode*>* childNodeSet = equivalentNode ? equivalentNode->getChildNodeSet() : conceptItem->getDirectSubClassNodeSet();
 							for (QSet<CHierarchyNode*>::const_iterator it = childNodeSet->constBegin(), itEnd = childNodeSet->constEnd(); it != itEnd; ++it) {
 								CHierarchyNode* childNode(*it);
 								visitHierNodetList.append(childNode);
 							}
 						}
 						if (superClasses) {
-							QSet<CHierarchyNode*>* parentNodeSet = conceptItem->getDirectSuperClassNodeSet();
+							QSet<CHierarchyNode*>* parentNodeSet = equivalentNode ? equivalentNode->getParentNodeSet() : conceptItem->getDirectSuperClassNodeSet();
 							for (QSet<CHierarchyNode*>::const_iterator it = parentNodeSet->constBegin(), itEnd = parentNodeSet->constEnd(); it != itEnd; ++it) {
 								CHierarchyNode* parentNode(*it);
 								visitHierNodetList.append(parentNode);
@@ -4251,16 +4272,12 @@ namespace Konclude {
 					}
 					if (compConQuery->isEquivalentClassNodesComputationRequired()) {
 						CClassSetResult* classesResult = new CClassSetResult();
-						QSet<CHierarchyNode*>* childNodeSet = conceptItem->getDirectSubClassNodeSet();
-						QSet<CHierarchyNode*>* parentNodeSet = conceptItem->getDirectSuperClassNodeSet();
 						bool abbreviatedIRIs = false;
-						if (parentNodeSet && childNodeSet && parentNodeSet->size() == 1 && childNodeSet->size() == 1) {
-							CHierarchyNode* node = (*childNodeSet->constBegin());
-							if (parentNodeSet->contains(node)) {
-								QStringList eqClassNameList(node->getEquivalentConceptStringList(abbreviatedIRIs));
-								for (QStringList::const_iterator it = eqClassNameList.constBegin(), itEnd = eqClassNameList.constEnd(); it != itEnd; ++it) {
-									classesResult->addClass(*it);
-								}
+						CHierarchyNode* node = getEquivalentClassNode(conceptItem);
+						if (node) {
+							QStringList eqClassNameList(node->getEquivalentConceptStringList(abbreviatedIRIs));
+							for (QStringList::const_iterator it = eqClassNameList.constBegin(), itEnd = eqClassNameList.constEnd(); it != itEnd; ++it) {
+								classesResult->addClass(*it);
 							}
 						}
 						query->setQueryResult(classesResult);
@@ -4498,7 +4515,7 @@ namespace Konclude {
 				COptimizedComplexConceptStepAnsweringItem* conEqProcStepItem = mOntoAnsweringItem->getConceptEquivalentClassesProcessingStepItem();
 				COptimizedComplexConceptStepAnsweringItem* instancesProcStepItem = mOntoAnsweringItem->getConceptInstancesProcessingStepItem();
 				QList<COptimizedComplexBuildingVariableCompositionsItem*>* buildingVarItemList = mOntoAnsweringItem->getVariableBuildingItemProcessingList();
-				while (!processing && (conSatProcStepItem->hasConceptItemsQueued() || conSuperProcStepItem->hasConceptItemsQueued() || conSubProcStepItem->hasConceptItemsQueued() || conEqProcStepItem->hasConceptItemsQueued() || instancesProcStepItem->hasConceptItemsQueued() || !buildingVarItemList->isEmpty())) {
+				while (!processing && (conSatProcStepItem->hasConceptItemsQueued() || conSuperProcStepItem->hasConceptItemsQueued() || conSubProcStepItem->hasConceptItemsQueued() || conSubRealStepItem->hasConceptItemsQueued() || conEqProcStepItem->hasConceptItemsQueued() || instancesProcStepItem->hasConceptItemsQueued() || !buildingVarItemList->isEmpty())) {
 					
 					
 					processing = createComplexConceptItemCalculation(processing, conSatProcStepItem, answererContext, conSuperProcStepItem, conSubProcStepItem, conSubRealStepItem, conEqProcStepItem, instancesProcStepItem);
@@ -4839,15 +4856,30 @@ namespace Konclude {
 
 						
 						QList<CHierarchyNode*>* possibleClassNodeTestingList = conceptItem->getPossibleSubClassNodeTestingList();
-						if (possibleClassNodeTestingList && !possibleClassNodeTestingList->isEmpty()) {
+						// the nodes are taken until one needs a test; a node that the saturation decides costs
+						// no job, and for a large ontology that is nearly every node, see issue #19
+						while (!processing && possibleClassNodeTestingList && !possibleClassNodeTestingList->isEmpty()) {
 							CHierarchyNode* testingNode = possibleClassNodeTestingList->takeFirst();
 							QSet<CHierarchyNode*>* maxSubNodeSet = conceptItem->getMaximumSubClassNodeSet();
 							if (maxSubNodeSet && maxSubNodeSet->contains(testingNode)) {
 								conceptItem->getDirectSubClassNodeSet()->insert(testingNode);
-							} else if (createSubClassSubsumptionTest(conceptItem, testingNode, answererContext)) {
-								processing = true;
-								compStep->setComputationProcessProcessing(true);
-								compStep->incCurrentlyRunningComputationCount();
+							} else {
+								CSaturationSubsumptionDecider::Verdict verdict = decideSubClassSubsumptionFromSaturation(conceptItem, testingNode);
+								if (verdict == CSaturationSubsumptionDecider::SUBSUMED) {
+									addSubClassSubsumptionResult(conceptItem, testingNode, true);
+								} else if (verdict == CSaturationSubsumptionDecider::NOT_SUBSUMED) {
+									addSubClassSubsumptionResult(conceptItem, testingNode, false);
+								} else if (verdict == CSaturationSubsumptionDecider::NEEDS_COMPLETION && mConfSaturationSubClassLabelCompletion && isLabelCompletionWorthwhile()
+										&& createLabelCompletionTest(conceptItem, testingNode, mSaturationSubsumptionDecider->getCompletionConcept(), answererContext)) {
+									// the node is taken up again once the label of the class is completed
+									processing = true;
+									compStep->setComputationProcessProcessing(true);
+									compStep->incCurrentlyRunningComputationCount();
+								} else if (createSubClassSubsumptionTest(conceptItem, testingNode, answererContext)) {
+									processing = true;
+									compStep->setComputationProcessProcessing(true);
+									compStep->incCurrentlyRunningComputationCount();
+								}
 							}
 						}
 						if (!possibleClassNodeTestingList || possibleClassNodeTestingList->isEmpty()) {
@@ -4864,8 +4896,11 @@ namespace Konclude {
 
 
 				if (!processing && conSubRealStepItem->hasConceptItemsQueued()) {
-					COptimizedComplexConceptItem* conceptItem = conSubRealStepItem->getNextQueuedConceptItem();
+					// taken from the queue like the items of the other steps, a finished item that stayed
+					// in front would keep every later item from being processed
+					COptimizedComplexConceptItem* conceptItem = conSubRealStepItem->takeNextQueuedConceptItem();
 					CComplexConceptStepComputationProcess* compStep = conceptItem->getComputationProcess()->getSubClassRealizationProcess(true);
+					compStep->setComputationProcessQueued(false);
 					CHierarchyNode* bottomHierNode = mOntoAnsweringItem->getOntology()->getClassification()->getClassConceptClassification()->getClassConceptTaxonomy()->getBottomHierarchyNode();
 
 					if (!compStep->isComputationProcessFinished()) {
@@ -4881,7 +4916,9 @@ namespace Konclude {
 							}
 
 							if (!reqList.isEmpty()) {
-								CAnsweringMessageDataRequirementCompletedRealization* reqCompMess = new CAnsweringMessageDataRequirementCompletedRealization(conceptItem);
+								// the completion has to finish this step, the realization completion message only
+								// queues the instances step, so a direct query waited for this step for ever
+								CAnsweringMessageDataRequirementCompletedSubClassRealization* reqCompMess = new CAnsweringMessageDataRequirementCompletedSubClassRealization(conceptItem);
 								processRequirements(answererContext, mOntoAnsweringItem->getOntology(), reqList, reqCompMess);
 								processing = true;
 							} else {
@@ -4899,8 +4936,37 @@ namespace Konclude {
 					compStep->setComputationProcessQueued(false);
 					if (!compStep->isComputationProcessStarted()) {
 						compStep->setComputationProcessStarted(true);
+						// A class node N is equivalent to the expression X if and only if N is the only direct super class
+						// of X and N is subsumed by X: an equivalent class is the one most specific super class. So one
+						// subsumption decision settles it, where the sub classes are a search through the class hierarchy
+						// below the direct super classes, which took seconds on SNOMED CT for an expression whose only
+						// direct super class is owl:Thing (issue #12).
+						if (!conceptItem->isEquivalenceDecided()) {
+							CComplexConceptStepComputationProcess* subStep = conceptItem->getComputationProcess()->getSubClassNodesComputationProcess(false);
+							QSet<CHierarchyNode*>* parentNodeSet = conceptItem->getDirectSuperClassNodeSet();
+							if (subStep && subStep->isComputationProcessFinished()) {
+								conceptItem->setDecidedEquivalentClassNode(getEquivalentClassNode(conceptItem));
+							} else if (!conceptItem->isSatisfiable()) {
+								conceptItem->setDecidedEquivalentClassNode(mOntoAnsweringItem->getOntology()->getClassification()->getClassConceptClassification()->getClassConceptTaxonomy()->getBottomHierarchyNode());
+							} else if (!parentNodeSet || parentNodeSet->size() != 1) {
+								conceptItem->setDecidedEquivalentClassNode(nullptr);
+							} else {
+								CHierarchyNode* candidateNode = *parentNodeSet->constBegin();
+								CSaturationSubsumptionDecider::Verdict verdict = decideSubClassSubsumptionFromSaturation(conceptItem, candidateNode);
+								if (verdict == CSaturationSubsumptionDecider::SUBSUMED) {
+									conceptItem->setDecidedEquivalentClassNode(candidateNode);
+								} else if (verdict == CSaturationSubsumptionDecider::NOT_SUBSUMED) {
+									conceptItem->setDecidedEquivalentClassNode(nullptr);
+								} else if (createSubClassSubsumptionTest(conceptItem, candidateNode, answererContext, true)) {
+									// the step is finished when the test completes
+									processing = true;
+									compStep->setComputationProcessProcessing(true);
+									compStep->incCurrentlyRunningComputationCount();
+								}
+							}
+						}
 					}
-					if (!processing) {
+					if (!processing && !compStep->isComputationProcessProcessing()) {
 						finishCalculationStepProcessing(conceptItem, compStep, answererContext);
 					}
 				}
@@ -10470,6 +10536,28 @@ namespace Konclude {
 			}
 
 			bool COptimizedComplexExpressionAnsweringHandler::finishSubClassCalculationStepProcessing(COptimizedComplexConceptItem* conceptItem, CComplexConceptStepComputationProcess* compStep, CAnswererContext* answererContext) {
+				if (mConfExtendedLogging && mSaturationSubsumptionDecider) {
+					QStringList codeStrings;
+					QHash<cint64,cint64>* codeCounts = mSaturationSubsumptionDecider->getUndecidedMergeConceptCodeCounts();
+					for (QHash<cint64,cint64>::const_iterator it = codeCounts->constBegin(), itEnd = codeCounts->constEnd(); it != itEnd; ++it) {
+						codeStrings.append(QString("%1%2:%3").arg(it.key() % 2 ? "-" : "").arg(it.key() / 2).arg(it.value()));
+					}
+					LOG(INFO, getDomain(), logTr("Saturation decided %1 sub class candidates as subsumed and %2 as not subsumed, %3 undecided, %5 implications fired in merges, %6 label completions requested, %7 completion tests run, %8 decisions from completed labels, merge blocking label concept codes: %4.")
+							.arg(mSaturationSubsumptionDecider->getSubsumedCount()).arg(mSaturationSubsumptionDecider->getNotSubsumedCount())
+							.arg(mSaturationSubsumptionDecider->getUndecidedCount()).arg(codeStrings.join(" ")).arg(mSaturationSubsumptionDecider->getFiredImplicationCount())
+							.arg(mSaturationSubsumptionDecider->getCompletionRequestCount()).arg(mLabelCompletionTestCount).arg(mSaturationSubsumptionDecider->getCompletedDecisionCount()),this);
+					LOG(INFO, getDomain(), logTr("Saturation merges: %1 by the label scan, %2 by the closure.").arg(mSaturationSubsumptionDecider->getFastDecisionCount()).arg(mSaturationSubsumptionDecider->getClosureDecisionCount()),this);
+					LOG(INFO, getDomain(), logTr("Completed labels decided %1 sub class candidates and left %2 undecided, label completion %3.").arg(mSaturationSubsumptionDecider->getCompletedLabelDecisiveCount()).arg(mSaturationSubsumptionDecider->getCompletedLabelUndecidedCount()).arg(mLabelCompletionStopped ? "stopped" : "active"),this);
+				}
+				// the search goes down from several nodes and stops at every subsumed one, so it also finds nodes below
+				// one that it found subsumed over another path, Father below Parent through Man, or the bottom node
+				// through a leaf; those are no direct sub classes, and an expression with one of them next to its
+				// equivalent class was not found equivalent to it (issue #50)
+				QSet<CHierarchyNode*>* foundSubClassNodeSet = conceptItem->getDirectSubClassNodeSet();
+				if (foundSubClassNodeSet) {
+					conceptItem->setDirectSubClassNodeSet(getDirectReducedSubNodeSet(*foundSubClassNodeSet));
+					delete foundSubClassNodeSet;
+				}
 				delete conceptItem->getPossibleSubClassNodeTestingList();
 				conceptItem->setPossibleSubClassNodeTestingList(nullptr);
 				delete conceptItem->getPossibleSubClassTestingNodeSet();
@@ -11465,6 +11553,50 @@ namespace Konclude {
 
 
 
+			CSaturationSubsumptionDecider* COptimizedComplexExpressionAnsweringHandler::getSaturationSubsumptionDecider() {
+				if (!mConfSaturationSubClassDecision) {
+					return nullptr;
+				}
+				if (!mSaturationSubsumptionDecider) {
+					mSaturationSubsumptionDecider = new CSaturationSubsumptionDecider(mOntoAnsweringItem->getOntology());
+					mSaturationSubsumptionDecider->setCompletedSuccessorDecision(mConfLabelCompletionSuccessors);
+				}
+				if (!mSaturationSubsumptionDecider->hasSaturation()) {
+					return nullptr;
+				}
+				return mSaturationSubsumptionDecider;
+			}
+
+
+			CSaturationSubsumptionDecider::Verdict COptimizedComplexExpressionAnsweringHandler::decideSubClassSubsumptionFromSaturation(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode) {
+				if (!getSaturationSubsumptionDecider()) {
+					return CSaturationSubsumptionDecider::UNDECIDED;
+				}
+				CConcept* subClassConcept = testingNode->getOneEquivalentConcept();
+				return mSaturationSubsumptionDecider->decideSubClass(subClassConcept, conceptItem->getConcept(), conceptItem->getConceptNegation());
+			}
+
+
+			bool COptimizedComplexExpressionAnsweringHandler::addSubClassSubsumptionResult(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, bool subsumed) {
+				bool candidatesAdded = false;
+				if (subsumed) {
+					conceptItem->getDirectSubClassNodeSet()->insert(testingNode);
+				} else {
+					// a node that is not subsumed may still have subsumed children
+					for (QSet<CHierarchyNode*>::const_iterator it = testingNode->getChildNodeSet()->constBegin(), itEnd = testingNode->getChildNodeSet()->constEnd(); it != itEnd; ++it) {
+						CHierarchyNode* childNode(*it);
+						if (!conceptItem->getPossibleSubClassTestingNodeSet()->contains(childNode)) {
+							conceptItem->getPossibleSubClassTestingNodeSet()->insert(childNode);
+							conceptItem->getPossibleSubClassNodeTestingList()->append(childNode);
+							candidatesAdded = true;
+						}
+					}
+				}
+				return candidatesAdded;
+			}
+
+
+
 			bool COptimizedComplexExpressionAnsweringHandler::createSuperClassSubsumptionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CAnswererContext* answererContext) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
@@ -11479,13 +11611,13 @@ namespace Konclude {
 
 
 
-			bool COptimizedComplexExpressionAnsweringHandler::createSubClassSubsumptionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CAnswererContext* answererContext) {
+			bool COptimizedComplexExpressionAnsweringHandler::createSubClassSubsumptionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CAnswererContext* answererContext, bool equivalenceCheck) {
 				CSatisfiableCalculationJob* satCalcJob = nullptr;
 				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
 				CConcept* subClassConcept = testingNode->getOneEquivalentConcept();
 				satCalcJob = extendProcessingByTopPropagation(satCalcJobGen, satCalcJob, conceptItem->isTopObjectPropertyUsed(), answererContext);
 				satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(subClassConcept, false, conceptItem->getConcept(), !conceptItem->getConceptNegation(), nullptr, satCalcJob);
-				CAnsweringMessageDataCalculationCompletedSubsumptionSubClass* completedMessage = new CAnsweringMessageDataCalculationCompletedSubsumptionSubClass(satCalcJob, conceptItem, testingNode);
+				CAnsweringMessageDataCalculationCompletedSubsumptionSubClass* completedMessage = new CAnsweringMessageDataCalculationCompletedSubsumptionSubClass(satCalcJob, conceptItem, testingNode, equivalenceCheck);
 				mOntoAnsweringItem->getAnsweringHandlingStatistics()->incComplexConceptItemsSubClassSubsumptionTestingCount();
 				processCalculationJob(answererContext, satCalcJob, completedMessage);
 				return true;
@@ -12301,6 +12433,9 @@ namespace Konclude {
 						} else if (calcType == CAnsweringMessageDataCalculationCompleted::SUBCLASSSUBSUMPTIONCALCULATION) {
 							CAnsweringMessageDataCalculationCompletedSubsumptionSubClass* subCalcCompMessage = (CAnsweringMessageDataCalculationCompletedSubsumptionSubClass*)calcCompMessage;
 							processSubClassSubsumptionCalculationCompleted(subCalcCompMessage, answererContext);
+						} else if (calcType == CAnsweringMessageDataCalculationCompleted::LABELCOMPLETIONCALCULATION) {
+							CAnsweringMessageDataCalculationCompletedLabelCompletion* labelCompMessage = (CAnsweringMessageDataCalculationCompletedLabelCompletion*)calcCompMessage;
+							processLabelCompletionCalculationCompleted(labelCompMessage, answererContext);
 						} else if (calcType == CAnsweringMessageDataCalculationCompleted::INDIVIDUALINSTANCECALCULATION) {
 							CAnsweringMessageDataCalculationCompletedInstanceIndividual* instCalcCompMessage = (CAnsweringMessageDataCalculationCompletedInstanceIndividual*)calcCompMessage;
 							processIndividualInstanceCalculationCompleted(instCalcCompMessage, answererContext);
@@ -12338,7 +12473,10 @@ namespace Konclude {
 					} else if (messageType == CAnsweringMessageData::CALCULATIONADAPTER) {
 						CAnsweringMessageDataCalculationAdapter* calcAdapMessage = (CAnsweringMessageDataCalculationAdapter*)message;
 						CAnsweringMessageDataCalculationAdapter::CALCULATIONADAPTERTYPE calcType = calcAdapMessage->getCalculationAdapterType();
-						if (calcType == CAnsweringMessageDataCalculationAdapter::CLASSSUBSUMERS) {
+						if (calcType == CAnsweringMessageDataCalculationAdapter::ROOTLABEL) {
+							CAnsweringMessageDataCalculationRootLabel* rootLabelMessage = (CAnsweringMessageDataCalculationRootLabel*)calcAdapMessage;
+							processExtractedRootLabel(rootLabelMessage, answererContext);
+						} else if (calcType == CAnsweringMessageDataCalculationAdapter::CLASSSUBSUMERS) {
 							CAnsweringMessageDataCalculationClassSubsumers* classSubsumersMessage = (CAnsweringMessageDataCalculationClassSubsumers*)calcAdapMessage;
 							processExtractedClassSubsumers(classSubsumersMessage, answererContext);
 						} else if (calcType == CAnsweringMessageDataCalculationAdapter::POSSIBLECLASSSUBSUMERS) {
@@ -12509,6 +12647,54 @@ namespace Konclude {
 
 
 
+			// The class node that is equivalent to the expression of the item, or null: as the equivalent classes step decided
+			// it, or else the one node that is its only direct super and its only direct sub class, since the sub and super
+			// classes of an item include the equivalent node.
+			CHierarchyNode* COptimizedComplexExpressionAnsweringHandler::getEquivalentClassNode(COptimizedComplexConceptItem* conceptItem) {
+				if (conceptItem->isEquivalenceDecided()) {
+					return conceptItem->getDecidedEquivalentClassNode();
+				}
+				QSet<CHierarchyNode*>* childNodeSet = conceptItem->getDirectSubClassNodeSet();
+				QSet<CHierarchyNode*>* parentNodeSet = conceptItem->getDirectSuperClassNodeSet();
+				if (parentNodeSet && childNodeSet && parentNodeSet->size() == 1 && childNodeSet->size() == 1) {
+					CHierarchyNode* node = *childNodeSet->constBegin();
+					if (parentNodeSet->contains(node)) {
+						return node;
+					}
+				}
+				return nullptr;
+			}
+
+
+
+			// The topmost nodes of a set of sub classes, those none of whose predecessors is in the set. The bottom
+			// node is left out as soon as there is another node, since each node lies above it; its predecessor set
+			// is not relied upon for that.
+			QSet<CHierarchyNode*>* COptimizedComplexExpressionAnsweringHandler::getDirectReducedSubNodeSet(const QSet<CHierarchyNode*>& subClassesSet) {
+				CHierarchyNode* bottomHierNode = mOntoAnsweringItem->getOntology()->getClassification()->getClassConceptClassification()->getClassConceptTaxonomy()->getBottomHierarchyNode();
+				QSet<CHierarchyNode*>* directSubClassesSet = new QSet<CHierarchyNode*>();
+				for (CHierarchyNode* subClassNode : subClassesSet) {
+					if (!subClassNode || subClassNode == bottomHierNode && subClassesSet.size() > 1) {
+						continue;
+					}
+					bool belowOtherNode = false;
+					for (QSet<CHierarchyNode*>::const_iterator it = subClassesSet.constBegin(), itEnd = subClassesSet.constEnd(); !belowOtherNode && it != itEnd; ++it) {
+						CHierarchyNode* otherNode(*it);
+						if (otherNode && otherNode != subClassNode && otherNode != bottomHierNode && subClassNode->hasPredecessorNode(otherNode)) {
+							belowOtherNode = true;
+						}
+					}
+					if (!belowOtherNode) {
+						directSubClassesSet->insert(subClassNode);
+					}
+				}
+				return directSubClassesSet;
+			}
+
+
+
+
+
 			bool COptimizedComplexExpressionAnsweringHandler::processExtractedClassSubsumers(CAnsweringMessageDataCalculationClassSubsumers* message, CAnswererContext* answererContext) {
 				CConcept* concept = message->getSubsumedConcept();
 				bool negation = message->getSubsumedConceptNegation();
@@ -12524,6 +12710,12 @@ namespace Konclude {
 						if (hierNode) {
 							superClassesSet->insert(hierNode);
 						}
+					}
+					// super classes found through other items before stay known, they are sound as well
+					QSet<CHierarchyNode*>* previousKnownSuperClassesSet = conceptItem->getKnownSuperClassNodeSet();
+					if (previousKnownSuperClassesSet) {
+						*superClassesSet += *previousKnownSuperClassesSet;
+						delete previousKnownSuperClassesSet;
 					}
 					conceptItem->setKnownSuperClassNodeSet(superClassesSet);
 				} else {
@@ -12635,27 +12827,127 @@ namespace Konclude {
 			}
 
 
+			bool COptimizedComplexExpressionAnsweringHandler::isLabelCompletionWorthwhile() {
+				// a completion is a tableau test of its own, and it pays only if the completed label then
+				// decides the candidate; where the saturation of most classes is insufficient because of
+				// universal or cardinality restrictions in their role groups, the completed label rarely
+				// does, and the candidate needs its subsumption test on top (issue #33); but the label is
+				// completed once and used by every later query, so the stop is off by default and pays only
+				// for a reasoner that answers a few queries
+				if (mLabelCompletionStopped) {
+					return false;
+				}
+				CSaturationSubsumptionDecider* decider = getSaturationSubsumptionDecider();
+				if (!decider || mConfLabelCompletionSampleSize <= 0) {
+					return true;
+				}
+				cint64 decisiveCount = decider->getCompletedLabelDecisiveCount();
+				cint64 totalCount = decisiveCount + decider->getCompletedLabelUndecidedCount();
+				if (totalCount >= mConfLabelCompletionSampleSize && decisiveCount * 100 < totalCount * mConfLabelCompletionMinimumDecisivePercent) {
+					mLabelCompletionStopped = true;
+					LOG(INFO, getDomain(), logTr("Label completion stopped: the completed labels decided %1 of %2 sub class candidates, the remaining candidates go to the tableau directly.").arg(decisiveCount).arg(totalCount), this);
+					return false;
+				}
+				return true;
+			}
+
+
+			bool COptimizedComplexExpressionAnsweringHandler::createLabelCompletionTest(COptimizedComplexConceptItem* conceptItem, CHierarchyNode* testingNode, CConcept* completionConcept, CAnswererContext* answererContext) {
+				if (!completionConcept || completionConcept == mOntoAnsweringItem->getTestingOntology()->getDataBoxes()->getTBox()->getBottomConcept()) {
+					// the bottom concept's completion test would conjoin every class of the ontology (the decider
+					// answers the bottom node itself; this guards every other caller)
+					return false;
+				}
+				CSatisfiableCalculationJobGenerator satCalcJobGen(mOntoAnsweringItem->getTestingOntology());
+				// the class with everything above it in the class hierarchy, so that the label of the root
+				// holds the consequences of every named subsumer, also of those the saturation missed
+				QList<CConcept*> conceptList;
+				conceptList.append(completionConcept);
+				CSaturationSubsumptionDecider* decider = getSaturationSubsumptionDecider();
+				if (decider) {
+					conceptList.append(decider->getHierarchyAncestors(completionConcept));
+				}
+				CSatisfiableCalculationJob* satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(conceptList, nullptr, nullptr);
+				CAnsweringMessageDataCalculationCompletedLabelCompletion* completedMessage = new CAnsweringMessageDataCalculationCompletedLabelCompletion(satCalcJob, conceptItem, testingNode, completionConcept);
+				satCalcJob->setSatisfiableAnswererSubsumptionMessageAdapter(new CSatisfiableTaskAnswererSubsumptionMessageAdapter(completionConcept, false, this, mOntoAnsweringItem->getTestingOntology(false), answererContext->getAnsweringCalculationHandler(), true));
+				++mLabelCompletionTestCount;
+				processCalculationJob(answererContext, satCalcJob, completedMessage);
+				return true;
+			}
+
+
+			bool COptimizedComplexExpressionAnsweringHandler::processExtractedRootLabel(CAnsweringMessageDataCalculationRootLabel* message, CAnswererContext* answererContext) {
+				CSaturationSubsumptionDecider* decider = getSaturationSubsumptionDecider();
+				if (decider && !message->getTestedConceptNegation() && message->getEntryList()) {
+					QVector<CSaturationSubsumptionDecider::CCompletedLabelEntry> entries;
+					entries.reserve(message->getEntryList()->size());
+					for (CCLASSSUBSUMPTIONMESSAGELIST<CRootLabelEntry>::const_iterator it = message->getEntryList()->constBegin(), itEnd = message->getEntryList()->constEnd(); it != itEnd; ++it) {
+						const CRootLabelEntry& entry(*it);
+						entries.append(CSaturationSubsumptionDecider::CCompletedLabelEntry(entry.mConcept, entry.mNegated, entry.mDeterministic));
+					}
+					decider->setCompletedLabel(message->getTestedConcept(), entries);
+				}
+				return true;
+			}
+
+
+			bool COptimizedComplexExpressionAnsweringHandler::processLabelCompletionCalculationCompleted(CAnsweringMessageDataCalculationCompletedLabelCompletion* message, CAnswererContext* answererContext) {
+				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
+				bool satisfiable = message->getCalculationCallbackContextData()->isSatisfiable();
+				CConcept* completedConcept = message->getCompletedConcept();
+				CSaturationSubsumptionDecider* decider = getSaturationSubsumptionDecider();
+				if (decider) {
+					if (!satisfiable) {
+						decider->setCompletedLabelUnsatisfiable(completedConcept);
+					} else if (!decider->hasCompletedLabel(completedConcept)) {
+						// the label did not arrive, the class stays with the tableau
+						decider->setCompletionFailed(completedConcept);
+					}
+				}
+				CComplexConceptStepComputationProcess* compStep = conceptItem->getComputationProcess()->getSubClassNodesComputationProcess(true);
+				// the node that waited for the completion is taken up again first
+				QList<CHierarchyNode*>* testingList = conceptItem->getPossibleSubClassNodeTestingList();
+				if (message->getTestingNode() && testingList) {
+					testingList->prepend(message->getTestingNode());
+				}
+				if (!compStep->isComputationProcessQueued()) {
+					compStep->setComputationProcessQueued(true);
+					COptimizedComplexConceptStepAnsweringItem* processingStep = mOntoAnsweringItem->getConceptProcessingStepItem(compStep->getComputationType());
+					processingStep->addQueuedConceptItem(conceptItem);
+				}
+				compStep->incFinishedComputationCount();
+				compStep->decCurrentlyRunningComputationCount();
+				if (compStep->getCurrentlyRunningComputationCount() == 0) {
+					compStep->setComputationProcessProcessing(false);
+					if (!conceptItem->getPossibleSubClassNodeTestingList() || conceptItem->getPossibleSubClassNodeTestingList()->isEmpty()) {
+						finishSubClassCalculationStepProcessing(conceptItem, compStep, answererContext);
+					}
+				}
+				return true;
+			}
+
+
 			bool COptimizedComplexExpressionAnsweringHandler::processSubClassSubsumptionCalculationCompleted(CAnsweringMessageDataCalculationCompletedSubsumptionSubClass* message, CAnswererContext* answererContext) {
 				COptimizedComplexConceptItem* conceptItem = message->getConceptItem();
 				bool satisfiable = message->getCalculationCallbackContextData()->isSatisfiable();
 				CHierarchyNode* subClassNode = message->getSubClassNode();
+				if (message->isEquivalenceCheck()) {
+					// the only direct super class is equivalent if it is subsumed as well
+					CComplexConceptStepComputationProcess* eqStep = conceptItem->getComputationProcess()->getEquivalentClassNodesComputationProcess(true);
+					conceptItem->setDecidedEquivalentClassNode(satisfiable ? nullptr : subClassNode);
+					eqStep->incFinishedComputationCount();
+					eqStep->decCurrentlyRunningComputationCount();
+					eqStep->setComputationProcessProcessing(false);
+					finishCalculationStepProcessing(conceptItem, eqStep, answererContext);
+					return true;
+				}
 				CComplexConceptStepComputationProcess* compStep = conceptItem->getComputationProcess()->getSubClassNodesComputationProcess(true);
-				if (!satisfiable) {
-					conceptItem->getDirectSubClassNodeSet()->insert(subClassNode);
-				} else {
-					for (QSet<CHierarchyNode*>::const_iterator it = subClassNode->getChildNodeSet()->constBegin(), itEnd = subClassNode->getChildNodeSet()->constEnd(); it != itEnd; ++it) {
-						CHierarchyNode* childNode(*it);
-						if (!conceptItem->getPossibleSubClassTestingNodeSet()->contains(childNode)) {
-							conceptItem->getPossibleSubClassTestingNodeSet()->insert(childNode);
-							conceptItem->getPossibleSubClassNodeTestingList()->append(childNode);
-							if (conceptItem->getPossibleSubClassNodeTestingList()->size() == 1) {
-								if (!compStep->isComputationProcessQueued()) {
-									compStep->setComputationProcessQueued(true);
-									COptimizedComplexConceptStepAnsweringItem* processingStep = mOntoAnsweringItem->getConceptProcessingStepItem(compStep->getComputationType());
-									processingStep->addQueuedConceptItem(conceptItem);
-								}
-							}
-						}
+				// the test says whether the node's class conjoined with the negated concept is satisfiable
+				if (addSubClassSubsumptionResult(conceptItem, subClassNode, !satisfiable)) {
+					if (!compStep->isComputationProcessQueued()) {
+						compStep->setComputationProcessQueued(true);
+						COptimizedComplexConceptStepAnsweringItem* processingStep = mOntoAnsweringItem->getConceptProcessingStepItem(compStep->getComputationType());
+						processingStep->addQueuedConceptItem(conceptItem);
 					}
 				}
 				compStep->incFinishedComputationCount();
@@ -13231,10 +13523,33 @@ namespace Konclude {
 				} visitor;
 				visitSuperSubConceptItems(startConceptItem, false, true, &visitor);
 				if (visitor.mFoundKnwonSuperClassNodeSet) {
-					startConceptItem->setKnownSuperClassNodeSet(visitor.mFoundKnwonSuperClassNodeSet);
+					// The super classes found through other items are super classes of this one, but not
+					// all of them: those of a subsuming item leave out, for instance, the atomic conjuncts
+					// of this item. The satisfiability test of this item may already have given its known
+					// and possible super classes from the model, so the found ones are added to those
+					// instead of replacing them, which lost Man and Father for Man and (hasChild some
+					// Person) once hasChild some Person had been asked about (issue #13).
+					QSet<CHierarchyNode*>* knownSuperClassNodeSet = startConceptItem->getKnownSuperClassNodeSet();
+					if (knownSuperClassNodeSet) {
+						*knownSuperClassNodeSet += *visitor.mFoundKnwonSuperClassNodeSet;
+						delete visitor.mFoundKnwonSuperClassNodeSet;
+					} else {
+						knownSuperClassNodeSet = visitor.mFoundKnwonSuperClassNodeSet;
+						startConceptItem->setKnownSuperClassNodeSet(knownSuperClassNodeSet);
+					}
+					visitor.mFoundKnwonSuperClassNodeSet = knownSuperClassNodeSet;
 					visitSuperSubConceptItems(startConceptItem, true, false, &visitor);
 					if (visitor.mFoundPossibleSuperClassNodeSet) {
-						startConceptItem->setPossibleSuperClassNodeSet(visitor.mFoundPossibleSuperClassNodeSet);
+						// a possible super class has to be one of the model and one of the sub items
+						QSet<CHierarchyNode*>* possibleSuperClassNodeSet = startConceptItem->getPossibleSuperClassNodeSet();
+						if (possibleSuperClassNodeSet) {
+							possibleSuperClassNodeSet->intersect(*visitor.mFoundPossibleSuperClassNodeSet);
+							delete visitor.mFoundPossibleSuperClassNodeSet;
+						} else {
+							possibleSuperClassNodeSet = visitor.mFoundPossibleSuperClassNodeSet;
+							startConceptItem->setPossibleSuperClassNodeSet(possibleSuperClassNodeSet);
+						}
+						possibleSuperClassNodeSet->subtract(*knownSuperClassNodeSet);
 						return true;
 					}
 				}
@@ -13332,21 +13647,23 @@ namespace Konclude {
 
 
 
-				QSet<CHierarchyNode*> testingSubClassCandidateSet;
-				if (visitor.mFoundMinimumSubClassNodeSet) {
-					visitor.mFoundMinimumSubClassNodeSet;
-					for (auto node : *visitor.mFoundMinimumSubClassNodeSet) {
-						testingSubClassCandidateSet.insert(node);
+				// The search for the sub classes goes down from the candidates, so they have to lie above every sub class.
+				// The direct super classes of the item do, and so do the direct sub classes of an item that subsumes it,
+				// since every sub class of the item is one of that item. Those are taken when there are any, as they are
+				// lower down; the topmost of them are needed, their most specific ones would leave out sub classes below
+				// the others.
+				QSet<CHierarchyNode*>* possibleClassNodeTestingSet = nullptr;
+				if (visitor.mFoundMinimumSubClassNodeSet && !visitor.mFoundMinimumSubClassNodeSet->isEmpty()) {
+					possibleClassNodeTestingSet = getDirectReducedSubNodeSet(*visitor.mFoundMinimumSubClassNodeSet);
+				} else {
+					QSet<CHierarchyNode*> testingSubClassCandidateSet;
+					QSet<CHierarchyNode*>* directSuperClassNodeSet = startConceptItem->getDirectSuperClassNodeSet();
+					if (directSuperClassNodeSet) {
+						testingSubClassCandidateSet = *directSuperClassNodeSet;
 					}
+					possibleClassNodeTestingSet = getDirectReducedSuperNodeSet(testingSubClassCandidateSet);
 				}
-				QSet<CHierarchyNode*>* directSuperClassNodeSet = startConceptItem->getDirectSuperClassNodeSet();
-				if (directSuperClassNodeSet) {
-					for (QSet<CHierarchyNode*>::const_iterator it = directSuperClassNodeSet->constBegin(), itEnd = directSuperClassNodeSet->constEnd(); it != itEnd; ++it) {
-						CHierarchyNode* hierNode(*it);
-						testingSubClassCandidateSet.insert(hierNode);
-					}
-				}
-				QSet<CHierarchyNode*>* possibleClassNodeTestingSet = getDirectReducedSuperNodeSet(testingSubClassCandidateSet);
+				delete visitor.mFoundMinimumSubClassNodeSet;
 				startConceptItem->setPossibleSubClassTestingNodeSet(possibleClassNodeTestingSet);
 				QList<CHierarchyNode*>* possibleClassNodeTestingList = new QList<CHierarchyNode *>();
 				startConceptItem->setPossibleSubClassNodeTestingList(possibleClassNodeTestingList);

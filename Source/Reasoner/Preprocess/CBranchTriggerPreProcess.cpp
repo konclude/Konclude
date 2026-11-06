@@ -32,6 +32,7 @@ namespace Konclude {
 				mOnto = nullptr;
 				mLastConceptId = 0;
 				mConfLocalizeRolesToGetTrigger = false;
+				mTriggerKeySetUsed = false;
 			}
 
 
@@ -125,19 +126,48 @@ namespace Konclude {
 			}
 
 
+			bool CBranchTriggerPreProcess::addTriggerKey(CConcept* concept, bool negated) {
+				// returns true if the key was not yet present (and adds it); a linear scan while the key list is short,
+				// the set only for the rare concepts with many triggers
+				const cint64 linearLimit = 32;
+				TConNegPair key(concept,negated);
+				if (mTriggerKeySetUsed) {
+					if (mTriggerKeySet.contains(key)) {
+						return false;
+					}
+					mTriggerKeySet.insert(key);
+					return true;
+				}
+				for (QVector<TConNegPair>::const_iterator it = mTriggerKeyVec.constBegin(), itEnd = mTriggerKeyVec.constEnd(); it != itEnd; ++it) {
+					if (*it == key) {
+						return false;
+					}
+				}
+				mTriggerKeyVec.append(key);
+				if (mTriggerKeyVec.size() > linearLimit) {
+					mTriggerKeySetUsed = true;
+					mTriggerKeySet.clear();
+					for (QVector<TConNegPair>::const_iterator it = mTriggerKeyVec.constBegin(), itEnd = mTriggerKeyVec.constEnd(); it != itEnd; ++it) {
+						mTriggerKeySet.insert(*it);
+					}
+				}
+				return true;
+			}
+
+
 			CConceptRoleBranchingTrigger *CBranchTriggerPreProcess::createBranchingTriggers(CConcept* concept, bool negated) {
-				typedef QPair<CConcept *, bool> TConNegPair;
 				CConceptRoleBranchingTrigger* branchingTriggerList = nullptr;
 
-				QSet<TConNegPair> branchingTriggerSet;
+				mDisjInitVec.resize(0);
+				mDisjVec.resize(0);
+				mTriggerKeyVec.resize(0);
+				mTriggerKeySetUsed = false;
+				mDisjInitVec.append(TConNegPair(concept,negated));
 
-				QList<TConNegPair> disjList;
-				QList<TConNegPair> disjInitList;
-				disjInitList.append(TConNegPair(concept,negated));
 
-
-				while (!disjInitList.isEmpty()) {
-					TConNegPair disConNegPair(disjInitList.takeFirst());
+				// flatten the (negated) disjunction, breadth first as before
+				for (cint64 initIdx = 0; initIdx < mDisjInitVec.size(); ++initIdx) {
+					const TConNegPair disConNegPair(mDisjInitVec.at(initIdx));
 					CConcept *disCon = disConNegPair.first;
 					bool disNeg = disConNegPair.second;
 					qint64 disConOpCode = disCon->getOperatorCode();
@@ -146,27 +176,24 @@ namespace Konclude {
 						while (splitOrOpIt) {
 							CConcept *splitCon = splitOrOpIt->getData();
 							bool splitConNeg = splitOrOpIt->isNegated();
-							disjInitList.append(TConNegPair(splitCon,splitConNeg^disNeg));
+							mDisjInitVec.append(TConNegPair(splitCon,splitConNeg^disNeg));
 							splitOrOpIt = splitOrOpIt->getNext();
 						}
 					} else {
-						disjList.append(TConNegPair(disCon,disNeg));
+						mDisjVec.append(TConNegPair(disCon,disNeg));
 					}
 				}		
 
-				while (!disjList.isEmpty()) {
-					TConNegPair disConNegPair(disjList.takeFirst());
-
-					CConcept *disCon = disConNegPair.first;
-					bool disNeg = disConNegPair.second;
+				for (QVector<TConNegPair>::const_iterator disIt = mDisjVec.constBegin(), disItEnd = mDisjVec.constEnd(); disIt != disItEnd; ++disIt) {
+					CConcept *disCon = disIt->first;
+					bool disNeg = disIt->second;
 					cint64 conOpCount = disCon->getOperandCount();
 
 					CConceptRoleBranchingTrigger* branchingTrigger = nullptr;
 
 					qint64 disConOpCode = disCon->getDefinitionOperatorTag();
 					if (disNeg && (disConOpCode == CCSUB || disConOpCode == CCATOM)) {
-						if (!branchingTriggerSet.contains(TConNegPair(disCon,!disNeg))) {
-							branchingTriggerSet.insert(TConNegPair(disCon,!disNeg));
+						if (addTriggerKey(disCon,!disNeg)) {
 							branchingTrigger = CObjectAllocator< CConceptRoleBranchingTrigger >::allocateAndConstruct(mMemMan);
 							branchingTrigger->initConceptBranchingTrigger(disCon,!disNeg);
 							++mStatConceptBranchTriggers;
@@ -184,8 +211,7 @@ namespace Konclude {
 							if (!triggerDomConcept) {
 								triggerDomConcept = getRoleDomainTriggerConcept(locatedRole, true);
 							}
-							if (!branchingTriggerSet.contains(TConNegPair(triggerDomConcept, false))) {
-								branchingTriggerSet.insert(TConNegPair(triggerDomConcept, false));
+							if (addTriggerKey(triggerDomConcept,false)) {
 								branchingTrigger = CObjectAllocator< CConceptRoleBranchingTrigger >::allocateAndConstruct(mMemMan);
 								branchingTrigger->initConceptBranchingTrigger(triggerDomConcept, false);
 								++mStatRoleBranchTriggers;
@@ -212,8 +238,11 @@ namespace Konclude {
 				if (!mRoleDomainTriggerConceptHash) {
 					mRoleDomainTriggerConceptHash = mTBox->getRoleDomainTriggerConceptHash(true);
 				}
+				if (!createIfNotExists) {
+					return mRoleDomainTriggerConceptHash->value(role,nullptr);
+				}
 				CConcept*& triggerConcept = (*mRoleDomainTriggerConceptHash)[role];
-				if (!triggerConcept && createIfNotExists) {
+				if (!triggerConcept) {
 					triggerConcept = createTriggerConcept();
 					addRoleDomainConcept(role,triggerConcept,false);
 				}

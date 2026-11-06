@@ -87,6 +87,10 @@ namespace Konclude {
 					//! Destructor
 					virtual ~CPrecomputationThread();
 
+					// deletes the precomputation items of the ontologies, once the thread has been stopped
+					// and before the ontologies and the kept tasks are released (issue #45)
+					CPrecomputationThread* deleteOntologyPrecomputationItems();
+
 					virtual bool precompute(CConcreteOntology* ontology, CConfigurationBase* config, const QList<COntologyProcessingRequirement*>& requirementList, CCallbackData* callback);
 					virtual bool precompute(CConcreteOntology* ontology, CConfigurationBase* config, const QList<COntologyProcessingRequirement*>& requirementList);
 					virtual bool callbackPrecomputed(CConcreteOntology* ontology, CCallbackData* callback);

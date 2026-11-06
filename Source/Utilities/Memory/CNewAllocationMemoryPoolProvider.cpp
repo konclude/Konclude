@@ -48,13 +48,22 @@ namespace Konclude {
 
 
 			CMemoryPool* CNewAllocationMemoryPoolProvider::acquireMemoryPool(cint64 minPoolSize) {
+				CMemoryPool* recycledPool = CMemoryPoolRecycler::getInstance()->takeMemoryPool(minPoolSize);
+				if (recycledPool) {
+					mStatAllocatedPoolSize += recycledPool->getMemoryBlockSize();
+					mStatDiffPoolSize += recycledPool->getMemoryBlockSize();
+					++mStatAllocatedPoolCount;
+					++mStatDiffPoolCount;
+					return recycledPool;
+				}
 				CMemoryPool* memoryPool = new CMemoryPool();
 				if (!memoryPool) {
 					// not enough memory even for the log message
 					//LOG(CATASTROPHIC,"::Konclude::Utilities::NewAllocationMemoryPoolProvider",logTr("Memory allocation failed."),this);
 				}
-				cint64 memoryBlockSize = qMax(mDefaultPoolSize,minPoolSize) + 8;
-				char* memoryBlock = new char[memoryBlockSize];
+				cint64 memoryBlockSize = CMemoryPool::mappedBlockSize(qMax(mDefaultPoolSize,minPoolSize) + 8);
+				bool memoryBlockMapped = false;
+				char* memoryBlock = CMemoryPool::allocateMemoryBlock(memoryBlockSize, memoryBlockMapped);
 				if (!memoryBlock) {
 					LOG(CATASTROPHIC,"::Konclude::Utilities::NewAllocationMemoryPoolProvider",logTr("Memory allocation failed."),this);
 				}
@@ -62,7 +71,7 @@ namespace Konclude {
 				mStatDiffPoolSize += memoryBlockSize;
 				++mStatAllocatedPoolCount;
 				++mStatDiffPoolCount;
-				memoryPool->setMemoryBlockData(memoryBlock,memoryBlockSize);
+				memoryPool->setMemoryBlockData(memoryBlock,memoryBlockSize,memoryBlockMapped);
 				return memoryPool;
 			}
 
@@ -74,8 +83,11 @@ namespace Konclude {
 					mStatReleasedPoolSize += tmpMemoryPool->getMemoryBlockSize();
 					mStatDiffPoolSize -= tmpMemoryPool->getMemoryBlockSize();
 					++mStatReleasedPoolCount;
-					char* memoryBlock = tmpMemoryPool->getMemoryBlockData();
-					delete [] memoryBlock;
+					tmpMemoryPool->clearNext();
+					if (CMemoryPoolRecycler::getInstance()->giveMemoryPool(tmpMemoryPool)) {
+						continue;
+					}
+					CMemoryPool::releaseMemoryBlockData(tmpMemoryPool);
 					delete tmpMemoryPool;
 				}
 				return this;

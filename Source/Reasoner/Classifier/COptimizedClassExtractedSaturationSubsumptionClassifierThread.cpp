@@ -52,6 +52,7 @@ namespace Konclude {
 
 			void COptimizedClassExtractedSaturationSubsumptionClassifierThread::readCalculationConfig(CCalculationConfigurationExtension *config) {
 				mTransitiveReductionAddAllPredecessors = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.TransitiveReduction.AddAllPredecessors",true);
+				mConfConcurrentSubsumerExtraction = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.ConcurrentSaturationSubsumerExtraction",true);
 			}
 
 
@@ -142,6 +143,7 @@ namespace Konclude {
 									if (!conRefSatLinking) {
 										conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 										conProcData->setConceptReferenceLinking(conRefSatLinking);
+										ontClassItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 									}
 									COptimizedClassExtractedSaturationSatisfiableTestingItem* classItem = ontClassItem->getClassSatisfiableTestItem(concept,true);
 									conRefSatLinking->setClassifierReferenceLinkingData(classItem);
@@ -152,13 +154,25 @@ namespace Konclude {
 						}
 					}
 				}
+				// the unsatisfiable classes were added to the bottom node, they have to be found there as well, otherwise
+				// looking one up creates a node of its own without parents, which answered no super classes and not
+				// owl:Nothing as equivalent class (issue #55); the other classifiers update the mapping likewise
+				tax->updateNodeEquivalences(bottomHierNode);
 
 
-				for (QList<COptimizedClassExtractedSaturationSatisfiableTestingItem*>::const_iterator it = extClassItemList.constBegin(), itEnd = extClassItemList.constEnd(); it != itEnd; ++it) {
-					COptimizedClassExtractedSaturationSatisfiableTestingItem* classExtTestItem(*it);
+				// the subsumer counts are read from the saturation nodes on all threads: a class writes only
+				// into its own testing item, the saturation data is only read
+				std::function<void(COptimizedClassExtractedSaturationSatisfiableTestingItem*)> countFunc = [&](COptimizedClassExtractedSaturationSatisfiableTestingItem* classExtTestItem) -> void {
 					CConcept* concept = classExtTestItem->getTestingConcept();
 					cint64 subsumerCount = precSatSubsumerExtractor.getSubsumerCount(concept);
 					classExtTestItem->setExtractionSubsumerCount(subsumerCount);
+				};
+				if (mConfConcurrentSubsumerExtraction && extClassItemList.size() > 1) {
+					QtConcurrent::blockingMap(extClassItemList,countFunc);
+				} else {
+					for (QList<COptimizedClassExtractedSaturationSatisfiableTestingItem*>::const_iterator it = extClassItemList.constBegin(), itEnd = extClassItemList.constEnd(); it != itEnd; ++it) {
+						countFunc(*it);
+					}
 				}
 
 				ontClassItem->decCurrentCalculatingCount();
@@ -331,18 +345,52 @@ namespace Konclude {
 
 
 					qSort(satItemList->begin(),satItemList->end(),itemSortLessThan);
-
-
+					// the label walks (the first direct subsumer of a class, else all its subsumers) are done on
+					// all threads before the taxonomy is built: they read only the saturation data and the
+					// subsumer counts above and write only into the class's own item; the taxonomy is then built
+					// in the original order with the results, so it is the same as with the sequential walks
+					QElapsedTimer extractionTimer;
+					extractionTimer.start();
+					cint64 itemCount = satItemList->count();
+					QVector<COptimizedClassExtractedSaturationSatisfiableTestingItem*> itemVec(itemCount,nullptr);
+					QVector<CConcept*> directSubsumerVec(itemCount,nullptr);
+					QVector<bool> subsumersExtractedVec(itemCount,false);
+					cint64 itemIdx = 0;
 					for (QList<COptimizedClassExtractedSaturationSatisfiableTestingItem*>::const_iterator it = satItemList->constBegin(), itEnd = satItemList->constEnd(); it != itEnd; ++it) {
-						COptimizedClassExtractedSaturationSatisfiableTestingItem* item = *it;
+						itemVec[itemIdx++] = *it;
+					}
+					QVector<cint64> indexVec(itemCount);
+					for (cint64 i = 0; i < itemCount; ++i) {
+						indexVec[i] = i;
+					}
+					std::function<void(const cint64&)> walkFunc = [&](const cint64& i) -> void {
+						COptimizedClassExtractedSaturationSatisfiableTestingItem* item = itemVec[i];
+						if (!item->isEquivalentItem() && item != bottomItem && item != topItem && item->getExtractionSubsumerCount() > topSubsumingItemCount) {
+							directSubsumerVec[i] = precSatSubsumerExtractor.getDirectSubsumerCount(item->getTestingConcept(),&isDirectSubsumer);
+							if (!directSubsumerVec[i]) {
+								precSatSubsumerExtractor.extractSubsumers(item->getTestingConcept(),item);
+								item->sortSubsumingConceptItemList();
+								subsumersExtractedVec[i] = true;
+							}
+						}
+					};
+					if (mConfConcurrentSubsumerExtraction && itemCount > 1) {
+						QtConcurrent::blockingMap(indexVec,walkFunc);
+					} else {
+						for (cint64 i = 0; i < itemCount; ++i) {
+							walkFunc(i);
+						}
+					}
+					LOG(INFO,getLogDomain(),logTr("Read the subsumers of %1 classes from the saturation in %2 ms%3.").arg(itemCount).arg(extractionTimer.elapsed()).arg(mConfConcurrentSubsumerExtraction && itemCount > 1 ? QString(" (concurrent, %1 threads)").arg(QThreadPool::globalInstance()->maxThreadCount()) : QString("")),getLogObject());
+					for (cint64 i = 0; i < itemCount; ++i) {
+						COptimizedClassExtractedSaturationSatisfiableTestingItem* item = itemVec[i];
 						if (!item->isEquivalentItem() && item != bottomItem && item != topItem) {
 							CHierarchyNode* itemNode = tax->getHierarchyNode(item->getTestingConcept(),true);
 							item->setSatisfiableConceptHierarchyNode(itemNode);
 							cint64 itemSubsumingCount = item->getExtractionSubsumerCount();
 							itemList.append(item);
 							if (itemSubsumingCount > topSubsumingItemCount) {
-
-								CConcept* directSubsumerConcept = precSatSubsumerExtractor.getDirectSubsumerCount(item->getTestingConcept(),&isDirectSubsumer);
+								CConcept* directSubsumerConcept = directSubsumerVec[i];
 								bool requiresDetailedSubsumerSearch = true;
 								if (directSubsumerConcept) {
 									COptimizedClassExtractedSaturationSatisfiableTestingItem* directSubsumerItem = getItemForConcept(directSubsumerConcept);
@@ -350,11 +398,14 @@ namespace Konclude {
 										item->setDirectSubsumer(directSubsumerItem);
 										requiresDetailedSubsumerSearch = false;
 									}
-								} 
-								
+								}
 								if (requiresDetailedSubsumerSearch) {
-									precSatSubsumerExtractor.extractSubsumers(item->getTestingConcept(),item);
-									QList<COptimizedClassExtractedSaturationSatisfiableTestingItem*>* subsumingConceptItemList = item->sortSubsumingConceptItemList();
+									if (!subsumersExtractedVec[i]) {
+										// the direct subsumer found above turned out equivalent to another class
+										precSatSubsumerExtractor.extractSubsumers(item->getTestingConcept(),item);
+										item->sortSubsumingConceptItemList();
+									}
+									QList<COptimizedClassExtractedSaturationSatisfiableTestingItem*>* subsumingConceptItemList = item->getSubsumingConceptItemList();
 									for (QList<COptimizedClassExtractedSaturationSatisfiableTestingItem*>::const_iterator subsumedIt = subsumingConceptItemList->constBegin(), subsumedItEnd = subsumingConceptItemList->constEnd(); subsumedIt != subsumedItEnd; ++subsumedIt) {
 										COptimizedClassExtractedSaturationSatisfiableTestingItem* subsumedConceptItem = *subsumedIt;
 										cint64 subsumedItemSubsumingCount = subsumedConceptItem->getExtractionSubsumerCount();
@@ -483,6 +534,8 @@ namespace Konclude {
 							bottomHierNode->makeParent(itemHierNode);
 						}
 					}
+					// the leaves are the direct parents of the bottom node now, the top node is not
+					tax->removeBypassedTopBottomLink();
 
 
 #ifdef OPTIMIZEDCLASSEXTRACTEDSATURATIONCLASSIFIERDEBUGSTATUSDESCRIPTION
@@ -543,6 +596,9 @@ namespace Konclude {
 					}
 					node->addParentNode(newParentNode);
 					newParentNode->addChildNode(node);
+					// a node with a child is not a leaf, so it must not be made a parent of the
+					// bottom node afterwards; the single direct subsumer path marks this as well
+					subsumedConceptItem->setPredecessorItem(true);
 					if (mTransitiveReductionAddAllPredecessors || resolvedExtSubsumerCount != remainingSubsumingResolvingCount) {
 						resolvedExtSubsumerCount = 0;
 						QList<CHierarchyNode*> predAddList;

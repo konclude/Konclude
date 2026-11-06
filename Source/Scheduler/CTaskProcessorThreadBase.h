@@ -23,6 +23,7 @@
 
 // Libraries includes
 #include <QTime>
+#include <atomic>
 
 // Namespace includes
 #include "SchedulerSettings.h"
@@ -118,6 +119,9 @@ namespace Konclude {
 
 			// protected methods
 			protected:
+				// releases the memory of the kept tasks, once nothing uses their data any more
+				cint64 releaseKeptTasks();
+
 				virtual bool processControlEvents(QEvent::Type type, CControlEvent *event);
 
 				virtual bool processEvent(CEvent *event, CContext* handlerContext);
@@ -157,6 +161,8 @@ namespace Konclude {
 				CTask* mTaskCompletionQueue;
 				CTaskProcessorContext *mTaskProcessorContext;
 				CTaskHandleMemoryAllocationManager *mMemoryAllocator;
+				// the completed tasks that were not released because their data is kept
+				QList<CTask*> mKeptTaskList;
 				CTaskHandleAlgorithm* mTaskHandleAlgo;
 				CTaskStatusPropagator* mTaskStatusPropagator;
 				CTaskCallbackExecuter* mCallbackExecuter;
@@ -169,7 +175,9 @@ namespace Konclude {
 				CTaskReserveQueueConsumer* mTaskReserveQueueConsumer;
 
 
-				bool mProcessingStopped;
+				// set by another thread in stopProcessing, hence atomic; relaxed suffices, since the release
+				// of the wake-up semaphore after it makes the store visible to the woken thread
+				std::atomic<bool> mProcessingStopped;
 
 				bool mThreadBlocked;
 

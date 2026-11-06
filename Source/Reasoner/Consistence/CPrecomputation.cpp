@@ -32,10 +32,33 @@ namespace Konclude {
 				mPrecomputed = false;
 				mSaturData = nullptr;
 				mStatsColl = nullptr;
+				mInitializedSaturationNodeCount = 0;
+				mSaturationNodeCount = 0;
 			}
 
 			CPrecomputation::~CPrecomputation() {
 				delete mSaturData;
+			}
+
+
+			CPrecomputation* CPrecomputation::incInitializedSaturationNodeCount(cint64 count) {
+				mInitializedSaturationNodeCount.fetch_add(count,std::memory_order_relaxed);
+				return this;
+			}
+
+			CPrecomputation* CPrecomputation::updateSaturationNodeCount(cint64 nodeCount) {
+				cint64 current = mSaturationNodeCount.load(std::memory_order_relaxed);
+				while (nodeCount > current && !mSaturationNodeCount.compare_exchange_weak(current,nodeCount,std::memory_order_relaxed)) {
+				}
+				return this;
+			}
+
+			cint64 CPrecomputation::getInitializedSaturationNodeCount() {
+				return mInitializedSaturationNodeCount.load(std::memory_order_relaxed);
+			}
+
+			cint64 CPrecomputation::getSaturationNodeCount() {
+				return mSaturationNodeCount.load(std::memory_order_relaxed);
 			}
 
 			bool CPrecomputation::isPrecomputed() {

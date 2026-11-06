@@ -32,6 +32,7 @@ namespace Konclude {
 				mSPARQLInterpreter = 0;
 				mLoaderConfig = 0;
 				mConfLogProcessingTimes = false;
+				mExitCode = 0;
 				
 				mStreamSPARQLHeader = QString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<sparql xmlns=\"http://www.w3.org/2005/sparql-results#\" xml:base=\"http://www.w3.org/2005/sparql-results#\" xmlns:owl=\"http://www.w3.org/2002/07/owl#\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema#\">").toLocal8Bit();
 				mStreamSPARQLFooter = QString("\r\n</sparql>").toLocal8Bit();
@@ -179,9 +180,7 @@ namespace Konclude {
 
 					} else {
 						LOG(ERROR,getLogDomain(),logTr("SPARQL request file '%1' not found.").arg(reqFileString),this);
-						// seems to be required to preventing crashes
-						// TODO: fix 
-						this->usleep(200);
+						mExitCode = 1;
 						concludeOWLlinkContent();
 					}
 				}	
@@ -292,7 +291,7 @@ namespace Konclude {
 					CLogger::getInstance()->waitSynchronization();
 					//qSleep(10);
 					//qWait();
-					QCoreApplication::exit();
+					QCoreApplication::exit(mExitCode);
 				}
 				return this;
 			}

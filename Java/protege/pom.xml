@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The Protege plug-in of Konclude, an OSGi bundle that registers KoncludeReasonerFactory with
+  Protege 5.6 and carries the shared library of Konclude, see Java/Readme.md.
+
+  Build it with
+
+      mvn package -Dkonclude.library.macos-arm64=<path of libKonclude.dylib>
+
+  and, to carry the libraries for Linux and Windows as well, which the release workflow does,
+  or instead of the one for macOS, with
+
+      -Dkonclude.library.linux-x64=<path of libKonclude.so>
+      -Dkonclude.library.linux-arm64=<path of libKonclude.so>
+      -Dkonclude.library.windows-x64=<path of Konclude.dll>
+
+  and copy target/konclude-protege-plugin-<version>.jar into the plugins directory of Protege.
+  The library has to be one that is built against a static Qt, so that it depends on nothing
+  but the system, see Java/Readme.md.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.konclude</groupId>
+	<artifactId>konclude-protege-plugin</artifactId>
+	<version>0.7.0-SNAPSHOT</version>
+	<packaging>bundle</packaging>
+
+	<name>Konclude Reasoner Plug-in</name>
+	<description>The reasoning system Konclude as a reasoner of Protege, through its JNI bridge</description>
+	<url>http://konclude.com/</url>
+	<licenses>
+		<license>
+			<name>LGPL 3.0</name>
+			<url>http://www.gnu.org/licenses/lgpl-3.0.html</url>
+		</license>
+	</licenses>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Protege 5.6.9 runs on Java 11 or newer, its own distributions bundle a JRE 11 -->
+		<maven.compiler.release>11</maven.compiler.release>
+
+		<!-- the OWL API that Protege 5.6.9 ships -->
+		<owlapi.version>4.5.29</owlapi.version>
+		<!-- the last Protege release on Maven Central, the plug-in API is that of 5.6.9 -->
+		<protege.version>5.6.6</protege.version>
+		<!-- the slf4j that Protege 5.6.9 ships, bnd takes the import range from it -->
+		<slf4j.version>1.7.36</slf4j.version>
+
+		<!--
+		  The shared library for macOS, which a build on a Mac with an ARM processor always
+		  packages. The default is where an in-tree build of KoncludeLIB.pro puts it; an
+		  out-of-tree build passes the path on the command line. The build fails if the file
+		  does not exist.
+		-->
+		<konclude.library.macos-arm64>${project.basedir}/../../Release/libKonclude.dylib</konclude.library.macos-arm64>
+
+		<!--
+		  The entries of Bundle-NativeCode and Include-Resource for the library of each
+		  platform, which the profiles below fill in when the path of the library is given, or
+		  for macOS on a Mac, so that a build without it neither lists the library nor looks for
+		  its file.
+		-->
+		<konclude.nativecode.macos-arm64></konclude.nativecode.macos-arm64>
+		<konclude.resource.macos-arm64></konclude.resource.macos-arm64>
+		<konclude.nativecode.linux-x64></konclude.nativecode.linux-x64>
+		<konclude.resource.linux-x64></konclude.resource.linux-x64>
+		<konclude.nativecode.linux-arm64></konclude.nativecode.linux-arm64>
+		<konclude.resource.linux-arm64></konclude.resource.linux-arm64>
+		<konclude.nativecode.windows-x64></konclude.nativecode.windows-x64>
+		<konclude.resource.windows-x64></konclude.resource.windows-x64>
+	</properties>
+
+	<profiles>
+		<!--
+		  The library for macOS is packaged when its path is given, or on a Mac with an ARM
+		  processor with the default path, as before the other platforms could do without it.
+		-->
+		<profile>
+			<id>macos-arm64</id>
+			<activation>
+				<property>
+					<name>konclude.library.macos-arm64</name>
+				</property>
+			</activation>
+			<properties>
+				<konclude.nativecode.macos-arm64>lib/native/macos-arm64/libKonclude.dylib; osname=MacOSX; osname="Mac OS X"; processor=aarch64,</konclude.nativecode.macos-arm64>
+				<konclude.resource.macos-arm64>,lib/native/macos-arm64/libKonclude.dylib=${konclude.library.macos-arm64}</konclude.resource.macos-arm64>
+			</properties>
+		</profile>
+		<profile>
+			<id>macos-arm64-on-a-mac</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<konclude.nativecode.macos-arm64>lib/native/macos-arm64/libKonclude.dylib; osname=MacOSX; osname="Mac OS X"; processor=aarch64,</konclude.nativecode.macos-arm64>
+				<konclude.resource.macos-arm64>,lib/native/macos-arm64/libKonclude.dylib=${konclude.library.macos-arm64}</konclude.resource.macos-arm64>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux-x64</id>
+			<activation>
+				<property>
+					<name>konclude.library.linux-x64</name>
+				</property>
+			</activation>
+			<properties>
+				<konclude.nativecode.linux-x64>lib/native/linux-x64/libKonclude.so; osname=Linux; processor=x86-64; processor=amd64,</konclude.nativecode.linux-x64>
+				<konclude.resource.linux-x64>,lib/native/linux-x64/libKonclude.so=${konclude.library.linux-x64}</konclude.resource.linux-x64>
+			</properties>
+		</profile>
+		<!--
+		  Java reports 64 bit ARM as aarch64 on Linux and macOS. The name arm64 must not be
+		  listed: Felix normalises it to arm_le, the 32 bit ARM, on which the library cannot load.
+		-->
+		<profile>
+			<id>linux-arm64</id>
+			<activation>
+				<property>
+					<name>konclude.library.linux-arm64</name>
+				</property>
+			</activation>
+			<properties>
+				<konclude.nativecode.linux-arm64>lib/native/linux-arm64/libKonclude.so; osname=Linux; processor=aarch64,</konclude.nativecode.linux-arm64>
+				<konclude.resource.linux-arm64>,lib/native/linux-arm64/libKonclude.so=${konclude.library.linux-arm64}</konclude.resource.linux-arm64>
+			</properties>
+		</profile>
+		<!--
+		  Felix normalises the name 'Windows 10' to windows10 and every other Windows, 11 and the
+		  server editions among them, to win32, so both names are needed.
+		-->
+		<profile>
+			<id>windows-x64</id>
+			<activation>
+				<property>
+					<name>konclude.library.windows-x64</name>
+				</property>
+			</activation>
+			<properties>
+				<konclude.nativecode.windows-x64>lib/native/windows-x64/Konclude.dll; osname=Win32; osname="Windows 10"; processor=x86-64; processor=amd64,</konclude.nativecode.windows-x64>
+				<konclude.resource.windows-x64>,lib/native/windows-x64/Konclude.dll=${konclude.library.windows-x64}</konclude.resource.windows-x64>
+			</properties>
+		</profile>
+	</profiles>
+
+
+	<dependencies>
+		<!-- everything the plug-in needs is a bundle of Protege, so nothing is packaged -->
+		<dependency>
+			<groupId>net.sourceforge.owlapi</groupId>
+			<artifactId>owlapi-distribution</artifactId>
+			<version>${owlapi.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>edu.stanford.protege</groupId>
+			<artifactId>protege-editor-owl</artifactId>
+			<version>${protege.version}</version>
+			<scope>provided</scope>
+			<exclusions>
+				<!-- Protege pulls in owlapi-osgidistribution, one copy of the OWL API is enough -->
+				<exclusion>
+					<groupId>net.sourceforge.owlapi</groupId>
+					<artifactId>owlapi-osgidistribution</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- the bridge and the OWL API wrapper are compiled into the bundle from Java/src and Java/owlapi/src -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>3.3.0</version>
+				<executions>
+					<execution>
+						<id>add-bridge-and-wrapper-sources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>${project.basedir}/../src</source>
+								<source>${project.basedir}/../owlapi/src</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.13.0</version>
+				<configuration>
+					<release>${maven.compiler.release}</release>
+					<encoding>UTF-8</encoding>
+					<!-- the tests of those directories are run by the scripts beside them, not shipped -->
+					<excludes>
+						<exclude>com/konclude/smoketest/**</exclude>
+						<exclude>com/konclude/owlapitest/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>5.1.9</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>com.konclude.protege;singleton:=true</Bundle-SymbolicName>
+						<Bundle-Name>Konclude Reasoner</Bundle-Name>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Bundle-Vendor>Konclude Developer Team</Bundle-Vendor>
+						<Bundle-Description>${project.description}</Bundle-Description>
+						<Bundle-DocURL>${project.url}</Bundle-DocURL>
+						<Bundle-License>http://www.gnu.org/licenses/lgpl-3.0.html</Bundle-License>
+						<Bundle-ClassPath>.</Bundle-ClassPath>
+						<Require-Bundle>org.protege.editor.core.application, org.protege.editor.owl, org.semanticweb.owl.owlapi</Require-Bundle>
+						<Export-Package>com.konclude.jnibridge, com.konclude.owlapi, com.konclude.protege</Export-Package>
+						<!-- java.* is never imported, everything else that bnd finds is, with a version range -->
+						<Import-Package>!java.*, *</Import-Package>
+
+						<!--
+						  The shared library, which OSGi extracts and hands to System.loadLibrary in
+						  KoncludeReasoner.loadNativeLibrary. The trailing * makes the native code
+						  optional, so that the bundle still resolves on a platform for which no
+						  library is packaged and the reasoner can say so when it is started.
+						-->
+						<Bundle-NativeCode>
+							${konclude.nativecode.macos-arm64}
+							${konclude.nativecode.linux-x64}
+							${konclude.nativecode.linux-arm64}
+							${konclude.nativecode.windows-x64}
+							*
+						</Bundle-NativeCode>
+						<Include-Resource>
+							{maven-resources}
+							${konclude.resource.macos-arm64}
+							${konclude.resource.linux-x64}
+							${konclude.resource.linux-arm64}
+							${konclude.resource.windows-x64}
+						</Include-Resource>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</project>

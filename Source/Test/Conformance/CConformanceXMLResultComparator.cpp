@@ -201,8 +201,12 @@ namespace Konclude {
 
 
 			bool CConformanceXMLResultComparator::isUnorderedContainer(const QString& elementName) {
-				// SPARQL result rows and OWLlink set members have no meaningful order.
-				return elementName == "results" || elementName.startsWith("SetOf");
+				// SPARQL result rows, OWLlink set members and synonym/synset members
+				// have no meaningful order.
+				return elementName == "results"
+						|| elementName == "IndividualSynonyms"
+						|| elementName.startsWith("SetOf")
+						|| elementName.endsWith("Synset");
 			}
 
 

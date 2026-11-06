@@ -73,6 +73,38 @@ namespace Konclude {
 			}
 
 
+			bool CConfigDependedSubsumptionClassifierFactory::hasSaturationDataForAllActiveClassConcepts(CConcreteOntology *ontology, CConcept** missingDataConcept) {
+				CTBox* tBox = ontology->getTBox();
+				if (!tBox) {
+					return false;
+				}
+				CBOXSET<CConcept*>* activeClassConceptSet = tBox->getActiveClassConceptSet(false);
+				if (!activeClassConceptSet || activeClassConceptSet->isEmpty()) {
+					// nothing would be extracted, so there is no data that could be missing
+					return true;
+				}
+				CConceptVector* conVec = tBox->getConceptVector(false);
+				if (!conVec) {
+					return false;
+				}
+				CPrecomputedSaturationSubsumerExtractor precSatSubsumerExtractor(ontology);
+				cint64 conCount = conVec->getItemCount();
+				for (cint64 conIdx = 1; conIdx < conCount; ++conIdx) {
+					CConcept* concept = conVec->getData(conIdx);
+					if (concept && concept->hasClassName() && activeClassConceptSet->contains(concept)) {
+						// getConceptFlags resolves the saturation data for the concept and returns false if it cannot
+						// be reached, which is exactly the case in which extractSubsumers would report no subsumers.
+						if (!precSatSubsumerExtractor.getConceptFlags(concept,nullptr,nullptr,nullptr)) {
+							if (missingDataConcept) {
+								*missingDataConcept = concept;
+							}
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+
 			bool CConfigDependedSubsumptionClassifierFactory::isClassificationBySatisfiableCalculationSufficient(CConcreteOntology *ontology, CConfigurationBase *config) {
 				COntologyStructureSummary* ontoStrSum = ontology->getStructureSummary();
 				if (ontoStrSum) {
@@ -98,6 +130,21 @@ namespace Konclude {
 						if (!satCalcTask->getProcessingDataBox()->isInsufficientNodeOccured() && !satCalcTask->getProcessingDataBox()->isProblematicEQCandidateOccured()) {
 							CBOXSET<CConcept*>* eqConceptNonCandSet = ontology->getTBox()->getEquivalentConceptNonCandidateSet(false);
 							if (!eqConceptNonCandSet || eqConceptNonCandSet->isEmpty()) {
+								// The checks above are properties of the saturation as a whole. They do not establish
+								// that the saturation actually produced data for each individual class concept, which
+								// is what the extracting classifier reads to obtain the subsumers of a concept.
+								bool requireSaturationDataForAllClassConcepts = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.RequireSaturationDataForAllClassConcepts",true);
+								if (requireSaturationDataForAllClassConcepts) {
+									CConcept* missingDataConcept = nullptr;
+									if (!hasSaturationDataForAllActiveClassConcepts(ontology,&missingDataConcept)) {
+										QString missingConceptName("<unknown>");
+										if (missingDataConcept) {
+											missingConceptName = CIRIName::getRecentIRIName(missingDataConcept->getClassNameLinker());
+										}
+										LOG(INFO,"::Konclude::Reasoner::Classifier::Factory",logTr("Ontology '%1' has the class concept '%2' without saturation data, classifying with subsumption tests instead of extracting subsumers from the saturation.").arg(ontology->getOntologyName()).arg(missingConceptName),this);
+										return false;
+									}
+								}
 								return true;
 							}
 						}

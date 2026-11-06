@@ -26,6 +26,7 @@
 
 // Namespace includes
 #include "ProcessSettings.h"
+#include <QAtomicInt>
 #include "CProcessContext.h"
 #include "CSaturationIndividualNodeExtensionResolveHash.h"
 
@@ -71,6 +72,9 @@ namespace Konclude {
 						CIndividualSaturationProcessNode* getProcessingIndividualNode();
 						cint64 getProcessingIndividualNodeID();
 						bool hasProcessingIndividualNode();
+						//! Parallel saturation (#92): 0 = no node, 1 = a thread is building the node, 2 = node published.
+						inline int getParallelState() { return mParallelState.loadAcquire(); }
+						inline void setParallelState(int state) { mParallelState.storeRelease(state); }
 
 					// protected methods
 					protected:
@@ -81,6 +85,7 @@ namespace Konclude {
 						CSaturationIndividualNodeExtensionResolveHash* mExtensionResolveHash;
 						CIndividualSaturationProcessNode* mIndiNode;
 						cint64 mIndiID;
+						QAtomicInt mParallelState;
 
 					// private methods
 					private:

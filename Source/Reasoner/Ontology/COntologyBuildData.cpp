@@ -65,6 +65,13 @@ namespace Konclude {
 				mDataLexicalValueBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CDataLexicalValueExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mFacetIRIFacetBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CStringRefStringHasher,CDataFacetExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				
+				mInheritedExpressionBuildCount = 0;
+				mInheritedBuildConceptCount = 0;
+				mInheritedBuildObjectRoleCount = 0;
+				mInheritedBuildIndividualCount = 0;
+				mInheritedBuildDataRoleCount = 0;
+				mInheritedBuildDatatypeCount = 0;
+				mInheritedBuildDataLexicalValueCount = 0;
 				mExpressionBuildListContainer = CObjectParameterizingAllocator< CBUILDLIST<CBuildExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 				mInverseObjectPropertyHash = CObjectParameterizingAllocator< CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
@@ -85,6 +92,7 @@ namespace Konclude {
 				mBuildIndividualList = CObjectParameterizingAllocator< CBUILDLIST<CIndividualTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mBuildDataRoleList = CObjectParameterizingAllocator< CBUILDLIST<CDataPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mBuildDatatypeList = CObjectParameterizingAllocator< CBUILDLIST<CDatatypeExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mBuildDataLexicalValueList = CObjectParameterizingAllocator< CBUILDLIST<CDataLexicalValueExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mBuildDataRangesList = CObjectParameterizingAllocator< CBUILDLIST<CDataRangeTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 
@@ -109,8 +117,35 @@ namespace Konclude {
 
 			COntologyBuildData::~COntologyBuildData() {
 				CMemoryAllocationManager* memAllocMan = CContext::getMemoryAllocationManager(mOntoContext);
-				// TODO: delete all
-				//cDeleteAll(*mExpressionBuildListContainer);
+
+				// The expressions built for this ontology are deleted with it; those before the
+				// inherited counts were copied from the referenced ontology, which deletes them itself.
+				// An expression can be in more than one list, a class term in the expression list and
+				// in the concept list, so each is deleted once. No expression deletes others. (#45)
+				QSet<CBuildExpression*> ownExpressionSet;
+				for (cint64 i = mInheritedExpressionBuildCount; i < mExpressionBuildListContainer->count(); ++i) {
+					ownExpressionSet.insert(mExpressionBuildListContainer->at(i));
+				}
+				for (cint64 i = mInheritedBuildConceptCount; i < mBuildConceptList->count(); ++i) {
+					ownExpressionSet.insert(mBuildConceptList->at(i));
+				}
+				for (cint64 i = mInheritedBuildObjectRoleCount; i < mBuildObjectRoleList->count(); ++i) {
+					ownExpressionSet.insert(mBuildObjectRoleList->at(i));
+				}
+				for (cint64 i = mInheritedBuildIndividualCount; i < mBuildIndividualList->count(); ++i) {
+					ownExpressionSet.insert(mBuildIndividualList->at(i));
+				}
+				for (cint64 i = mInheritedBuildDataRoleCount; i < mBuildDataRoleList->count(); ++i) {
+					ownExpressionSet.insert(mBuildDataRoleList->at(i));
+				}
+				for (cint64 i = mInheritedBuildDatatypeCount; i < mBuildDatatypeList->count(); ++i) {
+					ownExpressionSet.insert(mBuildDatatypeList->at(i));
+				}
+				for (cint64 i = mInheritedBuildDataLexicalValueCount; i < mBuildDataLexicalValueList->count(); ++i) {
+					ownExpressionSet.insert(mBuildDataLexicalValueList->at(i));
+				}
+				ownExpressionSet.remove(nullptr);
+				qDeleteAll(ownExpressionSet);
 				COPADestroyAndRelease(mTellAxiomSet,memAllocMan);
 				COPADestroyAndRelease(mRetractAxiomSet,memAllocMan);
 				COPADestroyAndRelease(mTellUpdatedAxiomSet,memAllocMan);
@@ -157,6 +192,7 @@ namespace Konclude {
 				COPADestroyAndRelease(mBuildDataRoleList,memAllocMan);
 				COPADestroyAndRelease(mBuildIndividualList,memAllocMan);
 				COPADestroyAndRelease(mBuildDatatypeList,memAllocMan);
+				COPADestroyAndRelease(mBuildDataLexicalValueList,memAllocMan);
 				COPADestroyAndRelease(mBuildDataRangesList,memAllocMan);
 
 				COPADestroyAndRelease(mImportDataHash,memAllocMan);
@@ -203,6 +239,7 @@ namespace Konclude {
 				*mFacetIRIFacetBuildHash = *buildData->mFacetIRIFacetBuildHash;
 
 				*mExpressionBuildListContainer = *buildData->mExpressionBuildListContainer;
+				mInheritedExpressionBuildCount = mExpressionBuildListContainer->count();
 
 				*mInverseObjectPropertyHash = *buildData->mInverseObjectPropertyHash;
 				*mInverseObjectPropertyList = *buildData->mInverseObjectPropertyList;
@@ -222,6 +259,13 @@ namespace Konclude {
 				*mBuildObjectRoleList = *buildData->mBuildObjectRoleList;
 				*mBuildDataRoleList = *buildData->mBuildDataRoleList;
 				*mBuildDatatypeList = *buildData->mBuildDatatypeList;
+				*mBuildDataLexicalValueList = *buildData->mBuildDataLexicalValueList;
+				mInheritedBuildIndividualCount = mBuildIndividualList->count();
+				mInheritedBuildConceptCount = mBuildConceptList->count();
+				mInheritedBuildObjectRoleCount = mBuildObjectRoleList->count();
+				mInheritedBuildDataRoleCount = mBuildDataRoleList->count();
+				mInheritedBuildDatatypeCount = mBuildDatatypeList->count();
+				mInheritedBuildDataLexicalValueCount = mBuildDataLexicalValueList->count();
 				*mBuildDataRangesList = *buildData->mBuildDataRangesList;
 
 				*mImportDataHash = *buildData->mImportDataHash;
@@ -511,6 +555,10 @@ namespace Konclude {
 
 			CBUILDLIST<CDatatypeExpression*>* COntologyBuildData::getBuildDatatypeList() {
 				return mBuildDatatypeList;
+			}
+
+			CBUILDLIST<CDataLexicalValueExpression*>* COntologyBuildData::getBuildDataLexicalValueList() {
+				return mBuildDataLexicalValueList;
 			}
 
 			cint64 COntologyBuildData::getNextAxiomNumber(bool moveNext) {

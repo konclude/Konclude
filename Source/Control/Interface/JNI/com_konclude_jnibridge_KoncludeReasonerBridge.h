@@ -55,6 +55,14 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initQu
 JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_finalizeQueryingBridge
   (JNIEnv *, jobject, jobject);
 
+/*
+ * Class:     com_konclude_jnibridge_KoncludeReasonerBridge
+ * Method:    takeKoncludeLogMessages
+ * Signature: ()[Ljava/lang/String;
+ */
+JNIEXPORT jobjectArray JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_takeKoncludeLogMessages
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

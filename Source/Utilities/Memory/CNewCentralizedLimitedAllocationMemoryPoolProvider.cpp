@@ -44,29 +44,47 @@ namespace Konclude {
 
 
 			CMemoryPool* CNewCentralizedLimitedAllocationMemoryPoolProvider::acquireMemoryPool(cint64 minPoolSize) {
-				cint64 memoryBlockSize = qMax(mDefaultPoolSize,minPoolSize);
+				cint64 memoryBlockSize = CMemoryPool::mappedBlockSize(qMax(mDefaultPoolSize,minPoolSize));
 				mAllocLimitator->addAllocatingMemorySize(memoryBlockSize+sizeof(CMemoryPool));
+				CMemoryPool* recycledPool = CMemoryPoolRecycler::getInstance()->takeMemoryPool(minPoolSize);
+				if (recycledPool) {
+					mStatAllocatedPoolSize += recycledPool->getMemoryBlockSize();
+					mStatDiffPoolSize += recycledPool->getMemoryBlockSize();
+					++mStatAllocatedPoolCount;
+					++mStatDiffPoolCount;
+					return recycledPool;
+				}
 				CMemoryPool* memoryPool = new CMemoryPool();
-				char* memoryBlock = new char[memoryBlockSize];
+				bool memoryBlockMapped = false;
+				char* memoryBlock = CMemoryPool::allocateMemoryBlock(memoryBlockSize, memoryBlockMapped);
 				mStatAllocatedPoolSize += memoryBlockSize;
 				mStatDiffPoolSize += memoryBlockSize;
 				++mStatAllocatedPoolCount;
 				++mStatDiffPoolCount;
-				memoryPool->setMemoryBlockData(memoryBlock,memoryBlockSize);
+				memoryPool->setMemoryBlockData(memoryBlock,memoryBlockSize,memoryBlockMapped);
 				return memoryPool;
 			}
 
 
 			CMemoryPool* CNewCentralizedLimitedAllocationMemoryPoolProvider::acquireMemoryPoolConsiderated(cint64 minPoolSize) {
-				cint64 memoryBlockSize = qMax(mDefaultPoolSize,minPoolSize);
+				cint64 memoryBlockSize = CMemoryPool::mappedBlockSize(qMax(mDefaultPoolSize,minPoolSize));
 				if (mAllocLimitator->addAllocatingMemorySize(memoryBlockSize+sizeof(CMemoryPool))) {
+					CMemoryPool* recycledPool = CMemoryPoolRecycler::getInstance()->takeMemoryPool(minPoolSize);
+					if (recycledPool) {
+						mStatAllocatedPoolSize += recycledPool->getMemoryBlockSize();
+						mStatDiffPoolSize += recycledPool->getMemoryBlockSize();
+						++mStatAllocatedPoolCount;
+						++mStatDiffPoolCount;
+						return recycledPool;
+					}
 					CMemoryPool* memoryPool = new CMemoryPool();
-					char* memoryBlock = new char[memoryBlockSize];
+					bool memoryBlockMapped = false;
+				char* memoryBlock = CMemoryPool::allocateMemoryBlock(memoryBlockSize, memoryBlockMapped);
 					mStatAllocatedPoolSize += memoryBlockSize;
 					mStatDiffPoolSize += memoryBlockSize;
 					++mStatAllocatedPoolCount;
 					++mStatDiffPoolCount;
-					memoryPool->setMemoryBlockData(memoryBlock,memoryBlockSize);
+					memoryPool->setMemoryBlockData(memoryBlock,memoryBlockSize,memoryBlockMapped);
 					return memoryPool;
 				} else {
 					throw CMemoryAllocationException();
@@ -85,8 +103,11 @@ namespace Konclude {
 					mAllocLimitator->addReleasedMemorySize(tmpMemoryPool->getMemoryBlockSize()+sizeof(CMemoryPool));
 					++mStatReleasedPoolCount;
 					--mStatDiffPoolCount;
-					char* memoryBlock = tmpMemoryPool->getMemoryBlockData();
-					delete[] memoryBlock;
+					tmpMemoryPool->clearNext();
+					if (CMemoryPoolRecycler::getInstance()->giveMemoryPool(tmpMemoryPool)) {
+						continue;
+					}
+					CMemoryPool::releaseMemoryBlockData(tmpMemoryPool);
 					delete tmpMemoryPool;
 				}
 				return this;

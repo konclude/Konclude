@@ -29,12 +29,18 @@ namespace Konclude {
 
 			namespace Task {
 
-				CSatisfiableTaskAnswererSubsumptionMessageAdapter::CSatisfiableTaskAnswererSubsumptionMessageAdapter(CConcept* testingConcept, bool testingNegation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology, CAnsweringMessageDataObserver* observer) {
+				CSatisfiableTaskAnswererSubsumptionMessageAdapter::CSatisfiableTaskAnswererSubsumptionMessageAdapter(CConcept* testingConcept, bool testingNegation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology, CAnsweringMessageDataObserver* observer, bool rootLabelRequested) {
+					mRootLabelRequested = rootLabelRequested;
 					mTestingConcept = testingConcept;
 					mOntology = testingOntology;
 					mMessageObserver = observer;
 					mAnsweringHandler = answeringHandler;
 					mTestingConceptNegation = testingNegation;
+				}
+
+
+				bool CSatisfiableTaskAnswererSubsumptionMessageAdapter::isRootLabelRequested() {
+					return mRootLabelRequested;
 				}
 
 

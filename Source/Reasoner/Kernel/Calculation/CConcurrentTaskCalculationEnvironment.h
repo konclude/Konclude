@@ -83,6 +83,10 @@ namespace Konclude {
 						CConcurrentTaskCalculationEnvironment* initCallbackExecuter(CSatisfiableCalculationTaskJobCallbackExecuter* callbackExecuter);
 						CConcurrentTaskCalculationEnvironment* initStatusPropagator(CSatisfiableCalculationTaskStatusPropagator* statusPropagator);
 
+						// Stops the processing loops of all processor units and ends and joins their threads,
+						// waiting for each at most waitMillis; returns the number of threads still running.
+						cint64 stopProcessorUnits(unsigned long waitMillis);
+
 						CSingleThreadTaskProcessorUnit* getSingleTaskProcessorUnit();
 						CTaskEventHandlerBasedScheduler* getSchedulerTaskProcessorUnit();
 						CTaskEventHandlerBasedCompletor* getCompletorTaskProcessorUnit();

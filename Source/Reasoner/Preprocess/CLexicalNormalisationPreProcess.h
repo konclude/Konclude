@@ -85,7 +85,27 @@ namespace Konclude {
 					CConcept *topConcept;
 					QHash<CConceptUnambiguousHasher,CConcept*>* replacementHash;
 					QHash< CConcept*,QPair<bool,CConcept*> >* conceptReplaceHash;
-					QSet<CConcept*>* processedSet; 
+					/*! concepts by tag: sets of concept pointers cost a hash operation per visited operand, about
+					 *  a seventh of the preprocessing of SNOMED CT */
+					class CConceptTagFlags {
+						public:
+							bool contains(CConcept* concept) const {
+								cint64 tag = concept->getConceptTag();
+								return tag < mFlags.size() && mFlags.at(tag);
+							}
+							void insert(CConcept* concept) {
+								cint64 tag = concept->getConceptTag();
+								if (tag >= mFlags.size()) {
+									mFlags.resize((int)qMax<cint64>(tag + 1, (cint64)mFlags.size() * 2));
+								}
+								mFlags[tag] = 1;
+							}
+						private:
+							QVector<quint8> mFlags;
+					};
+					CConceptTagFlags* processedSet;
+					//! the tags of the concepts in conceptReplaceHash, which only few are, so that the others need no lookup
+					CConceptTagFlags* replacedConceptFlags;
 					QList<CConcept*>* processingList;
 
 					CMemoryAllocationManager* mBoxMemMan;

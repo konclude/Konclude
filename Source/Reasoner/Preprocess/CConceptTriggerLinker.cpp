@@ -29,6 +29,7 @@ namespace Konclude {
 
 
 			CConceptTriggerLinker::CConceptTriggerLinker() : CSortedLinkerBase<CConceptTriggerLinker*,CConceptTriggerLinker>(this) {
+				mTriggerFrequency = UNKNOWN_TRIGGER_FREQUENCY;
 			}
 
 			CConceptTriggerLinker* CConceptTriggerLinker::initConceptTriggerLinker(CConcept* triggerConcept, cint64 triggerComplexity) {
@@ -50,13 +51,42 @@ namespace Konclude {
 				return this;
 			}
 
+			const cint64 CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
+			bool CConceptTriggerLinker::sFrequencyOrdered = true;
+
+			cint64 CConceptTriggerLinker::getTriggerFrequency() {
+				return mTriggerFrequency;
+			}
+
+			CConceptTriggerLinker* CConceptTriggerLinker::setTriggerFrequency(cint64 frequency) {
+				mTriggerFrequency = frequency;
+				return this;
+			}
+
 			bool CConceptTriggerLinker::operator<=(const CConceptTriggerLinker& conceptTriggerLinker) {
+				if (sFrequencyOrdered) {
+					if (mTriggerFrequency < conceptTriggerLinker.mTriggerFrequency) {
+						return true;
+					} else if (mTriggerFrequency > conceptTriggerLinker.mTriggerFrequency) {
+						return false;
+					}
+				}
 				if (mTriggerComplexity > conceptTriggerLinker.mTriggerComplexity) {
 					return true;
 				} else if (mTriggerComplexity < conceptTriggerLinker.mTriggerComplexity) {
 					return false;
 				} 
-				return mTriggerConcept >= conceptTriggerLinker.mTriggerConcept;
+				// triggers of the same complexity are ordered by their concept's tag, not by the concept's address:
+				// the absorber pairs the triggers in this order and reuses an implication whenever a pair already has
+				// one, and with the addresses the pairing followed the memory layout, which the allocator chooses
+				// differently from one build to the next; on SNOMED CT one build in two to four then reused some 8 000
+				// implications more, its saturation labels grew by 60 % and the precomputation took half as long
+				// again with half as much memory again; the later concepts first is the pairing of the good builds
+				// KONCLUDE_TRIGGER_TIEBREAK=asc is a testing switch: the ascending order pairs the triggers the way the slow
+				// memory layouts did before #79, which is the pairing the reproducers of issue #34 need
+				static bool ascending = getenv("KONCLUDE_TRIGGER_TIEBREAK") && QByteArray(getenv("KONCLUDE_TRIGGER_TIEBREAK")) == "asc";
+				if (ascending) return mTriggerConcept->getConceptTag() <= conceptTriggerLinker.mTriggerConcept->getConceptTag();
+				return mTriggerConcept->getConceptTag() >= conceptTriggerLinker.mTriggerConcept->getConceptTag();
 			}
 
 

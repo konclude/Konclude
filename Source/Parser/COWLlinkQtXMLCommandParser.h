@@ -72,6 +72,7 @@
 #include "Control/Command/Records/CStartProcessCommandRecord.h"
 #include "Control/Command/Records/CStopProcessCommandRecord.h"
 #include "Control/Command/Records/CNotSupportedNodeErrorRecord.h"
+#include "Control/Command/Records/CUnspecifiedMessageErrorRecord.h"
 
 #include "Control/Command/CCommandDelegater.h"
 #include "Control/Command/CCommandProcessedPrecondition.h"

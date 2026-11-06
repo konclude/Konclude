@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- The declared data range (xsd:integer) excludes the asserted string value. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/datatype-clash">
+  <Prefix name="" IRI="http://konclude.test/features/datatype-clash#"/>
+  <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+
+  <Declaration><DataProperty abbreviatedIRI=":age"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":alice"/></Declaration>
+
+  <DataPropertyRange>
+    <DataProperty abbreviatedIRI=":age"/>
+    <Datatype abbreviatedIRI="xsd:integer"/>
+  </DataPropertyRange>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI=":age"/>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">not-a-number</Literal>
+  </DataPropertyAssertion>
+</Ontology>

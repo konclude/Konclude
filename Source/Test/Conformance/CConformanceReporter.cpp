@@ -74,7 +74,12 @@ namespace Konclude {
 				for (const int& count : outcomeCounts) {
 					total += count;
 				}
+				int passed = outcomeCounts.value(CConformanceOutcome::TYPE::PASS, 0);
+				int nonPassing = total - passed;
 				QString executionWord = (total == 1) ? QString("test execution") : QString("test executions");
+				if (nonPassing > 0) {
+					return QString("%1 %2 (%3 %4, %5 non-passing):").arg(label).arg(name).arg(total).arg(executionWord).arg(nonPassing);
+				}
 				return QString("%1 %2 (%3 %4):").arg(label).arg(name).arg(total).arg(executionWord);
 			}
 
@@ -142,6 +147,15 @@ namespace Konclude {
 					if (!result.mExplanation.isEmpty()) {
 						line += QString("  (%1)").arg(result.mExplanation);
 					}
+				}
+				if (result.mOutcome == CConformanceOutcome::TYPE::KNOWN || result.mOutcome == CConformanceOutcome::TYPE::FIXED) {
+					QString typeText = result.mKnownIssueTypes.isEmpty()
+							? QString("unknown type") : result.mKnownIssueTypes.join(", ");
+					QString idText = result.mKnownIssueIds.isEmpty()
+							? QString() : QString(" [%1]").arg(result.mKnownIssueIds.join(", "));
+					QString descriptionText = result.mKnownIssueDescriptions.isEmpty()
+							? QString() : QString(": %1").arg(result.mKnownIssueDescriptions.join("; "));
+					line += QString("  --  known issue: %1%2%3").arg(typeText).arg(idText).arg(descriptionText);
 				}
 				return line;
 			}

@@ -57,6 +57,8 @@ namespace Konclude {
 			class CDataFacetExpression : public CBuildExpression, public CExpressionEntity {
 				// public methods
 				public:
+					//! The kind flags of this base class, see CBuildExpression::ExpressionKindFlag.
+					virtual cint64 getExpressionKindFlags() { return EKFDATAFACET; }
 					//! Constructor
 					CDataFacetExpression(const QString& facetIRI);
 

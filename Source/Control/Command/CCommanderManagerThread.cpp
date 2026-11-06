@@ -39,6 +39,10 @@ namespace Konclude {
 
 
 			CCommanderManagerThread::~CCommanderManagerThread() {
+				// the thread may still be initializing the managers (a batch loader that found no
+				// request file closes the application right away); the base class would only stop
+				// it after the members below are gone, so stop it first
+				stopThread(true);
 				if (reasonerManager) {
 					delete reasonerManager;
 				}

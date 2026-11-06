@@ -29,6 +29,7 @@
 
 // Other includes
 #include "Context/CContext.h"
+#include "Utilities/CAllocationObject.h"
 
 // Logger includes
 #include "Logger/CLogger.h"
@@ -52,6 +53,8 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
+			class CConceptReferenceLinking;
+
 			class COntologyContext : public CContext {
 				// public methods
 				public:
@@ -62,6 +65,18 @@ namespace Konclude {
 					virtual ~COntologyContext();
 
 					virtual COntologyContext* addUsedMemoryPools(CMemoryPool* memoryPools) = 0;
+					/*!
+					 *	Registers an object allocated in the context's memory pools that owns memory outside
+					 *	them, such as the string of a name; its destructor is run before the pools are
+					 *	released, which the release alone does not do (issue #45).
+					 */
+					virtual COntologyContext* addDestructiblePoolObject(CAllocationObject* object);
+					/*!
+					 *	Takes ownership of a linking data allocated on the heap and attached to a concept of the
+					 *	ontology from a processing thread, which cannot allocate from the context's pools; it is
+					 *	deleted with the context (issue #45).
+					 */
+					virtual COntologyContext* addOwnedConceptReferenceLinking(CConceptReferenceLinking* linking);
 
 				// protected methods
 				protected:

@@ -37,6 +37,10 @@ namespace Konclude {
 				CCalculationManager::~CCalculationManager() {
 				}
 
+				cint64 CCalculationManager::stopCalculation(unsigned long waitMillis) {
+					return 0;
+				}
+
 				CCalculationManager* CCalculationManager::calculateJobs(const QList< QPair<CCalculationJob*,CCallbackData*> >& jobCallbackList) {
 					for (QList< QPair<CCalculationJob*,CCallbackData*> >::const_iterator it = jobCallbackList.constBegin(), itEnd = jobCallbackList.constEnd(); it != itEnd; ++it) {
 						QPair<CCalculationJob*,CCallbackData*> jobCallbackPair(*it);

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+ <!-- Expected response for all-object-properties-request.xml; response statistics removed. Set order and namespace prefixes are ignored by the comparator. --><KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfObjectProperties>
+  <owl:ObjectProperty IRI="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+  <owl:ObjectProperty IRI="http://www.w3.org/2002/07/owl#bottomObjectProperty"/>
+  <owl:ObjectProperty IRI="#p"/>
+  <owl:ObjectProperty IRI="#q"/>
+  <owl:ObjectProperty IRI="#r"/>
+ </SetOfObjectProperties>
+ <OK/>
+</ResponseMessage>

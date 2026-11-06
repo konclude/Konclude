@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+ <!-- Expected response for instances-request.xml; response statistics removed. Set order and namespace prefixes are ignored by the comparator. --><KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfIndividualSynsets>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#a1"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#c1"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#d1"/>
+  </IndividualSynset>
+ </SetOfIndividualSynsets>
+ <OK/>
+</ResponseMessage>

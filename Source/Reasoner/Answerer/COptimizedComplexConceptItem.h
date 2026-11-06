@@ -223,6 +223,12 @@ namespace Konclude {
 
 					QSet<CHierarchyNode*>* getMaximumSubClassNodeSet();
 
+					// whether the class node equivalent to the expression is known without the sub classes, and which,
+					// null for none; decided by the equivalent classes step (issue #12)
+					bool isEquivalenceDecided();
+					CHierarchyNode* getDecidedEquivalentClassNode();
+					COptimizedComplexConceptItem* setDecidedEquivalentClassNode(CHierarchyNode* node);
+
 
 					bool isLazyRealizationInitializationRequested();
 					COptimizedComplexConceptItem* setLazyRealizationInitializationRequested(bool requested);
@@ -361,6 +367,8 @@ namespace Konclude {
 					QSet<CHierarchyNode*>* mPossibleSubClassTestingNodeSet;
 					QList<CHierarchyNode*>* mPossibleSubClassNodeTestingList;
 					QSet<CHierarchyNode*>* mMaximumSubClassNodeSet;
+					bool mEquivalenceDecided;
+					CHierarchyNode* mDecidedEquivalentClassNode;
 
 
 					QSet<TConceptNegPair> mAtomicClassConceptSet;

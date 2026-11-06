@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+ <!-- Expected response for all-classes-request.xml; response statistics removed. Set order and namespace prefixes are ignored by the comparator. --><KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfClasses>
+  <owl:Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:Class IRI="http://www.w3.org/2002/07/owl#Nothing"/>
+  <owl:Class IRI="#A"/>
+  <owl:Class IRI="#B"/>
+  <owl:Class IRI="#C"/>
+  <owl:Class IRI="#D"/>
+  <owl:Class IRI="#E"/>
+  <owl:Class IRI="#F"/>
+ </SetOfClasses>
+ <OK/>
+</ResponseMessage>

@@ -27,6 +27,7 @@
 #include "CKoncludeInfo.h"
 
 #include "Utilities/UtilitiesSettings.h"
+#include "Utilities/Memory/CSystemAllocatorTuning.h"
 
 #include "Logger/CLogger.h"
 #include "Logger/CConsolePrintLogObserver.h"
@@ -35,7 +36,6 @@
 
 #include "Control/Loader/CCommandLineLoader.h"
 #include "Control/Loader/CDefaultLoaderFactory.h"
-#include "Control/Loader/CConformanceLoader.h"
 
 #include "Control/Interface/CommandLine/CCommandLinePreparationTranslatorSelector.h"
 
@@ -43,6 +43,7 @@
 using namespace Konclude;
 using namespace Konclude::Logger;
 using namespace Konclude::Utilities;
+using namespace Konclude::Utilities::Memory;
 using namespace Konclude::Control::Loader;
 using namespace Konclude::Control::Interface::CommandLine;
 
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
 	QCoreApplication a(argc, argv);
 
 	CLogger *logger = CLogger::getInstance();
+	int exitCode = 0;
 
 	try {
 
@@ -63,6 +65,11 @@ int main(int argc, char *argv[])
 		LOG(INFO,"::Konclude::Main","Starting Konclude ... ",0);
 		LOG(INFO,"::Konclude::Main",koncludeString,0);
 		LOG(INFO,"::Konclude::Main",QString("%1, %2, Version %3 (%4)\r\n").arg(CKoncludeInfo::getKoncludeDescription()).arg(CKoncludeInfo::getKoncludeBitPlatformString()).arg(CKoncludeInfo::getKoncludeVersionString()).arg(CKoncludeInfo::getKoncludeCompilationDateString()),0);
+
+		QString allocatorTuning = CSystemAllocatorTuning::applyTuning();
+		if (!allocatorTuning.isEmpty()) {
+			LOG(INFO,"::Konclude::Main",allocatorTuning,0);
+		}
 
 		CLoaderFactory *loaderFactory = new CDefaultLoaderFactory();
 
@@ -75,7 +82,7 @@ int main(int argc, char *argv[])
 		cmdLineLoader->init(loaderFactory);
 
 		cmdLineLoader->load();
-		a.exec();
+		exitCode = a.exec();
 		cmdLineLoader->exit();
 		delete cmdLineLoader;
 		delete loaderFactory;
@@ -90,9 +97,10 @@ int main(int argc, char *argv[])
 
 	logger->shutdownLogger();
 
-	// Return the exit code recorded by the conformance test runner (0 when green,
-	// non-zero when there were failing/unstable tests) so CI can react to it.
-	return CConformanceLoader::getLastTestExitCode();
+	// Return the exit code of the conformance test runner when it ran (0 when green,
+	// non-zero for failing/unstable tests), otherwise the application's exit code.
+	int conformanceExitCode = CConformanceLoader::getLastTestExitCode();
+	return conformanceExitCode != 0 ? conformanceExitCode : exitCode;
 }
 
 

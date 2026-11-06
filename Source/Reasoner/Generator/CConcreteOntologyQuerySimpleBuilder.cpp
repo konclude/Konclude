@@ -148,7 +148,8 @@ namespace Konclude {
 
 					CEXPRESSIONLIST<CClassTermExpression*>* testClassExpressions = classDisjExp->getClassTermExpressionList();
 					for (CEXPRESSIONLIST<CClassTermExpression*>::const_iterator it0 = testClassExpressions->constBegin(); it0 != testClassExpressions->constEnd(); ++it0) {
-						for (CEXPRESSIONLIST<CClassTermExpression*>::const_iterator it1 = it0; it1 != testClassExpressions->constEnd(); ++it1) {
+						// Disjointness constrains only pairs of distinct classes; skip the diagonal (it0 == it1).
+						for (CEXPRESSIONLIST<CClassTermExpression*>::const_iterator it1 = it0 + 1; it1 != testClassExpressions->constEnd(); ++it1) {
 							CClassTermExpression *buildExp1 = *it0;
 							CClassTermExpression *buildExp2 = *it1;
 							CConcept *concept1 = getConceptFromBuildExpression(buildExp1);

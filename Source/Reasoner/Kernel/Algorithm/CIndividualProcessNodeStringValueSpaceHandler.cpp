@@ -657,7 +657,7 @@ namespace Konclude {
 													}
 												}
 
-												if (!triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+												if (!triggeringData->getDirectValueTriggeringData()->hasConceptTriggers()) {
 													stringValueSpaceMap->countValueValues(currentStringValue,&valueCounter);
 													stringValueSpaceMap->addValueExclusionDependencies(currentStringValue,depCollection);
 												}

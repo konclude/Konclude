@@ -22,6 +22,7 @@
 
 
 #include <QThread>
+#include <QList>
 #include <QSemaphore>
 #include <QTime>
 #include <QCoreApplication>
@@ -90,6 +91,10 @@ namespace Konclude {
 
 				void startThread(Priority priority = InheritPriority);
 				void stopThread(bool waitStopped = true);
+
+				// Asks each thread to quit and waits for all of them, at most waitMillis in total;
+				// returns the number of threads still running afterwards.
+				static qint64 quitAndWaitThreads(const QList<QThread*>& threads, unsigned long waitMillis);
 
 				void waitSynchronization();
 

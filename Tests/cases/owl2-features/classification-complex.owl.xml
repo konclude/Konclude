@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Classification coverage: equivalence, disjointness, unsatisfiable classes,
+  nominals, role chains, transitive roles, existential restrictions and
+  cardinalities. The expected taxonomy was generated once and reviewed by hand.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/classification">
+  <Prefix name="" IRI="http://konclude.test/features/classification#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":E"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":F"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":G"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":H"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":I"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":J"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":K"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":L"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":M"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":P"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Q"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":R"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":S"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":s"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b"/></Declaration>
+
+  <SubClassOf><Class abbreviatedIRI=":B"/><Class abbreviatedIRI=":A"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":B"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":D"/><Class abbreviatedIRI=":B"/></SubClassOf>
+
+  <EquivalentClasses><Class abbreviatedIRI=":E"/><Class abbreviatedIRI=":C"/></EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":F"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":A"/>
+      <ObjectComplementOf><Class abbreviatedIRI=":A"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":G"/>
+    <ObjectIntersectionOf><Class abbreviatedIRI=":B"/><Class abbreviatedIRI=":C"/></ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":J"/>
+    <ObjectUnionOf><Class abbreviatedIRI=":B"/><Class abbreviatedIRI=":C"/></ObjectUnionOf>
+  </EquivalentClasses>
+
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":I"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":P"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":b"/></ObjectOneOf>
+  </EquivalentClasses>
+
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":H"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":M"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":s"/><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+    </ObjectSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Q"/>
+    <ObjectHasValue><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a"/></ObjectHasValue>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":R"/>
+    <ObjectMinCardinality cardinality="1">
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </ObjectMinCardinality>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":S"/>
+    <ObjectMaxCardinality cardinality="0">
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </ObjectMaxCardinality>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":K"/>
+    <ObjectMinCardinality cardinality="2">
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </ObjectMinCardinality>
+  </EquivalentClasses>
+
+  <DisjointClasses><Class abbreviatedIRI=":R"/><Class abbreviatedIRI=":S"/></DisjointClasses>
+
+  <SubObjectPropertyOf>
+    <ObjectPropertyChain>
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <ObjectProperty abbreviatedIRI=":s"/>
+    </ObjectPropertyChain>
+    <ObjectProperty abbreviatedIRI=":t"/>
+  </SubObjectPropertyOf>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":L"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+  </EquivalentClasses>
+
+  <SubClassOf>
+    <Class abbreviatedIRI=":A"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":s"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom>
+    </ObjectSomeValuesFrom>
+  </SubClassOf>
+
+  <ClassAssertion><Class abbreviatedIRI=":A"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":B"/><NamedIndividual abbreviatedIRI=":b"/></ClassAssertion>
+</Ontology>

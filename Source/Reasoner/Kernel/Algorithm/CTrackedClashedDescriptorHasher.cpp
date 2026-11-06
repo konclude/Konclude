@@ -32,12 +32,23 @@ namespace Konclude {
 				CTrackedClashedDescriptorHasher::CTrackedClashedDescriptorHasher(CTrackedClashedDescriptor* trackedClashedDescriptor) {
 					mTrackedClashedDes = trackedClashedDescriptor;
 					mHashValue = calculateDescriptorHashValue(mTrackedClashedDes);
+					mIndividualID = mTrackedClashedDes->getAppropriatedIndividualID();
+					CConceptDescriptor* conDes = mTrackedClashedDes->getConceptDescriptor();
+					mConcept = conDes ? conDes->getConcept() : nullptr;
+					mNegation = conDes ? conDes->getNegation() : false;
+					mDepTrackPoint = mTrackedClashedDes->getDependencyTrackPoint();
+					mVarBindPath = mTrackedClashedDes->getVariableBindingPath();
 				}
 
 
 				CTrackedClashedDescriptorHasher::CTrackedClashedDescriptorHasher(const CTrackedClashedDescriptorHasher& hasher) {
 					mHashValue = hasher.mHashValue;
 					mTrackedClashedDes = hasher.mTrackedClashedDes;
+					mIndividualID = hasher.mIndividualID;
+					mConcept = hasher.mConcept;
+					mNegation = hasher.mNegation;
+					mDepTrackPoint = hasher.mDepTrackPoint;
+					mVarBindPath = hasher.mVarBindPath;
 				}
 
 
@@ -65,25 +76,16 @@ namespace Konclude {
 					if (mHashValue != clashedDesHasher.mHashValue) {
 						return false;
 					}
-					if (mTrackedClashedDes->getAppropriatedIndividualID() != clashedDesHasher.mTrackedClashedDes->getAppropriatedIndividualID()) {
+					if (mIndividualID != clashedDesHasher.mIndividualID) {
 						return false;
 					}
-					if (mTrackedClashedDes->getConceptDescriptor() && clashedDesHasher.mTrackedClashedDes->getConceptDescriptor()) {
-						if (mTrackedClashedDes->getConceptDescriptor()->getConcept() != clashedDesHasher.mTrackedClashedDes->getConceptDescriptor()->getConcept()) {
-							return false;
-						}
-						if (mTrackedClashedDes->getConceptDescriptor()->getNegation() != clashedDesHasher.mTrackedClashedDes->getConceptDescriptor()->getNegation()) {
-							return false;
-						}
-					} else {
-						if (mTrackedClashedDes->getConceptDescriptor() || clashedDesHasher.mTrackedClashedDes->getConceptDescriptor()) {
-							return false;
-						}
-					}
-					if (mTrackedClashedDes->getDependencyTrackPoint() != clashedDesHasher.mTrackedClashedDes->getDependencyTrackPoint()) {
+					if (mConcept != clashedDesHasher.mConcept || mNegation != clashedDesHasher.mNegation) {
 						return false;
 					}
-					if (mTrackedClashedDes->getVariableBindingPath() != clashedDesHasher.mTrackedClashedDes->getVariableBindingPath()) {
+					if (mDepTrackPoint != clashedDesHasher.mDepTrackPoint) {
+						return false;
+					}
+					if (mVarBindPath != clashedDesHasher.mVarBindPath) {
 						return false;
 					}
 					return true;

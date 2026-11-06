@@ -42,6 +42,8 @@
 
 #include "Parser/Expressions/CBuildExpression.h"
 
+#include <vector>
+
 using namespace Konclude::Utilities;
 using namespace Konclude::Utilities::Container;
 using namespace Konclude::Parser;
@@ -59,6 +61,236 @@ using namespace Konclude::Control::Interface::JNI;
 		} \
 	}
 
+
+// the opcodes of a batch, mirrored from AxiomExpressionBuildingBridge.OP_* on the Java side
+enum JNIBatchOpcode {
+	OP_OBJECT_INTERSECTION_OF = 1,
+	OP_OBJECT_UNION_OF = 2,
+	OP_OBJECT_COMPLEMENT_OF = 3,
+	OP_OBJECT_ONE_OF = 4,
+	OP_OBJECT_SOME_VALUES_FROM = 5,
+	OP_OBJECT_ALL_VALUES_FROM = 6,
+	OP_OBJECT_HAS_VALUE = 7,
+	OP_OBJECT_HAS_SELF = 8,
+	OP_OBJECT_MIN_CARDINALITY = 9,
+	OP_OBJECT_MAX_CARDINALITY = 10,
+	OP_OBJECT_EXACT_CARDINALITY = 11,
+	OP_OBJECT_INVERSE_OF = 12,
+	OP_DATA_ONE_OF = 13,
+	OP_DATA_COMPLEMENT_OF = 14,
+	OP_DATA_INTERSECTION_OF = 15,
+	OP_DATA_UNION_OF = 16,
+	OP_DATATYPE_RESTRICTION = 17,
+	OP_DATA_SOME_VALUES_FROM = 18,
+	OP_DATA_ALL_VALUES_FROM = 19,
+	OP_DATA_HAS_VALUE = 20,
+	OP_DATA_MIN_CARDINALITY = 21,
+	OP_DATA_MAX_CARDINALITY = 22,
+	OP_DATA_EXACT_CARDINALITY = 23,
+	OP_SUB_CLASS_OF = 30,
+	OP_EQUIVALENT_CLASSES = 31,
+	OP_DISJOINT_CLASSES = 32,
+	OP_DISJOINT_UNION = 33,
+	OP_SUB_OBJECT_PROPERTY_OF = 34,
+	OP_SUB_PROPERTY_CHAIN_OF = 35,
+	OP_EQUIVALENT_OBJECT_PROPERTIES = 36,
+	OP_DISJOINT_OBJECT_PROPERTIES = 37,
+	OP_INVERSE_OBJECT_PROPERTIES = 38,
+	OP_OBJECT_PROPERTY_DOMAIN = 39,
+	OP_OBJECT_PROPERTY_RANGE = 40,
+	OP_FUNCTIONAL_OBJECT_PROPERTY = 41,
+	OP_INVERSE_FUNCTIONAL_OBJECT_PROPERTY = 42,
+	OP_REFLEXIVE_OBJECT_PROPERTY = 43,
+	OP_IRREFLEXIVE_OBJECT_PROPERTY = 44,
+	OP_SYMMETRIC_OBJECT_PROPERTY = 45,
+	OP_ASYMMETRIC_OBJECT_PROPERTY = 46,
+	OP_TRANSITIVE_OBJECT_PROPERTY = 47,
+	OP_SUB_DATA_PROPERTY_OF = 48,
+	OP_EQUIVALENT_DATA_PROPERTIES = 49,
+	OP_DISJOINT_DATA_PROPERTIES = 50,
+	OP_DATA_PROPERTY_DOMAIN = 51,
+	OP_DATA_PROPERTY_RANGE = 52,
+	OP_FUNCTIONAL_DATA_PROPERTY = 53,
+	OP_DECLARATION = 54,
+	OP_CLASS_ASSERTION = 55,
+	OP_OBJECT_PROPERTY_ASSERTION = 56,
+	OP_NEGATIVE_OBJECT_PROPERTY_ASSERTION = 57,
+	OP_DATA_PROPERTY_ASSERTION = 58,
+	OP_NEGATIVE_DATA_PROPERTY_ASSERTION = 59,
+	OP_SAME_INDIVIDUAL = 60,
+	OP_DIFFERENT_INDIVIDUALS = 61,
+};
+
+// An argument that is negative refers to the result of an earlier op of this batch (-(k + 1) for the k-th op),
+// a positive one is the address of an expression built before.
+static inline CBuildExpression* jniBatchResolve(const std::vector<CBuildExpression*>& results, jlong v) {
+	return v < 0 ? results[(size_t)(-v - 1)] : (CBuildExpression*)v;
+}
+#define JNIBATCH_RESOLVE(v) jniBatchResolve(results, (v))
+
+static inline bool jniBatchIsKind(CBuildExpression* expression, cint64 kindFlag) {
+	return expression && (expression->getExpressionKindFlags() & kindFlag) != 0;
+}
+
+// the typed builder methods for the frequent ops, when the arguments have the expected kinds; this skips the
+// CExpressionSplitter of the untyped methods (which stays the fallback for anything else)
+#define JNIBATCH_LIST_KIND(list, kindFlag, allOfKind) JNIBATCH_NEED(1); jint n = (jint)ops[pos++]; JNIBATCH_NEED(n); CEXPRESSIONLIST<CBuildExpression*> list; list.reserve(n); bool allOfKind = true; \
+	for (jint i = 0; i < n; ++i) { CBuildExpression* e = JNIBATCH_RESOLVE(ops[pos++]); allOfKind = allOfKind && jniBatchIsKind(e, kindFlag); list.append(e); }
+#define JNIBATCH_NEED(k) if (pos + (k) > length) { return (jint)results.size(); }
+#define JNIBATCH_LIST(listType, list) JNIBATCH_NEED(1); jint n = (jint)ops[pos++]; JNIBATCH_NEED(n); CEXPRESSIONLIST<listType> list; list.reserve(n); \
+	for (jint i = 0; i < n; ++i) { list.append((listType)JNIBATCH_RESOLVE(ops[pos++])); }
+#define JNIBATCH_ARG1(a) JNIBATCH_NEED(1); CBuildExpression* a = JNIBATCH_RESOLVE(ops[pos++]);
+#define JNIBATCH_ARG2(a, b) JNIBATCH_NEED(2); CBuildExpression* a = JNIBATCH_RESOLVE(ops[pos++]); CBuildExpression* b = JNIBATCH_RESOLVE(ops[pos++]);
+#define JNIBATCH_ARG3(a, b, c) JNIBATCH_NEED(3); CBuildExpression* a = JNIBATCH_RESOLVE(ops[pos++]); CBuildExpression* b = JNIBATCH_RESOLVE(ops[pos++]); CBuildExpression* c = JNIBATCH_RESOLVE(ops[pos++]);
+#define JNIBATCH_ARG2N(a, b, n) JNIBATCH_NEED(3); CBuildExpression* a = JNIBATCH_RESOLVE(ops[pos++]); CBuildExpression* b = JNIBATCH_RESOLVE(ops[pos++]); int n = (int)ops[pos++];
+
+// Executes the ops of a batch in order; returns the number of ops that were built, which is less than the
+// number of ops in the batch if one of them failed (the Java side reports that).
+static jint buildExpressionBatch(CJNIAxiomExpressionVisitingLoader* builder, const jlong* ops, jint length) {
+	std::vector<CBuildExpression*> results;
+	results.reserve((size_t)length / 3 + 1);
+	jint pos = 0;
+	while (pos < length) {
+		jint opcode = (jint)ops[pos++];
+		CBuildExpression* expression = nullptr;
+		bool axiom = false;
+		switch (opcode) {
+			case OP_OBJECT_INTERSECTION_OF: {
+				JNIBATCH_LIST_KIND(list, CBuildExpression::EKFCLASSTERM, allClasses);
+				if (allClasses) {
+					expression = builder->getObjectIntersectionOf(*(CEXPRESSIONLIST<CClassTermExpression*>*)&list);
+				} else {
+					expression = builder->getObjectIntersectionOf(list);
+				}
+				break;
+			}
+			case OP_OBJECT_UNION_OF: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getObjectUnionOf(list); break; }
+			case OP_OBJECT_COMPLEMENT_OF: { JNIBATCH_ARG1(a); expression = builder->getObjectComplementOf(a); break; }
+			case OP_OBJECT_ONE_OF: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getObjectOneOf(list); break; }
+			case OP_OBJECT_SOME_VALUES_FROM: {
+				JNIBATCH_ARG2(p, f);
+				if (jniBatchIsKind(p, CBuildExpression::EKFOBJECTPROPERTYTERM) && jniBatchIsKind(f, CBuildExpression::EKFCLASSTERM)) {
+					expression = builder->getObjectSomeValuesFrom((CObjectPropertyTermExpression*)p, (CClassTermExpression*)f);
+				} else {
+					expression = builder->getObjectSomeValuesFrom(p, f);
+				}
+				break;
+			}
+			case OP_OBJECT_ALL_VALUES_FROM: { JNIBATCH_ARG2(p, f); expression = builder->getObjectAllValuesFrom(p, f); break; }
+			case OP_OBJECT_HAS_VALUE: { JNIBATCH_ARG2(p, f); expression = builder->getObjectHasValue(p, f); break; }
+			case OP_OBJECT_HAS_SELF: { JNIBATCH_ARG1(p); expression = builder->getObjectHasSelf(p); break; }
+			case OP_OBJECT_MIN_CARDINALITY: { JNIBATCH_ARG2N(p, f, n); expression = builder->getObjectMinCardinality(p, f, n); break; }
+			case OP_OBJECT_MAX_CARDINALITY: { JNIBATCH_ARG2N(p, f, n); expression = builder->getObjectMaxCardinality(p, f, n); break; }
+			case OP_OBJECT_EXACT_CARDINALITY: { JNIBATCH_ARG2N(p, f, n); expression = builder->getObjectExactlyCardinality(p, f, n); break; }
+			case OP_OBJECT_INVERSE_OF: { JNIBATCH_ARG1(p); expression = builder->getInverseObjectPropertyOf(p); break; }
+			case OP_DATA_ONE_OF: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getDataOneOf(list); break; }
+			case OP_DATA_COMPLEMENT_OF: { JNIBATCH_ARG1(r); expression = builder->getDataComplementOf(r); break; }
+			case OP_DATA_INTERSECTION_OF: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getDataIntersectionOf(list); break; }
+			case OP_DATA_UNION_OF: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getDataUnionOf(list); break; }
+			case OP_DATATYPE_RESTRICTION: { JNIBATCH_ARG1(dt); JNIBATCH_LIST(CDataFacetRestrictionExpression*, list); expression = builder->getDatatypeRestriction((CDatatypeExpression*)dt, list); break; }
+			case OP_DATA_SOME_VALUES_FROM: { JNIBATCH_ARG2(p, r); expression = builder->getDataSomeValuesFrom(p, r); break; }
+			case OP_DATA_ALL_VALUES_FROM: { JNIBATCH_ARG2(p, r); expression = builder->getDataAllValuesFrom(p, r); break; }
+			case OP_DATA_HAS_VALUE: {
+				JNIBATCH_ARG2(p, l);
+				if (jniBatchIsKind(p, CBuildExpression::EKFDATAPROPERTYTERM) && jniBatchIsKind(l, CBuildExpression::EKFDATARANGETERM)) {
+					expression = builder->getDataHasValue((CDataPropertyTermExpression*)p, (CDataRangeTermExpression*)l);
+				} else {
+					expression = builder->getDataHasValue(p, l);
+				}
+				break;
+			}
+			case OP_DATA_MIN_CARDINALITY: { JNIBATCH_ARG2N(p, r, n); expression = builder->getDataMinCardinality(p, r, n); break; }
+			case OP_DATA_MAX_CARDINALITY: { JNIBATCH_ARG2N(p, r, n); expression = builder->getDataMaxCardinality(p, r, n); break; }
+			case OP_DATA_EXACT_CARDINALITY: { JNIBATCH_ARG2N(p, r, n); expression = builder->getDataExactCardinality(p, r, n); break; }
+
+			case OP_SUB_CLASS_OF: {
+				JNIBATCH_ARG2(a, b);
+				if (jniBatchIsKind(a, CBuildExpression::EKFCLASSTERM) && jniBatchIsKind(b, CBuildExpression::EKFCLASSTERM)) {
+					expression = builder->getSubClassOf((CClassTermExpression*)a, (CClassTermExpression*)b);
+				} else {
+					expression = builder->getSubClassOf(a, b);
+				}
+				axiom = true;
+				break;
+			}
+			case OP_EQUIVALENT_CLASSES: {
+				JNIBATCH_LIST_KIND(list, CBuildExpression::EKFCLASSTERM, allClasses);
+				if (allClasses) {
+					expression = builder->getEquivalentClasses(*(CEXPRESSIONLIST<CClassTermExpression*>*)&list);
+				} else {
+					expression = builder->getEquivalentClasses(list);
+				}
+				axiom = true;
+				break;
+			}
+			case OP_DISJOINT_CLASSES: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getDisjointClasses(list); axiom = true; break; }
+			case OP_DISJOINT_UNION: { JNIBATCH_ARG1(c); JNIBATCH_LIST(CClassTermExpression*, list); expression = builder->getDisjointUnion((CClassExpression*)c, list); axiom = true; break; }
+			case OP_SUB_OBJECT_PROPERTY_OF: { JNIBATCH_ARG2(a, b); expression = builder->getSubObjectPropertyOf(a, b); axiom = true; break; }
+			case OP_SUB_PROPERTY_CHAIN_OF: { JNIBATCH_ARG1(s); JNIBATCH_LIST(CObjectPropertyTermExpression*, list); expression = builder->getSubObjectPropertyOf(list, (CObjectPropertyTermExpression*)s); axiom = true; break; }
+			case OP_EQUIVALENT_OBJECT_PROPERTIES: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getEquivalentObjectProperties(list); axiom = true; break; }
+			case OP_DISJOINT_OBJECT_PROPERTIES: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getDisjointObjectProperties(list); axiom = true; break; }
+			case OP_INVERSE_OBJECT_PROPERTIES: { JNIBATCH_ARG2(p, q); expression = builder->getInverseObjectProperties(p, q); axiom = true; break; }
+			case OP_OBJECT_PROPERTY_DOMAIN: { JNIBATCH_ARG2(p, c); expression = builder->getObjectPropertyDomainExpression(p, c); axiom = true; break; }
+			case OP_OBJECT_PROPERTY_RANGE: { JNIBATCH_ARG2(p, c); expression = builder->getObjectPropertyRangeExpression(p, c); axiom = true; break; }
+			case OP_FUNCTIONAL_OBJECT_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getFunctionalObjectProperty(p); axiom = true; break; }
+			case OP_INVERSE_FUNCTIONAL_OBJECT_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getInverseFunctionalObjectProperty(p); axiom = true; break; }
+			case OP_REFLEXIVE_OBJECT_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getReflexiveObjectProperty(p); axiom = true; break; }
+			case OP_IRREFLEXIVE_OBJECT_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getIrreflexiveObjectProperty(p); axiom = true; break; }
+			case OP_SYMMETRIC_OBJECT_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getSymmetricObjectProperty(p); axiom = true; break; }
+			case OP_ASYMMETRIC_OBJECT_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getAsymmetricObjectProperty(p); axiom = true; break; }
+			case OP_TRANSITIVE_OBJECT_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getTransetiveObjectProperty(p); axiom = true; break; }
+			case OP_SUB_DATA_PROPERTY_OF: { JNIBATCH_ARG2(a, b); expression = builder->getSubDataPropertyOf(a, b); axiom = true; break; }
+			case OP_EQUIVALENT_DATA_PROPERTIES: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getEquivalentDataProperties(list); axiom = true; break; }
+			case OP_DISJOINT_DATA_PROPERTIES: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getDisjointDataProperties(list); axiom = true; break; }
+			case OP_DATA_PROPERTY_DOMAIN: { JNIBATCH_ARG2(p, c); expression = builder->getDataPropertyDomainExpression(p, c); axiom = true; break; }
+			case OP_DATA_PROPERTY_RANGE: { JNIBATCH_ARG2(p, r); expression = builder->getDataPropertyRangeExpression(p, r); axiom = true; break; }
+			case OP_FUNCTIONAL_DATA_PROPERTY: { JNIBATCH_ARG1(p); expression = builder->getFunctionalDataProperty(p); axiom = true; break; }
+			case OP_DECLARATION: { JNIBATCH_ARG1(e); expression = builder->getDeclaration(e); axiom = true; break; }
+			case OP_CLASS_ASSERTION: { JNIBATCH_ARG2(c, i); expression = builder->getClassAssertion(c, i); axiom = true; break; }
+			case OP_OBJECT_PROPERTY_ASSERTION: { JNIBATCH_ARG3(p, s, o); expression = builder->getObjectPropertyAssertion(p, s, o); axiom = true; break; }
+			case OP_NEGATIVE_OBJECT_PROPERTY_ASSERTION: { JNIBATCH_ARG3(p, s, o); expression = builder->getNegativeObjectPropertyAssertion(p, s, o); axiom = true; break; }
+			case OP_DATA_PROPERTY_ASSERTION: { JNIBATCH_ARG3(p, s, l); expression = builder->getDataPropertyAssertion(p, s, l); axiom = true; break; }
+			case OP_NEGATIVE_DATA_PROPERTY_ASSERTION: { JNIBATCH_ARG3(p, s, l); expression = builder->getNegativeDataPropertyAssertion(p, s, l); axiom = true; break; }
+			case OP_SAME_INDIVIDUAL: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getSameIndividual(list); axiom = true; break; }
+			case OP_DIFFERENT_INDIVIDUALS: { JNIBATCH_LIST(CBuildExpression*, list); expression = builder->getDifferentIndividuals(list); axiom = true; break; }
+			default:
+				return (jint)results.size();
+		}
+		if (!expression) {
+			return (jint)results.size();
+		}
+		if (axiom) {
+			builder->tellOntologyAxiom((CAxiomExpression*)expression);
+		}
+		results.push_back(expression);
+	}
+	return (jint)results.size();
+}
+
+
+JNIEXPORT void JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_expectAxioms(JNIEnv * jenv, jobject builderObj, jobject bridgeObj, jlong axiomCount) {
+	JNIAXIOMEXPRESSIONBUILDINGBRDIGELOADER(jenv,builderObj,bridgeObj,
+		builder->reserveForAxioms((cint64)axiomCount);
+	)
+}
+
+
+JNIEXPORT jint JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildBatch(JNIEnv * jenv, jobject builderObj, jobject bridgeObj, jlongArray opsArray, jint length) {
+	jint built = -1;
+	JNIAXIOMEXPRESSIONBUILDINGBRDIGELOADER(jenv,builderObj,bridgeObj,
+		if (length <= 0 || !opsArray) {
+			built = 0;
+		} else {
+			// copied out instead of pinned, so that the JVM is never kept from collecting while a batch is built
+			std::vector<jlong> ops((size_t)length);
+			jenv->GetLongArrayRegion(opsArray, 0, length, ops.data());
+			if (!jenv->ExceptionCheck()) {
+				built = buildExpressionBatch(builder, ops.data(), length);
+			}
+		}
+	)
+	return built;
+}
 
 
 JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildOWLClass(JNIEnv * jenv, jobject builderObj, jobject bridgeObj, jstring string, jobject classObj) {
@@ -956,7 +1188,7 @@ JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridg
 
 
 
-JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildOWLDataUnionOfFromArgumentList(JNIEnv * jenv, jobject builderObj, jobject bridgeObj, jlong datatype) {
+JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildOWLDatatypeRestrictionFromArgumentList(JNIEnv * jenv, jobject builderObj, jobject bridgeObj, jlong datatype) {
 	CBuildExpression* expression = nullptr;
 	JNIAXIOMEXPRESSIONBUILDINGBRDIGELOADER(jenv, builderObj, bridgeObj,
 		CEXPRESSIONLIST<CDataFacetRestrictionExpression*>* expList = (CEXPRESSIONLIST<CDataFacetRestrictionExpression*>*)builder->popArgumentExpressionList();
@@ -970,7 +1202,7 @@ JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridg
 
 
 
-JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildOWLDatatypeRestrictionFromArgumentList(JNIEnv * jenv, jobject builderObj, jobject bridgeObj, jlong subPropertyExp, jlong superPropertyExp) {
+JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildOWLSubDataPropertyOfAxiom(JNIEnv * jenv, jobject builderObj, jobject bridgeObj, jlong subPropertyExp, jlong superPropertyExp) {
 	CBuildExpression* expression = nullptr;
 	JNIAXIOMEXPRESSIONBUILDINGBRDIGELOADER(jenv, builderObj, bridgeObj,
 		expression = builder->getSubDataPropertyOf((CBuildExpression*)subPropertyExp, (CBuildExpression*)superPropertyExp);

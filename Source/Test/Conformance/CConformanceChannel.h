@@ -122,7 +122,8 @@ namespace Konclude {
 				switch (task) {
 					case CConformanceTask::TYPE::CONSISTENCY:
 					case CConformanceTask::TYPE::SATISFIABILITY:
-					case CConformanceTask::TYPE::CLASSIFICATION:
+					case CConformanceTask::TYPE::CLASS_CLASSIFICATION:
+					case CConformanceTask::TYPE::CLASS_REALIZATION:
 						return TYPE::COMMAND_LINE;
 					case CConformanceTask::TYPE::OWLLINK:
 						return TYPE::OWLLINK_FILE;
@@ -138,7 +139,8 @@ namespace Konclude {
 					case TYPE::COMMAND_LINE:
 						return task == CConformanceTask::TYPE::CONSISTENCY
 								|| task == CConformanceTask::TYPE::SATISFIABILITY
-								|| task == CConformanceTask::TYPE::CLASSIFICATION;
+								|| task == CConformanceTask::TYPE::CLASS_CLASSIFICATION
+								|| task == CConformanceTask::TYPE::CLASS_REALIZATION;
 					case TYPE::OWLLINK_FILE:
 					case TYPE::OWLLINK_SERVER:
 						return task == CConformanceTask::TYPE::OWLLINK;

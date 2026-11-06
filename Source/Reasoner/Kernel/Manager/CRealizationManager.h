@@ -23,6 +23,7 @@
 
 // Libraries includes
 #include <QReadWriteLock>
+#include <QThread>
 #include <QHash>
 
 // Namespace includes
@@ -73,6 +74,9 @@ namespace Konclude {
 
 						//! Destructor
 						virtual ~CRealizationManager();
+
+						// the threads of the workers this manager has created, for stopping them when the reasoner closes
+						QList<QThread*> getWorkerThreads();
 
 						virtual CRealizer* getRealizer(CConcreteOntology *ontology, CConfigurationBase *config);
 

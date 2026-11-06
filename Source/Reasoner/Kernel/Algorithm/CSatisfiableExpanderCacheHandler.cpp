@@ -947,6 +947,11 @@ namespace Konclude {
 						}
 						if (continueDepLoading) {
 							CDependencyTrackPoint* prevDepTrackPoint = depNode->getPreviousDependencyTrackPoint();
+							if (!prevDepTrackPoint) {
+								// the dependencies end without reaching a concept of the node or of an ancestor (e.g.,
+								// at an independent dependency), so they cannot be tracked and the node is not cached
+								return false;
+							}
 							cint64 nextAncDepth = newAncDepth;
 							CDependencyNode* nextDepNode = prevDepTrackPoint->getDependencyNode();
 							if (nextDepNode && nextDepNode->hasAppropriateIndividualNode()) {
@@ -963,6 +968,9 @@ namespace Konclude {
 							CDependency* dependency = depIt.nextDependency();
 							// load additional dependencies
 							CDependencyTrackPoint* prevDepTrackPoint = dependency->getPreviousDependencyTrackPoint();
+							if (!prevDepTrackPoint) {
+								return false;
+							}
 							cint64 nextAncDepth = ancDepth;
 							CDependencyNode* nextDepNode = prevDepTrackPoint->getDependencyNode();
 							if (nextDepNode && nextDepNode->hasAppropriateIndividualNode()) {

@@ -63,7 +63,19 @@ namespace Konclude {
 			}
 
 
+			// The temporary ontology of a role classification references the data of the classified ontology, so it
+			// is deleted here, with the classifier, before the revision manager deletes the ontologies (issue #45).
 			COptimizedKPSetRoleSubsumptionClassifierThread::~COptimizedKPSetRoleSubsumptionClassifierThread() {
+				for (COntologyClassificationItem* ontItem : ontItemList) {
+					COptimizedKPSetRoleOntologyClassificationItem* roleItem = dynamic_cast<COptimizedKPSetRoleOntologyClassificationItem*>(ontItem);
+					CConcreteOntology* tmpRoleRealOntology = roleItem ? roleItem->getTemporaryRoleClassificationOntology() : nullptr;
+					if (tmpRoleRealOntology) {
+						// the consistence is the one of the classified ontology, which deletes it
+						tmpRoleRealOntology->setConsistence(nullptr);
+						delete tmpRoleRealOntology;
+						roleItem->setTemporaryRoleClassificationOntology(nullptr);
+					}
+				}
 			}
 
 
@@ -1692,6 +1704,9 @@ namespace Konclude {
 							++itWorkItem;
 						}
 						delete workItem;
+						// the adapters were created for this job alone and the job does not delete them (issue #45)
+						delete satCalcJob->getSatisfiableClassificationRoleMarkedMessageAdapter();
+						delete satCalcJob->getSatisfiableTaskIndividualDependenceTrackingAdapter();
 						delete satCalcJob;
 					}
 					workOntItemHash.remove(workItem);
@@ -1858,6 +1873,8 @@ namespace Konclude {
 							bottomHierNode->makeParent(itemHierNode);
 						}
 					}
+					// the leaves are the direct parents of the bottom node now, the top node is not
+					hierarchy->removeBypassedTopBottomLink();
 
 					LOG(INFO,getLogDomain(),logTr("Collect statistics for Ontology '%1'.").arg(ontology->getTerminologyName()),getLogObject());
 

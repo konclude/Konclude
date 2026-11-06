@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint over two different unsatisfiable classes X and Y (both are
+  subclasses of A and of E, and A is disjoint from E).  Both are empty, so the
+  pair is disjoint.  Expected answer: true.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#E"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#X"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#Y"/></owl:Declaration>
+    <owl:DisjointClasses><owl:Class IRI="#A"/><owl:Class IRI="#E"/></owl:DisjointClasses>
+    <owl:SubClassOf><owl:Class IRI="#X"/><owl:Class IRI="#A"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#X"/><owl:Class IRI="#E"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#Y"/><owl:Class IRI="#A"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#Y"/><owl:Class IRI="#E"/></owl:SubClassOf>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb"><owl:Class IRI="#X"/><owl:Class IRI="#Y"/></AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

@@ -191,6 +191,7 @@ namespace Konclude {
 					CBUILDLIST<CIndividualTermExpression*>* getBuildIndividualList();
 					CBUILDLIST<CDataRangeTermExpression*>* getBuildDataRangeList();
 					CBUILDLIST<CDatatypeExpression*>* getBuildDatatypeList();
+					CBUILDLIST<CDataLexicalValueExpression*>* getBuildDataLexicalValueList();
 
 					cint64 getNextAxiomNumber(bool moveNext = false);	
 					COntologyBuildData* setNextAxiomNumber(cint64 axiomNumber);
@@ -281,6 +282,16 @@ namespace Konclude {
 					// mapping hashes and container
 					CBUILDLIST<CBuildExpression*>* mExpressionBuildListContainer;
 
+					// how many entries of the build lists were copied from the referenced ontology; the
+					// expressions after them were built for this ontology and are deleted with it
+					cint64 mInheritedExpressionBuildCount;
+					cint64 mInheritedBuildConceptCount;
+					cint64 mInheritedBuildObjectRoleCount;
+					cint64 mInheritedBuildIndividualCount;
+					cint64 mInheritedBuildDataRoleCount;
+					cint64 mInheritedBuildDatatypeCount;
+					cint64 mInheritedBuildDataLexicalValueCount;
+
 
 					CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>* mInverseObjectPropertyHash;
 					CBUILDLIST< QPair<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*> >* mInverseObjectPropertyList;
@@ -298,6 +309,8 @@ namespace Konclude {
 					CBUILDLIST<CDataPropertyTermExpression*>* mBuildDataRoleList;
 					CBUILDLIST<CClassTermExpression*>* mBuildConceptList;
 					CBUILDLIST<CDatatypeExpression*>* mBuildDatatypeList;
+					//! the lexical values built for this ontology, so that they are deleted with it like the other expressions (issue #45)
+					CBUILDLIST<CDataLexicalValueExpression*>* mBuildDataLexicalValueList;
 					CBUILDLIST<CDataRangeTermExpression*>* mBuildDataRangesList;
 
 				// private methods

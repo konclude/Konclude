@@ -25,6 +25,8 @@
 
 
 // Namespace includes
+#include <atomic>
+
 #include "SchedulerSettings.h"
 #include "CTaskEventHandlerBasedProcessor.h"
 #include "CTaskEventHandlerBasedCompletor.h"
@@ -82,7 +84,7 @@ namespace Konclude {
 			// public methods
 			public:
 				//! Constructor
-				CSingleThreadTaskProcessorUnit(CTaskHandleAlgorithm* taskHandleAlgo, CConsiderateMemoryPoolProvider* memoryPoolProvider = nullptr);
+				CSingleThreadTaskProcessorUnit(CTaskHandleAlgorithm* taskHandleAlgo, CConsiderateMemoryPoolProvider* memoryPoolProvider = nullptr, cint64 freePoolReserveLimit = DEFAULT_FREE_POOL_RESERVE_LIMIT);
 
 				//! Destructor
 				virtual ~CSingleThreadTaskProcessorUnit();
@@ -121,6 +123,9 @@ namespace Konclude {
 
 			// protected methods
 			protected:
+				// releases the memory of the kept tasks, once nothing uses their data any more
+				cint64 releaseKeptTasks();
+
 				virtual bool processControlEvents(QEvent::Type type, CControlEvent *event);
 
 				bool addProcessingTask(CTask* task);
@@ -157,6 +162,8 @@ namespace Konclude {
 				CTask* mTaskCompletionQueue;
 				CTaskProcessorContext *mTaskProcessorContext;
 				CTaskHandleMemoryAllocationManager *mMemoryAllocator;
+				// the completed tasks that were not released because their data is kept
+				QList<CTask*> mKeptTaskList;
 				CTaskHandleAlgorithm* mTaskHandleAlgo;
 				CQueuedLinkedEventHandler* mEventHandler;
 				CTaskStatusPropagator* mTaskStatusPropagator;
@@ -167,7 +174,9 @@ namespace Konclude {
 				QSemaphore mProcessingWakeUpSemaphore;
 				CXLinker<CEventHandler*>* mEventHandlerLinker;
 
-				bool mProcessingStopped;
+				// set by another thread in stopProcessing, hence atomic; relaxed suffices, since the release
+				// of the wake-up semaphore after it makes the store visible to the woken thread
+				std::atomic<bool> mProcessingStopped;
 
 				bool mThreadBlocked;
 

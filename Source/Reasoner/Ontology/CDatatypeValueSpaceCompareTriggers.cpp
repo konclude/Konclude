@@ -29,6 +29,7 @@ namespace Konclude {
 
 
 			CDatatypeValueSpaceCompareTriggers::CDatatypeValueSpaceCompareTriggers(CContext* boxContext) : CDatatypeValueSpaceTriggers(boxContext),mValueTriggerMap(boxContext) {
+				mMinMaxTriggerCount = 0;
 			}
 
 
@@ -37,8 +38,10 @@ namespace Konclude {
 				initValueSpaceTriggers(data);
 				if (data) {
 					mValueTriggerMap.initValueSpaceTriggeringMap(&data->mValueTriggerMap);
+					mMinMaxTriggerCount = data->mMinMaxTriggerCount;
 				} else {
 					mValueTriggerMap.initValueSpaceTriggeringMap(nullptr);
+					mMinMaxTriggerCount = 0;
 				}
 				return this;
 			}
@@ -62,6 +65,7 @@ namespace Konclude {
 
 			CDatatypeValueSpaceCompareTriggers* CDatatypeValueSpaceCompareTriggers::addMinValueConceptTrigger(CDataLiteralCompareValue* value, bool inclusive, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger) {
 				incConceptTriggerCount(conceptTrigger->getCount());
+				mMinMaxTriggerCount += conceptTrigger->getCount();
 				CDatatypeValueSpaceConceptTriggeringData* minValueConceptTriggerData = getMinValueConceptTriggeringData(value,inclusive);
 				minValueConceptTriggerData->appendPartialConceptTriggers(conceptTrigger);
 				return this;
@@ -69,6 +73,7 @@ namespace Konclude {
 
 			CDatatypeValueSpaceCompareTriggers* CDatatypeValueSpaceCompareTriggers::addMaxValueConceptTrigger(CDataLiteralCompareValue* value, bool inclusive, CDatatypeValueSpaceConceptTriggerLinker* conceptTrigger) {
 				incConceptTriggerCount(conceptTrigger->getCount());
+				mMinMaxTriggerCount += conceptTrigger->getCount();
 				CDatatypeValueSpaceConceptTriggeringData* maxValueConceptTriggerData = getMaxValueConceptTriggeringData(value,inclusive);
 				maxValueConceptTriggerData->appendPartialConceptTriggers(conceptTrigger);
 				return this;
@@ -88,6 +93,11 @@ namespace Konclude {
 
 			CDatatypeValueSpaceTriggeringMap* CDatatypeValueSpaceCompareTriggers::getValueSpaceTriggeringMap() {
 				return &mValueTriggerMap;
+			}
+
+
+			cint64 CDatatypeValueSpaceCompareTriggers::getMinMaxTriggerCount() {
+				return mMinMaxTriggerCount;
 			}
 
 

@@ -782,6 +782,17 @@ namespace Konclude {
 					fullCompletionGraphConstruction = true;
 					totallyPreCompItem->setFullCompletionGraphConstruction(true);
 				}
+				// isFullCompletionGraphConstruction only says that the consistency check is meant to
+				// build the completion graph, which is what makes the precomputation of the individuals
+				// unnecessary. It can decide the consistency by the saturation of the all assertion
+				// individual instead, see createConsistencePrecomputationCheck, and then the graph is
+				// never built and the insufficiently saturated individuals still have to be precomputed
+				// here. Without this the individual step waits for a retrieval that nothing requests,
+				// which is why an ABox that forces two individuals to be merged never finished.
+				if (fullCompletionGraphConstruction && totallyPreCompItem->isConsistenceStepFinished()
+						&& !totallyPreCompItem->isFullCompletionGraphConstructed()) {
+					fullCompletionGraphConstruction = false;
+				}
 				if (totallyPreCompItem->hasIndividualsSaturationCacheSynchronisation() && totallyPreCompItem->hasIndividualsSaturated() && totallyPreCompItem->hasALLIndividualsSaturationOrderd() && totallyPreCompItem->hasInsufficientSaturationIndividuals()) {
 					if (!fullCompletionGraphConstruction) {
 						if (!totallyPreCompItem->hasIndividualPrecomputationChecked()) {
@@ -1018,6 +1029,8 @@ namespace Konclude {
 			void CTotallyPrecomputationThread::analyseConceptSaturationSubsumerExistItems(CTotallyOntologyPrecomputationItem* totallyPreCompItem, QList<CConceptNegationSaturationItem>& processList) {
 
 				QSet<CConceptNegationSaturationItem> processSet;
+				// the set grows to about twice the items; sized now instead of by rehashing
+				processSet.reserve(processList.size()*2);
 				for (QList<CConceptNegationSaturationItem>::const_iterator it = processList.constBegin(), itEnd = processList.constEnd(); it != itEnd; ++it) {
 					CConceptNegationSaturationItem conNegSatItem(*it);
 					processSet.insert(conNegSatItem);
@@ -1217,6 +1230,7 @@ namespace Konclude {
 							if (!conRefSatLinking) {
 								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
+								totallyPreCompItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 							}
 							if (conRefSatLinking->getConceptSaturationReferenceLinkingData(opCheckingNegation) == nullptr) {
 								CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(opCheckConcept, opCheckingNegation,true);
@@ -1234,6 +1248,7 @@ namespace Konclude {
 						if (!conRefSatLinking) {
 							conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 							conProcData->setConceptReferenceLinking(conRefSatLinking);
+							totallyPreCompItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 						}
 						if (conRefSatLinking->getConceptSaturationReferenceLinkingData(nextNegation) == nullptr) {
 							CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(nextConcept,nextNegation,true);
@@ -1255,6 +1270,7 @@ namespace Konclude {
 							if (!conRefSatLinking) {
 								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
+								totallyPreCompItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 							}
 							if (conRefSatLinking->getConceptSaturationReferenceLinkingData(saturateNegation) == nullptr) {
 								CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(nextConcept,saturateNegation,true);
@@ -2020,6 +2036,8 @@ namespace Konclude {
 				QList<CSaturationConceptDataItem*> disjunctionCandidateAlternativeList;
 
 				cint64 conCount = conVec->getItemCount();
+				// the items are mostly one per concept; sizing the hash now saves the rehashing while they are created
+				totallyPreCompItem->reserveSaturationConceptDataItems(conCount+conCount/4);
 				if (saturateConcepts) {
 					for (cint64 conIdx = 1; conIdx < conCount; ++conIdx) {
 						CConcept* concept = conVec->getData(conIdx);
@@ -2068,6 +2086,7 @@ namespace Konclude {
 									if (!conRefSatLinking) {
 										conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 										conProcData->setConceptReferenceLinking(conRefSatLinking);
+										totallyPreCompItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 									}
 									if (conRefSatLinking->getExistentialSuccessorConceptSaturationReferenceLinkingData() == nullptr) {
 										conRefSatLinking->setExistentialSuccessorConceptSaturationReferenceLinkingData(conItem);
@@ -2088,6 +2107,7 @@ namespace Konclude {
 									if (!opConRefSatLinking) {
 										opConRefSatLinking = new CConceptSaturationReferenceLinkingData();
 										opConProcData->setConceptReferenceLinking(opConRefSatLinking);
+										totallyPreCompItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(opConRefSatLinking);
 									}
 									if (opConRefSatLinking->getConceptSaturationReferenceLinkingData(opNegation) == nullptr) {
 										opConRefSatLinking->setSaturationReferenceLinkingData(conItem,opNegation);
@@ -2103,6 +2123,7 @@ namespace Konclude {
 								if (!conRefSatLinking) {
 									conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 									conProcData->setConceptReferenceLinking(conRefSatLinking);
+									totallyPreCompItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 								}
 								if (conRefSatLinking->getConceptSaturationReferenceLinkingData(false) == nullptr) {
 									CSaturationConceptDataItem* conItem = totallyPreCompItem->getSaturationConceptDataItem(concept,false,true);

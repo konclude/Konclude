@@ -113,6 +113,13 @@ namespace Konclude {
 				if (!result.mExplanation.isEmpty()) {
 					writeLiteralAssertion(stream, "kt:explanation", resultIRI, result.mExplanation);
 				}
+				for (int i = 0; i < result.mKnownIssueIds.count(); ++i) {
+					writeObjectPropertyAssertion(stream, "kt:knownIssue", resultIRI, result.mKnownIssueIds.at(i));
+					writeLiteralAssertion(stream, "kt:knownIssueType", resultIRI, result.mKnownIssueTypes.value(i));
+					if (!result.mKnownIssueDescriptions.value(i).isEmpty()) {
+						writeLiteralAssertion(stream, "kt:knownIssueDescription", resultIRI, result.mKnownIssueDescriptions.at(i));
+					}
+				}
 				if (!result.mOutputLogFile.isEmpty()) {
 					// Path of the file containing the raw output of the executed Konclude
 					// run for this test (a 'test-outputs' folder next to the output file).

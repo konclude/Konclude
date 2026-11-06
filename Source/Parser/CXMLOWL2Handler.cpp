@@ -32,9 +32,13 @@ namespace Konclude {
 
 			mOntoBuilder = ontoBuilder;
 			mAxiomNumber = 0;
+			mIgnoreParsingSubElements = false;
+			mParseIgnoreDepth = 0;
+			mUnsupportedAnnotationError = false;
 			LOG(INFO,getLogDomain(),logTr("Created OWL 2.0 Qt XML Parser."),this);
 
 			initializeParseFunctionJumpHash();
+			initializeAnnotationNodeSet();
 		}
 
 		CXMLOWL2Handler::CXMLOWL2Handler(COntologyBuilder* ontoBuilder, CCommandRecordRouter *commandRecordRouter)
@@ -42,9 +46,13 @@ namespace Konclude {
 
 				mOntoBuilder = ontoBuilder;
 				mAxiomNumber = 0;
+				mIgnoreParsingSubElements = false;
+				mParseIgnoreDepth = 0;
+				mUnsupportedAnnotationError = false;
 				LOG(INFO,getLogDomain(),logTr("Created OWL 2.0 Qt XML Parser."),this);
 
 				initializeParseFunctionJumpHash();
+				initializeAnnotationNodeSet();
 		}
 
 
@@ -52,13 +60,29 @@ namespace Konclude {
 
 
 		bool CXMLOWL2Handler::startElement(const QString& namespaceURI, const QString& localName, const QString& qName, const QXmlAttributes& atts, CParsingHandlingContext* handlingContext) {
+			if (!mIgnoreParsingSubElements && mAnnotationNodeSet.contains(qName)) {
+				// annotations do not influence the reasoning, skip the node and all its sub elements
+				mIgnoreParsingSubElements = true;
+				mParseIgnoreDepth = mStack.count();
+				if (!mUnsupportedAnnotationError) {
+					mUnsupportedAnnotationError = true;
+					LOG(WARNING,getLogDomain(),logTr("Annotations are currently not handled."),this);
+				}
+			}
 			mStack.push(new CParseStackObject(namespaceURI,localName,qName,atts));
 			return true;
 		}
 
 		bool CXMLOWL2Handler::endElement(const QString& namespaceURI, const QString& localName, const QString& qName, CParsingHandlingContext* handlingContext) {
 			CParseStackObject* parseStackObject = mStack.pop();
-			parseBuildNode(parseStackObject);
+			if (mIgnoreParsingSubElements) {
+				if (mStack.count() <= mParseIgnoreDepth) {
+					mIgnoreParsingSubElements = false;
+					mParseIgnoreDepth = 0;
+				}
+			} else {
+				parseBuildNode(parseStackObject);
+			}
 			delete parseStackObject;
 			return true;
 		}
@@ -332,6 +356,20 @@ namespace Konclude {
 			mParseFunctionJumpHash.insert(mOWLPrefixString+":ObjectPropertyAtom",&CXMLOWL2Handler::jumpFunctionParseRulePropertyAtomNode);
 			mParseFunctionJumpHash.insert("ClassAtom",&CXMLOWL2Handler::jumpFunctionParseRuleClassAtomNode);
 			mParseFunctionJumpHash.insert(mOWLPrefixString+":ClassAtom",&CXMLOWL2Handler::jumpFunctionParseRuleClassAtomNode);
+
+			return true;
+		}
+
+
+		bool CXMLOWL2Handler::initializeAnnotationNodeSet() {
+			// the annotation vocabulary is recognized, but ignored, since annotations do not influence the reasoning
+			QStringList annotationNodeNames;
+			annotationNodeNames << "AnnotationProperty" << "AnnotationPropertyRange" << "AnnotationPropertyDomain"
+					<< "SubAnnotationPropertyOf" << "AnnotationAssertion" << "Annotation";
+			foreach (const QString& annotationNodeName, annotationNodeNames) {
+				mAnnotationNodeSet.insert(annotationNodeName);
+				mAnnotationNodeSet.insert(mOWLPrefixString+":"+annotationNodeName);
+			}
 
 			return true;
 		}

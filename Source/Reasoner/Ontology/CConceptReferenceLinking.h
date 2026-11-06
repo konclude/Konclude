@@ -54,6 +54,8 @@ namespace Konclude {
 			class CConceptReferenceLinking {
 				// public methods
 				public:
+					//! virtual, so that the ontology that owns a linking data can delete it through the base (issue #45)
+					virtual ~CConceptReferenceLinking() {}
 					//! Constructor
 					CConceptReferenceLinking();
 

@@ -26,6 +26,8 @@
 #include <QMutex>
 #include <QSemaphore>
 #include <QVector>
+#include <QSet>
+#include <QAtomicInt>
 #include <QList>
 #include <QStringList>
 #include <QReadWriteLock>
@@ -149,6 +151,16 @@ namespace Konclude {
 						QList<COccurrenceUnsatisfiableCacheUpdateSlotItem *> usedUpdatesSlotsList;
 						QList<COccurrenceUnsatisfiableCacheUpdateSlotItem *> notusedUpdatesSlotsList;
 						COccurrenceUnsatisfiableCacheUpdateSlotItem* lastUpdateSlot;
+
+						// for each update slot the entries whose hash in that slot is older than their latest one,
+						// so that activating a slot only updates these instead of walking all entries
+						QVector< QSet<COccurrenceUnsatisfiableCacheEntry*> > mSlotOutdatedEntries;
+						// writes are collected in one update slot while more of them are queued, and activated together
+						COccurrenceUnsatisfiableCacheUpdateSlotItem* mBatchUpdateSlot;
+						cint64 mBatchWriteCount;
+						// hashes created for the open batch, not yet visible to readers, so they can be extended in place
+						QSet<COccurrenceUnsatisfiableCacheEntriesHash*> mBatchCreatedHashes;
+						QAtomicInt mQueuedWriteCount;
 
 						QMutex lockFreeMutexSync;
 						bool canGetLockFreeAccess;

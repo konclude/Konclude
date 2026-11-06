@@ -365,6 +365,24 @@ namespace Konclude {
 								if (messageData) {
 									possSubsumMessageDataLinker = messageData->append(possSubsumMessageDataLinker);
 								}
+								if (answererConceptMarkedAdapter->isRootLabelRequested()) {
+									// the whole label of the root node, each concept with its polarity and whether it
+									// was derived without a choice, completes an unreliable saturation for the decider
+									CCLASSSUBSUMPTIONMESSAGELIST<CRootLabelEntry>* entryList = CObjectParameterizingAllocator< CCLASSSUBSUMPTIONMESSAGELIST<CRootLabelEntry>,CContext* >::allocateAndConstructAndParameterize(mTempMemAllocMan,mTmpContext);
+									CReapplyConceptLabelSetIterator labelIt = conSet->getConceptLabelSetIterator(true,true,true);
+									while (labelIt.hasNext()) {
+										CConceptDescriptor* conDes = labelIt.getConceptDescriptor();
+										if (conDes) {
+											CDependencyTrackPoint* depTrackPoint = labelIt.getDependencyTrackPoint();
+											bool deterministic = depTrackPoint && depTrackPoint->getBranchingTag() <= maxDetBranchTag;
+											entryList->append(CRootLabelEntry(conDes->getConcept(), conDes->getNegation(), deterministic));
+										}
+										labelIt.moveNext();
+									}
+									CAnsweringMessageDataCalculationRootLabel* rootLabelMessageData = CObjectAllocator<CAnsweringMessageDataCalculationRootLabel>::allocateAndConstruct(mTempMemAllocMan);
+									rootLabelMessageData->initRootLabelMessageData(testingConcept,testingConceptNegation,entryList);
+									possSubsumMessageDataLinker = rootLabelMessageData->append(possSubsumMessageDataLinker);
+								}
 
 							}
 

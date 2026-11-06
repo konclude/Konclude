@@ -27,7 +27,7 @@ namespace Konclude {
 
 
 
-		CSingleThreadTaskProcessorUnit::CSingleThreadTaskProcessorUnit(CTaskHandleAlgorithm* taskHandleAlgo, CConsiderateMemoryPoolProvider* memoryPoolProvider) : CThread("TaskProcessingUnitThread") {
+		CSingleThreadTaskProcessorUnit::CSingleThreadTaskProcessorUnit(CTaskHandleAlgorithm* taskHandleAlgo, CConsiderateMemoryPoolProvider* memoryPoolProvider, cint64 freePoolReserveLimit) : CThread("TaskProcessingUnitThread") {
 			mTaskProcessingQueue = nullptr;
 			mTaskCompletionQueue = nullptr;
 			mTaskStatusPropagator = nullptr;
@@ -36,7 +36,7 @@ namespace Konclude {
 			if (!mMemoryPoolProvider) {
 				mMemoryPoolProvider = new CNewAllocationMemoryPoolProvider();
 			}
-			mMemoryAllocator = new CTaskHandleLimitedReserveMemoryPoolAllocationManager(mMemoryPoolProvider,30000,30);
+			mMemoryAllocator = new CTaskHandleLimitedReserveMemoryPoolAllocationManager(mMemoryPoolProvider,freePoolReserveLimit,30);
 			mTaskProcessorContext = new CTaskProcessorContextBase(this,mMemoryAllocator);
 			mTaskHandleAlgo = taskHandleAlgo;
 			mProcessingBlocked = true;
@@ -63,7 +63,40 @@ namespace Konclude {
 			mTaskSchedulingQueue = nullptr;
 		}
 
+		// Releases the memory of the tasks that completed without being released because their data
+		// was kept, such as the saturation or the consistency of an ontology. Nothing else releases
+		// them, so they stayed allocated until the process ended (issue #45). This runs when the unit
+		// is deleted, after its thread has been stopped and after the objects that read the data of
+		// these tasks, the workers and the caches, have been deleted. A task lives in its own memory
+		// pools, which the allocator reads before it releases them.
+		cint64 CSingleThreadTaskProcessorUnit::releaseKeptTasks() {
+			cint64 releasedCount = 0;
+			for (CTask* keptTask : mKeptTaskList) {
+				for (CDeletionLinker* deletionLinkerIt = keptTask->takeDeletionLinker(); deletionLinkerIt; deletionLinkerIt = deletionLinkerIt->getNext()) {
+					deletionLinkerIt->deleteObject();
+				}
+				mMemoryAllocator->releaseMemoryPoolContainer(keptTask);
+				++releasedCount;
+			}
+			mKeptTaskList.clear();
+			return releasedCount;
+		}
+
+
 		CSingleThreadTaskProcessorUnit::~CSingleThreadTaskProcessorUnit() {
+			// The unit owns its allocator, the pool provider handed to it or created for it, and its
+			// task handling algorithm. The thread has been stopped and joined before (see
+			// CConcurrentTaskCalculationEnvironment::stopProcessorUnits). The allocator releases its
+			// reserve of free pools to the provider, so it goes first. The memory of tasks that were
+			// kept, such as the saturation, is not held by the allocator and is released by the
+			// holder of the task (issue #45).
+			releaseKeptTasks();
+			delete mMemoryAllocator;
+			mMemoryAllocator = nullptr;
+			delete mMemoryPoolProvider;
+			mMemoryPoolProvider = nullptr;
+			delete mTaskHandleAlgo;
+			mTaskHandleAlgo = nullptr;
 		}
 
 
@@ -258,8 +291,12 @@ namespace Konclude {
 			return this;
 		}
 
+		// Ends the processing loop, which otherwise never returns to the event loop of the thread,
+		// so that quit() and wait() can then end the thread. The unit waits for work without a
+		// timeout, so the release is what wakes it; a task in progress finishes its current step.
 		CSingleThreadTaskProcessorUnit* CSingleThreadTaskProcessorUnit::stopProcessing() {
-			mProcessingStopped = true;
+			mProcessingStopped.store(true, std::memory_order_relaxed);
+			mProcessingWakeUpSemaphore.release();
 			return this;
 		}
 
@@ -293,7 +330,7 @@ namespace Konclude {
 
 		bool CSingleThreadTaskProcessorUnit::processingLoop() {
 			bool eventSafeguardProcessed = false;
-			while (!mProcessingStopped) {
+			while (!mProcessingStopped.load(std::memory_order_relaxed)) {
 				if (!mTaskProcessingQueue && mProcessingBlocked) {
 					// block until new events or task are available
 #ifdef KONCLUDE_SCHEDULER_TASK_THREADS_TIME_STATISTICS
@@ -489,7 +526,7 @@ namespace Konclude {
 			bool handleNextRound = true;
 			bool roundEventProcessed = false;
 			bool eventProcessed = false;
-			while (handleNextRound && !mProcessingStopped) {
+			while (handleNextRound && !mProcessingStopped.load(std::memory_order_relaxed)) {
 				roundEventProcessed = false;
 				CXLinker<CEventHandler*>* eventHandlerLinkerIt = mEventHandlerLinker;
 				if (eventHandlerLinkerIt) {
@@ -566,6 +603,10 @@ namespace Konclude {
 							deletionLinkerIt->deleteObject();
 						}
 						mMemoryAllocator->releaseMemoryPoolContainer(completionTask);
+					} else {
+						// a task whose data is kept, such as the saturation, is released when the unit is
+						// deleted, see releaseKeptTasks (issue #45)
+						mKeptTaskList.append(completionTask);
 					}
 					completedCount++;
 				}				

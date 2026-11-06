@@ -72,6 +72,8 @@ namespace Konclude {
 						
 						CCriticalPredecessorRoleCardinalityData* getCriticalPredecessorRoleCardinalityData(CRole* role, bool forceCreation = false);
 
+						bool hasCriticalPredecessorRoleCardinalityData(CRole* role);
+
 
 					// protected methods
 					protected:

@@ -107,15 +107,48 @@ The binaries of Konclude (and possibly some shared libraries) are located in the
     Note that the settings of the `Configs/querying-config.xml` file are automatically enabled if the `sparqlserver` or `sparqlfile` commands are used in order to deactivate some optimizations that are not yet compatible with the integrated query answering engine. However, the `Configs/querying-config.xml` file also contains some commented out settings that may be interesting for configuring some query answering aspects in more detail (e.g., concurrency, interpretation of anonymous variables, etc.).
 
 
+- JNI:
+
+	Konclude further contains a very basic and experimental JNI bridge in `Source/Control/Interface/JNI`, which is compiled into a shared library by `KoncludeLIB.pro` and which allows for building axioms and for asking a part of the supported questions directly from Java, i.e., without the OWLlink interface. The `Java` directory contains the Java classes that the bridge requires, a smoke test of the bridge, a translator from the OWL API into it and an implementation of the OWL API `OWLReasoner` interface on top of it, see `Java/Readme.md`. Note that only a part of the reasoning questions is provided by the bridge, so the reasoner reports the questions that it cannot answer as unsupported, and that the wrapper has not been used in a Protege plug-in yet. Several defects of the bridge itself, which had never been driven from Java before, were found and fixed along the way, see `Java/Readme.md`.
+
+
 - CONFIGURATION:
 
 	Konclude can be configured with configuration files, which are also OWLlink request files where only the 'Set' command is used. 'Set' commands without the specification of a specific knowledge base configure the default settings in Konclude, which are used to instantiate the configurations of newly created knowledge bases. It is highly recommended to NOT change the default configuration of Konclude, because many available configurations are only for debugging, testing and experimenting. However, if Konclude requires too much main memory, then you can try to deactivate the satisfiability or unsatisfiability caching (see example configuration file in `Configs` directory). The parameter `-c FILEPATH` can be used to load a configuration file.
 
-		
+
+- KNOWN ISSUES:
+
+	Incomplete realisation for qualified minimum cardinality restrictions:
+	the instance retrieval can lose instances of classes that are defined by a qualified minimum cardinality restriction, i.e., `Realize`, `GetInstances` and `GetFlattenedInstances` then report only a part of the instances of such a class. The entailment check is not affected, so `IsInstanceOf` still answers correctly for the very same individuals, and the classification of the class hierarchy is also unaffected.
+
+	A minimal example is `Tests/min-cardinality-realization.owl.xml` with the corresponding OWLlink request `Tests/min-cardinality-realization-request.xml`, where `IsInstanceOf` answers true for the individual `p` while `GetFlattenedInstances` returns an empty set. For `Tests/roberts-family-full-D.owl.xml`, only 1 of the 60 instances of `PersonWithManySibling` is reported, whereas the instances of `ParentOfLargeFamily` are reported completely even though that class is defined by a minimum cardinality restriction as well. Which instances are lost therefore depends on the ontology, and for some ontologies it also varies between runs, which is why the number of processing units configured with `-w` can appear to influence the result.
+
+	Deactivating the upfront merging of possible instance concepts, an optimization of the realisation, avoids the problem in all observed cases:
+
+	```
+	./Konclude realization -c Configs/no-upfront-instance-merging-config.xml -i Tests/roberts-family-full-D.owl.xml -o roberts-family-full-realization.owl.xml
+	```
+
+	makes the realisation complete and reproducible, all 60 instances are then reported, but also somewhat slower, about 30 percent for the example above. So far the problem has only been observed for classes that are defined by a qualified minimum cardinality restriction.
+
+
+	High memory consumption for large ontologies:
+	classifying a large ontology needs a multiple of the memory of the ontology itself, and the memory is not released before the process ends. Classifying SNOMED CT (320k classes, 750k axioms, 297 MB in OWL 2 XML) reaches about 14 GB, which makes it unsuitable for a machine with little free memory, in particular when it is classified from an application such as Protege that holds the ontology as well.
+
+	The memory is allocated while the ontology is precomputed, i.e., during the saturation of the concepts, and not while it is parsed: for the example above, the memory grows to 1.9 GB until the preprocessing is finished and then to 15.6 GB during the precomputation, while the classification itself stays below that. It does not depend noticeably on the number of processing units configured with `-w` (13.8 GB for `-w 1`, 15.7 GB for `-w 4`, 13.7 GB for `-w AUTO` on 16 cores), nor on how the ontology reaches the reasoner: loading it from a file with `LoadOntologies` instead of sending it with an OWLlink `Tell` request changes the peak only from 33 GB to 32 GB.
+
+	The optimizations that build the saturation data cannot be traded for memory with the available settings. Deactivating `Konclude.Calculation.Optimization.SaturationCaching` or `Konclude.Calculation.Optimization.SaturationExpansionSatisfiabilityCacheWriting` increases the memory instead (15.6 GB and 15.4 GB for the example above), and activating the calculation memory limit with `Konclude.Calculation.Memory.AllocationLimitation` did not finish the precomputation within 15 minutes. Deactivating `Konclude.Calculation.Optimization.ConceptSaturation` does reduce the memory to 2.4 GB, but it does not classify the ontology any more: the result then contains every class as a direct subclass of `owl:Thing`.
+
+	For a knowledge base that is served over OWLlink, note that releasing it with `ReleaseKB`, which is what Protege does when the reasoner is stopped, frees the knowledge base but does not return the memory to the system. A subsequent classification reuses it, so the server does not grow further, but the memory becomes available to other processes only when the server is restarted.
+
+
 
 # REQUIREMENTS, INSTALLATION, BUILD
 
 On GitHub, there is an up-to-date Docker image of Konclude available (`docker pull konclude/konclude`, cf. https://hub.docker.com/r/konclude/konclude), which should run on most platforms with Docker installed.
+
+The releases of this repository (rhausam/Konclude) also publish their own image, built from `Docker/Dockerfile` (ubuntu:24.04 with the statically linked package) for amd64 and arm64, as `ghcr.io/rhausam/konclude:<tag>` and `ghcr.io/rhausam/konclude:latest`; e.g. `docker run --rm -v $(pwd):/data ghcr.io/rhausam/konclude:latest classification -i /data/ontology.owl -o /data/classified.owl`.
 
 In principle, Konclude requires Qt 5.11 libraries or above [6], but they are included (or statically integrated/linked into the binary) for the released versions for most platfroms. If this is not the case, then you should install them manually on your system.
 

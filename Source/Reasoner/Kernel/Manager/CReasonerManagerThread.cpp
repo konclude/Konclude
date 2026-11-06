@@ -76,7 +76,7 @@ namespace Konclude {
 					mWorkControllerCount = qMax(processorCount,mWorkControllerCount);
 
 					mConfgAdaptThreadPoolToWorkerCount = CConfigDataReader::readConfigBoolean(configProvider, "Konclude.Calculation.AdaptThreadPoolSizeProcessorCount", true);
-					mBlockThreadPoolThreadCount = CConfigDataReader::readConfigBoolean(configProvider, "Konclude.Calculation.BlockingThreadPoolThreadsCount", 1);
+					mBlockThreadPoolThreadCount = CConfigDataReader::readConfigInteger(configProvider, "Konclude.Calculation.BlockingThreadPoolThreadsCount", 1);
 
 
 					//if (!isRunning()) {
@@ -85,6 +85,9 @@ namespace Konclude {
 					mSatExpCache = 0;
 					mReuseCompGraphCache = 0;
 					mSatNodeExpCache = 0;
+					mCompConsCache = 0;
+					mBackendAssCache = 0;
+					mOccStatsCache = 0;
 					//}
 					mPrecomputationManager = new CPrecomputationManager(this);
 					mPreprocessingManager = new CPreprocessingManager(this);
@@ -256,6 +259,14 @@ namespace Konclude {
 						QThreadPool::globalInstance()->setMaxThreadCount(poolThreadCount);
 					}
 					if (mBlockThreadPoolThreadCount > 0) {
+						// The blocked threads occupy their slots in the default thread pool until the
+						// reasoner is closed, so the pool has to be extended by their number. Otherwise
+						// the pool can be left without any usable thread, which makes all later
+						// QtConcurrent processing (for instance the concurrent realization or the
+						// individual label association indexing) wait forever for a task that can
+						// never be scheduled.
+						QThreadPool* defaultThreadPool = QThreadPool::globalInstance();
+						defaultThreadPool->setMaxThreadCount(defaultThreadPool->maxThreadCount() + mBlockThreadPoolThreadCount);
 						for (cint64 i = 0; i < mBlockThreadPoolThreadCount; ++i) {
 							QtConcurrent::run(QThreadPool::globalInstance(), [&]() {
 								mBlockThreadPoolThreadsBlockingSemaphore.acquire(1);
@@ -287,12 +298,55 @@ namespace Konclude {
 
 					LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Closing Reasoner."),this);
 
-					//QThread::msleep(50);
+					// Nothing stopped the threads of a reasoner before, so after a library instance was
+					// closed they kept running until the process exited, the processor threads polling,
+					// and crashed while Qt's static objects were destroyed (issue #30). They are stopped
+					// and joined here, before the objects they use are deleted: first the workers, which
+					// give tasks to the processor threads, then the processor threads, whose callbacks
+					// reach the workers, then the caches that both use. The objects themselves are left
+					// as before. A thread that does not stop in time is left running and reported.
+					QList<QThread*> workerThreads;
+					if (classificationMan) {
+						workerThreads += classificationMan->getWorkerThreads();
+					}
+					if (mPrecomputationManager) {
+						workerThreads += mPrecomputationManager->getWorkerThreads();
+					}
+					if (mPreprocessingManager) {
+						workerThreads += mPreprocessingManager->getWorkerThreads();
+					}
+					if (mRealizationManager) {
+						workerThreads += mRealizationManager->getWorkerThreads();
+					}
+					CAnsweringManagerThread* answeringManagerThread = dynamic_cast<CAnsweringManagerThread*>(mAnswererManager);
+					if (answeringManagerThread) {
+						workerThreads += answeringManagerThread->getWorkerThreads();
+						workerThreads.append(answeringManagerThread);
+					}
+					qint64 stillRunningCount = CThread::quitAndWaitThreads(workerThreads, 30000);
+					if (mCalculationManager) {
+						stillRunningCount += mCalculationManager->stopCalculation(30000);
+					}
+					QList<QThread*> cacheThreads;
+					for (QThread* cacheThread : QList<QThread*>({ mCompConsCache, mBackendAssCache, mOccStatsCache })) {
+						if (cacheThread) {
+							cacheThreads.append(cacheThread);
+						}
+					}
+					stillRunningCount += CThread::quitAndWaitThreads(cacheThreads, 30000);
+					if (stillRunningCount > 0) {
+						LOG(WARN,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("%1 thread(s) of the reasoner did not stop in time.").arg(stillRunningCount),this);
+					}
 
-					delete mCalculationManager;
+					// Deleted in the order of what reads what (issue #45): the workers and the caches read
+					// the data of the tasks that the processor units keep, such as the saturation, and the
+					// units release the memory of those tasks when they are deleted with the calculation
+					// manager, so the calculation manager goes last.
 					delete mPrecomputationManager;
 					delete mPreprocessingManager;
 					delete mRealizationManager;
+					// the classification manager, with its classifiers, is deleted by the commander, which
+					// created it, after this manager and before the revision manager deletes the ontologies
 
 					if (unsatCache) {
 						unsatCache->stopThread(true);
@@ -310,6 +364,12 @@ namespace Konclude {
 						mSatNodeExpCache->stopThread(true);
 						delete mSatNodeExpCache;
 					}
+
+					delete mCalculationManager;
+					// read by the processor units, so after them; the other two caches that are only stopped
+					// above still run jobs of their own on Qt's pool (issue #45)
+					delete mOccStatsCache;
+					mOccStatsCache = nullptr;
 
 					if (mBlockThreadPoolThreadCount > 0) {
 						mBlockThreadPoolThreadsBlockingSemaphore.release(mBlockThreadPoolThreadCount);
@@ -799,10 +859,14 @@ namespace Konclude {
 
 							reasoningData->mFinQueryCallback = new CCalcedQueryEvent(this,jobQuery);
 							LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Processing Query '%1'.").arg(query->getQueryName()),this);
+							return;
+						}
 
-
-
-						} 
+						// Each of the following blocks answers one kind of query and calls the callback
+						// that reports it, which hands the query back to its owner, who may delete it at
+						// once, so a block that answered the query has to return: the dynamic_cast of the
+						// next block would read the deleted query. That was a crash on a native thread
+						// in __dynamic_cast, seen on the Linux runners of the CI, see Java/Readme.md.
 
 
 
@@ -820,6 +884,7 @@ namespace Konclude {
 								callback->doCallback();
 							}
 							delete reasoningData;
+							return;
 						}
 
 						CConsistencePremisingQuery* consQuery = dynamic_cast<CConsistencePremisingQuery *>(query);
@@ -848,6 +913,7 @@ namespace Konclude {
 								callback->doCallback();
 							}
 							delete reasoningData;
+							return;
 						}
 
 
@@ -882,6 +948,7 @@ namespace Konclude {
 								callback->doCallback();
 							}
 							delete reasoningData;
+							return;
 						}
 
 
@@ -904,6 +971,7 @@ namespace Konclude {
 								callback->doCallback();
 							}
 							delete reasoningData;
+							return;
 						}
 
 
@@ -927,6 +995,7 @@ namespace Konclude {
 								callback->doCallback();
 							}
 							delete reasoningData;
+							return;
 						}
 
 
@@ -949,6 +1018,7 @@ namespace Konclude {
 							if (!confCollectProcessStatistics) {
 								delete reasoningData;
 							}
+							return;
 						}
 					}
 				}

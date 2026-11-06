@@ -76,9 +76,15 @@ namespace Konclude {
 
 
 
+			// The lookups below go through a constant pointer to the map on purpose: the map is shared
+			// between the ontology and the testing ontologies of the queries, and the non constant
+			// lowerBound detaches it, which allocates a copy and modifies the map. The tableau tasks
+			// of a query call these from their threads at the same time, and two of them detaching
+			// the same map at once corrupted it, seen as crashes in the value space triggering of
+			// data value nodes when many such nodes are tested together.
 			CDatatypeValueSpaceTriggeringIterator CDatatypeValueSpaceTriggeringMap::getLeftTriggeringIterator(CDataLiteralCompareValue* value, bool inclusive) {
 				CDatatypeValueSpaceTriggeringMapArranger mapValueArranger(value);
-				CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::const_iterator itLB = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::lowerBound(mapValueArranger), itEnd = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::constEnd();
+				CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::const_iterator itLB = static_cast<const CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>*>(this)->lowerBound(mapValueArranger), itEnd = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::constEnd();
 				if (itLB != itEnd) {
 					const CDatatypeValueSpaceTriggeringMapData& mapData = itLB.value();
 					CDatatypeValueSpaceTriggeringData* triggerData = mapData.mUseValue;
@@ -98,7 +104,7 @@ namespace Konclude {
 
 			CDatatypeValueSpaceTriggeringIterator CDatatypeValueSpaceTriggeringMap::getRightTriggeringIterator(CDataLiteralCompareValue* value, bool inclusive) {
 				CDatatypeValueSpaceTriggeringMapArranger mapValueArranger(value);
-				CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::const_iterator itLB = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::lowerBound(mapValueArranger), itEnd = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::constEnd();
+				CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::const_iterator itLB = static_cast<const CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>*>(this)->lowerBound(mapValueArranger), itEnd = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::constEnd();
 				if (itLB != itEnd) {
 					const CDatatypeValueSpaceTriggeringMapData& mapData = itLB.value();
 					CDatatypeValueSpaceTriggeringData* triggerData = mapData.mUseValue;
@@ -126,8 +132,8 @@ namespace Konclude {
 				CDatatypeValueSpaceTriggeringMapArranger mapValueArrangerMin(minValue);
 				CDatatypeValueSpaceTriggeringMapArranger mapValueArrangerMax(maxValue);
 				CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::const_iterator itEnd = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::constEnd(),
-					minItLB = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::lowerBound(mapValueArrangerMin), 
-					maxItLB = CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>::lowerBound(mapValueArrangerMax);
+					minItLB = static_cast<const CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>*>(this)->lowerBound(mapValueArrangerMin), 
+					maxItLB = static_cast<const CBOXMAP<CDatatypeValueSpaceTriggeringMapArranger,CDatatypeValueSpaceTriggeringMapData>*>(this)->lowerBound(mapValueArrangerMax);
 					
 				if (maxItLB != itEnd) {
 					const CDatatypeValueSpaceTriggeringMapData& mapData = maxItLB.value();
@@ -196,7 +202,10 @@ namespace Konclude {
 				valueTriggerCount = 0;
 				while (iterator.hasNext()) {
 					CDatatypeValueSpaceTriggeringData* triggerData = iterator.next();
-					if (triggerData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+					// a value with complete triggers only (the exact value trigger of a completely absorbed
+					// definition) is a trigger value too; counted as a free value it satisfied the search for
+					// a free value and the exact-value triggering was never reached (issue #101)
+					if (triggerData->getDirectValueTriggeringData()->hasConceptTriggers()) {
 						++valueTriggerCount;
 					}
 					if (triggerData->getMaxExclusiveTriggeringData()->hasPartialConceptTriggers()) {

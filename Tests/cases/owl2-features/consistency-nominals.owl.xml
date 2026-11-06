@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Nominals: B is the singleton {bob}, but alice is asserted to be in B. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/nominals">
+  <Prefix name="" IRI="http://konclude.test/features/nominals#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":alice"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":bob"/></Declaration>
+
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":A"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":alice"/></ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":B"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":bob"/></ObjectOneOf>
+  </EquivalentClasses>
+  <DifferentIndividuals>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <NamedIndividual abbreviatedIRI=":bob"/>
+  </DifferentIndividuals>
+  <ClassAssertion><Class abbreviatedIRI=":B"/><NamedIndividual abbreviatedIRI=":alice"/></ClassAssertion>
+</Ontology>

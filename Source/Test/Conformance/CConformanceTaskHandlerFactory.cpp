@@ -22,6 +22,7 @@
 
 #include "CConformanceCliBooleanTaskHandler.h"
 #include "CClassificationTaskHandler.h"
+#include "CRealizationTaskHandler.h"
 #include "COWLLinkBooleanTaskHandler.h"
 #include "CSPARQLBooleanTaskHandler.h"
 
@@ -45,8 +46,11 @@ namespace Konclude {
 						// in the response file.
 						return new CConformanceCliBooleanTaskHandler(testCase, binaryFile, configFile);
 
-					case CConformanceTask::TYPE::CLASSIFICATION:
+					case CConformanceTask::TYPE::CLASS_CLASSIFICATION:
 						return new CClassificationTaskHandler(testCase, binaryFile, configFile);
+
+					case CConformanceTask::TYPE::CLASS_REALIZATION:
+						return new CRealizationTaskHandler(testCase, binaryFile, configFile);
 
 					case CConformanceTask::TYPE::OWLLINK:
 						// One handler for the file and the live-server channel; the base

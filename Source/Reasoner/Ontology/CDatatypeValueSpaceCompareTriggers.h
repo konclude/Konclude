@@ -65,6 +65,9 @@ namespace Konclude {
 
 					CDatatypeValueSpaceTriggeringMap* getValueSpaceTriggeringMap();
 
+					//! Number of minimum and maximum triggers in the triggering map, i.e. the triggers whose firing for a value depends on other entries than the one at the value
+					cint64 getMinMaxTriggerCount();
+
 					CDatatypeValueSpaceConceptTriggeringData* getValueConceptTriggeringData(CDataLiteralCompareValue* value, bool createOrLocalize = true);
 
 					CDatatypeValueSpaceConceptTriggeringData* getMinValueConceptTriggeringData(CDataLiteralCompareValue* value, bool inclusive, bool createOrLocalize = true);
@@ -88,6 +91,7 @@ namespace Konclude {
 
 
 					CDatatypeValueSpaceTriggeringMap mValueTriggerMap;
+					cint64 mMinMaxTriggerCount;
 
 				// private methods
 				private:

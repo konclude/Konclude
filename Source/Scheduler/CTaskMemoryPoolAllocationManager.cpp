@@ -28,6 +28,8 @@ namespace Konclude {
 
 
 		CTaskMemoryPoolAllocationManager::CTaskMemoryPoolAllocationManager(CMemoryPoolContainer* memoryPoolContainer, CConsiderateMemoryPoolProvider* memoryPoolProvider) {
+			mConcurrentAllocation = false;
+			mAllocationLock.storeRelaxed(0);
 			mMemoryPoolContainer = memoryPoolContainer;
 			mMemoryPoolProvider = memoryPoolProvider;
 			mStatPoolAllocCount = 0;
@@ -35,6 +37,8 @@ namespace Konclude {
 		}
 
 		CTaskMemoryPoolAllocationManager::CTaskMemoryPoolAllocationManager() {
+			mConcurrentAllocation = false;
+			mAllocationLock.storeRelaxed(0);
 			mMemoryPoolContainer = nullptr;
 			mMemoryPoolProvider = nullptr;
 			mStatPoolAllocCount = 0;
@@ -64,6 +68,9 @@ namespace Konclude {
 		void* CTaskMemoryPoolAllocationManager::allocate(size_t size) {
 			void* memPtr = 0;
 			char* memBlock = 0;
+			if (mConcurrentAllocation) {
+				while (!mAllocationLock.testAndSetAcquire(0,1)) { }
+			}
 			if (size >= 8) {
 				memBlock = getMemoryBlock(size*sizeof(char),8);
 			} else if (size >= 4) {
@@ -73,8 +80,16 @@ namespace Konclude {
 			} else {
 				memBlock = getMemoryBlock(size*sizeof(char));
 			}
+			if (mConcurrentAllocation) {
+				mAllocationLock.storeRelease(0);
+			}
 			memPtr = memBlock;
 			return memPtr;
+		}
+
+		CMemoryAllocationManager* CTaskMemoryPoolAllocationManager::setConcurrentAllocation(bool concurrent) {
+			mConcurrentAllocation = concurrent;
+			return this;
 		}
 
 		CMemoryAllocationManager* CTaskMemoryPoolAllocationManager::release(void* address) {
@@ -84,7 +99,13 @@ namespace Konclude {
 
 		void* CTaskMemoryPoolAllocationManager::allocateAligned(size_t size, int alignment) {
 			void* memPtr = 0;
+			if (mConcurrentAllocation) {
+				while (!mAllocationLock.testAndSetAcquire(0,1)) { }
+			}
 			char* memBlock = getMemoryBlock(size*sizeof(char),alignment);
+			if (mConcurrentAllocation) {
+				mAllocationLock.storeRelease(0);
+			}
 			memPtr = memBlock;
 			return memPtr;
 		}

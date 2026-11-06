@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2002/07/owl#" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    <Prefix name="" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://www.w3.org/2002/07/owl#Nothing"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#Food"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#Food"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#Topping"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#Topping"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#Pizza"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#Pizza"/>
+        <Class IRI="http://konclude.test/dl/defined-classes#Food"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#MeatTopping"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#MeatTopping"/>
+        <Class IRI="http://konclude.test/dl/defined-classes#Topping"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#VegetarianTopping"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#VegetarianTopping"/>
+        <Class IRI="http://konclude.test/dl/defined-classes#Topping"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#VegetarianPizza"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#VegetarianPizza"/>
+        <Class IRI="http://konclude.test/dl/defined-classes#Pizza"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#Mozzarella"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#Mozzarella"/>
+        <Class IRI="http://konclude.test/dl/defined-classes#VegetarianTopping"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/defined-classes#Margherita"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/defined-classes#Margherita"/>
+        <Class IRI="http://konclude.test/dl/defined-classes#VegetarianPizza"/>
+    </SubClassOf>
+</Ontology>

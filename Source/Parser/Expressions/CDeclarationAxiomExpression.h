@@ -55,6 +55,8 @@ namespace Konclude {
 			class CDeclarationAxiomExpression : public CAxiomExpression, public CEntityAssociator {
 				// public methods
 				public:
+					//! The kind flags of this base class, see CBuildExpression::ExpressionKindFlag.
+					virtual cint64 getExpressionKindFlags() { return EKFDECLARATIONAXIOM; }
 					//! Constructor
 					CDeclarationAxiomExpression(CExpressionEntity* entity);
 

@@ -59,10 +59,11 @@ namespace Konclude {
 					if (QThreadPool::globalInstance()->maxThreadCount() > 1) {
 						QtConcurrent::run(functor);
 					} else {
-						QVector<int> vec(1);
-						QtConcurrent::blockingMap(vec, [&](int& data) {
-							functor();
-						});
+						// Without a second thread in the default thread pool the task is processed
+						// by the calling thread. It must not be handed over to the pool, because
+						// the pool is not guaranteed to have a thread available for it and waiting
+						// for a task that is never scheduled deadlocks the calling thread.
+						functor();
 					}
 				}
 

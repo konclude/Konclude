@@ -188,6 +188,15 @@ namespace Konclude {
 				return bottomNode;
 			}
 
+			CTaxonomy *CTaxonomy::removeBypassedTopBottomLink() {
+				if (topNode != bottomNode && bottomNode->hasParentNode(topNode) && bottomNode->getParentNodeSet()->count() > 1) {
+					// the top node remains a predecessor of the bottom node, only the direct link goes
+					bottomNode->removeParent(topNode);
+					topNode->removeChild(bottomNode);
+				}
+				return this;
+			}
+
 
 
 			CHierarchyNode *CTaxonomy::createHierarchyNode(CConcept *concept) {
@@ -245,7 +254,48 @@ namespace Konclude {
 
 			CTaxonomy *CTaxonomy::setTaxonomyComplete(bool completed) {
 				taxonomyComplete = completed;
-				return this;;
+				if (completed) {
+					orderEquivalentConcepts();
+				}
+				return this;
+			}
+
+
+			bool CTaxonomy::orderEquivalentConcepts() {
+				// the equivalent concepts of a node are collected in the order the classification
+				// merged them, which differs from run to run; the writers and the queries name a node
+				// by its first concept, so the lists are ordered by name, and two results of one
+				// hierarchy come out the same
+				QSet<CHierarchyNode*> orderedNodeSet;
+				QHash<CConcept*,CHierarchyNode*>* nodeHash = getConceptHierarchyNodeHash();
+				for (QHash<CConcept*,CHierarchyNode*>::const_iterator it = nodeHash->constBegin(), itEnd = nodeHash->constEnd(); it != itEnd; ++it) {
+					CHierarchyNode* node = it.value();
+					if (!node || orderedNodeSet.contains(node)) {
+						continue;
+					}
+					orderedNodeSet.insert(node);
+					QList<CConcept*>* eqConList = node->getEquivalentConceptList();
+					if (eqConList->size() > 1) {
+						qSort(eqConList->begin(), eqConList->end(), conceptNameLessThan);
+					}
+				}
+				return true;
+			}
+
+
+			bool CTaxonomy::conceptNameLessThan(CConcept* concept1, CConcept* concept2) {
+				// the built-in bottom (tag 0) and top (tag 1) concepts stay the representatives of their nodes
+				cint64 tag1 = concept1->getConceptTag();
+				cint64 tag2 = concept2->getConceptTag();
+				if (tag1 <= 1 || tag2 <= 1) {
+					return tag1 < tag2;
+				}
+				QString name1 = CIRIName::getRecentIRIName(concept1->getClassNameLinker());
+				QString name2 = CIRIName::getRecentIRIName(concept2->getClassNameLinker());
+				if (name1 != name2) {
+					return name1 < name2;
+				}
+				return concept1->getConceptTag() < concept2->getConceptTag();
 			}
 
 			bool CTaxonomy::isActiveNode(CHierarchyNode *node) {

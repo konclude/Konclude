@@ -34,6 +34,7 @@
 #include "CJNIOntologyRevisionData.h"
 #include "CJNIAxiomExpressionVisitingLoader.h"
 #include "CJNIQueryProcessor.h"
+#include "CJNILogMessageQueue.h"
 
 
 
@@ -42,6 +43,7 @@
 #include "CKoncludeInfo.h"
 
 #include "Utilities/UtilitiesSettings.h"
+#include "Utilities/Memory/CSystemAllocatorTuning.h"
 
 #include "Logger/CLogger.h"
 #include "Logger/CConsolePrintLogObserver.h"
@@ -65,7 +67,9 @@ using namespace Konclude::Control::Loader;
 
 
 static int qtAppargc = 1;
-static char* qtAppargv[] = {"Konclude", NULL};
+// writable, since QCoreApplication takes char** and MSVC rejects string literals for char*
+static char qtAppName[] = "Konclude";
+static char* qtAppargv[] = {qtAppName, NULL};
 static QCoreApplication* qtApp = NULL;
 static bool qtAppCreated = false;
 //static QThread* thread = NULL;
@@ -76,12 +80,19 @@ QByteArray qJNIConfigByteArray;
 
 JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initKoncludeLibraryInstance(JNIEnv * jenv, jobject bridgeObj, jstring jniConfigString) {
 
+	// writable, since the first entry may be replaced below and MSVC rejects string literals
+	// for char*
+	//char coutLogObserverArgument[] = "-CoutLogObserverLoader ";
+	// Appending '+=Konclude.Debugging.WriteDebuggingData=TRUE' writes the debugging data of
+	// the preprocessing into a 'Debugging' subdirectory of the working directory, which must
+	// not happen by default since the library is loaded into the process of another program.
+	char defaultReasonerArgument[] = "-DefaultReasonerLoader +=Konclude.Execution.CalculationManager=Konclude.Calculation.Calculator.ConcurrentTaskCalculationManager ";
+	char commandProcessorArgument[] = "-JNICommandProcessorLoader ";
+	char emptyArgument[] = " ";
 	char* defaultJNIArgumentStrings[] =  { 
-		//"-CoutLogObserverLoader ",
-		"-DefaultReasonerLoader +=Konclude.Execution.CalculationManager=Konclude.Calculation.Calculator.ConcurrentTaskCalculationManager +=Konclude.Debugging.WriteDebuggingData=TRUE ",
-		//"-DefaultReasonerLoader +=Konclude.Execution.CalculationManager=Konclude.Calculation.Calculator.ConcurrentTaskCalculationManager ",
-		"-JNICommandProcessorLoader ",
-		" "
+		defaultReasonerArgument,
+		commandProcessorArgument,
+		emptyArgument
 	};
 
 	int defaultJNIArgumentCount = 2;
@@ -99,6 +110,8 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initKo
 
 
 			CLogger *logger = CLogger::getInstance();
+			// keeps the log for the Java side from here on, which logs it with SLF4J
+			CJNILogMessageQueue::getInstance();
 
 			try {
 
@@ -108,6 +121,12 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initKo
 				LOG(INFO,"::Konclude::Main","Starting Konclude via JNI ...",0);
 				LOG(INFO,"::Konclude::Main",koncludeString,0);
 				LOG(INFO,"::Konclude::Main",QString("%1, %2, Version %3 (%4)\r\n").arg(CKoncludeInfo::getKoncludeDescription()).arg(CKoncludeInfo::getKoncludeBitPlatformString()).arg(CKoncludeInfo::getKoncludeVersionString()).arg(CKoncludeInfo::getKoncludeCompilationDateString()),0);
+
+				// once per process, for the whole virtual machine, see CSystemAllocatorTuning
+				QString allocatorTuning = Utilities::Memory::CSystemAllocatorTuning::applyTuning();
+				if (!allocatorTuning.isEmpty()) {
+					LOG(INFO,"::Konclude::Main",allocatorTuning,0);
+				}
 
 
 				CJNIInstanceManager* jniInstanceManager = new CJNIInstanceManager();
@@ -147,6 +166,10 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initKo
 
 				if (!jniInstanceManager->getJNICommandProcessor()) {
 					LOG(WARN,"::Konclude::Main","No JNI command processor loaded!",0);
+					// Without the command processor the library instance cannot be used at all, so
+					// the initialization has to fail here instead of letting the following calls
+					// dereference the missing processor.
+					CJNIHandler::throwKoncludeException(jenv,"No JNI command processor has been loaded, whence the Konclude library instance cannot be used. The loading arguments have to contain '-JNICommandProcessorLoader'.");
 				} else {
 					LOG(INFO,"::Konclude::Main","JNI command processer successfully initialised.",0);
 				}
@@ -165,6 +188,39 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initKo
 
 
 
+// the log messages queued since the last call, three entries each: the level (30 info, 60 warning,
+// 70 and above error), the domain and the text; a first entry "dropped" with the count when the queue was full
+JNIEXPORT jobjectArray JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_takeKoncludeLogMessages(JNIEnv * jenv, jclass bridgeClass) {
+	cint64 droppedCount = 0;
+	QList<QString> entries = CJNILogMessageQueue::getInstance()->takeMessages(&droppedCount);
+	if (droppedCount > 0) {
+		entries.prepend(QString("more log messages were written than could be kept, %1 of them were dropped").arg(droppedCount));
+		entries.prepend("::Konclude::JNI");
+		entries.prepend("60");
+	}
+	if (entries.isEmpty()) {
+		// the usual case, after every call of the wrapper
+		return nullptr;
+	}
+	jclass stringClass = jenv->FindClass("java/lang/String");
+	jobjectArray array = jenv->NewObjectArray(entries.size(), stringClass, nullptr);
+	if (!array) {
+		return nullptr;
+	}
+	for (int i = 0; i < entries.size(); ++i) {
+		const QString& entry = entries.at(i);
+		jstring string = jenv->NewString((const jchar*)entry.utf16(), entry.length());
+		jenv->SetObjectArrayElement(array, i, string);
+		jenv->DeleteLocalRef(string);
+	}
+	jenv->DeleteLocalRef(stringClass);
+	return array;
+}
+
+
+
+
+
 JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_closeKoncludeLibraryInstance(JNIEnv * jenv, jobject bridgeObj) {
 	CJNIInstanceManager* jniInstanceManager = CJNIHandler::getJNIInstanceManager(jenv,bridgeObj);
 	if (jniInstanceManager) {
@@ -172,10 +228,22 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_closeK
 		CJNICommandLoader* jniCommandLoader = jniInstanceManager->getJNICommandLoader();
 		jniCommandLoader->exit();
 
+		// every entity the bridge mapped holds a global reference to its Java object, which would
+		// keep one reference per class, property and individual in the virtual machine for every
+		// library instance that is closed (issue #45)
+		CJNIOntologyRevisionData* ontRevData = jniInstanceManager->getOntologyRevisionData();
+		if (ontRevData) {
+			ontRevData->getEntityMappingHash()->releaseGlobalReferences(jenv);
+		}
+
 		LOG(INFO,"::Konclude::Main",logTr("Stopping Konclude ..."),0);
 
 		delete jniInstanceManager;
 		CJNIHandler::setJNIInstanceManager(jenv,bridgeObj,nullptr);
+
+		// the tuned heaps of glibc are not trimmed while a reasoner works, so the memory of the
+		// destroyed one is handed back to the system here
+		Utilities::Memory::CSystemAllocatorTuning::releaseFreeMemory();
 	}
 }
 
@@ -188,7 +256,10 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initAx
 	if (jniInstanceManager) {
 		CJNIHandler* jniHandler = jniInstanceManager->getJNIHandler();
 		CJNICommandProcessor* jniProcessor = jniInstanceManager->getJNICommandProcessor();
-
+		if (!jniProcessor) {
+			CJNIHandler::throwKoncludeException(jenv,"The Konclude library instance has not been initialized correctly, no JNI command processor is available.");
+			return;
+		}
 
 
 		COntologyRevision* ontRev = nullptr;
@@ -221,6 +292,10 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_finali
 		LOG(INFO,"::Konclude::Main",logTr("Finalizing axiom/expression building bridge."),0);
 		CJNIHandler* jniHandler = jniInstanceManager->getJNIHandler();
 		CJNICommandProcessor* jniProcessor = jniInstanceManager->getJNICommandProcessor();
+		if (!jniProcessor) {
+			CJNIHandler::throwKoncludeException(jenv,"The Konclude library instance has not been initialized correctly, no JNI command processor is available.");
+			return;
+		}
 		CJNIAxiomExpressionVisitingLoader* axiomExpVisitLoader = jniHandler->getAxiomExpressionBuildingBridgeNativeData(jenv,builderObj);
 		if (axiomExpVisitLoader) {
 			axiomExpVisitLoader->completeBuilding();
@@ -247,7 +322,10 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_KoncludeReasonerBridge_initQu
 		LOG(INFO,"::Konclude::Main",logTr("Creating querying bridge."),0);
 		CJNIHandler* jniHandler = jniInstanceManager->getJNIHandler();
 		CJNICommandProcessor* jniProcessor = jniInstanceManager->getJNICommandProcessor();
-
+		if (!jniProcessor) {
+			CJNIHandler::throwKoncludeException(jenv,"The Konclude library instance has not been initialized correctly, no JNI command processor is available.");
+			return;
+		}
 
 		CJNIOntologyRevisionData* ontRevData = jniInstanceManager->getOntologyRevisionData();
 		if (ontRevData) {

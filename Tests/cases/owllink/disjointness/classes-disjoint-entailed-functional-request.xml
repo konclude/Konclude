@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint over two classes whose intersection is unsatisfiable for a
+  reason that is not a syntactic disjointness axiom: r is functional, A and B
+  require an r-successor in C resp. D, and C is disjoint from D.  An instance
+  of A and B would need two different r-successors, which functionality and the
+  disjointness of the fillers rule out.  Expected answer: true.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#B"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#C"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#D"/></owl:Declaration>
+    <owl:Declaration><owl:ObjectProperty IRI="#r"/></owl:Declaration>
+    <owl:FunctionalObjectProperty><owl:ObjectProperty IRI="#r"/></owl:FunctionalObjectProperty>
+    <owl:DisjointClasses><owl:Class IRI="#C"/><owl:Class IRI="#D"/></owl:DisjointClasses>
+    <owl:SubClassOf>
+      <owl:Class IRI="#A"/>
+      <owl:ObjectSomeValuesFrom><owl:ObjectProperty IRI="#r"/><owl:Class IRI="#C"/></owl:ObjectSomeValuesFrom>
+    </owl:SubClassOf>
+    <owl:SubClassOf>
+      <owl:Class IRI="#B"/>
+      <owl:ObjectSomeValuesFrom><owl:ObjectProperty IRI="#r"/><owl:Class IRI="#D"/></owl:ObjectSomeValuesFrom>
+    </owl:SubClassOf>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb"><owl:Class IRI="#A"/><owl:Class IRI="#B"/></AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

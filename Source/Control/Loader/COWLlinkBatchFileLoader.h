@@ -98,6 +98,7 @@ namespace Konclude {
 					bool directErrorOutput;
 					bool closeAfterOutput;
 					bool blockUntilProcessed;
+					int mExitCode;
 					QTime mResponseTime;
 					QSemaphore blockingSem;
 					COWLLinkRecordInterpreter *owllinkInterpreter;

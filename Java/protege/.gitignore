@@ -1,0 +1,5 @@
+# the Maven build of the plug-in
+target/
+
+# the compilation output and the framework caches of run-protege-plugin-test.sh
+build/

@@ -30,6 +30,9 @@
 #include "CEventLinker.h"
 #include "CThreadActivator.h"
 
+// Libraries includes
+#include <QAtomicPointer>
+
 // Other includes
 
 
@@ -75,7 +78,8 @@ namespace Konclude {
 			protected:
 				CEventLinker* mLastPostedEventLinker;
 				CEventLinker* mLastTakedDuplicatedPostEventLinker;
-				CEventLinker* mPostedEventLinker;
+				//! the posted events, newest first; posters push with compare-and-swap, the receiver takes the whole list at once, so no address of a taken event, whose memory is reused at once, is ever compared with
+				QAtomicPointer<CEventLinker> mPostedEventLinker;
 				CEventLinker* mLastTakedPostEventLinker;
 
 				CThreadActivator* mThreadActivator;

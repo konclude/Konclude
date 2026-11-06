@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Annotations and declarations alone never make an ontology inconsistent. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/annotations">
+  <Prefix name="" IRI="http://konclude.test/features/annotations#"/>
+  <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><AnnotationProperty abbreviatedIRI=":note"/></Declaration>
+  <AnnotationAssertion>
+    <AnnotationProperty abbreviatedIRI=":note"/>
+    <IRI>http://konclude.test/features/annotations#A</IRI>
+    <Literal>annotated class</Literal>
+  </AnnotationAssertion>
+  <AnnotationAssertion>
+    <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+    <IRI>http://konclude.test/features/annotations#A</IRI>
+    <Literal xml:lang="en">Class A</Literal>
+  </AnnotationAssertion>
+  <AnnotationAssertion>
+    <AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+    <IRI>http://konclude.test/features/annotations#A</IRI>
+    <Literal>Annotations must not change the logical answer.</Literal>
+  </AnnotationAssertion>
+</Ontology>

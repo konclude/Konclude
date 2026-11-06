@@ -108,7 +108,7 @@ namespace Konclude {
 						while (memPoolIt) {
 							CMemoryPool* tmpMemPool = memPoolIt;
 							memPoolIt = memPoolIt->getNext();
-							delete[] tmpMemPool->getMemoryBlockData();
+							CMemoryPool::releaseMemoryBlockData(tmpMemPool);
 							delete tmpMemPool;
 						}
 						hash = nullptr;

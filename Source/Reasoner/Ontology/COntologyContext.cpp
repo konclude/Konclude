@@ -36,6 +36,16 @@ namespace Konclude {
 			}
 
 
+			COntologyContext* COntologyContext::addDestructiblePoolObject(CAllocationObject* object) {
+				return this;
+			}
+
+
+			COntologyContext* COntologyContext::addOwnedConceptReferenceLinking(CConceptReferenceLinking* linking) {
+				return this;
+			}
+
+
 
 		}; // end namespace Ontology
 

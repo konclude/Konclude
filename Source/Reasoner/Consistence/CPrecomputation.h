@@ -22,6 +22,7 @@
 #define KONCLUDE_REASONER_CONSISTENCE_CPRECOMPUTATION_H
 
 // Libraries includes
+#include <atomic>
 
 
 // Namespace includes
@@ -68,6 +69,19 @@ namespace Konclude {
 					CPrecomputationStatistics* getPrecomputationStatistics();
 					CPrecomputation* setPrecomputationStatistics(CPrecomputationStatistics* statColl);
 
+					/**
+					 * The progress of the saturation of this ontology, for a progress report from
+					 * another thread while the saturation runs, see CJNIQueryProcessor::queryReasoningProgress:
+					 * the saturation nodes that have been initialised, counted by the saturation
+					 * algorithm once per node when it initialises it, and the nodes that exist, the
+					 * largest node count seen, which grows while the saturation creates successors.
+					 * Nothing else in the precomputation is counted, the saturation is what takes the time.
+					 */
+					CPrecomputation* incInitializedSaturationNodeCount(cint64 count = 1);
+					CPrecomputation* updateSaturationNodeCount(cint64 nodeCount);
+					cint64 getInitializedSaturationNodeCount();
+					cint64 getSaturationNodeCount();
+
 				// protected methods
 				protected:
 
@@ -77,6 +91,9 @@ namespace Konclude {
 					CSaturationData* mSaturData;
 
 					CPrecomputationStatistics* mStatsColl;
+
+					std::atomic<cint64> mInitializedSaturationNodeCount;
+					std::atomic<cint64> mSaturationNodeCount;
 
 				// private methods
 				private:

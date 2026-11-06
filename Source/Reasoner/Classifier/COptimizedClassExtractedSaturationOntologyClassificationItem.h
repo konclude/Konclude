@@ -58,6 +58,9 @@ namespace Konclude {
 					//! Constructor
 					COptimizedClassExtractedSaturationOntologyClassificationItem(CConfigurationBase *configuration, CClassifierStatistics *nextClassificationStatistics = 0);
 
+					//! Destructor
+					virtual ~COptimizedClassExtractedSaturationOntologyClassificationItem();
+
 
 					QHash<CConcept*,COptimizedClassExtractedSaturationSatisfiableTestingItem*>* getClassSatisfiableTestItemHash();
 					QList<COptimizedClassExtractedSaturationSatisfiableTestingItem*>* getClassSatisfiableTestItemList();

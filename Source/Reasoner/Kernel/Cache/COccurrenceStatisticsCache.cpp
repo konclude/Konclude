@@ -43,7 +43,9 @@ namespace Konclude {
 				}
 
 
+				// the thread has to be stopped before, the reasoner manager does that (issue #45)
 				COccurrenceStatisticsCache::~COccurrenceStatisticsCache() {
+					delete mCacheData;
 				}
 
 

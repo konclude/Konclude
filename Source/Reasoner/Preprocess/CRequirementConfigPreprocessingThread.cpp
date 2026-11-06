@@ -20,6 +20,8 @@
 
 #include "CRequirementConfigPreprocessingThread.h"
 
+#include <QtConcurrent>
+
 
 namespace Konclude {
 
@@ -442,9 +444,13 @@ namespace Konclude {
 			bool CRequirementConfigPreprocessingThread::createBuild(CRequirementConfigPreprocessingItem* reqConfPreCompItem) {
 				CConcreteOntology* ontology = reqConfPreCompItem->getOntology();
 				ontology->getDataBoxes()->setBuildContinuation();
-				CConcreteOntologyUpdateBuilder upBuilder(ontology);
-				upBuilder.initializeBuilding();
-				upBuilder.completeBuilding();
+				CConcreteOntologyUpdateBuilder* upBuilder = new CConcreteOntologyUpdateBuilder(ontology);
+				upBuilder->initializeBuilding();
+				upBuilder->completeBuilding();
+				// the builder's own sets and lists (new/built expression sets, localisation set, tagging lists) hold a node per
+				// built expression (50-115 ms to free on the SNOMED editions and the SDD); nothing references the builder any
+				// more, so they are freed on a helper thread, like the absorber and the normalisation after preprocessing
+				QtConcurrent::run([upBuilder]() { delete upBuilder; });
 				return false;
 			}
 

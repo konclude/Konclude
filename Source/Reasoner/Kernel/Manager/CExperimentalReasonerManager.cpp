@@ -47,6 +47,10 @@ namespace Konclude {
 						QThreadPool::globalInstance()->setMaxThreadCount(mWorkControllerCount);
 					}
 					if (mBlockThreadPoolThreadCount > 0) {
+						// see CReasonerManagerThread::threadStarted(), the pool has to be extended by
+						// the number of threads that are blocked until the reasoner is closed
+						QThreadPool* defaultThreadPool = QThreadPool::globalInstance();
+						defaultThreadPool->setMaxThreadCount(defaultThreadPool->maxThreadCount() + mBlockThreadPoolThreadCount);
 						for (cint64 i = 0; i < mBlockThreadPoolThreadCount; ++i) {
 							QtConcurrent::run(QThreadPool::globalInstance(), [&]() {
 								mBlockThreadPoolThreadsBlockingSemaphore.acquire(1);

@@ -19,6 +19,7 @@
  */
 
 #include "CBuildExpression.h"
+#include <QAtomicInteger>
 
 
 namespace Konclude {
@@ -28,7 +29,16 @@ namespace Konclude {
 		namespace Expression {
 
 
+			CBuildExpression::~CBuildExpression() {
+			}
+
 			CBuildExpression::CBuildExpression() {
+				static QAtomicInteger<qint64> buildOrderCounter(0);
+				mBuildOrder = buildOrderCounter.fetchAndAddRelaxed(1);
+			}
+
+			cint64 CBuildExpression::getBuildOrder() const {
+				return mBuildOrder;
 			}
 
 			bool CBuildExpression::visitSubExpressions(CSubExpressionVisitor* subExpressionVisitor) {

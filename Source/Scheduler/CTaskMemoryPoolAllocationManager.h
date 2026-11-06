@@ -28,6 +28,8 @@
 #include "SchedulerSettings.h"
 #include "CTaskMemoryAllocationManager.h"
 
+#include <QAtomicInt>
+
 
 // Other includes
 #include "Utilities/Memory/CMemoryPoolContainer.h"
@@ -76,6 +78,8 @@ namespace Konclude {
 				virtual void* allocate(size_t size);
 
 				virtual void* allocateAligned(size_t size, int alignment);
+				//! With concurrent allocation on, allocate() and allocateAligned() take a spin lock (parallel saturation, #92).
+				virtual CMemoryAllocationManager* setConcurrentAllocation(bool concurrent);
 
 				virtual cint64 getOptimizedMoreAllocationSize(cint64 size);
 
@@ -94,6 +98,8 @@ namespace Konclude {
 
 				cint64 mStatPoolAllocCount;
 				cint64 mStatAllocPoolSize;
+				bool mConcurrentAllocation;
+				QAtomicInt mAllocationLock;
 
 
 			// private methods

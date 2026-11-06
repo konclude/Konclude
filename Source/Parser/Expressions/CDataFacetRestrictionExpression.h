@@ -58,6 +58,8 @@ namespace Konclude {
 			class CDataFacetRestrictionExpression : public CBuildExpression, public CDataLiteralExpressionAssociator, public CDataFacetExpressionAssociator {
 				// public methods
 				public:
+					//! The kind flags of this base class, see CBuildExpression::ExpressionKindFlag.
+					virtual cint64 getExpressionKindFlags() { return EKFDATAFACETRESTRICTION; }
 					//! Constructor
 					CDataFacetRestrictionExpression(CDataLiteralExpression* dataLiteralExpression = nullptr, CDataFacetExpression* dataFacetExpression = nullptr);
 

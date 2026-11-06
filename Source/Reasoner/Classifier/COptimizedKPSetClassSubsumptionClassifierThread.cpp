@@ -70,6 +70,8 @@ namespace Konclude {
 				mConfWriteDebuggingData = false;
 
 				mStatProcesedSubsumMessCount = 0;
+				mStatIncompleteToldMessageCount = 0;
+				mStatOneSidedEquivalenceCount = 0;
 				mStatProcesedPossSubsumInitMessCount = 0;
 				mStatProcesedPossSubsumUpdateMessCount = 0;
 				mStatProcesedPseudoModelMessCount = 0;
@@ -134,10 +136,14 @@ namespace Konclude {
 					confMinTestParallelCount = confMaxTestParallelCount*factor;
 
 					mConfWriteDebuggingData = CConfigDataReader::readConfigBoolean(config,"Konclude.Debugging.WriteDebuggingData",false);
+					mConfTrustSaturationSubsumerCompleteness = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.TrustSaturationSubsumerCompleteness",true);
+					mConfConcurrentSubsumerExtraction = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Classification.ConcurrentSaturationSubsumerExtraction",true);
 
 				} else {
 					confMaxTestParallelCount = 1;
 					confMinTestParallelCount = 1;
+					mConfTrustSaturationSubsumerCompleteness = true;
+					mConfConcurrentSubsumerExtraction = true;
 					mConfWriteDebuggingData = false;
 				}
 
@@ -198,6 +204,21 @@ namespace Konclude {
 			}
 
 
+
+
+			// What the extraction of one class's subsumers from the saturation found, kept until the
+			// sequential part of the testing order build gets to the class.
+			class CSaturationSubsumerExtractionData {
+				public:
+					CSaturationSubsumerExtractionData(COptimizedKPSetClassTestingItem* classItem = nullptr) : mClassItem(classItem), mHasSaturationData(false), mUnsatisfiable(false), mInsufficient(false), mIncompleteProcessed(false), mPossibleSubsumer(false) {
+					}
+					COptimizedKPSetClassTestingItem* mClassItem;
+					bool mHasSaturationData;
+					bool mUnsatisfiable;
+					bool mInsufficient;
+					bool mIncompleteProcessed;
+					bool mPossibleSubsumer;
+			};
 
 
 			void COptimizedKPSetClassSubsumptionClassifierThread::createObviousSubsumptionSatisfiableTestingOrderFromSaturationData(COptimizedKPSetClassOntologyClassificationItem* ontClassItem) {
@@ -273,6 +294,7 @@ namespace Konclude {
 							if (!conRefSatLinking) {
 								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
+								ontClassItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 							}
 
 							conRefLinkDataHash->insert(concept,classItem);
@@ -289,45 +311,88 @@ namespace Konclude {
 
 
 
+				// The subsumers of the classes are read from the saturation nodes on all threads: a class
+				// writes only into its own testing item, and the saturation data and the reference linking
+				// set above are only read. Everything that touches another class's item or the ontology
+				// item (the successor links, the counters, the test lists, the fallback to the build data)
+				// follows in the original order, so the testing order is the same as with the sequential
+				// extraction. The individual dependence tracking writes into one shared vector, so the few
+				// classes whose saturation nodes are connected to nominals are extracted again sequentially.
+				QElapsedTimer orderTimer;
+				orderTimer.start();
+				QVector<CSaturationSubsumerExtractionData> extDataVec;
+				extDataVec.reserve(extClassConceptItemList.size());
 				for (QList<COptimizedKPSetClassTestingItem*>::const_iterator it = extClassConceptItemList.constBegin(), itEnd = extClassConceptItemList.constEnd(); it != itEnd; ++it) {
-					COptimizedKPSetClassTestingItem* classItem = (*it);
+					extDataVec.append(CSaturationSubsumerExtractionData(*it));
+				}
+
+				std::function<void(COptimizedKPSetClassTestingItem*,bool*)> checkEquivalentNonCandidatesFunc = [&](COptimizedKPSetClassTestingItem* classItem, bool* possibleSubsumerFlag) -> void {
+					if (equivConNonCandSet && !equivConNonCandSet->isEmpty()) {
+						for (QSet<CConcept*>::const_iterator eqConIt = equivConNonCandSet->constBegin(), eqConItEnd = equivConNonCandSet->constEnd(); !*possibleSubsumerFlag && eqConIt != eqConItEnd; ++eqConIt) {
+							CConcept* eqCon = *eqConIt;
+							CConceptProcessData* eqConProcData = (CConceptProcessData*)eqCon->getConceptData();
+							CConceptSaturationReferenceLinkingData* eqConRefSatLinking = (CConceptSaturationReferenceLinkingData*)eqConProcData->getConceptReferenceLinking();
+							COptimizedKPSetClassTestingItem* eqClassItem = (COptimizedKPSetClassTestingItem*)eqConRefSatLinking->getClassifierReferenceLinkingData();
+							if (!classItem->hasSubsumerConceptItem(eqClassItem)) {
+								*possibleSubsumerFlag = true;
+							}
+						}
+					}
+				};
+
+				CIndividualDependenceTrackingObserver* indDepTrackingObserver = ontClassItem->getIndividualDependenceTrackingCollector();
+				std::function<void(CSaturationSubsumerExtractionData&,CIndividualDependenceTrackingObserver*)> extractFunc = [&](CSaturationSubsumerExtractionData& extData, CIndividualDependenceTrackingObserver* observer) -> void {
+					COptimizedKPSetClassTestingItem* classItem = extData.mClassItem;
+					CConcept* concept = classItem->getTestingConcept();
+					if (!classItem->isSatisfiableTested()) {
+						extData.mHasSaturationData = precSatSubsumerExtractor->getConceptFlags(concept,&extData.mUnsatisfiable,&extData.mInsufficient,&extData.mIncompleteProcessed);
+						if (extData.mHasSaturationData && !extData.mUnsatisfiable) {
+							precSatSubsumerExtractor->extractSubsumers(concept,classItem,&extData.mPossibleSubsumer,observer,classItem);
+							if (!extData.mIncompleteProcessed) {
+								checkEquivalentNonCandidatesFunc(classItem,&extData.mPossibleSubsumer);
+							}
+						}
+					}
+				};
+
+				if (mConfConcurrentSubsumerExtraction && extDataVec.size() > 1) {
+					std::function<void(CSaturationSubsumerExtractionData&)> concurrentExtractFunc = [&](CSaturationSubsumerExtractionData& extData) -> void {
+						extractFunc(extData,nullptr);
+					};
+					QtConcurrent::blockingMap(extDataVec,concurrentExtractFunc);
+					if (indDepTrackingObserver) {
+						for (QVector<CSaturationSubsumerExtractionData>::iterator it = extDataVec.begin(), itEnd = extDataVec.end(); it != itEnd; ++it) {
+							CSaturationSubsumerExtractionData& extData = *it;
+							if (extData.mHasSaturationData && !extData.mUnsatisfiable && extData.mClassItem->hasIndividualDependenceTracked()) {
+								precSatSubsumerExtractor->extractSubsumers(extData.mClassItem->getTestingConcept(),extData.mClassItem,nullptr,indDepTrackingObserver,extData.mClassItem);
+							}
+						}
+					}
+				} else {
+					for (QVector<CSaturationSubsumerExtractionData>::iterator it = extDataVec.begin(), itEnd = extDataVec.end(); it != itEnd; ++it) {
+						extractFunc(*it,indDepTrackingObserver);
+					}
+				}
+				cint64 extractionTime = orderTimer.elapsed();
+
+
+				for (QVector<CSaturationSubsumerExtractionData>::iterator it = extDataVec.begin(), itEnd = extDataVec.end(); it != itEnd; ++it) {
+					CSaturationSubsumerExtractionData& extData = *it;
+					COptimizedKPSetClassTestingItem* classItem = extData.mClassItem;
 					CConcept* concept = classItem->getTestingConcept();
 
-					bool unsatisfiableFlag = false;
-					bool insufficientFlag = false;
-					bool incompleteProcessedFlag = false;
-
-
-					//QString iriClassNameString = CIRIName::getRecentIRIName(concept->getClassNameLinker());
-					//if (iriClassNameString == "http://owl.man.ac.uk/2005/07/sssw/people#sheep") {
-					//	bool bug = true;
-					//}
-
-
-
 					if (!classItem->isSatisfiableTested()) {
-						if (precSatSubsumerExtractor->getConceptFlags(concept,&unsatisfiableFlag,&insufficientFlag,&incompleteProcessedFlag)) {
-							if (!unsatisfiableFlag) {
-								bool possibleSubsumerFlag = false;
-								precSatSubsumerExtractor->extractSubsumers(concept,classItem,&possibleSubsumerFlag,ontClassItem->getIndividualDependenceTrackingCollector(),classItem);
-								if (incompleteProcessedFlag) {
+						if (extData.mHasSaturationData) {
+							if (!extData.mUnsatisfiable) {
+								bool possibleSubsumerFlag = extData.mPossibleSubsumer;
+								if (extData.mIncompleteProcessed) {
 									QSet<CConcept*> conSubsumSet = getSubsumerSetFromBuildData(concept,ontClassItem);
 									for (QSet<CConcept*>::const_iterator it = conSubsumSet.constBegin(), itEnd = conSubsumSet.constEnd(); it != itEnd; ++it) {
 										CConcept* subsumerConcept = *it;
 										COptimizedKPSetClassTestingItem* subsumerItem = ontClassItem->getConceptSatisfiableTestItem(subsumerConcept,true);
 										classItem->addSubsumingConceptItem(subsumerItem);
 									}
-								}
-								if (equivConNonCandSet && !equivConNonCandSet->isEmpty()) {
-									for (CBOXSET<CConcept*>::const_iterator eqConIt = equivConNonCandSet->constBegin(), eqConItEnd = equivConNonCandSet->constEnd(); !possibleSubsumerFlag && eqConIt != eqConItEnd; ++eqConIt) {
-										CConcept* eqCon = *eqConIt;
-										CConceptProcessData* eqConProcData = (CConceptProcessData*)eqCon->getConceptData();
-										CConceptSaturationReferenceLinkingData* eqConRefSatLinking = (CConceptSaturationReferenceLinkingData*)eqConProcData->getConceptReferenceLinking();
-										COptimizedKPSetClassTestingItem* eqClassItem = (COptimizedKPSetClassTestingItem*)eqConRefSatLinking->getClassifierReferenceLinkingData();
-										if (!classItem->hasSubsumerConceptItem(eqClassItem)) {
-											possibleSubsumerFlag = true;
-										}
-									}
+									checkEquivalentNonCandidatesFunc(classItem,&possibleSubsumerFlag);
 								}
 								cint64 foundSubsumerCount = 0;
 								QList<COptimizedKPSetClassTestingItem*>* subsumerItemList = classItem->getSubsumingConceptItemList();
@@ -337,7 +402,14 @@ namespace Konclude {
 									subsumerItem->addSuccessorSatisfiableTestItem(classItem);
 								}
 								classItem->setUnprocessedPredecessorItems(foundSubsumerCount);
-								if (!insufficientFlag && !possibleSubsumerFlag && !incompleteProcessedFlag) {
+								// When the saturation reports the subsumers of a class complete, the
+								// result is declared final and no subsumption test is run for the class;
+								// on SNOMED CT this is most of the classification time. The subsumptions
+								// this used to lose (issue #34) were dropped by the saturation's label
+								// copy, fixed in PR #82, and the classifier is not the place to
+								// compensate for that. The option keeps the tests for a check.
+								if (mConfTrustSaturationSubsumerCompleteness
+										&& !extData.mInsufficient && !possibleSubsumerFlag && !extData.mIncompleteProcessed) {
 									classItem->setResultSatisfiableDerivated(true);
 									classItem->setPossibleSubsumptionMapInitialized(true);
 								}
@@ -372,6 +444,7 @@ namespace Konclude {
 					}
 				}
 
+				LOG(INFO,"::Konclude::Reasoner::Kernel::ReasonerManager",logTr("Testing order of %1 classes created from the saturation data in %2 ms, subsumer extraction %3 ms (%4, %5 threads).").arg(extDataVec.size()).arg(orderTimer.elapsed()).arg(extractionTime).arg(mConfConcurrentSubsumerExtraction ? "concurrent" : "sequential").arg(QThreadPool::globalInstance()->maxThreadCount()),this);
 			}
 
 
@@ -480,6 +553,26 @@ namespace Konclude {
 
 
 
+			bool COptimizedKPSetClassSubsumptionClassifierThread::hasAllToldSubsumers(COptimizedKPSetClassOntologyClassificationItem* ontClassItem, COptimizedKPSetClassTestingItem* classItem) {
+				CConcept* concept = classItem->getTestingConcept();
+				QSet<CConcept*> toldSubsumers = getSubsumerSetFromBuildData(concept,ontClassItem);
+				for (QSet<CConcept*>::const_iterator it = toldSubsumers.constBegin(), itEnd = toldSubsumers.constEnd(); it != itEnd; ++it) {
+					CConcept* toldSubsumer = *it;
+					if (toldSubsumer != concept) {
+						COptimizedKPSetClassTestingItem* toldItem = ontClassItem->getConceptSatisfiableTestItem(toldSubsumer);
+						if (toldItem && toldItem != classItem && !classItem->hasSubsumerConceptItem(toldItem)) {
+							++mStatIncompleteToldMessageCount;
+							if (mStatIncompleteToldMessageCount <= 10) {
+								LOG(WARNING,getLogDomain(),logTr("The subsumers reported for '%1' lack its told parent '%2'; the class keeps its own test.").arg(CIRIName::getRecentIRIName(concept->getClassNameLinker())).arg(CIRIName::getRecentIRIName(toldSubsumer->getClassNameLinker())),getLogObject());
+							}
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+
+
 			void COptimizedKPSetClassSubsumptionClassifierThread::createObviousSubsumptionSatisfiableTestingOrderFromBuildData(COptimizedKPSetClassOntologyClassificationItem* ontClassItem) {
 
 				CTBox *tBox = ontClassItem->getOntology()->getDataBoxes()->getTBox();
@@ -557,6 +650,7 @@ namespace Konclude {
 							if (!conRefSatLinking) {
 								conRefSatLinking = new CConceptSaturationReferenceLinkingData();
 								conProcData->setConceptReferenceLinking(conRefSatLinking);
+								ontClassItem->getOntology()->getOntologyContext()->addOwnedConceptReferenceLinking(conRefSatLinking);
 							}
 
 							conRefLinkDataHash->insert(concept,subsumerItem);
@@ -1770,7 +1864,14 @@ namespace Konclude {
 							}
 						}
 						//if (!possSubsumMap || !possSubsumMap->hasRemainingPossibleSubsumptions()) {
-						subsumedItem->setResultSatisfiableDerivated(true);
+						// A told message comes from the label of a tableau node and declares the class's subsumers
+						// complete; the class is then never tested itself. The label can be incomplete without the
+						// analyser knowing (issue #95 was a node initialised from a saturation substitute chain), and
+						// the cheapest witness of that is a told parent of the class that the message did not carry.
+						// In that case the class keeps its own satisfiable test, and the gap is logged.
+						if (hasAllToldSubsumers(optKPSetClassificationItem, subsumedItem)) {
+							subsumedItem->setResultSatisfiableDerivated(true);
+						}
 						//}
 
 					} else if (messageData->getClassificationMessageDataType() == CClassificationMessageData::TELLCLASSINITIALIZEPOSSIBLESUBSUM) {
@@ -2466,6 +2567,9 @@ namespace Konclude {
 							++itWorkItem;
 						}
 						delete workItem;
+						// the adapters were created for this job alone and the job does not delete them (issue #45)
+						delete satCalcJob->getSatisfiableClassificationMessageAdapter();
+						delete satCalcJob->getSatisfiableTaskIndividualDependenceTrackingAdapter();
 						delete satCalcJob;
 					}
 					workOntItemHash.remove(workItem);
@@ -2551,10 +2655,21 @@ namespace Konclude {
 									COptimizedKPSetClassTestingItem* subsumedConceptItem = *subsumedIt;
 									cint64 subsumedItemSubsumingCount = subsumedConceptItem->getSubsumingConceptItemCount();
 									if (subsumedItemSubsumingCount == itemSubsumingCount) {
-										// mark as equivalent
-										subsumedConceptItem->setEquivalentItem(true);
-										itemNode->addEquivalentConcept(subsumedConceptItem->getTestingConcept());
-										tax->updateNodeEquivalences(itemNode);
+										// Equal subsumer counts imply an equivalence only if both lists are complete; with
+										// complete lists the subsumer also holds this class in its list, so that is required
+										// too. Without it the subsumption stays strict and the inconsistency is logged: issue
+										// #95 showed how one lost told parent otherwise turns into false equivalences.
+										if (subsumedConceptItem->hasSubsumerConceptItem(item)) {
+											// mark as equivalent
+											subsumedConceptItem->setEquivalentItem(true);
+											itemNode->addEquivalentConcept(subsumedConceptItem->getTestingConcept());
+											tax->updateNodeEquivalences(itemNode);
+										} else {
+											++mStatOneSidedEquivalenceCount;
+											if (mStatOneSidedEquivalenceCount <= 10) {
+												LOG(WARNING,getLogDomain(),logTr("Classes '%1' and '%2' have the same number of subsumers but only one lists the other; the subsumption is kept strict.").arg(CIRIName::getRecentIRIName(item->getTestingConcept()->getClassNameLinker())).arg(CIRIName::getRecentIRIName(subsumedConceptItem->getTestingConcept()->getClassNameLinker())),getLogObject());
+											}
+										}
 									} else {
 										break;
 									}
@@ -2656,6 +2771,8 @@ namespace Konclude {
 							bottomHierNode->makeParent(itemHierNode);
 						}
 					}
+					// the leaves are the direct parents of the bottom node now, the top node is not
+					tax->removeBypassedTopBottomLink();
 
 					LOG(INFO,getLogDomain(),logTr("Collect statistics for Ontology '%1'.").arg(ontology->getTerminologyName()),getLogObject());
 

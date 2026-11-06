@@ -66,7 +66,7 @@ namespace Konclude {
 				}
 				mSameRealization = nullptr;
 				if (realization) {
-					mSameRealization = realization->getConceptRealization();
+					mSameRealization = realization->getSameRealization();
 					if (mSameRealization) {
 						mResult = new CSucceedQueryResult();
 					}
@@ -106,6 +106,11 @@ namespace Konclude {
 
 			bool CSameIndividualsResultVisitCallbackQuery::hasError() {
 				return mRealizationCalcError || mQueryConstructError || CQuery::hasError();
+			}
+
+
+			COntologyProcessingDynamicRealizationRequirement* CSameIndividualsResultVisitCallbackQuery::getDynamicRealizationRequirement() {
+				return new COntologyProcessingSameRealizationRequirement(CIndividualReference(mIndividual), CIndividualReference());
 			}
 
 		}; // end namespace Query

@@ -277,6 +277,8 @@ namespace Konclude {
 					bool hasRemainingProcessingRequirements();
 
 					CSaturationConceptDataItem* getSaturationConceptDataItem(CConcept* satConcept, bool negated, bool create);
+					//! Sizes the item hash for the expected number of items up front (it grew by rehashing, a third of the job preparation time).
+					CTotallyOntologyPrecomputationItem* reserveSaturationConceptDataItems(cint64 itemCount);
 					CSaturationConceptDataItem* getSaturationRoleSuccessorConceptDataItem(CRole* role, CConcept* satConcept, bool negated, bool create);
 
 					CApproximatedSaturationCalculationJob* getSaturationCalculationJob();
@@ -491,6 +493,7 @@ namespace Konclude {
 
 
 					CApproximatedSaturationCalculationJob* mApproxSatCalcJob;
+					QList<CApproximatedSaturationCalculationJob*> mApproxSatCalcJobList;
 
 					CCalculationConfigurationExtension* mCalculationConfig;
 

@@ -88,6 +88,7 @@ namespace Konclude {
 				mBuildedIndividualList = CObjectParameterizingAllocator< CBUILDLIST<CIndividualTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
 				mExpressionBuildHash = CObjectParameterizingAllocator< CBUILDHASH<CExpressionHasher,CBuildExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
+				mInheritedExpressionBuildCount = 0;
 				mExpressionBuildListContainer = CObjectParameterizingAllocator< CBUILDLIST<CBuildExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 				mInverseObjectPropertyHash = CObjectParameterizingAllocator< CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>,CContext* >::allocateAndConstructAndParameterize(memAllocMan,mOntoContext);
 
@@ -114,6 +115,11 @@ namespace Konclude {
 
 			CExpressionDataBoxMapping::~CExpressionDataBoxMapping() {
 				CMemoryAllocationManager* memAllocMan = CContext::getMemoryAllocationManager(mOntoContext);
+				// the expressions the preprocessing built for this ontology, the inverse properties,
+				// are in no other list; those copied from the referenced ontology are left to it (#45)
+				for (cint64 i = mInheritedExpressionBuildCount; i < mExpressionBuildListContainer->count(); ++i) {
+					delete mExpressionBuildListContainer->at(i);
+				}
 				COPADestroyAndRelease(mClassTermConceptHash,memAllocMan);
 				COPADestroyAndRelease(mConceptClassTermHash,memAllocMan);
 				COPADestroyAndRelease(mDataRangeTermConceptHash,memAllocMan);
@@ -253,6 +259,7 @@ namespace Konclude {
 				*mInverseObjectPropertyHash = *dataBoxMapping->mInverseObjectPropertyHash;
 				*mExpressionBuildHash = *dataBoxMapping->mExpressionBuildHash;
 				*mExpressionBuildListContainer = *dataBoxMapping->mExpressionBuildListContainer;
+				mInheritedExpressionBuildCount = mExpressionBuildListContainer->count();
 
 				mConstructFlags.referenceBuildConstructFlags(&dataBoxMapping->mConstructFlags);
 				return this;

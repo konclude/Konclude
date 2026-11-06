@@ -55,6 +55,8 @@ namespace Konclude {
 			class CClassTermExpression : public CBuildExpression {
 				// public methods
 				public:
+					//! The kind flags of this base class, see CBuildExpression::ExpressionKindFlag.
+					virtual cint64 getExpressionKindFlags() { return EKFCLASSTERM; }
 					//! Constructor
 					CClassTermExpression();
 

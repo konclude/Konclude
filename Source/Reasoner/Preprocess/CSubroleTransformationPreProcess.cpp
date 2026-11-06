@@ -149,8 +149,10 @@ namespace Konclude {
 									CInverseObjectPropertyOfExpression* invRoleExpression = new CInverseObjectPropertyOfExpression(buildExpression);
 									expressionBuildHash->insert(CExpressionHasher(invRoleExpression), invRoleExpression);
 									expressionBuildContainerList->append(invRoleExpression);
-									roleObjPropTermHash->insert(role, invRoleExpression);
-									objPropTermRoleHash->insert(invRoleExpression, role);
+									// the inverse expression denotes the inverse role and not the role
+									// itself, so it must not replace the entry of the role
+									roleObjPropTermHash->insert(inverseRole, invRoleExpression);
+									objPropTermRoleHash->insert(invRoleExpression, inverseRole);
 								}
 							}
 						}

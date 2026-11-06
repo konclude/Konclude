@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint over two members of a disjoint union.  A is the disjoint
+  union of B, C and D, so B and C are disjoint.  Expected answer: true.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#B"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#C"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#D"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#b1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#c1"/></owl:Declaration>
+    <owl:DisjointUnion><owl:Class IRI="#A"/><owl:Class IRI="#B"/><owl:Class IRI="#C"/><owl:Class IRI="#D"/></owl:DisjointUnion>
+    <owl:ClassAssertion><owl:Class IRI="#B"/><owl:NamedIndividual IRI="#b1"/></owl:ClassAssertion>
+    <owl:ClassAssertion><owl:Class IRI="#C"/><owl:NamedIndividual IRI="#c1"/></owl:ClassAssertion>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb"><owl:Class IRI="#B"/><owl:Class IRI="#C"/></AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

@@ -65,6 +65,8 @@ namespace Konclude {
 					virtual void* allocateAligned(size_t size, int alignment) = 0;
 
 					virtual cint64 getOptimizedMoreAllocationSize(cint64 size);
+					//! Makes allocate() safe for several threads (a lock inside); default: not supported, nothing happens.
+					virtual CMemoryAllocationManager* setConcurrentAllocation(bool concurrent);
 
 
 				// protected methods

@@ -54,6 +54,9 @@ namespace Konclude {
 
 			// Konclude code configs
 			const static cint64 DEFAULTMEMORYPOOLSIZE = 50000;
+			// how many released pools of the default size the process keeps for reuse across
+			// threads, see CMemoryPoolRecycler; configurable with Konclude.Calculation.Memory.RecycledPoolLimit
+			const static cint64 DEFAULT_MEMORY_POOL_RECYCLE_LIMIT = 20000;
 
 
 

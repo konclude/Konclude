@@ -26,6 +26,8 @@
 
 // Namespace includes
 #include "OntologySettings.h"
+#include <QMutex>
+#include <QList>
 #include "CBoxContext.h"
 
 // Other includes
@@ -71,6 +73,8 @@ namespace Konclude {
 
 
 					virtual COntologyContext* addUsedMemoryPools(CMemoryPool* memoryPools);
+					virtual COntologyContext* addDestructiblePoolObject(CAllocationObject* object);
+					virtual COntologyContext* addOwnedConceptReferenceLinking(CConceptReferenceLinking* linking);
 
 				// protected methods
 				protected:
@@ -82,6 +86,10 @@ namespace Konclude {
 
 					CObjectContainer *mObjCon;
 					COntologyContextMemoryManager *mOntMemMan;
+					QMutex mDestructiblePoolObjectMutex;
+					QList<CAllocationObject*> mDestructiblePoolObjectList;
+					QMutex mOwnedConceptReferenceLinkingMutex;
+					QList<CConceptReferenceLinking*> mOwnedConceptReferenceLinkingList;
 
 				// private methods
 				private:

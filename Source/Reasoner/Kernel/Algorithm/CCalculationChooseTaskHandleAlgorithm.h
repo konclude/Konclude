@@ -68,6 +68,9 @@ namespace Konclude {
 						//! Constructor
 						CCalculationChooseTaskHandleAlgorithm(CTaskHandleAlgorithm* tableauCompTaskHandleAlg = nullptr, CTaskHandleAlgorithm* tableauApproxSaturTaskHandleAlg = nullptr);
 
+						//! Destructor, deletes the two algorithms, which are created for it alone
+						virtual ~CCalculationChooseTaskHandleAlgorithm();
+
 						virtual bool handleTask(CTaskProcessorContext *processorContext, CTask* task);
 
 					// protected methods

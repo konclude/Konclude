@@ -23,6 +23,11 @@
 
 // Libraries includes
 #include <QLinkedList>
+#include <QVector>
+#include <QElapsedTimer>
+#include <QThreadPool>
+#include <QtConcurrent/QtConcurrent>
+#include <functional>
 
 // Namespace includes
 #include "ClassifierSettings.h"
@@ -144,6 +149,7 @@ namespace Konclude {
 					void createObviousSubsumptionSatisfiableTestingOrder(COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
 					
 					QSet<CConcept*> getSubsumerSetFromBuildData(CConcept* concept, COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
+					bool hasAllToldSubsumers(COptimizedKPSetClassOntologyClassificationItem* ontClassItem, COptimizedKPSetClassTestingItem* classItem);
 					void createObviousSubsumptionSatisfiableTestingOrderFromBuildData(COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
 					void createObviousSubsumptionSatisfiableTestingOrderFromSaturationData(COptimizedKPSetClassOntologyClassificationItem* ontClassItem);
 
@@ -210,8 +216,16 @@ namespace Konclude {
 
 					bool mConfPossSubsumPseudoModelTest;
 					bool mConfWriteDebuggingData;
+					// whether the subsumers extracted from the saturation may be declared final,
+					// which loses subsumptions, see createObviousSubsumptionSatisfiableTestingOrderFromSaturationData
+					bool mConfTrustSaturationSubsumerCompleteness;
+					// whether the subsumers are extracted from the saturation nodes on all threads when the
+					// testing order is built, see createObviousSubsumptionSatisfiableTestingOrderFromSaturationData
+					bool mConfConcurrentSubsumerExtraction;
 
 					cint64 mStatProcesedSubsumMessCount;
+					cint64 mStatIncompleteToldMessageCount;
+					cint64 mStatOneSidedEquivalenceCount;
 					cint64 mStatProcesedPossSubsumInitMessCount;
 					cint64 mStatProcesedPossSubsumUpdateMessCount;
 					cint64 mStatProcesedPseudoModelMessCount;

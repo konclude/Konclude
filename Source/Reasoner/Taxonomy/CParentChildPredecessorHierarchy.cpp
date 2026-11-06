@@ -167,6 +167,17 @@ namespace Konclude {
 
 
 			template<class T, class N, class E>
+			T* CParentChildPredecessorHierarchy<T,N,E>::removeBypassedTopBottomLink() {
+				if (topNode != bottomNode && bottomNode->hasParentNode(topNode) && bottomNode->getParentNodeSet()->count() > 1) {
+					// the top node remains a predecessor of the bottom node, only the direct link goes
+					bottomNode->removeParent(topNode);
+					topNode->removeChild(bottomNode);
+				}
+				return (T*)this;
+			}
+
+
+			template<class T, class N, class E>
 			bool CParentChildPredecessorHierarchy<T,N,E>::isNodeSatisfiable(N* node) {
 				return node != bottomNode && !node->hasPredecessorNode(bottomNode);
 			}

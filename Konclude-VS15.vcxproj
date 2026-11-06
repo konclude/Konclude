@@ -889,7 +889,9 @@
     <ClCompile Include="Source\Control\Interface\JNI\CJNIInstanceManager.cpp" />
     <ClCompile Include="Source\Control\Interface\JNI\CJNIInstanceManagerConfigType.cpp" />
     <ClCompile Include="Source\Control\Interface\JNI\CJNIOntologyRevisionData.cpp" />
+    <ClCompile Include="Source\Control\Interface\JNI\CJNIQueryExpressionBuildingLoader.cpp" />
     <ClCompile Include="Source\Control\Interface\JNI\CJNIQueryProcessor.cpp" />
+    <ClCompile Include="Source\Control\Interface\JNI\CJNILogMessageQueue.cpp" />
     <ClCompile Include="Source\Control\Interface\JNI\com_konclude_jnibridge_AxiomExpressionBuildingBridge.cpp" />
     <ClCompile Include="Source\Control\Interface\JNI\com_konclude_jnibridge_KoncludeReasonerBridge.cpp" />
     <ClCompile Include="Source\Control\Interface\JNI\com_konclude_jnibridge_QueryingBridge.cpp" />
@@ -2155,6 +2157,7 @@
     <ClCompile Include="Source\Reasoner\Kernel\Process\CIndividualProcessNodeVector.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Process\CIndividualReactivationProcessingQueue.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNode.cpp" />
+    <ClCompile Include="Source\Reasoner\Kernel\Process\CParallelSaturationProcessContext.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeCacheData.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeExtensionData.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeLinker.cpp" />
@@ -2759,6 +2762,7 @@
     <ClCompile Include="Source\Reasoner\Preprocess\CDatatypeNormalizerPreProcess.cpp" />
     <ClCompile Include="Source\Reasoner\Preprocess\CDisjunctSortingPreProcess.cpp" />
     <ClCompile Include="Source\Reasoner\Preprocess\CExtractPropagationIntoCreationDirectionPreProcess.cpp" />
+    <ClCompile Include="Source\Reasoner\Preprocess\CNonSimpleRoleRestrictionCheckPreProcess.cpp" />
     <ClCompile Include="Source\Reasoner\Preprocess\CExtractRelevantConceptRolePreProcess.cpp" />
     <ClCompile Include="Source\Reasoner\Preprocess\CFullNominalSchemaGroundingPreProcess.cpp" />
     <ClCompile Include="Source\Reasoner\Preprocess\CLexicalNormalisationPreProcess.cpp" />
@@ -3473,6 +3477,16 @@
     <ClCompile Include="Source\Utilities\Memory\CMemoryAllocationManager.cpp" />
     <ClCompile Include="Source\Utilities\Memory\CMemoryAllocator.cpp" />
     <ClCompile Include="Source\Utilities\Memory\CMemoryPool.cpp" />
+    <ClCompile Include="Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedLabelCompletion.cpp" />
+    <ClCompile Include="Source\Reasoner\Answerer\CAnsweringMessageDataCalculationRootLabel.cpp" />
+    <ClCompile Include="Source\Reasoner\Answerer\CMappingsInstancesComputationMode.cpp" />
+    <ClCompile Include="Source\Reasoner\Answerer\CSaturationSubsumptionDecider.cpp" />
+    <ClCompile Include="Source\Reasoner\Kernel\Process\CTriggeredNominalImplicationProcessingRestrictionSpecification.cpp" />
+    <ClCompile Include="Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererQueryingPropagationAdapter.cpp" />
+    <ClCompile Include="Source\Reasoner\Preprocess\CTriggeredImplicationGCIAbsorberPreProcess.cpp" />
+    <ClCompile Include="Source\Reasoner\Taxonomy\CPCPrSuIpIsDiHierarchyNode.cpp" />
+    <ClCompile Include="Source\Utilities\Memory\CMemoryPoolRecycler.cpp" />
+    <ClCompile Include="Source\Utilities\Memory\CSystemAllocatorTuning.cpp" />
     <ClCompile Include="Source\Utilities\Memory\CMemoryPoolAllocationManager.cpp" />
     <ClCompile Include="Source\Utilities\Memory\CMemoryPoolContainer.cpp" />
     <ClCompile Include="Source\Utilities\Memory\CMemoryPoolContainerAllocationManager.cpp" />
@@ -3794,7 +3808,9 @@
     <ClInclude Include="Source\Control\Interface\JNI\CJNIInstanceManager.h" />
     <ClInclude Include="Source\Control\Interface\JNI\CJNIInstanceManagerConfigType.h" />
     <ClInclude Include="Source\Control\Interface\JNI\CJNIOntologyRevisionData.h" />
+    <ClInclude Include="Source\Control\Interface\JNI\CJNIQueryExpressionBuildingLoader.h" />
     <ClInclude Include="Source\Control\Interface\JNI\CJNIQueryProcessor.h" />
+    <ClInclude Include="Source\Control\Interface\JNI\CJNILogMessageQueue.h" />
     <ClInclude Include="Source\Control\Interface\JNI\JNISettings.h" />
     <CustomBuild Include="Source\Control\Interface\OWLlink\COWLlinkHttpConnectionHandlerProcessor.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='DebugDLL|Win32'">Moc%27ing %(Filename)%(Extension)...</Message>
@@ -5153,6 +5169,7 @@
     <ClInclude Include="Source\Reasoner\Kernel\Process\CIndividualProcessNodeVector.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CIndividualReactivationProcessingQueue.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNode.h" />
+    <ClInclude Include="Source\Reasoner\Kernel\Process\CParallelSaturationProcessContext.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeCacheData.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeExtensionData.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CIndividualSaturationProcessNodeLinker.h" />
@@ -5203,6 +5220,7 @@
     <ClInclude Include="Source\Reasoner\Kernel\Process\CReapplyConceptLabelSet.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CReapplyConceptLabelSetIterator.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CReapplyConceptSaturationLabelSet.h" />
+    <ClInclude Include="Source\Reasoner\Kernel\Process\CReapplyConceptSaturationLabelHash.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CReapplyConceptSaturationLabelSetIterator.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CReapplyQueue.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Process\CReapplyQueueIterator.h" />
@@ -5625,6 +5643,7 @@
     <ClInclude Include="Source\Reasoner\Preprocess\CDatatypeNormalizerPreProcess.h" />
     <ClInclude Include="Source\Reasoner\Preprocess\CDisjunctSortingPreProcess.h" />
     <ClInclude Include="Source\Reasoner\Preprocess\CExtractPropagationIntoCreationDirectionPreProcess.h" />
+    <ClInclude Include="Source\Reasoner\Preprocess\CNonSimpleRoleRestrictionCheckPreProcess.h" />
     <ClInclude Include="Source\Reasoner\Preprocess\CExtractRelevantConceptRolePreProcess.h" />
     <ClInclude Include="Source\Reasoner\Preprocess\CFullNominalSchemaGroundingPreProcess.h" />
     <ClInclude Include="Source\Reasoner\Preprocess\CLexicalNormalisationPreProcess.h" />
@@ -6731,6 +6750,22 @@
     <ClInclude Include="Source\Utilities\Memory\CMemoryAllocationManager.h" />
     <ClInclude Include="Source\Utilities\Memory\CMemoryAllocator.h" />
     <ClInclude Include="Source\Utilities\Memory\CMemoryPool.h" />
+    <ClInclude Include="Source\Control\Interface\JNI\com_konclude_jnibridge_AxiomExpressionBuildingBridge.h" />
+    <ClInclude Include="Source\Control\Interface\JNI\com_konclude_jnibridge_KoncludeReasonerBridge.h" />
+    <ClInclude Include="Source\Control\Interface\JNI\com_konclude_jnibridge_QueryingBridge.h" />
+    <ClInclude Include="Source\Logger\Record\RecordSettings.h" />
+    <ClInclude Include="Source\Reasoner\Answerer\CAnsweringMessageDataCalculationCompletedLabelCompletion.h" />
+    <ClInclude Include="Source\Reasoner\Answerer\CAnsweringMessageDataCalculationRootLabel.h" />
+    <ClInclude Include="Source\Reasoner\Answerer\CMappingsInstancesComputationMode.h" />
+    <ClInclude Include="Source\Reasoner\Answerer\CSaturationSubsumptionDecider.h" />
+    <ClInclude Include="Source\Reasoner\Kernel\Process\CTriggeredNominalImplicationProcessingRestrictionSpecification.h" />
+    <ClInclude Include="Source\Reasoner\Kernel\Process\Dependency\DependencySettings.h" />
+    <ClInclude Include="Source\Reasoner\Kernel\Process\Marker\MarkerSettings.h" />
+    <ClInclude Include="Source\Reasoner\Kernel\Task\CSatisfiableTaskAnswererQueryingPropagationAdapter.h" />
+    <ClInclude Include="Source\Reasoner\Preprocess\CTriggeredImplicationGCIAbsorberPreProcess.h" />
+    <ClInclude Include="Source\Reasoner\Taxonomy\CPCPrSuIpIsDiHierarchyNode.h" />
+    <ClInclude Include="Source\Utilities\Memory\CMemoryPoolRecycler.h" />
+    <ClInclude Include="Source\Utilities\Memory\CSystemAllocatorTuning.h" />
     <ClInclude Include="Source\Utilities\Memory\CMemoryPoolAllocationManager.h" />
     <ClInclude Include="Source\Utilities\Memory\CMemoryPoolContainer.h" />
     <ClInclude Include="Source\Utilities\Memory\CMemoryPoolContainerAllocationManager.h" />

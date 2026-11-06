@@ -296,6 +296,8 @@ namespace Konclude {
 					CBUILDHASH<CObjectPropertyTermExpression*,CObjectPropertyTermExpression*>* mInverseObjectPropertyHash;
 					CBUILDHASH<CExpressionHasher,CBuildExpression*>* mExpressionBuildHash;
 					CBUILDLIST<CBuildExpression*>* mExpressionBuildListContainer;
+					// entries copied from the referenced ontology, see COntologyBuildData
+					cint64 mInheritedExpressionBuildCount;
 
 
 				// private methods

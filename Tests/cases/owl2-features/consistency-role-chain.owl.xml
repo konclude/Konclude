@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Role chain r o s -> t, t has domain D, but alice is explicitly not a D. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/role-chain">
+  <Prefix name="" IRI="http://konclude.test/features/role-chain#"/>
+
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":s"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":alice"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":bob"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":carol"/></Declaration>
+
+  <SubObjectPropertyOf>
+    <ObjectPropertyChain>
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <ObjectProperty abbreviatedIRI=":s"/>
+    </ObjectPropertyChain>
+    <ObjectProperty abbreviatedIRI=":t"/>
+  </SubObjectPropertyOf>
+  <ObjectPropertyDomain><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":D"/></ObjectPropertyDomain>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":r"/>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <NamedIndividual abbreviatedIRI=":bob"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":s"/>
+    <NamedIndividual abbreviatedIRI=":bob"/>
+    <NamedIndividual abbreviatedIRI=":carol"/>
+  </ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectComplementOf><Class abbreviatedIRI=":D"/></ObjectComplementOf>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+  </ClassAssertion>
+</Ontology>

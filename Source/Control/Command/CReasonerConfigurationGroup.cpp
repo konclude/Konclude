@@ -90,7 +90,7 @@ namespace Konclude {
 				// Parallelisation configurations
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.ProcessorCount",
-						"Number of Processor-Threads that are used for task based reasoning.",
+						"Number of processor threads that run the tableau and saturation tasks, or 'AUTO' for one per core. With 1, all tasks run on one thread, but the threads that coordinate the reasoning steps and the cache threads run beside it.",
 						new CStringConfigType("1")),
 						new CStringConfigType("1"));
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.AdaptThreadPoolSizeProcessorCount",
@@ -121,6 +121,14 @@ namespace Konclude {
 						"Sets the memory allocation increasing size for the calculation.",
 						new CIntegerConfigType(1024*1024*512)),
 						new CIntegerConfigType(1024*1024*512));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Memory.TaskProcessorFreePoolReserveLimit",
+						"Maximum number of memory pools (about 50 KB each) that each task processing thread keeps in reserve for reuse after tasks have finished; pools beyond this number are returned to the system.",
+						new CIntegerConfigType(1000)),
+						new CIntegerConfigType(1000));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Memory.RecycledPoolLimit",
+						"Maximum number of released memory pools (about 50 KB each) that the process keeps for reuse across its threads; pools beyond this number are returned to the system.",
+						new CIntegerConfigType(20000)),
+						new CIntegerConfigType(20000));
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.DatatypeReasoning",
@@ -923,6 +931,15 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.CompleteDataLiteralAbsorption",
+						"Determines whether definitions (equivalent classes axioms) containing data literals are absorbed completely, with exact value triggers ranked below the class restrictions, instead of only into equivalence candidates. With it the saturation of SNOMED CT has no insufficient node and the classification needs no tableau test; the absorption itself costs a few seconds of preprocessing on the AU Edition (issue #90).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.FrequencyOrderedTriggerChains",
+						"Determines whether the implication chain absorbed from a definition starts with the conjunct that occurs in the fewest conjunctions of the ontology, instead of with the most complex trigger. Keeps the saturation's memory linear for ontologies whose definitions share a few common conjuncts.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Preprocessing.CoreConceptCyclesExtraction.SkipForELFragment",
 						"Determines whether the extraction of core concept cycles is skipped for EL ontologies.",
@@ -1125,6 +1142,16 @@ namespace Konclude {
 						new CStringConfigType("Konclude.Calculation.Classification.Classifier.OptimizedKPSetClassClassifier")),
 						new CStringConfigType("Konclude.Calculation.Classification.Classifier.OptimizedKPSetClassClassifier"));
 
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.TrustSaturationSubsumerCompleteness",
+						"Determines whether the classifier declares the subsumers extracted from the saturation to be the final result of a class when the saturation reports them complete, so that no subsumption test is run for the class. Turning it off keeps the tests as a check.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.ConcurrentSaturationSubsumerExtraction",
+						"Determines whether the classifier reads the subsumers of the classes from the saturation on all threads when it builds the testing order. Turning it off extracts them one class after the other on the classifier thread.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.PruneSubsumptionRelations",
 						"Determines whether unnecessary calculations for ontology classification are pruned.",
 						new CBooleanConfigType(true)),
@@ -1211,6 +1238,15 @@ namespace Konclude {
 						"Determines whether the statistics for building the model are collected for the classification.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.ParallelSaturation",
+						"Determines whether the first processing of the saturation nodes is distributed over several threads (dependency levels in parallel, everything else by the saturation task itself).",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Calculation.Precomputation.ParallelSaturationThreadCount",
+						"Number of threads for the parallel saturation, 0 for the processor count.",
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
 
 				addConfigProperty(new CConfigDescription("Konclude.Calculation.Classification.OptimizedSubClassSubsumptionClassifier.MaximumParallelSatisfiableCalculationCount",
 						"Determines how many satisfiable calculation jobs are created per classifier at one time.",
@@ -1737,6 +1773,27 @@ namespace Konclude {
 						"Determines whether additional logging is output for complex query answering.",
 						new CBooleanConfigType(false)),
 						new CBooleanConfigType(false));
+
+				addConfigProperty(new CConfigDescription("Konclude.Answering.SaturationBasedSubClassDecision",
+						"Determines whether the sub classes of a class expression are decided from the precomputed saturation where it suffices, so that only the remaining nodes are tested with the tableau.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Answering.SaturationBasedSubClassLabelCompletion",
+						"Determines whether a class whose saturation is not reliable enough for the decision of the sub classes of a class expression gets its label completed once with a satisfiability test, instead of a test for every query that visits it, see Konclude.Answering.SaturationBasedSubClassDecision.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Answering.SaturationBasedSubClassLabelCompletionSuccessors",
+						"Determines whether a universal restriction of a class expression query that reaches the successors of a sub class candidate whose label was completed is decided from the saturation of the candidate's class (the restriction is satisfied where its filler is at every successor under its role, or is a nested universal restriction over a role the successor has no successor under), instead of with a tableau test per candidate; see Konclude.Answering.SaturationBasedSubClassLabelCompletion.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+				addConfigProperty(new CConfigDescription("Konclude.Answering.SaturationBasedSubClassLabelCompletionSampleSize",
+						"Number of decisions from completed labels after which the label completion is stopped for the rest of the reasoner's life if too few of them decided a sub class candidate, see Konclude.Answering.SaturationBasedSubClassLabelCompletionMinimumDecisivePercent. 0, the default, never stops it: a completed label is paid for once and used by every later query, so even a small share of decided candidates pays off over a session of queries, and stopping helps only a reasoner that answers a few queries, for which 2000 is a reasonable sample.",
+						new CIntegerConfigType(0)),
+						new CIntegerConfigType(0));
+				addConfigProperty(new CConfigDescription("Konclude.Answering.SaturationBasedSubClassLabelCompletionMinimumDecisivePercent",
+						"Percentage of the decisions from completed labels that have to decide the candidate for the label completion to go on once the sample of Konclude.Answering.SaturationBasedSubClassLabelCompletionSampleSize is reached; below it the candidates go to the tableau directly, labels completed before are still used.",
+						new CIntegerConfigType(30)),
+						new CIntegerConfigType(30));
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables",
 						"Determines whether non-answer individual variables are interpreted as anonymous variables.",

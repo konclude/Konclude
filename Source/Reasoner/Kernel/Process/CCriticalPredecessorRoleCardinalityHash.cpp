@@ -55,6 +55,13 @@ namespace Konclude {
 				}
 
 
+				bool CCriticalPredecessorRoleCardinalityHash::hasCriticalPredecessorRoleCardinalityData(CRole* role) {
+					// look up without creating an entry, since the hash may belong to a node that was
+					// processed by another saturation task and must not be modified here
+					return mCriticalPredecessorRoleDataHash.contains(role);
+				}
+
+
 				CCriticalPredecessorRoleCardinalityHash* CCriticalPredecessorRoleCardinalityHash::addCriticalPredecessorRoleCardinality(CRole* role, CConcept* unproblematicConcept, bool unproblematicNegation) {
 					CCriticalPredecessorRoleCardinalityData* criticalPredData = getCriticalPredecessorRoleCardinalityData(role,true);
 					CXNegLinker<CConcept*>* unprobConNegLinker = CObjectAllocator< CXNegLinker<CConcept*> >::allocateAndConstruct(mContext->getUsedMemoryAllocationManager());

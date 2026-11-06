@@ -23,6 +23,7 @@
 
 // Libraries includes
 #include <QReadWriteLock>
+#include <QThread>
 
 // Namespace includes
 #include "ClassifierSettings.h"
@@ -69,6 +70,9 @@ namespace Konclude {
 
 					//! Destructor
 					virtual ~CClassificationManager();
+
+					// the threads of the workers this manager has created, for stopping them when the reasoner closes
+					QList<QThread*> getWorkerThreads();
 
 					virtual CClassificationManager *initializeManager(CSubsumptionClassifierFactory *takeClassifierFactory, CConfigurationProvider *configurationProvider);
 

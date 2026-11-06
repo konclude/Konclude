@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Defined classes with all-values restrictions and a disjointness axiom:
+  Margherita is subsumed by VegetarianPizza through the all-values
+  restriction over hasTopping, and vegetarian and meat toppings are disjoint.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/dl/defined-classes">
+  <Prefix name="" IRI="http://konclude.test/dl/defined-classes#"/>
+
+  <Declaration><Class abbreviatedIRI=":Food"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Pizza"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Topping"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":VegetarianTopping"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":MeatTopping"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Mozzarella"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":VegetarianPizza"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Margherita"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":hasTopping"/></Declaration>
+
+  <SubClassOf><Class abbreviatedIRI=":Pizza"/><Class abbreviatedIRI=":Food"/></SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":Pizza"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":hasTopping"/><Class abbreviatedIRI=":Topping"/></ObjectSomeValuesFrom>
+  </SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":VegetarianTopping"/><Class abbreviatedIRI=":Topping"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":MeatTopping"/><Class abbreviatedIRI=":Topping"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":Mozzarella"/><Class abbreviatedIRI=":VegetarianTopping"/></SubClassOf>
+  <DisjointClasses><Class abbreviatedIRI=":VegetarianTopping"/><Class abbreviatedIRI=":MeatTopping"/></DisjointClasses>
+
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":VegetarianPizza"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":Pizza"/>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":hasTopping"/><Class abbreviatedIRI=":VegetarianTopping"/></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Margherita"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":Pizza"/>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":hasTopping"/><Class abbreviatedIRI=":Mozzarella"/></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

@@ -108,6 +108,7 @@ namespace Konclude {
 					bool mConfDirectErrorOutput;
 					bool mConfCloseAfterOutput;
 					bool mBlockUntilProcessed;
+					int mExitCode;
 					QTime mResponseTime;
 					QSemaphore mBlockingSem;
 					CSPARQLRecordResultStreamingInterpreter* mSPARQLInterpreter;

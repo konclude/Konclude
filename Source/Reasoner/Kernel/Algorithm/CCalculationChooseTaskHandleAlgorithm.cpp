@@ -34,6 +34,14 @@ namespace Konclude {
 					mTableauApproxSaturTaskHandleAlg = tableauApproxSaturTaskHandleAlg;
 				}
 
+
+				// CReasonerManagerThread::createTaskHandleAlgorithm creates both algorithms for this one,
+				// so it owns them; the processor unit that owns this deletes it (issue #45)
+				CCalculationChooseTaskHandleAlgorithm::~CCalculationChooseTaskHandleAlgorithm() {
+					delete mTableauCompTaskHandleAlg;
+					delete mTableauApproxSaturTaskHandleAlg;
+				}
+
 				bool CCalculationChooseTaskHandleAlgorithm::handleTask(CTaskProcessorContext *processorContext, CTask* task) {
 					if (mTableauCompTaskHandleAlg && task->getTaskType() == CSatisfiableCalculationTask::CALCULATIONTABLEAUCOMPLETIONTASK) {
 						return mTableauCompTaskHandleAlg->handleTask(processorContext,task);

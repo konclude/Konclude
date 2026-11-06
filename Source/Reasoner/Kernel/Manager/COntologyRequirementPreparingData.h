@@ -92,7 +92,8 @@ namespace Konclude {
 						QList<COntologyProcessingRequirement*> mCheckingReqList;
 						QList<COntologyProcessingRequirement*> mFailedReqList;
 
-						QList<COntologyProcessingRequirement*> mAllReqList;
+						/** the requirements the reasoner manager created itself and has to delete */
+						QList<COntologyProcessingRequirement*> mDynamicReqList;
 
 
 						COntologyProcessingStep::PROCESSORTYPE mCheckingProcessorType;

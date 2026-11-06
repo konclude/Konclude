@@ -321,7 +321,7 @@ namespace Konclude {
 				CConcept *topConcept = ontology->getDataBoxes()->getTopConcept();
 				CConcept *bottomConcept = ontology->getDataBoxes()->getBottomConcept();
 
-				QSet< QPair<CConcept*,bool> > singleConNegSet;
+				CVisitedConceptNegationSet singleConNegSet;
 
 				CDatatypeValueSpacesTriggers* valueSpaceTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
 				if (valueSpaceTriggers) {
@@ -374,7 +374,7 @@ namespace Konclude {
 				CConcept *topConcept = ontology->getDataBoxes()->getTopConcept();
 				CConcept *bottomConcept = ontology->getDataBoxes()->getBottomConcept();
 
-				QSet< QPair<CConcept*,bool> > singleConNegSet;
+				CVisitedConceptNegationSet singleConNegSet;
 				QHash<CRole*,bool> existRoleHash;
 
 				CDatatypeValueSpacesTriggers* valueSpaceTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
@@ -413,7 +413,7 @@ namespace Konclude {
 				CConcept *topConcept = ontology->getDataBoxes()->getTopConcept();
 				CConcept *bottomConcept = ontology->getDataBoxes()->getBottomConcept();
 
-				QSet< QPair<CConcept*,bool> > singleConNegSet;
+				CVisitedConceptNegationSet singleConNegSet;
 				QHash<CRole*,bool> existRoleHash;
 
 				CDatatypeValueSpacesTriggers* valueSpaceTriggers = ontology->getDataBoxes()->getMBox()->getValueSpacesTriggers(false);
@@ -468,8 +468,8 @@ namespace Konclude {
 
 
 
-			bool COntologyInspector::analyseConceptStructureFlags(CConcept* concept, bool negated, QSet< QPair<CConcept*,bool> >& singleConNegSet, QHash<CRole*,bool>* existRoleHash, CStructureFlags& structureFlags) {
-				singleConNegSet.insert(QPair<CConcept*,bool>(concept,negated));
+			bool COntologyInspector::analyseConceptStructureFlags(CConcept* concept, bool negated, CVisitedConceptNegationSet& singleConNegSet, QHash<CRole*,bool>* existRoleHash, CStructureFlags& structureFlags) {
+				singleConNegSet.insert(concept,negated);
 				QList< QPair<CConcept*,bool> > checkConNegList;
 				checkConNegList.append(QPair<CConcept*,bool>(concept,negated));
 
@@ -489,8 +489,8 @@ namespace Konclude {
 							while (domConIt) {
 								CConcept* domCon = domConIt->getData();
 								bool domConNeg = domConIt->isNegated();
-								if (!singleConNegSet.contains(QPair<CConcept*,bool>(domCon,domConNeg))) {
-									singleConNegSet.insert(QPair<CConcept*,bool>(domCon,domConNeg));
+								if (!singleConNegSet.contains(domCon,domConNeg)) {
+									singleConNegSet.insert(domCon,domConNeg);
 									checkConNegList.append(QPair<CConcept*,bool>(domCon,domConNeg));
 								}
 								domConIt = domConIt->getNext();
@@ -501,8 +501,8 @@ namespace Konclude {
 								while (ranConIt) {
 									CConcept* ranCon = ranConIt->getData();
 									bool ranConNeg = ranConIt->isNegated();
-									if (!singleConNegSet.contains(QPair<CConcept*,bool>(ranCon,ranConNeg))) {
-										singleConNegSet.insert(QPair<CConcept*,bool>(ranCon,ranConNeg));
+									if (!singleConNegSet.contains(ranCon,ranConNeg)) {
+										singleConNegSet.insert(ranCon,ranConNeg);
 										checkConNegList.append(QPair<CConcept*,bool>(ranCon,ranConNeg));
 									}
 									ranConIt = ranConIt->getNext();
@@ -585,8 +585,8 @@ namespace Konclude {
 						bool opConNeg = opConIt->isNegated()^inspectOperandsNegated;
 						if (inspectOperandCount-- > 0) {
 							if (!inspectOnlySameNegation || opConNeg == conNeg) {
-								if (!singleConNegSet.contains(QPair<CConcept*,bool>(opCon,opConNeg))) {
-									singleConNegSet.insert(QPair<CConcept*,bool>(opCon,opConNeg));
+								if (!singleConNegSet.contains(opCon,opConNeg)) {
+									singleConNegSet.insert(opCon,opConNeg);
 									checkConNegList.append(QPair<CConcept*,bool>(opCon,opConNeg));
 								}
 							}

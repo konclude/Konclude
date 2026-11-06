@@ -535,6 +535,22 @@ JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridg
 JNIEXPORT jlong JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildOWLDatatypeRestrictionFromArgumentList
   (JNIEnv *, jobject, jobject, jlong);
 
+/*
+ * Class:     com_konclude_jnibridge_AxiomExpressionBuildingBridge
+ * Method:    buildBatch
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;[JI)I
+ */
+JNIEXPORT jint JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_buildBatch
+  (JNIEnv *, jobject, jobject, jlongArray, jint);
+
+/*
+ * Class:     com_konclude_jnibridge_AxiomExpressionBuildingBridge
+ * Method:    expectAxioms
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;J)V
+ */
+JNIEXPORT void JNICALL Java_com_konclude_jnibridge_AxiomExpressionBuildingBridge_expectAxioms
+  (JNIEnv *, jobject, jobject, jlong);
+
 #ifdef __cplusplus
 }
 #endif

@@ -54,6 +54,9 @@ namespace Konclude {
 				mConfOftenTriggerUseCountPunishment = 20;
 				mConfPunishOftenSameTriggerUse = true;
 				mConfDatatypeAbsorption = true;
+				mConfCompleteDataLiteralAbsorption = true;
+				mConfFrequencyOrderedTriggerChains = true;
+				mCurrentConjunctFrequency = CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
 
 				mConfCardinalityQualificationTriggerAbsorption = true;
 				mConfPartialCardinalityQualificationTriggerAbsorption = true;
@@ -63,12 +66,15 @@ namespace Konclude {
 
 				mLastDisjunctId = 0;
 				mOnto = nullptr;
+				mTriggerLinkerChunkUsed = 0;
 			}
 
 
 			CTriggeredImplicationBinaryAbsorberPreProcess::~CTriggeredImplicationBinaryAbsorberPreProcess() {
-				qDeleteAll(mTriggerContainer);
-				mTriggerContainer.clear();
+				for (CConceptTriggerLinker* chunk : mTriggerLinkerChunkContainer) {
+					delete[] chunk;
+				}
+				mTriggerLinkerChunkContainer.clear();
 			}
 
 
@@ -107,6 +113,9 @@ namespace Konclude {
 				mConfNominalSchemaBackPropagation = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.NominalSchemaBackPropagation",true);
 				mConfNominalSchemaPathPreabsorption = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.NominalSchemaPathPreabsorption",true);
 				mConfDatatypeAbsorption = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.DatatypeAbsorption",true);
+				mConfCompleteDataLiteralAbsorption = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.CompleteDataLiteralAbsorption",true);
+				mConfFrequencyOrderedTriggerChains = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.FrequencyOrderedTriggerChains",true);
+				CConceptTriggerLinker::sFrequencyOrdered = mConfFrequencyOrderedTriggerChains;
 				mConfNominalSchemaPathPreabsorption = false;
 
 				mConfCardinalityQualificationTriggerAbsorption = CConfigDataReader::readConfigBoolean(config,"Konclude.Calculation.Preprocessing.CardinalityQualificationTriggerAbsorption",true);
@@ -121,6 +130,16 @@ namespace Konclude {
 				mTriggerImplHash = tBox->getTriggerImplicationHash(true);
 				mEquivConCandidateHash = tBox->getEquivalentConceptCandidateHash(true);
 				mCandidateEquivConHash = tBox->getCandidateEquivalentConceptHash(true);
+				// the hashes grow to between half and three times the concept count (SNOMED AU, the SDD); sizing them
+				// up front avoids rehashing millions of entries while they grow (~5 % of the SDD's preprocessing); none
+				// of them is iterated, so the bucket count does not affect any order
+				mConceptTriggerLinkerHash.reserve(conceptCount);
+				mConceptTotalAbsorbableHash.reserve(conceptCount);
+				mConceptPartialAbsorbableHash.reserve(conceptCount);
+				mConjunctFrequency.reserve(conceptCount / 2);
+				mConceptImplicationImpliedHash.reserve(2 * conceptCount);
+				mTriggCountHash.reserve(2 * conceptCount);
+				mTriggerImplHash->reserve(2 * conceptCount);
 				mEquivConNonCandidateSet = tBox->getEquivalentConceptNonCandidateSet(true);
 				mRoleDomainTriggerConceptHash = tBox->getRoleDomainTriggerConceptHash(false);
 				mIndividualTriggerConceptHash = tBox->getIndividualTriggerConceptHash(false);
@@ -165,6 +184,32 @@ namespace Konclude {
 				}
 
 
+				mConjunctFrequency.clear();
+				mCurrentConjunctFrequency = CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
+				if (mConfFrequencyOrderedTriggerChains) {
+					// In how many conjunctions does each conjunct occur: definitions (CCEQ), conjunctions (CCAND) and
+					// negated disjunctions (CCOR), nested ones included. The chains built below start with the
+					// rarest conjunct of a definition. With the most complex trigger first, as before, an ontology
+					// whose definitions share a few common conjuncts (the SNOMED drug model's data values, the SDD
+					// drug ontology's boolean flags) unfolds every node carrying them into one implication per
+					// definition, and the saturation's memory grows with the square of the ontology.
+					for (cint64 conIdx = 0; conIdx < conceptCount; conIdx++) {
+						CConcept* concept = mConceptVec->getLocalData(conIdx);
+						if (concept) {
+							cint64 opCode = concept->getOperatorCode();
+							if (opCode == CCEQ || opCode == CCAND || opCode == CCOR) {
+								for (CSortedNegLinker<CConcept*>* opIt = concept->getOperandList(); opIt; opIt = opIt->getNext()) {
+									CConcept* op = opIt->getData();
+									bool neg = opIt->isNegated() ^ (opCode == CCOR);
+									if (opCode == CCEQ && !neg && op->getOperatorCode() == CCAND) {
+										continue; // its operands are counted with the conjunction itself
+									}
+									++mConjunctFrequency[QPair<CConcept*,bool>(op, neg)];
+								}
+							}
+						}
+					}
+				}
 				if (mConfAbsorbEqClassDefinitions) {
 
 					QList<CAbsorpEquivalentClassItem> equivConceptAbsorbItemList;
@@ -726,7 +771,7 @@ namespace Konclude {
 
 
 
-			void CTriggeredImplicationBinaryAbsorberPreProcess::collectPositiveConcepts(CConcept* initalConcept, bool initalNegated, QSet<TConceptNegationPair>* positiveConceptSet, bool recursiveDefinition) {
+			void CTriggeredImplicationBinaryAbsorberPreProcess::collectPositiveConcepts(CConcept* initalConcept, bool initalNegated, CConceptNegationFlags* positiveConceptSet, bool recursiveDefinition) {
 				TConceptNegationPair processConNegPair(initalConcept,initalNegated);
 				if (!positiveConceptSet->contains(processConNegPair)) {
 					positiveConceptSet->insert(processConNegPair);
@@ -1028,7 +1073,9 @@ namespace Konclude {
 				for (CSortedNegLinker<CConcept*>* opConLinkerIt = absorpOpLinker; opConLinkerIt; opConLinkerIt = opConLinkerIt->getNext()) {
 					CConcept* concept = opConLinkerIt->getData();
 					bool negated = opConLinkerIt->isNegated();
+					mCurrentConjunctFrequency = mConjunctFrequency.value(QPair<CConcept*,bool>(concept, negated), CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY);
 					CConceptTriggerLinker* tmpTriggers = copyTriggerLinkers(getTriggersForConcept(concept,negated));
+					mCurrentConjunctFrequency = CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
 					if (tmpTriggers) {
 						triggers = tmpTriggers->append(triggers);
 					}
@@ -1845,14 +1892,18 @@ namespace Konclude {
 					TConceptNegationPair conNegPair(*it);
 					CConcept* concept = conNegPair.first;
 					bool negated = conNegPair.second;
+					mCurrentConjunctFrequency = mConjunctFrequency.value(QPair<CConcept*,bool>(concept, !negated), CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY);
 					CConceptTriggerLinker* tmpTriggers = copyTriggerLinkers(getPartialTriggersForConcept(concept,!negated));
+					mCurrentConjunctFrequency = CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
 					triggers = tmpTriggers->append(triggers);
 				}
 				for (QList<TConceptNegationPair>::const_iterator it = partialAbsorbList.constBegin(), itEnd = partialAbsorbList.constEnd(); it != itEnd; ++it) {
 					TConceptNegationPair conNegPair(*it);
 					CConcept* concept = conNegPair.first;
 					bool negated = conNegPair.second;
+					mCurrentConjunctFrequency = mConjunctFrequency.value(QPair<CConcept*,bool>(concept, !negated), CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY);
 					CConceptTriggerLinker* tmpTriggers = copyTriggerLinkers(getPartialTriggersForConcept(concept,!negated));
+					mCurrentConjunctFrequency = CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
 					triggers = tmpTriggers->append(triggers);
 				}
 				CConceptTriggerLinker* impliedConceptTrigger = getImplicationTriggeredConceptForTriggers(triggers,nullptr);
@@ -3061,13 +3112,17 @@ namespace Konclude {
 					} else if (negated && (opCode == CCOR) || !negated && (opCode == CCAND || opCode == CCEQ)) {
 						// AND, collect triggers from operands
 						CConceptTriggerLinker* andTriggers = nullptr;
+						cint64 savedConjunctFrequency = mCurrentConjunctFrequency;
 						for (CSortedNegLinker<CConcept*>* opConLinkerIt = opConLinker; opConLinkerIt; opConLinkerIt = opConLinkerIt->getNext()) {
 							CConcept* opConcept = opConLinkerIt->getData();
 							bool opNegated = opConLinkerIt->isNegated()^negated;
+							// an uncounted operand (a filler's conjunct) takes the frequency of the conjunct it belongs to
+							mCurrentConjunctFrequency = mConjunctFrequency.value(QPair<CConcept*,bool>(opConcept, opNegated), savedConjunctFrequency);
 
 							CConceptTriggerLinker* newTriggers = copyTriggerLinkers(getTriggersForConcept(opConcept,opNegated, backPropTriggerConcept));
 							andTriggers = newTriggers->append(andTriggers);
 						}
+						mCurrentConjunctFrequency = savedConjunctFrequency;
 						if (backPropConcept) {
 							CConceptTriggerLinker* implTriggeredConcept = getImplicationTriggeredConceptForTriggers(andTriggers, &backPropImpConcept);
 							addUnfoldingConceptForConcept(backPropTriggerConcept, backPropImpConcept, false);
@@ -3186,6 +3241,21 @@ namespace Konclude {
 						triggers = newTrigger->append(triggers);
 
 
+					} else if (!negated && (opCode == CCDATALITERAL)) {
+						// the exact value trigger of the literal (see isConceptImplicationTriggerable); it is registered for the
+						// whole ontology rather than scoped by the back propagation concept, since it is a single entry of the
+						// value space's trigger map and fires only on nodes whose value is exactly this literal
+						// (built directly: the assuring builder begins by calling this one, so it cannot be asked)
+						if (mConfCompleteDataLiteralAbsorption && isDataLiteralConceptExactlyTriggerable(concept)) {
+							// Complexity 0, below an atom's 1: the absorber orders the triggers of a chain with the highest complexity
+							// first, and a data value is shared by far more definitions than the class restrictions beside it (a
+							// strength of 10.0 by hundreds of ingredients). With the value first, every role-group node with that
+							// value collected a waiting implication per ingredient combination, 225 million on SNOMED CT AU.
+							CConceptTriggerLinker* literalTrigger = createExactDataLiteralTrigger(concept->getDataLiteral(), branchTiggerCreation, 0);
+							if (literalTrigger) {
+								triggers = literalTrigger->append(triggers);
+							}
+						}
 					} else if (!negated && (opCode == CCVALUE)) {
 						CConcept* propagatedTriggerConcept = createTriggerConcept(branchTiggerCreation);
 						CConcept* nextLevelTriggerConcept = createTriggerPropagationConcept(propagatedTriggerConcept,role, branchTiggerCreation);
@@ -3299,7 +3369,13 @@ namespace Konclude {
 							CConceptTriggerLinker* relTrigger = triggerIt;
 							triggerIt = triggerIt->getNext();
 							relTrigger->clearNext();
+							cint64 reusedTriggerFrequency = qMin(trigger->getTriggerFrequency(), relTrigger->getTriggerFrequency());
 							*trigger = *impliedConceptTrigger;
+							// the assignment copied the stored linker's data pointer, which the sorted insertion
+							// dereferences: the linker has to point at itself again, or it is ordered by the stored
+							// linker's complexity and frequency instead of its own
+							trigger->setData(trigger);
+							trigger->setTriggerFrequency(reusedTriggerFrequency);
 							if (lastTriggerIt) {
 								lastTriggerIt->setNext(triggerIt);
 							} else {
@@ -3371,6 +3447,18 @@ namespace Konclude {
 					}
 
 				}
+				// the merges above change triggers after their insertion, so the list is sorted once more
+				{
+					CConceptTriggerLinker* resortedTriggers = nullptr;
+					CConceptTriggerLinker* resortIt = sortedTriggers;
+					while (resortIt) {
+						CConceptTriggerLinker* nextResortIt = resortIt->getNext();
+						resortIt->clearNext();
+						resortedTriggers = resortedTriggers ? resortedTriggers->insertNextSorted(resortIt) : resortIt;
+						resortIt = nextResortIt;
+					}
+					sortedTriggers = resortedTriggers;
+				}
 				if (firstImplicationConcept) {
 					*firstImplicationConcept = nullptr;
 					if (sortedTriggers) {
@@ -3413,10 +3501,11 @@ namespace Konclude {
 							CConcept* minConcept1 = qMin(concept1,concept2);
 							CConcept* maxConcept1 = qMax(concept1,concept2);
 							TConceptPair conceptPair(minConcept1,maxConcept1);
-							trigger2->initConceptTriggerLinker(newImpliedTriggerConcept,newTriggerComplexity);
+							cint64 newTriggerFrequency = qMin(trigger1->getTriggerFrequency(), trigger2->getTriggerFrequency());
+							trigger2->initConceptTriggerLinker(newImpliedTriggerConcept,newTriggerComplexity)->setTriggerFrequency(newTriggerFrequency);
 							mConceptImplicationImpliedHash.insert(conceptPair,trigger2);
 
-							trigger1->initConceptTriggerLinker(newImpliedTriggerConcept,newTriggerComplexity);
+							trigger1->initConceptTriggerLinker(newImpliedTriggerConcept,newTriggerComplexity)->setTriggerFrequency(newTriggerFrequency);
 						}
 						implicationTriggeredConcept = trigger1;
 					}
@@ -3461,10 +3550,14 @@ namespace Konclude {
 				if (newTrigger) {
 					mTmpTriggerLinker = mTmpTriggerLinker->getNext();
 				} else {
-					newTrigger = new CConceptTriggerLinker();
-					mTriggerContainer.append(newTrigger);
+					if (mTriggerLinkerChunkContainer.isEmpty() || mTriggerLinkerChunkUsed >= TRIGGERLINKERCHUNKSIZE) {
+						mTriggerLinkerChunkContainer.append(new CConceptTriggerLinker[TRIGGERLINKERCHUNKSIZE]);
+						mTriggerLinkerChunkUsed = 0;
+					}
+					newTrigger = mTriggerLinkerChunkContainer.last() + mTriggerLinkerChunkUsed++;
 				}
 				newTrigger->clearNext();
+				newTrigger->setTriggerFrequency(mCurrentConjunctFrequency);
 				return newTrigger;
 			}
 
@@ -3479,6 +3572,10 @@ namespace Konclude {
 				CConceptTriggerLinker* newTriggers = nullptr;
 				for (CConceptTriggerLinker* triggerIt = triggers; triggerIt; triggerIt = triggerIt->getNext()) {
 					CConceptTriggerLinker* newTrigger = createTriggerLinker()->initConceptTriggerLinker(triggerIt->getTriggerConcept(),triggerIt->getTriggerComplexity());
+					if (mCurrentConjunctFrequency == CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY) {
+						// the triggers of a conjunction keep the frequencies of its conjuncts
+						newTrigger->setTriggerFrequency(triggerIt->getTriggerFrequency());
+					}
 					newTriggers = newTrigger->append(newTriggers);
 				}
 				return newTriggers;
@@ -3710,6 +3807,28 @@ namespace Konclude {
 			}
 
 
+			bool CTriggeredImplicationBinaryAbsorberPreProcess::isDataLiteralConceptExactlyTriggerable(CConcept* concept) {
+				// whether an exact value trigger can be built for the literal: the value must be parsed and of a value space with triggers
+				if (!mConfDatatypeAbsorption || concept->getOperatorCode() != CCDATALITERAL) {
+					return false;
+				}
+				CDataLiteral* dataLiteral = concept->getDataLiteral();
+				if (!dataLiteral) {
+					return false;
+				}
+				CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
+				if (!dataLitValue) {
+					return false;
+				}
+				// The value spaces whose tableau handlers fire the complete value trigger for a node fixed to one value
+				// (the saturation fires it for real and string literals; the other literals' nodes go to the tableau).
+				// The IRI, XML and binary spaces are not covered by the datatypes test scenario and stay candidates.
+				CDataLiteralValue::DATA_LITERAL_VALUE_TYPE valueType = dataLitValue->getDataValueType();
+				return valueType == CDataLiteralValue::DLVT_REAL || valueType == CDataLiteralValue::DLVT_STRING || valueType == CDataLiteralValue::DLVT_BOOLEAN
+						|| valueType == CDataLiteralValue::DLVT_DOUBLE || valueType == CDataLiteralValue::DLVT_FLOAT || valueType == CDataLiteralValue::DLVT_DATETIME;
+			}
+
+
 			bool CTriggeredImplicationBinaryAbsorberPreProcess::isConceptImplicationTriggerable(CConcept* concept, bool negated, QHash<CConcept*,TOccuredAbsorbablePair>* conceptEqConAbsorbed) {
 				cint64 openMultipleOccurCount = 0;
 				QList<TConceptNegationPair>* dependingCacheList = nullptr;
@@ -3793,6 +3912,14 @@ namespace Konclude {
 						opConLinkerIt = opConLinkerIt->getNext();
 					}
 					absorbable = allOpsTriggerable;
+				} else if (!negated && (opCode == CCDATALITERAL)) {
+					// A data literal can be absorbed completely: its exact value trigger fires on a node if and only if
+					// the node's value is the literal, which is what the equivalence absorption needs. Without this
+					// case every definition containing a DataHasValue was only a candidate, which the saturation
+					// cannot resolve (issue #90).
+					// (the assuring test cannot be asked, it begins by asking this one)
+					// (the exact value trigger is ranked below the class restrictions, see getTriggersForConcept)
+					absorbable = mConfCompleteDataLiteralAbsorption && isDataLiteralConceptExactlyTriggerable(concept);
 				} else if (opCode == CCEQ) {
 					if (negated) {
 						absorbable = false;
@@ -4124,7 +4251,9 @@ namespace Konclude {
 					TConceptNegationPair conNegPair(*it);
 					CConcept* concept = conNegPair.first;
 					bool negated = conNegPair.second;
+					mCurrentConjunctFrequency = mConjunctFrequency.value(QPair<CConcept*,bool>(concept, !negated), CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY);
 					CConceptTriggerLinker* tmpTriggers = copyTriggerLinkers(getPartialTriggersForConcept(concept,!negated));
+					mCurrentConjunctFrequency = CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
 					triggers = tmpTriggers->append(triggers);
 				}
 				CConceptTriggerLinker* impliedConceptTrigger = getImplicationTriggeredConceptForTriggers(triggers,nullptr);
@@ -4139,7 +4268,9 @@ namespace Konclude {
 					TConceptNegationPair conNegPair(*it);
 					CConcept* concept = conNegPair.first;
 					bool negated = conNegPair.second;
+					mCurrentConjunctFrequency = mConjunctFrequency.value(QPair<CConcept*,bool>(concept, !negated), CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY);
 					CConceptTriggerLinker* tmpTriggers = copyTriggerLinkers(getPartialTriggersForConcept(concept,!negated));
+					mCurrentConjunctFrequency = CConceptTriggerLinker::UNKNOWN_TRIGGER_FREQUENCY;
 					triggers = tmpTriggers->append(triggers);
 				}
 				CConceptTriggerLinker* impliedConceptTrigger = getImplicationTriggeredConceptForTriggers(triggers,&implicationConcept);
@@ -4302,9 +4433,11 @@ namespace Konclude {
 						if (opCode != CCEQ || !mEQNotConceptPartialAbsorbableSet.contains(concept)) {
 
 							CConceptTriggerLinker* andTriggers = nullptr;
+							cint64 savedPartialConjunctFrequency = mCurrentConjunctFrequency;
 							for (CSortedNegLinker<CConcept*>* opConLinkerIt = opConLinker; opConLinkerIt; opConLinkerIt = opConLinkerIt->getNext()) {
 								CConcept* opConcept = opConLinkerIt->getData();
 								bool opNegated = opConLinkerIt->isNegated()^negated;
+								mCurrentConjunctFrequency = mConjunctFrequency.value(QPair<CConcept*,bool>(opConcept, opNegated), savedPartialConjunctFrequency);
 
 								if (mConceptPartialAbsorbableHash.value(TConceptNegationPair(opConcept,opNegated),false) || mConceptTotalAbsorbableHash.value(TConceptNegationPair(opConcept,opNegated),false)) {
 									CConceptTriggerLinker* newTriggers = copyTriggerLinkers(getPartialTriggersForConcept(opConcept,opNegated, backPropTriggerConcept));
@@ -4313,6 +4446,7 @@ namespace Konclude {
 									}
 								}
 							}
+							mCurrentConjunctFrequency = savedPartialConjunctFrequency;
 							if (opCode == CCEQ || backPropConcept) {
 								CConceptTriggerLinker* implTriggers = getImplicationTriggeredConceptForTriggers(andTriggers,backPropImpConceptPointer);
 								if (backPropConcept) {
@@ -4915,6 +5049,61 @@ namespace Konclude {
 
 
 
+			CConceptTriggerLinker* CTriggeredImplicationBinaryAbsorberPreProcess::createExactDataLiteralTrigger(CDataLiteral* dataLiteral, bool branchTiggerCreation, cint64 triggerComplexity) {
+				// the trigger concept that the value space fires on a node whose value is exactly this literal (a complete value trigger);
+				// used by the assuring triggers and by the complete absorption of definitions with data literals
+				// (the complexity is the parameter)
+				CConcept* valueTriggerConcept = createTriggerConcept(branchTiggerCreation);
+				CConceptTriggerLinker* valueTrigger = createTriggerLinker();
+				valueTrigger->initConceptTriggerLinker(valueTriggerConcept, triggerComplexity);
+				CDatatypeValueSpaceConceptTriggerLinker* valueSpaceConceptTriggerLinker = createValueSpaceConceptTriggerLinker();
+				valueSpaceConceptTriggerLinker->initConceptTrigger(valueTriggerConcept);
+
+
+				CDatatypeValueSpaceTriggers* valueSpaceTrigger = nullptr;
+				CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
+				if (dataLitValue) {
+					CDataLiteralCompareValue* compareDataLitValue = dynamic_cast<CDataLiteralCompareValue*>(dataLitValue);
+					if (compareDataLitValue) {
+						CDatatypeValueSpaceType* valueSpaceType = nullptr;
+						CDataLiteralValue::DATA_LITERAL_VALUE_TYPE dataLiteralValueType = compareDataLitValue->getDataValueType();
+						CDatatypeValueSpaceTypes* valueSpaceTypes = CDatatypeValueSpaceTypes::getValueSpaceTypes();
+						if (dataLiteralValueType == CDataLiteralValue::DLVT_REAL) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceRealType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_STRING) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceStringType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BOOLEAN) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceBooleanType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DOUBLE) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceDoubleType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_FLOAT) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceFloatType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_IRI) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceIRIType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_XML) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceXMLType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_HEXBINARY) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceBinaryHexDataType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BASE64BINARY) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceBinaryBase64DataType();
+						} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DATETIME) {
+							valueSpaceType = valueSpaceTypes->getValueSpaceDateTimeType();
+						}
+
+						if (valueSpaceType) {
+							CDatatypeValueSpacesTriggers* valueSpacesTriggers = mMBox->getValueSpacesTriggers(true);
+							CDatatypeValueSpaceCompareTriggers* compareValueSpaceConceptTrigger = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(valueSpaceType);
+							if (compareValueSpaceConceptTrigger) {
+								compareValueSpaceConceptTrigger->addCompleteValueConceptTrigger(compareDataLitValue, valueSpaceConceptTriggerLinker);
+							}
+						}
+					}
+				}
+				
+				return valueTrigger;
+			}
+
+
 			CConceptTriggerLinker* CTriggeredImplicationBinaryAbsorberPreProcess::getAssuringTriggersForConcept(CConcept* concept, bool negated) {
 				CConceptTriggerLinker* triggers = nullptr;
 
@@ -4993,55 +5182,11 @@ namespace Konclude {
 								CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
 								if (dataLitValue) {
 
-									cint64 triggerComplexity = 2;
-									CConcept* valueTriggerConcept = createTriggerConcept(branchTiggerCreation);
-									CConceptTriggerLinker* valueTrigger = createTriggerLinker();
-									valueTrigger->initConceptTriggerLinker(valueTriggerConcept, triggerComplexity);
-									CDatatypeValueSpaceConceptTriggerLinker* valueSpaceConceptTriggerLinker = createValueSpaceConceptTriggerLinker();
-									valueSpaceConceptTriggerLinker->initConceptTrigger(valueTriggerConcept);
-
-
-									CDatatypeValueSpaceTriggers* valueSpaceTrigger = nullptr;
-									CDataLiteralValue* dataLitValue = dataLiteral->getDataLiteralValue();
-									if (dataLitValue) {
-										CDataLiteralCompareValue* compareDataLitValue = dynamic_cast<CDataLiteralCompareValue*>(dataLitValue);
-										if (compareDataLitValue) {
-											CDatatypeValueSpaceType* valueSpaceType = nullptr;
-											CDataLiteralValue::DATA_LITERAL_VALUE_TYPE dataLiteralValueType = compareDataLitValue->getDataValueType();
-											CDatatypeValueSpaceTypes* valueSpaceTypes = CDatatypeValueSpaceTypes::getValueSpaceTypes();
-											if (dataLiteralValueType == CDataLiteralValue::DLVT_REAL) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceRealType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_STRING) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceStringType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BOOLEAN) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceBooleanType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DOUBLE) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceDoubleType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_FLOAT) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceFloatType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_IRI) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceIRIType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_XML) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceXMLType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_HEXBINARY) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceBinaryHexDataType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_BASE64BINARY) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceBinaryBase64DataType();
-											} else if (dataLiteralValueType == CDataLiteralValue::DLVT_DATETIME) {
-												valueSpaceType = valueSpaceTypes->getValueSpaceDateTimeType();
-											}
-
-											if (valueSpaceType) {
-												CDatatypeValueSpacesTriggers* valueSpacesTriggers = mMBox->getValueSpacesTriggers(true);
-												CDatatypeValueSpaceCompareTriggers* compareValueSpaceConceptTrigger = (CDatatypeValueSpaceCompareTriggers*)valueSpacesTriggers->getValueSpaceTriggers(valueSpaceType);
-												if (compareValueSpaceConceptTrigger) {
-													compareValueSpaceConceptTrigger->addCompleteValueConceptTrigger(compareDataLitValue, valueSpaceConceptTriggerLinker);
-												}
-											}
-										}
+									CConceptTriggerLinker* literalTrigger = createExactDataLiteralTrigger(dataLiteral, branchTiggerCreation, 2);
+									if (literalTrigger) {
+										triggers = literalTrigger->append(triggers);
 									}
 									
-									triggers = valueTrigger->append(triggers);
 
 								}
 							}

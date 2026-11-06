@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint over an unsatisfiable class X (X is a subclass of both A
+  and E, and A is disjoint from E) and the satisfiable class A.  X has no
+  instance, so it is disjoint from A.  Expected answer: true.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#E"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#X"/></owl:Declaration>
+    <owl:DisjointClasses><owl:Class IRI="#A"/><owl:Class IRI="#E"/></owl:DisjointClasses>
+    <owl:SubClassOf><owl:Class IRI="#X"/><owl:Class IRI="#A"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#X"/><owl:Class IRI="#E"/></owl:SubClassOf>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb"><owl:Class IRI="#X"/><owl:Class IRI="#A"/></AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

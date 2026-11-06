@@ -27,6 +27,7 @@
 // Namespace includes
 #include "MemorySettings.h"
 #include "CConsiderateMemoryPoolProvider.h"
+#include "CMemoryPoolRecycler.h"
 
 // Other includes
 

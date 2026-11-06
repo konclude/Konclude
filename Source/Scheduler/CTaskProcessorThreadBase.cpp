@@ -82,6 +82,26 @@ namespace Konclude {
 			mLastProcessedEvent = nullptr;
 		}
 
+		// Releases the memory of the tasks that completed without being released because their data
+		// was kept, such as the saturation or the consistency of an ontology. Nothing else releases
+		// them, so they stayed allocated until the process ended (issue #45). This runs when the unit
+		// is deleted, after its thread has been stopped and after the objects that read the data of
+		// these tasks, the workers and the caches, have been deleted. A task lives in its own memory
+		// pools, which the allocator reads before it releases them.
+		cint64 CTaskProcessorThreadBase::releaseKeptTasks() {
+			cint64 releasedCount = 0;
+			for (CTask* keptTask : mKeptTaskList) {
+				for (CDeletionLinker* deletionLinkerIt = keptTask->takeDeletionLinker(); deletionLinkerIt; deletionLinkerIt = deletionLinkerIt->getNext()) {
+					deletionLinkerIt->deleteObject();
+				}
+				mMemoryAllocator->releaseMemoryPoolContainer(keptTask);
+				++releasedCount;
+			}
+			mKeptTaskList.clear();
+			return releasedCount;
+		}
+
+
 		CTaskProcessorThreadBase::~CTaskProcessorThreadBase() {
 		}
 
@@ -172,8 +192,12 @@ namespace Konclude {
 			return this;
 		}
 
+		// Ends the processing loop, which otherwise never returns to the event loop of the thread,
+		// so that quit() and wait() can then end the thread. The loop sees the flag when it wakes,
+		// which the release makes immediate; a task in progress finishes its current step first.
 		CTaskProcessorThreadBase* CTaskProcessorThreadBase::stopProcessing() {
-			mProcessingStopped = true;
+			mProcessingStopped.store(true, std::memory_order_relaxed);
+			mProcessingWakeUpSemaphore.release();
 			return this;
 		}
 
@@ -207,7 +231,7 @@ namespace Konclude {
 
 		bool CTaskProcessorThreadBase::processingLoop() {
 			bool eventSafeguardProcessed = false;
-			while (!mProcessingStopped) {
+			while (!mProcessingStopped.load(std::memory_order_relaxed)) {
 				if (!mTaskProcessingQueue && mProcessingBlocked) {
 					// block until new events or task are available
 #ifdef KONCLUDE_SCHEDULER_TASK_THREADS_TIME_STATISTICS
@@ -226,7 +250,9 @@ namespace Konclude {
 				}
 				mProcessingBlocked = false;
 				eventSafeguardProcessed = false;
-				while (mEventSignalized) {
+				// handleEvents does nothing once the processing is stopped and then never clears the
+				// signal, so a loop waiting for the signal to clear has to see the stop as well
+				while (mEventSignalized && !mProcessingStopped.load(std::memory_order_relaxed)) {
 					bool eventsProcessed = handleEvents();
 				}
 				if (mTaskProcessingQueue) {
@@ -264,7 +290,7 @@ namespace Konclude {
 				}
 				processDispenseNotification();
 				if (!mTaskProcessingQueue) {
-					while (mEventSignalized || !eventSafeguardProcessed) {
+					while ((mEventSignalized || !eventSafeguardProcessed) && !mProcessingStopped.load(std::memory_order_relaxed)) {
 						bool eventsProcessed = handleEvents();
 						if (eventsProcessed) {
 							eventSafeguardProcessed = false;
@@ -553,7 +579,7 @@ namespace Konclude {
 			bool handleNextRound = true;
 			bool roundEventProcessed = false;
 			bool eventProcessed = false;
-			while (handleNextRound && !mProcessingStopped) {
+			while (handleNextRound && !mProcessingStopped.load(std::memory_order_relaxed)) {
 				roundEventProcessed = false;
 				CXLinker<CEventHandler*>* eventHandlerLinkerIt = mEventHandlerLinker;
 				if (eventHandlerLinkerIt) {

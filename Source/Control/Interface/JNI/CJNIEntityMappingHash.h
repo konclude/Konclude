@@ -72,6 +72,10 @@ namespace Konclude {
 						jobject getMappedObject(CBuildExpression* expression);
 						CJNIEntityMappingHash* inserObjectMapping(CBuildExpression* expression, jobject obj);
 
+						// releases the global references to the Java objects of the mapping, which the
+						// bridge creates for every entity (issue #45)
+						CJNIEntityMappingHash* releaseGlobalReferences(JNIEnv* jenv);
+
 
 
 					// protected methods

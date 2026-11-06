@@ -1431,7 +1431,11 @@ namespace Konclude {
 										CPrepareKnowledgeBaseForQueryCommand *pKBFQC = (CPrepareKnowledgeBaseForQueryCommand *)command;
 
 										CQueryGenerator* queryGenerator = pKBFQC->getQueryGenerator();
-										if (queryGenerator->requiresPreprocessedOntology()) {
+										if (!queryGenerator) {
+											// there is no query, for example because it is about a knowledge base that
+											// does not exist, in which case nothing has to be prepared
+											CUnspecifiedMessageErrorRecord::makeRecord("No query generated, knowledge base cannot be prepared for it.",&commandRecordRouter);
+										} else if (queryGenerator->requiresPreprocessedOntology()) {
 											CPreprocessKnowledgeBaseRequirementsForQueryCommand* prepKBForQueryC = new CPreprocessKnowledgeBaseRequirementsForQueryCommand(pKBFQC->getOntologyRevisionProvider());
 											pKBFQC->makeToSubCommand(prepKBForQueryC);
 											preSynchronizer->delegateCommand(prepKBForQueryC);

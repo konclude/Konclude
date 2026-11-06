@@ -31,6 +31,8 @@
 #include "Control/Command/CCommandDelegater.h"
 
 #include "Control/Command/Records/CClosureProcessCommandRecord.h"
+#include "Control/Command/Records/CProcessErrorRecord.h"
+#include "Control/Command/Instructions/CParseOWLlinkCommandsCommand.h"
 
 #include "Control/Command/Instructions/CGetDescriptionCommand.h"
 #include "Control/Command/Instructions/CTellKnowledgeBaseOWL2XMLNodeCommand.h"
@@ -169,6 +171,8 @@ namespace Konclude {
 
 						CConfiguration* mConfig;
 						bool mConfExtendedErrorReporting;
+						//! whether the response message already carries the error of an unparsable request
+						bool mSyntaxErrorReported;
 
 					// private methods
 					private:

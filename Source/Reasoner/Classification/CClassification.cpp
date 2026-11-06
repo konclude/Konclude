@@ -36,7 +36,16 @@ namespace Konclude {
 			}
 
 
+			// The class and property classifications are the classification items of the classifiers,
+			// which set them here and delete them nowhere, so the ontology they classified owns them
+			// (issue #45). Their destructors free what the items own and read no concept or task, so
+			// they may run after the data of the ontology is gone.
 			CClassification::~CClassification() {
+				delete mClassConceptClassification;
+				delete mObjectPropertyRoleClassification;
+				if (mDataPropertyRoleClassification != mObjectPropertyRoleClassification) {
+					delete mDataPropertyRoleClassification;
+				}
 			}
 
 

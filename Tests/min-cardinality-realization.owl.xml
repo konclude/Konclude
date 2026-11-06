@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	Minimal example for the incomplete realisation of classes that are defined by a
+	qualified minimum cardinality restriction.
+
+	ManySibling is equivalent to Person and at least 4 R-successors that are Persons.
+	The individual p is asserted to have exactly the 4 pairwise different Person
+	successors s1, s2, s3 and s4, whence p must be an instance of ManySibling.
+
+	Konclude answers the entailment question for p correctly, but it does not report p
+	when the instances of ManySibling are retrieved:
+
+	  ./Konclude owllinkfile -i Tests/min-cardinality-realization-request.xml
+	      IsInstanceOf(p, ManySibling)  ->  true
+	      GetFlattenedInstances(ManySibling)  ->  {}          (p is missing)
+
+	  ./Konclude realization -i Tests/min-cardinality-realization.owl.xml -o out.owl.xml
+	      out.owl.xml contains no ClassAssertion for ManySibling
+
+	The realisation becomes complete if the upfront merging of possible instance
+	concepts is deactivated, see the KNOWN ISSUES section of the Readme:
+
+	  ./Konclude realization -c Configs/no-upfront-instance-merging-config.xml \
+	      -i Tests/min-cardinality-realization.owl.xml -o out.owl.xml
+
+	Two related observations:
+	- If R is additionally declared symmetric and the 4 assertions are turned around, so
+	  that the successors of p are only implied, then p is reported correctly.
+	- Whether instances are lost, and which ones, varies between runs for some
+	  ontologies, which is where the configured number of processing units appears to
+	  have an influence.
+-->
+
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     ontologyIRI="http://konclude.com/test/min-cardinality-realization">
+
+	<Declaration><Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/></Declaration>
+	<Declaration><Class IRI="http://konclude.com/test/min-cardinality-realization#ManySibling"/></Declaration>
+	<Declaration><ObjectProperty IRI="http://konclude.com/test/min-cardinality-realization#R"/></Declaration>
+
+	<EquivalentClasses>
+		<Class IRI="http://konclude.com/test/min-cardinality-realization#ManySibling"/>
+		<ObjectIntersectionOf>
+			<Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/>
+			<ObjectMinCardinality cardinality="4">
+				<ObjectProperty IRI="http://konclude.com/test/min-cardinality-realization#R"/>
+				<Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/>
+			</ObjectMinCardinality>
+		</ObjectIntersectionOf>
+	</EquivalentClasses>
+
+	<ClassAssertion><Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#p"/></ClassAssertion>
+	<ClassAssertion><Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s1"/></ClassAssertion>
+	<ClassAssertion><Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s2"/></ClassAssertion>
+	<ClassAssertion><Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s3"/></ClassAssertion>
+	<ClassAssertion><Class IRI="http://konclude.com/test/min-cardinality-realization#Person"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s4"/></ClassAssertion>
+
+	<ObjectPropertyAssertion><ObjectProperty IRI="http://konclude.com/test/min-cardinality-realization#R"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#p"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s1"/></ObjectPropertyAssertion>
+	<ObjectPropertyAssertion><ObjectProperty IRI="http://konclude.com/test/min-cardinality-realization#R"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#p"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s2"/></ObjectPropertyAssertion>
+	<ObjectPropertyAssertion><ObjectProperty IRI="http://konclude.com/test/min-cardinality-realization#R"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#p"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s3"/></ObjectPropertyAssertion>
+	<ObjectPropertyAssertion><ObjectProperty IRI="http://konclude.com/test/min-cardinality-realization#R"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#p"/><NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s4"/></ObjectPropertyAssertion>
+
+	<DifferentIndividuals>
+		<NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#p"/>
+		<NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s1"/>
+		<NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s2"/>
+		<NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s3"/>
+		<NamedIndividual IRI="http://konclude.com/test/min-cardinality-realization#s4"/>
+	</DifferentIndividuals>
+
+</Ontology>

@@ -716,7 +716,7 @@ namespace Konclude {
 													}
 												}
 
-												if (!triggeringData->getDirectValueTriggeringData()->hasPartialConceptTriggers()) {
+												if (!triggeringData->getDirectValueTriggeringData()->hasConceptTriggers()) {
 													realValueSpaceMap->countValueValues(currentRealValue,&valueCounter);
 													realValueSpaceMap->addValueExclusionDependencies(currentRealValue,depCollection);
 												}

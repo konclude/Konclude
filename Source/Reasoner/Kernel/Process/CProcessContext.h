@@ -33,6 +33,7 @@
 
 // Other includes
 #include "Scheduler/CTaskContext.h"
+#include "Utilities/Memory/CObjectAllocator.h"
 
 
 // Logger includes
@@ -74,6 +75,13 @@ namespace Konclude {
 						inline CMemoryAllocationManager* getUsedMemoryAllocationManager();
 						inline CProcessingStatisticGathering* getUsedProcessingStatisticsGathering();
 
+						//! Free lists of the entry arrays the saturation label hashes have outgrown, one per power-of-two
+						//! capacity (index = log2), so that they are reused instead of lying dead in the pools, whose
+						//! release is a no-op; see CReapplyConceptSaturationLabelHash. Allocated on first use, so only
+						//! the saturation's contexts carry it.
+						inline void** getSaturationLabelHashFreeArrays();
+						const static int SATURATIONLABELHASHFREEARRAYCOUNT = 40;
+
 
 
 					// protected methods
@@ -84,6 +92,7 @@ namespace Konclude {
 						CProcessMemoryPoolAllocationManager* mUsedMemMan;
 						CProcessTagger* mUsedProcessTagger;
 						CProcessingStatisticGathering* mUsedProcessStatGath;
+						void** mSaturationLabelHashFreeArrays;
 
 
 					// private methods
@@ -105,6 +114,16 @@ namespace Konclude {
 
 				CProcessingStatisticGathering* CProcessContext::getUsedProcessingStatisticsGathering() {
 					return mUsedProcessStatGath;
+				}
+
+				void** CProcessContext::getSaturationLabelHashFreeArrays() {
+					if (!mSaturationLabelHashFreeArrays) {
+						mSaturationLabelHashFreeArrays = CObjectAllocator<void*>::allocateArray(mUsedMemMan,SATURATIONLABELHASHFREEARRAYCOUNT);
+						for (int i = 0; i < SATURATIONLABELHASHFREEARRAYCOUNT; ++i) {
+							mSaturationLabelHashFreeArrays[i] = nullptr;
+						}
+					}
+					return mSaturationLabelHashFreeArrays;
 				}
 
 

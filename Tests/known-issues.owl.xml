@@ -1,42 +1,508 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  known-issues.owl.xml - known discrepancies the runner treats as KNOWN
-  (green, reported) instead of FAIL (red). Deliberately NOT a *.kt.owl.xml and
-  outside cases/, so discovery does not treat it as a test case; the runner
-  loads it separately via --known-issues.
+  known-issues.owl.xml - the known-divergence model shared by all suites.
 
-  Finding (2026-10-21, Konclude v0.7.0-1138): Konclude reports several clearly
-  inconsistent ontologies incorrectly as consistent. Common pattern: violations
-  the reasoner must detect only through FORCED structure (generated role
-  successors; negative role characteristics asymmetry/irreflexivity/role
-  disjointness solely via property assertions) are not found - while directly
-  present clashes (max cardinality with explicit distinct fillers,
-  NegativeObjectPropertyAssertion, DisjointClasses, datatype conflicts,
-  complement) are detected correctly.
-  Not yet confirmed as an upstream bug - for assessment by the developers.
+  An issue is a first-class individual. Its type records whether it is a
+  reasoner bug, an unsupported feature, a performance issue or a corpus
+  limitation. kt:affectsTest links the issue to every affected test; the
+  same issue can therefore be referenced by many tests. A test links back
+  with kt:knownFailure (see the *.kt.owl.xml control ontologies).
+
+  The file is not discovered as a test (it is not *.kt.owl.xml and lives
+  outside Tests/cases/).
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/known-issues">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- Issue 1: asymmetry is not enforced -->
-  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-asymmetric"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-asymmetric"/><Literal>open</Literal></DataPropertyAssertion>
-  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-asymmetric</IRI><Literal>AsymmetricObjectProperty(r) with r(x,y),r(y,x) or r(x,x) is reported consistent; expected inconsistent. Also not detected via ObjectHasSelf.</Literal></AnnotationAssertion>
+  <!-- issue-w3c-webont-description-logic: 7 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+  </ClassAssertion>
 
-  <!-- Issue 2: irreflexivity via property assertion is not enforced -->
-  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-irreflexive"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-irreflexive"/><Literal>open</Literal></DataPropertyAssertion>
-  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-irreflexive</IRI><Literal>IrreflexiveObjectProperty(r) with a direct assertion r(x,x) is reported consistent; expected inconsistent. (The same violation via ObjectHasSelf is detected correctly.)</Literal></AnnotationAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+  </ClassAssertion>
 
-  <!-- Issue 3: role disjointness is not enforced -->
-  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-disjoint-roles"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-disjoint-roles"/><Literal>open</Literal></DataPropertyAssertion>
-  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-disjoint-roles</IRI><Literal>DisjointObjectProperties(r,s) with r(x,y),s(x,y) is reported consistent; expected inconsistent.</Literal></AnnotationAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
 
-  <!-- Issue 4: min/max cardinality clash over generated successors -->
-  <ClassAssertion><Class abbreviatedIRI="kt:Issue"/><NamedIndividual abbreviatedIRI="kt:issue-mincard-maxcard"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:status"/><NamedIndividual abbreviatedIRI="kt:issue-mincard-maxcard"/><Literal>open</Literal></DataPropertyAssertion>
-  <AnnotationAssertion><AnnotationProperty abbreviatedIRI="rdfs:comment"/><IRI>kt:issue-mincard-maxcard</IRI><Literal>min 2 r AND max 1 r on x (without explicit successors) is reported consistent; expected inconsistent. With explicit distinct fillers max 1 is violated correctly.</Literal></AnnotationAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <Literal>https://www.w3.org/TR/owl2-test/</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <Literal>Legacy OWL 1 description-logic tests whose current result differs. Not yet triaged; some cases may reflect OWL 1/RDF-based semantics rather than a defect.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-012"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-013"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-017"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-035"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-612"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-613"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-617"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-w3c-rdf-semantics-idioms: 9 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:CorpusLimitation"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <Literal>https://www.w3.org/TR/owl2-test/</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <Literal>RDF-based equality/disjointness and negative-assertion idioms whose direct-semantics form is not unique. To be triaged.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-eqdis-different-irrflxv"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-ndis-alldifferent-fw"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-ndis-alldifferent-fw-distinctmembers"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-ndis-alldisjointclasses-fw"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-ndis-alldisjointproperties-fw"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-npa-dat-fw"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-npa-ind-fw"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-restrict-maxcard-inst-obj-zero"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-rdf-semantics-idioms"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-rdfbased-sem-restrict-maxqcr-inst-obj-zero"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-w3c-new-features: 7 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:UnsupportedFeature"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <Literal>https://www.w3.org/TR/owl2-test/</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <Literal>OWL 2 features that are not handled or not handled correctly: bottom object/data properties, keys, owl:rational and negative assertions.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-new-feature-bottomdataproperty-001"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-new-feature-bottomobjectproperty-001"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-new-feature-disjointdataproperties-001"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-new-feature-keys-002"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-new-feature-negativedatapropertyassertion-001"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-new-feature-negativeobjectpropertyassertion-001"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-new-features"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-new-feature-rational-002"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-w3c-datatypes: 4 test(s); kt:w3c-datatype-datacomplementof-001
+       passes since the datatype value-space fix of the merged fork (PR #103),
+       so it is no longer listed as affected. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+    <Literal>https://www.w3.org/TR/owl2-test/</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+    <Literal>Datatype value-space differences: datatype complements, float discreteness, infinities, signed zero and integer/real equality.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-datatype-float-discrete-001"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-minus-infinity-is-not-in-owl-real"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-plus-and-minus-zero-are-distinct"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-datatypes"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-one-two"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-w3c-disjoint-data-properties: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-disjoint-data-properties"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-disjoint-data-properties"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-disjoint-data-properties"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-disjoint-data-properties"/>
+    <Literal>https://www.w3.org/TR/owl2-test/</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-disjoint-data-properties"/>
+    <Literal>Disjoint data properties are not enforced, so the test is reported consistent instead of inconsistent.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-disjoint-data-properties"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-inconsistent-disjoint-dataproperties"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-w3c-xmlliteral: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-xmlliteral"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:UnsupportedFeature"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-xmlliteral"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-xmlliteral"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-xmlliteral"/>
+    <Literal>https://www.w3.org/TR/owl2-test/</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-xmlliteral"/>
+    <Literal>rdf:XMLLiteral whitespace semantics differ from the expected result.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-w3c-xmlliteral"/>
+    <NamedIndividual abbreviatedIRI="kt:w3c-webont-miscellaneous-203"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-owlxml-has-key-unsupported: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-owlxml-has-key-unsupported"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:UnsupportedFeature"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-owlxml-has-key-unsupported"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-owlxml-has-key-unsupported"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-owlxml-has-key-unsupported"/>
+    <Literal>https://www.w3.org/TR/owl2-syntax/#Keys</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-owlxml-has-key-unsupported"/>
+    <Literal>The OWL/XML parser maps HasKey to the unsupported-node handler, so key axioms are silently ignored.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-owlxml-has-key-unsupported"/>
+    <NamedIndividual abbreviatedIRI="kt:consistency-keys"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-sparql-optional-empty: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
+    <Literal>https://www.w3.org/TR/sparql11-query/#optionals</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
+    <Literal>SELECT with OPTIONAL returns no rows instead of the required left-join rows.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-optional"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-sparql-union-empty: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
+    <Literal>https://www.w3.org/TR/sparql11-query/#alternatives</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
+    <Literal>SELECT with UNION returns no rows although both branches have matches.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-union"/>
+  </ObjectPropertyAssertion>
+
+  <!-- issue-sparql-filter-hang: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:PerformanceIssue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
+    <Literal>https://www.w3.org/TR/sparql11-query/#expressions</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
+    <Literal>A FILTER comparing an individual to a constant does not terminate; the test is capped at 5 seconds.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-filter"/>
+  </ObjectPropertyAssertion>
 
 </Ontology>
