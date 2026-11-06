@@ -1,0 +1,11 @@
+Prefix(:=<http://konclude.test/rules#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<http://konclude.test/rules/inconsistency>
+
+Declaration(Class(:A))
+Declaration(NamedIndividual(:a))
+ClassAssertion(:A :a)
+DLSafeRule(Body(ClassAtom(:A Variable(:x))) Head(ClassAtom(owl:Nothing Variable(:x))))
+)

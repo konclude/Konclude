@@ -57,6 +57,17 @@ TOKEN :
 | < ONTOLOGY: "Ontology" >
 | < IMPORT: "Import" >
 
+/* DL-safe rules (SWRL) */
+| < DL_SAFE_RULE: "DLSafeRule" >
+| < RULE_BODY: "Body" >
+| < RULE_HEAD: "Head" >
+| < CLASS_ATOM: "ClassAtom" >
+| < OBJECT_PROPERTY_ATOM: "ObjectPropertyAtom" >
+| < DATA_PROPERTY_ATOM: "DataPropertyAtom" >
+| < DIFFERENT_INDIVIDUALS_ATOM: "DifferentIndividualsAtom" >
+| < BUILT_IN_ATOM: "BuiltInAtom" >
+| < RULE_VARIABLE: "Variable" >
+
 /* Entities and Literals */
 | < CLASS: "Class" >
 | < DATATYPE: "Datatype" >
@@ -1016,6 +1027,95 @@ CBuildExpressionPtr dataExactCardinality():
 }
 
 
+/* DL-safe rules (SWRL), accepted in addition to the OWL 2 axiom set */
+
+CBuildExpressionPtr dLSafeRuleAxiom():
+{
+}{
+	dLSafeRule() { return nullptr; }
+}
+
+void dLSafeRule():
+{
+	CParseRuleAtom* atom = nullptr;
+	QList<CParseRuleAtom*> bodyAtomList;
+	QList<CParseRuleAtom*> headAtomList;
+	bool allAtomsSupported = true;
+}{
+	<DL_SAFE_RULE> <OPEN_BRACKET>
+		<RULE_BODY> <OPEN_BRACKET>
+			( atom = ruleAtom() { if (atom) { bodyAtomList.append(atom); } else { allAtomsSupported = false; } } )*
+		<CLOSE_BRACKET>
+		<RULE_HEAD> <OPEN_BRACKET>
+			( atom = ruleAtom() { if (atom) { headAtomList.append(atom); } else { allAtomsSupported = false; } } )*
+		<CLOSE_BRACKET>
+	<CLOSE_BRACKET> {
+		if (allAtomsSupported) {
+			CRuleExpressionCreator ruleExpressionCreator(getBuilder());
+			cint64 axiomNumber = 0;
+			QList<CBuildExpression*> ruleAxioms = ruleExpressionCreator.createRuleAxioms(bodyAtomList, headAtomList, axiomNumber);
+			foreach (CBuildExpression* ruleAxiom, ruleAxioms) {
+				getBuilder()->tellOntologyAxiom(ruleAxiom);
+			}
+		}
+	}
+}
+
+QString ruleVariable():
+{
+	QString iriString;
+}{
+	<RULE_VARIABLE> <OPEN_BRACKET> iriString = iri() <CLOSE_BRACKET> {
+		return getBuilder()->resolveAbbreviationName(iriString);
+	}
+}
+
+CParseRuleAtomPtr ruleAtom():
+{
+	CBuildExpressionPtr expression;
+	QString variableName1;
+	QString variableName2;
+}{
+	(
+	  <CLASS_ATOM> <OPEN_BRACKET> expression = classExpression() variableName1 = ruleVariable() <CLOSE_BRACKET> {
+			CParseRuleAtom* atom = new CParseRuleAtom(CParseRuleAtom::CLASSATOM);
+			atom->mVariableName1 = variableName1;
+			atom->mAtomExpression = expression;
+			return atom;
+		}
+	| <OBJECT_PROPERTY_ATOM> <OPEN_BRACKET> expression = objectPropertyExpression() variableName1 = ruleVariable() variableName2 = ruleVariable() <CLOSE_BRACKET> {
+			CParseRuleAtom* atom = new CParseRuleAtom(CParseRuleAtom::PROPERTYATOM);
+			atom->mVariableName1 = variableName1;
+			atom->mVariableName2 = variableName2;
+			atom->mAtomExpression = expression;
+			return atom;
+		}
+	| <DIFFERENT_INDIVIDUALS_ATOM> <OPEN_BRACKET> variableName1 = ruleVariable() variableName2 = ruleVariable() <CLOSE_BRACKET> {
+			CParseRuleAtom* atom = new CParseRuleAtom(CParseRuleAtom::DIFFERENTINDIVIDUALSATOM);
+			atom->mVariableName1 = variableName1;
+			atom->mVariableName2 = variableName2;
+			return atom;
+		}
+	| <DATA_PROPERTY_ATOM> <OPEN_BRACKET> expression = dataPropertyExpression() variableName1 = ruleVariable() variableName2 = ruleVariable() <CLOSE_BRACKET> {
+			return nullptr;
+		}
+	| <BUILT_IN_ATOM> <OPEN_BRACKET> expression = classExpression() ( ruleTerm() )* <CLOSE_BRACKET> {
+			return nullptr;
+		}
+	)
+}
+
+void ruleTerm():
+{
+	CBuildExpressionPtr x;
+	QString variableName;
+}{
+	(
+	  variableName = ruleVariable()
+	| x = literal(false)
+	)
+}
+
 /* 9 Axioms */
 CBuildExpressionPtr axiom():
 {
@@ -1023,6 +1123,7 @@ CBuildExpressionPtr axiom():
 }{
 	(
 	x = declaration()
+	| x = dLSafeRuleAxiom()
 	| x = classAxiom()
 	| x = objectPropertyAxiom()
 	| x = dataPropertyAxiom()

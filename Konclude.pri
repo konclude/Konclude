@@ -437,6 +437,7 @@ HEADERS += \
    ./Source/Parser/CParsingHandlingContext.h \
    ./Source/Parser/CParsingExpressionSplitter.h \
    ./Source/Parser/CParseRuleAtom.h \
+   ./Source/Parser/CRuleExpressionCreator.h \
    ./Source/Parser/COWLlinkQueryParser.h \
    ./Source/Parser/COWLlinkQueryExtensionParser.h \
    ./Source/Parser/COWLlinkQtXMLSimpleQueryParser.h \
@@ -3109,6 +3110,7 @@ SOURCES += \
    ./Source/Parser/CParsingHandlingContext.cpp \
    ./Source/Parser/CParsingExpressionSplitter.cpp \
    ./Source/Parser/CParseRuleAtom.cpp \
+   ./Source/Parser/CRuleExpressionCreator.cpp \
    ./Source/Parser/COWLlinkQueryParser.cpp \
    ./Source/Parser/COWLlinkQueryExtensionParser.cpp \
    ./Source/Parser/COWLlinkQtXMLSimpleQueryParser.cpp \

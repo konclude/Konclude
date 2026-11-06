@@ -136,6 +136,16 @@ CBuildExpressionPtr dataMaxCardinality();
 
 CBuildExpressionPtr dataExactCardinality();
 
+CBuildExpressionPtr dLSafeRuleAxiom();
+
+void dLSafeRule();
+
+QString ruleVariable();
+
+CParseRuleAtomPtr ruleAtom();
+
+void ruleTerm();
+
 CBuildExpressionPtr axiom();
 
 void axiomAnnotations();
@@ -255,7 +265,7 @@ CBuildExpressionPtr annotationPropertyRange();
   private: bool jj_lookingAhead;
   private: bool jj_semLA;
   private: int jj_gen;
-  private: int jj_la1[42];
+  private: int jj_la1[47];
   private: ErrorHandler *errorHandler;
   private: bool errorHandlerCreated;
   protected: bool hasError;

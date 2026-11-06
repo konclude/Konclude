@@ -32,6 +32,8 @@
 
 // Other includes
 #include "Parser/COntologyBuilder.h"
+#include "Parser/CRuleExpressionCreator.h"
+#include "Parser/CParseRuleAtom.h"
 
 
 // Logger includes
