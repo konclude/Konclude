@@ -1284,7 +1284,7 @@ namespace Konclude {
 							lastVarExpression = subDataPropVarExp;
 							varExpSet.insert(subDataPropVarExp);
 						}
-						CObjectPropertyVariableExpression* superDataPropVarExp = dynamic_cast<CObjectPropertyVariableExpression*>(subDataPropOfAssExp->getSuperDataPropertyTermExpression());
+						CDataPropertyVariableExpression* superDataPropVarExp = dynamic_cast<CDataPropertyVariableExpression*>(subDataPropOfAssExp->getSuperDataPropertyTermExpression());
 						if (superDataPropVarExp) {
 							hasVariable = true;
 							lastVarExpression = superDataPropVarExp;
@@ -3716,11 +3716,13 @@ namespace Konclude {
 
 			bool COptimizedComplexExpressionAnsweringHandler::checkEntailmentRoleSubObjectPropertyAxiom(CRole* subRole, CRole* superRole, CComplexQueryExpressionProcessingData* procData, CAnswererContext* answererContext) {
 
-				if (subRole->hasPropertyName() && superRole->hasPropertyName()) {
+				// A property that the query cannot resolve to a role has no hierarchy node;
+				// such an axiom is not entailed instead of dereferencing the missing role (issue #26).
+				if (subRole && superRole && subRole->hasPropertyName() && superRole->hasPropertyName()) {
 					CRolePropertiesHierarchyNode* subConHierNode = mOntoAnsweringItem->getOntology()->getClassification()->getObjectPropertyRoleClassification()->getRolePropertiesHierarchy()->getHierarchyNode(subRole, false);
 					CRolePropertiesHierarchyNode* superConHierNode = mOntoAnsweringItem->getOntology()->getClassification()->getObjectPropertyRoleClassification()->getRolePropertiesHierarchy()->getHierarchyNode(superRole, false);
 
-					if (!subConHierNode->hasPredecessorNode(superConHierNode)) {
+					if (subConHierNode && superConHierNode && !subConHierNode->hasPredecessorNode(superConHierNode)) {
 						procData->setUnsatisfiable(true);
 					}
 				}
@@ -3732,11 +3734,15 @@ namespace Konclude {
 
 			bool COptimizedComplexExpressionAnsweringHandler::checkEntailmentRoleSubDataPropertyAxiom(CRole* subRole, CRole* superRole, CComplexQueryExpressionProcessingData* procData, CAnswererContext* answererContext) {
 
-				if (subRole->hasPropertyName() && superRole->hasPropertyName()) {
-					CRolePropertiesHierarchyNode* subConHierNode = mOntoAnsweringItem->getOntology()->getClassification()->getDataPropertyRoleClassification()->getRolePropertiesHierarchy()->getHierarchyNode(subRole, false);
-					CRolePropertiesHierarchyNode* superConHierNode = mOntoAnsweringItem->getOntology()->getClassification()->getDataPropertyRoleClassification()->getRolePropertiesHierarchy()->getHierarchyNode(superRole, false);
+				// A property that the query cannot resolve to a role, e.g., a data property
+				// variable, has no hierarchy node; such an axiom is not entailed instead of
+				// dereferencing the missing role (issue #26).
+				CPropertyRoleClassification* roleClassification = mOntoAnsweringItem->getOntology()->getClassification()->getDataPropertyRoleClassification();
+				if (subRole && superRole && roleClassification && subRole->hasPropertyName() && superRole->hasPropertyName()) {
+					CRolePropertiesHierarchyNode* subConHierNode = roleClassification->getRolePropertiesHierarchy()->getHierarchyNode(subRole, false);
+					CRolePropertiesHierarchyNode* superConHierNode = roleClassification->getRolePropertiesHierarchy()->getHierarchyNode(superRole, false);
 
-					if (!subConHierNode->hasPredecessorNode(superConHierNode)) {
+					if (subConHierNode && superConHierNode && !subConHierNode->hasPredecessorNode(superConHierNode)) {
 						procData->setUnsatisfiable(true);
 					}
 				}
@@ -7777,11 +7783,50 @@ namespace Konclude {
 
 
 
+			QSet<CRole*> COptimizedComplexExpressionAnsweringHandler::getDataRoleWithSubRolesSet(CRole* dataRole) {
+				QSet<CRole*> dataRoleSet;
+				if (!dataRole) {
+					return dataRoleSet;
+				}
+				dataRoleSet.insert(dataRole);
+				CPropertyRoleClassification* roleClassification = mOntoAnsweringItem->getOntology()->getClassification()->getDataPropertyRoleClassification();
+				if (roleClassification) {
+					CRolePropertiesHierarchy* roleHierarchy = roleClassification->getRolePropertiesHierarchy();
+					if (roleHierarchy) {
+						QSet<CRolePropertiesHierarchyNode*> processedNodeSet;
+						QList<CRolePropertiesHierarchyNode*> processingNodeList;
+						CRolePropertiesHierarchyNode* hierNode = roleHierarchy->getHierarchyNode(dataRole, false);
+						if (hierNode) {
+							processingNodeList.append(hierNode);
+							processedNodeSet.insert(hierNode);
+						}
+						while (!processingNodeList.isEmpty()) {
+							CRolePropertiesHierarchyNode* processingNode = processingNodeList.takeFirst();
+							for (CRole* equivalentRole : *processingNode->getEquivalentElementList()) {
+								dataRoleSet.insert(equivalentRole);
+							}
+							for (CRolePropertiesHierarchyNode* childNode : *processingNode->getChildNodeSet()) {
+								if (!processedNodeSet.contains(childNode)) {
+									processingNodeList.append(childNode);
+									processedNodeSet.insert(childNode);
+								}
+							}
+						}
+					}
+				}
+				return dataRoleSet;
+			}
+
+
+
 			QSet<CDataLiteral*>* COptimizedComplexExpressionAnsweringHandler::getInstantiatedDataLiterals(const CIndividualReference& indiRef, CRole* dataRole, QSet<CDataLiteral*>* dataLiteralSet, CAnswererContext* answererContext) {
 
 				if (!dataLiteralSet) {
 					dataLiteralSet = new QSet<CDataLiteral*>();
 				}
+				// A value asserted for a sub-property is also a value of the queried
+				// super-property, so the assertions of all sub-properties are collected (issue #26).
+				QSet<CRole*> dataRoleSet = getDataRoleWithSubRolesSet(dataRole);
 				QHash<QPair<QString, CDatatype*>, CDataLiteral*>* dataValueDatatypeSingleLiteralHash = nullptr;
 				COntologyTriplesAssertionsAccessor* triplesAssertionAccessor = mOntoAnsweringItem->getOntology()->getOntologyTriplesData()->getTripleAssertionAccessor();
 				if (triplesAssertionAccessor) {
@@ -7815,14 +7860,7 @@ namespace Konclude {
 					bool nondeterministicNodeFlag = true;
 					CIndividualProcessNode* indiProcNode = getNominalIndividualProcessNode(indiRef, indiProcVector, &nondeterministicNodeFlag, answererContext);
 					if (indiProcNode) {
-						CRoleSuccessorLinkIterator succRoleIt = indiProcNode->getRoleSuccessorLinkIterator(dataRole);
-						while (succRoleIt.hasNext()) {
-							bool nonDeterministicEdgeFlag = true;
-							CIndividualLinkEdge* linkEdge = succRoleIt.next(true);
-							CDependencyTrackPoint* linkEdgeDepPoint = linkEdge->getDependencyTrackPoint();
-							if (linkEdgeDepPoint) {
-								nonDeterministicEdgeFlag = linkEdgeDepPoint->getBranchingTag() > 0;
-							}
+						function<void(CIndividualLinkEdge*, bool)> collectDataLiteralsFunc = [&](CIndividualLinkEdge* linkEdge, bool nonDeterministicEdgeFlag) {
 							cint64 succIndiId = linkEdge->getOppositeIndividualID(indiProcNode);
 							CIndividualProcessNode* succNode = indiProcVector->getData(succIndiId);
 
@@ -7850,6 +7888,18 @@ namespace Konclude {
 										}
 									}
 								}
+							}
+						};
+						for (CRole* queriedDataRole : dataRoleSet) {
+							CRoleSuccessorLinkIterator succRoleIt = indiProcNode->getRoleSuccessorLinkIterator(queriedDataRole);
+							while (succRoleIt.hasNext()) {
+								bool nonDeterministicEdgeFlag = true;
+								CIndividualLinkEdge* linkEdge = succRoleIt.next(true);
+								CDependencyTrackPoint* linkEdgeDepPoint = linkEdge->getDependencyTrackPoint();
+								if (linkEdgeDepPoint) {
+									nonDeterministicEdgeFlag = linkEdgeDepPoint->getBranchingTag() > 0;
+								}
+								collectDataLiteralsFunc(linkEdge, nonDeterministicEdgeFlag);
 							}
 						}
 					}
@@ -7886,7 +7936,7 @@ namespace Konclude {
 							return false;
 						}
 					} visitor([&](CDataLiteral* dataLiteral, CRole* dataLiteralDataRole)->bool {
-						if (dataRole == dataLiteralDataRole) {
+						if (dataRoleSet.contains(dataLiteralDataRole)) {
 
 							if (dataValueDatatypeSingleLiteralHash) {
 								CDataLiteral*& hashedValue = (*dataValueDatatypeSingleLiteralHash)[QPair<QString, CDatatype*>(dataLiteral->getLexicalDataLiteralValueString(), dataLiteral->getDatatype())];
@@ -7927,7 +7977,7 @@ namespace Konclude {
 					CIndividual* indi = indiRef.getIndividual();
 					if (indi) {
 						for (CDataAssertionLinker* dataAssertionLinkerIt = indi->getAssertionDataLinker(); dataAssertionLinkerIt; dataAssertionLinkerIt = dataAssertionLinkerIt->getNext()) {
-							if (dataRole == dataAssertionLinkerIt->getRole()) {
+							if (dataRoleSet.contains(dataAssertionLinkerIt->getRole())) {
 
 								CDataLiteral* dataLiteral = dataAssertionLinkerIt->getDataLiteral();
 

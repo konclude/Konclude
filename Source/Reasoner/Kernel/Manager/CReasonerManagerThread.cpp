@@ -20,6 +20,9 @@
 
 #include "CReasonerManagerThread.h"
 
+#include "Parser/Expressions/CDataPropertyAssertionExpression.h"
+#include "Parser/Expressions/CSubDataPropertyOfExpression.h"
+
 
 namespace Konclude {
 
@@ -28,6 +31,22 @@ namespace Konclude {
 		namespace Kernel {
 
 			namespace Manager {
+
+
+				// Values of a data property are also values of its super-properties, which are known
+				// only after the data property hierarchy has been classified, so a query that matches
+				// data property assertions needs that classification (issue #26).
+				static bool hasDataPropertyAxiom(CComplexVariablesAnsweringQuery* query) {
+					if (!query) {
+						return false;
+					}
+					for (CAxiomExpression* axiomExp : *query->getAxiomExpressions()) {
+						if (dynamic_cast<CDataPropertyAssertionExpression*>(axiomExp) || dynamic_cast<CSubDataPropertyOfExpression*>(axiomExp)) {
+							return true;
+						}
+					}
+					return false;
+				}
 
 
 				CReasonerManagerThread::CReasonerManagerThread(CWatchDog *threadWatchDog) : CIntervalThread("Reasoner-Manager",threadWatchDog) {
@@ -512,6 +531,9 @@ namespace Konclude {
 						if (compVarAnsweringQuery) {
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
+							if (hasDataPropertyAxiom(compVarAnsweringQuery)) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY));
+							}
 						}
 						CComplexAxiomsDataPropertyVariablesAnsweringQuery* compDataPropVarAnsweringQuery = dynamic_cast<CComplexAxiomsDataPropertyVariablesAnsweringQuery*>(complexAnsweringQuery);
 						if (compDataPropVarAnsweringQuery) {
