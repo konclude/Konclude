@@ -3,6 +3,7 @@
 #include "JavaCC.h"
 #include "CharStream.h"
 #include "Token.h"
+#include "ErrorHandler.h"
 #include "TokenManager.h"
 #include "OWL2FunctionalStyleParserConstants.h"
 #include "CTokenManager.h"
@@ -82,13 +83,13 @@ int  jjStartNfa_0(int pos, unsigned long long active0, unsigned long long active
 
  int  jjMoveStringLiteralDfa26_0(unsigned long long old0, unsigned long long active0, unsigned long long old1, unsigned long long active1);
 
- int  jjMoveStringLiteralDfa27_0(unsigned long long old0, unsigned long long active0, unsigned long long old1, unsigned long long active1);
+ int  jjMoveStringLiteralDfa27_0(unsigned long long old1, unsigned long long active1);
 
- int  jjMoveStringLiteralDfa28_0(unsigned long long old0, unsigned long long active0, unsigned long long old1, unsigned long long active1);
+ int  jjMoveStringLiteralDfa28_0(unsigned long long old1, unsigned long long active1);
 
- int  jjMoveStringLiteralDfa29_0(unsigned long long old0, unsigned long long active0, unsigned long long old1, unsigned long long active1);
+ int  jjMoveStringLiteralDfa29_0(unsigned long long old1, unsigned long long active1);
 
- int  jjMoveStringLiteralDfa30_0(unsigned long long old0, unsigned long long active0, unsigned long long old1, unsigned long long active1);
+ int  jjMoveStringLiteralDfa30_0(unsigned long long old1, unsigned long long active1);
 
 int jjStartNfaWithStates_0(int pos, int kind, int state);
 
@@ -178,6 +179,13 @@ void  TokenLexicalActions(Token *matchedToken);
     int jjimageLen;
     int lengthOfMatch;
     JAVACC_CHAR_TYPE curChar;
+    TokenManagerErrorHandler *errorHandler;
+    bool errorHandlerCreated;
+    public: void setErrorHandler(TokenManagerErrorHandler *eh) {
+      if (errorHandlerCreated && errorHandler != NULL) delete errorHandler;
+      errorHandler = eh;
+      errorHandlerCreated = false;
+    }
 };
 }
 }

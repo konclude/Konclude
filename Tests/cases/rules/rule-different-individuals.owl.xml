@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     xml:base="http://konclude.test/rules/different-individuals"
+     ontologyIRI="http://konclude.test/rules/different-individuals">
+    <Prefix name="" IRI="http://konclude.test/rules#"/>
+    <Declaration><Class IRI="http://konclude.test/rules#A"/></Declaration>
+    <Declaration><Class IRI="http://konclude.test/rules#B"/></Declaration>
+    <Declaration><NamedIndividual IRI="http://konclude.test/rules#a"/></Declaration>
+    <Declaration><NamedIndividual IRI="http://konclude.test/rules#b"/></Declaration>
+    <ClassAssertion><Class IRI="http://konclude.test/rules#A"/><NamedIndividual IRI="http://konclude.test/rules#a"/></ClassAssertion>
+    <ClassAssertion><Class IRI="http://konclude.test/rules#A"/><NamedIndividual IRI="http://konclude.test/rules#b"/></ClassAssertion>
+    <DifferentIndividuals><NamedIndividual IRI="http://konclude.test/rules#a"/><NamedIndividual IRI="http://konclude.test/rules#b"/></DifferentIndividuals>
+    <DLSafeRule>
+        <Body>
+            <ClassAtom><Class IRI="http://konclude.test/rules#A"/><Variable IRI="http://konclude.test/rules#x"/></ClassAtom>
+            <ClassAtom><Class IRI="http://konclude.test/rules#A"/><Variable IRI="http://konclude.test/rules#y"/></ClassAtom>
+            <DifferentIndividualsAtom><Variable IRI="http://konclude.test/rules#x"/><Variable IRI="http://konclude.test/rules#y"/></DifferentIndividualsAtom>
+        </Body>
+        <Head>
+            <ClassAtom><Class IRI="http://konclude.test/rules#B"/><Variable IRI="http://konclude.test/rules#x"/></ClassAtom>
+        </Head>
+    </DLSafeRule>
+</Ontology>

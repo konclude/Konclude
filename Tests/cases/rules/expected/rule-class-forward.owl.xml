@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected realisation result of rule-class-forward (declarations and order are ignored). -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/rules/expected/rule-class-forward">
+    <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/rules#a"/></ClassAssertion>
+    <ClassAssertion><Class IRI="http://konclude.test/rules#A"/><NamedIndividual IRI="http://konclude.test/rules#a"/></ClassAssertion>
+    <ClassAssertion><Class IRI="http://konclude.test/rules#B"/><NamedIndividual IRI="http://konclude.test/rules#a"/></ClassAssertion>
+</Ontology>

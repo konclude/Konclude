@@ -87,4 +87,15 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:abox-500-asymmetric-violation"/><Literal>abox-500-asymmetric-violation.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:abox-500-asymmetric-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
+  <!-- 11) cross-round-universal-propagation: a universal restriction whose role successor lives in
+       another saturation round must still reach the real successor. The small-saturation-batch system
+       config forces the cross-round split on this tiny ontology; a : D1 is derived only if the
+       completion materialises the neighbour, so not-D1(a) makes it inconsistent. Without the fix this
+       is wrongly reported consistent. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cross-round-universal-propagation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cross-round-universal-propagation"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cross-round-universal-propagation"/><Literal>cross-round-universal-propagation.owl.xml</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cross-round-universal-propagation"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cross-round-universal-propagation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
 </Ontology>

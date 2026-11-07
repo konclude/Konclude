@@ -103,6 +103,7 @@ namespace Konclude {
 					//! Returns the captured console output of the finished process,
 					//! either from the log file or from the in-memory channel buffers.
 					static QString readLogOutput(const QString& outputLogFilePath, QProcess& process);
+					static QString serverLogTail(const QString& outputLogFilePath, QProcess& process);
 
 				// protected variables
 				protected:
