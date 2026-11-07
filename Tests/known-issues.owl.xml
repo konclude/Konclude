@@ -646,7 +646,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
-    <Literal>With a named subject the answering of a data property value does not work: a SELECT for the value does not terminate and an ASK about a value crashes while the instance entailment result is processed. The ASK test is capped at 5 seconds.</Literal>
+    <Literal>With a named subject the answering of a data property value does not work: the SELECT for the value answers no rows (it deadlocked until the missing sub-query classification was added) and an ASK about a value crashes while the instance entailment result is processed. The ASK test is capped at 5 seconds.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>

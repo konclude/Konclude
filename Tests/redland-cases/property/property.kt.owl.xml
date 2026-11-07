@@ -117,6 +117,13 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/><Literal>expected/predicate-variable-class.xml</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/></ObjectPropertyAssertion>
 
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-ground-subject"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-ground-subject"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-ground-subject"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-ground-subject"/><Literal>queries/select-data-value-ground-subject.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-ground-subject"/><Literal>expected/select-data-value-ground-subject.xml</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-ground-subject"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/></ObjectPropertyAssertion>
+
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><Literal>sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><Literal>property.ttl</Literal></DataPropertyAssertion>

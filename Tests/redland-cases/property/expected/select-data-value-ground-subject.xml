@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for select-data-value-ground-subject.sparql (known failure):
+     :a asserts :dp1 "v1", so the value of the known subject is "v1". Rows are
+     compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="val"/>
+  </head>
+  <results>
+    <result>
+      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">v1</literal></binding>
+    </result>
+  </results>
+</sparql>

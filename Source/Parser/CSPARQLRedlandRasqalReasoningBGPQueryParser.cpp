@@ -1099,7 +1099,12 @@ namespace Konclude {
 						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternClassAskQuery(axiomList, subQueryName);
 						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
 					}
-				} else if (hasIndiVars && allIndiVars || varExpSet.isEmpty()) {
+				} else if (allIndiVars || varExpSet.isEmpty()) {
+					// A pattern whose only variables are data literal variables (e.g. a known
+					// subject with a variable value, <a> :dp ?v) binds literals of a known
+					// individual and is answered by the individual variable query as well.
+					// Without this case no sub-query was created at all and the composition
+					// waited for a result that could never arrive (issue #26).
 
 					CEXPRESSIONLIST<COrderingTermExpression*> orderingList;
 					QList<CFilteringTermExpression*> filteringList;
