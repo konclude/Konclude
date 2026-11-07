@@ -5,13 +5,13 @@
   values to super-properties, inverse properties and the negative control that
   a data-property hierarchy query does not return object properties.
 
-  The last group covers shapes that are known to be broken today (crashes,
-  hangs or missing answers, see Tests/known-issues.owl.xml): the string-typed
-  literal does not match the plain literal, declarations are not answered as
-  schema triples, a variable predicate crashes the answering, and a ground
-  data-property value query does not terminate. Those tests are marked with
-  kt:knownFailure and become KNOWN; they flip to FIXED as soon as a fix makes
-  them pass.
+  The last group covers shapes that are still broken (missing answers, see
+  Tests/known-issues.owl.xml): declarations are not answered as schema triples,
+  a query with a variable predicate answers nothing (it used to crash), and a
+  query with a known subject and a data property
+  value does not terminate. Those tests are marked with kt:knownFailure and
+  become KNOWN; they flip to FIXED as soon as a fix makes them pass. The
+  string-typed literal that used to be here is a regular test since its fix.
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/property">
@@ -93,7 +93,8 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><Literal>property.ttl</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><Literal>queries/data-typed-literal.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><Literal>expected/data-typed-literal.xml</Literal></DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/></ObjectPropertyAssertion>
+  <!-- The typed string literal is answered correctly since the datatype is passed on with its
+       full IRI (fix of issue #26); the corresponding issue is closed in known-issues.owl.xml. -->
 
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/><Literal>sparql</Literal></DataPropertyAssertion>

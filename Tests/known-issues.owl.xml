@@ -521,7 +521,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -533,7 +533,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
-    <Literal>A data property value asserted with a plain literal is not found by a query that uses the same string as an explicitly typed xsd:string literal.</Literal>
+    <Literal>Fixed by passing the datatype of an explicitly typed xsd:string literal on as its full IRI instead of the QName xsd:string, which the literal normaliser could not resolve. The test is a regular test again.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
@@ -604,7 +604,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
-    <Literal>A triple pattern with a variable predicate and a constant object segfaults in the Redland/Rasqal sub-query resolving (CRedlandRasqalSubQueryTripleResolvingData::setSubjectVariable).</Literal>
+    <Literal>A triple pattern with a variable predicate and a constant object segfaulted in the Redland/Rasqal sub-query resolving because the sub-query had no answer result when it was initialised. The crash is guarded now (the sub-query contributes no statements), but such queries still answer nothing.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>

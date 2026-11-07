@@ -1659,6 +1659,11 @@ namespace Konclude {
 				bool requiresBindingReturning = false;
 				QVector<CRedlandRasqalSubQueryTripleResolvingData*>* triplesResolvingDataVec = subQueryProcData->getTriplesResolvingDataVector();
 				librdf_world* world = subQueryProcData->getRedlandWorld();
+				if (triplePos >= triplesResolvingDataVec->size()) {
+					// no resolving data was created for this triple (the sub-query had no answer
+					// result that could be resolved), nothing can be bound (issue #26)
+					return false;
+				}
 				CRedlandRasqalSubQueryTripleResolvingData* tripleResolveData = (*triplesResolvingDataVec)[triplePos];
 
 				if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->subject)) {
@@ -2055,6 +2060,12 @@ namespace Konclude {
 
 				if (nextPos == 0) {
 					initialize_update_resolving(subQueryProcData);
+				}
+				// A sub-query that has no resolving data had no answer result when it was
+				// initialised (its answer is still composed by Rasqal). It contributes no
+				// matching statements instead of dereferencing a missing entry (issue #26).
+				if (!subQueryProcData->isBooleanSubQuery() && subQueryProcData->getTriplesResolvingDataVector()->isEmpty()) {
+					return librdf_new_empty_stream(world);
 				}
 				if (subQueryProcData->isBooleanSubQuery()) {
 					CRedlandRasqalSubQueryTripleResolvingData* tripleResolvData = get_triple_resolving_data(subQueryProcData, statement, 0);

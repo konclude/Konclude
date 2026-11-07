@@ -124,7 +124,9 @@ namespace Konclude {
 			} else if (RASQAL_LITERAL_STRING == rasqal_literal_get_type(literal)) {
 				string = QString("\"%1\"").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal)));
 			} else if (RASQAL_LITERAL_XSD_STRING == rasqal_literal_get_type(literal)) {
-				string = QString("\"%1\"^^xsd:string").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal)));
+				// the datatype has to be the full IRI, a prefixed name is not resolved by the
+				// query prefixes here and leaves the literal without a parseable datatype
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_STRING_DATATYPE);
 			} else if (RASQAL_LITERAL_BOOLEAN == rasqal_literal_get_type(literal)) {
 				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_BOOLEAN_DATATYPE);
 			} else if (RASQAL_LITERAL_INTEGER == rasqal_literal_get_type(literal)) {
