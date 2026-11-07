@@ -1,0 +1,4 @@
+PREFIX : <http://konclude.test/property#>
+# :dpEq2 is equivalent to :dpEq1, so the value asserted with :dpEq1 is a value of :dpEq2.
+SELECT ?s ?v
+WHERE { ?s :dpEq2 ?v . }

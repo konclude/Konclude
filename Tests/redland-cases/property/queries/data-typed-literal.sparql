@@ -1,0 +1,6 @@
+PREFIX : <http://konclude.test/property#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+# A plain literal is an xsd:string in RDF 1.1, so the typed constant matches the
+# assertions of :dp1 (known failure, see Tests/known-issues.owl.xml).
+SELECT ?s
+WHERE { ?s :dp1 "v1"^^xsd:string . }

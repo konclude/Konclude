@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for data-value-super.sparql: the values of :dp1, :dpSub and
+     :dpInt (the latter as an integer literal) are values of :dp2. Rows are
+     compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="s"/>
+    <variable name="v"/>
+  </head>
+  <results>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#a</uri></binding>
+      <binding name="v"><literal datatype="http://www.w3.org/2001/XMLSchema#string">v1</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#a</uri></binding>
+      <binding name="v"><literal datatype="http://www.w3.org/2001/XMLSchema#string">v1sub</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#a</uri></binding>
+      <binding name="v"><literal datatype="http://www.w3.org/2001/XMLSchema#integer">42</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#b</uri></binding>
+      <binding name="v"><literal datatype="http://www.w3.org/2001/XMLSchema#string">v1</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#b</uri></binding>
+      <binding name="v"><literal datatype="http://www.w3.org/2001/XMLSchema#integer">42</literal></binding>
+    </result>
+  </results>
+</sparql>

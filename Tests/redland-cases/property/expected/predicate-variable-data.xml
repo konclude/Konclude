@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for predicate-variable-data.sparql (known failure): the
+     predicate is bound to :dp1 for both individuals. Rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="s"/>
+    <variable name="p"/>
+  </head>
+  <results>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#a</uri></binding>
+      <binding name="p"><uri>http://konclude.test/property#dp1</uri></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#b</uri></binding>
+      <binding name="p"><uri>http://konclude.test/property#dp1</uri></binding>
+    </result>
+  </results>
+</sparql>

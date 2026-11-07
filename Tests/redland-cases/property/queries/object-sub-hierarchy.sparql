@@ -1,0 +1,5 @@
+PREFIX : <http://konclude.test/property#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# The sub-properties of an object property.
+SELECT ?sub
+WHERE { ?sub rdfs:subPropertyOf :op2 . }

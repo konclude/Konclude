@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for data-typed-literal.sparql (known failure): the plain
+     literal "v1" is an xsd:string, so the typed constant matches. Rows are
+     compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="s"/>
+  </head>
+  <results>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#a</uri></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#b</uri></binding>
+    </result>
+  </results>
+</sparql>

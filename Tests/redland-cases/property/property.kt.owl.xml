@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Property queries of the SPARQL interface: the object-property and class
+  hierarchy queries, the propagation of object-property and data-property
+  values to super-properties, inverse properties and the negative control that
+  a data-property hierarchy query does not return object properties.
+
+  The last group covers shapes that are known to be broken today (crashes,
+  hangs or missing answers, see Tests/known-issues.owl.xml): the string-typed
+  literal does not match the plain literal, declarations are not answered as
+  schema triples, a variable predicate crashes the answering, and a ground
+  data-property value query does not terminate. Those tests are marked with
+  kt:knownFailure and become KNOWN; they flip to FIXED as soon as a fix makes
+  them pass.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/property">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <!-- Suite: the folder containing this control ontology. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-property"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-property"/><Literal>Property</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-property"/><Literal>property</Literal></DataPropertyAssertion>
+
+  <!-- Object property hierarchy, the control of the data-property crash of issue #26. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-object-super-hierarchy"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-object-super-hierarchy"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-object-super-hierarchy"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-object-super-hierarchy"/><Literal>queries/object-super-hierarchy.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-object-super-hierarchy"/><Literal>expected/object-super-hierarchy.xml</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-object-sub-hierarchy"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-object-sub-hierarchy"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-object-sub-hierarchy"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-object-sub-hierarchy"/><Literal>queries/object-sub-hierarchy.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-object-sub-hierarchy"/><Literal>expected/object-sub-hierarchy.xml</Literal></DataPropertyAssertion>
+
+  <!-- Object property assertions, including the inverse direction. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-object-value-propagation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-object-value-propagation"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-object-value-propagation"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-object-value-propagation"/><Literal>queries/object-value-propagation.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-object-value-propagation"/><Literal>expected/object-value-propagation.xml</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-object-inverse"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-object-inverse"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-object-inverse"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-object-inverse"/><Literal>queries/object-inverse.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-object-inverse"/><Literal>expected/object-inverse.xml</Literal></DataPropertyAssertion>
+
+  <!-- Class hierarchy, the class analogue of the property hierarchy queries. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-class-super-hierarchy"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-class-super-hierarchy"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-class-super-hierarchy"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-class-super-hierarchy"/><Literal>queries/class-super-hierarchy.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-class-super-hierarchy"/><Literal>expected/class-super-hierarchy.xml</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-class-sub-hierarchy"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-class-sub-hierarchy"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-class-sub-hierarchy"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-class-sub-hierarchy"/><Literal>queries/class-sub-hierarchy.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-class-sub-hierarchy"/><Literal>expected/class-sub-hierarchy.xml</Literal></DataPropertyAssertion>
+
+  <!-- Data property values under a super-property, with typed and equivalent properties. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-data-value-super"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-data-value-super"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-data-value-super"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-data-value-super"/><Literal>queries/data-value-super.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-data-value-super"/><Literal>expected/data-value-super.xml</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-data-value-datatype"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-data-value-datatype"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-data-value-datatype"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-data-value-datatype"/><Literal>queries/data-value-datatype.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-data-value-datatype"/><Literal>expected/data-value-datatype.xml</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-data-value-equivalent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-data-value-equivalent"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-data-value-equivalent"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-data-value-equivalent"/><Literal>queries/data-value-equivalent.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-data-value-equivalent"/><Literal>expected/data-value-equivalent.xml</Literal></DataPropertyAssertion>
+
+  <!-- Negative control: a data property hierarchy query must return no object property. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-data-hierarchy-only-data"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-data-hierarchy-only-data"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-data-hierarchy-only-data"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-data-hierarchy-only-data"/><Literal>queries/data-hierarchy-only-data.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-data-hierarchy-only-data"/><Literal>expected/data-hierarchy-only-data.xml</Literal></DataPropertyAssertion>
+
+  <!-- Known failures: see Tests/known-issues.owl.xml. -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><Literal>queries/data-typed-literal.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><Literal>expected/data-typed-literal.xml</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/><Literal>queries/ask-class-declaration.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/><Literal>queries/predicate-variable-data.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/><Literal>expected/predicate-variable-data.xml</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/><Literal>queries/predicate-variable-class.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/><Literal>expected/predicate-variable-class.xml</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><Literal>property.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><Literal>queries/ask-data-super-value.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><NamedIndividual abbreviatedIRI="kt:run-property-timeout5"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:RunConfig"/><NamedIndividual abbreviatedIRI="kt:run-property-timeout5"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:runConfigName"/><NamedIndividual abbreviatedIRI="kt:run-property-timeout5"/><Literal>property-timeout5</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:timeoutSeconds"/><NamedIndividual abbreviatedIRI="kt:run-property-timeout5"/><Literal>5</Literal></DataPropertyAssertion>
+
+</Ontology>

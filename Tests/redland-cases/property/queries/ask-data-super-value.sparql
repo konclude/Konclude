@@ -1,0 +1,4 @@
+PREFIX : <http://konclude.test/property#>
+# A known data property value with a named subject (known failure: the answering
+# does not terminate, see Tests/known-issues.owl.xml; the test is capped at 5 s).
+ASK { :a :dp2 "v1" . }

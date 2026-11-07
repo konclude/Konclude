@@ -505,4 +505,154 @@
     <NamedIndividual abbreviatedIRI="kt:sparql-filter"/>
   </ObjectPropertyAssertion>
 
+  <!-- GitHub issue #26: a SPARQL constant that is a string typed literal does not
+       match the plain literal of the assertion, although both are xsd:string in
+       RDF 1.1. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <Literal>A data property value asserted with a plain literal is not found by a query that uses the same string as an explicitly typed xsd:string literal.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/>
+  </ObjectPropertyAssertion>
+
+  <!-- GitHub issue #26: the declarations of the ontology (rdf:type of classes and
+       properties) are not answered as schema triples. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:UnsupportedFeature"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <Literal>A query for the declared classes or properties of the ontology answers nothing, so an ASK for the declaration of a class is false.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/>
+  </ObjectPropertyAssertion>
+
+  <!-- GitHub issue #26: a variable in the predicate position crashes the answering. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <Literal>A triple pattern with a variable predicate and a constant object segfaults in the Redland/Rasqal sub-query resolving (CRedlandRasqalSubQueryTripleResolvingData::setSubjectVariable).</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/>
+  </ObjectPropertyAssertion>
+
+  <!-- GitHub issue #26: a data property value query with a named subject does not
+       terminate. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <Literal>With a named subject the answering of a data property value does not work: a SELECT for the value does not terminate and an ASK about a value crashes while the instance entailment result is processed. The ASK test is capped at 5 seconds.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/>
+  </ObjectPropertyAssertion>
+
 </Ontology>

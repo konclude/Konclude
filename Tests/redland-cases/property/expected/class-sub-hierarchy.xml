@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for class-sub-hierarchy.sparql: :C2, :C1 and its equivalent
+     :C4, :C3 itself and the built-in bottom class. Rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="sub"/>
+  </head>
+  <results>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/property#C1</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/property#C2</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/property#C3</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/property#C4</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://www.w3.org/2002/07/owl#Nothing</uri></binding>
+    </result>
+  </results>
+</sparql>

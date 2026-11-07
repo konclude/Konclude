@@ -1,0 +1,37 @@
+@prefix : <http://konclude.test/property#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Class hierarchy: :C1 <= :C2 <= :C3, with :C4 equivalent to :C1.
+:C1 a owl:Class ; rdfs:subClassOf :C2 .
+:C2 a owl:Class ; rdfs:subClassOf :C3 .
+:C3 a owl:Class .
+:C4 a owl:Class ; owl:equivalentClass :C1 .
+
+# Object properties: :op1 <= :op2, and :invOp1 is the inverse of :op1.
+:op1 a owl:ObjectProperty ; rdfs:subPropertyOf :op2 .
+:op2 a owl:ObjectProperty .
+:invOp1 a owl:ObjectProperty ; owl:inverseOf :op1 .
+
+# Data properties: :dpSub <= :dp1 <= :dp2, :dpInt under :dp2, :dpEq1 equivalent to :dpEq2.
+:dp1 a owl:DatatypeProperty ; rdfs:subPropertyOf :dp2 .
+:dp2 a owl:DatatypeProperty .
+:dpSub a owl:DatatypeProperty ; rdfs:subPropertyOf :dp1 .
+:dpInt a owl:DatatypeProperty ; rdfs:subPropertyOf :dp2 .
+:dpEq1 a owl:DatatypeProperty ; owl:equivalentProperty :dpEq2 .
+:dpEq2 a owl:DatatypeProperty .
+
+# ABox
+:a a owl:NamedIndividual , :C1 ;
+   :op1 :b ;
+   :dp1 "v1" ;
+   :dpSub "v1sub" ;
+   :dpInt "42"^^xsd:integer ;
+   :dpEq1 "eq1" .
+
+:b a owl:NamedIndividual , :C2 ;
+   :dp1 "v1" ;
+   :dpInt "042"^^xsd:integer .
+
+:c a owl:NamedIndividual , :C3 .
