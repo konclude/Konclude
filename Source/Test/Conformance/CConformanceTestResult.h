@@ -71,6 +71,8 @@ namespace Konclude {
 					qint64 mDurationMs;                     // run time
 					QString mSuiteId;                       // suite of the test
 					QString mSuiteName;                     // suite name used in reports
+					QString mDescription;                   // what the test checks (kt:description)
+					QString mSuiteDescription;              // what the suite covers (kt:description)
 					QString mRunConfigId;                   // run configuration of this execution
 					QString mRunConfigName;                 // run configuration name used in reports
 					QString mSystemConfigPath;              // '-c' file of this execution, may be empty

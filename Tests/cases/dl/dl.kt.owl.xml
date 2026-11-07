@@ -1,158 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Control ontology for the DL corner cases (consistency tests).
-  Each expectation derived from the DL semantics. Picked up by discovery.
-  Note: usesOntology is a relative file name in the same directory.
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/dl">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- Suite: the folder containing this control ontology. Run configurations
-       (kt:usesTestRunConfig) and reasoner configurations (kt:usesTestSystemConfig) may be
-       assigned to the suite and apply to all of its tests. -->
   <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>DL-corner-cases</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>dl</Literal></DataPropertyAssertion>
-
-  <!-- Per test: ClassAssertion(ConsistencyTest) + task + usesOntology + expectedResult -->
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>Control ontology for the DL corner cases (consistency tests). Each expectation derived from the DL semantics. . Note: usesOntology is a relative file name in the same directory. Run configurations (kt:usesTestRunConfig) and reasoner configurations (kt:usesTestSystemConfig) may be assigned to the suite and apply to all of its tests.</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>Per test: ClassAssertion(ConsistencyTest) + task + usesOntology + expectedResult</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>disjoint-violation-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>Test case: functional-two-fillers.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>functional-two-fillers-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>Test case: functional-merge.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>functional-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>Test case: maxcard-violation.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>maxcard-violation-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>Test case: mincard-maxcard-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>mincard-maxcard-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>Test case: mincard3-maxcard2-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>mincard3-maxcard2-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>Test case: mincard-maxcard-equal.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>mincard-maxcard-equal-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>Test case: qualified-min-max-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>qualified-min-max-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>Test case: subrole-min-max-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>subrole-min-max-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>Test case: superrole-min-max-ok.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>superrole-min-max-ok-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>Test case: unqualified-qualified-ok.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>unqualified-qualified-ok-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>Test case: data-min-max-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>data-min-max-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>Test case: irreflexive-selfloop.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>irreflexive-selfloop-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>Test case: asymmetric-violation.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>asymmetric-violation-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>Test case: nominal-oneof.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>nominal-oneof-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:transitive"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>Test case: transitive.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>transitive-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>Test case: datatype-conflict.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>datatype-conflict-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>Test case: datatype-range.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>datatype-range-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>Test case: disjoint-roles.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>disjoint-roles-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>Test case: simple-consistent.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>simple-consistent-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>Test case: complement-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>complement-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>Test case: all-some-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>all-some-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>A data max cardinality of one on xsd:dateTimeStamp is consistent with a single value of the datatype.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>datetimestamp-maxcard-ok-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>Two distinct xsd:dateTimeStamp values violate a data max cardinality of one.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>datetimestamp-maxcard-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
-  <!-- An existential restriction whose successor is an inverse-at-most witness: satisfying it
-       requires merging the named individual with another successor, which the saturation must
-       not decide on its own. -->
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>An existential restriction whose successor is an inverse-at-most witness: satisfying it requires merging the named individual with another successor, which the saturation must not decide on its own.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>inv-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
-  <!-- The same contradiction behind a class definition (the asserted concept does not reveal it). -->
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>The same contradiction behind a class definition (the asserted concept does not reveal it).</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>inv-atmost-type-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
-
-  <!-- Classification of defined classes with all-values restrictions. -->
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/><Literal>class-classification</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/><Literal>defined-classes-ontology.owl.xml</Literal></DataPropertyAssertion>

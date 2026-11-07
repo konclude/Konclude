@@ -209,6 +209,7 @@ namespace Konclude {
 
 				// Suite metadata: kt:suiteName and kt:suiteDirectory.
 				QString suiteName;
+				QString suiteDescription;
 				QString declaredDirectory;
 				QDomNodeList dataAssertions = root.elementsByTagName("DataPropertyAssertion");
 				for (int i = 0; i < dataAssertions.count(); ++i) {
@@ -224,6 +225,9 @@ namespace Konclude {
 						suiteName = value;
 					} else if (propertyName.endsWith("suiteDirectory")) {
 						declaredDirectory = QDir::cleanPath(value);
+					} else if (propertyName.endsWith("description")) {
+						// What the suite covers, as a data literal (not as a comment).
+						suiteDescription = value;
 					}
 				}
 
@@ -237,6 +241,7 @@ namespace Konclude {
 				if (!suiteName.isEmpty()) {
 					suite.mName = suiteName;
 				}
+				suite.mDescription = suiteDescription;
 				if (suite.mName.isEmpty()) {
 					suite.mName = directoryPart;
 				}
@@ -351,6 +356,9 @@ namespace Konclude {
 						// Optional restriction for a realization test: only this
 						// individual is realized ('realization -x').
 						testCase.mTestIndividual = value;
+					} else if (propertyName.endsWith("description")) {
+						// What the test checks, as a data literal (not as a comment).
+						testCase.mDescription = value;
 					} else if (propertyName.endsWith("timeoutSeconds")) {
 						LOG(WARN, getLogDomain(), logTr("kt:timeoutSeconds on test '%1' in '%2' is ignored; declare a kt:RunConfig and assign it with kt:usesTestRunConfig.").arg(individualName).arg(filePath), this);
 					} else if (propertyName.endsWith("flaky")) {
@@ -764,6 +772,8 @@ namespace Konclude {
 				result.mExpectedVerdict = execution.mTestCase.mExpectedVerdict;
 				result.mSuiteId = execution.mSuiteId;
 				result.mSuiteName = execution.mSuiteName;
+				result.mDescription = execution.mTestCase.mDescription;
+				result.mSuiteDescription = mSuites.value(execution.mSuiteId).mDescription;
 				result.mRunConfigId = execution.mRunConfig.mId;
 				result.mRunConfigName = execution.mRunConfig.getDisplayName();
 				result.mSystemConfigPath = execution.mSystemConfigPath;

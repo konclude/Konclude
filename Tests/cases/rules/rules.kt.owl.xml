@@ -1,11 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  DL-safe rule (DLSafeRule) conformance suite: class atoms, object property atoms
-  in body and head, multiple head variables, different-individual atoms, rule
-  chains, rules that do not fire, unsupported built-in atoms and a rule that
-  makes the ontology inconsistent.  Each feature is tested in OWL 2 Functional
-  Syntax and, where meaningful, in OWL/XML.
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/rules">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
@@ -13,6 +6,7 @@
   <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-rules"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-rules"/><Literal>Rules</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-rules"/><Literal>rules</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-rules"/><Literal>DL-safe rule (DLSafeRule) conformance suite: class atoms, object property atoms in body and head, multiple head variables, different-individual atoms, rule chains, rules that do not fire, unsupported built-in atoms and a rule that makes the ontology inconsistent. Each feature is tested in OWL 2 Functional Syntax and, where meaningful, in OWL/XML.</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward"/><Literal>class-realization</Literal></DataPropertyAssertion>

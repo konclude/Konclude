@@ -56,9 +56,11 @@ namespace Konclude {
 				// Declare every suite once and keep its readable name on the suite
 				// individual; each result then points at that individual.
 				QMap<QString, QString> suiteNames;
+				QMap<QString, QString> suiteDescriptions;
 				for (const CConformanceTestResult& result : results) {
 					if (!result.mSuiteId.isEmpty()) {
 						suiteNames.insert(result.mSuiteId, result.mSuiteName);
+						suiteDescriptions.insert(result.mSuiteId, result.mSuiteDescription);
 					}
 				}
 				for (auto suiteIt = suiteNames.constBegin(); suiteIt != suiteNames.constEnd(); ++suiteIt) {
@@ -67,6 +69,10 @@ namespace Konclude {
 					stream << "</ClassAssertion>\n";
 					if (!suiteIt.value().isEmpty()) {
 						writeLiteralAssertion(stream, "kt:suiteName", suiteIt.key(), suiteIt.value());
+					}
+					QString suiteDescription = suiteDescriptions.value(suiteIt.key());
+					if (!suiteDescription.isEmpty()) {
+						writeLiteralAssertion(stream, "kt:description", suiteIt.key(), suiteDescription);
 					}
 				}
 
@@ -94,6 +100,10 @@ namespace Konclude {
 				}
 
 				writeLiteralAssertion(stream, "kt:task", resultIRI, CConformanceTask::typeToString(result.mTask));
+				if (!result.mDescription.isEmpty()) {
+					// What the test checks, copied from its kt:description.
+					writeLiteralAssertion(stream, "kt:description", resultIRI, result.mDescription);
+				}
 				writeLiteralAssertion(stream, "kt:interface", resultIRI, result.mInterface);
 				if (!result.mRunConfigName.isEmpty()) {
 					writeLiteralAssertion(stream, "kt:runConfig", resultIRI, result.mRunConfigName);

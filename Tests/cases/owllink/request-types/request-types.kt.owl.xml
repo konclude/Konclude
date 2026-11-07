@@ -1,12 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  OWLlink request-type coverage.
-
-  One test per OWLlink request type: boolean requests use kt:expectedResult,
-  result-set requests use an expected response document (kt:expectedFile).
-  All requests share the same small ontology so the expected answers are
-  easy to verify by hand.
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/owllink-request-types">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
@@ -15,153 +7,154 @@
   <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-requests"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-requests"/><Literal>OWLlink-request-types</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-requests"/><Literal>owllink/request-types</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-requests"/><Literal>OWLlink request-type coverage. One test per OWLlink request type: boolean requests use kt:expectedResult, result-set requests use an expected response document (kt:expectedFile). All requests share the same small ontology so the expected answers are easy to verify by hand.</Literal></DataPropertyAssertion>
 
-  <!-- kb-satisfiable -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-kb-satisfiable"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-kb-satisfiable"/><Literal>kb-satisfiable</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-kb-satisfiable"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-kb-satisfiable"/><Literal>kb-satisfiable-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-kb-satisfiable"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- class-satisfiable -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-class-satisfiable"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-class-satisfiable"/><Literal>class-satisfiable</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-class-satisfiable"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-class-satisfiable"/><Literal>class-satisfiable-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-class-satisfiable"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- class-subsumed -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-class-subsumed"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-class-subsumed"/><Literal>class-subsumed</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-class-subsumed"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-class-subsumed"/><Literal>class-subsumed-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-class-subsumed"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- instance-of -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-instance-of"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-instance-of"/><Literal>instance-of</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-instance-of"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-instance-of"/><Literal>instance-of-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-instance-of"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- classes-equivalent -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-classes-equivalent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-classes-equivalent"/><Literal>classes-equivalent</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-classes-equivalent"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-classes-equivalent"/><Literal>classes-equivalent-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-classes-equivalent"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- entailed-true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-entailed-true"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-entailed-true"/><Literal>entailed-true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-entailed-true"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-entailed-true"/><Literal>entailed-true-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-entailed-true"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- entailed-false -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-entailed-false"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-entailed-false"/><Literal>entailed-false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-entailed-false"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-entailed-false"/><Literal>entailed-false-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-entailed-false"/><Literal>false</Literal></DataPropertyAssertion>
 
-  <!-- classes-disjoint -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-classes-disjoint"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-classes-disjoint"/><Literal>classes-disjoint</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-classes-disjoint"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-classes-disjoint"/><Literal>classes-disjoint-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:request-classes-disjoint"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- subclasses -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses"/><Literal>subclasses</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses"/><Literal>subclasses-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses"/><Literal>expected/subclasses-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- superclasses -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-superclasses"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-superclasses"/><Literal>superclasses</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-superclasses"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-superclasses"/><Literal>superclasses-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-superclasses"/><Literal>expected/superclasses-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- equivalent-classes -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-equivalent-classes"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-equivalent-classes"/><Literal>equivalent-classes</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-equivalent-classes"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-equivalent-classes"/><Literal>equivalent-classes-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-equivalent-classes"/><Literal>expected/equivalent-classes-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- types -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-types"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-types"/><Literal>types</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-types"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-types"/><Literal>types-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-types"/><Literal>expected/types-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- instances -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-instances"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-instances"/><Literal>instances</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-instances"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-instances"/><Literal>instances-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-instances"/><Literal>expected/instances-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- flattened-instances -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-flattened-instances"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-flattened-instances"/><Literal>flattened-instances</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-flattened-instances"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-flattened-instances"/><Literal>flattened-instances-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-flattened-instances"/><Literal>expected/flattened-instances-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- op-targets -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-targets"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-targets"/><Literal>op-targets</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-targets"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-targets"/><Literal>op-targets-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-targets"/><Literal>expected/op-targets-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- op-sources -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-sources"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-sources"/><Literal>op-sources</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-sources"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-sources"/><Literal>op-sources-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-object-property-sources"/><Literal>expected/op-sources-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- sub-object-properties -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-object-properties"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-object-properties"/><Literal>sub-object-properties</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-object-properties"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-object-properties"/><Literal>sub-object-properties-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-object-properties"/><Literal>expected/sub-object-properties-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- super-object-properties -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-super-object-properties"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-super-object-properties"/><Literal>super-object-properties</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-super-object-properties"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-super-object-properties"/><Literal>super-object-properties-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-super-object-properties"/><Literal>expected/super-object-properties-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- sub-data-properties -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-data-properties"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-data-properties"/><Literal>sub-data-properties</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-data-properties"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-data-properties"/><Literal>sub-data-properties-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-sub-data-properties"/><Literal>expected/sub-data-properties-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- same-individuals -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-same-individuals"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-same-individuals"/><Literal>same-individuals</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-same-individuals"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-same-individuals"/><Literal>same-individuals-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-same-individuals"/><Literal>expected/same-individuals-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- between -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-object-properties-between"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-object-properties-between"/><Literal>between</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-object-properties-between"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-object-properties-between"/><Literal>between-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-object-properties-between"/><Literal>expected/between-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- all-classes -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-all-classes"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-all-classes"/><Literal>all-classes</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-all-classes"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-all-classes"/><Literal>all-classes-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-all-classes"/><Literal>expected/all-classes-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- all-individuals -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-all-individuals"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-all-individuals"/><Literal>all-individuals</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-all-individuals"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-all-individuals"/><Literal>all-individuals-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-all-individuals"/><Literal>expected/all-individuals-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- all-object-properties -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-all-object-properties"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-all-object-properties"/><Literal>all-object-properties</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-all-object-properties"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-all-object-properties"/><Literal>all-object-properties-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-all-object-properties"/><Literal>expected/all-object-properties-response.xml</Literal></DataPropertyAssertion>
 
-  <!-- Same request over the live OWLlink server. -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses-server"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses-server"/><Literal>Same request over the live OWLlink server.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses-server"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses-server"/><Literal>../subclasses-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:request-get-subclasses-server"/><Literal>../expected/subclasses-response.xml</Literal></DataPropertyAssertion>

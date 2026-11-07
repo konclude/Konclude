@@ -1,16 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Control ontology for the EL suite (*.kt.owl.xml). Two tests run on the
-  shared ontology Tests/ontologies/el-aunt.owl.xml, one on
-  role-composition.owl.xml. Contains REAL assertions over the kt: vocabulary
-  (no domain reasoning runs over this; this file only drives the runner).
-  Picked up by discovery because it is a *.kt.owl.xml under Tests/cases/.
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/el/aunt">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- Suite: the folder containing this control ontology. -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:TestSuite"/>
     <NamedIndividual abbreviatedIRI="kt:suite-el"/>
@@ -25,12 +17,17 @@
     <NamedIndividual abbreviatedIRI="kt:suite-el"/>
     <Literal>el</Literal>
   </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-el"/>
+    <Literal>Control ontology for the EL suite (*.kt.owl.xml). Two tests run on the shared ontology Tests/ontologies/el-aunt.owl.xml, one on role-composition.owl.xml. Contains REAL assertions over the kt: vocabulary (no domain reasoning runs over this; this file only drives the runner). Test group: Test 3: classification through a property chain.</Literal>
+  </DataPropertyAssertion>
 
-  <!-- ============ Test 1: classification (default matrix) ============ -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:ClassClassificationTest"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
   </ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/><Literal>Test 1: classification (default matrix)</Literal></DataPropertyAssertion>
   <!-- shared ontology from the pool, stored once, referenced relatively -->
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:usesOntology"/>
@@ -66,11 +63,11 @@
     <Literal>HermiT 1.4.5</Literal>
   </DataPropertyAssertion>
 
-  <!-- ============ Test 2: consistency, additionally without saturation ============ -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:ConsistencyTest"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/>
   </ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/><Literal>Test 2: consistency, additionally without saturation</Literal></DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:usesOntology"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/>
@@ -89,7 +86,6 @@
     <Literal>consistent</Literal>
   </DataPropertyAssertion>
 
-  <!-- ============ Test 3: classification through a property chain ============ -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:ClassClassificationTest"/>
     <NamedIndividual abbreviatedIRI="kt:el-role-composition"/>

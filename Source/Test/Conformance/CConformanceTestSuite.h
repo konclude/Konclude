@@ -63,6 +63,7 @@ namespace Konclude {
 					QString mId;				//!< individual IRI of the suite (kt:suite-...)
 					QString mName;				//!< optional human-readable name (kt:suiteName)
 					QString mDirectory;			//!< directory relative to the input root
+					QString mDescription;		//!< what the suite covers (kt:description)
 			};
 
 

@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Control ontology: describes two consistency tests (one consistent, one
-  inconsistent case). Picked up by discovery (*.kt.owl.xml under Tests/cases/).
-  Flat format, easy to read with QDomDocument:
-    - test individual typed via ClassAssertion(kt:ConsistencyTest, test)
-    - kt:task  as DataPropertyAssertion  -> "consistency"
-    - kt:usesOntology as DataPropertyAssertion -> relative ontology file name
-    - kt:expectedResult as DataPropertyAssertion -> "consistent"/"inconsistent"
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/basic/consistency">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- Suite: the folder containing this control ontology. -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:TestSuite"/>
     <NamedIndividual abbreviatedIRI="kt:suite-basic"/>
@@ -27,12 +17,17 @@
     <NamedIndividual abbreviatedIRI="kt:suite-basic"/>
     <Literal>basic</Literal>
   </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:suite-basic"/>
+    <Literal>Control ontology: describes two consistency tests (one consistent, one inconsistent case). (*.kt.owl.xml under Tests/cases/). Flat format, easy to read with QDomDocument: - test individual typed via ClassAssertion(kt:ConsistencyTest, test) - kt:task as DataPropertyAssertion -&gt; "consistency" - kt:usesOntology as DataPropertyAssertion -&gt; relative ontology file name - kt:expectedResult as DataPropertyAssertion -&gt; "consistent"/"inconsistent"</Literal>
+  </DataPropertyAssertion>
 
-  <!-- Test 1: consistent ontology -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:ConsistencyTest"/>
     <NamedIndividual abbreviatedIRI="kt:basic-consistent"/>
   </ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:basic-consistent"/><Literal>Test 1: consistent ontology</Literal></DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:task"/>
     <NamedIndividual abbreviatedIRI="kt:basic-consistent"/>
@@ -49,11 +44,11 @@
     <Literal>consistent</Literal>
   </DataPropertyAssertion>
 
-  <!-- Test 2: inconsistent ontology -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:ConsistencyTest"/>
     <NamedIndividual abbreviatedIRI="kt:basic-inconsistent"/>
   </ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:basic-inconsistent"/><Literal>Test 2: inconsistent ontology</Literal></DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:task"/>
     <NamedIndividual abbreviatedIRI="kt:basic-inconsistent"/>
