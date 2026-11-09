@@ -20,6 +20,9 @@
 
 #include "COptimizedComplexExpressionAnsweringHandler.h"
 
+#include "Parser/Expressions/CNamedIndividualExpression.h"
+#include "Reasoner/Ontology/COntologyStringMapping.h"
+
 namespace Konclude {
 
 	namespace Reasoner {
@@ -6098,6 +6101,17 @@ namespace Konclude {
 
 							CRole* dataRole = mOntoAnsweringItem->getOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getDataPropertyTermRoleMappingHash()->value(dataPropertyExp);
 							CIndividual* indi = mOntoAnsweringItem->getOntology()->getDataBoxes()->getExpressionDataBoxMapping()->getIndividulTermIndiMappingHash()->value(indiTermExp);
+							if (!indi) {
+								// The individual term of a query-local assertion is not registered in the expression
+								// mapping of the ontology, so the lookup above misses it (issue #26). The ontology
+								// builder resolves such terms by name when it materialises an expression (see
+								// CConcreteOntologyUpdateBuilder::getIndividualForIndividualTerm), so use the same name
+								// mapping here instead of losing the values of the pattern.
+								indi = getIndividualFromIndividualName(indiTermExp);
+								if (!indi) {
+									LOG(WARNING, getDomain(), logTr("Cannot resolve the individual of the data property assertion, so its values cannot be retrieved."), this);
+								}
+							}
 
 
 							COptimizedComplexVariableDataLiteralBaseItem* dataLiteralBaseItem = new COptimizedComplexVariableDataLiteralBaseItem(indi, dataRole);
@@ -7817,6 +7831,32 @@ namespace Konclude {
 				return dataRoleSet;
 			}
 
+
+
+			CIndividual* COptimizedComplexExpressionAnsweringHandler::getIndividualFromIndividualName(CIndividualTermExpression* indiTermExp) {
+
+				// The expression mapping of the ontology is keyed by the expression objects of the ontology, so the
+				// term expressions of a query never hit it. The ontology builder resolves such terms by name when it
+				// materialises an expression into an ontology (CConcreteOntologyUpdateBuilder::getIndividualForIndividualTerm),
+				// and the same name mapping is available on the ontology here.
+				// Only named individuals are resolved: a blank node of a SPARQL query is a variable (SPARQL
+				// semantics), so a ground data property assertion of a query never carries an anonymous individual,
+				// and the name mapping is keyed by the names of the named individuals of the ontology.
+				QString indiName;
+				if (indiTermExp && indiTermExp->getType() == CBuildExpression::BETNAMEDINDIVIDUAL) {
+					indiName = ((CNamedIndividualExpression*)indiTermExp)->getName();
+				}
+				if (!indiName.isEmpty()) {
+					COntologyStringMapping* stringMapping = mOntoAnsweringItem->getOntology()->getStringMapping();
+					if (stringMapping) {
+						CMAPPINGHASH<CStringRefStringHasher, CIndividual*>* individualNameIndividualMappingHash = stringMapping->getIndividualNameIndividualMappingHash(false);
+						if (individualNameIndividualMappingHash) {
+							return individualNameIndividualMappingHash->value(indiName);
+						}
+					}
+				}
+				return nullptr;
+			}
 
 
 			QSet<CDataLiteral*>* COptimizedComplexExpressionAnsweringHandler::getInstantiatedDataLiterals(const CIndividualReference& indiRef, CRole* dataRole, QSet<CDataLiteral*>* dataLiteralSet, CAnswererContext* answererContext) {

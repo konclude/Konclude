@@ -619,8 +619,7 @@
     <NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/>
   </ObjectPropertyAssertion>
 
-  <!-- GitHub issue #26: a data property value query with a named subject does not
-       terminate. -->
+
   <ClassAssertion>
     <Class abbreviatedIRI="kt:Issue"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
@@ -646,13 +645,47 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
-    <Literal>With a named subject the answering of a data property value does not work: the SELECT for the value answers no rows (it deadlocked until the missing sub-query classification was added) and an ASK about a value crashes while the instance entailment result is processed. The ASK test is capped at 5 seconds.</Literal>
+    <Literal>An ASK about a data property value of a named subject crashes while the instance entailment result is processed (the query has no processing linker). The SELECT half was fixed separately: it answered no rows because the data literal base item resolved the query individual only in the expression mapping of the ontology; the item now resolves it by name through the ontology string mapping and answers the asserted value and values entailed through sub-properties. The ASK test is capped at 5 seconds.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
     <NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+    <Literal>Data property value queries (with a named subject and with a variable subject) answer the asserted values, including the values of sub-properties, but not a value that is only entailed: neither a value of an owl:hasValue restriction on the individual nor a value that is derived from the TBox (for example B <= C and C <= (dp hasValue v) for an instance of B). The data literal base item collects the asserted data of the individual; the completion graph source of the literal lookup is not available for the query (the ontology consistency model provides no individual process node vector), and entailed values are not materialised as data property assertions. Materialising the syntactic restrictions alone would not be enough, because the value can be derived from class inclusion.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+    <NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-hasvalue"/>
   </ObjectPropertyAssertion>
 
 </Ontology>

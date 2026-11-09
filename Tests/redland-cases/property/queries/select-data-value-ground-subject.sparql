@@ -1,5 +1,5 @@
 PREFIX : <http://konclude.test/property#>
-# A known individual with a data property value: :a :dp1 "v1" is asserted, so the
-# value has to be bound for the known subject (known failure, see Tests/known-issues).
+# A known individual with data property values: :a :dp1 "v1" is asserted and :a :dpSub "v1sub"
+# with :dpSub rdfs:subPropertyOf :dp1, so both values are bound for the known subject.
 SELECT ?val
 WHERE { :a :dp1 ?val . }

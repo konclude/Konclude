@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Expected answer for select-data-value-ground-subject.sparql (known failure):
-     :a asserts :dp1 "v1", so the value of the known subject is "v1". Rows are
-     compared as a set. -->
+<!-- Expected answer for select-data-value-ground-subject.sparql:
+     :a asserts :dp1 "v1" and :dpSub "v1sub", and :dpSub is a sub-property of :dp1,
+     so both values are values of the known subject. Rows are compared as a set. -->
 <sparql xmlns="http://www.w3.org/2005/sparql-results#">
   <head>
     <variable name="val"/>
@@ -9,6 +9,9 @@
   <results>
     <result>
       <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">v1</literal></binding>
+    </result>
+    <result>
+      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">v1sub</literal></binding>
     </result>
   </results>
 </sparql>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for select-data-value-entailed-indirect.sparql:
+     :a has the asserted value "asserted2" (through the sub-property :dp2) and the
+     restriction value "hv1"; :c has the value "tbox" that is derived from the TBox
+     (:B <= :C, :C <= (dp1 hasValue "tbox")). Rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="s"/>
+    <variable name="val"/>
+  </head>
+  <results>
+    <result>
+      <binding name="s"><uri>http://konclude.test/hasvalue#a</uri></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">asserted2</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/hasvalue#a</uri></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">hv1</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/hasvalue#c</uri></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">tbox</literal></binding>
+    </result>
+  </results>
+</sparql>
