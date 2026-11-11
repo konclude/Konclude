@@ -1,0 +1,2 @@
+PREFIX sp: <http://konclude.test/language#>
+SELECT ?p ?a WHERE { ?p sp:age ?a } ORDER BY DESC(?a) LIMIT 3

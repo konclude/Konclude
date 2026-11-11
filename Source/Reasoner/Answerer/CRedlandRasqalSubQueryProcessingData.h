@@ -129,6 +129,9 @@ namespace Konclude {
 					cint64 getBindingsCount();
 					CRedlandRasqalSubQueryProcessingData* setBindingsCount(cint64 count);
 
+					cint64 getCurrentAnswerRow();
+					CRedlandRasqalSubQueryProcessingData* incCurrentAnswerRow();
+
 
 					QVector<rasqal_literal*>* getBindingPositionVariableBoundRedlandNodeVector();
 					bool hasBoundVariables();
@@ -184,6 +187,7 @@ namespace Konclude {
 					bool mBooleanSubQueryChecked;
 					cint64 mSubQueryId;
 					cint64 mBindingsCount;
+					cint64 mCurrentAnswerRow;
 					CComplexAnsweringExpressionQuery* mSubQuery;
 					rasqal_graph_pattern* mSubqueryGraphPattern;
 					librdf_world* mRedlandWorld;

@@ -2050,6 +2050,11 @@ namespace Konclude {
 						new CBooleanConfigType(true)),
 						new CBooleanConfigType(true));
 
+				addConfigProperty(new CConfigDescription("Konclude.Answering.ClosedAskDirectBooleanAnswering",
+						"Determines whether a closed ASK is answered directly from the boolean reasoning sub-query instead of being evaluated over the Redland model.",
+						new CBooleanConfigType(true)),
+						new CBooleanConfigType(true));
+
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Answering.DistinctUnecessaryVariablesReductionBeforeAnswerGeneration",

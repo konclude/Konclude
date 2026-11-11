@@ -754,7 +754,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -766,13 +766,54 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
-    <Literal>An ASK with a variable-subject class assertion (for example ASK { ?w a :Woman }) answers false although the equivalent SELECT returns the witness. An ASK has no distinguished variables: its variables are existential and may bind to anonymous completion-graph nodes created by existential axioms, so the query must be decided by completion-graph entailment, not by named-individual instance retrieval. Three problems: (1) a single-variable ASK sub-query is reduced to a concept instance-retrieval task and builds no variable composition item, but the boolean result code reads only that item; (2) a connected multi-triple ASK sub-query can be true, but the lazy Redland model resolver creates triple resolving data only for the first triple of a boolean sub-query; (3) the ASK-to-boolean conversion is lossy for BGPs that an outer FILTER/join still needs. With Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables=true the single-class and pure-role ASKs answer true via the completion graph even when the only witness is anonymous, while the class+role combination still needs the absorption initializer extension. See Docs/Analysis-SPARQL-ASK-ClassAssertion.md.</Literal>
+    <Literal>Fixed. The existential interpretation remains config-gated (Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables); the single-variable boolean ASK reduction is skipped so named witnesses work with the default config. A closed ASK is answered directly from the conjunction of its boolean sub-queries, and non-closed sub-queries use query-local placeholders for hidden individual variables while preserving direct-result streaming. The regular resolver path is covered by the *-regular tests with Konclude.Answering.ClosedAskDirectBooleanAnswering=false. Regression guards include kt:sparql-ask-class-assertion, kt:sparql-ask-complex, kt:sparql-ask-anonymous-woman, kt:sparql-ask-anonymous-child, kt:sparql-ask-anonymous-woman-child, kt:sparql-ask-anonymous-man, kt:sparql-select-anonymous-woman and kt:sparql-select-hidden-anonymous-join. See Docs/Analysis-SPARQL-ASK-ClassAssertion.md.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
     <NamedIndividual abbreviatedIRI="kt:sparql-ask-complex"/>
+  </ObjectPropertyAssertion>
+
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <Literal>https://www.w3.org/TR/sparql11-query/#rVariable</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <Literal>A variable-predicate query over constant individuals (for example SELECT ?p { sp:alice ?p sp:bob } or SELECT ?d ?v { sp:alice ?d ?v }) answers empty. The parser classifies the pattern as an object-property or data-property SCHEMA query (property hierarchy) instead of a fact query over the known subject/object, so the role/data-property variable never becomes a binding. The object-property path is the allObjPropVars branch; the data-property path is the allDataPropVars branch in CSPARQLRedlandRasqalReasoningBGPQueryParser::generateBGPBasedSubQueries. Affects kt:sparql-select-role-variable and kt:sparql-select-data-variable. See Docs/Investigation-SPARQL-VariablePredicate.md.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-select-role-variable"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-select-data-variable"/>
   </ObjectPropertyAssertion>
 
 

@@ -51,6 +51,16 @@
 	
 	
 	
+	<!--Specifies whether a closed ASK is answered directly from the boolean reasoning sub-query instead of being evaluated over the Redland model. Disable it to exercise the regular resolver path.-->
+	<Set key='Konclude.Answering.ClosedAskDirectBooleanAnswering'>
+		<Literal>true</Literal>
+	</Set>
+	
+	
+	
+	
+	
+	
 	<!--Specifies whether non-selected SPARQL variables are interpreted as existential/anonymous variables.-->
 	<Set key='Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables'>
 		<Literal>false</Literal>

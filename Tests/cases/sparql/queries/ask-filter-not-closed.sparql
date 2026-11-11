@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# Not a closed ASK: the FILTER uses ?w, so the parser must keep a bindings
+# sub-query and Redland must apply the filter. Only sp:alice is a Woman, so the
+# answer is false.
+ASK { ?w a sp:Woman . FILTER(?w != sp:alice) }

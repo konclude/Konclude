@@ -153,6 +153,7 @@ namespace Konclude {
 				// protected variables
 				protected:
 					CComplexQueryCompositionRedlandRasqalProcessingData* mCurrentProcessingRedlandRasqalQueryProcData;
+					bool mConfClosedAskDirectBooleanAnswering;
 
 
 				// private methods

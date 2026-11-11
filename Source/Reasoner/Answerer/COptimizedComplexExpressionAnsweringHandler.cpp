@@ -2417,7 +2417,7 @@ namespace Konclude {
 
 
 
-					if (!forceBuildingItem && varExpSet.size() == 1 && dynamic_cast<CIndividualVariableExpression*>(lastVarExpression) && !anonymousIndiVariableSet.contains(lastVarExpression)) {
+					if (!forceBuildingItem && varExpSet.size() == 1 && dynamic_cast<CIndividualVariableExpression*>(lastVarExpression) && !anonymousIndiVariableSet.contains(lastVarExpression) && !compAssIndVarQuery->isBooleanEntailmentResultRequired()) {
 						// reduce to instance test
 						//TODO: make sure expression ontology contains inverses for all roles
 						LOG(INFO, getDomain(), logTr("Reducing query to single (complex) instance retrieval task."), this);

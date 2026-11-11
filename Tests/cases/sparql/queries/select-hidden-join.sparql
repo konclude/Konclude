@@ -1,0 +1,4 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# ?c is hidden (not projected) and joins the two triples. It must still be
+# materialised so the pattern is not lost in the Redland model.
+SELECT ?w WHERE { ?w sp:hasChild ?c . ?c a sp:Man }

@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/anonymous#>
+# Control for the ASK tests: the only Woman is anonymous, so there is no named
+# binding to return. An empty result is correct here and proves that ASK cannot
+# be implemented as "SELECT returned a row".
+SELECT ?w WHERE { ?w a sp:Woman }

@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/anonymous#>
+# The anonymous spouse is a Woman with a child. This combines a class assertion
+# with a role assertion on the same existential variable; it currently needs the
+# absorption-initializer extension (option F of the analysis).
+ASK { ?w a sp:Woman . ?w sp:hasChild ?c }

@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# Disconnected hidden variable: ?c is not projected and shares no variable with
+# ?w. This used to crash (boolean sub-query with no bindings) and must answer
+# the projected variable only.
+SELECT ?w WHERE { ?w a sp:Woman . ?c a sp:Man }

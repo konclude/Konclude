@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration used by the *-regular ASK tests. It disables the direct
+  closed-ASK boolean extraction, so the query goes through the regular
+  Redland/Rasqal model path with the reasoning sub-query result.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Answering.ClosedAskDirectBooleanAnswering'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

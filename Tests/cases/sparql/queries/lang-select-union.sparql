@@ -1,0 +1,2 @@
+PREFIX sp: <http://konclude.test/language#>
+SELECT ?p WHERE { { ?p a sp:Woman } UNION { ?p a sp:Man } }

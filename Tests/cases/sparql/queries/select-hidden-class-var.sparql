@@ -1,0 +1,4 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# ?c is a class variable, hidden and never existential. DISTINCT removes the
+# duplicate projected rows caused by the different classes of each individual.
+SELECT DISTINCT ?w WHERE { ?w a ?c }

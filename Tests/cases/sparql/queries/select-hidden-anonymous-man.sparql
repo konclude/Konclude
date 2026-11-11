@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/hidden-man#>
+# ?c is hidden and the only sp:Man is an anonymous hasFriend successor of
+# alice. The SELECT must still return alice; the hidden existential variable
+# must not turn the row into a missing join.
+SELECT ?w WHERE { ?w a sp:Woman . ?c a sp:Man }

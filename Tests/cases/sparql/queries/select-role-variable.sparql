@@ -1,0 +1,4 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# Variable predicate over a known subject/object pair: the only asserted role is
+# hasChild. This is a role-variable query, not a schema property-hierarchy query.
+SELECT ?p WHERE { sp:alice ?p sp:bob }

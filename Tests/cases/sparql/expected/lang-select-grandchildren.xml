@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head><variable name="p"/><variable name="g"/></head>
+  <results>
+    <result><binding name="p"><uri>http://konclude.test/language#bob</uri></binding><binding name="g"><uri>http://konclude.test/language#eve</uri></binding></result>
+    <result><binding name="p"><uri>http://konclude.test/language#alice</uri></binding><binding name="g"><uri>http://konclude.test/language#eve</uri></binding></result>
+    <result><binding name="p"><uri>http://konclude.test/language#henry</uri></binding><binding name="g"><uri>http://konclude.test/language#carol</uri></binding></result>
+  </results>
+</sparql>

@@ -1,0 +1,2 @@
+PREFIX sp: <http://konclude.test/language#>
+ASK { sp:alice sp:ancestorOf sp:eve }

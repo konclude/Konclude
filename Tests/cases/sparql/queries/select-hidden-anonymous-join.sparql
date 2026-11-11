@@ -1,0 +1,4 @@
+PREFIX sp: <http://konclude.test/language#>
+# The spouse ?s and the child ?c are hidden anonymous variables; only ?p is
+# projected. This is the joined anonymous-binding case of the test plan.
+SELECT ?p WHERE { ?p a sp:MarriedPerson . ?p sp:hasSpouse ?s . ?s a sp:Woman . ?s sp:hasChild ?c }

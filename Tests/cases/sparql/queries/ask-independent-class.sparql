@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# Two independent class assertions produce two reasoning sub-queries. The
+# closed-ASK short-circuit must not collapse them incorrectly; the outer model
+# combines their booleans.
+ASK { ?w a sp:Woman . ?c a sp:Man }

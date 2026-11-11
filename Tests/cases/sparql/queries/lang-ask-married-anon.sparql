@@ -1,0 +1,4 @@
+PREFIX sp: <http://konclude.test/language#>
+# grace is a MarriedPerson; the spouse and the spouse's child are anonymous
+# completion nodes. Needs the existential interpretation config.
+ASK { ?p a sp:MarriedPerson . ?p sp:hasSpouse ?s . ?s a sp:Woman . ?s sp:hasChild ?c }
