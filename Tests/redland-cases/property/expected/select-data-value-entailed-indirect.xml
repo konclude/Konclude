@@ -15,11 +15,11 @@
     </result>
     <result>
       <binding name="s"><uri>http://konclude.test/hasvalue#a</uri></binding>
-      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">hv1</literal></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">hv1</literal></binding>
     </result>
     <result>
       <binding name="s"><uri>http://konclude.test/hasvalue#c</uri></binding>
-      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">tbox</literal></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">tbox</literal></binding>
     </result>
   </results>
 </sparql>

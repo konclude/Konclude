@@ -20,12 +20,43 @@
 
 #include "CComplexVariablesAnsweringQuery.h"
 
+#include "Parser/Expressions/CSubExpressionVisitor.h"
+
 
 namespace Konclude {
 
 	namespace Reasoner {
 
 		namespace Query {
+
+			using namespace Parser::Expression;
+
+			class CDataValueExpressionFindingVisitor : public CSubExpressionVisitor {
+				public:
+					CDataValueExpressionFindingVisitor() {
+						mFound = false;
+					}
+
+					virtual bool visitSubExpression(CBuildExpression* expression, CBuildExpression* subExpression, CSubExpressionVisitor* visitor) {
+						if (!subExpression || mFound) {
+							return true;
+						}
+						cint64 expressionKind = subExpression->getExpressionKindFlags();
+						if (expressionKind & (CBuildExpression::EKFDATAPROPERTYTERM | CBuildExpression::EKFDATALITERALTERM | CBuildExpression::EKFDATARANGETERM)) {
+							mFound = true;
+							return false;
+						}
+						subExpression->visitSubExpressions(this);
+						return !mFound;
+					}
+
+					virtual bool visitEntity(CBuildExpression* expression, CExpressionEntity* entity, CSubExpressionVisitor* visitor) {
+						return true;
+					}
+
+					bool mFound;
+			};
+
 
 			CComplexVariablesAnsweringQuery::CComplexVariablesAnsweringQuery(CConcreteOntology* baseOntology, CConcreteOntology* expressionOntology, const QList<CAxiomExpression*>& axiomExpressions, const QList<CExpressionVariable*>& disVariables, CConfigurationBase* configuration, const QString& queryName) : CComplexAnsweringExpressionQuery(baseOntology,expressionOntology,configuration,queryName) {
 				mAxiomExpressions = axiomExpressions;
@@ -34,6 +65,20 @@ namespace Konclude {
 				mBooleanEntailmentResult = false;
 				mResultLimit = -1;
 				mResultOffset = 0;
+
+				// the data values of the individuals are only needed when the query contains a data
+				// property or data literal pattern; the realization requirement is added by the
+				// reasoner manager during the query preparation
+				CDataValueExpressionFindingVisitor dataValueFindingVisitor;
+				for (CAxiomExpression* axiomExpression : mAxiomExpressions) {
+					if (axiomExpression) {
+						axiomExpression->visitSubExpressions(&dataValueFindingVisitor);
+						if (dataValueFindingVisitor.mFound) {
+							break;
+						}
+					}
+				}
+				mDataValueRealizationRequired = dataValueFindingVisitor.mFound;
 			}
 
 			CComplexVariablesAnsweringQuery::~CComplexVariablesAnsweringQuery() {

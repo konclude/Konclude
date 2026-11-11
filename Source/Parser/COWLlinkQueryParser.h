@@ -87,6 +87,7 @@ namespace Konclude {
 				CQueryGetEquivalentClassesExpression *parseGetEquivalentClassesNode(QDomElement *node);
 				CQueryIsEntailedExpression* parseIsEntailedNode(QDomElement *node);
 				CQueryExpression* parseGetObjectPropertyTargetsNode(QDomElement *node);
+				CQueryExpression* parseGetDataPropertyTargetsNode(QDomElement *node);
 				CQueryExpression* parseGetFlattenedObjectPropertyTargetsNode(QDomElement *node);
 				CQueryExpression* parseGetObjectPropertySourcesNode(QDomElement *node);
 				CQueryExpression* parseGetFlattenedObjectPropertySourcesNode(QDomElement *node);
@@ -95,6 +96,12 @@ namespace Konclude {
 				CQueryGetObjectPropertiesOfSourceExpression* parseGetObjectPropertiesOfSourceNode(QDomElement *node);
 				CQueryGetObjectPropertiesOfTargetExpression* parseGetObjectPropertiesOfTargetNode(QDomElement *node);
 				CQueryGetObjectPropertiesBetweenExpression* parseGetObjectPropertiesOfBetweenNode(QDomElement *node);
+
+				CQueryExpression* parseGetDataPropertiesOfSourceNode(QDomElement *node);
+				CQueryExpression* parseGetDataPropertiesBetweenNode(QDomElement *node);
+				CQueryExpression* parseGetDataPropertiesOfLiteralNode(QDomElement *node);
+				CQueryExpression* parseGetDataPropertySourcesNode(QDomElement *node);
+				CQueryExpression* parseGetFlattenedDataPropertySourcesNode(QDomElement *node);
 
 
 

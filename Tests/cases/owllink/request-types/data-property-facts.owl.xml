@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Shared data for the OWLlink data property fact requests (GetDataPropertiesOfSource,
+     GetDataPropertiesBetween, GetDataPropertiesOfLiteral, GetDataPropertySources and
+     GetFlattenedDataPropertySources). It contains an asserted value, a value of a
+     sub-property, a value of another data property, a TBox-derived value and two
+     individuals that are the same individual. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://ex.test/data-property-facts">
+  <Prefix name="" IRI="http://ex.test/data-property-facts#"/>
+  <Declaration><DataProperty IRI="#dp1"/></Declaration>
+  <Declaration><DataProperty IRI="#dp2"/></Declaration>
+  <Declaration><DataProperty IRI="#dp3"/></Declaration>
+  <Declaration><Class IRI="#B"/></Declaration>
+  <Declaration><Class IRI="#C"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <Declaration><NamedIndividual IRI="#c"/></Declaration>
+  <Declaration><NamedIndividual IRI="#d"/></Declaration>
+  <Declaration><NamedIndividual IRI="#e"/></Declaration>
+  <Declaration><NamedIndividual IRI="#f"/></Declaration>
+  <SubDataPropertyOf><DataProperty IRI="#dp1"/><DataProperty IRI="#dp2"/></SubDataPropertyOf>
+  <SubClassOf><Class IRI="#B"/><Class IRI="#C"/></SubClassOf>
+  <SubClassOf>
+    <Class IRI="#C"/>
+    <DataHasValue>
+      <DataProperty IRI="#dp3"/>
+      <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">derived</Literal>
+    </DataHasValue>
+  </SubClassOf>
+  <DataPropertyAssertion>
+    <DataProperty IRI="#dp1"/>
+    <NamedIndividual IRI="#a"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">value1</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty IRI="#dp2"/>
+    <NamedIndividual IRI="#a"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">value2</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty IRI="#dp1"/>
+    <NamedIndividual IRI="#b"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">value1</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty IRI="#dp2"/>
+    <NamedIndividual IRI="#c"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">value1</Literal>
+  </DataPropertyAssertion>
+  <ClassAssertion><Class IRI="#B"/><NamedIndividual IRI="#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#B"/><NamedIndividual IRI="#f"/></ClassAssertion>
+  <SameIndividual><NamedIndividual IRI="#b"/><NamedIndividual IRI="#e"/></SameIndividual>
+</Ontology>

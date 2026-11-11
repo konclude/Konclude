@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-union-forced-value-mixed-request.xml: Both
+     branches of the union force the same value, so it is entailed and answered even though it is
+     only derived in a non-deterministic branch. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">mixed</Literal>
+ </SetOfLiterals>
+</ResponseMessage>

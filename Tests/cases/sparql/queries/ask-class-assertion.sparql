@@ -1,0 +1,4 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# Minimal reproducer for kt:issue-sparql-ask-class-assertion: the equivalent SELECT
+# returns sp:alice, but the Boolean ASK evaluation over the Redland model answers false.
+ASK { ?w a sp:Woman }

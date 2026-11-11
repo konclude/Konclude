@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-sources-super-property-request.xml: The super-property
+     #dp2 has the value "value1" for #c directly and for #a, #b and #e through the sub-property
+     #dp1; the same individuals #b and #e are returned as one synset. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/data-property-facts"/>
+ <OK/>
+ <SetOfIndividualSynsets>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#a"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#b"/>
+   <owl:NamedIndividual IRI="#e"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#c"/>
+  </IndividualSynset>
+ </SetOfIndividualSynsets>
+</ResponseMessage>

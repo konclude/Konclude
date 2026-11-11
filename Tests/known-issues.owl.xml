@@ -449,7 +449,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -484,7 +484,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -667,7 +667,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -679,13 +679,101 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
-    <Literal>Data property value queries (with a named subject and with a variable subject) answer the asserted values, including the values of sub-properties, but not a value that is only entailed: neither a value of an owl:hasValue restriction on the individual nor a value that is derived from the TBox (for example B <= C and C <= (dp hasValue v) for an instance of B). The data literal base item collects the asserted data of the individual; the completion graph source of the literal lookup is not available for the query (the ontology consistency model provides no individual process node vector), and entailed values are not materialised as data property assertions. Materialising the syntactic restrictions alone would not be enough, because the value can be derived from class inclusion.</Literal>
+    <Literal>Data property value queries (with a named subject and with a variable subject) answer the asserted values, including the values of sub-properties, and values that are only entailed: a value of an owl:hasValue restriction on the individual as well as a value that is derived from the TBox (for example B <= C and C <= (dp hasValue v) for an instance of B). The values are provided by the data literal realization of the individual, which is computed on demand from the asserted data, the asserted concepts and the backend cache labels. Non-deterministically derived values are only answered when they hold in the deterministic part of the realization.</Literal>
+  </DataPropertyAssertion>
+
+
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+    <Literal>A data value that only follows from a non-deterministic branch (for example one branch of a union or an at-most restriction) is treated as a candidate and verified lazily. The realizing item queues a satisfiability test of the individual together with the negated value (individual and not(SOME(dataProperty,{value}))) and caches the result per (individual, data property, value); only values whose negation is unsatisfiable are published. The verification uses temporary SOME concepts in the ontology of the realizing item, so no answerer state is needed. Deterministic values, including TBox-derived hasValue and minimum cardinality values, are answered without a test.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+    <Literal>A minimum cardinality restriction with a literal-only data range (DataMinCardinality 1 over DataOneOf "atleast") forces the data value. The label scan now also extracts the literal of the data range of an at-least restriction with cardinality one (CCATLEAST with CCATALITERAL operand), so the value is answered; the candidate verification covers branch-dependent variants.</Literal>
+  </DataPropertyAssertion>
+
+  <!-- issue-sparql-ask-class-assertion: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <Literal>https://www.w3.org/TR/sparql11-query/#ask</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <Literal>An ASK with a variable-subject class assertion (for example ASK { ?w a :Woman }) answers false although the equivalent SELECT returns the witness. An ASK has no distinguished variables: its variables are existential and may bind to anonymous completion-graph nodes created by existential axioms, so the query must be decided by completion-graph entailment, not by named-individual instance retrieval. Three problems: (1) a single-variable ASK sub-query is reduced to a concept instance-retrieval task and builds no variable composition item, but the boolean result code reads only that item; (2) a connected multi-triple ASK sub-query can be true, but the lazy Redland model resolver creates triple resolving data only for the first triple of a boolean sub-query; (3) the ASK-to-boolean conversion is lossy for BGPs that an outer FILTER/join still needs. With Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables=true the single-class and pure-role ASKs answer true via the completion graph even when the only witness is anonymous, while the class+role combination still needs the absorption initializer extension. See Docs/Analysis-SPARQL-ASK-ClassAssertion.md.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
-    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
-    <NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-hasvalue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-ask-complex"/>
   </ObjectPropertyAssertion>
+
 
 </Ontology>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink data-property request-type coverage: flattened-data-property-sources.
+  The shared ontology is loaded with LoadOntologies from a file next to this request.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/data-property-facts"/>
+  <LoadOntologies kb="http://ex.test/data-property-facts">
+    <OntologyIRI IRI="file:data-property-facts.owl.xml"/>
+  </LoadOntologies>
+  <GetFlattenedDataPropertySources kb="http://ex.test/data-property-facts" id="q-flattened-data-property-sources">
+    <owl:DataProperty IRI="#dp1"/>
+    <owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">value1</owl:Literal>
+  </GetFlattenedDataPropertySources>
+</RequestMessage>

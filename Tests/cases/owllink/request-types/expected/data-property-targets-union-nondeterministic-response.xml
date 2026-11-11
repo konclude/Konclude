@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-union-nondeterministic-request.xml: An individual that is a member of a union whose branches require different data values has no entailed value, so the answer is empty (negative test: do not answer values that only hold in one branch). -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xml:base="http://www.w3.org/2002/07/owl#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals/>
+</ResponseMessage>

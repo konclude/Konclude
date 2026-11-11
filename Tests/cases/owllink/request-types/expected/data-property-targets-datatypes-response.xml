@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-datatypes-request.xml: Values of different datatypes (string, integer, decimal, boolean) are answered with their datatypes. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#decimal">3.14</Literal>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#boolean">true</Literal>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">42</Literal>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">plain</Literal>
+ </SetOfLiterals>
+</ResponseMessage>

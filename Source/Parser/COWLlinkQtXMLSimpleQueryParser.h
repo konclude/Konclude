@@ -28,6 +28,7 @@
 // Namespace includes
 #include "CQueryParser.h"
 #include "COWLlinkQueryParser.h"
+#include "Expressions/CDataLiteralExpression.h"
 
 
 // Other includes
@@ -76,6 +77,7 @@ namespace Konclude {
 				virtual QList<CBuildExpression*> parseOntologyChildNodesInverseHandling(QDomElement *node, bool& inversed);
 				QString getEntityStringName(QDomElement *node);
 				QString resolveAbbreviationName(const QString& name);
+				CDataLiteralExpression* getDataLiteralExpression(const QString& lexicalValue, const QString& datatypeIRI);
 
 			// private methods
 			private:

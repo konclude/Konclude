@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-sources-request.xml: The individual synsets that have the
+     value "value1" for #dp1: #a and the same-individual synset of #b and #e. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/data-property-facts"/>
+ <OK/>
+ <SetOfIndividualSynsets>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#a"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#b"/>
+   <owl:NamedIndividual IRI="#e"/>
+  </IndividualSynset>
+ </SetOfIndividualSynsets>
+</ResponseMessage>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink data-property request-type coverage: data-property-sources-super-property.
+  The query asks for the sources of the super-property #dp2 and the value "value1"; the value is
+  asserted only for the sub-property #dp1 on #a, #b and #e and directly for #dp2 on #c.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/data-property-facts"/>
+  <LoadOntologies kb="http://ex.test/data-property-facts">
+    <OntologyIRI IRI="file:data-property-facts.owl.xml"/>
+  </LoadOntologies>
+  <GetDataPropertySources kb="http://ex.test/data-property-facts" id="q-data-property-sources-super-property">
+    <owl:DataProperty IRI="#dp2"/>
+    <owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">value1</owl:Literal>
+  </GetDataPropertySources>
+</RequestMessage>

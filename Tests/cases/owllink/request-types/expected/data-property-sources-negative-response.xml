@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-sources-negative-request.xml: The named individuals that
+     are not sources of #dp1 for the value "value1": #c (only a #dp2 value), #d (no data value) and
+     #f (only a TBox-derived #dp3 value). -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/data-property-facts"/>
+ <OK/>
+ <SetOfIndividualSynsets>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#c"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#d"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="#f"/>
+  </IndividualSynset>
+ </SetOfIndividualSynsets>
+</ResponseMessage>

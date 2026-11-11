@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-properties-of-source-request.xml: The data property synsets of
+     individual #a: the asserted data property, the super-property of the asserted value and the
+     data property of the TBox-derived value; owl:topDataProperty is always part of the answer. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/data-property-facts"/>
+ <OK/>
+ <SetOfDataPropertySynsets>
+  <DataPropertySynset>
+   <owl:DataProperty IRI="#dp1"/>
+  </DataPropertySynset>
+  <DataPropertySynset>
+   <owl:DataProperty IRI="#dp2"/>
+  </DataPropertySynset>
+  <DataPropertySynset>
+   <owl:DataProperty IRI="#dp3"/>
+  </DataPropertySynset>
+  <DataPropertySynset>
+   <owl:DataProperty IRI="http://www.w3.org/2002/07/owl#topDataProperty"/>
+  </DataPropertySynset>
+ </SetOfDataPropertySynsets>
+</ResponseMessage>

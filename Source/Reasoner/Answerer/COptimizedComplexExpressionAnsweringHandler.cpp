@@ -19,6 +19,8 @@
  */
 
 #include "COptimizedComplexExpressionAnsweringHandler.h"
+#include "Reasoner/Realization/CDataLiteralRealization.h"
+#include "Reasoner/Ontology/COntologyProcessingDataLiteralRealizationRequirement.h"
 
 #include "Parser/Expressions/CNamedIndividualExpression.h"
 #include "Reasoner/Ontology/COntologyStringMapping.h"
@@ -32,6 +34,24 @@ namespace Konclude {
 			
 
 
+
+			class CDataLiteralSetCollectorVisitor : public Realization::CDataLiteralRealizationVisitor {
+				public:
+					CDataLiteralSetCollectorVisitor(QSet<CDataLiteral*>* dataLiteralSet) {
+						mDataLiteralSet = dataLiteralSet;
+					}
+					virtual bool visitDataRole(CRole* dataRole, bool deterministic) {
+						return true;
+					}
+					virtual bool visitDataLiteral(CRole* dataRole, CDataLiteral* dataLiteral, bool deterministic) {
+						if (mDataLiteralSet) {
+							mDataLiteralSet->insert(dataLiteral);
+						}
+						return true;
+					}
+				protected:
+					QSet<CDataLiteral*>* mDataLiteralSet;
+			};
 
 			COptimizedComplexExpressionAnsweringHandler::COptimizedComplexExpressionAnsweringHandler(COptimizedComplexExpressionOntologyAnsweringItem* ontoAnsweringItem) : CAnsweringHandler(), CLogDomain("::Konclude::Reasoner::Kernel::ComplexExpressionQueryAnswerer") {
 				mOntoAnsweringItem = ontoAnsweringItem;
@@ -7867,7 +7887,20 @@ namespace Konclude {
 				// A value asserted for a sub-property is also a value of the queried
 				// super-property, so the assertions of all sub-properties are collected (issue #26).
 				QSet<CRole*> dataRoleSet = getDataRoleWithSubRolesSet(dataRole);
-				QHash<QPair<QString, CDatatype*>, CDataLiteral*>* dataValueDatatypeSingleLiteralHash = nullptr;
+
+				// the data literal realization knows the asserted and the derived values, including
+				// the values of same individuals, when the individual has been analysed
+				if (mOntoAnsweringItem->getOntology()->getRealization()) {
+					Realization::CDataLiteralRealization* dataLiteralRealization = mOntoAnsweringItem->getOntology()->getRealization()->getDataLiteralRealization();
+					if (dataLiteralRealization) {
+						if (dataLiteralRealization->requiresDataLiteralsRealization(indiRef, dataRole)) {
+							dataLiteralRealization->realizeDataLiterals(indiRef);
+						}
+						CDataLiteralSetCollectorVisitor dataLiteralCollector(dataLiteralSet);
+						dataLiteralRealization->visitDataLiterals(indiRef, dataRole, &dataLiteralCollector);
+						return dataLiteralSet;
+					}
+				}				QHash<QPair<QString, CDatatype*>, CDataLiteral*>* dataValueDatatypeSingleLiteralHash = nullptr;
 				COntologyTriplesAssertionsAccessor* triplesAssertionAccessor = mOntoAnsweringItem->getOntology()->getOntologyTriplesData()->getTripleAssertionAccessor();
 				if (triplesAssertionAccessor) {
 					dataValueDatatypeSingleLiteralHash = mOntoAnsweringItem->getDataValueDatatypeSingleLiteralHash();
@@ -15570,6 +15603,10 @@ namespace Konclude {
 				CRole* dataRole = dataBaseItem->getDataRole();
 				CIndividualReference indiRef = dataBaseItem->getIndividualReference();
 				COptimizedComplexVariableIndividualMappings* variableMapping = dataBaseItem->getVariableMapping();
+
+
+
+
 
 				cint64 varIdx = 0;
 

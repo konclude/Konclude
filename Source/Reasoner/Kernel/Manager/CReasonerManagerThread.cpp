@@ -494,6 +494,14 @@ namespace Konclude {
 						if (realQuery->isDynamicRealisationRequired()) {
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
+							if (realQuery->isDataRoleClassificationRequired()) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY));
+							}
+							if (realQuery->isSameIndividualRealisationRequired()) {
+								// the data values (and the synsets of their answers) are only complete after
+								// the same individuals have been merged, so that step has to run first
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+							}
 							reqList.append(realQuery->getDynamicRealizationRequirement());
 						} else {
 							if (realQuery->isSameIndividualRealisationRequired()) {
@@ -516,6 +524,10 @@ namespace Konclude {
 						CConcreteOntology* ontology = complexAnsweringQuery->getBaseOntology();
 						QList<COntologyProcessingRequirement*> reqList;
 						reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY));
+						// the data literal answering uses the realization of the individual data values
+						if (complexAnsweringQuery->isDataValueRealizationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+						}
 
 						CComplexConceptAnsweringQuery* complexConceptAnsweringQuery = dynamic_cast<CComplexConceptAnsweringQuery*>(complexAnsweringQuery);
 						if (complexConceptAnsweringQuery) {

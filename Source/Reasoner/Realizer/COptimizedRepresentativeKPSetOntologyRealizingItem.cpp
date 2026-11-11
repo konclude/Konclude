@@ -20,6 +20,18 @@
 
 #include "COptimizedRepresentativeKPSetOntologyRealizingItem.h"
 
+#include "Reasoner/Taxonomy/CRolePropertiesHierarchy.h"
+#include "Reasoner/Taxonomy/CRolePropertiesHierarchyNode.h"
+#include "Reasoner/Classification/CPropertyRoleClassification.h"
+#include "Reasoner/Ontology/CDataAssertionLinker.h"
+#include "Reasoner/Ontology/CIndividual.h"
+#include <QReadLocker>
+#include <QWriteLocker>
+#include "Reasoner/Kernel/Cache/CCacheValue.h"
+#include "Reasoner/Ontology/CConceptVector.h"
+#include "Reasoner/Ontology/COntologyProcessingDataLiteralRealizationRequirement.h"
+#include "CIndividualDataLiteralTestingItem.h"
+
 
 namespace Konclude {
 
@@ -29,9 +41,22 @@ namespace Konclude {
 
 
 			COptimizedRepresentativeKPSetOntologyRealizingItem::COptimizedRepresentativeKPSetOntologyRealizingItem() {
+				mRealizeDataLiteralProcessingStep = nullptr;
 			}
 
 			COptimizedRepresentativeKPSetOntologyRealizingItem::~COptimizedRepresentativeKPSetOntologyRealizingItem() {
+				for (QHash<cint64, COptimizedRepresentativeKPSetDataLiteralRealizationData*>::iterator it = mDataLiteralRealizationHash.begin(); it != mDataLiteralRealizationHash.end(); ++it) {
+					delete it.value();
+				}
+				mDataLiteralRealizationHash.clear();
+				for (CIndividualDataLiteralTestingItem* testingItem : mDataLiteralCandidateTestingItemList) {
+					delete testingItem;
+				}
+				mDataLiteralCandidateTestingItemList.clear();
+				if (mRealizeDataLiteralProcessingStep) {
+					delete mRealizeDataLiteralProcessingStep;
+					mRealizeDataLiteralProcessingStep = nullptr;
+				}
 				delete mCalculationConfig;
 				delete mInitRealizeProcessingStep;
 				delete mRealizeConceptProcessingStep;
@@ -860,9 +885,51 @@ namespace Konclude {
 					} else if (stepProcRequirement->getRequiredProcessingStep()->getOntologyProcessingType() == COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE) {
 						markInstantiatedItemForSameIndividualsRealization(procData, CIndividualReference());
 						supportRequirement = true;
+
 					}
 				}
 
+				COntologyProcessingDataLiteralRealizationRequirement* dataLiteralRealReq = dynamic_cast<COntologyProcessingDataLiteralRealizationRequirement*>(ontoRequirement);
+				if (dataLiteralRealReq) {
+					// the data values of the requested individual are analysed here, on the realizing
+					// thread, so that the query threads only read the published result afterwards;
+					// an empty individual reference asks for the values of all named individuals
+					CIndividualReference dataLiteralIndividualReference = dataLiteralRealReq->getIndividualReference();
+					QList<CIndividualReference> dataLiteralIndividualReferenceList;
+					if (dataLiteralIndividualReference.isNonEmpty()) {
+						dataLiteralIndividualReferenceList.append(dataLiteralIndividualReference);
+					} else {
+						cint64 individualCount = mOntology->getABox()->getIndividualCount();
+						for (cint64 individualId = 0; individualId < individualCount; ++individualId) {
+							CIndividual* individual = mOntology->getABox()->getIndividualVector()->getData(individualId);
+							if (individual) {
+								dataLiteralIndividualReferenceList.append(CIndividualReference(individual, individualId));
+							}
+						}
+					}
+					for (CIndividualReference concreteIndividualReference : dataLiteralIndividualReferenceList) {
+						COptimizedRepresentativeKPSetDataLiteralRealizationData* dataLiteralData = getDataLiteralRealizationData(concreteIndividualReference);
+						if (!dataLiteralData) {
+							continue;
+						}
+						for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : dataLiteralData->mCandidateList) {
+							if (candidate->mState == COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_CANDIDATE) {
+								CIndividualDataLiteralTestingItem* dataLiteralTestingItem = new CIndividualDataLiteralTestingItem(this, dataLiteralData, candidate, concreteIndividualReference, procData);
+								candidate->mState = COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_TESTING;
+								candidate->mTestingItem = dataLiteralTestingItem;
+								addDataLiteralCandidateTestingItem(dataLiteralTestingItem);
+								if (procData) {
+									procData->incProcessingItemCount(nullptr);
+								}
+							} else if (candidate->mState == COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_TESTING && candidate->mTestingItem && procData) {
+								// the same candidate is verified for another requirement as well
+								candidate->mTestingItem->addProcessingData(procData);
+								procData->incProcessingItemCount(nullptr);
+							}
+						}
+					}
+					supportRequirement = true;
+				}
 				COntologyProcessingDynamicRealizationRequirement* dynamicRealRequirment = dynamic_cast<COntologyProcessingDynamicRealizationRequirement*>(ontoRequirement);
 				if (dynamicRealRequirment) {
 
@@ -4260,6 +4327,441 @@ namespace Konclude {
 				return mBackendAssocCacheReader;
 			}
 
+
+			CRealizingTestingStep* COptimizedRepresentativeKPSetOntologyRealizingItem::getRealizeDataLiteralProcessingStep() {
+				return mRealizeDataLiteralProcessingStep;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::extractDataLiteralValue(CConcept* concept, bool conceptNegation, CRole*& dataRole, CDataLiteral*& dataLiteral) {
+				dataRole = nullptr;
+				dataLiteral = nullptr;
+				if (!concept) {
+					return false;
+				}
+				// a minimum cardinality of one over a literal-only data range is normalised to
+				// not ALL dp. (not {v}); the negated literal is wrapped in a conjunction with one operand
+				CRole* negatedMinRole = concept->getRole();
+				if (conceptNegation && concept->getOperatorCode() == CCALL && negatedMinRole && negatedMinRole->isDataRole() && concept->getOperandCount() == 1) {
+					CConcept* fillerConcept = concept->getOperandList()->getData();
+					if (fillerConcept && !concept->getOperandList()->isNegated() && fillerConcept->getOperatorCode() == CCAND && fillerConcept->getOperandCount() == 1) {
+						CConcept* innerConcept = fillerConcept->getOperandList()->getData();
+						if (innerConcept && fillerConcept->getOperandList()->isNegated() && innerConcept->getOperatorCode() == CCDATALITERAL && innerConcept->getDataLiteral()) {
+							dataRole = negatedMinRole;
+							dataLiteral = innerConcept->getDataLiteral();
+							return true;
+						}
+					}
+				}
+				// a data value appears either as a positive existential (SOME dp.{v}) or, because
+				// the ABox class assertions are kept in negated form, as a negated universal
+				// (not ALL dp.not {v}), which is the same value
+				bool valueConcept = false;
+				if (!conceptNegation && concept->getOperatorCode() == CCSOME) {
+					valueConcept = true;
+				} else if (conceptNegation && concept->getOperatorCode() == CCALL) {
+					valueConcept = true;
+				}
+				if (!valueConcept) {
+					// a minimum cardinality of one over a literal-only data range names the value as well,
+					// for example DataMinCardinality(1 dp1 DataOneOf("atleast"))
+					if (!conceptNegation && concept->getOperatorCode() == CCATLEAST && concept->getParameter() == 1) {
+						CRole* role = concept->getRole();
+						if (role && role->isDataRole() && concept->getOperandCount() == 1) {
+							CConcept* fillerConcept = concept->getOperandList()->getData();
+							if (fillerConcept && !concept->getOperandList()->isNegated() && fillerConcept->getOperatorCode() == CCDATALITERAL && fillerConcept->getDataLiteral()) {
+								dataRole = role;
+								dataLiteral = fillerConcept->getDataLiteral();
+								return true;
+							}
+						}
+					}
+					return false;
+				}
+				CRole* role = concept->getRole();
+				if (!role || !role->isDataRole() || concept->getOperandCount() != 1) {
+					return false;
+				}
+				CConcept* fillerConcept = concept->getOperandList()->getData();
+				bool fillerNegation = concept->getOperandList()->isNegated();
+				if (!fillerConcept || fillerNegation != conceptNegation) {
+					return false;
+				}
+				if (fillerConcept->getOperatorCode() != CCDATALITERAL) {
+					return false;
+				}
+				dataRole = role;
+				dataLiteral = fillerConcept->getDataLiteral();
+				return dataLiteral != nullptr;
+			}
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::isDataRoleSubRoleOf(CRole* subRole, CRole* superRole) {
+				if (!subRole || !superRole) {
+					return false;
+				}
+				if (subRole == superRole) {
+					return true;
+				}
+				CPropertyRoleClassification* roleClassification = mOntology->getClassification()->getDataPropertyRoleClassification();
+				if (!roleClassification) {
+					return false;
+				}
+				CRolePropertiesHierarchy* roleHierarchy = roleClassification->getRolePropertiesHierarchy();
+				if (!roleHierarchy) {
+					return false;
+				}
+				CRolePropertiesHierarchyNode* subRoleNode = roleHierarchy->getHierarchyNode(subRole, false);
+				CRolePropertiesHierarchyNode* superRoleNode = roleHierarchy->getHierarchyNode(superRole, false);
+				if (!subRoleNode || !superRoleNode) {
+					return false;
+				}
+				QSet<CRolePropertiesHierarchyNode*> visitedNodeSet;
+				QList<CRolePropertiesHierarchyNode*> processingNodeList;
+				processingNodeList.append(subRoleNode);
+				visitedNodeSet.insert(subRoleNode);
+				while (!processingNodeList.isEmpty()) {
+					CRolePropertiesHierarchyNode* processingNode = processingNodeList.takeFirst();
+					if (processingNode == superRoleNode) {
+						return true;
+					}
+					for (CRolePropertiesHierarchyNode* parentNode : *processingNode->getParentNodeSet()) {
+						if (!visitedNodeSet.contains(parentNode)) {
+							visitedNodeSet.insert(parentNode);
+							processingNodeList.append(parentNode);
+						}
+					}
+				}
+				return false;
+			}
+
+
+			COptimizedRepresentativeKPSetOntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::addDataLiteralForRole(QHash<CRole*, QSet<CDataLiteral*>*>& roleDataLiteralSetHash, CRole* dataRole, CDataLiteral* dataLiteral) {
+				if (!dataRole || !dataLiteral) {
+					return this;
+				}
+				QSet<CDataLiteral*>*& dataLiteralSet = roleDataLiteralSetHash[dataRole];
+				if (!dataLiteralSet) {
+					dataLiteralSet = new QSet<CDataLiteral*>();
+				}
+				dataLiteralSet->insert(dataLiteral);
+				return this;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::analyzeDataLiteralLabel(COptimizedRepresentativeKPSetDataLiteralRealizationData* data, cint64 indiId, cint64 labelType, bool deterministic) {
+				if (!mBackendAssocCacheReader) {
+					return false;
+				}
+				CBackendRepresentativeMemoryLabelCacheItem* labelCacheItem = mBackendAssocCacheReader->getIndividualAssociatedCacheLabelItem(indiId, labelType);
+				if (!labelCacheItem) {
+					return false;
+				}
+				CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelValueLinker*>* tagValueHash = labelCacheItem->getTagCacheValueHash(false);
+				if (!tagValueHash) {
+					return false;
+				}
+				CConceptVector* conceptVector = mOntology->getTBox()->getConceptVector();
+				if (!conceptVector) {
+					return false;
+				}
+				for (CCACHINGHASH<cint64, CBackendRepresentativeMemoryLabelValueLinker*>::const_iterator it = tagValueHash->constBegin(), itEnd = tagValueHash->constEnd(); it != itEnd; ++it) {
+					cint64 conceptTag = it.key();
+					if (conceptTag == 0) {
+						continue;
+					}
+					bool conceptNegation = conceptTag < 0;
+					CConcept* concept = conceptVector->getData(conceptNegation ? -conceptTag : conceptTag);
+					CRole* dataRole = nullptr;
+					CDataLiteral* dataLiteral = nullptr;
+					if (extractDataLiteralValue(concept, conceptNegation, dataRole, dataLiteral)) {
+						// the cache value encodes whether the concept was derived deterministically or in a
+						// non-deterministic branch, so the values of the full label can be classified as well
+						bool deterministicValue = deterministic;
+						CBackendRepresentativeMemoryLabelValueLinker* labelValueLinker = it.value();
+						if (labelValueLinker) {
+							CCacheValue::CACHEVALUEIDENTIFIER cacheValueIdentifier = labelValueLinker->getCacheValue().getCacheValueIdentifier();
+							if (cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_CONCEPT || cacheValueIdentifier == CCacheValue::CACHEVALTAGAND_NONDETERMINISTIC_NEGATED_CONCEPT) {
+								deterministicValue = false;
+							} else if (cacheValueIdentifier == CCacheValue::CACHEVALTAGANDCONCEPT || cacheValueIdentifier == CCacheValue::CACHEVALTAGANDNEGATEDCONCEPT) {
+								deterministicValue = true;
+							}
+						}
+						if (deterministicValue) {
+							addDataLiteralForRole(data->mDeterministicLiteralSetHash, dataRole, dataLiteral);
+						} else {
+							addDataLiteralForRole(data->mNondeterministicLiteralSetHash, dataRole, dataLiteral);
+							// the value only holds in a branch, so it is verified by a satisfiability
+							// test of the individual together with the negated value ({@link DLCS_ENTAILED})
+							data->addDataLiteralCandidate(dataRole, dataLiteral);
+						}
+					}
+				}
+				return true;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::analyzeDataLiteralRealizationData(COptimizedRepresentativeKPSetDataLiteralRealizationData* data, const CIndividualReference& indiRef) {
+				// the values of all (deterministically) same individuals are values of the queried
+				// individual, so the analysis closes over the same individual set of the cache
+				QSet<cint64> processedIdSet;
+				QList<cint64> processingIdList;
+				processingIdList.append(indiRef.getIndividualID());
+				while (!processingIdList.isEmpty()) {
+					cint64 indiId = processingIdList.takeFirst();
+					if (processedIdSet.contains(indiId)) {
+						continue;
+					}
+					processedIdSet.insert(indiId);
+
+					CIndividual* individual = mOntology->getABox()->getIndividualVector()->getData(indiId);
+					if (individual) {
+						for (CDataAssertionLinker* dataAssertionLinkerIt = individual->getAssertionDataLinker(); dataAssertionLinkerIt; dataAssertionLinkerIt = dataAssertionLinkerIt->getNext()) {
+							addDataLiteralForRole(data->mDeterministicLiteralSetHash, dataAssertionLinkerIt->getRole(), dataAssertionLinkerIt->getDataLiteral());
+						}
+						// a DataHasValue class assertion is kept as a concept assertion of the individual
+						// (in negated form, see the label scan), so the asserted concepts are analysed as well
+						for (CConceptAssertionLinker* conceptAssertionLinkerIt = individual->getAssertionConceptLinker(); conceptAssertionLinkerIt; conceptAssertionLinkerIt = conceptAssertionLinkerIt->getNext()) {
+							CRole* dataRole = nullptr;
+							CDataLiteral* dataLiteral = nullptr;
+							if (extractDataLiteralValue(conceptAssertionLinkerIt->getData(), conceptAssertionLinkerIt->isNegated(), dataRole, dataLiteral)) {
+								addDataLiteralForRole(data->mDeterministicLiteralSetHash, dataRole, dataLiteral);
+							}
+						}
+					}
+					if (!analyzeDataLiteralLabel(data, indiId, CBackendRepresentativeMemoryLabelCacheItem::FULL_CONCEPT_SET_LABEL, true)) {
+						analyzeDataLiteralLabel(data, indiId, CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_CONCEPT_SET_LABEL, true);
+					}
+					// the non-deterministic label holds the branch dependent concepts; their values are
+					// candidates that have to be verified, even when the full label is available
+					analyzeDataLiteralLabel(data, indiId, CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_CONCEPT_SET_LABEL, false);
+
+					if (mBackendAssocCacheReader) {
+						CBackendRepresentativeMemoryCacheIndividualAssociationData* associationData = mBackendAssocCacheReader->getIndividualAssociationData(indiId);
+						if (associationData) {
+							CBackendRepresentativeMemoryLabelCacheItem* sameIndividualSetLabel = associationData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+							if (sameIndividualSetLabel) {
+								mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, sameIndividualSetLabel, [&](cint64 sameIndividualId)->bool {
+									if (!processedIdSet.contains(sameIndividualId)) {
+										processingIdList.append(sameIndividualId);
+									}
+									return true;
+								});
+							}
+						}
+					}
+				}
+				return true;
+			}
+
+
+			COptimizedRepresentativeKPSetDataLiteralRealizationData* COptimizedRepresentativeKPSetOntologyRealizingItem::getDataLiteralRealizationData(const CIndividualReference& indiRef) {
+				// the analysis is protected by the write lock, the readers use the read lock; the
+				// realization data of an individual is immutable once it has been analysed
+				QWriteLocker locker(&mDataLiteralRealizationLock);
+				COptimizedRepresentativeKPSetDataLiteralRealizationData* data = mDataLiteralRealizationHash.value(indiRef.getIndividualID());
+				if (!data) {
+					data = new COptimizedRepresentativeKPSetDataLiteralRealizationData();
+					mDataLiteralRealizationHash.insert(indiRef.getIndividualID(), data);
+				}
+				if (!data->mAnalyzed) {
+					data->mAnalyzed = analyzeDataLiteralRealizationData(data, indiRef);
+				}
+				return data;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitDataRoles(const CIndividualReference& indiRef, CDataLiteralRealizationVisitor* visitor) {
+				QReadLocker locker(&mDataLiteralRealizationLock);
+				COptimizedRepresentativeKPSetDataLiteralRealizationData* data = mDataLiteralRealizationHash.value(indiRef.getIndividualID());
+				bool visited = false;
+				if (!data) {
+					return false;
+				}
+				QSet<CRole*> visitedDataRoleSet;
+				for (QHash<CRole*, QSet<CDataLiteral*>*>::const_iterator it = data->mDeterministicLiteralSetHash.constBegin(), itEnd = data->mDeterministicLiteralSetHash.constEnd(); it != itEnd; ++it) {
+					if (it.value()->isEmpty()) {
+						continue;
+					}
+					visitedDataRoleSet.insert(it.key());
+					visited = true;
+					if (visitor) {
+						visitor->visitDataRole(it.key(), true);
+					}
+				}
+				for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : data->mCandidateList) {
+					if (candidate->mState != COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_ENTAILED || visitedDataRoleSet.contains(candidate->mDataRole)) {
+						continue;
+					}
+					visitedDataRoleSet.insert(candidate->mDataRole);
+					visited = true;
+					if (visitor) {
+						visitor->visitDataRole(candidate->mDataRole, false);
+					}
+				}
+				return visited;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitDataLiterals(const CIndividualReference& indiRef, CRole* dataRole, CDataLiteralRealizationVisitor* visitor) {
+				QReadLocker locker(&mDataLiteralRealizationLock);
+				COptimizedRepresentativeKPSetDataLiteralRealizationData* data = mDataLiteralRealizationHash.value(indiRef.getIndividualID());
+				bool visited = false;
+				if (!data) {
+					return false;
+				}
+				QSet<CDataLiteral*> visitedLiteralSet;
+				for (QHash<CRole*, QSet<CDataLiteral*>*>::const_iterator it = data->mDeterministicLiteralSetHash.constBegin(), itEnd = data->mDeterministicLiteralSetHash.constEnd(); it != itEnd; ++it) {
+					if (!isDataRoleSubRoleOf(it.key(), dataRole)) {
+						continue;
+					}
+					for (QSet<CDataLiteral*>::const_iterator litIt = it.value()->constBegin(), litItEnd = it.value()->constEnd(); litIt != litItEnd; ++litIt) {
+						CDataLiteral* dataLiteral = *litIt;
+						if (visitedLiteralSet.contains(dataLiteral)) {
+							continue;
+						}
+						visitedLiteralSet.insert(dataLiteral);
+						visited = true;
+						if (visitor) {
+							visitor->visitDataLiteral(it.key(), dataLiteral, true);
+						}
+					}
+				}
+				for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : data->mCandidateList) {
+					// only values that hold in every model are published; the verified candidates
+					// are branch dependent in their derivation, but their value is entailed
+					if (candidate->mState != COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_ENTAILED) {
+						continue;
+					}
+					if (!isDataRoleSubRoleOf(candidate->mDataRole, dataRole) || visitedLiteralSet.contains(candidate->mDataLiteral)) {
+						continue;
+					}
+					visitedLiteralSet.insert(candidate->mDataLiteral);
+					visited = true;
+					if (visitor) {
+						visitor->visitDataLiteral(candidate->mDataRole, candidate->mDataLiteral, false);
+					}
+				}
+				return visited;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::isDataLiteralInstance(CRole* dataRole, const CIndividualReference& indiRef, CDataLiteral* dataLiteral) {
+				if (!dataRole || !dataLiteral) {
+					return false;
+				}
+				QReadLocker locker(&mDataLiteralRealizationLock);
+				COptimizedRepresentativeKPSetDataLiteralRealizationData* data = mDataLiteralRealizationHash.value(indiRef.getIndividualID());
+				if (!data) {
+					return false;
+				}
+				for (QHash<CRole*, QSet<CDataLiteral*>*>::const_iterator it = data->mDeterministicLiteralSetHash.constBegin(), itEnd = data->mDeterministicLiteralSetHash.constEnd(); it != itEnd; ++it) {
+					if (isDataRoleSubRoleOf(it.key(), dataRole) && it.value()->contains(dataLiteral)) {
+						return true;
+					}
+				}
+				for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : data->mCandidateList) {
+					if (candidate->mState == COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_ENTAILED && candidate->mDataLiteral == dataLiteral && isDataRoleSubRoleOf(candidate->mDataRole, dataRole)) {
+						return true;
+					}
+				}
+				return false;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::requiresDataLiteralsRealization(const CIndividualReference& indiRef, CRole* dataRole) {
+				QReadLocker locker(&mDataLiteralRealizationLock);
+				COptimizedRepresentativeKPSetDataLiteralRealizationData* data = mDataLiteralRealizationHash.value(indiRef.getIndividualID());
+				if (!data) {
+					return true;
+				}
+				for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : data->mCandidateList) {
+					if (candidate->mState == COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_CANDIDATE || candidate->mState == COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_TESTING) {
+						return true;
+					}
+				}
+				return false;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::realizeDataLiterals(const CIndividualReference& indiRef) {
+				if (indiRef.isNonEmpty()) {
+					getDataLiteralRealizationData(indiRef);
+				} else {
+					realizeAllDataLiterals();
+				}
+				return true;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::realizeAllDataLiterals() {
+				// the reverse requests ask about all named individuals, so their data values are
+				// analysed once; the analysis is cached per individual like the on-demand analysis
+				cint64 individualCount = mOntology->getABox()->getIndividualCount();
+				for (cint64 individualId = 0; individualId < individualCount; ++individualId) {
+					CIndividual* individual = mOntology->getABox()->getIndividualVector()->getData(individualId);
+					if (individual) {
+						getDataLiteralRealizationData(CIndividualReference(individual, individualId));
+					}
+				}
+				return true;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::hasOnlyDeterministicDataLiterals(CRole* dataRole) {
+				QReadLocker locker(&mDataLiteralRealizationLock);
+				for (QHash<cint64, COptimizedRepresentativeKPSetDataLiteralRealizationData*>::const_iterator it = mDataLiteralRealizationHash.constBegin(), itEnd = mDataLiteralRealizationHash.constEnd(); it != itEnd; ++it) {
+					COptimizedRepresentativeKPSetDataLiteralRealizationData* data = it.value();
+					for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : data->mCandidateList) {
+						if (isDataRoleSubRoleOf(candidate->mDataRole, dataRole) && (candidate->mState == COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_CANDIDATE || candidate->mState == COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_TESTING)) {
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::hasDataLiteralCandidateTestingItems() {
+				return !mDataLiteralCandidateTestingItemList.isEmpty();
+			}
+
+
+			CIndividualDataLiteralTestingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::takeDataLiteralCandidateTestingItem() {
+				if (!mDataLiteralCandidateTestingItemList.isEmpty()) {
+					return mDataLiteralCandidateTestingItemList.takeFirst();
+				}
+				return nullptr;
+			}
+
+
+			COptimizedRepresentativeKPSetOntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::addDataLiteralCandidateTestingItem(CIndividualDataLiteralTestingItem* testingItem) {
+				if (testingItem) {
+					mDataLiteralCandidateTestingItemList.append(testingItem);
+				}
+				return this;
+			}
+
+
+			CConcept* COptimizedRepresentativeKPSetOntologyRealizingItem::getDataLiteralTestingConcept(CRole* dataRole, CDataLiteral* dataLiteral) {
+				return mDataLiteralTestingConceptHash.value(QPair<CRole*, CDataLiteral*>(dataRole, dataLiteral), nullptr);
+			}
+
+
+			COptimizedRepresentativeKPSetOntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::setDataLiteralTestingConcept(CRole* dataRole, CDataLiteral* dataLiteral, CConcept* testingConcept) {
+				mDataLiteralTestingConceptHash.insert(QPair<CRole*, CDataLiteral*>(dataRole, dataLiteral), testingConcept);
+				return this;
+			}
+
+
+			CConcept* COptimizedRepresentativeKPSetOntologyRealizingItem::getDataLiteralConcept(CDataLiteral* dataLiteral) {
+				return mDataLiteralConceptHash.value(dataLiteral, nullptr);
+			}
+
+
+			COptimizedRepresentativeKPSetOntologyRealizingItem* COptimizedRepresentativeKPSetOntologyRealizingItem::setDataLiteralConcept(CDataLiteral* dataLiteral, CConcept* literalConcept) {
+				mDataLiteralConceptHash.insert(dataLiteral, literalConcept);
+				return this;
+			}
 
 		}; // end namespace Realizer
 

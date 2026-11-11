@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-union-forced-value-request.xml: Both branches of a union require the same data value, so the value is entailed. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xml:base="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">forced</Literal>
+ </SetOfLiterals>
+</ResponseMessage>

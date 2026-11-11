@@ -62,12 +62,14 @@
 #include "Reasoner/Ontology/COntologyProcessingSameRealizationRequirement.h"
 #include "Reasoner/Ontology/COntologyProcessingIteratorRealizationRequirement.h"
 #include "Reasoner/Ontology/COntologyProcessingInitializedRealizationRequirement.h"
+#include "Reasoner/Ontology/CConcept.h"
 
 #include "Reasoner/Realization/CRoleRealizationInstanceVisitor.h"
 #include "Reasoner/Realization/CRoleRealizationIndividualVisitor.h"
 #include "Reasoner/Realization/CRoleRealization.h"
 #include "Reasoner/Realization/CConceptRealization.h"
 #include "Reasoner/Realization/CSameRealization.h"
+#include "Reasoner/Realization/CDataLiteralRealization.h"
 #include "Reasoner/Realization/CPossibleAssertionsCollectionSet.h"
 #include "Reasoner/Realization/CRealizationIndividualInstanceItemReference.h"
 #include "Reasoner/Realization/CRealizationIndividualSorting.h"
@@ -96,7 +98,98 @@ namespace Konclude {
 			 *		\brief		TODO
 			 *
 			 */
-			class COptimizedRepresentativeKPSetOntologyRealizingItem : public COntologyRealizingItem, public CRoleRealization, public CConceptRealization, public CSameRealization {
+			class CIndividualDataLiteralTestingItem;
+
+			/*! 
+			 *
+			 *		\class		COptimizedRepresentativeKPSetDataLiteralCandidate
+			 *
+			 *		\brief		A non-deterministically derived data value that has to be verified by a
+			 *					satisfiability test of the individual together with the negated value.
+			 *
+			 */
+			class COptimizedRepresentativeKPSetDataLiteralCandidate {
+				public:
+					enum DATALITERALCANDIDATESTATE {
+						DLCS_CANDIDATE,
+						DLCS_TESTING,
+						DLCS_ENTAILED,
+						DLCS_NOTENTAILED
+					};
+
+					COptimizedRepresentativeKPSetDataLiteralCandidate(CRole* dataRole, CDataLiteral* dataLiteral) {
+						mDataRole = dataRole;
+						mDataLiteral = dataLiteral;
+						mState = DLCS_CANDIDATE;
+						mTestingItem = nullptr;
+						mTestingConcept = nullptr;
+					}
+
+					CRole* mDataRole;
+					CDataLiteral* mDataLiteral;
+					DATALITERALCANDIDATESTATE mState;
+					CIndividualDataLiteralTestingItem* mTestingItem;
+					CConcept* mTestingConcept;
+			};
+
+
+			/*! 
+			 *
+			 *		\class		COptimizedRepresentativeKPSetDataLiteralRealizationData
+			 *
+			 *		\brief		Lazily analysed data literal realization data of one individual.
+			 *
+			 */
+			class COptimizedRepresentativeKPSetDataLiteralRealizationData {
+				public:
+					COptimizedRepresentativeKPSetDataLiteralRealizationData() {
+						mAnalyzed = false;
+					}
+					~COptimizedRepresentativeKPSetDataLiteralRealizationData() {
+						for (QHash<CRole*, QSet<CDataLiteral*>*>::iterator it = mDeterministicLiteralSetHash.begin(); it != mDeterministicLiteralSetHash.end(); ++it) {
+							delete it.value();
+						}
+						for (QHash<CRole*, QSet<CDataLiteral*>*>::iterator it = mNondeterministicLiteralSetHash.begin(); it != mNondeterministicLiteralSetHash.end(); ++it) {
+							delete it.value();
+						}
+						for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : mCandidateList) {
+							delete candidate;
+						}
+					}
+
+					COptimizedRepresentativeKPSetDataLiteralCandidate* addDataLiteralCandidate(CRole* dataRole, CDataLiteral* dataLiteral) {
+						if (!dataRole || !dataLiteral) {
+							return nullptr;
+						}
+						QSet<CDataLiteral*>* deterministicLiteralSet = mDeterministicLiteralSetHash.value(dataRole);
+						if (deterministicLiteralSet && deterministicLiteralSet->contains(dataLiteral)) {
+							return nullptr;
+						}
+						for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : mCandidateList) {
+							if (candidate->mDataRole == dataRole && candidate->mDataLiteral == dataLiteral) {
+								return candidate;
+							}
+						}
+						COptimizedRepresentativeKPSetDataLiteralCandidate* candidate = new COptimizedRepresentativeKPSetDataLiteralCandidate(dataRole, dataLiteral);
+						mCandidateList.append(candidate);
+						return candidate;
+					}
+
+					COptimizedRepresentativeKPSetDataLiteralCandidate* getDataLiteralCandidate(CRole* dataRole, CDataLiteral* dataLiteral) {
+						for (COptimizedRepresentativeKPSetDataLiteralCandidate* candidate : mCandidateList) {
+							if (candidate->mDataRole == dataRole && candidate->mDataLiteral == dataLiteral) {
+								return candidate;
+							}
+						}
+						return nullptr;
+					}
+
+					bool mAnalyzed;
+					QHash<CRole*, QSet<CDataLiteral*>*> mDeterministicLiteralSetHash;
+					QHash<CRole*, QSet<CDataLiteral*>*> mNondeterministicLiteralSetHash;
+					QList<COptimizedRepresentativeKPSetDataLiteralCandidate*> mCandidateList;
+			};
+			class COptimizedRepresentativeKPSetOntologyRealizingItem : public COntologyRealizingItem, public CRoleRealization, public CConceptRealization, public CSameRealization, public CDataLiteralRealization {
 				// public methods
 				public:
 					//! Constructor
@@ -594,8 +687,34 @@ namespace Konclude {
 
 					CBackendRepresentativeMemoryCacheReader* getBackendAssociationCacheReader();
 
+					CRealizingTestingStep* getRealizeDataLiteralProcessingStep();
+
+					virtual bool visitDataRoles(const CIndividualReference& indiRef, CDataLiteralRealizationVisitor* visitor);
+					virtual bool visitDataLiterals(const CIndividualReference& indiRef, CRole* dataRole, CDataLiteralRealizationVisitor* visitor);
+					virtual bool isDataLiteralInstance(CRole* dataRole, const CIndividualReference& indiRef, CDataLiteral* dataLiteral);
+					virtual bool requiresDataLiteralsRealization(const CIndividualReference& indiRef, CRole* dataRole);
+					virtual bool realizeDataLiterals(const CIndividualReference& indiRef);
+					bool realizeAllDataLiterals();
+					virtual bool hasOnlyDeterministicDataLiterals(CRole* dataRole);
+
+					bool hasDataLiteralCandidateTestingItems();
+					CIndividualDataLiteralTestingItem* takeDataLiteralCandidateTestingItem();
+					COptimizedRepresentativeKPSetOntologyRealizingItem* addDataLiteralCandidateTestingItem(CIndividualDataLiteralTestingItem* testingItem);
+					CConcept* getDataLiteralTestingConcept(CRole* dataRole, CDataLiteral* dataLiteral);
+					COptimizedRepresentativeKPSetOntologyRealizingItem* setDataLiteralTestingConcept(CRole* dataRole, CDataLiteral* dataLiteral, CConcept* testingConcept);
+					CConcept* getDataLiteralConcept(CDataLiteral* dataLiteral);
+					COptimizedRepresentativeKPSetOntologyRealizingItem* setDataLiteralConcept(CDataLiteral* dataLiteral, CConcept* literalConcept);
+
+
 				// protected methods
 				protected:
+					COptimizedRepresentativeKPSetDataLiteralRealizationData* getDataLiteralRealizationData(const CIndividualReference& indiRef);
+					bool analyzeDataLiteralRealizationData(COptimizedRepresentativeKPSetDataLiteralRealizationData* data, const CIndividualReference& indiRef);
+					bool analyzeDataLiteralLabel(COptimizedRepresentativeKPSetDataLiteralRealizationData* data, cint64 indiId, cint64 labelType, bool deterministic);
+					COptimizedRepresentativeKPSetOntologyRealizingItem* addDataLiteralForRole(QHash<CRole*, QSet<CDataLiteral*>*>& roleDataLiteralSetHash, CRole* dataRole, CDataLiteral* dataLiteral);
+					bool isDataRoleSubRoleOf(CRole* subRole, CRole* superRole);
+					bool extractDataLiteralValue(CConcept* concept, bool conceptNegation, CRole*& dataRole, CDataLiteral*& dataLiteral);
+
 
 				// protected variables
 				protected:
@@ -603,6 +722,7 @@ namespace Konclude {
 					CRealizingTestingStep* mRealizeConceptProcessingStep;
 					CRealizingTestingStep* mRealizeRoleProcessingStep;
 					CRealizingTestingStep* mRealizeSameIndividualsProcessingStep;
+					CRealizingTestingStep* mRealizeDataLiteralProcessingStep;
 					CRealization* mRealization;
 
 					CBackendRepresentativeMemoryCacheReader* mBackendAssocCacheReader;
@@ -640,6 +760,14 @@ namespace Konclude {
 					QHash<CRole*, QSet<CBackendRepresentativeMemoryLabelCacheItem*>* > mDataRoleDetCacheLabelItemSetHash;
 					QHash<CRole*, QSet<CBackendRepresentativeMemoryLabelCacheItem*>* > mDataRoleNonDetCacheLabelItemSetHash;
 					QSet<CRole*> mDataRoleNondeterministicCacheLabelsSet;
+
+					QHash<cint64, COptimizedRepresentativeKPSetDataLiteralRealizationData*> mDataLiteralRealizationHash;
+					QReadWriteLock mDataLiteralRealizationLock;
+
+					QList<CIndividualDataLiteralTestingItem*> mDataLiteralCandidateTestingItemList;
+					QHash<QPair<CRole*, CDataLiteral*>, CConcept*> mDataLiteralTestingConceptHash;
+					QHash<CDataLiteral*, CConcept*> mDataLiteralConceptHash;
+
 
 
 

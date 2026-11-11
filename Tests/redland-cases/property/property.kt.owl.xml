@@ -121,7 +121,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-hasvalue"/><Literal>hasvalue.ttl</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-hasvalue"/><Literal>queries/select-data-value-entailed-hasvalue.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-hasvalue"/><Literal>expected/select-data-value-entailed-hasvalue.xml</Literal></DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-hasvalue"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-indirect"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-indirect"/><Literal>All data property values over all individuals: the asserted value of a sub-property, the value of a hasValue restriction on the individual and a value that is only derived from the TBox (subclass and hasValue restriction).</Literal></DataPropertyAssertion>
@@ -129,7 +128,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-indirect"/><Literal>hasvalue.ttl</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-indirect"/><Literal>queries/select-data-value-entailed-indirect.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-indirect"/><Literal>expected/select-data-value-entailed-indirect.xml</Literal></DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:property-select-data-value-entailed-indirect"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/><Literal>Test case: property-ask-data-super-value.</Literal></DataPropertyAssertion>

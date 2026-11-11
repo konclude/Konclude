@@ -30,6 +30,7 @@
 #include "CRealizerThread.h"
 #include "CRealizingTestingItem.h"
 #include "CIndividualConceptInstanceTestingItem.h"
+#include "CIndividualDataLiteralTestingItem.h"
 #include "CIndividualPairRoleInstanceTestingItem.h"
 #include "CIndividualSameTestingItem.h"
 #include "COptimizedRepresentativeKPSetOntologyRealizingItem.h"
@@ -246,6 +247,8 @@ namespace Konclude {
 
 
 					bool createNextConceptInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetConceptInstancesItem* instancesItem, COptimizedKPSetIndividualItem* instantiatedItem, cint64 remainingTestingCount, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
+					bool createNextDataLiteralInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, CIndividualDataLiteralTestingItem* dataLiteralTestingItem);
+					COptimizedRepresentativeKPSetOntologyRealizingThread* setDataLiteralRequirementProcessed(COntologyRealizingItem* ontRealItem, const QList<COntologyRealizingDynamicRequirmentProcessingData*>& procDataList);
 					bool createNextRoleInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetRoleInstancesItem* instancesItem, COptimizedKPSetIndividualItemPair itemPair, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
 					bool createNextSameIndividualsTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetIndividualItem* instantiatedItem1, COptimizedKPSetIndividualItem* instantiatedItem2, COntologyRealizingDynamicRequirmentProcessingData* procData = nullptr);
 					bool createIndividualsConsistencyTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem);

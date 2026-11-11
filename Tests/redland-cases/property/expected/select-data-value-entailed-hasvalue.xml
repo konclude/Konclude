@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- Expected answer for select-data-value-entailed-hasvalue.sparql:
-     "asserted2" is asserted for the sub-property :dp2 and "hv1" is entailed by the
-     hasValue restriction on :a, so both are values of :a under :dp1. Rows are
+     "asserted2" is asserted for the sub-property :dp2 (xsd:string) and "hv1" is entailed by the
+     hasValue restriction on :a (kept as an RDF plain literal), so both are values of :a under :dp1. Rows are
      compared as a set. -->
 <sparql xmlns="http://www.w3.org/2005/sparql-results#">
   <head>
@@ -12,7 +12,7 @@
       <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">asserted2</literal></binding>
     </result>
     <result>
-      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">hv1</literal></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral">hv1</literal></binding>
     </result>
   </results>
 </sparql>

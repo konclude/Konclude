@@ -509,6 +509,8 @@ HEADERS += \
    ./Source/Parser/Expressions/CQueryGetSubClassHierarchyExpression.h \
    ./Source/Parser/Expressions/CQueryGetSubClassesExpression.h \
    ./Source/Parser/Expressions/CQueryGetSameIndividualsExpression.h \
+   ./Source/Parser/Expressions/CQueryGetDataPropertyTargetsExpression.h \
+   ./Source/Parser/Expressions/CQueryGetDataPropertyFactsExpression.h \
    ./Source/Parser/Expressions/CQueryGetObjectPropertyTargetsExpression.h \
    ./Source/Parser/Expressions/CQueryGetObjectPropertySourcesExpression.h \
    ./Source/Parser/Expressions/CQueryGetObjectPropertiesOfTargetExpression.h \
@@ -1788,6 +1790,7 @@ HEADERS += \
    ./Source/Reasoner/Ontology/COntologyProcessingRequirement.h \
    ./Source/Reasoner/Ontology/COntologyProcessingIteratorRealizationRequirement.h \
    ./Source/Reasoner/Ontology/COntologyProcessingInitializedRealizationRequirement.h \
+   ./Source/Reasoner/Ontology/COntologyProcessingDataLiteralRealizationRequirement.h \
    ./Source/Reasoner/Ontology/COntologyProcessingDynamicRealizationRequirement.h \
    ./Source/Reasoner/Ontology/COntologyProcessingConceptSaturationRequirement.h \
    ./Source/Reasoner/Ontology/COntologyProcessingConceptRealizationRequirement.h \
@@ -2086,6 +2089,9 @@ HEADERS += \
    ./Source/Reasoner/Query/CInstancesResultVisitCallbackQuery.h \
    ./Source/Reasoner/Query/CInstancesQuery.h \
    ./Source/Reasoner/Query/CIndividualSynsetsResultVisitorGenerator.h \
+   ./Source/Reasoner/Query/CDataLiteralSetResult.h \
+   ./Source/Reasoner/Query/CDataPropertyTargetsQuery.h \
+   ./Source/Reasoner/Query/CDataPropertyFactsQuery.h \
    ./Source/Reasoner/Query/CIndividualSynsetsResult.h \
    ./Source/Reasoner/Query/CIndividualSynsetResultVisitorGenerator.h \
    ./Source/Reasoner/Query/CIndividualSynsetResult.h \
@@ -2179,6 +2185,7 @@ HEADERS += \
    ./Source/Reasoner/Realization/CRoleRealizationHierarchyNodeVisitor.h \
    ./Source/Reasoner/Realization/CRoleRealizationInstantiatedToHierarchyNodeVisitor.h \
    ./Source/Reasoner/Realization/CConceptRealization.h \
+   ./Source/Reasoner/Realization/CDataLiteralRealization.h \
    ./Source/Reasoner/Realization/CRoleRealization.h \
    ./Source/Reasoner/Realizer/RealizerSettings.h \
    ./Source/Reasoner/Realizer/CRealizingTestingStep.h \
@@ -2246,6 +2253,7 @@ HEADERS += \
    ./Source/Reasoner/Realizer/CIndividualRoleCandidateConfirmationTestingItem.h \
    ./Source/Reasoner/Realizer/CIndividualPairRoleInstanceTestingItem.h \
    ./Source/Reasoner/Realizer/CIndividualConceptInstanceTestingItem.h \
+   ./Source/Reasoner/Realizer/CIndividualDataLiteralTestingItem.h \
    ./Source/Reasoner/Realizer/CIncrementalKPSetOntologyConceptRealizingThread.h \
    ./Source/Reasoner/Realizer/CIncrementalKPSetOntologyConceptRealizingItem.h \
    ./Source/Reasoner/Realizer/COptimizedKPSetIndividualInstantiatedItemMultiHash.h \
@@ -3180,6 +3188,8 @@ SOURCES += \
    ./Source/Parser/Expressions/CQueryGetSubClassHierarchyExpression.cpp \
    ./Source/Parser/Expressions/CQueryGetSubClassesExpression.cpp \
    ./Source/Parser/Expressions/CQueryGetSameIndividualsExpression.cpp \
+   ./Source/Parser/Expressions/CQueryGetDataPropertyTargetsExpression.cpp \
+   ./Source/Parser/Expressions/CQueryGetDataPropertyFactsExpression.cpp \
    ./Source/Parser/Expressions/CQueryGetObjectPropertyTargetsExpression.cpp \
    ./Source/Parser/Expressions/CQueryGetObjectPropertySourcesExpression.cpp \
    ./Source/Parser/Expressions/CQueryGetObjectPropertiesOfTargetExpression.cpp \
@@ -4438,6 +4448,7 @@ SOURCES += \
    ./Source/Reasoner/Ontology/COntologyProcessingRequirement.cpp \
    ./Source/Reasoner/Ontology/COntologyProcessingIteratorRealizationRequirement.cpp \
    ./Source/Reasoner/Ontology/COntologyProcessingInitializedRealizationRequirement.cpp \
+   ./Source/Reasoner/Ontology/COntologyProcessingDataLiteralRealizationRequirement.cpp \
    ./Source/Reasoner/Ontology/COntologyProcessingDynamicRealizationRequirement.cpp \
    ./Source/Reasoner/Ontology/COntologyProcessingConceptSaturationRequirement.cpp \
    ./Source/Reasoner/Ontology/COntologyProcessingConceptRealizationRequirement.cpp \
@@ -4730,6 +4741,9 @@ SOURCES += \
    ./Source/Reasoner/Query/CInstancesResultVisitCallbackQuery.cpp \
    ./Source/Reasoner/Query/CInstancesQuery.cpp \
    ./Source/Reasoner/Query/CIndividualSynsetsResultVisitorGenerator.cpp \
+   ./Source/Reasoner/Query/CDataLiteralSetResult.cpp \
+   ./Source/Reasoner/Query/CDataPropertyTargetsQuery.cpp \
+   ./Source/Reasoner/Query/CDataPropertyFactsQuery.cpp \
    ./Source/Reasoner/Query/CIndividualSynsetsResult.cpp \
    ./Source/Reasoner/Query/CIndividualSynsetResultVisitorGenerator.cpp \
    ./Source/Reasoner/Query/CIndividualSynsetResult.cpp \
@@ -4888,6 +4902,7 @@ SOURCES += \
    ./Source/Reasoner/Realizer/CIndividualRoleCandidateConfirmationTestingItem.cpp \
    ./Source/Reasoner/Realizer/CIndividualPairRoleInstanceTestingItem.cpp \
    ./Source/Reasoner/Realizer/CIndividualConceptInstanceTestingItem.cpp \
+   ./Source/Reasoner/Realizer/CIndividualDataLiteralTestingItem.cpp \
    ./Source/Reasoner/Realizer/CIncrementalKPSetOntologyConceptRealizingThread.cpp \
    ./Source/Reasoner/Realizer/CIncrementalKPSetOntologyConceptRealizingItem.cpp \
    ./Source/Reasoner/Realizer/COptimizedKPSetIndividualInstantiatedItemMultiHash.cpp \

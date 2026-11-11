@@ -35,6 +35,7 @@ namespace Konclude {
 				mRequiresConceptRealisation = false;
 				mRequiresRoleRealisation = false;
 				mDynamicRealisation = false;
+				mRequiresDataRoleClassification = false;
 			}
 
 			CRealizationPremisingQuery::~CRealizationPremisingQuery() {
@@ -72,6 +73,10 @@ namespace Konclude {
 
 			bool CRealizationPremisingQuery::isDynamicRealisationRequired() {
 				return mDynamicRealisation;
+			}
+
+			bool CRealizationPremisingQuery::isDataRoleClassificationRequired() {
+				return mRequiresDataRoleClassification;
 			}
 
 			COntologyProcessingDynamicRealizationRequirement* CRealizationPremisingQuery::getDynamicRealizationRequirement() {
