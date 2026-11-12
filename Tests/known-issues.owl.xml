@@ -414,7 +414,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -426,7 +426,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
-    <Literal>SELECT with OPTIONAL returns no rows instead of the required left-join rows.</Literal>
+    <Literal>Fixed. The engine already returned the left-join rows; the XML serializers wrote a non-standard &lt;unbound/&gt; binding element for an unbound variable. Unbound variables are now omitted from the binding, as required by SPARQL Results XML. Guards: kt:sparql-optional and kt:sparql-lang-select-optional.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
@@ -679,7 +679,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
-    <Literal>Data property value queries (with a named subject and with a variable subject) answer the asserted values, including the values of sub-properties, and values that are only entailed: a value of an owl:hasValue restriction on the individual as well as a value that is derived from the TBox (for example B <= C and C <= (dp hasValue v) for an instance of B). The values are provided by the data literal realization of the individual, which is computed on demand from the asserted data, the asserted concepts and the backend cache labels. Non-deterministically derived values are only answered when they hold in the deterministic part of the realization.</Literal>
+    <Literal>Data property value queries (with a named subject and with a variable subject) answer the asserted values, including the values of sub-properties, and values that are only entailed: a value of an owl:hasValue restriction on the individual as well as a value that is derived from the TBox (for example B &lt;= C and C &lt;= (dp hasValue v) for an instance of B). The values are provided by the data literal realization of the individual, which is computed on demand from the asserted data, the asserted concepts and the backend cache labels. Non-deterministically derived values are only answered when they hold in the deterministic part of the realization.</Literal>
   </DataPropertyAssertion>
 
 

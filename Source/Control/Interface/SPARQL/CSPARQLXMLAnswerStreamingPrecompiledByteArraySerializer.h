@@ -122,7 +122,6 @@ namespace Konclude {
 						QByteArray mLiteralDatatypeBegin;
 						QByteArray mLiteralDatatypeEnd;
 						QByteArray mLiteralEnd;
-						QByteArray mUnbound;
 
 						bool mConfAvoidStringCopying;
 

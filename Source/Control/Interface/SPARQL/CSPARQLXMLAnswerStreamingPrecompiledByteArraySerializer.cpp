@@ -52,7 +52,6 @@ namespace Konclude {
 					mLiteralDatatypeBegin = QString("<literal datatype=\"").toUtf8();
 					mLiteralDatatypeEnd = QString("\">").toUtf8();
 					mLiteralEnd = QString("</literal>").toUtf8();
-					mUnbound = QString("<unbound/>").toUtf8();
 
 					mConfAvoidStringCopying = false;
 					mDoubleQuoteEscapeString = "&quot;";
@@ -154,11 +153,10 @@ namespace Konclude {
 						++varListIt;
 
 						CVariableBindingResult* varBin = mVarBindIt->getNext();
-						mTemporaryBuffer.append(mBindingNameBegin);
-						writeUTF8String(varString);
-						mTemporaryBuffer.append(mBindingNameEnd);
-
 						if (varBin) {
+							mTemporaryBuffer.append(mBindingNameBegin);
+							writeUTF8String(varString);
+							mTemporaryBuffer.append(mBindingNameEnd);
 							if (varBin->isNamedIndividualBindingType()) {
 								mTemporaryBuffer.append(mUriBegin);
 								writeUTF8String(varBin->getQueryResultString());
@@ -175,10 +173,9 @@ namespace Konclude {
 								writeUTF8StringEscaped(datatypeDatavalueStringPair.second);
 								mTemporaryBuffer.append(mLiteralEnd);
 							}
-						} else {
-							mTemporaryBuffer.append(mUnbound);
+							mTemporaryBuffer.append(mBindingEnd);
 						}
-						mTemporaryBuffer.append(mBindingEnd);
+						// An unbound variable is omitted from the result, not written as <unbound/>.
 					}
 					mTemporaryBuffer.append(mResultEnd);
 					return this;

@@ -270,9 +270,9 @@ namespace Konclude {
 								++varListIt;
 
 								CVariableBindingResult* varBin = varBindIt->getNext();
-								QDomElement bindingEl = document.createElement("binding");
-								bindingEl.setAttribute("name", varString);
 								if (varBin) {
+									QDomElement bindingEl = document.createElement("binding");
+									bindingEl.setAttribute("name", varString);
 									if (varBin->isNamedIndividualBindingType() || varBin->isClassBindingType() || varBin->isPropertyBindingType()) {
 										QDomElement uriEl = document.createElement("uri");
 										uriEl.appendChild(document.createTextNode(varBin->getQueryResultString()));
@@ -289,11 +289,10 @@ namespace Konclude {
 										uriEl.appendChild(document.createTextNode(varBin->getLiteralDatavalueBindingString()));
 										bindingEl.appendChild(uriEl);
 									}
-								} else {
-									QDomElement unboundEl = document.createElement("unbound");
-									bindingEl.appendChild(unboundEl);
+									resultEl.appendChild(bindingEl);
 								}
-								resultEl.appendChild(bindingEl);
+								// An unbound variable is not a binding in SPARQL Results XML;
+								// omit it entirely instead of writing <unbound/>.
 							}
 							resultsElement.appendChild(resultEl);
 						}

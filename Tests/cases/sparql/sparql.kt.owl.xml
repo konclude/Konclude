@@ -56,12 +56,11 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:timeoutSeconds"/><NamedIndividual abbreviatedIRI="kt:run-sparql-timeout5"/><Literal>5</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>Test case: sparql-optional.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>OPTIONAL left join: alice has child bob, bob has no child (unbound child is omitted from the XML binding).</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>queries/optional.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>expected/optional.xml</Literal></DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/><Literal>Test case: sparql-union.</Literal></DataPropertyAssertion>
