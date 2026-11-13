@@ -84,6 +84,10 @@ namespace Konclude {
 				}
 
 
+				void COWLlinkProcessor::ontologyLoadingFailed(CCommand* command) {
+				}
+
+
 
 
 				CQtHttpTransactionManager* COWLlinkProcessor::getNetworkTransactionManager() {
@@ -145,6 +149,8 @@ namespace Konclude {
 
 							if (!QFile::exists(iriFileString)) {
 								CUnspecifiedMessageErrorRecord::makeRecord(QString("File '%1' not found.").arg(resolvedString),&commandRecordRouter);
+								// kept without a device, so that the knowledge base is not installed without this ontology
+								loadDataList.append(new CLoadKnowledgeBaseData(nullptr,ontoIRIString,resolvedString));
 							} else {
 								QFile* file = new QFile(iriFileString);
 								CLoadKnowledgeBaseData* loadData = new CLoadKnowledgeBaseData(file,ontoIRIString,resolvedString);
@@ -645,6 +651,12 @@ namespace Konclude {
 												QString ontoIRI = loadData->getOriginalDataName();
 												QString resolvedIRI = loadData->getResolvedDataName();
 
+												if (!device) {
+													// not found, which is already reported
+													allParsingSucceeded = false;
+													continue;
+												}
+
 
 												QTime parsingTime;
 												if (mConfLogProcessingTimes) {
@@ -679,7 +691,12 @@ namespace Konclude {
 
 											}
 
-											if (importOntologiesList.isEmpty()) {
+											if (!allParsingSucceeded) {
+												// Reasoning over the ontologies that were read would answer for an ontology that was not
+												// read completely, so the knowledge base is neither installed nor are its imports loaded.
+												CUnspecifiedMessageErrorRecord::makeRecord(QString("Knowledge base '%1' not installed, since not all of its ontologies could be read.").arg(chPaInKBOntComm->getKnowledgeBaseName()),&commandRecordRouter);
+												ontologyLoadingFailed(chPaInKBOntComm);
+											} else if (importOntologiesList.isEmpty()) {
 												CInstallKnowledgeBaseRevisionUpdateCommand *inKBRevUpC = new CInstallKnowledgeBaseRevisionUpdateCommand(chPaInKBOntComm->getKnowledgeBaseName(),chPaInKBOntComm);
 												chPaInKBOntComm->makeToSubCommand(inKBRevUpC);
 												preSynchronizer->delegateCommand(inKBRevUpC);

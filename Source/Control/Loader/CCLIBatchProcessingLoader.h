@@ -145,6 +145,8 @@ namespace Konclude {
 
 					virtual void writeCommandOutput(const QString& outputFileName, CCommand* processedCommand);
 
+					virtual void ontologyLoadingFailed(CCommand* command);
+
 				// protected variables
 				protected:
 					QString mIRINameString;
@@ -162,6 +164,8 @@ namespace Konclude {
 					bool mCloseAfterOutput;
 					bool mOutputMeasuredTimeInSeconds;
 					bool mBlockUntilProcessed;
+					bool mOntologyLoadingFailed;
+					int mExitCode;
 					QTime mMeasurementTime;
 					QSemaphore mBlockingSemaphore;
 					COWLLinkRecordInterpreter* mOWLLinkInterpreter;

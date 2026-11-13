@@ -276,7 +276,7 @@ namespace Konclude {
 
 			CConcept* CDatatypeNormalizerPreProcess::getDateTimeStampRestrictionConcept() {
 				if (!mDatetimeStampRestrictionConcept) {
-					CDatatype* dateTimeDatatype = getDatatype(PREFIX_XML_DATETIMESTAMP_DATATYPE);
+					CDatatype* dateTimeDatatype = getDatatype(PREFIX_XML_DATETIME_DATATYPE);
 					mDatetimeStampRestrictionConcept = createConcept();
 					mDatetimeStampRestrictionConcept->setOperatorCode(CCDATARESTRICTION);
 					mDatetimeStampRestrictionConcept->setDatatype(dateTimeDatatype);

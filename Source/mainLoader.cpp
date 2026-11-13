@@ -97,10 +97,11 @@ int main(int argc, char *argv[])
 
 	logger->shutdownLogger();
 
-	// Return the exit code of the conformance test runner when it ran (0 when green,
-	// non-zero for failing/unstable tests), otherwise the application's exit code.
-	int conformanceExitCode = CConformanceLoader::getLastTestExitCode();
-	return conformanceExitCode != 0 ? conformanceExitCode : exitCode;
+	// Return the exit code recorded by the conformance test runner (0 when green,
+	// non-zero when there were failing/unstable tests) so CI can react to it.
+	// The exit code an interface set (non-zero when, e.g., an ontology could not be read) takes
+	// precedence.
+	return exitCode != 0 ? exitCode : CConformanceLoader::getLastTestExitCode();
 }
 
 

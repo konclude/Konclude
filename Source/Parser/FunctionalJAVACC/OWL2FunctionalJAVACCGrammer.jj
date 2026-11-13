@@ -547,6 +547,11 @@ CBuildExpressionPtr declaration():
 	<DECLARATION> <OPEN_BRACKET> axiomAnnotations()
 	x = entity()
 	<CLOSE_BRACKET> {
+		if (!x) {
+			// an annotation property (entity() builds nothing for one, as annotations are not
+			// reasoned with): its declaration is skipped like any other annotation axiom
+			return nullptr;
+		}
 		return getBuilder()->getDeclaration(x);
 	}
 }

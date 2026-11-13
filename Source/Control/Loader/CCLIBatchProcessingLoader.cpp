@@ -34,6 +34,8 @@ namespace Konclude {
 				mConfLogProcessingTimes = false;
 				mProcessingCommandData = nullptr;
 				mLogTotalProcessingTime = false;
+				mOntologyLoadingFailed = false;
+				mExitCode = 0;
 
 			}
 
@@ -122,6 +124,13 @@ namespace Konclude {
 
 			COWLlinkProcessor *CCLIBatchProcessingLoader::concludeOWLlinkContent() {
 				finishCommandProcessing();
+				if (mOntologyLoadingFailed) {
+					// no answer is given for an ontology that could not be read: the remaining commands are
+					// dropped and Konclude exits with a failure
+					logOutputError(QString("Loading '%1' failed, no result is given.").arg(mRequestFileString));
+					mProcessCommandList.clear();
+					mExitCode = 1;
+				}
 				if (hasMoreProcessingCommands()) {
 					processNextCommand();
 				} else {
@@ -158,6 +167,10 @@ namespace Konclude {
 			}
 
 			void CCLIBatchProcessingLoader::writeCommandOutput(const QString& outputFileName, CCommand* processedCommand) {
+			}
+
+			void CCLIBatchProcessingLoader::ontologyLoadingFailed(CCommand* command) {
+				mOntologyLoadingFailed = true;
 			}
 
 			void CCLIBatchProcessingLoader::finishCommandProcessing() {
@@ -211,7 +224,7 @@ namespace Konclude {
 
 				if (mCloseAfterOutput) {
 					CLogger::getInstance()->waitSynchronization();
-                    QCoreApplication::exit();
+                    QCoreApplication::exit(mExitCode);
 				}
 			}
 
