@@ -1,0 +1,2 @@
+PREFIX sp: <http://konclude.test/sparql#>
+SELECT ?person WHERE { ?person a sp:Person } ORDER BY ?person LIMIT 1

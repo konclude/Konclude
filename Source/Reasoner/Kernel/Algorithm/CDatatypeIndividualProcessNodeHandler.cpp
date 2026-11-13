@@ -220,7 +220,13 @@ namespace Konclude {
 
 							if (!negated) {
 								potentiallyModified |= closeOtherValueSpaces(indiProcNode,valueSpaceType,depTrackPoint,calcAlgContext);
-							} else {
+							} else if (datatype->isBasicDatatype() || datatypeConcept->getOperandCount() == 0) {
+								// Only a basic datatype (owl:real, xsd:string, ...) covers its whole value space, so only its
+								// negation closes that space. A derived datatype such as xsd:integer is owl:real with a
+								// restriction operand, and its negation is carried by the negated operand (the DATATYPE rule
+								// applies it): closing the real space here as well made every decimal successor clash with
+								// 'not xsd:integer', so that 'some p xsd:decimal' and 'some p xsd:integer' came out equivalent
+								// and a value of 3.5 satisfied 'some p xsd:integer' (issue #100).
 								potentiallyModified |= closeValueSpace(indiProcNode,valueSpaceType,depTrackPoint,calcAlgContext);
 							}
 						}

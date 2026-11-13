@@ -43,7 +43,7 @@ namespace Konclude {
 
 
 			CConformanceTask::TYPE CClassificationTaskHandler::getTaskType() const {
-				return CConformanceTask::TYPE::CLASSIFICATION;
+				return CConformanceTask::TYPE::CLASS_CLASSIFICATION;
 			}
 
 

@@ -140,7 +140,15 @@ cd "$SRC"
 download "https://github.com/jemalloc/jemalloc/releases/download/$JEMALLOC_VERSION/jemalloc-$JEMALLOC_VERSION.tar.bz2" jemalloc.tar.bz2
 tar -xjf jemalloc.tar.bz2
 cd "jemalloc-$JEMALLOC_VERSION"
-./configure --prefix="$LIB/jemalloc-static"
+# jemalloc fixes the page size when it is configured and refuses to run on a kernel with larger
+# pages. ARM64 Linux kernels come with 4, 16 or 64 KB pages (Graviton and Docker Desktop 4 KB,
+# Asahi Linux 16 KB, some Raspberry Pi and server kernels 64 KB), so the ARM64 build assumes
+# 64 KB pages, which works on all three at the cost of a coarser granularity of its extents.
+JEMALLOC_OPTIONS=""
+if [ "$(uname -s)-$(uname -m)" = "Linux-aarch64" ]; then
+	JEMALLOC_OPTIONS="--with-lg-page=16"
+fi
+./configure --prefix="$LIB/jemalloc-static" $JEMALLOC_OPTIONS
 make -j"$JOBS"
 make install
 echo "::endgroup::"

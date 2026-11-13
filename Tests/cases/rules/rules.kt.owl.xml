@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  DL-safe rule (DLSafeRule) conformance suite: class atoms, object property atoms
+  in body and head, multiple head variables, different-individual atoms, rule
+  chains, rules that do not fire, unsupported built-in atoms and a rule that
+  makes the ontology inconsistent.  Each feature is tested in OWL 2 Functional
+  Syntax and, where meaningful, in OWL/XML.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/rules">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-rules"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-rules"/><Literal>Rules</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-rules"/><Literal>rules</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward"/><Literal>rule-class-forward.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward"/><Literal>expected/rule-class-forward.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-class-forward"/>
+    <Literal>Class rule body/head in functional syntax: A(a) must imply B(a).</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward-xml"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward-xml"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward-xml"/><Literal>rule-class-forward.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-class-forward-xml"/><Literal>expected/rule-class-forward.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-class-forward-xml"/>
+    <Literal>The same class rule in OWL/XML must give the same result.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-chain"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-chain"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-chain"/><Literal>rule-chain.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-chain"/><Literal>expected/rule-chain.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-chain"/>
+    <Literal>Two chained rules: A(a) implies B(a) and then C(a).</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-chain-xml"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-chain-xml"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-chain-xml"/><Literal>rule-chain.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-chain-xml"/><Literal>expected/rule-chain.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-chain-xml"/>
+    <Literal>The chained rules in OWL/XML must give the same result.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-property-body"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-property-body"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-property-body"/><Literal>rule-property-body.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-property-body"/><Literal>expected/rule-property-body.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-property-body"/>
+    <Literal>Object property atom in the rule body: A(a), r(a,b) must imply B(b).</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-property-body-xml"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-property-body-xml"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-property-body-xml"/><Literal>rule-property-body.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-property-body-xml"/><Literal>expected/rule-property-body.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-property-body-xml"/>
+    <Literal>The same property atom rule in OWL/XML must give the same result.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-property-head"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-property-head"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-property-head"/><Literal>rule-property-head.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-property-head"/><Literal>expected/rule-property-head.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-property-head"/>
+    <Literal>Object property atom in the rule head: r(a,b) implies s(a,b), which then implies B(b).</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-multi-head"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-multi-head"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-multi-head"/><Literal>rule-multi-head.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-multi-head"/><Literal>expected/rule-multi-head.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-multi-head"/>
+    <Literal>One rule with two head variables must derive B(a) and C(b).</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals"/><Literal>rule-different-individuals.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals"/><Literal>expected/rule-different-individuals.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-different-individuals"/>
+    <Literal>DifferentIndividualsAtom in the body must derive B for both distinct A individuals.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals-xml"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals-xml"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals-xml"/><Literal>rule-different-individuals.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-different-individuals-xml"/><Literal>expected/rule-different-individuals.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-different-individuals-xml"/>
+    <Literal>The same DifferentIndividualsAtom rule in OWL/XML must give the same result.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-not-fired"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-not-fired"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-not-fired"/><Literal>rule-not-fired.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-not-fired"/><Literal>expected/rule-not-fired.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-not-fired"/>
+    <Literal>A rule whose body is not satisfied must not add C(a).</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rule-unsupported-builtin"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-unsupported-builtin"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-unsupported-builtin"/><Literal>rule-unsupported-builtin.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rule-unsupported-builtin"/><Literal>expected/rule-unsupported-builtin.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-unsupported-builtin"/>
+    <Literal>A rule with a built-in atom is skipped; the ontology still loads and stays consistent.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency"/><Literal>rule-inconsistency.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-inconsistency"/>
+    <Literal>A rule with owl:Nothing in the head makes an ontology with an A individual inconsistent.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-xml"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-xml"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-xml"/><Literal>rule-inconsistency.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-xml"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-inconsistency-xml"/>
+    <Literal>The same rule in OWL/XML must also make the ontology inconsistent.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-absent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-absent"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-absent"/><Literal>rule-inconsistency-absent.owl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rule-inconsistency-absent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:rule-inconsistency-absent"/>
+    <Literal>The same rule with no A individual leaves the ontology consistent.</Literal>
+  </DataPropertyAssertion>
+</Ontology>

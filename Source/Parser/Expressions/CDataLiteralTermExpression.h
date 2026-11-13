@@ -53,6 +53,8 @@ namespace Konclude {
 			class CDataLiteralTermExpression : public CDataRangeTermExpression {
 				// public methods
 				public:
+					//! The kind flags of this base class, see CBuildExpression::ExpressionKindFlag.
+					virtual cint64 getExpressionKindFlags() { return EKFDATARANGETERM | EKFDATALITERALTERM; }
 					//! Constructor
 					CDataLiteralTermExpression();
 

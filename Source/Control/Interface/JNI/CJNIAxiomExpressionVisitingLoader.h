@@ -41,6 +41,7 @@
 namespace Konclude {
 
 	using namespace Reasoner::Generator;
+	using namespace Reasoner::Ontology;
 	using namespace Parser::Expression;
 
 	namespace Control {
@@ -49,7 +50,7 @@ namespace Konclude {
 
 			namespace JNI {
 
-				/*! 
+				/*!
 				 *
 				 *		\class		CJNIAxiomLoader
 				 *		\author		Andreas Steigmiller
@@ -63,6 +64,14 @@ namespace Konclude {
 					public:
 						//! Constructor
 						CJNIAxiomExpressionVisitingLoader(CJNIInstanceManager* jniInstanceManager, CJNIOntologyRevisionData* ontRevData);
+
+						/**
+						 * Builds into the given ontology instead of the one of the revision data, which
+						 * stays the revision whose entity mapping the built entities are recorded in.
+						 * Used for the expressions of a query, which are built into a revision of
+						 * their own so that the installed ontology is not written to.
+						 */
+						CJNIAxiomExpressionVisitingLoader(CJNIInstanceManager* jniInstanceManager, CJNIOntologyRevisionData* ontRevData, CConcreteOntology* buildOntology);
 
 						//! Destructor
 						virtual ~CJNIAxiomExpressionVisitingLoader();

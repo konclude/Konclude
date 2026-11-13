@@ -63,7 +63,10 @@ namespace Konclude {
 					// public methods
 					public:
 						//! Constructor
-						CSatisfiableTaskAnswererSubsumptionMessageAdapter(CConcept* testingConcept, bool testingNegation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology = nullptr, CAnsweringMessageDataObserver* observer = nullptr);
+						CSatisfiableTaskAnswererSubsumptionMessageAdapter(CConcept* testingConcept, bool testingNegation, CAnsweringHandler* answeringHandler, CConcreteOntology* testingOntology = nullptr, CAnsweringMessageDataObserver* observer = nullptr, bool rootLabelRequested = false);
+
+						//! whether the whole label of the root node is to be reported, for the saturation decider
+						bool isRootLabelRequested();
 
 						CConcept* getTestingConcept();
 						bool getTestingConceptNegation();
@@ -79,6 +82,7 @@ namespace Konclude {
 					protected:
 						CConcept* mTestingConcept;
 						bool mTestingConceptNegation;
+						bool mRootLabelRequested;
 						CConcreteOntology* mOntology;
 						CAnsweringHandler* mAnsweringHandler;
 						CAnsweringMessageDataObserver* mMessageObserver;

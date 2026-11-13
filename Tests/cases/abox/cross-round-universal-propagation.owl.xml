@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Cross-round universal-restriction propagation in the individual saturation.
+  The individual saturation processes the ABox in rounds; a role partner in
+  another round is replaced by a representative proxy. The consequence here is
+  carried by a normalised existential GCI that becomes a universal restriction
+  on the inverse role:
+
+    r(a,b), s(b,c), A2(a), A1(c)
+    SubClassOf(ObjectSomeValuesFrom(s, A1), B1)                  -> b : B1
+    SubClassOf(ObjectIntersectionOf(ObjectSomeValuesFrom(r, B1), A2), D1)
+                                                                 -> a : exists r.B1, a : D1
+    ClassAssertion(ObjectComplementOf(D1), a)                    -> contradiction
+
+  a is an instance of D1 only through its role successor b's derived type B1.
+  If b lands in a different saturation round than a (forced here by the small
+  saturation batch system config), the universal restriction cannot be
+  propagated to the real a inside the saturation, so a's type D1 is missed and
+  the ontology is wrongly reported consistent. With the cross-round universal
+  propagation fix the completion materialises the neighbour and derives D1, so
+  not-D1(a) clashes and the ontology is inconsistent.
+
+  Run with the small-saturation-batch system config so the split is forced on
+  this tiny ontology (kt:usesTestSystemConfig). Without the fix this test is
+  reported consistent; with the fix it is inconsistent.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/cross-round-universal-propagation">
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#s"/></Declaration>
+  <Declaration><Class IRI="#A1"/></Declaration>
+  <Declaration><Class IRI="#A2"/></Declaration>
+  <Declaration><Class IRI="#B1"/></Declaration>
+  <Declaration><Class IRI="#D1"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="#b"/></Declaration>
+  <Declaration><NamedIndividual IRI="#c"/></Declaration>
+  <SubClassOf>
+    <ObjectSomeValuesFrom><ObjectProperty IRI="#s"/><Class IRI="#A1"/></ObjectSomeValuesFrom>
+    <Class IRI="#B1"/>
+  </SubClassOf>
+  <SubClassOf>
+    <ObjectIntersectionOf>
+      <ObjectSomeValuesFrom><ObjectProperty IRI="#r"/><Class IRI="#B1"/></ObjectSomeValuesFrom>
+      <Class IRI="#A2"/>
+    </ObjectIntersectionOf>
+    <Class IRI="#D1"/>
+  </SubClassOf>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#r"/><NamedIndividual IRI="#a"/><NamedIndividual IRI="#b"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#s"/><NamedIndividual IRI="#b"/><NamedIndividual IRI="#c"/></ObjectPropertyAssertion>
+  <ClassAssertion><Class IRI="#A2"/><NamedIndividual IRI="#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#A1"/><NamedIndividual IRI="#c"/></ClassAssertion>
+  <ClassAssertion><ObjectComplementOf><Class IRI="#D1"/></ObjectComplementOf><NamedIndividual IRI="#a"/></ClassAssertion>
+</Ontology>

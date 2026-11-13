@@ -35,7 +35,12 @@ namespace Konclude {
 					mJNIInstanceManager = jniInstanceManager;
 				}
 
-				CJNIAxiomExpressionVisitingLoader::~CJNIAxiomExpressionVisitingLoader() {					
+				CJNIAxiomExpressionVisitingLoader::CJNIAxiomExpressionVisitingLoader(CJNIInstanceManager* jniInstanceManager, CJNIOntologyRevisionData* ontRevData, CConcreteOntology* buildOntology) : CConcreteOntologyUpdateCollectorBuilder(buildOntology) {
+					mOntRevData = ontRevData;
+					mJNIInstanceManager = jniInstanceManager;
+				}
+
+				CJNIAxiomExpressionVisitingLoader::~CJNIAxiomExpressionVisitingLoader() {
 				}
 
 

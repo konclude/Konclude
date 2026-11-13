@@ -23,6 +23,7 @@
 
 // Libraries includes
 #include <QString>
+#include <QStringList>
 
 // Namespace includes
 #include "CConformanceTask.h"
@@ -74,6 +75,9 @@ namespace Konclude {
 					QString mRunConfigName;                 // run configuration name used in reports
 					QString mSystemConfigPath;              // '-c' file of this execution, may be empty
 					QString mSystemConfigName;              // system configuration name used in reports
+					QStringList mKnownIssueIds;             // issues linked to the test
+					QStringList mKnownIssueTypes;           // issue types, parallel to mKnownIssueIds
+					QStringList mKnownIssueDescriptions;    // issue descriptions, parallel to mKnownIssueIds
 			};
 
 

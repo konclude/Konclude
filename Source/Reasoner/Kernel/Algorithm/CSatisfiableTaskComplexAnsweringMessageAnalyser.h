@@ -38,6 +38,7 @@
 #include "Reasoner/Answerer/CAnsweringMessageDataCalculationPossibleClassSubsumersData.h"
 #include "Reasoner/Answerer/CAnsweringMessageDataCalculationPossibleClassSubsumers.h"
 #include "Reasoner/Answerer/CAnsweringMessageDataCalculationClassSubsumers.h"
+#include "Reasoner/Answerer/CAnsweringMessageDataCalculationRootLabel.h"
 #include "Reasoner/Answerer/CAnsweringMessageDataCalculationMaterializedConcepts.h"
 
 #include "Reasoner/Kernel/Task/CSatisfiableCalculationTask.h"

@@ -69,6 +69,11 @@ namespace Konclude {
 						virtual ~CCalculationManager();
 
 						virtual CCalculationManager *calculateJob(CCalculationJob* job, CCallbackData* callbackData = nullptr) = 0;
+
+						// Stops the threads that calculate and waits for them, each at most waitMillis, before
+						// the objects they use are deleted; returns the number that did not stop in time. No
+						// calculation can be requested afterwards.
+						virtual cint64 stopCalculation(unsigned long waitMillis);
 						virtual CCalculationManager *calculateJobs(const QList< QPair<CCalculationJob*,CCallbackData*> >& jobCallbackList);
 
 						virtual CCalculationManager *initializeManager(CCalculationEnvironmentFactory *contextFactory, CConfigurationProvider *configurationProvider) = 0;

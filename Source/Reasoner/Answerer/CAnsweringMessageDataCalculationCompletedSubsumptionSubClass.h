@@ -55,11 +55,13 @@ namespace Konclude {
 				// public methods
 				public:
 					//! Constructor
-					CAnsweringMessageDataCalculationCompletedSubsumptionSubClass(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem, CHierarchyNode* subClassNode);
+					CAnsweringMessageDataCalculationCompletedSubsumptionSubClass(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem, CHierarchyNode* subClassNode, bool equivalenceCheck = false);
 
 
 					COptimizedComplexConceptItem* getConceptItem();
 					CHierarchyNode* getSubClassNode();
+					// the test decides the equivalence of the item's only direct super class, not a sub class candidate
+					bool isEquivalenceCheck();
 
 
 				// protected methods
@@ -69,6 +71,7 @@ namespace Konclude {
 				protected:
 					COptimizedComplexConceptItem* mConceptItem;
 					CHierarchyNode* mSubClassNode;
+					bool mEquivalenceCheck;
 
 
 				// private methods

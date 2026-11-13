@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A positive and a negative assertion for the same pair of individuals clash. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/negative-assertions">
+  <Prefix name="" IRI="http://konclude.test/features/negative-assertions#"/>
+
+  <Declaration><ObjectProperty abbreviatedIRI=":knows"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":age"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":alice"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":bob"/></Declaration>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":knows"/>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <NamedIndividual abbreviatedIRI=":bob"/>
+  </ObjectPropertyAssertion>
+  <NegativeObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":knows"/>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <NamedIndividual abbreviatedIRI=":bob"/>
+  </NegativeObjectPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI=":age"/>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">42</Literal>
+  </DataPropertyAssertion>
+  <NegativeDataPropertyAssertion>
+    <DataProperty abbreviatedIRI=":age"/>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">42</Literal>
+  </NegativeDataPropertyAssertion>
+</Ontology>

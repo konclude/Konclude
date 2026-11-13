@@ -20,6 +20,9 @@
 
 #include "COptimizedComplexConceptItem.h"
 
+// complete type for the deletion of the realization iterator, otherwise no destructor runs (issue #45)
+#include "Reasoner/Realization/CRealizationIndividualInstanceItemReferenceIterator.h"
+
 
 namespace Konclude {
 
@@ -65,6 +68,8 @@ namespace Konclude {
 				mPossibleInstanceCandidatePropagationBeginningKnownInstancesCount = 0;
 
 				mMaximumSubClassNodeSet = nullptr;
+				mEquivalenceDecided = false;
+				mDecidedEquivalentClassNode = nullptr;
 
 				mLazyRealizationInitialized = false;
 				mLazyRealizationInitializationRequested = false;
@@ -505,6 +510,21 @@ namespace Konclude {
 
 			QSet<CHierarchyNode*>* COptimizedComplexConceptItem::getMaximumSubClassNodeSet() {
 				return mMaximumSubClassNodeSet;
+			}
+
+
+			bool COptimizedComplexConceptItem::isEquivalenceDecided() {
+				return mEquivalenceDecided;
+			}
+
+			CHierarchyNode* COptimizedComplexConceptItem::getDecidedEquivalentClassNode() {
+				return mDecidedEquivalentClassNode;
+			}
+
+			COptimizedComplexConceptItem* COptimizedComplexConceptItem::setDecidedEquivalentClassNode(CHierarchyNode* node) {
+				mEquivalenceDecided = true;
+				mDecidedEquivalentClassNode = node;
+				return this;
 			}
 
 

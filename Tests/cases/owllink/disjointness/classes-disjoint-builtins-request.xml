@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint with the built-in classes.  The request asks two questions
+  and therefore returns two BooleanResponses:
+    (owl:Thing, A)   -> false, because owl:Thing and A share every A instance
+    (owl:Nothing, A) -> true,  because owl:Nothing is empty
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#a1"/></owl:Declaration>
+    <owl:ClassAssertion><owl:Class IRI="#A"/><owl:NamedIndividual IRI="#a1"/></owl:ClassAssertion>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb"><owl:Class abbreviatedIRI="owl:Thing"/><owl:Class IRI="#A"/></AreClassesDisjoint>
+  <AreClassesDisjoint kb="http://ex.test/kb"><owl:Class abbreviatedIRI="owl:Nothing"/><owl:Class IRI="#A"/></AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

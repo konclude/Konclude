@@ -62,6 +62,11 @@ namespace Konclude {
 			COptimizedKPSetClassTestingItem::~COptimizedKPSetClassTestingItem() {
 				delete mPossibleSubsumedList;
 				delete mPossibleSubsumedSet;
+				// the possible subsumptions are created by the classifier for this map only (issue #45)
+				if (mPossibleSubsumptionMap) {
+					qDeleteAll(*mPossibleSubsumptionMap);
+					delete mPossibleSubsumptionMap;
+				}
 			}
 
 			CConcept* COptimizedKPSetClassTestingItem::getTestingConcept() {

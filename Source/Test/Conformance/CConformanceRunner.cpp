@@ -171,6 +171,12 @@ namespace Konclude {
 
 				for (CConformanceTestCase& testCase : caseById) {
 					if (finalizeTestCase(testCase)) {
+						for (const QString& issueId : mKnownIssuesByTest.value(testCase.mId)) {
+							appendUnique(testCase.mKnownIssueIds, issueId);
+						}
+						if (!testCase.mKnownIssueIds.isEmpty()) {
+							testCase.mKnownFailure = true;
+						}
 						mTestCases.append(testCase);
 					} else {
 						LOG(INFO, getLogDomain(), logTr("Skipping incomplete or unsupported test '%1' in '%2'.").arg(testCase.mId).arg(filePath), this);
@@ -341,6 +347,10 @@ namespace Konclude {
 						testCase.mExpectedResultTexts.append(value);
 					} else if (propertyName.endsWith("testClass")) {
 						testCase.mTestClass = value;
+					} else if (propertyName.endsWith("testIndividual")) {
+						// Optional restriction for a realization test: only this
+						// individual is realized ('realization -x').
+						testCase.mTestIndividual = value;
 					} else if (propertyName.endsWith("timeoutSeconds")) {
 						LOG(WARN, getLogDomain(), logTr("kt:timeoutSeconds on test '%1' in '%2' is ignored; declare a kt:RunConfig and assign it with kt:usesTestRunConfig.").arg(individualName).arg(filePath), this);
 					} else if (propertyName.endsWith("flaky")) {
@@ -364,7 +374,11 @@ namespace Konclude {
 					QDomElement target = assertion.firstChildElement("NamedIndividual").nextSiblingElement("NamedIndividual");
 					if (propertyName.endsWith("knownFailure")) {
 						if (caseById.contains(individualName)) {
-							caseById[individualName].mKnownFailure = true;
+							CConformanceTestCase& testCase = caseById[individualName];
+							testCase.mKnownFailure = true;
+							if (!target.isNull()) {
+								appendUnique(testCase.mKnownIssueIds, elementIRI(target));
+							}
 						}
 					} else if (propertyName.endsWith("memberOfSuite") && !target.isNull()) {
 						// Suites are first-class individuals with their own description and
@@ -402,16 +416,128 @@ namespace Konclude {
 			}
 
 
+			void CConformanceRunner::loadKnownIssues() {
+				// The known-issue ontology is shared by all suites and is therefore
+				// searched next to the input directory and in its ancestors. An
+				// explicit Konclude.Conformance.KnownIssuesFile wins.
+				QString knownIssuesFile = mKnownIssuesFile;
+				if (knownIssuesFile.isEmpty()) {
+					QDir searchDirectory(QFileInfo(mInputDirectory).absoluteFilePath());
+					for (int level = 0; level < 4 && !searchDirectory.isRoot(); ++level) {
+						QString candidate = searchDirectory.absoluteFilePath("known-issues.owl.xml");
+						if (QFile::exists(candidate)) {
+							knownIssuesFile = candidate;
+							break;
+						}
+						if (!searchDirectory.cdUp()) {
+							break;
+						}
+					}
+				}
+				if (knownIssuesFile.isEmpty() || !QFile::exists(knownIssuesFile)) {
+					return;
+				}
+
+				QFile file(knownIssuesFile);
+				if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+					LOG(WARN, getLogDomain(), logTr("Cannot open known-issue ontology '%1'.").arg(knownIssuesFile), this);
+					return;
+				}
+				QDomDocument document;
+				QString errorMessage;
+				int errorLine = 0;
+				int errorColumn = 0;
+				bool parsed = document.setContent(&file, &errorMessage, &errorLine, &errorColumn);
+				file.close();
+				if (!parsed) {
+					LOG(WARN, getLogDomain(), logTr("Cannot parse known-issue ontology '%1' (%2 at line %3).").arg(knownIssuesFile).arg(errorMessage).arg(errorLine), this);
+					return;
+				}
+
+				QDomElement root = document.documentElement();
+				QHash<QString, CConformanceKnownIssue> issues;
+				QSet<QString> issueTypes;
+				issueTypes << "ReasonerBug" << "UnsupportedFeature" << "PerformanceIssue" << "CorpusLimitation";
+
+				QDomNodeList classAssertions = root.elementsByTagName("ClassAssertion");
+				for (int i = 0; i < classAssertions.count(); ++i) {
+					QDomElement assertion = classAssertions.at(i).toElement();
+					QString className = CConformanceTask::localName(elementIRI(assertion.firstChildElement("Class")));
+					QString issueName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					if (issueName.isEmpty()) {
+						continue;
+					}
+					CConformanceKnownIssue issue = issues.value(issueName);
+					issue.mId = issueName;
+					if (issueTypes.contains(className)) {
+						issue.mType = className;
+					}
+					issues.insert(issueName, issue);
+				}
+
+				QDomNodeList dataAssertions = root.elementsByTagName("DataPropertyAssertion");
+				for (int i = 0; i < dataAssertions.count(); ++i) {
+					QDomElement assertion = dataAssertions.at(i).toElement();
+					QString propertyName = CConformanceTask::localName(elementIRI(assertion.firstChildElement("DataProperty")));
+					QString issueName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					QDomElement literal = assertion.firstChildElement("Literal");
+					if (issueName.isEmpty() || literal.isNull()) {
+						continue;
+					}
+					CConformanceKnownIssue issue = issues.value(issueName);
+					issue.mId = issueName;
+					QString value = literal.text().trimmed();
+					if (QString::compare(propertyName, "status", Qt::CaseInsensitive) == 0) {
+						issue.mStatus = value.toLower();
+					} else if (QString::compare(propertyName, "description", Qt::CaseInsensitive) == 0) {
+						issue.mDescription = value;
+					} else if (QString::compare(propertyName, "tracker", Qt::CaseInsensitive) == 0) {
+						issue.mTracker = value;
+					}
+					issues.insert(issueName, issue);
+				}
+
+				QHash<QString, QStringList> issuesByTest;
+				QSet<QString> affectedIssues;
+				QDomNodeList objectAssertions = root.elementsByTagName("ObjectPropertyAssertion");
+				for (int i = 0; i < objectAssertions.count(); ++i) {
+					QDomElement assertion = objectAssertions.at(i).toElement();
+					QString propertyName = CConformanceTask::localName(elementIRI(assertion.firstChildElement("ObjectProperty")));
+					if (QString::compare(propertyName, "affectsTest", Qt::CaseInsensitive) != 0) {
+						continue;
+					}
+					QString issueName = elementIRI(assertion.firstChildElement("NamedIndividual"));
+					QDomElement target = assertion.firstChildElement("NamedIndividual").nextSiblingElement("NamedIndividual");
+					if (issueName.isEmpty() || target.isNull()) {
+						continue;
+					}
+					QString status = issues.value(issueName).mStatus;
+					if (status == QString("fixed") || status == QString("closed")) {
+						continue;
+					}
+					appendUnique(issuesByTest[elementIRI(target)], issueName);
+					affectedIssues.insert(issueName);
+				}
+
+				mKnownIssues = issues;
+				mKnownIssuesByTest = issuesByTest;
+				LOG(INFO, getLogDomain(), logTr("Loaded %1 open known issue(s) affecting %2 test(s) from '%3'.")
+						.arg(affectedIssues.count()).arg(issuesByTest.count()).arg(knownIssuesFile), this);
+			}
+
+
 			bool CConformanceRunner::finalizeTestCase(CConformanceTestCase& testCase) {
 				if (!testCase.mHasTask || testCase.mOntologyFile.isEmpty()) {
 					return false;
 				}
 
 				testCase.mExpectedVerdicts.clear();
-				// Classification always compares result files; OWLlink and SPARQL do so
-				// when the description declares kt:expectedFile. Otherwise those tasks
-				// compare the boolean answer(s) declared with kt:expectedResult.
-				bool fileComparison = (testCase.mTask == CConformanceTask::TYPE::CLASSIFICATION)
+				// Classification and realization always compare result files; OWLlink
+				// and SPARQL do so when the description declares kt:expectedFile.
+				// Otherwise those tasks compare the boolean answer(s) declared with
+				// kt:expectedResult.
+				bool fileComparison = (testCase.mTask == CConformanceTask::TYPE::CLASS_CLASSIFICATION
+						|| testCase.mTask == CConformanceTask::TYPE::CLASS_REALIZATION)
 						|| ((testCase.mTask == CConformanceTask::TYPE::OWLLINK || testCase.mTask == CConformanceTask::TYPE::SPARQL)
 							&& !testCase.mExpectedFile.isEmpty());
 				if (fileComparison) {
@@ -615,7 +741,7 @@ namespace Konclude {
 
 				QString fileName = resolveExecutionFileBase(execution, runIndex);
 				switch (execution.mTestCase.mTask) {
-					case CConformanceTask::TYPE::CLASSIFICATION:
+					case CConformanceTask::TYPE::CLASS_CLASSIFICATION:
 						fileName += "-classification.owl.xml";
 						break;
 					case CConformanceTask::TYPE::OWLLINK:
@@ -642,6 +768,12 @@ namespace Konclude {
 				result.mRunConfigName = execution.mRunConfig.getDisplayName();
 				result.mSystemConfigPath = execution.mSystemConfigPath;
 				result.mSystemConfigName = execution.getSystemConfigName();
+				for (const QString& issueId : execution.mTestCase.mKnownIssueIds) {
+					CConformanceKnownIssue issue = mKnownIssues.value(issueId);
+					result.mKnownIssueIds.append(issueId);
+					result.mKnownIssueTypes.append(issue.mType.isEmpty() ? QString("unknown") : issue.mType);
+					result.mKnownIssueDescriptions.append(issue.mDescription);
+				}
 
 				qint64 timeoutMs = execution.mRunConfig.mTimeoutSeconds * 1000;
 
@@ -744,10 +876,59 @@ namespace Konclude {
 				}
 			}
 
+
+			void CConformanceRunner::logNonPassingOutcomeLines(const QMap<CConformanceOutcome::TYPE, int>& outcomeCounts) {
+				for (CConformanceOutcome::TYPE outcome : CConformanceOutcome::allTypes()) {
+					if (outcome == CConformanceOutcome::TYPE::PASS) {
+						continue;
+					}
+					int count = outcomeCounts.value(outcome, 0);
+					if (count > 0) {
+						LOG(INFO, getLogDomain(), logTr("%1").arg(QString("  %1 %2")
+								.arg(count).arg(CConformanceOutcome::typeToDescription(outcome))), this);
+					}
+				}
+			}
+
+
+			void CConformanceRunner::logKnownIssueSummary(const QList<CConformanceTestResult>& results) {
+				QMap<QString, QMap<QString, int> > issueCountsByType;
+				for (const CConformanceTestResult& result : results) {
+					if (result.mOutcome != CConformanceOutcome::TYPE::KNOWN) {
+						continue;
+					}
+					for (int i = 0; i < result.mKnownIssueIds.count(); ++i) {
+						QString type = result.mKnownIssueTypes.value(i, QString("unknown"));
+						issueCountsByType[type][result.mKnownIssueIds.at(i)]++;
+					}
+				}
+				if (issueCountsByType.isEmpty()) {
+					return;
+				}
+
+				LOG(INFO, getLogDomain(), logTr("Known issues by type:"), this);
+				for (const QString& type : issueCountsByType.keys()) {
+					QMap<QString, int> issueCounts = issueCountsByType.value(type);
+					int typeCount = 0;
+					for (const int& count : issueCounts) {
+						typeCount += count;
+					}
+					LOG(INFO, getLogDomain(), logTr("  %1: %2 test execution(s), %3 issue(s)")
+							.arg(type).arg(typeCount).arg(issueCounts.count()), this);
+					for (const QString& issueId : issueCounts.keys()) {
+						CConformanceKnownIssue issue = mKnownIssues.value(issueId);
+						QString description = issue.mDescription.isEmpty() ? QString("(no description)") : issue.mDescription;
+						LOG(INFO, getLogDomain(), logTr("    %1 (%2): %3")
+								.arg(issueId).arg(issueCounts.value(issueId)).arg(description), this);
+					}
+				}
+			}
+
 			int CConformanceRunner::run() {
 
 				LOG(INFO, getLogDomain(), logTr("Starting conformance run in '%1'.").arg(mInputDirectory), this);
 
+				loadKnownIssues();
 				QStringList controlFiles = discoverControlOntologies();
 				LOG(INFO, getLogDomain(), logTr("Discovered %1 control ontologies (*.kt.owl.xml).").arg(controlFiles.count()), this);
 				for (const QString& controlFile : controlFiles) {
@@ -825,22 +1006,45 @@ namespace Konclude {
 				// Overall summary: header line, then each outcome count on its own line.
 				LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatSummaryHeader(controlFiles.count(), mTestCases.count(), mSuites.count(), mExecutions.count())), this);
 				logOutcomeLines(totalOutcomeCounts, true);
+				logKnownIssueSummary(results);
 
-				// Per-suite, per-task and per-interface breakdown.
+				// Per-suite, per-task and per-interface breakdown. Categories without a
+				// non-passing execution are omitted; passed executions are not repeated.
 				for (const QString& suiteId : suiteOutcomeCounts.keys()) {
 					QMap<CConformanceOutcome::TYPE, int> singleSuiteOutcomeCounts = suiteOutcomeCounts.value(suiteId);
+					int total = 0;
+					for (const int& count : singleSuiteOutcomeCounts) {
+						total += count;
+					}
+					if (total <= singleSuiteOutcomeCounts.value(CConformanceOutcome::TYPE::PASS, 0)) {
+						continue;
+					}
 					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("suite", suiteNames.value(suiteId), singleSuiteOutcomeCounts)), this);
-					logOutcomeLines(singleSuiteOutcomeCounts, false);
+					logNonPassingOutcomeLines(singleSuiteOutcomeCounts);
 				}
 				for (CConformanceTask::TYPE taskType : typeOutcomeCounts.keys()) {
 					QMap<CConformanceOutcome::TYPE, int> taskOutcomeCounts = typeOutcomeCounts.value(taskType);
+					int total = 0;
+					for (const int& count : taskOutcomeCounts) {
+						total += count;
+					}
+					if (total <= taskOutcomeCounts.value(CConformanceOutcome::TYPE::PASS, 0)) {
+						continue;
+					}
 					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("test type", CConformanceTask::typeToString(taskType), taskOutcomeCounts)), this);
-					logOutcomeLines(taskOutcomeCounts, false);
+					logNonPassingOutcomeLines(taskOutcomeCounts);
 				}
 				for (const QString& interfaceName : interfaceOutcomeCounts.keys()) {
 					QMap<CConformanceOutcome::TYPE, int> interfaceTaskOutcomeCounts = interfaceOutcomeCounts.value(interfaceName);
+					int total = 0;
+					for (const int& count : interfaceTaskOutcomeCounts) {
+						total += count;
+					}
+					if (total <= interfaceTaskOutcomeCounts.value(CConformanceOutcome::TYPE::PASS, 0)) {
+						continue;
+					}
 					LOG(INFO, getLogDomain(), logTr("%1").arg(CConformanceReporter::formatCategoryHeader("interface", interfaceName, interfaceTaskOutcomeCounts)), this);
-					logOutcomeLines(interfaceTaskOutcomeCounts, false);
+					logNonPassingOutcomeLines(interfaceTaskOutcomeCounts);
 				}
 
 				// Clear completion message (also covers the case with no failures).

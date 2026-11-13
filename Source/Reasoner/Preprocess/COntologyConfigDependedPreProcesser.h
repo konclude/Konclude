@@ -29,6 +29,7 @@
 #include "CLexicalNormalisationPreProcess.h"
 #include "CNegationTransformationPreProcess.h"
 #include "CSubroleTransformationPreProcess.h"
+#include "CNonSimpleRoleRestrictionCheckPreProcess.h"
 #include "COntologyAssignmentTransformationPreProcess.h"
 #include "COntologyStructureInspectionPreProcess.h"
 #include "CRoleChainAutomataTransformationPreProcess.h"

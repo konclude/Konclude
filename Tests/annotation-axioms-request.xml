@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xml:base="http://example.org/annotations#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://example.org/annotations"/>
+
+    <Tell kb="http://example.org/annotations">
+
+        <owl:Declaration>
+            <owl:Class IRI="Parent"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="Child"/>
+        </owl:Declaration>
+
+        <!-- declaration of an annotation property -->
+        <owl:Declaration>
+            <owl:AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:AnnotationProperty IRI="myNote"/>
+        </owl:Declaration>
+
+        <!-- annotation assertion with a literal value -->
+        <owl:AnnotationAssertion>
+            <owl:AnnotationProperty abbreviatedIRI="rdfs:label"/>
+            <owl:IRI>http://example.org/annotations#Parent</owl:IRI>
+            <owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">A parent</owl:Literal>
+        </owl:AnnotationAssertion>
+
+        <!-- annotation assertion with an IRI value -->
+        <owl:AnnotationAssertion>
+            <owl:AnnotationProperty IRI="myNote"/>
+            <owl:IRI>http://example.org/annotations#Child</owl:IRI>
+            <owl:IRI>http://example.org/annotations#Parent</owl:IRI>
+        </owl:AnnotationAssertion>
+
+        <!-- nested annotation on an annotation assertion -->
+        <owl:AnnotationAssertion>
+            <owl:Annotation>
+                <owl:AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+                <owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">why this label</owl:Literal>
+            </owl:Annotation>
+            <owl:AnnotationProperty abbreviatedIRI="rdfs:label"/>
+            <owl:IRI>http://example.org/annotations#Child</owl:IRI>
+            <owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">A child</owl:Literal>
+        </owl:AnnotationAssertion>
+
+        <owl:SubAnnotationPropertyOf>
+            <owl:AnnotationProperty IRI="myNote"/>
+            <owl:AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+        </owl:SubAnnotationPropertyOf>
+
+        <owl:AnnotationPropertyDomain>
+            <owl:AnnotationProperty IRI="myNote"/>
+            <owl:IRI>http://example.org/annotations#Parent</owl:IRI>
+        </owl:AnnotationPropertyDomain>
+
+        <owl:AnnotationPropertyRange>
+            <owl:AnnotationProperty IRI="myNote"/>
+            <owl:IRI>http://www.w3.org/2001/XMLSchema#string</owl:IRI>
+        </owl:AnnotationPropertyRange>
+
+        <!-- an annotated logical axiom: the annotation must be ignored,
+             but the SubClassOf itself must still be told to the reasoner -->
+        <owl:SubClassOf>
+            <owl:Annotation>
+                <owl:AnnotationProperty abbreviatedIRI="rdfs:comment"/>
+                <owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">every child is a parent here</owl:Literal>
+            </owl:Annotation>
+            <owl:Class IRI="Child"/>
+            <owl:Class IRI="Parent"/>
+        </owl:SubClassOf>
+
+    </Tell>
+
+    <!-- Child must be classified under Parent, i.e. the annotated SubClassOf
+         axiom above must have survived the annotation handling -->
+    <IsEntailed kb="http://example.org/annotations">
+        <owl:SubClassOf>
+            <owl:Class IRI="Child"/>
+            <owl:Class IRI="Parent"/>
+        </owl:SubClassOf>
+        <ExpectedResult>
+            <BooleanResponse result="true"/>
+        </ExpectedResult>
+    </IsEntailed>
+
+    <IsClassSatisfiable kb="http://example.org/annotations">
+        <owl:Class IRI="Child"/>
+        <ExpectedResult>
+            <BooleanResponse result="true"/>
+        </ExpectedResult>
+    </IsClassSatisfiable>
+
+    <GetSubClasses kb="http://example.org/annotations" direct="true">
+        <owl:Class IRI="Parent"/>
+    </GetSubClasses>
+
+    <ReleaseKB kb="http://example.org/annotations"/>
+
+</RequestMessage>

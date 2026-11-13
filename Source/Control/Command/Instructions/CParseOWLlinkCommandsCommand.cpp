@@ -31,6 +31,7 @@ namespace Konclude {
 
 				CParseOWLlinkCommandsCommand::CParseOWLlinkCommandsCommand(QByteArray *array, const QString &arraySourcePath, CCommand *parentSuperCommand) 
 						: CParseCommandsCommand(array,arraySourcePath,parentSuperCommand) {
+					mSyntaxError = false;
 				}
 
 
@@ -43,6 +44,14 @@ namespace Konclude {
 					return PARSEOWLLINKCOMMANDSCOMMAND;
 				}
 
+
+				bool CParseOWLlinkCommandsCommand::hasSyntaxError() {
+					return mSyntaxError;
+				}
+
+				void CParseOWLlinkCommandsCommand::setSyntaxError(bool syntaxError) {
+					mSyntaxError = syntaxError;
+				}
 
 				QString CParseOWLlinkCommandsCommand::getBriefCommandDescription() {					
 					return QString("Parse-OWLlink-Commands Command");

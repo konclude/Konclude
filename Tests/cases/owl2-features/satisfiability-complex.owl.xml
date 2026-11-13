@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Class-expression coverage for the 'satisfiability' CLI task.
+  The control ontology asks about the classes below with kt:testClass; the
+  ontology is intentionally consistent so only the queried class matters.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/satisfiability">
+  <Prefix name="" IRI="http://konclude.test/features/satisfiability#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+  <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C5"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C6"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C7"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C8"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C9"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C10"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C11"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C12"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C13"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C14"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C15"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C16"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C17"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C18"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C19"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C20"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C21"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C22"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C23"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":s"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":u"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":dp"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":dq"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b"/></Declaration>
+
+  <DisjointClasses><Class abbreviatedIRI=":A"/><Class abbreviatedIRI=":B"/></DisjointClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C"/>
+    <ObjectIntersectionOf><Class abbreviatedIRI=":A"/><Class abbreviatedIRI=":B"/></ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C2"/>
+    <ObjectUnionOf><Class abbreviatedIRI=":A"/><Class abbreviatedIRI=":B"/></ObjectUnionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C3"/>
+    <ObjectComplementOf><Class abbreviatedIRI=":A"/></ObjectComplementOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C4"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":b"/></ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C5"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":A"/>
+      <ObjectComplementOf><Class abbreviatedIRI=":A"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C6"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C7"/>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":A"/></ObjectAllValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C8"/>
+    <ObjectHasValue><ObjectProperty abbreviatedIRI=":v"/><NamedIndividual abbreviatedIRI=":a"/></ObjectHasValue>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C9"/>
+    <ObjectHasSelf><ObjectProperty abbreviatedIRI=":s"/></ObjectHasSelf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C10"/>
+    <ObjectHasSelf><ObjectProperty abbreviatedIRI=":t"/></ObjectHasSelf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C11"/>
+    <ObjectMinCardinality cardinality="2"><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/></ObjectMinCardinality>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C12"/>
+    <ObjectMaxCardinality cardinality="0"><ObjectProperty abbreviatedIRI=":r"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></ObjectMaxCardinality>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C13"/>
+    <ObjectExactCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/></ObjectExactCardinality>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C14"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":u"/><Class abbreviatedIRI=":A"/></ObjectSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C15"/>
+    <DataSomeValuesFrom><DataProperty abbreviatedIRI=":dp"/><Datatype IRI="http://www.w3.org/2001/XMLSchema#integer"/></DataSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C16"/>
+    <DataSomeValuesFrom>
+      <DataProperty abbreviatedIRI=":dp"/>
+      <DataIntersectionOf><Datatype IRI="http://www.w3.org/2001/XMLSchema#integer"/><Datatype IRI="http://www.w3.org/2001/XMLSchema#string"/></DataIntersectionOf>
+    </DataSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C17"/>
+    <DataHasValue><DataProperty abbreviatedIRI=":dp"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">5</Literal></DataHasValue>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C18"/>
+    <DataAllValuesFrom><DataProperty abbreviatedIRI=":dp"/><Datatype IRI="http://www.w3.org/2001/XMLSchema#string"/></DataAllValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C19"/>
+    <DataMinCardinality cardinality="2">
+      <DataProperty abbreviatedIRI=":dp"/>
+      <Datatype IRI="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+    </DataMinCardinality>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C20"/>
+    <DataMaxCardinality cardinality="0">
+      <DataProperty abbreviatedIRI=":dq"/>
+    </DataMaxCardinality>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C21"/>
+    <DataSomeValuesFrom>
+      <DataProperty abbreviatedIRI=":dp"/>
+      <DatatypeRestriction>
+        <Datatype IRI="http://www.w3.org/2001/XMLSchema#integer"/>
+        <FacetRestriction facet="http://www.w3.org/2001/XMLSchema#minInclusive"><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">5</Literal></FacetRestriction>
+        <FacetRestriction facet="http://www.w3.org/2001/XMLSchema#maxInclusive"><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">3</Literal></FacetRestriction>
+      </DatatypeRestriction>
+    </DataSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C22"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":C23"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <SubClassOf>
+    <Class abbreviatedIRI=":A"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+  </SubClassOf>
+  <FunctionalObjectProperty><ObjectProperty abbreviatedIRI=":r"/></FunctionalObjectProperty>
+  <ReflexiveObjectProperty><ObjectProperty abbreviatedIRI=":s"/></ReflexiveObjectProperty>
+  <IrreflexiveObjectProperty><ObjectProperty abbreviatedIRI=":t"/></IrreflexiveObjectProperty>
+  <TransitiveObjectProperty><ObjectProperty abbreviatedIRI=":r"/></TransitiveObjectProperty>
+  <InverseObjectProperties><ObjectProperty abbreviatedIRI=":r"/><ObjectProperty abbreviatedIRI=":u"/></InverseObjectProperties>
+  <DataPropertyRange><DataProperty abbreviatedIRI=":dp"/><Datatype IRI="http://www.w3.org/2001/XMLSchema#integer"/></DataPropertyRange>
+  <FunctionalDataProperty><DataProperty abbreviatedIRI=":dq"/></FunctionalDataProperty>
+
+  <ClassAssertion><Class abbreviatedIRI=":A"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":B"/><NamedIndividual abbreviatedIRI=":b"/></ClassAssertion>
+</Ontology>

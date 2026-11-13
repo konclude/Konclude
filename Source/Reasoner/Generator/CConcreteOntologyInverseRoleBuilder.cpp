@@ -132,8 +132,10 @@ namespace Konclude {
 						expression = new CInverseObjectPropertyOfExpression(buildExpression);
 						expressionBuildHash->insert(CExpressionHasher(expression),expression);
 						expressionBuildContainerList->append(expression);
-						roleObjPropTermHash->insert(role,expression);
-						objPropTermRoleHash->insert(expression,role);
+						// the inverse expression denotes the inverse role and not the role itself,
+						// so it must not replace the entry of the role, which is its named property
+						roleObjPropTermHash->insert(inverseRole,expression);
+						objPropTermRoleHash->insert(expression,inverseRole);
 
 
 						QList< QPair<cint64,bool> > subRoleTagList(roleTagSubRoleTagNegationHash.values(role->getRoleTag()));
@@ -257,8 +259,10 @@ namespace Konclude {
 				expression = new CInverseObjectPropertyOfExpression(buildExpression);
 				expressionBuildHash->insert(CExpressionHasher(expression),expression);
 				expressionBuildContainerList->append(expression);
-				roleObjPropTermHash->insert(role,expression);
-				objPropTermRoleHash->insert(expression,role);
+				// the inverse expression denotes the inverse role and not the role itself, so it
+				// must not replace the entry of the role, which is its named property
+				roleObjPropTermHash->insert(inverseRole,expression);
+				objPropTermRoleHash->insert(expression,inverseRole);
 
 
 				QList< QPair<cint64,bool> > subRoleTagList(roleTagSubRoleTagNegationHash.values(role->getRoleTag()));

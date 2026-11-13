@@ -20,6 +20,11 @@
 
 #include "CMemoryPool.h"
 
+#if !defined(_WIN32)
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
+
 
 namespace Konclude {
 
@@ -32,6 +37,7 @@ namespace Konclude {
 				mMemoryBlockBegin = 0;
 				mMemoryBlockSize = 0;
 				mMemoryBlockPointer = 0;
+				mMemoryBlockMapped = false;
 			}
 
 			CMemoryPool::~CMemoryPool() {
@@ -53,12 +59,61 @@ namespace Konclude {
 				return mMemoryBlockEnd;
 			}
 
-			CMemoryPool* CMemoryPool::setMemoryBlockData(char* memoryBlock, cint64 memoryBlockSize) {
+			CMemoryPool* CMemoryPool::setMemoryBlockData(char* memoryBlock, cint64 memoryBlockSize, bool memoryBlockMapped) {
 				mMemoryBlockBegin = memoryBlock;
 				mMemoryBlockSize = memoryBlockSize;
 				mMemoryBlockEnd = mMemoryBlockBegin + mMemoryBlockSize;
 				mMemoryBlockPointer = mMemoryBlockBegin;
+				mMemoryBlockMapped = memoryBlockMapped;
 				return this;
+			}
+
+			bool CMemoryPool::isMemoryBlockMapped() {
+				return mMemoryBlockMapped;
+			}
+
+#if !defined(_WIN32)
+			static cint64 roundedMappingSize(cint64 memoryBlockSize) {
+				static const cint64 pageSize = (cint64)sysconf(_SC_PAGESIZE);
+				return ((memoryBlockSize + pageSize - 1) / pageSize) * pageSize;
+			}
+#endif
+
+			cint64 CMemoryPool::mappedBlockSize(cint64 memoryBlockSize) {
+#if !defined(_WIN32)
+				return roundedMappingSize(memoryBlockSize);
+#else
+				return memoryBlockSize;
+#endif
+			}
+
+			char* CMemoryPool::allocateMemoryBlock(cint64 memoryBlockSize, bool& memoryBlockMapped) {
+#if !defined(_WIN32)
+				void* mapping = mmap(nullptr, (size_t)roundedMappingSize(memoryBlockSize), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+				if (mapping != MAP_FAILED) {
+					memoryBlockMapped = true;
+					return (char*)mapping;
+				}
+#endif
+				memoryBlockMapped = false;
+				return new char[memoryBlockSize];
+			}
+
+			void CMemoryPool::releaseMemoryBlock(char* memoryBlock, cint64 memoryBlockSize, bool memoryBlockMapped) {
+				if (!memoryBlock) {
+					return;
+				}
+#if !defined(_WIN32)
+				if (memoryBlockMapped) {
+					munmap(memoryBlock, (size_t)roundedMappingSize(memoryBlockSize));
+					return;
+				}
+#endif
+				delete [] memoryBlock;
+			}
+
+			void CMemoryPool::releaseMemoryBlockData(CMemoryPool* memoryPool) {
+				releaseMemoryBlock(memoryPool->getMemoryBlockData(), memoryPool->getMemoryBlockSize(), memoryPool->isMemoryBlockMapped());
 			}
 
 			CMemoryPool* CMemoryPool::setMemoryBlockPointer(char* memoryBlockPointer) {

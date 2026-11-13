@@ -91,6 +91,16 @@ namespace Konclude {
 
 					T* updateNodeEquivalentElements(N* node);
 
+					/*!
+					 *	Removes the direct link between the top and the bottom node if the bottom
+					 *	node has other parents. The bottom node is made a child of the top node when
+					 *	the hierarchy is created, which is the complete hierarchy without further
+					 *	satisfiable elements; once the leaves have been made its parents the top
+					 *	node is only a predecessor of it, and a remaining direct link would report
+					 *	the bottom node as a direct child of the top node as well.
+					 */
+					T* removeBypassedTopBottomLink();
+
 
 					virtual T* setNodeSatisfiable(N* node);
 					virtual T* setNodeUnsatisfiable(N* node);

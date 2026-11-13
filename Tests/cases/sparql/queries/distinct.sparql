@@ -1,0 +1,2 @@
+PREFIX sp: <http://konclude.test/sparql#>
+SELECT DISTINCT ?p WHERE { ?p sp:hasChild ?c }

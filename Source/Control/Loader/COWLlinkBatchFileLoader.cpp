@@ -32,6 +32,7 @@ namespace Konclude {
 				owllinkInterpreter = 0;
 				loaderConfig = 0;
 				mConfLogProcessingTimes = false;
+				mExitCode = 0;
 			}
 
 
@@ -150,6 +151,7 @@ namespace Konclude {
 
 					} else {
 						LOG(ERROR,getLogDomain(),logTr("OWLlink request file '%1' not found.").arg(reqFileString),this);
+						mExitCode = 1;
 						concludeOWLlinkContent();
 					}
 				}	
@@ -186,7 +188,7 @@ namespace Konclude {
 					CLogger::getInstance()->waitSynchronization();
 					//qSleep(10);
 					//qWait();
-                    QCoreApplication::exit();
+					QCoreApplication::exit(mExitCode);
 				}
 				return this;
 			}

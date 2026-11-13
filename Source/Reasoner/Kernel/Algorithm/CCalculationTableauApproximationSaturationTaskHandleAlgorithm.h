@@ -25,6 +25,13 @@
 
 
 // Namespace includes
+// Libraries includes
+#include <QMutex>
+#include <QWaitCondition>
+#include <QVector>
+#include <QAtomicInt>
+#include <thread>
+
 #include "AlgorithmSettings.h"
 #include "CCalculationAlgorithmContextBase.h"
 #include "CCalculationStopProcessingException.h"
@@ -42,6 +49,9 @@
 #include "Reasoner/Kernel/Process/CConceptSaturationProcessLinker.h"
 #include "Reasoner/Kernel/Process/CIndividualSaturationProcessNodeStatusUpdateLinker.h"
 #include "Reasoner/Kernel/Process/CLinkedDataValueAssertionSaturationData.h"
+#include "Reasoner/Kernel/Process/CParallelSaturationProcessContext.h"
+#include "Scheduler/CTaskMemoryPoolAllocationManager.h"
+#include "Utilities/Memory/CMemoryPoolContainer.h"
 
 #include "Scheduler/CTask.h"
 #include "Scheduler/CTaskHandleAlgorithm.h"
@@ -61,6 +71,16 @@
 
 // Logger includes
 #include "Logger/CLogger.h"
+
+#include "Reasoner/Ontology/CDatatypeValueSpaceCompareTriggers.h"
+#include "Reasoner/Ontology/CDatatypeValueSpaceRealTriggers.h"
+#include "Reasoner/Ontology/CDatatypeValueSpaceStringTriggers.h"
+#include "Reasoner/Ontology/CDatatypeValueSpaceTriggeringMap.h"
+#include "Reasoner/Ontology/CDatatypeValueSpaceTriggeringData.h"
+#include "Reasoner/Ontology/CDatatypeValueSpaceConceptTriggerLinker.h"
+#include "Reasoner/Ontology/CDataLiteralCompareValue.h"
+#include "Reasoner/Ontology/CDataLiteralRealValue.h"
+#include "Reasoner/Ontology/CDataLiteralStringValue.h"
 
 
 
@@ -110,7 +130,61 @@ namespace Konclude {
 
 						virtual bool handleTask(CTaskProcessorContext *processorContext, CTask* task);
 
+						// parallel saturation (#92): the first processing of the saturation nodes runs on several threads,
+						// one dependency level at a time; a thread writes only into the node it processes, everything it
+						// would write into another node is recorded and applied by the owner between the levels
+						class CParallelSaturationDeferredRecord {
+							public:
+								enum KIND { CONCEPTADD, CONCEPTADDFILTERED, LINKINSTALL, QUEUENODE, QUEUEUNINITIALIZEDNODE, DIRECTFLAGS, DIRECTNOTDEPENDENTFLAGS, INDIRECTFLAGS, SUCCESSORNOMINAL, CARDINALITYCANDIDATES, DATALITERALSUCCESSOR, EXTENSIONQUEUE, DISJUNCTEXTRACTQUEUE, CRITICALQUEUE, DISJUNCTION, QUEUENODEFLAGGED, EXTENSIONQUEUEFULL, CRITICALADD, MARKATMOST, PREDMERGE, FUNCROLEDEP, FUNCQUALDEP, ATMOSTMERGEQUEUE };
+								KIND mKind;
+								CIndividualSaturationProcessNode* mNode;
+								CIndividualSaturationProcessNode* mNode2;
+								CConcept* mConcept;
+								CRole* mRole;
+								void* mPointer;
+								cint64 mValue1;
+								cint64 mValue2;
+								bool mFlag;
+								CParallelSaturationDeferredRecord* mNext;
+						};
+						class CParallelSaturationSlice {
+							public:
+								CIndividualSaturationProcessNode** mNodes;
+								cint64 mCount;
+								CParallelSaturationDeferredRecord* mDeferredLinker;
+								CParallelSaturationDeferredRecord* mDeferredLast;
+								CIndividualSaturationProcessNodeLinker* mCompletionLinker;
+								CIndividualSaturationProcessNodeLinker* mCompletionLast;
+								// the slice's records relinked per target node's thread (bucketing), and their number
+								CParallelSaturationDeferredRecord** mOwnerHeads;
+								CParallelSaturationDeferredRecord** mOwnerLasts;
+								cint64 mRecordCount;
+						};
+						class CParallelSaturationShared;
+						// what the threads do with the slices of a round
+						enum PARALLELROUNDKIND { PARALLELROUND_PROCESSDYNAMIC, PARALLELROUND_PROCESSSTATIC, PARALLELROUND_EXTENSION, PARALLELROUND_CRITICAL };
+						void parallelHelperMain(CParallelSaturationShared* shared, cint64 helperIndex);
+
 						void readCalculationConfig(CSatisfiableCalculationTask* satCalcTask);
+
+						bool runParallelSaturation(CSatisfiableCalculationTask* satCalcTask, CCalculationAlgorithmContextBase* calcAlgContext);
+						void processParallelSlice(CParallelSaturationSlice* slice, CCalculationAlgorithmContextBase* calcAlgContext);
+						void processParallelNode(CIndividualSaturationProcessNode* indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+						void processDisjunctionConcept(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationDescriptor* conDes, CCalculationAlgorithmContextBase* calcAlgContext);
+						void applyParallelDeferredRecords(CParallelSaturationSlice* slice, CCalculationAlgorithmContextBase* calcAlgContext);
+						void applyParallelDeferredRecord(CParallelSaturationDeferredRecord* record, CCalculationAlgorithmContextBase* calcAlgContext);
+						void applyParallelRecordsForThread(CParallelSaturationShared* shared, CParallelSaturationSlice* applySlice, CCalculationAlgorithmContextBase* calcAlgContext);
+						void bucketParallelRecords(CParallelSaturationShared* shared, cint64 threadIndex);
+						CParallelSaturationSlice* createParallelSlice(CIndividualSaturationProcessNode** nodes, cint64 count, cint64 threadCount);
+						void runParallelRound(CParallelSaturationShared* shared, QVector<CParallelSaturationSlice*>& slices, cint64 roundKind, CCalculationAlgorithmContextBase* calcAlgContext, cint64* roundStats);
+						void processParallelExtensionSlice(CParallelSaturationSlice* slice, CCalculationAlgorithmContextBase* calcAlgContext);
+						void processParallelCriticalSlice(CParallelSaturationSlice* slice, CCalculationAlgorithmContextBase* calcAlgContext);
+						//! Serial processing of the queued nodes (and the disjunct extraction linkers) while the queue is small; true if it reached the threshold.
+						bool drainSerialQueuedNodes(cint64 threshold, CCalculationAlgorithmContextBase* calcAlgContext);
+						//! Parallel resolution of the extension node of baseNode for the concepts of one of the maps (the other null).
+						CIndividualSaturationProcessNode* resolveParallelExtensionNode(CIndividualSaturationProcessNode* baseNode, CSaturationSuccessorConceptExtensionMap* succConExtMap, CPROCESSINGHASH<cint64,CConceptNegationPair>* conExtensionMap, CCalculationAlgorithmContextBase* calcAlgContext);
+						void addFUNCTIONALRoleExtensionFunctionalityAddedToDependentIndividual(CIndividualSaturationProcessNode*& depIndi, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);
+						void deferParallelRecord(CParallelSaturationDeferredRecord::KIND kind, CIndividualSaturationProcessNode* node, CIndividualSaturationProcessNode* node2, CConcept* concept, CRole* role, void* pointer, cint64 value1, cint64 value2, bool flag);
 
 
 						cint64 getAppliedANDRuleCount();
@@ -166,6 +240,8 @@ namespace Konclude {
 						void applySOMERule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applySELFRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyALLRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
+						bool isRoleSubRoleOf(CRole* subRole, bool subRoleNegation, CRole* superRole, CCalculationAlgorithmContextBase* calcAlgContext);
+						void markInsufficientForOutsideBatchUniversalSuccessor(CIndividualSaturationProcessNode* processIndi, CConcept* allConcept, bool allNegation, CRole* allRole, CCalculationAlgorithmContextBase* calcAlgContext);
 						void applyATMOSTRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyATLEASTRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
 						void applyIMPLICATIONRule(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker);
@@ -181,8 +257,12 @@ namespace Konclude {
 
 						void createSuccessorForDataLiteral(CIndividualSaturationProcessNode*& processIndi, CRole* role, CDataLiteral* dataLiteral, CCalculationAlgorithmContextBase* calcAlgContext);
 						void associateDataLiteralWithNode(CIndividualSaturationProcessNode*& processIndi, CDataLiteral* dataLiteral, CDatatype* datatype, CCalculationAlgorithmContextBase* calcAlgContext);
-						void handleDatatypeValueSpaceTriggers(CIndividualSaturationProcessNode*& processIndi, CDatatype* datatype, bool &dataValueTriviallySat, bool &dataValueTriviallyUnsat, CCalculationAlgorithmContextBase* calcAlgContext);
-						bool tryHandleDatatypeValueSpaceTriggers(CIndividualSaturationProcessNode*& processIndi, CDatatypeValueSpaceTriggers* datatypeValueSpaceTrigger, CDatatypeValueSpacesTriggers* valueSpaceTriggers, CDatatype* datatype, CCalculationAlgorithmContextBase* calcAlgContext);
+						void handleDatatypeValueSpaceTriggers(CIndividualSaturationProcessNode*& processIndi, CDatatype* datatype, CDataLiteralValue* dataLitValue, bool &dataValueTriviallySat, bool &dataValueTriviallyUnsat, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool tryHandleDatatypeValueSpaceTriggers(CIndividualSaturationProcessNode*& processIndi, CDatatypeValueSpaceTriggers* datatypeValueSpaceTrigger, CDatatypeValueSpacesTriggers* valueSpaceTriggers, CDatatype* datatype, CDataLiteralValue* dataLitValue, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool tryHandleCompareValueSpaceTriggersForValue(CIndividualSaturationProcessNode*& processIndi, CDatatypeValueSpaceRealTriggers* realTriggers, CDatatypeValueSpaceStringTriggers* stringTriggers, CDataLiteralCompareValue* compareValue, CCalculationAlgorithmContextBase* calcAlgContext);
+						bool tryHandleCompareValueSpaceTriggersForDatatype(CIndividualSaturationProcessNode*& processIndi, CDatatypeValueSpaceRealTriggers* realTriggers, CDatatype* datatype, CCalculationAlgorithmContextBase* calcAlgContext);
+						void addValueSpaceConceptTriggersToIndividual(CDatatypeValueSpaceConceptTriggeringData* triggeringData, bool completeTriggers, CIndividualSaturationProcessNode*& processIndi, CCalculationAlgorithmContextBase* calcAlgContext);
+						void addValueSpaceTriggersAtValueToIndividual(CDatatypeValueSpaceTriggeringData* triggeringData, CIndividualSaturationProcessNode*& processIndi, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						void createSuccessorForConcept(CIndividualSaturationProcessNode*& processIndi, CConceptSaturationProcessLinker* conProLinker, cint64 cardinality, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -329,6 +409,8 @@ namespace Konclude {
 
 						bool markATMOSTRestrictedAncestorsAsInsufficient(CConceptSaturationDescriptor* conDes, CIndividualSaturationProcessNode* functionallyRestrictedSuccessorNode, CXNegLinker<CRole*>* functionallyRestrictedSuccessorCreationRoleLinker, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool markNominalATMOSTRestrictedAncestorsAsInsufficient(CConceptSaturationDescriptor* conDes, CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						bool hasCriticalPredecessorRoleCardinality(CCriticalPredecessorRoleCardinalityHash* criticalPredRoleCardHash, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);
 
 						void updateExtractDisjunctCommonConcept(CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						void initializeExtractDisjunctCommonConcept(CIndividualSaturationProcessNode*& indiProcSatNode, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -579,6 +661,33 @@ namespace Konclude {
 						QString mRuleEndDebugIndiModelString;
 						QString mEndSaturationDebugIndiModelString;
 
+
+						bool mConfParallelSaturation;
+						cint64 mConfParallelSaturationThreadCount;
+						bool mConfParallelSaturationParallelApply;
+						bool mConfParallelSaturationTailRounds;
+						bool mConfParallelSaturationExtensionRounds;
+						cint64 mConfParallelSaturationMaxGenerations;
+						cint64 mConfProcessorCount;
+						bool mParallelMode;
+						CIndividualSaturationProcessNode* mParallelCurrentNode;
+						bool mParallelContinueCurrent;
+						CParallelSaturationSlice* mParallelCurrentSlice;
+						// applying records to the thread's own nodes (writes into other nodes are recorded again)
+						bool mParallelApplying;
+						// 0 for the saturation task's own thread, 1.. for the helpers; stored in each node at its first processing
+						cint64 mParallelThreadIndex;
+						// node creation in the extension rounds: the owner's node vector and ID counter, guarded by this mutex
+						QMutex* mParallelNodeMutex;
+						CProcessingDataBox* mParallelOwnerDataBox;
+						// the records only the owner may apply, taken out of the generations by this thread, applied by the owner at the end of the round
+						CParallelSaturationDeferredRecord* mParallelOwnerOnlyLinker;
+						CParallelSaturationDeferredRecord* mParallelOwnerOnlyLast;
+						cint64 mParallelOwnerOnlyCount;
+						// the records of a round live in pools of their own per thread, given back to the provider after the round
+						CMemoryPoolContainer* mParallelRecordContainer;
+						CTaskMemoryPoolAllocationManager* mParallelRecordMemMan;
+						void releaseParallelRecordMemory();
 
 						CSatisfiableCalculationTask* mDebugTestingSaturationTask;
 						QString mDebugTestSaturationDebugIndiModelString;

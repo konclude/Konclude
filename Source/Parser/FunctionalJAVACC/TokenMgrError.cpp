@@ -78,6 +78,10 @@ static char hexChar(int i) {
  * Replaces unprintable characters by their escaped (or unicode escaped)
  * equivalents in the given string
  */
+namespace Konclude {
+namespace Parser {
+namespace FunctionalJAVACC {
+
 JAVACC_SIMPLE_STRING addUnicodeEscapes(JAVACC_STRING_TYPE str) {
   JAVACC_SIMPLE_STRING retval;
   for (size_t i = 0; i < str.size(); i++) {
@@ -121,3 +125,7 @@ JAVACC_SIMPLE_STRING addUnicodeEscapes(JAVACC_STRING_TYPE str) {
   return retval;
 }
 /* JavaCC - OriginalChecksum=35439b7e26a5e5693053317508794bdf (do not edit this line) */
+
+}
+}
+}

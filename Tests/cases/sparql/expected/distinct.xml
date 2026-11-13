@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected DISTINCT answer: alice is the only person with a child. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="p"/>
+  </head>
+  <results>
+    <result>
+      <binding name="p"><uri>http://konclude.test/sparql#alice</uri></binding>
+    </result>
+  </results>
+</sparql>

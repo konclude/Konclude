@@ -7,6 +7,32 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_VALUE_COUNT
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_VALUE_COUNT 12L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_CALCULATION_PROCESSED_TASKS
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_CALCULATION_PROCESSED_TASKS 0L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_CALCULATION_REMAINING_TASKS
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_CALCULATION_REMAINING_TASKS 1L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_PERCENT
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_PERCENT 2L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_TESTED
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_TESTED 3L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_TOTAL
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_TOTAL 4L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_REMAINING_MILLISECONDS
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_CLASSIFICATION_REMAINING_MILLISECONDS 5L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_PERCENT
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_PERCENT 6L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_TESTED
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_TESTED 7L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_TOTAL
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_TOTAL 8L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_REMAINING_MILLISECONDS
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_REALIZATION_REMAINING_MILLISECONDS 9L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_SATURATION_INITIALIZED_NODES
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_SATURATION_INITIALIZED_NODES 10L
+#undef com_konclude_jnibridge_QueryingBridge_PROGRESS_SATURATION_NODES
+#define com_konclude_jnibridge_QueryingBridge_PROGRESS_SATURATION_NODES 11L
 /*
  * Class:     com_konclude_jnibridge_QueryingBridge
  * Method:    checkIsOWLOntologyConsistent
@@ -82,7 +108,7 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLTypes
 /*
  * Class:     com_konclude_jnibridge_QueryingBridge
  * Method:    queryOWLSameIndividuals
- * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;Ljava/lang/String;Ljava/lang/Object;Lcom/konclude/jnibridge/SetOfObjectSetCallbackListener;)V
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;Ljava/lang/String;Ljava/lang/Object;Lcom/konclude/jnibridge/ObjectSetCallbackListener;)V
  */
 JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLSameIndividuals
   (JNIEnv *, jobject, jobject, jstring, jobject, jobject);
@@ -102,6 +128,70 @@ JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLObject
  */
 JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLObjectPropertyTargets
   (JNIEnv *, jobject, jobject, jstring, jobject, jstring, jobject, jobject);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    initOWLClassExpressionBuilder
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;Lcom/konclude/jnibridge/AxiomExpressionBuildingBridge;)V
+ */
+JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_initOWLClassExpressionBuilder
+  (JNIEnv *, jobject, jobject, jobject);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    checkIsOWLClassExpressionSatisfiable
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_konclude_jnibridge_QueryingBridge_checkIsOWLClassExpressionSatisfiable
+  (JNIEnv *, jobject, jobject, jlong);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    queryOWLClassExpressionSubClasses
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;JLcom/konclude/jnibridge/SetOfObjectSetCallbackListener;Z)V
+ */
+JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLClassExpressionSubClasses
+  (JNIEnv *, jobject, jobject, jlong, jobject, jboolean);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    queryOWLClassExpressionSuperClasses
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;JLcom/konclude/jnibridge/SetOfObjectSetCallbackListener;Z)V
+ */
+JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLClassExpressionSuperClasses
+  (JNIEnv *, jobject, jobject, jlong, jobject, jboolean);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    queryOWLClassExpressionEquivalentClasses
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;JLcom/konclude/jnibridge/ObjectSetCallbackListener;)V
+ */
+JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLClassExpressionEquivalentClasses
+  (JNIEnv *, jobject, jobject, jlong, jobject);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    queryOWLClassExpressionInstances
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;JLcom/konclude/jnibridge/SetOfObjectSetCallbackListener;Z)V
+ */
+JNIEXPORT void JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLClassExpressionInstances
+  (JNIEnv *, jobject, jobject, jlong, jobject, jboolean);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    queryOWLReasoningProgress
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLReasoningProgress
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     com_konclude_jnibridge_QueryingBridge
+ * Method:    queryOWLClassHierarchy
+ * Signature: (Lcom/konclude/jnibridge/KoncludeReasonerBridge;Ljava/lang/Object;)[I
+ */
+JNIEXPORT jintArray JNICALL Java_com_konclude_jnibridge_QueryingBridge_queryOWLClassHierarchy
+  (JNIEnv *, jobject, jobject, jobject);
 
 #ifdef __cplusplus
 }

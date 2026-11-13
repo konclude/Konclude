@@ -53,7 +53,10 @@ namespace Konclude {
 
 			}
 
+			// deleted by the CClassification of the ontology, which the item is the class classification of, after the
+			// data of the ontology; the test items read nothing of the ontology when they are deleted (issue #45)
 			COptimizedKPSetClassOntologyClassificationItem::~COptimizedKPSetClassOntologyClassificationItem() {
+				qDeleteAll(mSatTestItemContainer);
 			}
 
 

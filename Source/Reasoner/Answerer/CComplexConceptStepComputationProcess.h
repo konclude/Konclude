@@ -49,7 +49,11 @@ namespace Konclude {
 
 
 			enum ComplexConceptStepComputationProcessType {
-				COMPUTATIONTYPESATISFIABILITY = 0, COMPUTATIONTYPESUPERCLASSNODES = 1, COMPUTATIONTYPESUBCLASSNODES = 2, COMPUTATIONTYPEEQUIVALENTCLASSNODES = 3, COMPUTATIONTYPEINSTANCES = 4, REALIZATIONTYPESUBCLASS = 5
+				// the steps of a concept item are processed in this order, each one queuing the next required one
+				// when it finishes, so the realization of the direct sub classes, which the direct instances need
+				// to subtract their instances, has to come before the instances step, whose completion queues
+				// no further step
+				COMPUTATIONTYPESATISFIABILITY = 0, COMPUTATIONTYPESUPERCLASSNODES = 1, COMPUTATIONTYPESUBCLASSNODES = 2, COMPUTATIONTYPEEQUIVALENTCLASSNODES = 3, REALIZATIONTYPESUBCLASS = 4, COMPUTATIONTYPEINSTANCES = 5
 			};
 
 			static const cint64 COMPLEXCONCEPTSTEPCOMPUTATIONPROCESSTYPECOUNT = 6;

@@ -93,6 +93,25 @@ namespace Konclude {
 
 
 
+			template<class S>
+			static void reserveSetAtLeast(S& set, cint64 size) {
+				if (set.capacity() < size) {
+					set.reserve((int)size);
+				}
+			}
+
+			void CConcreteOntologyUpdateCollectorBuilder::reserveForAxioms(cint64 axiomCount) {
+				if (axiomCount <= 0) {
+					return;
+				}
+				// every told axiom lands in these three sets; the entities get a declaration each on top, and an axiom
+				// of the SNOMED editions builds about four expressions (so the expression hash is reserved for five per axiom)
+				reserveSetAtLeast(*mTellAxiomSet, mTellAxiomSet->size() + axiomCount);
+				reserveSetAtLeast(*mTellUpdatedAxiomSet, mTellUpdatedAxiomSet->size() + axiomCount);
+				reserveSetAtLeast(mLocTellUpdatedAxiomSet, mLocTellUpdatedAxiomSet.size() + axiomCount);
+				reserveExpressionBuildHash(mExpressionBuildHash->size() + axiomCount * 5);
+			}
+
 			bool CConcreteOntologyUpdateCollectorBuilder::tellOntologyAxiom(CAxiomExpression* axiom) {
 				if (!mTellAxiomSet->contains(axiom)) {
 					mRetractAxiomSet->remove(axiom);

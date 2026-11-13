@@ -34,6 +34,7 @@ namespace Konclude {
 			mAxiomNumber = 0;
 
 			mReportErrorCount = 100;
+			mUnsupportedAnnotationError = false;
 
 			LOG(INFO,getLogDomain(),logTr("Created OWL 2.0 Qt XML Parser."),this);
 
@@ -50,6 +51,7 @@ namespace Konclude {
 			mAxiomNumber = 0;
 
 			mReportErrorCount = 100;
+			mUnsupportedAnnotationError = false;
 
 			LOG(INFO,getLogDomain(),logTr("Created OWL 2.0 Qt XML Parser."),this);
 
@@ -94,6 +96,9 @@ namespace Konclude {
 					LOG(INFO,getLogDomain(),logTr("Parsing of '%1' completed.").arg(filename),this);
 
 				} else {
+					// the document is built up to the error, it must not be processed since everything
+					// after the error would be ignored without any indication
+					successfullParsed = false;
 					LOG(ERROR,getLogDomain(),logTr("XML error: %1, file: %2, line: %3, column %4.").arg(errorMessage).arg(filename).arg(errorLine).arg(errorColumn),this);
 				}
 				file.close();
@@ -388,6 +393,19 @@ namespace Konclude {
 
 			mParseFunctionJumpHash.insert("DLSafeRule",&COWL2QtXMLOntologyParser::jumpFunctionParseIgnoredNode);
 			mParseFunctionJumpHash.insert("owl:DLSafeRule",&COWL2QtXMLOntologyParser::jumpFunctionParseIgnoredNode);
+
+			mParseFunctionJumpHash.insert("AnnotationProperty",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("owl:AnnotationProperty",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("AnnotationPropertyRange",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("owl:AnnotationPropertyRange",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("AnnotationPropertyDomain",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("owl:AnnotationPropertyDomain",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("SubAnnotationPropertyOf",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("owl:SubAnnotationPropertyOf",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("AnnotationAssertion",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("owl:AnnotationAssertion",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("Annotation",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
+			mParseFunctionJumpHash.insert("owl:Annotation",&COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode);
 
 			return true;
 		}
@@ -840,6 +858,14 @@ namespace Konclude {
 			} else if (nodeString == "Import" || nodeString == "owl:Import") {
 				expression = jumpFunctionParseImportNode(node);
 
+			} else if (nodeString == "AnnotationProperty" || nodeString == "owl:AnnotationProperty"
+					|| nodeString == "AnnotationPropertyRange" || nodeString == "owl:AnnotationPropertyRange"
+					|| nodeString == "AnnotationPropertyDomain" || nodeString == "owl:AnnotationPropertyDomain"
+					|| nodeString == "SubAnnotationPropertyOf" || nodeString == "owl:SubAnnotationPropertyOf"
+					|| nodeString == "AnnotationAssertion" || nodeString == "owl:AnnotationAssertion"
+					|| nodeString == "Annotation" || nodeString == "owl:Annotation") {
+				expression = jumpFunctionUnsupportedAnnotationNode(node);
+
 			} else {
 				if (mReportErrorCount > 0) {
 					--mReportErrorCount;
@@ -859,8 +885,10 @@ namespace Konclude {
 		CDeclarationAxiomExpression* COWL2QtXMLOntologyParser::parseDeclarationNode(QDomElement* node) {
 			QList<CBuildExpression *> builds = parseChildNodes(node);
 			CDeclarationAxiomExpression* declarationExpression = nullptr;
-			declarationExpression = mOntoBuilder->getDeclaration(builds);
-			++mAxiomNumber;
+			if (!builds.isEmpty()) {
+				declarationExpression = mOntoBuilder->getDeclaration(builds);
+				++mAxiomNumber;
+			}
 			return declarationExpression;
 		}
 
@@ -1888,6 +1916,16 @@ namespace Konclude {
 			QString importIRIString = node->text();
 			if (!importIRIString.isEmpty()) {
 				mOntoBuilder->addOntologyImport(importIRIString);
+			}
+			return nullptr;
+		}
+
+
+		CBuildExpression* COWL2QtXMLOntologyParser::jumpFunctionUnsupportedAnnotationNode(QDomElement* node) {
+			// annotations do not influence the reasoning, the sub elements are not parsed
+			if (!mUnsupportedAnnotationError) {
+				mUnsupportedAnnotationError = true;
+				LOG(WARNING,getLogDomain(),logTr("Annotations are currently not handled."),this);
 			}
 			return nullptr;
 		}

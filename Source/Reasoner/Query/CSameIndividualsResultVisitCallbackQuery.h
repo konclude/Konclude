@@ -29,6 +29,7 @@
 #include "CQuery.h"
 #include "CSucceedQueryResult.h"
 #include "CRealizationPremisingQuery.h"
+#include "Reasoner/Ontology/COntologyProcessingSameRealizationRequirement.h"
 #include "CEntityExpressionSetResultVisitingCallback.h"
 #include "CEntityExpressionSetResultVisitingCallbackGenerator.h"
 
@@ -78,6 +79,10 @@ namespace Konclude {
 
 					virtual bool hasError();
 
+					// the same realization is only computed if the query asks for it, without this
+					// the callback reports nothing, compare CSameIndividualsQuery
+					virtual COntologyProcessingDynamicRealizationRequirement* getDynamicRealizationRequirement();
+
 				// protected methods
 				protected:
 
@@ -89,7 +94,7 @@ namespace Konclude {
 					QString queryString;
 
 					CSucceedQueryResult* mResult;
-					CConceptRealization* mSameRealization;
+					CSameRealization* mSameRealization;
 
 					bool mQueryConstructError;
 					bool mRealizationCalcError;

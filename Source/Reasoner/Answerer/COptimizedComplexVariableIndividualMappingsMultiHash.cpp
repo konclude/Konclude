@@ -52,7 +52,7 @@ namespace Konclude {
 					while (memPoolsIt) {
 						CMemoryPool* tmpMemPool = memPoolsIt;
 						memPoolsIt = memPoolsIt->getNext();
-						delete[] tmpMemPool->getMemoryBlockData();
+						CMemoryPool::releaseMemoryBlockData(tmpMemPool);
 						delete tmpMemPool;
 					}
 					delete mContext;
@@ -243,7 +243,7 @@ namespace Konclude {
 					while (memPoolsIt) {
 						CMemoryPool* tmpMemPool = memPoolsIt;
 						memPoolsIt = memPoolsIt->getNext();
-						delete[] tmpMemPool->getMemoryBlockData();
+						CMemoryPool::releaseMemoryBlockData(tmpMemPool);
 						delete tmpMemPool;
 					}
 					delete mContext;
@@ -257,7 +257,7 @@ namespace Konclude {
 					while (memPoolsIt) {
 						CMemoryPool* tmpMemPool = memPoolsIt;
 						memPoolsIt = memPoolsIt->getNext();
-						delete[] tmpMemPool->getMemoryBlockData();
+						CMemoryPool::releaseMemoryBlockData(tmpMemPool);
 						delete tmpMemPool;
 					}
 					delete multiHashPart;

@@ -70,7 +70,7 @@ namespace Konclude {
 			// public methods
 			public:
 				//! Constructor
-				CTaskProcessorThread(CTaskHandleAlgorithm* taskHandleAlgo, CTaskEventHandlerBasedDistributionCompletor* distributorCompletor, CConsiderateMemoryPoolProvider* memoryPoolProvider = nullptr);
+				CTaskProcessorThread(CTaskHandleAlgorithm* taskHandleAlgo, CTaskEventHandlerBasedDistributionCompletor* distributorCompletor, CConsiderateMemoryPoolProvider* memoryPoolProvider = nullptr, cint64 freePoolReserveLimit = DEFAULT_FREE_POOL_RESERVE_LIMIT);
 
 				//! Destructor
 				virtual ~CTaskProcessorThread();

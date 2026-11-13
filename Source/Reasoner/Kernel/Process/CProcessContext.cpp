@@ -33,6 +33,7 @@ namespace Konclude {
 				CProcessContext::CProcessContext() {
 					mUsedProcessTagger = nullptr;
 					mUsedMemMan = nullptr;
+					mSaturationLabelHashFreeArrays = nullptr;
 				}
 
 

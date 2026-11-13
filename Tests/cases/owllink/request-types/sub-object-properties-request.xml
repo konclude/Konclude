@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink request-type coverage: sub-object-properties.
+  The request is self-contained: it creates a KB, tells the test ontology and
+  asks one query. The expected answer is documented in the control ontology.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#B"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#C"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#D"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#E"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#F"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#a1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#b1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#c1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#d1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#e1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#s1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#s2"/></owl:Declaration>
+    <owl:Declaration><owl:ObjectProperty IRI="#p"/></owl:Declaration>
+    <owl:Declaration><owl:ObjectProperty IRI="#q"/></owl:Declaration>
+    <owl:Declaration><owl:ObjectProperty IRI="#r"/></owl:Declaration>
+    <owl:Declaration><owl:DataProperty IRI="#dp1"/></owl:Declaration>
+    <owl:Declaration><owl:DataProperty IRI="#dp2"/></owl:Declaration>
+    <owl:SubClassOf><owl:Class IRI="#B"/><owl:Class IRI="#A"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#C"/><owl:Class IRI="#B"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#D"/><owl:Class IRI="#B"/></owl:SubClassOf>
+    <owl:EquivalentClasses><owl:Class IRI="#F"/><owl:Class IRI="#B"/></owl:EquivalentClasses>
+    <owl:DisjointClasses><owl:Class IRI="#A"/><owl:Class IRI="#E"/></owl:DisjointClasses>
+    <owl:SubObjectPropertyOf><owl:ObjectProperty IRI="#p"/><owl:ObjectProperty IRI="#q"/></owl:SubObjectPropertyOf>
+    <owl:InverseObjectProperties><owl:ObjectProperty IRI="#p"/><owl:ObjectProperty IRI="#r"/></owl:InverseObjectProperties>
+    <owl:SubDataPropertyOf><owl:DataProperty IRI="#dp1"/><owl:DataProperty IRI="#dp2"/></owl:SubDataPropertyOf>
+    <owl:ClassAssertion><owl:Class IRI="#A"/><owl:NamedIndividual IRI="#a1"/></owl:ClassAssertion>
+    <owl:ClassAssertion><owl:Class IRI="#C"/><owl:NamedIndividual IRI="#c1"/></owl:ClassAssertion>
+    <owl:ClassAssertion><owl:Class IRI="#D"/><owl:NamedIndividual IRI="#d1"/></owl:ClassAssertion>
+    <owl:ClassAssertion><owl:Class IRI="#E"/><owl:NamedIndividual IRI="#e1"/></owl:ClassAssertion>
+    <owl:ObjectPropertyAssertion><owl:ObjectProperty IRI="#p"/><owl:NamedIndividual IRI="#a1"/><owl:NamedIndividual IRI="#b1"/></owl:ObjectPropertyAssertion>
+    <owl:ObjectPropertyAssertion><owl:ObjectProperty IRI="#q"/><owl:NamedIndividual IRI="#a1"/><owl:NamedIndividual IRI="#c1"/></owl:ObjectPropertyAssertion>
+    <owl:DataPropertyAssertion><owl:DataProperty IRI="#dp1"/><owl:NamedIndividual IRI="#a1"/><owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">42</owl:Literal></owl:DataPropertyAssertion>
+    <owl:SameIndividual><owl:NamedIndividual IRI="#s1"/><owl:NamedIndividual IRI="#s2"/></owl:SameIndividual>
+  </Tell>
+  <GetSubObjectProperties kb="http://ex.test/kb"><owl:ObjectProperty IRI="#q"/></GetSubObjectProperties>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

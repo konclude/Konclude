@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Example control ontology (*.kt.owl.xml). Describes TWO tests on the same
-  shared ontology Tests/ontologies/el-aunt.owl.xml. Contains REAL assertions
-  over the kt: vocabulary (no domain reasoning runs over this; this file only
-  drives the runner). Picked up by discovery because it is a *.kt.owl.xml
-  under Tests/cases/.
+  Control ontology for the EL suite (*.kt.owl.xml). Two tests run on the
+  shared ontology Tests/ontologies/el-aunt.owl.xml, one on
+  role-composition.owl.xml. Contains REAL assertions over the kt: vocabulary
+  (no domain reasoning runs over this; this file only drives the runner).
+  Picked up by discovery because it is a *.kt.owl.xml under Tests/cases/.
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/el/aunt">
@@ -18,7 +18,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:suiteName"/>
     <NamedIndividual abbreviatedIRI="kt:suite-el"/>
-    <Literal>EL-family-examples</Literal>
+    <Literal>EL-examples</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:suiteDirectory"/>
@@ -28,7 +28,7 @@
 
   <!-- ============ Test 1: classification (default matrix) ============ -->
   <ClassAssertion>
-    <Class abbreviatedIRI="kt:ClassificationTest"/>
+    <Class abbreviatedIRI="kt:ClassClassificationTest"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
   </ClassAssertion>
   <!-- shared ontology from the pool, stored once, referenced relatively -->
@@ -50,7 +50,7 @@
   </DataPropertyAssertion>
   <!-- provenance/attribution -->
   <DataPropertyAssertion>
-    <DataProperty abbreviatedIRI="kt:inspiredBy"/>
+    <DataProperty abbreviatedIRI="kt:sourceCase"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
     <Literal>ELK el-reasoner family example</Literal>
   </DataPropertyAssertion>
@@ -87,6 +87,37 @@
     <DataProperty abbreviatedIRI="kt:expectedResult"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-consistent-without-saturation"/>
     <Literal>consistent</Literal>
+  </DataPropertyAssertion>
+
+  <!-- ============ Test 3: classification through a property chain ============ -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ClassClassificationTest"/>
+    <NamedIndividual abbreviatedIRI="kt:el-role-composition"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:task"/>
+    <NamedIndividual abbreviatedIRI="kt:el-role-composition"/>
+    <Literal>class-classification</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:usesOntology"/>
+    <NamedIndividual abbreviatedIRI="kt:el-role-composition"/>
+    <Literal>role-composition.owl.xml</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:expectedFile"/>
+    <NamedIndividual abbreviatedIRI="kt:el-role-composition"/>
+    <Literal>expected/role-composition-classification.owl.xml</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:el-role-composition"/>
+    <Literal>A is subsumed by X through the property chain r o s -> t.</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:sourceCase"/>
+    <NamedIndividual abbreviatedIRI="kt:el-role-composition"/>
+    <Literal>PropertyCompositionsWithHierarchy</Literal>
   </DataPropertyAssertion>
 
 </Ontology>

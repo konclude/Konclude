@@ -181,6 +181,15 @@ namespace Konclude {
 				delete mSaturationPrecomputationStep;
 				delete mIndividualPrecomputationStep;
 
+				// every saturation concept data item, for a concept or a role successor, is created by
+				// this item and appended to the container (issue #45); the saturation data of mSaturDataList
+				// is left, the last one of them belongs to the precomputation of the ontology as well
+				qDeleteAll(mSatItemContainer);
+				mSatItemContainer.clear();
+				qDeleteAll(mApproxSatCalcJobList);
+				mApproxSatCalcJobList.clear();
+				mApproxSatCalcJob = nullptr;
+
 				if (mAllAssertionIndividual) {
 					CConceptAssertionLinker* conAssLinker = mAllAssertionIndividual->getAssertionConceptLinker();
 					while (conAssLinker) {
@@ -710,6 +719,14 @@ namespace Konclude {
 
 
 
+			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::reserveSaturationConceptDataItems(cint64 itemCount) {
+				if (itemCount > mConceptNegationSatItemHash.capacity()) {
+					mConceptNegationSatItemHash.reserve(itemCount);
+				}
+				return this;
+			}
+
+
 			CSaturationConceptDataItem* CTotallyOntologyPrecomputationItem::getSaturationConceptDataItem(CConcept* satConcept, bool negated, bool create) {
 				CSaturationConceptDataItem* item = nullptr;
 				CConceptProcessData* conProcData = (CConceptProcessData*)satConcept->getConceptData();
@@ -744,8 +761,13 @@ namespace Konclude {
 				return mApproxSatCalcJob;
 			}
 
+			// the item owns every saturation job of the precomputation, one per step, and deletes them with the
+			// data of their construction (issue #45)
 			CTotallyOntologyPrecomputationItem* CTotallyOntologyPrecomputationItem::setSaturationCalculationJob(CApproximatedSaturationCalculationJob* calculationJob) {
 				mApproxSatCalcJob = calculationJob;
+				if (calculationJob && !mApproxSatCalcJobList.contains(calculationJob)) {
+					mApproxSatCalcJobList.append(calculationJob);
+				}
 				return this;
 			}
 

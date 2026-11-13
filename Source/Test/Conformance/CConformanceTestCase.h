@@ -64,11 +64,13 @@ namespace Konclude {
 					QStringList mExpectedResultTexts;        // expected result literals as read from the ontology
 					QList<CConformanceTask::VERDICT> mExpectedVerdicts; // typed expectations, one per answer
 					CConformanceTask::VERDICT mExpectedVerdict; // first expectation, used in reports
-					QString mExpectedFile;                   // absolute path to an expected OWL/XML classification result
+					QString mExpectedFile;                   // absolute path to an expected OWL/XML result (classification or realization)
 					QString mTestClass;                      // class IRI for satisfiability (as declared in the ontology)
+					QString mTestIndividual;                 // individual IRI for a restricted realization (optional)
 					QString mControlFile;                    // originating *.kt.owl.xml (for messages)
 					QString mSuiteId;                        // suite the control ontology declares/derives
 					bool mKnownFailure;                      // marked via kt:knownFailure or kt:flaky
+					QStringList mKnownIssueIds;              // issues the test is linked to
 			};
 
 

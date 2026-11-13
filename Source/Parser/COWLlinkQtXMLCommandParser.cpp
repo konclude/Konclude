@@ -67,7 +67,21 @@ namespace Konclude {
 
 			QDomDocument document;
 
-			document.setContent(content,true);
+			QString errorMessage;
+			int errorLine = 0, errorColumn = 0;
+			if (!document.setContent(content,true,&errorMessage,&errorLine,&errorColumn)) {
+				// the document is built up to the error, processing it would silently ignore everything
+				// after the error, for example the remaining axioms of a Tell request
+				QString errorString(QString("XML parsing error at %1:%2: '%3'.").arg(errorLine).arg(errorColumn).arg(errorMessage));
+				LOG(ERROR,getLogDomain(),logTr("Request couldn't be parsed. %1").arg(errorString),this);
+				if (command) {
+					// distinguishes the unparsable request from a problem with one of its instructions,
+					// only the former has to be reported in the response message itself
+					command->setSyntaxError(true);
+				}
+				CUnspecifiedMessageErrorRecord::makeRecord(recorder,QString("Request couldn't be parsed. %1").arg(errorString),getLogDomain(),command);
+				return false;
+			}
 
 			QDomElement documentElement(document.documentElement());
 

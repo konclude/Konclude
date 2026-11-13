@@ -28,7 +28,7 @@ namespace Konclude {
 
 		CEventLinkerChannel::CEventLinkerChannel(CThreadActivator* threadActivator, double channelPriority) {
 			mThreadActivator = threadActivator;
-			mPostedEventLinker = nullptr;
+			mPostedEventLinker.storeRelease(nullptr);
 			mLastTakedPostEventLinker = nullptr;
 			mLastPostedEventLinker = nullptr;
 			mLastTakedDuplicatedPostEventLinker = nullptr;
@@ -45,26 +45,19 @@ namespace Konclude {
 
 
 		bool CEventLinkerChannel::checkPostEvent(CEvent* processingEvent) {
-			return processingEvent != mLastTakedPostEventLinker;
+			// the posted list is taken whole, so no event address is compared with that of an
+			// earlier event whose memory may have been reused since
+			return true;
 		}
 
 
 		CEventChannel* CEventLinkerChannel::postEvent(CEvent* processingEvent) {
-			mLastPostedEventLinker = mPostedEventLinker;
-			CEventLinker* newEventPostLinker = processingEvent;
 			processingEvent->setEventChannelPriority(mChannelPriority);
-			//if (newEventPostLinker == mLastTakedPostEventLinker) {
-			//	mLastTakedDuplicatedPostEventLinker = newEventPostLinker;
-			//}
-			if (mPostedEventLinker != newEventPostLinker) {
-				newEventPostLinker->initEventLinker(processingEvent,mPostedEventLinker);
-				mPostedEventLinker = newEventPostLinker;
-			} else {
-				// write access to mLastTakedPostEventLinker is safe only in this case
-				newEventPostLinker->initEventLinker(processingEvent,nullptr);
-				mPostedEventLinker = newEventPostLinker;
-				mLastTakedPostEventLinker = nullptr;
-			}
+			CEventLinker* headEventLinker = nullptr;
+			do {
+				headEventLinker = mPostedEventLinker.loadAcquire();
+				processingEvent->initEventLinker(processingEvent,headEventLinker);
+			} while (!mPostedEventLinker.testAndSetRelease(headEventLinker,processingEvent));
 			++postedLinkerCount;
 			mThreadActivator->signalizeEvent();
 			return this;
@@ -72,33 +65,26 @@ namespace Konclude {
 
 
 		CEventLinker* CEventLinkerChannel::takeEvents(CEventLinker* addEventLinker) {
-			// reverse stored event order, take all events
-			CEventLinker* tmpEventPostLinker = mPostedEventLinker;
-			//bool duplicatedStopp = tmpEventPostLinker == mLastTakedDuplicatedPostEventLinker;
-			//mLastTakedDuplicatedPostEventLinker = nullptr;
-			CEventLinker* tmpNextLastPostEventLinker = tmpEventPostLinker;
-			CEventLinker* tmpAddEventLinker = nullptr;
-			while (tmpEventPostLinker && (tmpEventPostLinker != mLastTakedPostEventLinker /*|| duplicatedStopp*/)) {
-				//if (tmpEventPostLinker == mLastTakedPostEventLinker) {
-				//	duplicatedStopp = false;
-				//}
-				tmpAddEventLinker = tmpEventPostLinker;
-				tmpEventPostLinker = tmpEventPostLinker->getNextEventLinker();
-				addEventLinker = tmpAddEventLinker->setNextEventLinker(addEventLinker);
-				++fetchedLinkerCount;
+			// the whole posted list is taken, which reverses its order back to the one of posting; an
+			// empty channel is left alone, the receiver polls its channels often and a write on every
+			// poll would bounce the cache line between it and the posters
+			if (!mPostedEventLinker.loadAcquire()) {
+				return addEventLinker;
 			}
-			if (tmpNextLastPostEventLinker != mLastTakedPostEventLinker) {
-				mLastTakedPostEventLinker = tmpNextLastPostEventLinker;
+			CEventLinker* takenEventLinker = mPostedEventLinker.fetchAndStoreAcquire(nullptr);
+			while (takenEventLinker) {
+				CEventLinker* nextEventLinker = takenEventLinker->getNextEventLinker();
+				addEventLinker = takenEventLinker->setNextEventLinker(addEventLinker);
+				++fetchedLinkerCount;
+				takenEventLinker = nextEventLinker;
 			}
 			return addEventLinker;
 		}
 
 
-
 		bool CEventLinkerChannel::hasEvents() {
-			return mLastTakedPostEventLinker != mPostedEventLinker;
+			return mPostedEventLinker.loadRelaxed() != nullptr;
 		}
-
 
 
 		double CEventLinkerChannel::getChannelPriority() {

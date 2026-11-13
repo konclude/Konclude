@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint over a class and its complement: A and not-A have no
+  common instance.  This exercises the complex-query path (a
+  ObjectComplementOf argument).  Expected answer: true.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#a1"/></owl:Declaration>
+    <owl:ClassAssertion><owl:Class IRI="#A"/><owl:NamedIndividual IRI="#a1"/></owl:ClassAssertion>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb">
+    <owl:Class IRI="#A"/>
+    <owl:ObjectComplementOf><owl:Class IRI="#A"/></owl:ObjectComplementOf>
+  </AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

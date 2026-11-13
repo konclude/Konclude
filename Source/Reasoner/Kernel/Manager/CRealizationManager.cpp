@@ -42,6 +42,25 @@ namespace Konclude {
 				CRealizationManager::~CRealizationManager() {
 				}
 
+				QList<QThread*> CRealizationManager::getWorkerThreads() {
+					QList<QThread*> threads;
+					mReadWriteLock.lockForRead();
+					for (auto worker : mRealizerSet) {
+						QThread* thread = dynamic_cast<QThread*>(worker);
+						if (thread && !threads.contains(thread)) {
+							threads.append(thread);
+						}
+					}
+					for (auto worker : mOntoRealizerHash) {
+						QThread* thread = dynamic_cast<QThread*>(worker);
+						if (thread && !threads.contains(thread)) {
+							threads.append(thread);
+						}
+					}
+					mReadWriteLock.unlock();
+					return threads;
+				}
+
 				CRealizer* CRealizationManager::getRealizer(CConcreteOntology *ontology, CConfigurationBase *config) {
 					CRealizer* realizer = nullptr;
 					mReadWriteLock.lockForRead();

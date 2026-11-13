@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected OPTIONAL answer: alice has a child bob, bob has none (unbound child). -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="person"/>
+    <variable name="child"/>
+  </head>
+  <results>
+    <result>
+      <binding name="person"><uri>http://konclude.test/sparql#alice</uri></binding>
+      <binding name="child"><uri>http://konclude.test/sparql#bob</uri></binding>
+    </result>
+    <result>
+      <binding name="person"><uri>http://konclude.test/sparql#bob</uri></binding>
+    </result>
+  </results>
+</sparql>

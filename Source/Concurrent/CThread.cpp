@@ -19,6 +19,8 @@
  */
 #include "CThread.h"
 
+#include <QElapsedTimer>
+
 
 
 #include "Events/CRequestFeedbackEvent.h"
@@ -239,6 +241,22 @@ namespace Konclude {
 		void CThread::startThread(Priority priority) {
 			start(priority);
 			moveToThread(this);
+		}
+
+		qint64 CThread::quitAndWaitThreads(const QList<QThread*>& threads, unsigned long waitMillis) {
+			for (QThread* thread : threads) {
+				thread->quit();
+			}
+			QElapsedTimer timer;
+			timer.start();
+			qint64 stillRunningCount = 0;
+			for (QThread* thread : threads) {
+				qint64 remainingMillis = (qint64)waitMillis - timer.elapsed();
+				if (!thread->wait(remainingMillis > 0 ? (unsigned long)remainingMillis : 0)) {
+					++stillRunningCount;
+				}
+			}
+			return stillRunningCount;
 		}
 
 		void CThread::stopThread(bool waitStopped) {

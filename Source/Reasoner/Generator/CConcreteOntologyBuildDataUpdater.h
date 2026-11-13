@@ -419,6 +419,8 @@ namespace Konclude {
 
 					virtual CConcreteOntologyBuildDataUpdater* addHashedExpression(CBuildExpression* expression);
 					virtual CBuildExpression* getHashedExpression(CBuildExpression* expression);
+					//! grows the structural expression hash to the expected number of expressions (never shrinks it)
+					virtual void reserveExpressionBuildHash(cint64 expressionCount);
 
 
 					// protected variables
@@ -505,6 +507,7 @@ namespace Konclude {
 					CBUILDLIST<CDataRangeTermExpression*>* mBuildDataRangeList;
 					CBUILDLIST<CDataPropertyTermExpression*>* mBuildDataRoleList;
 					CBUILDLIST<CDatatypeExpression*>* mBuildDatatypeList;
+					CBUILDLIST<CDataLexicalValueExpression*>* mBuildDataLexicalValueList;
 
 
 

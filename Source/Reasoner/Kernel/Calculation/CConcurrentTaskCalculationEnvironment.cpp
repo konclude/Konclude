@@ -45,8 +45,32 @@ namespace Konclude {
 				}
 
 				CConcurrentTaskCalculationEnvironment::~CConcurrentTaskCalculationEnvironment() {
+					// the units release their pools to providers that report to the allocation
+					// limitation, so the units go before it
 					qDeleteAll(mProcessorUnitList);
 					mProcessorUnitList.clear();
+					mThreadUnitList.clear();
+					mProcessUnit = nullptr;
+					delete mCallbackExecuter;
+					delete mStatusPropagator;
+					delete mAllocationLimitation;
+				}
+
+
+				cint64 CConcurrentTaskCalculationEnvironment::stopProcessorUnits(unsigned long waitMillis) {
+					// The loop of a unit never returns to the event loop of its thread while it runs, so
+					// quit() only takes effect once stopProcessing has ended the loop. All loops are
+					// stopped first, so that no unit waits for another that is still being joined.
+					QList<QThread*> threads;
+					if (mProcessUnit) {
+						mProcessUnit->stopProcessing();
+						threads.append(mProcessUnit);
+					}
+					for (CTaskProcessorThreadBase* threadUnit : mThreadUnitList) {
+						threadUnit->stopProcessing();
+						threads.append(threadUnit);
+					}
+					return CThread::quitAndWaitThreads(threads, waitMillis);
 				}
 
 

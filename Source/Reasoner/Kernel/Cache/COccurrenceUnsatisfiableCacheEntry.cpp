@@ -58,7 +58,7 @@ namespace Konclude {
 
 
 				COccurrenceUnsatisfiableCacheEntry::~COccurrenceUnsatisfiableCacheEntry() {
-					delete cacheEntriesHashes;
+					delete[] cacheEntriesHashes;
 					if (readCountVec) {
 						delete[] readCountVec;
 					}

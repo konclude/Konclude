@@ -61,7 +61,10 @@ namespace Konclude {
 				mInitTime.start();
 			}
 
+			// deleted by the CClassification of the ontology, which the item is the role classification of, after
+			// the data of the ontology; the temporary ontology is deleted before by the classifier (issue #45)
 			COptimizedKPSetRoleOntologyClassificationItem::~COptimizedKPSetRoleOntologyClassificationItem() {
+				qDeleteAll(mSatTestItemContainer);
 			}
 
 

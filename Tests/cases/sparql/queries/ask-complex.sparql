@@ -1,0 +1,2 @@
+PREFIX sp: <http://konclude.test/sparql#>
+ASK { ?w a sp:Woman . ?w sp:hasChild ?c . ?c a sp:Man }

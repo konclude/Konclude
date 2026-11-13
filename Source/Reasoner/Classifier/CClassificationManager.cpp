@@ -32,10 +32,53 @@ namespace Konclude {
 			}
 
 
+			// the classifiers are stopped by the reasoner manager before (issue #45)
 			CClassificationManager::~CClassificationManager() {
+				QSet<CSubsumptionClassifier*> classifierSet(mOntoClassifierSet);
+				for (CSubsumptionClassifier* classifier : mOntoBackgroundClassifierHash) {
+					classifierSet.insert(classifier);
+				}
+				for (CSubsumptionClassifier* classifier : mOntoDataPropertyClassifierHash) {
+					classifierSet.insert(classifier);
+				}
+				for (CSubsumptionClassifier* classifier : mOntoObjectPropertyClassifierHash) {
+					classifierSet.insert(classifier);
+				}
+				qDeleteAll(classifierSet);
 				if (mClassifierFac) {
 					delete mClassifierFac;
 				}
+			}
+
+			QList<QThread*> CClassificationManager::getWorkerThreads() {
+				QList<QThread*> threads;
+				readWriteLock.lockForRead();
+				for (auto worker : mOntoClassifierSet) {
+					QThread* thread = dynamic_cast<QThread*>(worker);
+					if (thread && !threads.contains(thread)) {
+						threads.append(thread);
+					}
+				}
+				for (auto worker : mOntoBackgroundClassifierHash) {
+					QThread* thread = dynamic_cast<QThread*>(worker);
+					if (thread && !threads.contains(thread)) {
+						threads.append(thread);
+					}
+				}
+				for (auto worker : mOntoDataPropertyClassifierHash) {
+					QThread* thread = dynamic_cast<QThread*>(worker);
+					if (thread && !threads.contains(thread)) {
+						threads.append(thread);
+					}
+				}
+				for (auto worker : mOntoObjectPropertyClassifierHash) {
+					QThread* thread = dynamic_cast<QThread*>(worker);
+					if (thread && !threads.contains(thread)) {
+						threads.append(thread);
+					}
+				}
+				readWriteLock.unlock();
+				return threads;
 			}
 
 

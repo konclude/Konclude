@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xml:base="http://www.owllink.org/testsuite/1a#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+	<!--Deactivates the upfront merging of possible instance concepts, which is an optimization of the
+		realisation that currently loses instances of classes that are defined by a qualified minimum
+		cardinality restriction, see the KNOWN ISSUES section of the Readme and the example in
+		Tests/min-cardinality-realization.owl.xml.
+
+		Realisation becomes complete and reproducible with this setting, but also somewhat slower,
+		about 30 percent for Tests/roberts-family-full-D.owl.xml.-->
+
+	<Set key='Konclude.Calculation.Realization.OptimizedKPSetOntologyConceptRealizer.PossibleInstanceConceptsUpfrontMerging'>
+		<Literal>false</Literal>
+	</Set>
+
+</RequestMessage>

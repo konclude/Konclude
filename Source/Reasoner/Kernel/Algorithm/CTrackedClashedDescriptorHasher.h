@@ -73,6 +73,14 @@ namespace Konclude {
 					protected:
 						CTrackedClashedDescriptor* mTrackedClashedDes;
 						cint64 mHashValue;
+						// the compared data is copied: the descriptor may be recycled for another dependency
+						// while this hasher is still in a set, and comparing through the pointer would
+						// then match the recycled descriptor against itself
+						cint64 mIndividualID;
+						CConcept* mConcept;
+						bool mNegation;
+						CDependencyTrackPoint* mDepTrackPoint;
+						CVariableBindingPath* mVarBindPath;
 
 
 					// private methods

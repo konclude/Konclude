@@ -30,6 +30,7 @@
 #include "CHierarchy.h"
 
 // Other includes
+#include "Reasoner/Ontology/CIRIName.h"
 
 
 // Logger includes
@@ -92,6 +93,9 @@ namespace Konclude {
 					virtual bool isComplete();
 
 					virtual CTaxonomy *setTaxonomyComplete(bool completed = true);
+					//! orders the equivalent concepts of every node by name, so that a node is always named by the same concept
+					virtual bool orderEquivalentConcepts();
+					static bool conceptNameLessThan(CConcept* concept1, CConcept* concept2);
 
 					virtual bool isActiveNode(CHierarchyNode *node);
 					virtual CTaxonomy *setActiveNode(CHierarchyNode *node, bool nodeActive = true);
@@ -100,6 +104,17 @@ namespace Konclude {
 					virtual CHierarchyNode *getActiveNode(CHierarchyNode *node);
 
 					virtual CTaxonomy *updateNodeEquivalences(CHierarchyNode *node);
+
+					/*!
+					 *	Removes the direct link between the top and the bottom node if the bottom
+					 *	node has other parents. The bottom node is made a child of the top node when
+					 *	the taxonomy is created, which is the complete hierarchy of an ontology
+					 *	without satisfiable concepts; once the leaves have been made its parents
+					 *	the top node is only an ancestor of it, and a remaining direct link would
+					 *	report the bottom node, with the unsatisfiable concepts, as a direct
+					 *	child of the top node as well.
+					 */
+					virtual CTaxonomy *removeBypassedTopBottomLink();
 
 					virtual QHash<CConcept*,CHierarchyNode*>* getConceptHierarchyNodeHash();
 

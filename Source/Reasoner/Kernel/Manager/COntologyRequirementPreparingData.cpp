@@ -37,17 +37,20 @@ namespace Konclude {
 
 
 				COntologyRequirementPreparingData::~COntologyRequirementPreparingData() {
-					foreach (COntologyProcessingRequirement* requirement, mAllReqList) {
-						if (requirement->isDynamicRequirement()) {
-							delete requirement;
-						}
-					}
+					// only the dynamic requirements belong to the reasoner manager; the others belong
+					// to the command that asked for the preparation, which may have deleted them by
+					// now, since the callback that releases the command is made before this data is
+					// deleted, so no requirement other than a dynamic one may be touched here
+					qDeleteAll(mDynamicReqList);
 				}
 
 
 
 				COntologyRequirementPreparingData* COntologyRequirementPreparingData::addOntologyRequirement(COntologyProcessingRequirement* requirement) {
-					mAllReqList.append(requirement);
+					// asked while the requirement is certainly alive, see the destructor
+					if (requirement->isDynamicRequirement()) {
+						mDynamicReqList.append(requirement);
+					}
 					bool addedReq = false;
 					COntologyProcessingStepRequirement* requirementStep = dynamic_cast<COntologyProcessingStepRequirement*>(requirement);
 					if (requirementStep) {

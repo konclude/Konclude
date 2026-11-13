@@ -98,7 +98,25 @@ namespace Konclude {
 
 					bool collectConjunctions(CConcept* concept, bool negated, QList< TConceptNegationPair >& conjList);
 
-					void collectPositiveConcepts(CConcept* concept, bool negated, QSet<TConceptNegationPair>* positiveConceptSet, bool recursiveDefinition = false);
+					/*! the concepts with their polarity that occur positively, by tag: a set of pairs cost a hash
+					 *  operation per visited operand, a third of the preprocessing of SNOMED CT */
+					class CConceptNegationFlags {
+						public:
+							bool contains(const TConceptNegationPair& conNegPair) const {
+								cint64 index = conNegPair.first->getConceptTag() * 2 + (conNegPair.second ? 1 : 0);
+								return index < mFlags.size() && mFlags.at(index);
+							}
+							void insert(const TConceptNegationPair& conNegPair) {
+								cint64 index = conNegPair.first->getConceptTag() * 2 + (conNegPair.second ? 1 : 0);
+								if (index >= mFlags.size()) {
+									mFlags.resize((int)qMax<cint64>(index + 1, (cint64)mFlags.size() * 2));
+								}
+								mFlags[index] = 1;
+							}
+						private:
+							QVector<quint8> mFlags;
+					};
+					void collectPositiveConcepts(CConcept* concept, bool negated, CConceptNegationFlags* positiveConceptSet, bool recursiveDefinition = false);
 
 					CConcept* getRoleDomainTriggerConcept(CRole* role);
 
@@ -123,6 +141,8 @@ namespace Konclude {
 					CConcept* getEquivalenceConceptCandidateTriggeredImplication(CConcept* eqConcept, bool negated);
 					bool isGCIConceptTriggeredImplicationAbsorbable(CConcept* orConcept, bool negated, cint64* notAbsorbableOperandsCount = nullptr);
 					bool isConceptImplicationTriggerable(CConcept* concept, bool negated, QHash<CConcept*,TOccuredAbsorbablePair>* conceptEqConAbsorbed);
+					bool isDataLiteralConceptExactlyTriggerable(CConcept* concept);
+					CConceptTriggerLinker* createExactDataLiteralTrigger(CDataLiteral* dataLiteral, bool branchTiggerCreation, cint64 triggerComplexity);
 					bool isConceptImplicationTriggerable(CConcept* concept, bool negated, QHash<CConcept*,TOccuredAbsorbablePair>* conceptEqConAbsorbed, cint64* openMultipleOccurCount, QList<TConceptNegationPair>** dependingCacheList);
 					bool isConceptSimpleImplicationTriggerable(CConcept* concept, bool negated);
 					void createEquivalenceAbsorbedTriggeredImplication(CConcept* eqConcept, bool negated, CSortedNegLinker<CConcept*>* absorpOpLinker);
@@ -308,13 +328,21 @@ namespace Konclude {
 					QHash<TConceptNegationPair, CConceptTriggerLinker*> mConceptTriggerLinkerHash;
 					QHash<TConceptNegationPair, CConceptTriggerLinker*> mAssuringConceptTriggerLinkerHash;
 					CConceptTriggerLinker* mTmpTriggerLinker;
+					//! in how many conjunctions each conjunct occurs, and the frequency of the conjunct whose triggers are being built
+					QHash<QPair<CConcept*,bool>,cint64> mConjunctFrequency;
+					cint64 mCurrentConjunctFrequency;
+					bool mConfFrequencyOrderedTriggerChains;
 
 					QHash<TConceptNegationPair, CConcept*> mBackPropActivationConHash;
 
 					QSet<CConcept*> mCreatedImpliedDisjunctions;
 
 
-					QList<CConceptTriggerLinker*> mTriggerContainer;
+					// trigger linkers are allocated in chunks and released chunk-wise: the SDD creates 8 million of them,
+					// and allocating and freeing each one separately was ~5 % of the preprocessing
+					QList<CConceptTriggerLinker*> mTriggerLinkerChunkContainer;
+					cint64 mTriggerLinkerChunkUsed;
+					const static cint64 TRIGGERLINKERCHUNKSIZE = 4096;
 					QList<CSortedNegLinker<CConcept*>*> mLaterTopConceptTriggerAddList;
 
 
@@ -349,7 +377,7 @@ namespace Konclude {
 					QHash<CRole*,CRole*> mRoleInverseRoleCreateHash;
 					CBOXHASH<cint64,CConcept*>* mIndividualTriggerConceptHash;
 
-					QSet<TConceptNegationPair> mPositiveConceptReferencedSet;
+					CConceptNegationFlags mPositiveConceptReferencedSet;
 					CImplicationReplacementVector* mImpRepVec = nullptr;
 
 					cint64 mNextVariableID;
@@ -383,6 +411,7 @@ namespace Konclude {
 					cint64 mConfOftenTriggerUseCountPunishment;
 
 					bool mConfDatatypeAbsorption;
+					bool mConfCompleteDataLiteralAbsorption;
 
 
 					class CTriggCount {

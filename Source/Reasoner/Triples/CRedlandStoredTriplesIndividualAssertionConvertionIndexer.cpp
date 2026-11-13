@@ -146,6 +146,7 @@ namespace Konclude {
 
 					CIRIName* newName = CObjectAllocator<CIRIName>::allocateAndConstruct(mMemMan);
 					QString indiName = QString::fromUtf8(indiNameCharPointer);
+					mUupdatingOntology->getDataBoxes()->getBoxContext()->addDestructiblePoolObject(newName);
 					if (blankNode) {
 						if (!indiName.startsWith("_:")) {
 							indiName = mAnonymousOntologyIdentifier + indiName;

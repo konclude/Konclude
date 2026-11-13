@@ -28,8 +28,9 @@ namespace Konclude {
 		namespace Answerer {
 
 
-			CAnsweringMessageDataCalculationCompletedSubsumptionSubClass::CAnsweringMessageDataCalculationCompletedSubsumptionSubClass(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem, CHierarchyNode* subClassNode) : CAnsweringMessageDataCalculationCompleted(calcJob, SUBCLASSSUBSUMPTIONCALCULATION) {
+			CAnsweringMessageDataCalculationCompletedSubsumptionSubClass::CAnsweringMessageDataCalculationCompletedSubsumptionSubClass(CSatisfiableCalculationJob* calcJob, COptimizedComplexConceptItem* conceptItem, CHierarchyNode* subClassNode, bool equivalenceCheck) : CAnsweringMessageDataCalculationCompleted(calcJob, SUBCLASSSUBSUMPTIONCALCULATION) {
 				mSubClassNode = subClassNode;
+				mEquivalenceCheck = equivalenceCheck;
 				mConceptItem = conceptItem;
 			}
 
@@ -41,6 +42,10 @@ namespace Konclude {
 
 			CHierarchyNode* CAnsweringMessageDataCalculationCompletedSubsumptionSubClass::getSubClassNode() {
 				return mSubClassNode;
+			}
+
+			bool CAnsweringMessageDataCalculationCompletedSubsumptionSubClass::isEquivalenceCheck() {
+				return mEquivalenceCheck;
 			}
 
 

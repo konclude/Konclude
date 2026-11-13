@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2002/07/owl#" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    <Prefix name="" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://www.w3.org/2002/07/owl#Nothing"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://konclude.test/el/role-composition#X"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/el/role-composition#X"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/el/role-composition#D"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/el/role-composition#D"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/el/role-composition#B"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/el/role-composition#B"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/el/role-composition#A"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/el/role-composition#A"/>
+        <Class IRI="http://konclude.test/el/role-composition#X"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/el/role-composition#C"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/el/role-composition#C"/>
+        <Class IRI="http://konclude.test/el/role-composition#D"/>
+    </SubClassOf>
+</Ontology>

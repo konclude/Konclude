@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/inv-atmost-merge">
+
+  <Declaration><Class IRI="#P1"/></Declaration>
+  <Declaration><Class IRI="#P2"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#invR"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+
+  <DisjointClasses><Class IRI="#P1"/><Class IRI="#P2"/></DisjointClasses>
+  <InverseObjectProperties><ObjectProperty IRI="#invR"/><ObjectProperty IRI="#r"/></InverseObjectProperties>
+
+  <!-- x has an invR-successor whose r-successors all belong to P1 and of which there is at
+       most one; since r(y,x) holds, x itself is that successor, so x must be in P1, which
+       contradicts x in P2. -->
+  <ClassAssertion><Class IRI="#P2"/><NamedIndividual IRI="#x"/></ClassAssertion>
+  <ClassAssertion>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty IRI="#invR"/>
+      <ObjectIntersectionOf>
+        <ObjectSomeValuesFrom><ObjectProperty IRI="#r"/><Class IRI="#P1"/></ObjectSomeValuesFrom>
+        <ObjectMaxCardinality cardinality="1"><ObjectProperty IRI="#r"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></ObjectMaxCardinality>
+      </ObjectIntersectionOf>
+    </ObjectSomeValuesFrom>
+    <NamedIndividual IRI="#x"/>
+  </ClassAssertion>
+</Ontology>

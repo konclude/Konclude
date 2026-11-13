@@ -35,6 +35,13 @@ namespace Konclude {
 				mBottomSatTestItem = nullptr;
 			}
 
+
+			// deleted by the CClassification of the ontology, which the item is the class classification of; the
+			// test items read nothing of the ontology when they are deleted (issue #45)
+			COptimizedClassExtractedSaturationOntologyClassificationItem::~COptimizedClassExtractedSaturationOntologyClassificationItem() {
+				qDeleteAll(mClassSatTestItemContainer);
+			}
+
 			QHash<CConcept*,COptimizedClassExtractedSaturationSatisfiableTestingItem*>* COptimizedClassExtractedSaturationOntologyClassificationItem::getClassSatisfiableTestItemHash() {
 				return &mClassSatItemHash;
 			}

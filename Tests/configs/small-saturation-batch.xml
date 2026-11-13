@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration used by kt:usesTestSystemConfig in
+  Tests/cases/abox/abox.kt.owl.xml for the cross-round universal-restriction
+  propagation test: it forces the individual saturation to process one
+  individual per round, so a role partner always falls into a different round
+  than its predecessor. This reproduces the cross-round split (and the missing
+  successor-dependent type without the fix) on a tiny ontology, instead of
+  needing thousands of individuals.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Precomputation.TotalPrecomputor.IndividualsSaturationSize'>
+		<Literal>1</Literal>
+	</Set>
+</RequestMessage>

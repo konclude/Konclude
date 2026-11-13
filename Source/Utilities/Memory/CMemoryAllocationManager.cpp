@@ -35,6 +35,10 @@ namespace Konclude {
 			}
 
 
+			CMemoryAllocationManager* CMemoryAllocationManager::setConcurrentAllocation(bool concurrent) {
+				return this;
+			}
+
 			cint64 CMemoryAllocationManager::getOptimizedMoreAllocationSize(cint64 size) {
 				return size;
 			}

@@ -751,7 +751,7 @@ namespace Konclude {
 						while (memPools) {
 							CMemoryPool* tmpMemPool = memPools;
 							memPools = memPools->getNextMemoryPool();
-							delete [] tmpMemPool->getMemoryBlockData();
+							CMemoryPool::releaseMemoryBlockData(tmpMemPool);
 							delete tmpMemPool;
 						}
 					};

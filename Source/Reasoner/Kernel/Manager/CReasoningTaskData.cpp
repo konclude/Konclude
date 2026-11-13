@@ -20,6 +20,9 @@
 
 #include "CReasoningTaskData.h"
 
+// complete type for the deletion of the preparing data, otherwise its destructor does not run (issue #45)
+#include "CRequirementPreparingData.h"
+
 
 namespace Konclude {
 

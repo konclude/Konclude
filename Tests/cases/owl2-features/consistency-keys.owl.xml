@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Keys: two distinct individuals with the same key value must be equal. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/keys">
+  <Prefix name="" IRI="http://konclude.test/features/keys#"/>
+  <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+
+  <Declaration><Class abbreviatedIRI=":Person"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":ssn"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":alice"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":bob"/></Declaration>
+
+  <HasKey><Class abbreviatedIRI=":Person"/><DataProperty abbreviatedIRI=":ssn"/></HasKey>
+
+  <ClassAssertion><Class abbreviatedIRI=":Person"/><NamedIndividual abbreviatedIRI=":alice"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":Person"/><NamedIndividual abbreviatedIRI=":bob"/></ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI=":ssn"/>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">123</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI=":ssn"/>
+    <NamedIndividual abbreviatedIRI=":bob"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">123</Literal>
+  </DataPropertyAssertion>
+  <DifferentIndividuals>
+    <NamedIndividual abbreviatedIRI=":alice"/>
+    <NamedIndividual abbreviatedIRI=":bob"/>
+  </DifferentIndividuals>
+</Ontology>

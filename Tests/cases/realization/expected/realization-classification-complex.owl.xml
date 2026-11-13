@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Expected realization result for classification-complex.owl.xml.
+  a: I ({a}), P ({a,b}), A, M, L, R and Thing.
+  b: B, J (equivalent to B), P, A, M, L, R and Thing.
+  Order and declarations are ignored by the comparator.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/classification-realization">
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#I"/><NamedIndividual IRI="http://konclude.test/features/classification#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#P"/><NamedIndividual IRI="http://konclude.test/features/classification#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#A"/><NamedIndividual IRI="http://konclude.test/features/classification#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#M"/><NamedIndividual IRI="http://konclude.test/features/classification#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#L"/><NamedIndividual IRI="http://konclude.test/features/classification#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#R"/><NamedIndividual IRI="http://konclude.test/features/classification#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/features/classification#a"/></ClassAssertion>
+
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#B"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#J"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#P"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#A"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#M"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#L"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/features/classification#R"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/features/classification#b"/></ClassAssertion>
+</Ontology>

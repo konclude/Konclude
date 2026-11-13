@@ -31,6 +31,11 @@
 // Other includes
 #include "Reasoner/Ontology/CConceptRoleBranchingTrigger.h"
 
+// Qt includes
+#include <QVector>
+#include <QSet>
+#include <QPair>
+
 // Logger includes
 #include "Logger/CLogger.h"
 
@@ -93,6 +98,16 @@ namespace Konclude {
 					cint64 mLastConceptId;
 
 					bool mConfLocalizeRolesToGetTrigger;
+
+					// work containers reused across all concepts (cleared, capacity kept)
+					typedef QPair<CConcept*,bool> TConNegPair;
+					QVector<TConNegPair> mDisjInitVec;
+					QVector<TConNegPair> mDisjVec;
+					QVector<TConNegPair> mTriggerKeyVec;
+					QSet<TConNegPair> mTriggerKeySet;
+					bool mTriggerKeySetUsed;
+
+					bool addTriggerKey(CConcept* concept, bool negated);
 
 
 				// private methods

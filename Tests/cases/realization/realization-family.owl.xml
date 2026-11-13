@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Small family ontology used by the realization conformance tests.
+  It exercises inverse properties, defined classes and a two-step role chain
+  encoded through existential restrictions (not role chains).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/realization/family">
+  <Prefix name="" IRI="http://konclude.test/realization/family#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class IRI="#Person"/></Declaration>
+  <Declaration><Class IRI="#Man"/></Declaration>
+  <Declaration><Class IRI="#Woman"/></Declaration>
+  <Declaration><Class IRI="#Parent"/></Declaration>
+  <Declaration><Class IRI="#Mother"/></Declaration>
+  <Declaration><Class IRI="#Father"/></Declaration>
+  <Declaration><Class IRI="#Grandparent"/></Declaration>
+  <Declaration><ObjectProperty IRI="#hasChild"/></Declaration>
+  <Declaration><ObjectProperty IRI="#hasParent"/></Declaration>
+  <Declaration><NamedIndividual IRI="#alice"/></Declaration>
+  <Declaration><NamedIndividual IRI="#bob"/></Declaration>
+  <Declaration><NamedIndividual IRI="#carol"/></Declaration>
+  <Declaration><NamedIndividual IRI="#dave"/></Declaration>
+
+  <SubClassOf><Class IRI="#Man"/><Class IRI="#Person"/></SubClassOf>
+  <SubClassOf><Class IRI="#Woman"/><Class IRI="#Person"/></SubClassOf>
+  <SubClassOf><Class IRI="#Parent"/><Class IRI="#Person"/></SubClassOf>
+
+  <InverseObjectProperties>
+    <ObjectProperty IRI="#hasChild"/>
+    <ObjectProperty IRI="#hasParent"/>
+  </InverseObjectProperties>
+
+  <EquivalentClasses>
+    <Class IRI="#Parent"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty IRI="#hasChild"/>
+      <Class IRI="#Person"/>
+    </ObjectSomeValuesFrom>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="#Mother"/>
+    <ObjectIntersectionOf>
+      <Class IRI="#Woman"/>
+      <Class IRI="#Parent"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="#Father"/>
+    <ObjectIntersectionOf>
+      <Class IRI="#Man"/>
+      <Class IRI="#Parent"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="#Grandparent"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty IRI="#hasChild"/>
+      <Class IRI="#Parent"/>
+    </ObjectSomeValuesFrom>
+  </EquivalentClasses>
+
+  <ClassAssertion><Class IRI="#Woman"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Man"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Person"/><NamedIndividual IRI="#carol"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Person"/><NamedIndividual IRI="#dave"/></ClassAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="#hasChild"/>
+    <NamedIndividual IRI="#alice"/>
+    <NamedIndividual IRI="#carol"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="#hasChild"/>
+    <NamedIndividual IRI="#bob"/>
+    <NamedIndividual IRI="#carol"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="#hasChild"/>
+    <NamedIndividual IRI="#carol"/>
+    <NamedIndividual IRI="#dave"/>
+  </ObjectPropertyAssertion>
+</Ontology>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Punning: the same IRI names a class and an individual; the two uses are separate. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/features/punning">
+  <Prefix name="" IRI="http://konclude.test/features/punning#"/>
+
+  <Declaration><Class abbreviatedIRI=":Punning"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Marker"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":Punning"/></Declaration>
+
+  <SubClassOf><Class abbreviatedIRI=":Punning"/><Class abbreviatedIRI=":Marker"/></SubClassOf>
+  <ClassAssertion><Class abbreviatedIRI=":Punning"/><NamedIndividual abbreviatedIRI=":Punning"/></ClassAssertion>
+</Ontology>

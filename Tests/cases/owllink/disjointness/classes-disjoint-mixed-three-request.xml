@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint over three classes where two pairs are disjoint but one
+  pair overlaps: G is a subclass of A, and A is disjoint from E.  The query
+  must answer false as soon as one pair overlaps.  Expected answer: false.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#E"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#G"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#g1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#e1"/></owl:Declaration>
+    <owl:DisjointClasses><owl:Class IRI="#A"/><owl:Class IRI="#E"/></owl:DisjointClasses>
+    <owl:SubClassOf><owl:Class IRI="#G"/><owl:Class IRI="#A"/></owl:SubClassOf>
+    <owl:ClassAssertion><owl:Class IRI="#G"/><owl:NamedIndividual IRI="#g1"/></owl:ClassAssertion>
+    <owl:ClassAssertion><owl:Class IRI="#E"/><owl:NamedIndividual IRI="#e1"/></owl:ClassAssertion>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb"><owl:Class IRI="#A"/><owl:Class IRI="#E"/><owl:Class IRI="#G"/></AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>

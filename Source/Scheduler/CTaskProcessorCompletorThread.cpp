@@ -27,14 +27,14 @@ namespace Konclude {
 
 
 
-		CTaskProcessorCompletorThread::CTaskProcessorCompletorThread(CTaskHandleAlgorithm* taskHandleAlgo, CConsiderateMemoryPoolProvider* memoryPoolProvider) : CTaskProcessorThreadBase(taskHandleAlgo,"TaskProcesserCompletorThread"),CConcreteMemoryPoolDistributor(nullptr) {
+		CTaskProcessorCompletorThread::CTaskProcessorCompletorThread(CTaskHandleAlgorithm* taskHandleAlgo, CConsiderateMemoryPoolProvider* memoryPoolProvider, cint64 freePoolReserveLimit) : CTaskProcessorThreadBase(taskHandleAlgo,"TaskProcesserCompletorThread"),CConcreteMemoryPoolDistributor(nullptr) {
 			mMemoryPoolReleaser = new CDirectDistributionMemoryPoolReleaser(this);
 			mMemoryPoolProvider = memoryPoolProvider;
 			if (!mMemoryPoolProvider) {
 				//mMemoryPoolProvider = CConcreteMemoryPoolDistributor::createDistributionMemoryPoolProvider(mMemoryPoolReleaser);
 				mMemoryPoolProvider = new CNewAllocationMemoryPoolProvider();
 			}
-			mMemoryAllocator = new CTaskHandleLimitedReserveMemoryPoolAllocationManager(mMemoryPoolProvider,80000,30);
+			mMemoryAllocator = new CTaskHandleLimitedReserveMemoryPoolAllocationManager(mMemoryPoolProvider,freePoolReserveLimit,30);
 			mTaskProcessorContext = new CTaskProcessorContextBase(this,mMemoryAllocator);
 
 			mSchedulerCommunicator = nullptr;
@@ -42,6 +42,19 @@ namespace Konclude {
 		}
 
 		CTaskProcessorCompletorThread::~CTaskProcessorCompletorThread() {
+			// The unit owns its allocator, the pool provider handed to it or created for it, and its
+			// task handling algorithm. The thread has been stopped and joined before (see
+			// CConcurrentTaskCalculationEnvironment::stopProcessorUnits). The allocator releases its
+			// reserve of free pools to the provider, so it goes first. The memory of tasks that were
+			// kept, such as the saturation, is not held by the allocator and is released by the
+			// holder of the task (issue #45).
+			releaseKeptTasks();
+			delete mMemoryAllocator;
+			mMemoryAllocator = nullptr;
+			delete mMemoryPoolProvider;
+			mMemoryPoolProvider = nullptr;
+			delete mTaskHandleAlgo;
+			mTaskHandleAlgo = nullptr;
 		}
 
 
@@ -159,6 +172,10 @@ namespace Konclude {
 								deletionLinkerIt->deleteObject();
 							}
 							mMemoryAllocator->releaseMemoryPoolContainer(completionTask);
+						} else {
+							// a task whose data is kept, such as the saturation, is released when the unit is
+							// deleted, see releaseKeptTasks (issue #45)
+							mKeptTaskList.append(completionTask);
 						}
 #endif
 						completedCount++;

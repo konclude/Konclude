@@ -30,8 +30,8 @@ namespace Konclude {
 
 			QList<CConformanceTask::TYPE> CConformanceTask::allTypes() {
 				QList<TYPE> types;
-				types << TYPE::CONSISTENCY << TYPE::SATISFIABILITY << TYPE::CLASSIFICATION
-					  << TYPE::OWLLINK << TYPE::SPARQL;
+				types << TYPE::CONSISTENCY << TYPE::SATISFIABILITY << TYPE::CLASS_CLASSIFICATION
+					  << TYPE::CLASS_REALIZATION << TYPE::OWLLINK << TYPE::SPARQL;
 				return types;
 			}
 
@@ -40,7 +40,8 @@ namespace Konclude {
 				switch (type) {
 					case TYPE::CONSISTENCY: return QString("consistency");
 					case TYPE::SATISFIABILITY: return QString("satisfiability");
-					case TYPE::CLASSIFICATION: return QString("classification");
+					case TYPE::CLASS_CLASSIFICATION: return QString("class-classification");
+					case TYPE::CLASS_REALIZATION: return QString("class-realization");
 					case TYPE::OWLLINK: return QString("owllink");
 					case TYPE::SPARQL: return QString("sparql");
 				}
@@ -64,7 +65,8 @@ namespace Konclude {
 				switch (type) {
 					case TYPE::CONSISTENCY: return QString("kt:ConsistencyTest");
 					case TYPE::SATISFIABILITY: return QString("kt:SatisfiabilityTest");
-					case TYPE::CLASSIFICATION: return QString("kt:ClassificationTest");
+					case TYPE::CLASS_CLASSIFICATION: return QString("kt:ClassClassificationTest");
+					case TYPE::CLASS_REALIZATION: return QString("kt:ClassRealizationTest");
 					case TYPE::OWLLINK: return QString();
 					case TYPE::SPARQL: return QString("kt:SparqlTest");
 				}
@@ -93,7 +95,8 @@ namespace Konclude {
 				switch (type) {
 					case TYPE::CONSISTENCY: return positive ? QString("consistent") : QString("inconsistent");
 					case TYPE::SATISFIABILITY: return positive ? QString("satisfiable") : QString("unsatisfiable");
-					case TYPE::CLASSIFICATION: return positive ? QString("match") : QString("mismatch");
+					case TYPE::CLASS_CLASSIFICATION: return positive ? QString("match") : QString("mismatch");
+					case TYPE::CLASS_REALIZATION: return positive ? QString("match") : QString("mismatch");
 					case TYPE::OWLLINK: return positive ? QString("true") : QString("false");
 					case TYPE::SPARQL: return positive ? QString("true") : QString("false");
 				}

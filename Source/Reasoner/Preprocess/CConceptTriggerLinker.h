@@ -66,6 +66,18 @@ namespace Konclude {
 					CConceptTriggerLinker* setTriggerComplexity(cint64 complexity);
 
 					bool operator<=(const CConceptTriggerLinker& conceptTriggerLinker);
+					/*!
+					 *	In how many conjunctions the trigger's conjunct occurs (for a merged pair, the rarer of the two).
+					 *	With frequency ordering the chain of a definition starts with its rarest conjunct, so that a
+					 *	node is unfolded into the implications of the few definitions sharing its rare conjuncts
+					 *	instead of into one implication per definition sharing a common one. Unknown for triggers
+					 *	that do not stem from a counted conjunct; those are ordered after the counted ones.
+					 */
+					cint64 getTriggerFrequency();
+					CConceptTriggerLinker* setTriggerFrequency(cint64 frequency);
+					static const cint64 UNKNOWN_TRIGGER_FREQUENCY = (cint64)1 << 60;
+					//! set by the absorber from Konclude.Calculation.Preprocessing.FrequencyOrderedTriggerChains
+					static bool sFrequencyOrdered;
 
 				// protected methods
 				protected:
@@ -74,6 +86,7 @@ namespace Konclude {
 				private:
 					CConcept* mTriggerConcept;
 					cint64 mTriggerComplexity;
+					cint64 mTriggerFrequency;
 
 				// private variables
 				private:

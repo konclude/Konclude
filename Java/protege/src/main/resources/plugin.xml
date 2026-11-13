@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Registers Konclude with the reasoner menu of Protege, see
+  org.protege.editor.owl.model.inference.ProtegeOWLReasonerInfo.
+-->
+<plugin>
+	<extension id="konclude-factory" point="org.protege.editor.owl.inference_reasonerfactory">
+		<name value="Konclude"/>
+		<label value="Konclude"/>
+		<class value="com.konclude.protege.KoncludeProtegeReasonerInfo"/>
+	</extension>
+</plugin>

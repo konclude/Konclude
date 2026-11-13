@@ -56,55 +56,34 @@ namespace Konclude {
 
 
 			bool CExpressionSplitter::addSplittedExpression(CBuildExpression* expression) {
-				CClassTermExpression* classExpression = dynamic_cast<CClassTermExpression*>(expression);
-				if (classExpression) {
-					mClassList.append(classExpression);
+				// the kind flags of the expression's base class instead of a chain of up to eight dynamic_casts per argument
+				cint64 kind = expression->getExpressionKindFlags();
+				if (kind & CBuildExpression::EKFCLASSTERM) {
+					mClassList.append(static_cast<CClassTermExpression*>(expression));
 					return true;
-				} else {
-					CObjectPropertyTermExpression* objectPropertyExpression = dynamic_cast<CObjectPropertyTermExpression*>(expression);
-					if (objectPropertyExpression) {
-						mObjectPropertyList.append(objectPropertyExpression);
-						return true;
-					} else {
-						CIndividualTermExpression* individualExpression = dynamic_cast<CIndividualTermExpression*>(expression);
-						if (individualExpression) {
-							mIndiList.append(individualExpression);
-							return true;
-						} else {
-							CDataPropertyTermExpression* dataPropertyExpression = dynamic_cast<CDataPropertyTermExpression*>(expression);
-							if (dataPropertyExpression) {
-								mDataPropertyList.append(dataPropertyExpression);
-								return true;
-							} else {
-								CDataRangeTermExpression* dataRangeExpression = dynamic_cast<CDataRangeTermExpression*>(expression);
-								if (dataRangeExpression) {
-									mDataRangeList.append(dataRangeExpression);
-									CDataLiteralTermExpression* dataLiteralTermExpression = dynamic_cast<CDataLiteralTermExpression*>(expression);
-									if (dataLiteralTermExpression) {
-										mDataLiteralTermList.append(dataLiteralTermExpression);
-									} else {
-										CDatatypeExpression* datatypeExpression = dynamic_cast<CDatatypeExpression*>(expression);
-										if (datatypeExpression) {
-											mDatatypeList.append(datatypeExpression);
-										} 
-									}
-									return true;
-								} else {
-									CDataFacetRestrictionExpression* dataFacetRestExpression = dynamic_cast<CDataFacetRestrictionExpression*>(expression);
-									if (dataFacetRestExpression) {
-										mDataFacetRestrictionList.append(dataFacetRestExpression);
-										return true;
-									} else {
-										CDataFacetExpression* dataFacetExpression = dynamic_cast<CDataFacetExpression*>(expression);
-										if (dataFacetExpression) {
-											mDataFacetList.append(dataFacetExpression);
-											return true;
-										}
-									}
-								}
-							}
-						}
+				} else if (kind & CBuildExpression::EKFOBJECTPROPERTYTERM) {
+					mObjectPropertyList.append(static_cast<CObjectPropertyTermExpression*>(expression));
+					return true;
+				} else if (kind & CBuildExpression::EKFINDIVIDUALTERM) {
+					mIndiList.append(static_cast<CIndividualTermExpression*>(expression));
+					return true;
+				} else if (kind & CBuildExpression::EKFDATAPROPERTYTERM) {
+					mDataPropertyList.append(static_cast<CDataPropertyTermExpression*>(expression));
+					return true;
+				} else if (kind & CBuildExpression::EKFDATARANGETERM) {
+					mDataRangeList.append(static_cast<CDataRangeTermExpression*>(expression));
+					if (kind & CBuildExpression::EKFDATALITERALTERM) {
+						mDataLiteralTermList.append(static_cast<CDataLiteralTermExpression*>(expression));
+					} else if (kind & CBuildExpression::EKFDATATYPE) {
+						mDatatypeList.append(static_cast<CDatatypeExpression*>(expression));
 					}
+					return true;
+				} else if (kind & CBuildExpression::EKFDATAFACETRESTRICTION) {
+					mDataFacetRestrictionList.append(static_cast<CDataFacetRestrictionExpression*>(expression));
+					return true;
+				} else if (kind & CBuildExpression::EKFDATAFACET) {
+					mDataFacetList.append(static_cast<CDataFacetExpression*>(expression));
+					return true;
 				}
 				return false;
 			}

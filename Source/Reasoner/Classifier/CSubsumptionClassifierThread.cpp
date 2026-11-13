@@ -43,6 +43,8 @@ namespace Konclude {
 
 			CSubsumptionClassifierThread::~CSubsumptionClassifierThread() {
 				stopThread();
+				// the items of ontItemList are the classifications of the ontologies, whose CClassification
+				// deletes them (issue #45)
 			}
 
 

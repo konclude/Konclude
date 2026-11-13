@@ -170,6 +170,8 @@ jobs:
           Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/lubm-univ-bench-sparql-load-and-query-test.sparql -o Tests/query-answers.xml -c Configs/querying-config.xml
           Release/Konclude.app/Contents/MacOS/Konclude sparqlfile -s Tests/roberts-family-full-sparql-existential-variables-query-test.sparql -i Tests/roberts-family-full-D.owl.xml
 
+
+
       # The conformance runner drives the built binary as a subprocess and compares the answers
       # with the expected result files in Tests/cases. It runs on every platform, so a regression
       # of one build does not hide behind the other platforms.
@@ -201,4 +203,150 @@ jobs:
           path: |
             conformance-results/result.owl.xml
             conformance-results/test-outputs/
+          if-no-files-found: ignore
+
+
+  # The JNI interface of Konclude is compiled only for KoncludeLIB.pro, which defines
+  # KONCLUDE_COMPILE_JNI_INTERFACE, so the sources of the bridge are empty in the builds above and
+  # nothing notices when a change breaks the shared library or the bridge. The smoke test and
+  # the OWL API test are shell scripts, which run in the Git Bash of the Windows runner.
+  jni_library:
+    name: JNI library ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            cc: "gcc",
+            cxx: "g++"
+          }
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            cc: "clang",
+            cxx: "clang++"
+          }
+        - {
+            name: "Windows Latest MSVC",
+            os: windows-latest,
+            cc: "cl",
+            cxx: "cl"
+          }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # sccache keeps the objects of earlier runs in a local directory, which actions/cache saves
+      # under the commit and restores from the most recent run of the same job and platform, so
+      # that only the translation units a change touches are compiled again. qmake is handed
+      # 'sccache <compiler>' as QMAKE_CC and QMAKE_CXX, which leaves linking and moc as they are.
+      # The directory is used rather than the GitHub Actions backend of sccache, which stores
+      # every object as a cache entry of its own, several thousand per job.
+      - name: Install sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Prepare sccache
+        shell: bash
+        run: |
+          echo "SCCACHE_DIR=$RUNNER_TEMP/sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_CACHE_SIZE=2G" >> "$GITHUB_ENV"
+
+      - name: Restore the compiler cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/sccache
+          key: sccache-${{ github.job }}-${{ matrix.config.os }}-${{ github.sha }}
+          restore-keys: sccache-${{ github.job }}-${{ matrix.config.os }}-
+
+      - name: Install Qt
+        if: ${{ !startsWith(matrix.config.os, 'macos') }}
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          cache: true
+
+      - name: Install Qt macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          brew install qt@5
+          echo "$(brew --prefix qt@5)/bin" >> "$GITHUB_PATH"
+
+      # KoncludeLIB.pro takes the Java and JNI include directories from JAVA_HOME
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile the shared library
+        if: ${{ !startsWith(matrix.config.os, 'windows') }}
+        run: |
+          echo `qmake --version`
+          qmake KoncludeLIB.pro "QMAKE_CC=sccache ${{ matrix.config.cc }}" "QMAKE_CXX=sccache ${{ matrix.config.cxx }}"
+          make -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
+
+      # the same tool set and jom as for the command line build above
+      - name: Prepare Visual Studio
+        if: startsWith(matrix.config.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: '14.29'
+
+      - name: Compile the shared library Windows
+        if: startsWith(matrix.config.os, 'windows')
+        run: |
+          . .github/scripts/jom.ps1
+          Install-Jom
+          qmake --version
+          qmake KoncludeLIB.pro "QMAKE_CC=sccache cl" "QMAKE_CXX=sccache cl" "CONFIG+=no_batch"
+          Invoke-Make
+
+      - name: Compiler cache statistics
+        if: always()
+        shell: bash
+        run: sccache --show-stats || true
+
+      # compiles the Java side against the bridge and drives the built library through it. On
+      # Windows the library finds the Qt DLLs through PATH, to which install-qt-action adds them.
+      - name: Run the JNI smoke test
+        shell: bash
+        run: ./Java/run-jni-smoke-test.sh
+
+      # the OWL API wrapper against the library, with the OWL API resolved by Maven; on macOS the
+      # plug-in test below runs the same scenarios once more through the bundles of Protege
+      - name: Run the OWL API test
+        shell: bash
+        run: ./Java/run-owlapi-test.sh
+
+      # builds the Protege plug-in around the library and runs it inside the OSGi framework of
+      # a Protege installation, see Java/Readme.md. The plug-in carries the library for macOS on
+      # arm64 only, which is what the macOS runner is; the library here depends on the Qt of
+      # Homebrew, which is fine for the test but not for a plug-in to ship.
+      - name: Download Protege
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          curl -sSL -o protege.zip https://github.com/protegeproject/protege-distribution/releases/download/protege-5.6.6/Protege-5.6.6-platform-independent.zip
+          unzip -q protege.zip -d protege
+          ls -d protege/*/bundles
+
+      - name: Run the Protege plug-in test
+        if: startsWith(matrix.config.os, 'macos')
+        run: ./Java/run-protege-plugin-test.sh "$(dirname "$(ls -d protege/*/bundles)")" Release
+
+      # a crash of the virtual machine in a native call leaves its report beside the test and
+      # only a summary in the log, so the report is kept for reading
+      - name: Keep the crash reports of the virtual machine
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jvm-crash-reports-${{ matrix.config.os }}
+          path: |
+            hs_err_pid*.log
+            Java/hs_err_pid*.log
+            Java/crash-reports/*.log
+            Java/protege/hs_err_pid*.log
           if-no-files-found: ignore

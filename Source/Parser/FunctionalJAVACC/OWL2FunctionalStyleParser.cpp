@@ -1,16 +1,16 @@
 /* OWL2FunctionalStyleParser.cc */
-#include "OWL2FunctionalStyleParser.h"
+#include "./OWL2FunctionalStyleParser.h"
 namespace Konclude {
 namespace Parser {
 namespace FunctionalJAVACC {
   unsigned int jj_la1_0[] = {
-0x0,0x0,0x200,0x0,0x0,0x800,0x40000,0x0,0x0,0x100,0x3f000,0x80000,0x800000,0x800000,0x0,0x0,0xff000000,0x0,0xff000000,0xff000000,0xff000000,0x800000,0x800000,0x800000,0x40000,0x0,0x0,0xff000000,0x0,0x180000,0x80000,0x0,0x0,0x80000,0x80000,0x0,0x0,0x0,0x0,0x0,0x0,};
+0x0,0x0,0x200,0x0,0x0,0x800,0x8001000,0x0,0x0,0x100,0x7e00000,0x10000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf8000,0xf8000,0x100000,0xf8000,0x100000,0x8001000,0x0,0x0,0x0,0x0,0x30000000,0x10000000,0x0,0x0,0x10000000,0x10000000,0x0,0x0,0x0,0x0,0x0,0x0,};
   unsigned int jj_la1_1[] = {
-0x0,0x0,0x0,0x0,0x0,0x0,0xffffe000,0x0,0x0,0x0,0x0,0x0,0x78,0x78,0x0,0x0,0x1f87,0x0,0x1f87,0x1f87,0x1f87,0x78,0x78,0x78,0xffffe000,0x0,0x1e000,0x1f87,0x3ffe0000,0x0,0x0,0xc0000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+0x0,0x0,0x0,0x0,0x0,0x0,0xffc00000,0x0,0x0,0x0,0x0,0x0,0xf001,0xf001,0x0,0x0,0x3f0ffe,0x0,0x3f0ffe,0x3f0ffe,0x3f0ffe,0xf001,0xf001,0xf001,0x0,0x0,0x0,0x0,0x0,0xffc00000,0x0,0x3c00000,0x3f0ffe,0xfc000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
   unsigned int jj_la1_2[] = {
-0x40100000,0x2000,0x0,0x40100000,0x40100000,0x0,0x3dfff,0x40500000,0x80000,0x0,0x0,0x40100000,0x40100000,0x40100000,0x0,0x40100000,0x40100000,0x40500000,0x40100000,0x40100000,0x40100000,0x40100000,0x40100000,0x40100000,0x3dfff,0x2000,0x0,0x40100000,0x0,0x40100000,0x40100000,0xf,0x40100000,0x40100000,0x40100000,0x1fc0,0x40500000,0x2000,0x40500000,0x3c000,0x40500000,};
+0x20000000,0x400000,0x0,0x20000000,0x20000000,0x0,0x7bfffff,0xa0000000,0x10000000,0x0,0x0,0x20000000,0x20000000,0x20000000,0x0,0x20000000,0x20000000,0xa0000000,0x20000000,0x20000000,0x20000000,0x20000000,0x20000000,0x20000000,0x0,0x0,0x0,0x0,0x0,0x7bfffff,0x400000,0x0,0x20000000,0x7f,0x20000000,0x20000000,0x1f80,0x20000000,0x20000000,0x20000000,0x3f8000,0xa0000000,0x400000,0xa0000000,0x7800000,0xa0000000,};
   unsigned int jj_la1_3[] = {
-0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x4,0x0,0x0,};
+0x80,0x0,0x0,0x80,0x80,0x0,0x0,0x80,0x0,0x0,0x0,0x80,0x80,0x80,0x800,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x80,0x0,0x0,0x800,0x0,0x800,0x0,0x0,0x0,0x80,0x0,0x80,0x80,0x0,0x80,0x80,0x80,0x0,0x80,0x0,0x880,0x0,0x80,};
 
   /** Constructor with user supplied TokenManager. */
 
@@ -180,10 +180,10 @@ void OWL2FunctionalStyleParser::prefixDeclaration() {QString abbName;
     jj_consume_token(CLOSE_BRACKET);
     }
     
-	if (abbName.endsWith(":")) {
-		abbName = abbName.remove(abbName.length()-1,1);
-	}
-getBuilder()->addNameAbbreviation(fullName,abbName);
+if (abbName.endsWith(":")) {
+                        abbName = abbName.remove(abbName.length()-1,1);
+                }
+                getBuilder()->addNameAbbreviation(fullName,abbName);
   }
 
 
@@ -310,6 +310,7 @@ void OWL2FunctionalStyleParser::axioms() {CBuildExpressionPtr x;if (!hasError) {
     
     while (!hasError) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case DL_SAFE_RULE:
       case DECLARATION:
       case SUB_CLASS_OF:
       case EQUIVALENT_CLASSES:
@@ -1824,12 +1825,369 @@ assert(false);
   }
 
 
+CBuildExpressionPtr OWL2FunctionalStyleParser::dLSafeRuleAxiom() {if (!hasError) {
+    
+    dLSafeRule();
+    }
+    
+return nullptr;
+assert(false);
+  }
+
+
+void OWL2FunctionalStyleParser::dLSafeRule() {CParseRuleAtom* atom = nullptr;
+        QList<CParseRuleAtom*> bodyAtomList;
+        QList<CParseRuleAtom*> headAtomList;
+        bool allAtomsSupported = true;if (!hasError) {
+    
+    jj_consume_token(DL_SAFE_RULE);
+    }
+    if (!hasError) {
+    
+    jj_consume_token(OPEN_BRACKET);
+    }
+    if (!hasError) {
+    
+    jj_consume_token(RULE_BODY);
+    }
+    if (!hasError) {
+    
+    jj_consume_token(OPEN_BRACKET);
+    }
+    if (!hasError) {
+    
+    while (!hasError) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case CLASS_ATOM:
+      case OBJECT_PROPERTY_ATOM:
+      case DATA_PROPERTY_ATOM:
+      case DIFFERENT_INDIVIDUALS_ATOM:
+      case BUILT_IN_ATOM:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[24] = jj_gen;
+        goto end_label_9;
+      }if (!hasError) {
+      
+      atom = ruleAtom();
+      }
+      if (!hasError) {
+      
+if (atom) { bodyAtomList.append(atom); } else { allAtomsSupported = false; }
+      }
+      
+    }
+    end_label_9: ;
+    }
+    if (!hasError) {
+    
+    jj_consume_token(CLOSE_BRACKET);
+    }
+    if (!hasError) {
+    
+    jj_consume_token(RULE_HEAD);
+    }
+    if (!hasError) {
+    
+    jj_consume_token(OPEN_BRACKET);
+    }
+    if (!hasError) {
+    
+    while (!hasError) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case CLASS_ATOM:
+      case OBJECT_PROPERTY_ATOM:
+      case DATA_PROPERTY_ATOM:
+      case DIFFERENT_INDIVIDUALS_ATOM:
+      case BUILT_IN_ATOM:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[25] = jj_gen;
+        goto end_label_10;
+      }if (!hasError) {
+      
+      atom = ruleAtom();
+      }
+      if (!hasError) {
+      
+if (atom) { headAtomList.append(atom); } else { allAtomsSupported = false; }
+      }
+      
+    }
+    end_label_10: ;
+    }
+    if (!hasError) {
+    
+    jj_consume_token(CLOSE_BRACKET);
+    }
+    if (!hasError) {
+    
+    jj_consume_token(CLOSE_BRACKET);
+    }
+    
+if (allAtomsSupported) {
+                        CRuleExpressionCreator ruleExpressionCreator(getBuilder());
+                        cint64 axiomNumber = 0;
+                        QList<CBuildExpression*> ruleAxioms = ruleExpressionCreator.createRuleAxioms(bodyAtomList, headAtomList, axiomNumber);
+                        foreach (CBuildExpression* ruleAxiom, ruleAxioms) {
+                                getBuilder()->tellOntologyAxiom(ruleAxiom);
+                        }
+                }
+  }
+
+
+QString OWL2FunctionalStyleParser::ruleVariable() {QString iriString;if (!hasError) {
+    
+    jj_consume_token(RULE_VARIABLE);
+    }
+    if (!hasError) {
+    
+    jj_consume_token(OPEN_BRACKET);
+    }
+    if (!hasError) {
+    
+    iriString = iri();
+    }
+    if (!hasError) {
+    
+    jj_consume_token(CLOSE_BRACKET);
+    }
+    
+return getBuilder()->resolveAbbreviationName(iriString);
+assert(false);
+  }
+
+
+CParseRuleAtomPtr OWL2FunctionalStyleParser::ruleAtom() {CBuildExpressionPtr expression;
+        QString variableName1;
+        QString variableName2;if (!hasError) {
+    
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case CLASS_ATOM:{if (!hasError) {
+      
+      jj_consume_token(CLASS_ATOM);
+      }
+      if (!hasError) {
+      
+      jj_consume_token(OPEN_BRACKET);
+      }
+      if (!hasError) {
+      
+      expression = classExpression();
+      }
+      if (!hasError) {
+      
+      variableName1 = ruleVariable();
+      }
+      if (!hasError) {
+      
+      jj_consume_token(CLOSE_BRACKET);
+      }
+      if (!hasError) {
+      
+CParseRuleAtom* atom = new CParseRuleAtom(CParseRuleAtom::CLASSATOM);
+                        atom->mVariableName1 = variableName1;
+                        atom->mAtomExpression = expression;
+                        return atom;
+      }
+      
+      break;
+      }
+    case OBJECT_PROPERTY_ATOM:{if (!hasError) {
+      
+      jj_consume_token(OBJECT_PROPERTY_ATOM);
+      }
+      if (!hasError) {
+      
+      jj_consume_token(OPEN_BRACKET);
+      }
+      if (!hasError) {
+      
+      expression = objectPropertyExpression();
+      }
+      if (!hasError) {
+      
+      variableName1 = ruleVariable();
+      }
+      if (!hasError) {
+      
+      variableName2 = ruleVariable();
+      }
+      if (!hasError) {
+      
+      jj_consume_token(CLOSE_BRACKET);
+      }
+      if (!hasError) {
+      
+CParseRuleAtom* atom = new CParseRuleAtom(CParseRuleAtom::PROPERTYATOM);
+                        atom->mVariableName1 = variableName1;
+                        atom->mVariableName2 = variableName2;
+                        atom->mAtomExpression = expression;
+                        return atom;
+      }
+      
+      break;
+      }
+    case DIFFERENT_INDIVIDUALS_ATOM:{if (!hasError) {
+      
+      jj_consume_token(DIFFERENT_INDIVIDUALS_ATOM);
+      }
+      if (!hasError) {
+      
+      jj_consume_token(OPEN_BRACKET);
+      }
+      if (!hasError) {
+      
+      variableName1 = ruleVariable();
+      }
+      if (!hasError) {
+      
+      variableName2 = ruleVariable();
+      }
+      if (!hasError) {
+      
+      jj_consume_token(CLOSE_BRACKET);
+      }
+      if (!hasError) {
+      
+CParseRuleAtom* atom = new CParseRuleAtom(CParseRuleAtom::DIFFERENTINDIVIDUALSATOM);
+                        atom->mVariableName1 = variableName1;
+                        atom->mVariableName2 = variableName2;
+                        return atom;
+      }
+      
+      break;
+      }
+    case DATA_PROPERTY_ATOM:{if (!hasError) {
+      
+      jj_consume_token(DATA_PROPERTY_ATOM);
+      }
+      if (!hasError) {
+      
+      jj_consume_token(OPEN_BRACKET);
+      }
+      if (!hasError) {
+      
+      expression = dataPropertyExpression();
+      }
+      if (!hasError) {
+      
+      variableName1 = ruleVariable();
+      }
+      if (!hasError) {
+      
+      variableName2 = ruleVariable();
+      }
+      if (!hasError) {
+      
+      jj_consume_token(CLOSE_BRACKET);
+      }
+      if (!hasError) {
+      
+return nullptr;
+      }
+      
+      break;
+      }
+    case BUILT_IN_ATOM:{if (!hasError) {
+      
+      jj_consume_token(BUILT_IN_ATOM);
+      }
+      if (!hasError) {
+      
+      jj_consume_token(OPEN_BRACKET);
+      }
+      if (!hasError) {
+      
+      expression = classExpression();
+      }
+      if (!hasError) {
+      
+      while (!hasError) {
+        switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+        case RULE_VARIABLE:
+        case QUOTED_QString:{
+          ;
+          break;
+          }
+        default:
+          jj_la1[26] = jj_gen;
+          goto end_label_11;
+        }if (!hasError) {
+        
+        ruleTerm();
+        }
+        
+      }
+      end_label_11: ;
+      }
+      if (!hasError) {
+      
+      jj_consume_token(CLOSE_BRACKET);
+      }
+      if (!hasError) {
+      
+return nullptr;
+      }
+      
+      break;
+      }
+    default:
+      jj_la1[27] = jj_gen;
+      jj_consume_token(-1);
+      errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
+    }
+    }
+    
+assert(false);
+  }
+
+
+void OWL2FunctionalStyleParser::ruleTerm() {CBuildExpressionPtr x;
+        QString variableName;if (!hasError) {
+    
+    switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+    case RULE_VARIABLE:{if (!hasError) {
+      
+      variableName = ruleVariable();
+      }
+      
+      break;
+      }
+    case QUOTED_QString:{if (!hasError) {
+      
+      x = literal(false);
+      }
+      
+      break;
+      }
+    default:
+      jj_la1[28] = jj_gen;
+      jj_consume_token(-1);
+      errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
+    }
+    }
+    
+  }
+
+
 CBuildExpressionPtr OWL2FunctionalStyleParser::axiom() {CBuildExpressionPtr x = nullptr;if (!hasError) {
     
     switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
     case DECLARATION:{if (!hasError) {
       
       x = declaration();
+      }
+      
+      break;
+      }
+    case DL_SAFE_RULE:{if (!hasError) {
+      
+      x = dLSafeRuleAxiom();
       }
       
       break;
@@ -1913,7 +2271,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::axiom() {CBuildExpressionPtr x = 
       break;
       }
     default:
-      jj_la1[24] = jj_gen;
+      jj_la1[29] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -1933,15 +2291,15 @@ void OWL2FunctionalStyleParser::axiomAnnotations() {if (!hasError) {
         break;
         }
       default:
-        jj_la1[25] = jj_gen;
-        goto end_label_9;
+        jj_la1[30] = jj_gen;
+        goto end_label_12;
       }if (!hasError) {
       
       annotation();
       }
       
     }
-    end_label_9: ;
+    end_label_12: ;
     }
     
   }
@@ -1979,7 +2337,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::classAxiom() {CBuildExpressionPtr
       break;
       }
     default:
-      jj_la1[26] = jj_gen;
+      jj_la1[31] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -2140,11 +2498,11 @@ v.append(x);
         break;
         }
       default:
-        jj_la1[27] = jj_gen;
-        goto end_label_10;
+        jj_la1[32] = jj_gen;
+        goto end_label_13;
       }
     }
-    end_label_10: ;
+    end_label_13: ;
     }
     
 return v;
@@ -2247,7 +2605,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::objectPropertyAxiom() {CBuildExpr
       break;
       }
     default:
-      jj_la1[28] = jj_gen;
+      jj_la1[33] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -2291,7 +2649,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::subObjectPropertyOf() {CBuildExpr
       break;
       }
     default:
-      jj_la1[29] = jj_gen;
+      jj_la1[34] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -2404,11 +2762,11 @@ v.append(x);
         break;
         }
       default:
-        jj_la1[30] = jj_gen;
-        goto end_label_11;
+        jj_la1[35] = jj_gen;
+        goto end_label_14;
       }
     }
-    end_label_11: ;
+    end_label_14: ;
     }
     
 return v;
@@ -2734,7 +3092,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::dataPropertyAxiom() {CBuildExpres
       break;
       }
     default:
-      jj_la1[31] = jj_gen;
+      jj_la1[36] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -2846,11 +3204,11 @@ v.append(x);
         break;
         }
       default:
-        jj_la1[32] = jj_gen;
-        goto end_label_12;
+        jj_la1[37] = jj_gen;
+        goto end_label_15;
       }
     }
-    end_label_12: ;
+    end_label_15: ;
     }
     
 return v;
@@ -3005,15 +3363,15 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {if (!hasError) {
         break;
         }
       default:
-        jj_la1[33] = jj_gen;
-        goto end_label_13;
+        jj_la1[38] = jj_gen;
+        goto end_label_16;
       }if (!hasError) {
       
       objectPropertyExpression();
       }
       
     }
-    end_label_13: ;
+    end_label_16: ;
     }
     if (!hasError) {
     
@@ -3034,15 +3392,15 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::hasKey() {if (!hasError) {
         break;
         }
       default:
-        jj_la1[34] = jj_gen;
-        goto end_label_14;
+        jj_la1[39] = jj_gen;
+        goto end_label_17;
       }if (!hasError) {
       
       objectPropertyExpression();
       }
       
     }
-    end_label_14: ;
+    end_label_17: ;
     }
     if (!hasError) {
     
@@ -3111,7 +3469,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::assertion() {CBuildExpressionPtr 
       break;
       }
     default:
-      jj_la1[35] = jj_gen;
+      jj_la1[40] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -3194,11 +3552,11 @@ v.append(x);
         break;
         }
       default:
-        jj_la1[36] = jj_gen;
-        goto end_label_15;
+        jj_la1[41] = jj_gen;
+        goto end_label_18;
       }
     }
-    end_label_15: ;
+    end_label_18: ;
     }
     
 return v;
@@ -3411,15 +3769,15 @@ void OWL2FunctionalStyleParser::annotationAnnotations() {if (!hasError) {
         break;
         }
       default:
-        jj_la1[37] = jj_gen;
-        goto end_label_16;
+        jj_la1[42] = jj_gen;
+        goto end_label_19;
       }if (!hasError) {
       
       annotation();
       }
       
     }
-    end_label_16: ;
+    end_label_19: ;
     }
     
   }
@@ -3451,7 +3809,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::annotationValue() {if (!hasError)
       break;
       }
     default:
-      jj_la1[38] = jj_gen;
+      jj_la1[43] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -3494,7 +3852,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::annotationAxiom() {if (!hasError)
       break;
       }
     default:
-      jj_la1[39] = jj_gen;
+      jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -3558,7 +3916,7 @@ CBuildExpressionPtr OWL2FunctionalStyleParser::annotationSubject() {if (!hasErro
       break;
       }
     default:
-      jj_la1[40] = jj_gen;
+      jj_la1[45] = jj_gen;
       jj_consume_token(-1);
       errorHandler->handleParseError(token, getToken(1), __FUNCTION__, this), hasError = true;
     }
@@ -3699,7 +4057,7 @@ void OWL2FunctionalStyleParser::ReInit(TokenManager *tm){
     trace_enabled = false;
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 41; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 46; i++) jj_la1[i] = -1;
   }
 
 

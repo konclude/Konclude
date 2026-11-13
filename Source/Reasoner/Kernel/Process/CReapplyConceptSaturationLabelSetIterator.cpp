@@ -31,11 +31,15 @@ namespace Konclude {
 
 
 
-				CReapplyConceptSaturationLabelSetIterator::CReapplyConceptSaturationLabelSetIterator(const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itBegin, const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itEnd, const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itAdditionalBegin, const CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator& itAdditionalEnd, bool iterateConSatDes, bool iterateReapplies) 
+				CReapplyConceptSaturationLabelSetIterator::CReapplyConceptSaturationLabelSetIterator(const CReapplyConceptSaturationLabelHash::const_iterator& itBegin, const CReapplyConceptSaturationLabelHash::const_iterator& itEnd, const CReapplyConceptSaturationLabelHash::const_iterator& itAdditionalBegin, const CReapplyConceptSaturationLabelHash::const_iterator& itAdditionalEnd, bool iterateConSatDes, bool iterateReapplies) 
 						: mItBegin(itBegin), mItEnd(itEnd), mItAdditionalBegin(itAdditionalBegin), mItAdditionalEnd(itAdditionalEnd), mIterateConSatDes(iterateConSatDes), mIterateReapplies(iterateReapplies) {
 					
 					while (!isIteratorValid()) {
-						++mItBegin;
+						if (mItBegin != mItEnd) {
+							++mItBegin;
+						} else {
+							++mItAdditionalBegin;
+						}
 					}
 				}
 

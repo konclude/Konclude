@@ -25,6 +25,7 @@
 
 
 // Namespace includes
+#include "Parser/CParseRuleAtom.h"
 #include "JavaCC.h"
 
 // Other includes
@@ -89,6 +90,7 @@ namespace Konclude {
 			// forward declarations
 
 			typedef CBuildExpression* CBuildExpressionPtr;
+			typedef CParseRuleAtom* CParseRuleAtomPtr;
 			typedef CDatatypeExpression* CDatatypeExpressionPtr;
 			typedef CDataLexicalValueExpression* CDataLexicalValueExpressionPtr;
 

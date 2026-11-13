@@ -140,6 +140,7 @@ namespace Konclude {
 							CAbbreviatedIRIName* newName = CObjectAllocator<CAbbreviatedIRIName>::allocateAndConstruct(mMemManager);
 							QString abbString = name.mid(prefix.length());
 							newName->init(namePrefix,abbString);
+							mOnto->getOntologyContext()->addDestructiblePoolObject(newName);
 							newName->setNameVersionID(lastNameID);
 							CLinker<CName*>* newNameLinker = CObjectAllocator< CLinker<CName*> >::allocateAndConstruct(mMemManager);
 							newNameLinker->init(newName);
@@ -150,6 +151,7 @@ namespace Konclude {
 					if (!nameAdded) {
 						CIRIName* newName = CObjectAllocator<CIRIName>::allocateAndConstruct(mMemManager);
 						newName->init(name);
+						mOnto->getOntologyContext()->addDestructiblePoolObject(newName);
 						newName->setNameVersionID(lastNameID);
 						CLinker<CName*>* newNameLinker = CObjectAllocator< CLinker<CName*> >::allocateAndConstruct(mMemManager);
 						newNameLinker->init(newName);

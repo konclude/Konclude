@@ -90,6 +90,8 @@ namespace Konclude {
 					virtual bool completeBuilding();
 
 					virtual bool tellOntologyAxiom(CAxiomExpression* axiom);
+					//! a hint of how many axioms will be told: grows the axiom sets and the expression hash once instead of rehashing
+					virtual void reserveForAxioms(cint64 axiomCount);
 					virtual bool retractOntologyAxiom(CAxiomExpression* axiom);
 
 					virtual bool addOntologyImport(const QStringRef& name);

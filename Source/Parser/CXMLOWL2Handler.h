@@ -292,6 +292,8 @@ namespace Konclude {
 
 				void jumpFunctionParseIgnoredNode(CParseStackObject* parseStackObj);
 
+				bool initializeAnnotationNodeSet();
+
 
 
 				void addTemporaryBuildExpression(CBuildExpression* buildExp);
@@ -313,6 +315,13 @@ namespace Konclude {
 				typedef void (CXMLOWL2Handler::*ParseFunction) (CParseStackObject*  parseStackObj);
 
 				CQtHash<QString,ParseFunction> mParseFunctionJumpHash;
+
+				// node names of the annotation vocabulary, whose sub trees are skipped entirely
+				QSet<QString> mAnnotationNodeSet;
+
+				bool mIgnoreParsingSubElements;
+				cint64 mParseIgnoreDepth;
+				bool mUnsupportedAnnotationError;
 
 				QList<CBuildExpression*> mRuleExpContainer;
 

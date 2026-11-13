@@ -70,6 +70,14 @@ namespace Konclude {
 
 
 
+		// The task processing units keep the memory pools of finished tasks in a free list for reuse instead of returning them
+		// to the provider. This is the default upper bound of that list, in pools of DEFAULTMEMORYPOOLSIZE bytes each (~50 KB).
+		// Tasks that are created outside the processing units, such as the tests of the answering handlers, only ever fill the
+		// lists and never draw from them, so the bound decides how much memory a long sequence of tests can hold in reserve
+		// per unit. Configurable with Konclude.Calculation.Memory.TaskProcessorFreePoolReserveLimit.
+		static const cint64 DEFAULT_FREE_POOL_RESERVE_LIMIT = 1000;
+
+
 		// Custom Events >= 2000
 
 

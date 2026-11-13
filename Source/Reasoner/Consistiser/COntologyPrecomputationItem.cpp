@@ -28,6 +28,9 @@ namespace Konclude {
 		namespace Consistiser {
 
 
+			COntologyPrecomputationItem::~COntologyPrecomputationItem() {
+			}
+
 			COntologyPrecomputationItem::COntologyPrecomputationItem() {
 			}
 

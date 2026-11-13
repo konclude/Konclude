@@ -28,7 +28,7 @@
   </DataPropertyAssertion>
 
   <ClassAssertion>
-    <Class abbreviatedIRI="kt:ClassificationTest"/>
+    <Class abbreviatedIRI="kt:ClassClassificationTest"/>
     <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
   </ClassAssertion>
   <DataPropertyAssertion>
@@ -48,7 +48,7 @@
     <Literal>expected/galen-classification.owl.xml</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
-    <DataProperty abbreviatedIRI="kt:inspiredBy"/>
+    <DataProperty abbreviatedIRI="kt:sourceCase"/>
     <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
     <Literal>GALEN medical ontology</Literal>
   </DataPropertyAssertion>

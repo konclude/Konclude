@@ -45,6 +45,7 @@ namespace Konclude {
 					mSubstituteIndiNode = nullptr;
 					mCopyIndiNode = nullptr;
 					mRequiredBackProp = false;
+					mReducedConceptLabel = false;
 
 					mDependingIndiNodeLinker = nullptr;
 					mDepSaturationIndiNode = nullptr;
@@ -74,6 +75,10 @@ namespace Konclude {
 					mLoadedNominalIndiTriplesAssertions = false;
 					mOccurrenceStatisticsCollectingRequired = false;
 					mOccurrenceStatisticsCollected = false;
+					mParallelLock.store(0);
+					mParallelLevel = 0;
+					mParallelOwner = 0;
+					mParallelLockDepth = 0;
 					return this;
 				}
 
@@ -92,6 +97,9 @@ namespace Konclude {
 
 
 				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::initCopingIndividualSaturationProcessNode(CIndividualSaturationProcessNode* indiNode, bool tryFlatLabelCopy) {
+					// copying is not a pure read of the source: a large label is turned into a shared one and the copy
+					// registers at the source, so copies from one source on several threads are serialised by its lock
+					indiNode->lockParallel();
 					if (indiNode->getRoleBackwardPropagationHash(false)) {
 						getRoleBackwardPropagationHash(true)->copyRoleBackwardSaturationPropagationHash(indiNode->getRoleBackwardPropagationHash(false),this);
 					}
@@ -120,6 +128,7 @@ namespace Konclude {
 					CXNegLinker<CIndividualSaturationProcessNode*>* depCopyLinker = CObjectAllocator< CXNegLinker<CIndividualSaturationProcessNode*> >::allocateAndConstruct(mMemAllocMan);
 					depCopyLinker->initNegLinker(this,true);
 					indiNode->addCopyDependingIndividualNodeLinker(depCopyLinker);
+					indiNode->unlockParallel();
 					return this;
 				}
 
@@ -330,6 +339,15 @@ namespace Konclude {
 					return this;
 				}
 
+				bool CIndividualSaturationProcessNode::hasReducedConceptLabel() {
+					return mReducedConceptLabel;
+				}
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setReducedConceptLabel(bool reducedConceptLabel) {
+					mReducedConceptLabel = reducedConceptLabel;
+					return this;
+				}
+
 				bool CIndividualSaturationProcessNode::hasSubstituteIndividualNode() {
 					return mSubstituteIndiNode != nullptr;
 				}
@@ -434,6 +452,31 @@ namespace Konclude {
 					return this;
 				}
 
+
+				cint64 CIndividualSaturationProcessNode::getParallelLevel() {
+					return mParallelLevel;
+				}
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setParallelLevel(cint64 level) {
+					mParallelLevel = level;
+					return this;
+				}
+
+				int CIndividualSaturationProcessNode::getParallelLockTag() {
+					static QAtomicInt tagCounter(0);
+					static thread_local int tag = 0;
+					if (tag == 0) {
+						tag = tagCounter.fetchAndAddRelaxed(1)+1;
+					}
+					return tag;
+				}
+
+
+				CIndividualSaturationProcessNode* CIndividualSaturationProcessNode::setProcessContext(CProcessContext* processContext) {
+					mProcessContext = processContext;
+					mMemAllocMan = mProcessContext->getMemoryAllocationManager();
+					return this;
+				}
 
 				CBackwardSaturationPropagationLink* CIndividualSaturationProcessNode::getInitializingBackwardPropagationLinks() {
 					return mInitBackwardPropLinks;

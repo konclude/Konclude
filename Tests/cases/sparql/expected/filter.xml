@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected FILTER answer: only alice satisfies ?person = sp:alice. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="person"/>
+  </head>
+  <results>
+    <result>
+      <binding name="person"><uri>http://konclude.test/sparql#alice</uri></binding>
+    </result>
+  </results>
+</sparql>

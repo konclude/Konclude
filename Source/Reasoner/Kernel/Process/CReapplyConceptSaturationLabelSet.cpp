@@ -39,7 +39,7 @@ namespace Konclude {
 					mConceptDesDepHash = nullptr;
 					mAdditionalConceptDesDepHash = nullptr;
 					mConceptSatDesLinker = nullptr;
-					mConceptDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+					mConceptDesDepHash = CObjectParameterizingAllocator< CReapplyConceptSaturationLabelHash,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 					mConceptCount = 0;
 					mTotelCount = 0;
 					mModifiedUpdateLinker = nullptr;
@@ -51,17 +51,16 @@ namespace Konclude {
 				CReapplyConceptSaturationLabelSet* CReapplyConceptSaturationLabelSet::copyReapplyConceptSaturationLabelSet(CReapplyConceptSaturationLabelSet* copyConceptSaturationLabelSet, bool tryFlatLabelCopy) {
 					mConceptCount = copyConceptSaturationLabelSet->mConceptCount;
 					mTotelCount = copyConceptSaturationLabelSet->mTotelCount;
-					mConceptDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+					mConceptDesDepHash = CObjectParameterizingAllocator< CReapplyConceptSaturationLabelHash,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 					mConceptFlags = copyConceptSaturationLabelSet->mConceptFlags;
 					if (copyConceptSaturationLabelSet->mConceptDesDepHash->count() >= ADDITIONALCOPYSIZE || tryFlatLabelCopy && copyConceptSaturationLabelSet->mConceptDesDepHash->count() > 0) {
 
-						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* tmpAdditionalConDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						CReapplyConceptSaturationLabelHash* tmpAdditionalConDesDepHash = CObjectParameterizingAllocator< CReapplyConceptSaturationLabelHash,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
 						if (copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash) {
 							if (copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->count() > copyConceptSaturationLabelSet->mConceptDesDepHash->count()) {
-								*tmpAdditionalConDesDepHash = *copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash;
-								tmpAdditionalConDesDepHash->detach();
+								tmpAdditionalConDesDepHash->copyFrom(*copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash);
 
-								for (CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator it = copyConceptSaturationLabelSet->mConceptDesDepHash->constBegin(), itEnd = copyConceptSaturationLabelSet->mConceptDesDepHash->constEnd(); it != itEnd; ++it) {
+								for (CReapplyConceptSaturationLabelHash::const_iterator it = copyConceptSaturationLabelSet->mConceptDesDepHash->constBegin(), itEnd = copyConceptSaturationLabelSet->mConceptDesDepHash->constEnd(); it != itEnd; ++it) {
 									cint64 conTag = it.key();
 									const CConceptSaturationDescriptorReapplyData& conDesReapplyData(it.value());
 									CConceptSaturationDescriptorReapplyData& newConDesReapplyData = (*tmpAdditionalConDesDepHash)[conTag];
@@ -73,17 +72,17 @@ namespace Konclude {
 									}
 								}
 							} else {
-								*tmpAdditionalConDesDepHash = *copyConceptSaturationLabelSet->mConceptDesDepHash;
-								tmpAdditionalConDesDepHash->detach();
+								tmpAdditionalConDesDepHash->copyFrom(*copyConceptSaturationLabelSet->mConceptDesDepHash);
 
-								for (CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>::const_iterator it = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->constBegin(), itEnd = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->constEnd(); it != itEnd; ++it) {
+								// the entries of the own hash were pulled from the shared hash when first touched and extended since
+								// (implications waiting on the trigger are prepended to the reapply list), so they supersede the shared
+								// entries; the shared hash only supplies the tags the own hash has not touched (issue #34)
+								for (CReapplyConceptSaturationLabelHash::const_iterator it = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->constBegin(), itEnd = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash->constEnd(); it != itEnd; ++it) {
 									cint64 conTag = it.key();
 									const CConceptSaturationDescriptorReapplyData& conDesReapplyData(it.value());
 									CConceptSaturationDescriptorReapplyData& newConDesReapplyData = (*tmpAdditionalConDesDepHash)[conTag];
-									if (conDesReapplyData.mConSatDes) {
+									if (!newConDesReapplyData.mConSatDes && !newConDesReapplyData.mImpReapplyConSatDes) {
 										newConDesReapplyData.mConSatDes = conDesReapplyData.mConSatDes;
-									}
-									if (conDesReapplyData.mImpReapplyConSatDes) {
 										newConDesReapplyData.mImpReapplyConSatDes = conDesReapplyData.mImpReapplyConSatDes;
 									}
 								}
@@ -92,12 +91,16 @@ namespace Konclude {
 						} else {
 							copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash = copyConceptSaturationLabelSet->mConceptDesDepHash;
 						}
-						CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>* tmpNewConDesDepHash = CObjectParameterizingAllocator< CPROCESSHASH<cint64,CConceptSaturationDescriptorReapplyData>,CContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						CReapplyConceptSaturationLabelHash* tmpNewConDesDepHash = CObjectParameterizingAllocator< CReapplyConceptSaturationLabelHash,CProcessContext* >::allocateAndConstructAndParameterize(mProcessContext->getUsedMemoryAllocationManager(),mProcessContext);
+						// the source's new own hash grows from the source's own context: in the parallel saturation (#92) the
+						// source's thread fills it later while this thread allocates from its own context
+						if (copyConceptSaturationLabelSet->mProcessContext) {
+							tmpNewConDesDepHash->setProcessContext(copyConceptSaturationLabelSet->mProcessContext);
+						}
 						copyConceptSaturationLabelSet->mConceptDesDepHash = tmpNewConDesDepHash;
 					}
 
-					*mConceptDesDepHash = *copyConceptSaturationLabelSet->mConceptDesDepHash;
-					mConceptDesDepHash->detach();
+					mConceptDesDepHash->copyFrom(*copyConceptSaturationLabelSet->mConceptDesDepHash);
 					mAdditionalConceptDesDepHash = copyConceptSaturationLabelSet->mAdditionalConceptDesDepHash;
 					mConceptSatDesLinker = copyConceptSaturationLabelSet->mConceptSatDesLinker;
 					mLastNominalIndepConSatDes = copyConceptSaturationLabelSet->mLastNominalIndepConSatDes;
@@ -323,6 +326,14 @@ namespace Konclude {
 					}
 				}
 
+
+				CReapplyConceptSaturationLabelSet* CReapplyConceptSaturationLabelSet::setProcessContext(CProcessContext* processContext) {
+					mProcessContext = processContext;
+					if (mConceptDesDepHash) {
+						mConceptDesDepHash->setProcessContext(processContext);
+					}
+					return this;
+				}
 
 				bool CReapplyConceptSaturationLabelSet::areAllConceptsInAdditionalHash() {
 					return mConceptDesDepHash->isEmpty();

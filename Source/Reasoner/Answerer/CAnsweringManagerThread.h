@@ -84,6 +84,9 @@ namespace Konclude {
 					//! Destructor
 					virtual ~CAnsweringManagerThread();
 
+					// the threads of the answerers, for stopping them when the reasoner closes
+					QList<QThread*> getWorkerThreads();
+
 					virtual CAnsweringManager* answerComplexQuery(CComplexAnsweringQuery* complexAnsweringQuery, CCallbackData* callback = nullptr);
 
 					virtual CAnsweringProgress* getAnsweringProgress();

@@ -1,0 +1,17 @@
+Prefix(:=<http://konclude.test/rules#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<http://konclude.test/rules/property-head>
+
+Declaration(Class(:A))
+Declaration(Class(:B))
+Declaration(ObjectProperty(:r))
+Declaration(ObjectProperty(:s))
+Declaration(NamedIndividual(:a))
+Declaration(NamedIndividual(:b))
+ClassAssertion(:A :a)
+ObjectPropertyAssertion(:r :a :b)
+DLSafeRule(Body(ClassAtom(:A Variable(:x)) ObjectPropertyAtom(:r Variable(:x) Variable(:y))) Head(ObjectPropertyAtom(:s Variable(:x) Variable(:y))))
+DLSafeRule(Body(ClassAtom(:A Variable(:x)) ObjectPropertyAtom(:s Variable(:x) Variable(:y))) Head(ClassAtom(:B Variable(:y))))
+)

@@ -382,6 +382,8 @@ namespace Konclude {
 					mStatBackPropActivationCount = 0;
 
 					mCurrentRecProcDepth = 0;
+					mBranchingTaskCompleted = false;
+					mDirectRuleProcessing = false;
 					mCurrentRecProcDepthLimit = 300;
 
 					mMaxBlockingCachingSavedCandidateCount = 50;
@@ -1078,6 +1080,8 @@ namespace Konclude {
 							CConceptProcessDescriptor* conProcDes = nullptr;
 
 							mCurrentRecProcDepth = 0;
+							mBranchingTaskCompleted = false;
+							mDirectRuleProcessing = false;
 							mProcessRuleToTaskProcessingVerificationCount = 80;
 							mRemainProcessRuleToTaskProcessingVerification = mProcessRuleToTaskProcessingVerificationCount;
 
@@ -1181,7 +1185,16 @@ namespace Konclude {
 											KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mBeforeRuleDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
 
 
+											mDirectRuleProcessing = true;
 											continueProcessingIndividual = tableauRuleProcessing(indiProcNode,conProcDes,mCalcAlgContext);
+											mDirectRuleProcessing = false;
+											if (mBranchingTaskCompleted) {
+												// the OR branching created the branch tasks and completed this task (formerly a thrown
+												// CCalculationStopProcessingException(true)): leave the processing as the exception did
+												mBranchingTaskCompleted = false;
+												completed = true;
+												break;
+											}
 
 
 											KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mAfterRuleDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
@@ -1218,25 +1231,27 @@ namespace Konclude {
 
 										}
 
-										individualNodeConclusion(indiProcNode,calcAlgContext);
+										if (!completed) {
+											individualNodeConclusion(indiProcNode,calcAlgContext);
+										}
 
 									}
 
-									if (mCalcAlgContext->isMinModificationUpdated()) {
+									if (!completed && mCalcAlgContext->isMinModificationUpdated()) {
 										// update history
 										nodeSwitchHistory->updateLastIndividualProcessNodeSwitch(mCalcAlgContext->getMinModificationAncestorDepth(),mCalcAlgContext->getMinModificationIndividualID());
 									}
 								}
 
 								indiProcNode = nullptr;
-								if (!canceled) {
+								if (!canceled && !completed) {
 									indiProcNode = takeNextProcessIndividual(calcAlgContext);
 								}
 
 							}
 
 
-							if (mOptIncrementalExpansion && !mProcessingDataBox->isIncrementalExpansionCachingMerged()) {
+							if (!completed && mOptIncrementalExpansion && !mProcessingDataBox->isIncrementalExpansionCachingMerged()) {
 								incrementalMergeWithPreviousNondeterministicCompletionGraph(calcAlgContext);
 								mProcessingDataBox->setIncrementalExpansionCachingMerged(true);
 							}
@@ -1260,7 +1275,7 @@ namespace Konclude {
 
 
 
-							if (mConfPossibleInstanceIndividualsMerging && !canceled) {
+							if (!completed && mConfPossibleInstanceIndividualsMerging && !canceled) {
 
 
 
@@ -1318,10 +1333,10 @@ namespace Konclude {
 							}
 
 
-							satisfiable = true;
+							satisfiable = !completed;
 
 
-							if (mConfGenerateQueries) {
+							if (!completed && mConfGenerateQueries) {
 								CCompletionGraphRandomWalkQueryGenerator queryGen;
 								queryGen.generateQueries(calcAlgContext->getSatisfiableCalculationTask());
 							}
@@ -4775,7 +4790,21 @@ namespace Konclude {
 						individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTSATURATIONBLOCKINGCACHEDDUEDIRECTMODIFIED);
 					}
 					bool stillSaturationCached = false;
-					if (!individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHEDINVALIDATED)) {
+					// the root node of a classification test is not cached from the saturation: the classifier takes the
+					// possible subsumers from its label, and the saturation marks a successor with an unresolved disjunction
+					// insufficient without passing that on to the root, so blocking the successors of a cached root would
+					// leave the label incomplete (e.g., a laterality successor whose choice triggers absorbed definitions)
+					bool classificationRoot = false;
+					if (individualNode->getIndividualAncestorDepth() <= 0) {
+						CSatisfiableCalculationTask* satCalcTask = calcAlgContext->getUsedSatisfiableCalculationTask();
+						if (satCalcTask) {
+							CSatisfiableCalculationTask* rootTask = (CSatisfiableCalculationTask*)satCalcTask->getRootTask();
+							if (satCalcTask->getClassificationMessageAdapter() || rootTask && rootTask->getClassificationMessageAdapter()) {
+								classificationRoot = true;
+							}
+						}
+					}
+					if (!classificationRoot && !individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHEDINVALIDATED)) {
 
 						CSaturationNodeExpansionCacheHandler* satNodeExpCacheHandler = calcAlgContext->getSaturationNodeExpansionCacheHandler();
 						if (!stillSaturationCached && satNodeExpCacheHandler && mConfSaturationExpansionCacheReading) {
@@ -17007,6 +17036,12 @@ namespace Konclude {
 
 							processorContext->getTaskProcessorCommunicator()->communicateTaskCreation(newTaskList);
 
+							if (mDirectRuleProcessing && mCurrentRecProcDepth <= 1) {
+								// the branching completes this task; a rule applied directly from the task loop returns there
+								// with the flag (see handleTask) instead of unwinding with an exception, which is costly
+								mBranchingTaskCompleted = true;
+								return;
+							}
 							throw CCalculationStopProcessingException(true);
 						} else {
 							// throw clash
@@ -19031,6 +19066,23 @@ namespace Konclude {
 
 					bool blocked = false;
 
+					if (testIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCONCRETEDATAINDINODE)) {
+						// a data node is not tested for a blocker itself (see the loop below), its blocking follows from its ancestor;
+						// its flags have to be updated here, otherwise an indirectly blocked data node that is to be retested
+						// because its ancestor lost the blocker keeps these flags and is queued for processing again and again
+						cint64 retestFlags = CIndividualProcessNode::PRFBLOCKINGRETESTDUEANCESTORMODIFIED | CIndividualProcessNode::PRFBLOCKINGRETESTDUEDIRECTMODIFIED | CIndividualProcessNode::PRFBLOCKINGRETESTDUEBLOCKERMODIFIED | CIndividualProcessNode::PRFBLOCKINGRETESTDUEINDIRECTBLOCKERLOSS;
+						cint64 blockedFlags = CIndividualProcessNode::PRFDIRECTBLOCKED | CIndividualProcessNode::PRFINDIRECTBLOCKED | CIndividualProcessNode::PRFPROCESSINGBLOCKED;
+						CIndividualProcessNode* locDataIndi = getLocalizedIndividual(testIndi,false,calcAlgContext);
+						CIndividualProcessNode* dataAncIndi = getAncestorIndividual(locDataIndi,calcAlgContext);
+						if (dataAncIndi && dataAncIndi->hasPartialProcessingRestrictionFlags(blockedFlags) && !dataAncIndi->hasPartialProcessingRestrictionFlags(retestFlags)) {
+							// the ancestor is still blocked and not to be retested, the data node stays blocked with it
+							locDataIndi->clearProcessingRestrictionFlags(retestFlags);
+							return true;
+						}
+						locDataIndi->clearProcessingRestrictionFlags(retestFlags | blockedFlags);
+						ancTestIndi = dataAncIndi;
+					}
+
 					bool blockingTesting = true;
 					if (!previousBlocked && mCompGraphCacheHandler && mConfIgnoreBlockingCompletionGraphCachedNonBlockingNodes) {
 						if (mCompGraphCacheHandler->isIndividualNodeCompletionGraphConsistencePresentNonBlocked(testIndi, calcAlgContext)) {
@@ -20902,6 +20954,7 @@ namespace Konclude {
 								if (superConDes->getNegation() != subConDes->getNegation()) {
 									clashDescriptors = createClashedConceptDescriptor(clashDescriptors, subSetIndi, subConDes, subDepTrackPoint, calcAlgContext);
 									clashDescriptors = createClashedConceptDescriptor(clashDescriptors, superSetIndi, superConDes, superDepTrackPoint, calcAlgContext);
+									return true;
 								}
 							}
 							subConSetIt.moveNext();
@@ -21768,7 +21821,9 @@ namespace Konclude {
 								satIndiNode = satIndiNode->getSubstituteIndividualNode();
 							}
 							CReapplyConceptSaturationLabelSet* satConSet = satIndiNode->getReapplyConceptSaturationLabelSet(false);
-							if (satConSet) {
+							// a reduced label lacks the ALL and implication concepts the saturation applied, the
+							// node is not initialized from it since they would not be applied here, see issue #47
+							if (satConSet && !satIndiNode->hasReducedConceptLabel() && !baseSatIndiNode->hasReducedConceptLabel()) {
 								if (satIndiNode->getIndirectStatusFlags()->hasClashedFlag() || baseSatIndiNode->getIndirectStatusFlags()->hasClashedFlag()) {
 									CClashedDependencyDescriptor* clashDes = nullptr;
 									addConceptToIndividualSkipANDProcessing(concept,conceptNegation,indi,depTrackPoint,false,false, true,calcAlgContext);
@@ -21797,7 +21852,13 @@ namespace Konclude {
 									bool satCachingPossible = true;
 									CConceptDescriptor* lastSatCachPossibleConDes = nullptr;
 
-									if (satIndiNode = baseSatIndiNode) {
+									// This was an assignment (=), so the label was always copied from the end of the substitute chain while
+									// the concept itself was added without its own unfolding: the concepts of the intermediate substitutes, a
+									// told parent whose saturation equals its parent's, never reached the label. The saturation subsumer
+									// extraction adds them when it walks the chain, so the default classification did not notice; without it
+									// (SaturationSubsumerExtraction=false) a class lost its told parent whenever the expansion cache had not
+									// been filled by an earlier test, and the taxonomy turned that into false equivalences (issue #95).
+									if (satIndiNode == baseSatIndiNode) {
 										addConceptToIndividualSkipANDProcessing(concept,conceptNegation,indi,depTrackPoint,allowPreprocess,false, true,calcAlgContext);
 									} else {
 										addConceptToIndividual(concept,conceptNegation,indi,depTrackPoint,allowPreprocess,false,calcAlgContext);
@@ -22091,7 +22152,9 @@ namespace Konclude {
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::tryExpansionFromSaturatedData(CIndividualProcessNode*& indi, CIndividualProcessNode* createdSuccIndi, CConceptDescriptor* conDes, CDependencyTrackPoint* depTrackPoint, CIndividualSaturationProcessNode*& saturationIndiNode, bool* satCachingPossible, CConceptDescriptor** lastSatCachPossibleConDes, CCalculationAlgorithmContextBase* calcAlgContext) {
 					if (saturationIndiNode && saturationIndiNode->isInitialized()) {
 						CReapplyConceptSaturationLabelSet* satConSet = saturationIndiNode->getReapplyConceptSaturationLabelSet(false);
-						if (satConSet) {
+						// the concepts of a reduced label would be taken as expanded although the ALL and
+						// implication concepts the saturation applied are missing, see issue #47
+						if (satConSet && !saturationIndiNode->hasReducedConceptLabel()) {
 							bool nominalConnectionFlag = saturationIndiNode->getIndirectStatusFlags()->hasNominalConnectionFlag();
 							if (saturationIndiNode->getIndirectStatusFlags()->hasClashedFlag()) {
 								if (!nominalConnectionFlag || !mOptIncrementalExpansion) {

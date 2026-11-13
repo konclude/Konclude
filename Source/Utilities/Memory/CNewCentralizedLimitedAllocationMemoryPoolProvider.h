@@ -30,6 +30,7 @@
 #include "CAllocationLimitator.h"
 #include "CMemoryAllocationException.h"
 #include "CConsiderateMemoryPoolProvider.h"
+#include "CMemoryPoolRecycler.h"
 
 // Other includes
 

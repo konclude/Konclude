@@ -29,3 +29,14 @@ RCC_DIR += ./GeneratedFiles
 include(Konclude.pri)
 
 
+
+# jemalloc in place of the malloc of the C library, as the release packages of Konclude.pro link
+# it: 'qmake CONFIG+=jemalloc' links -ljemalloc, and JEMALLOC_LIB=<file> a particular library,
+# e.g. a static libjemalloc.a or the shared library of a distribution without its development
+# package. On Linux with glibc this shortens the classification of SNOMED CT by a third, see
+# 'THE MEMORY ALLOCATOR ON LINUX' in Java/Readme.md.
+unix:jemalloc {
+	isEmpty(JEMALLOC_LIB): LIBS += -ljemalloc
+	else: LIBS += $$JEMALLOC_LIB
+	message("Linking jemalloc: $$JEMALLOC_LIB")
+}

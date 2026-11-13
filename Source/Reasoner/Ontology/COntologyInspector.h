@@ -26,6 +26,8 @@
 
 // Namespace includes
 #include "OntologySettings.h"
+
+#include <QVector>
 #include "COntologyStructureSummary.h"
 #include "CConcreteOntology.h"
 
@@ -90,7 +92,30 @@ namespace Konclude {
 							bool mUniversalRoleOccurence;
 					};
 
-					bool analyseConceptStructureFlags(CConcept* concept, bool negated, QSet< QPair<CConcept*,bool> >& singleConNegSet, QHash<CRole*,bool>* existRoleHash, CStructureFlags& flags);
+					/*! The set of (concept, negation) pairs already visited by analyseConceptStructureFlags, as two bits
+					 *  per concept tag. It replaced a QSet of pairs, whose millions of insertions and lookups were a
+					 *  fifth of the preprocessing of SNOMED CT AU (issue #92); the concept tags are dense. */
+					class CVisitedConceptNegationSet {
+						public:
+							inline bool contains(CConcept* concept, bool negated) const {
+								cint64 tag = concept->getConceptTag();
+								return tag >= 0 && tag < mBits.size() && (mBits[tag] & (negated ? 2 : 1)) != 0;
+							}
+							inline void insert(CConcept* concept, bool negated) {
+								cint64 tag = concept->getConceptTag();
+								if (tag < 0) {
+									return;
+								}
+								if (tag >= mBits.size()) {
+									mBits.resize(qMax<cint64>(tag + 1, mBits.size() * 2 + 1024)); // new elements are value-initialised to zero
+								}
+								mBits[tag] |= (negated ? 2 : 1);
+							}
+						private:
+							QVector<quint8> mBits;
+					};
+
+					bool analyseConceptStructureFlags(CConcept* concept, bool negated, CVisitedConceptNegationSet& singleConNegSet, QHash<CRole*,bool>* existRoleHash, CStructureFlags& flags);
 
 				// protected variables
 				protected:

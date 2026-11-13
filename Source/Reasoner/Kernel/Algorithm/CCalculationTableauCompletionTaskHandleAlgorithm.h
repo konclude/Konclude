@@ -1133,6 +1133,8 @@ namespace Konclude {
 
 						cint64 mCurrentRecProcDepth;
 						cint64 mCurrentRecProcDepthLimit;
+						bool mBranchingTaskCompleted;
+						bool mDirectRuleProcessing;
 
 
 						CIndividualAncestorDepthMaximumConceptProcessingPriorityStrategy* mIndiAncDepthMasConProcPriStr;

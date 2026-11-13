@@ -36,6 +36,8 @@ namespace Konclude {
 			}
 
 			CClassConceptClassification::~CClassConceptClassification() {
+				// the taxonomy is created by the classifier for this classification only (issue #45)
+				delete mClassConceptTaxonomy;
 			}
 
 

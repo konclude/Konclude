@@ -56,7 +56,8 @@ namespace Konclude {
 					enum class TYPE {
 						CONSISTENCY,			//!< Is the ontology consistent?
 						SATISFIABILITY,			//!< Is the requested class satisfiable?
-						CLASSIFICATION,			//!< Does the computed taxonomy match the expected one?
+						CLASS_CLASSIFICATION,	//!< Does the computed class taxonomy match the expected one?
+						CLASS_REALIZATION,		//!< Do the computed individual types match the expected ones?
 						OWLLINK,		//!< Does the OWLlink BooleanResponse match the expectation?
 						SPARQL			//!< Does the SPARQL ASK result match the expectation?
 					};

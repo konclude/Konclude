@@ -1,0 +1,12 @@
+Prefix(:=<http://konclude.test/rules#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<http://konclude.test/rules/unsupported-builtin>
+
+Declaration(Class(:A))
+Declaration(Class(:B))
+Declaration(NamedIndividual(:a))
+ClassAssertion(:A :a)
+DLSafeRule(Body(ClassAtom(:A Variable(:x)) BuiltInAtom(<http://www.w3.org/2003/11/swrlb#greaterThan> Variable(:x) "1")) Head(ClassAtom(:B Variable(:x))))
+)

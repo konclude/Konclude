@@ -20,6 +20,9 @@
 
 #include "COptimizedComplexVariableRolePropagationAbstractItem.h"
 
+// complete type for the deletion of the requirements, otherwise no destructor runs (issue #45)
+#include "Reasoner/Ontology/COntologyProcessingRequirement.h"
+
 
 namespace Konclude {
 
@@ -214,7 +217,7 @@ namespace Konclude {
 						while (memPoolIt) {
 							CMemoryPool* tmpMemPool = memPoolIt;
 							memPoolIt = memPoolIt->getNext();
-							delete[] tmpMemPool->getMemoryBlockData();
+							CMemoryPool::releaseMemoryBlockData(tmpMemPool);
 							delete tmpMemPool;
 						}
 						hash = nullptr;

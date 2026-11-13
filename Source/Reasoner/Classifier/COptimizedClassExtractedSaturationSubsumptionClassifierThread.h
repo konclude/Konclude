@@ -47,6 +47,10 @@
 
 #include <iostream>
 
+#include <QElapsedTimer>
+#include <QtConcurrent/QtConcurrent>
+#include <functional>
+
 using namespace std;
 
 
@@ -109,6 +113,7 @@ namespace Konclude {
 					QMutex statUpdateMutex;
 
 					bool mTransitiveReductionAddAllPredecessors;
+					bool mConfConcurrentSubsumerExtraction;
 
 					CClassificationProgress mClassifyProgess;
 					QTime classStartTime;

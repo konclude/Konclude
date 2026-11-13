@@ -41,6 +41,19 @@ namespace Konclude {
 				CPreprocessingManager::~CPreprocessingManager() {
 				}
 
+				QList<QThread*> CPreprocessingManager::getWorkerThreads() {
+					QList<QThread*> threads;
+					mReadWriteLock.lockForRead();
+					for (auto worker : mOntoPreprocessHash) {
+						QThread* thread = dynamic_cast<QThread*>(worker);
+						if (thread && !threads.contains(thread)) {
+							threads.append(thread);
+						}
+					}
+					mReadWriteLock.unlock();
+					return threads;
+				}
+
 				CPreprocessor* CPreprocessingManager::getPreprocessor(CConcreteOntology *ontology, CConfigurationBase *config) {
 					CPreprocessor* preprocessor = nullptr;
 					mReadWriteLock.lockForRead();

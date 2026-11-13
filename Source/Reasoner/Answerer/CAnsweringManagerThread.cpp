@@ -50,6 +50,16 @@ namespace Konclude {
 				stopThread();
 			}
 
+			QList<QThread*> CAnsweringManagerThread::getWorkerThreads() {
+				QList<QThread*> threads;
+				mReadWriteLock.lockForRead();
+				for (CAnswererThread* answererThread : mAnswererThreadContainer) {
+					threads.append(answererThread);
+				}
+				mReadWriteLock.unlock();
+				return threads;
+			}
+
 
 			CAnsweringManager* CAnsweringManagerThread::answerComplexQuery(CComplexAnsweringQuery* complexAnsweringQuery, CCallbackData* callback) {
 				postEvent(new CAnswerComplexQueryEvent(complexAnsweringQuery, callback));

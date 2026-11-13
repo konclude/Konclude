@@ -33,12 +33,14 @@
 #include "COptimizedClassExtractedSaturationSubsumptionClassifierThread.h"
 #include "CIncrementalKPSetClassSubsumptionClassifierThread.h"
 #include "COptimizedKPSetRoleSubsumptionClassifierThread.h"
+#include "CPrecomputedSaturationSubsumerExtractor.h"
 
 // Other includes
 #include "Config/CConfigurationBase.h"
 #include "Config/CConfigDataReader.h"
 
 #include "Reasoner/Ontology/CConcreteOntology.h"
+#include "Reasoner/Ontology/CIRIName.h"
 
 #include "Reasoner/Kernel/Manager/CReasonerManager.h"
 
@@ -88,6 +90,11 @@ namespace Konclude {
 				protected:
 					bool isClassificationBySatisfiableCalculationSufficient(CConcreteOntology *ontology, CConfigurationBase *config);
 					bool isClassificationBySaturationCalculationSufficient(CConcreteOntology *ontology, CConfigurationBase *config);
+
+					//! Tests whether the saturation produced data for every active class concept. The extracting
+					//! classifier reads the subsumers of a concept from its saturation data and silently extracts
+					//! none at all if that data is missing, so it must not be used unless all of them have it.
+					bool hasSaturationDataForAllActiveClassConcepts(CConcreteOntology *ontology, CConcept** missingDataConcept);
 
 				// protected variables
 				protected:

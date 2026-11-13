@@ -36,6 +36,8 @@ namespace Konclude {
 			}
 
 			CPropertyRoleClassification::~CPropertyRoleClassification() {
+				// the hierarchy is created by the role classifier for this classification only (issue #45)
+				delete mRolePropertiesHierarchy;
 			}
 
 

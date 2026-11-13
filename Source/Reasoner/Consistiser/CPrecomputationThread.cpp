@@ -44,6 +44,24 @@ namespace Konclude {
 				stopThread();
 			}
 
+			CPrecomputationThread* CPrecomputationThread::deleteOntologyPrecomputationItems() {
+				// an item can be in several of the containers, so each is deleted once
+				QSet<COntologyPrecomputationItem*> itemSet = mActiveOntItemSet + mInactiveOntItemSet;
+				for (COntologyPrecomputationItem* item : mProcessingOntItemList) {
+					itemSet.insert(item);
+				}
+				for (COntologyPrecomputationItem* item : mOntItemHash) {
+					itemSet.insert(item);
+				}
+				itemSet.remove(nullptr);
+				mActiveOntItemSet.clear();
+				mInactiveOntItemSet.clear();
+				mProcessingOntItemList.clear();
+				mOntItemHash.clear();
+				qDeleteAll(itemSet);
+				return this;
+			}
+
 
 			bool CPrecomputationThread::precompute(CConcreteOntology* ontology, CConfigurationBase* config, const QList<COntologyProcessingRequirement*>& requirementList, CCallbackData* callback) {
 				postEvent(new CPrecomputeOntologyEvent(ontology,config,requirementList,callback));

@@ -1404,6 +1404,12 @@ namespace Konclude {
 			}
 
 
+			void CConcreteOntologyBuildDataUpdater::reserveExpressionBuildHash(cint64 expressionCount) {
+				if (mExpressionBuildHash && mExpressionBuildHash->capacity() < expressionCount) {
+					mExpressionBuildHash->reserve((int)expressionCount);
+				}
+			}
+
 			CBuildExpression* CConcreteOntologyBuildDataUpdater::getHashedExpression(CBuildExpression* expression) {
 				CBuildExpression* hashExpression = nullptr;
 				hashExpression = mExpressionBuildHash->value(CExpressionHasher(expression),nullptr);
@@ -2395,6 +2401,7 @@ namespace Konclude {
 				mBuildDataRoleList = mOntoBuild->getBuildDataRoleList();
 				mBuildDataRangeList = mOntoBuild->getBuildDataRangeList();
 				mBuildDatatypeList = mOntoBuild->getBuildDatatypeList();
+				mBuildDataLexicalValueList = mOntoBuild->getBuildDataLexicalValueList();
 
 				mExpressionBuildContainerList = mOntoBuild->getExpressionBuildListContainer();
 				mInverseObjectPropertyHash = mOntoBuild->getInverseObjectPropertyHash();
@@ -2671,6 +2678,7 @@ namespace Konclude {
 					expression = new CDataLexicalValueExpression(dataLexicalValue);
 					expression->setEntityID(mNextEntityNumber++);
 					mDataLexicalValueBuildHash->insert(dataLexicalValue,expression);
+					mBuildDataLexicalValueList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALEXICALVALUE);
 				}
 				return expression;
@@ -2684,6 +2692,7 @@ namespace Konclude {
 					expression = new CDataLexicalValueExpression(dataLexicalValueString);
 					expression->setEntityID(mNextEntityNumber++);
 					mDataLexicalValueBuildHash->insert(dataLexicalValueString,expression);
+					mBuildDataLexicalValueList->append(expression);
 					mBuildExpCounter->incBuildExpressionCount(CBuildExpression::BETDATALEXICALVALUE);
 				}
 				return expression;

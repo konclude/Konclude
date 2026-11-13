@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/inv-atmost-type-merge">
+
+  <Declaration><Class IRI="#U"/></Declaration>
+  <Declaration><Class IRI="#P1"/></Declaration>
+  <Declaration><Class IRI="#P2"/></Declaration>
+  <Declaration><ObjectProperty IRI="#r"/></Declaration>
+  <Declaration><ObjectProperty IRI="#invR"/></Declaration>
+  <Declaration><NamedIndividual IRI="#x"/></Declaration>
+
+  <DisjointClasses><Class IRI="#P1"/><Class IRI="#P2"/></DisjointClasses>
+  <InverseObjectProperties><ObjectProperty IRI="#invR"/><ObjectProperty IRI="#r"/></InverseObjectProperties>
+
+  <!-- Same contradiction as inv-atmost-merge, but hidden behind the class definition of U,
+       so that the asserted concept alone does not reveal it. -->
+  <EquivalentClasses>
+    <Class IRI="#U"/>
+    <ObjectIntersectionOf>
+      <Class IRI="#P2"/>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty IRI="#invR"/>
+        <ObjectIntersectionOf>
+          <ObjectSomeValuesFrom><ObjectProperty IRI="#r"/><Class IRI="#P1"/></ObjectSomeValuesFrom>
+          <ObjectMaxCardinality cardinality="1"><ObjectProperty IRI="#r"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></ObjectMaxCardinality>
+        </ObjectIntersectionOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <ClassAssertion><Class IRI="#U"/><NamedIndividual IRI="#x"/></ClassAssertion>
+</Ontology>

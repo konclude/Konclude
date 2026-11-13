@@ -127,8 +127,14 @@ namespace Konclude {
 				CConformanceTaskResult taskResult;
 				if (!waitForTcpPort(port, startupTimeoutMs)) {
 					taskResult.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
-					taskResult.mExplanation = QString("test server did not accept connections on port %1 within %2 s")
-							.arg(port).arg(startupTimeoutMs / 1000.0, 0, 'g', 6);
+					taskResult.mExplanation = QString("test server did not accept connections on port %1 within %2 s%3")
+							.arg(port).arg(startupTimeoutMs / 1000.0, 0, 'g', 6).arg(serverLogTail(outputLogFilePath, server));
+				} else if (server.state() != QProcess::Running) {
+					// The port answered, but the process is already gone: report why
+					// instead of failing later with a bare connection error.
+					taskResult.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
+					taskResult.mExplanation = QString("test server exited before serving a request on port %1%2")
+							.arg(port).arg(serverLogTail(outputLogFilePath, server));
 				} else {
 					QString requestText;
 					if (!readTextFile(mTestCase.mOntologyFile, requestText)) {
@@ -140,9 +146,25 @@ namespace Konclude {
 						QString url = QString("http://127.0.0.1:%1/").arg(port);
 						QString responseText;
 						QString errorText;
-						if (!postHttpRequest(url, requestText.toUtf8(), contentType, timeoutMs, responseText, errorText)) {
+
+						// A server that binds its port before it finished initialising can
+						// accept the probe connection and still reset the first request, so
+						// a refused connection is retried for a moment before the channel is
+						// reported as broken.
+						bool requestDelivered = false;
+						for (int attempt = 0; attempt < 4 && !requestDelivered; ++attempt) {
+							if (attempt > 0) {
+								QThread::msleep(250);
+							}
+							if (server.state() != QProcess::Running) {
+								break;
+							}
+							requestDelivered = postHttpRequest(url, requestText.toUtf8(), contentType, timeoutMs, responseText, errorText);
+						}
+						if (!requestDelivered) {
 							taskResult.mStatus = CConformanceTaskResult::STATUS::EXECUTION_ERROR;
-							taskResult.mExplanation = QString("HTTP request to '%1' failed: %2").arg(url).arg(errorText);
+							taskResult.mExplanation = QString("HTTP request to '%1' failed: %2%3")
+									.arg(url).arg(errorText).arg(serverLogTail(outputLogFilePath, server));
 						} else {
 							// The answer is stored like the '-o' file of a file channel, so
 							// both channels are interpreted and archived identically.
@@ -211,6 +233,21 @@ namespace Konclude {
 				text = QString::fromUtf8(file.readAll());
 				file.close();
 				return true;
+			}
+
+
+			QString CConformanceTaskHandler::serverLogTail(const QString& outputLogFilePath, QProcess& process) {
+				// Diagnostics for a channel that did not answer: the last lines of the
+				// server's own output (or a note that it wrote nothing at all).
+				QString logOutput = readLogOutput(outputLogFilePath, process);
+				QStringList lines = logOutput.split('\n', Qt::SkipEmptyParts);
+				while (lines.count() > 12) {
+					lines.removeFirst();
+				}
+				if (lines.isEmpty()) {
+					return QString("; the test server wrote no output");
+				}
+				return QString("; server output:\n") + lines.join('\n');
 			}
 
 

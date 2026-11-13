@@ -36,6 +36,7 @@ namespace Konclude {
 
 
 				COccurrenceStatisticsCacheData::~COccurrenceStatisticsCacheData() {
+					qDeleteAll(mOntologyDataHash);
 				}
 
 

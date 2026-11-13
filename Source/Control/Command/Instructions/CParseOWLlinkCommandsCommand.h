@@ -71,6 +71,10 @@ namespace Konclude {
 
 						virtual QString getBriefCommandDescription();					
 
+						//! whether the request itself couldn't be parsed, as opposed to a problem with one of its instructions
+						bool hasSyntaxError();
+						void setSyntaxError(bool syntaxError);
+
 					// protected methods
 					protected:
 
@@ -82,6 +86,7 @@ namespace Konclude {
 
 					// private variables
 					private:
+						bool mSyntaxError;
 
 				};
 

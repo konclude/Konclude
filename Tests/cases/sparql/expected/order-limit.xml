@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected ORDER BY ?person LIMIT 1 answer: alice sorts before bob. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="person"/>
+  </head>
+  <results>
+    <result>
+      <binding name="person"><uri>http://konclude.test/sparql#alice</uri></binding>
+    </result>
+  </results>
+</sparql>

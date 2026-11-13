@@ -30,6 +30,7 @@
 
 // Namespace incldues
 #include "CParseRuleAtom.h"
+#include "CRuleExpressionCreator.h"
 #include "COntologyBuilder.h"
 #include "CParsingExpressionSplitter.h"
 
@@ -293,18 +294,6 @@ namespace Konclude {
 
 
 
-				QHash<QString,CParseRuleAtom*> createVariableAtomHash(const QList<CParseRuleAtom*>& atomList);
-				QMap<cint64,QString> createVariableCountMap(const QList<CParseRuleAtom*>& atomList);
-				CBuildExpression* createBodyExpresions(const QString& varString, QHash<QString,CParseRuleAtom*>& bodyVariableAtomHash, QHash<QString,CParseRuleAtom*>& headVariableAtomHash);
-
-				bool hasBackExpressionLinks(const QString& varString, CParseRuleAtom* notRuleAtom, QHash<QString,CParseRuleAtom*>& bodyVariableAtomHash, QSet<QString>& processedVarSet, 
-						QSet<CParseRuleAtom*>& processedAtomSet, QHash<QString,CParseRuleAtom*>& headVariableAtomHash, QSet<QString>& backTestProcessedVarSet, QSet<CParseRuleAtom*>& backTestProcessedAtomSet);
-			
-				bool hasBackExpressionLinks(const QString& varString, CParseRuleAtom* notRuleAtom, QHash<QString,CParseRuleAtom*>& bodyVariableAtomHash, QSet<QString>& processedVarSet, 
-						QSet<CParseRuleAtom*>& processedAtomSet, QHash<QString,CParseRuleAtom*>& headVariableAtomHash);
-
-				CBuildExpression* createBodyExpresions(const QString& varString, bool direct, QHash<QString,CParseRuleAtom*>& bodyVariableAtomHash, QSet<QString>& processedVarSet, QSet<CParseRuleAtom*>& processedAtomSet, QHash<QString,CParseRuleAtom*>& headVariableAtomHash);
-				CBuildExpression* getNeighbourAtomObjectPropertyExpression(CParseRuleAtom* ruleAtom, bool inversed);
 
 
 
@@ -471,6 +460,7 @@ namespace Konclude {
 
 				CCommandRecordRouter recordRouter;
 				COntologyBuilder* mOntoBuilder;
+				CRuleExpressionCreator* mRuleExpressionCreator;
 				QString mOntologyIdentifier;
 				cint64 mAxiomNumber;
 

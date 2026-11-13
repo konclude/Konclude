@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  EL classification through a property chain (role composition) r o s -> t.
+  A is subsumed by X because X is defined as an existential over t and the
+  chain composes r and s into t.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/el/role-composition">
+  <Prefix name="" IRI="http://konclude.test/el/role-composition#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":X"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":s"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+
+  <SubClassOf>
+    <Class abbreviatedIRI=":A"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+  </SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":B"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":s"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom>
+  </SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D"/></SubClassOf>
+  <SubObjectPropertyOf>
+    <ObjectPropertyChain>
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <ObjectProperty abbreviatedIRI=":s"/>
+    </ObjectPropertyChain>
+    <ObjectProperty abbreviatedIRI=":t"/>
+  </SubObjectPropertyOf>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":X"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom>
+  </EquivalentClasses>
+</Ontology>

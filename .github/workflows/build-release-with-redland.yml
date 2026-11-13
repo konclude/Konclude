@@ -1,29 +1,32 @@
 name: Build Releases (with Redland)
 
-# Builds the release packages of Konclude for Windows, macOS and Linux and collects them in a
-# draft GitHub release. The workflow runs for tags that match releases/v*, where the name of
+# Builds the release packages of Konclude for Windows, macOS and Linux, and the Protege plug-in
+# with the shared library of Konclude for all three, and collects them in a draft GitHub
+# release. The workflow runs for tags that match releases/v*, where the name of
 # the release is the tag without the releases/ prefix, and it can be started manually, where
 # the release is named after the most recent tag and its creation can be switched off to only
-# build and test the packages. Pushes to master also build and test the packages, but do not
-# create a release, so the Redland-enabled builds are checked on every integration.
+# build and test the packages.
 on:
   push:
     tags:
       - 'releases/v*'
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       create_release:
         description: 'Create a draft release with the built packages'
         type: boolean
         default: true
+      jemalloc_debug:
+        description: 'Link a debug build of jemalloc into the Linux libraries, which aborts on a pointer it did not allocate (for testing, not for a release)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 env:
-  # Qt version that is statically compiled for the macOS and Linux packages. Only the qtbase
+  # Qt version that is statically compiled for the macOS and Linux packages and for the library
+  # of the Protege plug-in on all three platforms. Only the qtbase
   # module is built, since Konclude does not require any other module.
   QT_STATIC_VERSION: 5.15.17
   # Increase whenever the configuration of the static Qt build changes, to invalidate the cache.
@@ -85,7 +88,7 @@ jobs:
   build_windows:
     name: Windows x64 MSVC Dynamic
     runs-on: windows-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
     needs: tags
     env:
       RELEASE_NAME: Konclude-${{ needs.tags.outputs.git_tag }}-Windows-x64-MSVC-Dynamic-Qt5.15.2
@@ -197,6 +200,92 @@ jobs:
           name: release-windows
           path: Release/${{ env.RELEASE_NAME }}.zip
           if-no-files-found: error
+
+      # The shared library for the Protege plug-in. The package above uses the Qt DLLs, which
+      # System.loadLibrary would not find beside the library in the directory that OSGi extracts
+      # it to, so the library is built against a static Qt with the static C runtime of MSVC
+      # instead, and then depends on the system DLLs only, as on macOS and Linux. The Qt is
+      # built with the same tool set as the package.
+      - name: Cache static Qt
+        id: cache-qt-static
+        uses: actions/cache@v4
+        with:
+          path: qt-static
+          key: qt-static-${{ runner.os }}-${{ runner.arch }}-msvc2019-static-runtime-${{ env.QT_STATIC_VERSION }}-${{ env.QT_STATIC_CACHE_REVISION }}
+
+      # jom.ps1 retries the install of jom and falls back to nmake without it
+      - name: Install jom
+        run: |
+          . .github/scripts/jom.ps1
+          Install-Jom
+
+      - name: Compile static Qt
+        if: steps.cache-qt-static.outputs.cache-hit != 'true'
+        run: |
+          $ROOT = (Get-Location).Path
+          $QT_MINOR = $env:QT_STATIC_VERSION.Substring(0, $env:QT_STATIC_VERSION.LastIndexOf('.'))
+          curl.exe -fsSL --retry 5 -o qtbase.tar.xz "https://download.qt.io/archive/qt/$QT_MINOR/$env:QT_STATIC_VERSION/submodules/qtbase-everywhere-opensource-src-$env:QT_STATIC_VERSION.tar.xz"
+          tar -xf qtbase.tar.xz
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Set-Location "qtbase-everywhere-src-$env:QT_STATIC_VERSION"
+          .\configure.bat -static -static-runtime -release -opensource -confirm-license -prefix "$ROOT\qt-static" -platform win32-msvc `
+            -no-gui -no-widgets -no-opengl -no-icu -no-dbus -qt-pcre -qt-zlib `
+            -no-sql-mysql -no-sql-psql -no-sql-odbc -nomake examples -nomake tests
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          . "$ROOT\.github\scripts\jom.ps1"
+          Invoke-Make
+          Invoke-Make install
+
+      # KoncludeLIB.pro takes the JNI include directories from JAVA_HOME
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile the Konclude library
+        run: |
+          New-Item -ItemType Directory -Force -Path konclude-lib, library | Out-Null
+          Set-Location konclude-lib
+          ..\qt-static\bin\qmake.exe -o Makefile ..\KoncludeLIB.pro -after "QT-=gui" "CONFIG-=static staticlib debug_and_release" "CONFIG+=shared dll"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          jom -j "$env:NUMBER_OF_PROCESSORS"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          $dependents = dumpbin /nologo /dependents Release\Konclude.dll
+          $dependents
+          $foreign = $dependents | Select-String -Pattern '^\s+(Qt5\S*|vcruntime\S*|msvcp\S*|api-ms-win-crt\S*|ucrtbase\S*)\.dll'
+          if ($foreign) {
+            Write-Output "::error::The library depends on DLLs that are not part of Windows: $($foreign -join ', ')"
+            exit 1
+          }
+          Copy-Item Release\Konclude.dll ..\library\
+
+      - name: Konclude Library Test
+        shell: bash
+        run: |
+          ./Java/run-jni-smoke-test.sh library/Konclude.dll
+          ./Java/run-owlapi-test.sh library/Konclude.dll
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: library-windows
+          path: library/Konclude.dll
+          if-no-files-found: error
+
+      - name: Keep the crash reports of the virtual machine
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jvm-crash-reports-windows
+          path: |
+            hs_err_pid*.log
+            Java/hs_err_pid*.log
+            Java/crash-reports/*.log
+          if-no-files-found: ignore
+
+
+
+
   build_macosx:
     name: macOS arm64 Clang Static
     runs-on: macos-latest
@@ -337,17 +426,87 @@ jobs:
           path: Release/${{ env.RELEASE_NAME }}.zip
           if-no-files-found: error
 
+      # The shared library for the Protege plug-in, against the same static Qt, so that it depends
+      # on the system only, see 'A LIBRARY WITHOUT QT DEPENDENCIES' in Java/Readme.md. It is built
+      # in a directory of its own, since KoncludeLIB.pro compiles the sources with the JNI
+      # interface into the same object directory as Konclude.pro. A static Qt propagates
+      # CONFIG += static, which would make the library an archive, hence the CONFIG arguments.
+      # KoncludeLIB.pro takes the JNI include directories from JAVA_HOME.
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compile the Konclude library
+        run: |
+          mkdir -p konclude-lib library
+          cd konclude-lib
+          ../qt-static/bin/qmake -o Makefile ../konclude-static/KoncludeLIB.pro -after "QT-=gui" "CONFIG-=static staticlib" "CONFIG+=shared dll"
+          make -j"$(sysctl -n hw.ncpu)"
+          otool -L Release/libKonclude.dylib
+          # the first line is the install name of the library itself
+          if otool -L Release/libKonclude.dylib | tail -n +3 | grep -vE "^\s*(/usr/lib/|/System/Library/)"; then
+            echo "::error::The library depends on the libraries listed above, which are not part of macOS."
+            exit 1
+          fi
+          cp -L Release/libKonclude.dylib ../library/
+
+      - name: Konclude Library Test
+        run: |
+          konclude-static/Java/run-jni-smoke-test.sh library/libKonclude.dylib
+          konclude-static/Java/run-owlapi-test.sh library/libKonclude.dylib
+
+      # the plug-in inside the OSGi framework of Protege, as the push workflow does, but with the
+      # library that is shipped
+      - name: Download Protege
+        run: |
+          curl -fsSL --retry 5 -o protege.zip https://github.com/protegeproject/protege-distribution/releases/download/protege-5.6.6/Protege-5.6.6-platform-independent.zip
+          unzip -q protege.zip -d protege
+          ls -d protege/*/bundles
+
+      - name: Konclude Plug-in Test
+        run: konclude-static/Java/run-protege-plugin-test.sh "$(dirname "$(ls -d protege/*/bundles)")" library/libKonclude.dylib
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: library-macos
+          path: library/libKonclude.dylib
+          if-no-files-found: error
+
+      - name: Keep the crash reports of the virtual machine
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jvm-crash-reports-macos
+          path: |
+            hs_err_pid*.log
+            konclude-static/Java/hs_err_pid*.log
+            konclude-static/Java/crash-reports/*.log
+            konclude-static/Java/protege/hs_err_pid*.log
+          if-no-files-found: ignore
 
 
 
+
+  # One job per architecture. The runners are the oldest available ones, so that the packages run
+  # with as old a glibc as possible; docker is the platform name of the architecture for the image.
   build_linux:
-    name: Linux x64 GCC Static
-    # the oldest available runner, so that the package runs with as old a glibc as possible
-    runs-on: ubuntu-22.04
+    name: Linux ${{ matrix.arch }} GCC Static
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x64, runner: ubuntu-22.04, docker: amd64 }
+          - { arch: arm64, runner: ubuntu-22.04-arm, docker: arm64 }
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 240
     needs: tags
     env:
-      RELEASE_NAME: Konclude-${{ needs.tags.outputs.git_tag }}-Linux-x64-GCC-Static-Qt5.15.17
+      RELEASE_NAME: Konclude-${{ needs.tags.outputs.git_tag }}-Linux-${{ matrix.arch }}-GCC-Static-Qt5.15.17
 
     steps:
       - name: Checkout Konclude code
@@ -480,8 +639,189 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: release-linux
+          name: release-linux-${{ matrix.arch }}
           path: Release/${{ env.RELEASE_NAME }}.zip
+          if-no-files-found: error
+
+      # A Docker image from the package and Docker/Dockerfile, built and run on the architecture it
+      # is for; it is only tested here and not pushed anywhere.
+      - name: Konclude Docker Image Test
+        run: |
+          mkdir -p docker-context
+          cp -r "Release/$RELEASE_NAME" "docker-context/${{ matrix.docker }}"
+          docker build -t konclude-test -f konclude-static/Docker/Dockerfile docker-context
+          # the request loads file:./Tests/galen.owl.xml relative to the working directory, /data
+          docker run --rm -v "$(pwd)/Release/$RELEASE_NAME":/data konclude-test \
+            owllinkfile -i Tests/galen-classify-request.xml -o docker-response.xml
+          response="Release/$RELEASE_NAME/docker-response.xml"
+          if grep -q "<Error" "$response" || ! grep -q "<ClassSynset" "$response"; then
+            echo "::error::The classification in the Docker image did not answer."
+            head -c 2000 "$response"
+            exit 1
+          fi
+          echo "$(grep -c '<ClassSynset' "$response") classes in the hierarchy"
+          rm -f "$response"
+
+      # The tested image, pushed to the GitHub Container Registry under its architecture when the run
+      # publishes (the create_release input); the manifest job below joins the two architectures.
+      - name: Push Docker Image for the Architecture
+        if: needs.tags.outputs.publish == 'true'
+        run: |
+          image="ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/konclude"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker tag konclude-test "$image:${{ needs.tags.outputs.git_tag }}-${{ matrix.docker }}"
+          docker push "$image:${{ needs.tags.outputs.git_tag }}-${{ matrix.docker }}"
+
+      # The shared library for the Protege plug-in, as for macOS. Static archives are linked into a
+      # shared object only if they are position independent, which the mkspec of Qt makes them
+      # (QMAKE_CFLAGS_STATIC_LIB includes -fPIC). The C++ runtime is linked statically as for the
+      # package, and the symbols of all archives are kept local, so that the C++ runtime and Qt
+      # inside the library do not interpose on those of the virtual machine or of other libraries.
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # jemalloc inside the library, hidden, for the library's allocations only; the program the
+      # library is loaded into keeps its malloc. See 'THE MEMORY ALLOCATOR ON LINUX' in Java/Readme.md.
+      - name: Compile jemalloc for the library
+        run: |
+          konclude-static/.github/scripts/build-jemalloc-library.sh jemalloc-work jemalloc-library \
+            ${{ (github.event_name == 'workflow_dispatch' && inputs.jemalloc_debug) && 'debug' || 'release' }}
+
+      - name: Compile the Konclude library
+        run: |
+          mkdir -p konclude-lib library
+          cd konclude-lib
+          # the jemalloc settings before -after, since KoncludeLIB.pro's jemalloc scope has to see them
+          ../qt-static/bin/qmake -o Makefile ../konclude-static/KoncludeLIB.pro \
+            "CONFIG+=jemalloc" "JEMALLOC_LIB=$GITHUB_WORKSPACE/jemalloc-library/libjemalloc_pic.a" \
+            -after "QT-=gui" "CONFIG-=static staticlib" "CONFIG+=shared dll" \
+            "QMAKE_LFLAGS+=-static-libstdc++ -static-libgcc -Wl,--exclude-libs,ALL"
+          make -j"$(nproc)"
+          ldd Release/libKonclude.so
+          if ldd Release/libKonclude.so | grep -vE "(linux-vdso|ld-linux-[a-z0-9_-]+|libc|libm|libdl|libpthread|librt|libz)\.so"; then
+            echo "::error::The library depends on the libraries listed above, which might not be available."
+            exit 1
+          fi
+          # every allocation of the library has to go to jemalloc: it must neither import nor export
+          # an allocation function of the C library
+          if nm -D Release/libKonclude.so | grep -E " (malloc|calloc|realloc|free|aligned_alloc|posix_memalign|memalign|valloc|mallctl)(@|$)"; then
+            echo "::error::The library imports or exports the allocation functions listed above, jemalloc is not used for all of its allocations."
+            exit 1
+          fi
+          # and its calls to its own functions must not be taken over by the program's libstdc++.so
+          if ! readelf -d Release/libKonclude.so | grep -q "(SYMBOLIC)"; then
+            echo "::error::The library is not linked with -Bsymbolic, the program's libstdc++.so would supply some of its C++ functions, which allocate with the program's malloc."
+            exit 1
+          fi
+          cp -L Release/libKonclude.so ../library/
+
+      - name: Konclude Library Test
+        run: |
+          konclude-static/Java/run-jni-smoke-test.sh library/libKonclude.so
+          konclude-static/Java/run-owlapi-test.sh library/libKonclude.so
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: library-linux-${{ matrix.arch }}
+          path: library/libKonclude.so
+          if-no-files-found: error
+
+      - name: Keep the crash reports of the virtual machine
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jvm-crash-reports-linux-${{ matrix.arch }}
+          path: |
+            hs_err_pid*.log
+            konclude-static/Java/hs_err_pid*.log
+            konclude-static/Java/crash-reports/*.log
+          if-no-files-found: ignore
+
+
+
+
+  # The multi-architecture image: one manifest for the amd64 and the arm64 images the Linux jobs
+  # pushed, tagged with the release tag and as latest, at ghcr.io/<owner>/konclude. The image is
+  # Docker/Dockerfile, i.e. ubuntu:24.04 with the statically linked package; the package's GALEN
+  # classification ran in it on each architecture before the push. Nothing is pushed unless the
+  # run publishes. A new package on the registry is private until its visibility is changed once
+  # in the repository owner's package settings.
+  publish_docker:
+    name: Docker Image Manifest
+    if: needs.tags.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [tags, build_linux]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Create and Push the Manifest
+        run: |
+          image="ghcr.io/$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')/konclude"
+          tag="${{ needs.tags.outputs.git_tag }}"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker buildx imagetools create -t "$image:$tag" -t "$image:latest" "$image:$tag-amd64" "$image:$tag-arm64"
+          docker buildx imagetools inspect "$image:$tag"
+          echo "::notice::Docker image $image:$tag (amd64, arm64) and $image:latest"
+
+  # The Protege plug-in with the libraries of all platforms, see Java/Readme.md. The version of
+  # the plug-in is the one of the release, e.g., 0.7.0-1138 for v0.7.0-1138, which the bundle
+  # plug-in turns into the OSGi version 0.7.0.1138.
+  build_plugin:
+    name: Protege Plug-in
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [tags, build_windows, build_macosx, build_linux]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Download libraries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: library-*
+          path: libraries
+
+      - name: Build the plug-in
+        working-directory: Java/protege
+        env:
+          GIT_TAG: ${{ needs.tags.outputs.git_tag }}
+        run: |
+          ls -lR ../../libraries
+          mvn -B -q versions:set -DnewVersion="${GIT_TAG#v}" -DgenerateBackupPoms=false
+          mvn -B package \
+            -Dkonclude.library.macos-arm64="$GITHUB_WORKSPACE/libraries/library-macos/libKonclude.dylib" \
+            -Dkonclude.library.linux-x64="$GITHUB_WORKSPACE/libraries/library-linux-x64/libKonclude.so" \
+            -Dkonclude.library.linux-arm64="$GITHUB_WORKSPACE/libraries/library-linux-arm64/libKonclude.so" \
+            -Dkonclude.library.windows-x64="$GITHUB_WORKSPACE/libraries/library-windows/Konclude.dll"
+          jar="target/konclude-protege-plugin-${GIT_TAG#v}.jar"
+          unzip -l "$jar"
+          unzip -p "$jar" META-INF/MANIFEST.MF
+          for library in lib/native/macos-arm64/libKonclude.dylib lib/native/linux-x64/libKonclude.so \
+                         lib/native/linux-arm64/libKonclude.so lib/native/windows-x64/Konclude.dll; do
+            if ! unzip -l "$jar" "$library" >/dev/null; then
+              echo "::error::The plug-in does not contain $library."
+              exit 1
+            fi
+          done
+          mkdir -p ../../plugin
+          cp "$jar" ../../plugin/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-plugin
+          path: plugin/*.jar
           if-no-files-found: error
 
 
@@ -537,31 +877,20 @@ jobs:
           cache-name: cache-konclude-docker-run-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
 
       - name: Build Run Image
         working-directory: KoncludeDocker
         run: |
-          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncluderun:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerRunImage.tar.gz"
-          if [ -f "$FILEIMAGE" ]; then
-            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
-              echo "Loaded cached image '$DOCKERIMAGE'."
-            else
-              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
-              rm -f "$FILEIMAGE"
-            fi
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          bash -eo pipefail ./run/snap.sh
-          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
-            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
-            exit 1
-          fi
-          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
-          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
+          ./run/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
 
       - name: Cache Docker Konclude Develop Image
         uses: actions/cache@v4
@@ -569,31 +898,20 @@ jobs:
           cache-name: cache-konclude-docker-develop-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
 
       - name: Build Develop Image
         working-directory: KoncludeDocker
         run: |
-          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncludedev:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz"
-          if [ -f "$FILEIMAGE" ]; then
-            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
-              echo "Loaded cached image '$DOCKERIMAGE'."
-            else
-              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
-              rm -f "$FILEIMAGE"
-            fi
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          bash -eo pipefail ./develop/snap.sh
-          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
-            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
-            exit 1
-          fi
-          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
-          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
+          ./develop/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
 
 
 
@@ -651,31 +969,20 @@ jobs:
           cache-name: cache-konclude-docker-run-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerRunImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/run/Dockerfile') }}
 
       - name: Build Run Image
         working-directory: KoncludeDocker
         run: |
-          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncluderun:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerRunImage.tar.gz"
-          if [ -f "$FILEIMAGE" ]; then
-            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
-              echo "Loaded cached image '$DOCKERIMAGE'."
-            else
-              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
-              rm -f "$FILEIMAGE"
-            fi
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          bash -eo pipefail ./run/snap.sh
-          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
-            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
-            exit 1
-          fi
-          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
-          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
+          ./run/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
 
       - name: Cache Docker Konclude Develop Image
         uses: actions/cache@v4
@@ -683,64 +990,43 @@ jobs:
           cache-name: cache-konclude-docker-develop-Image
         with:
           path: DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-v2-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('KoncludeDocker/develop/Dockerfile') }}
 
       - name: Build Develop Image
         working-directory: KoncludeDocker
         run: |
-          set -o pipefail
           mkdir -p ../DockerCacheDirectory
           DOCKERIMAGE="koncludedev:latest"
           FILEIMAGE="../DockerCacheDirectory/KoncludeDockerDevelopImage.tar.gz"
-          if [ -f "$FILEIMAGE" ]; then
-            if gzip -t "$FILEIMAGE" && docker load -i "$FILEIMAGE"; then
-              echo "Loaded cached image '$DOCKERIMAGE'."
-            else
-              echo "::warning::Cached image '$FILEIMAGE' is unusable; rebuilding it."
-              rm -f "$FILEIMAGE"
-            fi
+          if test -f "$FILEIMAGE"; then
+            docker load -i $FILEIMAGE
           fi
           echo "DockerCacheDirectory/" >> .dockerignore
-          bash -eo pipefail ./develop/snap.sh
-          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
-            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
-            exit 1
-          fi
-          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
-          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
+          ./develop/snap.sh
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
 
       - name: Build Build Image
         working-directory: KoncludeDocker
         run: |
           echo "DockerCacheDirectory/" >> .dockerignore
-          bash -eo pipefail ./build/snap.sh
-          if ! docker image inspect koncludebuild:latest >/dev/null 2>&1; then
-            echo "::error::Docker image 'koncludebuild:latest' was not built; see the build output above."
-            exit 1
-          fi
+          ./build/snap.sh
 
       - name: Build Deploy Image
         working-directory: KoncludeDocker
         run: |
-          set -o pipefail
           DOCKERIMAGE="konclude:latest"
           FILEIMAGE="../DockerCacheDirectory/Konclude-${{needs.tags.outputs.git_tag}}-Docker-Image.tar.gz"
           echo "DockerCacheDirectory/" >> .dockerignore
-          bash -eo pipefail ./deploy/snap.sh
-          if ! docker image inspect "$DOCKERIMAGE" >/dev/null 2>&1; then
-            echo "::error::Docker image '$DOCKERIMAGE' was not built; see the build output above."
-            exit 1
-          fi
+          ./deploy/snap.sh
           docker tag konclude konclude/konclude:latest
           docker tag konclude konclude/konclude:${{needs.tags.outputs.git_tag}}
-          docker save "$DOCKERIMAGE" | gzip > "$FILEIMAGE.tmp"
-          mv "$FILEIMAGE.tmp" "$FILEIMAGE"
+          docker save $(docker history -q $DOCKERIMAGE | tr '\n' ' ' | tr -d '<missing>') | gzip >  $FILEIMAGE
 
       - name: Build
         working-directory: KoncludeDocker
         run: |
           echo "DockerCacheDirectory/" >> .dockerignore
-          bash -eo pipefail ./build_release_parameterized.sh ${{needs.tags.outputs.revision_build}}  ${{needs.tags.outputs.revision_tag}} ${{needs.tags.outputs.revision_hash}}
+          ./build_release_parameterized.sh ${{needs.tags.outputs.revision_build}}  ${{needs.tags.outputs.revision_tag}} ${{needs.tags.outputs.revision_hash}}
           ls -al ../Release
 
       - name: Konclude Docker Test
@@ -786,7 +1072,7 @@ jobs:
   publish:
     name: Draft release
     runs-on: ubuntu-latest
-    needs: [tags, build_windows, build_macosx, build_linux, build_docker]
+    needs: [tags, build_windows, build_macosx, build_linux, build_plugin, build_docker]
     if: always() && needs.tags.result == 'success' && needs.tags.outputs.publish == 'true'
     permissions:
       contents: write

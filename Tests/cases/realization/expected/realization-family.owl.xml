@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Expected realization result for realization-family.owl.xml.
+  Only the class assertions matter; declarations and their order are ignored
+  by CRealizationResultComparator.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/realization/family-expected">
+
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Person"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Parent"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Grandparent"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Woman"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Mother"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Man"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Person"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Parent"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Grandparent"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Father"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="#carol"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Person"/><NamedIndividual IRI="#carol"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Parent"/><NamedIndividual IRI="#carol"/></ClassAssertion>
+
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="#dave"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Person"/><NamedIndividual IRI="#dave"/></ClassAssertion>
+</Ontology>

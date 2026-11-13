@@ -1,0 +1,13 @@
+Prefix(:=<http://konclude.test/rules#>)
+Prefix(owl:=<http://www.w3.org/2002/07/owl#>)
+Prefix(xsd:=<http://www.w3.org/2001/XMLSchema#>)
+
+Ontology(<http://konclude.test/rules/not-fired>
+
+Declaration(Class(:A))
+Declaration(Class(:B))
+Declaration(Class(:C))
+Declaration(NamedIndividual(:a))
+ClassAssertion(:A :a)
+DLSafeRule(Body(ClassAtom(:A Variable(:x)) ClassAtom(:B Variable(:x))) Head(ClassAtom(:C Variable(:x))))
+)

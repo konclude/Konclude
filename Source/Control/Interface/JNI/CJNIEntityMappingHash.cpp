@@ -20,6 +20,8 @@
 
 #include "CJNIEntityMappingHash.h"
 
+#include <QSet>
+
 
 namespace Konclude {
 
@@ -41,6 +43,20 @@ namespace Konclude {
 
 				jobject CJNIEntityMappingHash::getMappedObject(CBuildExpression* expression) {
 					return (jobject)mEntityMapHash.value(expression,nullptr);
+				}
+
+				CJNIEntityMappingHash* CJNIEntityMappingHash::releaseGlobalReferences(JNIEnv* jenv) {
+					QSet<jobject> referenceSet;
+					for (jobject obj : mEntityMapHash) {
+						if (obj) {
+							referenceSet.insert(obj);
+						}
+					}
+					for (jobject obj : referenceSet) {
+						jenv->DeleteGlobalRef(obj);
+					}
+					mEntityMapHash.clear();
+					return this;
 				}
 
 				CJNIEntityMappingHash* CJNIEntityMappingHash::inserObjectMapping(CBuildExpression* expression, jobject obj) {

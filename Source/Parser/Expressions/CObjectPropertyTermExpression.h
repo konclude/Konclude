@@ -53,6 +53,8 @@ namespace Konclude {
 			class CObjectPropertyTermExpression : public CPropertyTermExpression {
 				// public methods
 				public:
+					//! The kind flags of this base class, see CBuildExpression::ExpressionKindFlag.
+					virtual cint64 getExpressionKindFlags() { return EKFOBJECTPROPERTYTERM; }
 					//! Constructor
 					CObjectPropertyTermExpression();
 

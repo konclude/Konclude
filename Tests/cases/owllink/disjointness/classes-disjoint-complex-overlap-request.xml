@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AreClassesDisjoint over an anonymous class expression that overlaps: B is a
+  subclass of A, so the intersection A and B is B and has a model.  Expected
+  answer: false.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:Class IRI="#A"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#B"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#b1"/></owl:Declaration>
+    <owl:SubClassOf><owl:Class IRI="#B"/><owl:Class IRI="#A"/></owl:SubClassOf>
+    <owl:ClassAssertion><owl:Class IRI="#B"/><owl:NamedIndividual IRI="#b1"/></owl:ClassAssertion>
+  </Tell>
+  <AreClassesDisjoint kb="http://ex.test/kb">
+    <owl:ObjectIntersectionOf><owl:Class IRI="#A"/><owl:Class IRI="#B"/></owl:ObjectIntersectionOf>
+    <owl:Class IRI="#A"/>
+  </AreClassesDisjoint>
+  <ReleaseKB kb="http://ex.test/kb"/>
+</RequestMessage>
