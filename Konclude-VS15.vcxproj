@@ -1212,6 +1212,8 @@
     <ClCompile Include="Source\Parser\Expressions\CQueryAreClassesEquivalentExpression.cpp" />
     <ClCompile Include="Source\Parser\Expressions\CQueryExpression.cpp" />
     <ClCompile Include="Source\Parser\Expressions\CQueryGetClassAssertionsExpression.cpp" />
+    <ClCompile Include="Source\Parser\Expressions\CQueryGetDataPropertyFactsExpression.cpp" />
+    <ClCompile Include="Source\Parser\Expressions\CQueryGetDataPropertyTargetsExpression.cpp" />
     <ClCompile Include="Source\Parser\Expressions\CQueryGetDeterministicClassAssertionsExpression.cpp" />
     <ClCompile Include="Source\Parser\Expressions\CQueryGetDeterministicIndividualsExpression.cpp" />
     <ClCompile Include="Source\Parser\Expressions\CQueryGetEquivalentClassesExpression.cpp" />
@@ -2697,6 +2699,7 @@
     <ClCompile Include="Source\Reasoner\Ontology\COntologyProcessingComplexAnsweringRequirement.cpp" />
     <ClCompile Include="Source\Reasoner\Ontology\COntologyProcessingConceptRealizationRequirement.cpp" />
     <ClCompile Include="Source\Reasoner\Ontology\COntologyProcessingConceptSaturationRequirement.cpp" />
+    <ClCompile Include="Source\Reasoner\Ontology\COntologyProcessingDataLiteralRealizationRequirement.cpp" />
     <ClCompile Include="Source\Reasoner\Ontology\COntologyProcessingDynamicRealizationRequirement.cpp" />
     <ClCompile Include="Source\Reasoner\Ontology\COntologyProcessingInitializedRealizationRequirement.cpp" />
     <ClCompile Include="Source\Reasoner\Ontology\COntologyProcessingIteratorRealizationRequirement.cpp" />
@@ -2841,6 +2844,9 @@
     <ClCompile Include="Source\Reasoner\Query\CComplexSuperClassesAnsweringQuery.cpp" />
     <ClCompile Include="Source\Reasoner\Query\CComplexVariablesAnsweringQuery.cpp" />
     <ClCompile Include="Source\Reasoner\Query\CConsistencePremisingQuery.cpp" />
+    <ClCompile Include="Source\Reasoner\Query\CDataLiteralSetResult.cpp" />
+    <ClCompile Include="Source\Reasoner\Query\CDataPropertyFactsQuery.cpp" />
+    <ClCompile Include="Source\Reasoner\Query\CDataPropertyTargetsQuery.cpp" />
     <ClCompile Include="Source\Reasoner\Query\CDeterministicClassAssertionQuery.cpp" />
     <ClCompile Include="Source\Reasoner\Query\CDeterministicIndividualsQuery.cpp" />
     <ClCompile Include="Source\Reasoner\Query\CDeterministicNondeterministicIndividualsQuery.cpp" />
@@ -3004,6 +3010,7 @@
     <ClCompile Include="Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingItem.cpp" />
     <ClCompile Include="Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingThread.cpp" />
     <ClCompile Include="Source\Reasoner\Realizer\CIndividualConceptInstanceTestingItem.cpp" />
+    <ClCompile Include="Source\Reasoner\Realizer\CIndividualDataLiteralTestingItem.cpp" />
     <ClCompile Include="Source\Reasoner\Realizer\CIndividualPairRoleInstanceTestingItem.cpp" />
     <ClCompile Include="Source\Reasoner\Realizer\CIndividualRoleCandidateConfirmationTestingItem.cpp" />
     <ClCompile Include="Source\Reasoner\Realizer\CIndividualRoleCandidateTestingData.cpp" />
@@ -4327,6 +4334,8 @@
     <ClInclude Include="Source\Parser\Expressions\CQueryAreClassesEquivalentExpression.h" />
     <ClInclude Include="Source\Parser\Expressions\CQueryExpression.h" />
     <ClInclude Include="Source\Parser\Expressions\CQueryGetClassAssertionsExpression.h" />
+    <ClInclude Include="Source\Parser\Expressions\CQueryGetDataPropertyFactsExpression.h" />
+    <ClInclude Include="Source\Parser\Expressions\CQueryGetDataPropertyTargetsExpression.h" />
     <ClInclude Include="Source\Parser\Expressions\CQueryGetDeterministicClassAssertionsExpression.h" />
     <ClInclude Include="Source\Parser\Expressions\CQueryGetDeterministicIndividualsExpression.h" />
     <ClInclude Include="Source\Parser\Expressions\CQueryGetEquivalentClassesExpression.h" />
@@ -5579,6 +5588,7 @@
     <ClInclude Include="Source\Reasoner\Ontology\COntologyProcessingComplexAnsweringRequirement.h" />
     <ClInclude Include="Source\Reasoner\Ontology\COntologyProcessingConceptRealizationRequirement.h" />
     <ClInclude Include="Source\Reasoner\Ontology\COntologyProcessingConceptSaturationRequirement.h" />
+    <ClInclude Include="Source\Reasoner\Ontology\COntologyProcessingDataLiteralRealizationRequirement.h" />
     <ClInclude Include="Source\Reasoner\Ontology\COntologyProcessingDynamicRealizationRequirement.h" />
     <ClInclude Include="Source\Reasoner\Ontology\COntologyProcessingInitializedRealizationRequirement.h" />
     <ClInclude Include="Source\Reasoner\Ontology\COntologyProcessingIteratorRealizationRequirement.h" />
@@ -5726,6 +5736,9 @@
     <ClInclude Include="Source\Reasoner\Query\CComplexSuperClassesAnsweringQuery.h" />
     <ClInclude Include="Source\Reasoner\Query\CComplexVariablesAnsweringQuery.h" />
     <ClInclude Include="Source\Reasoner\Query\CConsistencePremisingQuery.h" />
+    <ClInclude Include="Source\Reasoner\Query\CDataLiteralSetResult.h" />
+    <ClInclude Include="Source\Reasoner\Query\CDataPropertyFactsQuery.h" />
+    <ClInclude Include="Source\Reasoner\Query\CDataPropertyTargetsQuery.h" />
     <ClInclude Include="Source\Reasoner\Query\CDeterministicClassAssertionQuery.h" />
     <ClInclude Include="Source\Reasoner\Query\CDeterministicIndividualsQuery.h" />
     <ClInclude Include="Source\Reasoner\Query\CDeterministicNondeterministicIndividualsQuery.h" />
@@ -5891,6 +5904,7 @@
     <ClInclude Include="Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingItem.h" />
     <ClInclude Include="Source\Reasoner\Realizer\CIncrementalKPSetOntologyConceptRealizingThread.h" />
     <ClInclude Include="Source\Reasoner\Realizer\CIndividualConceptInstanceTestingItem.h" />
+    <ClInclude Include="Source\Reasoner\Realizer\CIndividualDataLiteralTestingItem.h" />
     <ClInclude Include="Source\Reasoner\Realizer\CIndividualPairRoleInstanceTestingItem.h" />
     <ClInclude Include="Source\Reasoner\Realizer\CIndividualRoleCandidateConfirmationTestingItem.h" />
     <ClInclude Include="Source\Reasoner\Realizer\CIndividualRoleCandidateTestingData.h" />
