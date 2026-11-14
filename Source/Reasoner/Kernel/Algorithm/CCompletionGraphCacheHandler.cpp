@@ -583,12 +583,15 @@ namespace Konclude {
 								}
 							}
 							if (succIndi->getLocalizationTag() > mDetLocalizationTag) {
-								if (succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
+								// C4 counts the neighbours that are new (e.g. the test node) or rebuilt in this test and whose
+								// label does not exclude the qualification C, i.e. does not contain nnf(not C)
+								if (!succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) || succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID)) {
 									bool containsSomeOps = true;
 									if (opConLinkerIt) {
 										containsSomeOps = false;
 										while (opConLinkerIt && !containsSomeOps) {
-											bool opNegated = opConLinkerIt->isNegated() ^ conNegation;
+											// not (>= n r.C) is (<= n-1 r.C), so the qualification keeps its polarity
+											bool opNegated = opConLinkerIt->isNegated();
 											CConcept* opCon = opConLinkerIt->getData();
 											bool containsNegated = false;
 											CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
@@ -603,11 +606,15 @@ namespace Konclude {
 											}
 											opConLinkerIt = opConLinkerIt->getNext();
 										}
-										if (containsSomeOps) {
-											CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualNodeID());
-											if (!corrCachedSuccIndi || corrCachedSuccIndi->getMergedIntoIndividualNodeID() != succIndi->getIndividualNodeID() || corrCachedSuccIndi->getLastMergedIntoIndividualNode() != succIndi->getLastMergedIntoIndividualNode()) {
-												++updatedCardinality;
-											}
+									}
+									if (containsSomeOps) {
+										// a neighbour that is also an r-neighbour in the cached graph is counted with the cached
+										// neighbours below; any other one, e.g. an individual whose link was only expanded from the
+										// backend cache in this test, is counted here
+										CIndividualProcessNode* corrCachedSuccIndi = mCompGraphCachedProcNodeVec->getData(succIndi->getIndividualNodeID());
+										if (!corrCachedSuccIndi || corrCachedSuccIndi->getMergedIntoIndividualNodeID() != succIndi->getIndividualNodeID() || corrCachedSuccIndi->getLastMergedIntoIndividualNode() != succIndi->getLastMergedIntoIndividualNode()
+												|| !compGraphCachedIndiNode->hasRoleSuccessorToIndividual(role, corrCachedSuccIndi, false)) {
+											++updatedCardinality;
 										}
 									}
 								}
