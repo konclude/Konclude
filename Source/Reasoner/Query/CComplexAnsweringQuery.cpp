@@ -34,10 +34,22 @@ namespace Konclude {
 				mQueryStats = nullptr;
 				mQueryResult = nullptr;
 				mQueryName = queryName;
+				mDataValueRealizationRequired = false;
 			}
 
 			CComplexAnsweringQuery::~CComplexAnsweringQuery() {
 				delete mQueryStats;
+			}
+
+
+			bool CComplexAnsweringQuery::isDataValueRealizationRequired() {
+				return mDataValueRealizationRequired;
+			}
+
+
+			CComplexAnsweringQuery* CComplexAnsweringQuery::setDataValueRealizationRequired(bool required) {
+				mDataValueRealizationRequired = required;
+				return this;
 			}
 
 			CComplexAnsweringQuery* CComplexAnsweringQuery::setQueryResult(CQueryResult* queryResult) {

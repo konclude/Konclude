@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/hidden-man"
+          xml:base="http://konclude.test/hidden-man">
+  <Prefix name="sp" IRI="http://konclude.test/hidden-man#"/>
+  <Declaration><Class IRI="#Woman"/></Declaration>
+  <Declaration><Class IRI="#Man"/></Declaration>
+  <Declaration><Class IRI="#PersonWithMan"/></Declaration>
+  <Declaration><ObjectProperty IRI="#hasFriend"/></Declaration>
+  <Declaration><NamedIndividual IRI="#alice"/></Declaration>
+  <ClassAssertion><Class IRI="#Woman"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#PersonWithMan"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <SubClassOf>
+    <Class IRI="#PersonWithMan"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty IRI="#hasFriend"/>
+      <Class IRI="#Man"/>
+    </ObjectSomeValuesFrom>
+  </SubClassOf>
+</Ontology>

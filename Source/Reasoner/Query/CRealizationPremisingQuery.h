@@ -79,6 +79,7 @@ namespace Konclude {
 					bool isRoleRealisationRequired();
 					bool isSameIndividualRealisationRequired();
 					bool isDynamicRealisationRequired();
+					bool isDataRoleClassificationRequired();
 
 					virtual COntologyProcessingDynamicRealizationRequirement* getDynamicRealizationRequirement();
 
@@ -95,6 +96,7 @@ namespace Konclude {
 					bool mRequiresRoleRealisation;
 					bool mRequiresSameIndividualRealisation;
 					bool mDynamicRealisation;
+					bool mRequiresDataRoleClassification;
 
 				// private methods
 				private:

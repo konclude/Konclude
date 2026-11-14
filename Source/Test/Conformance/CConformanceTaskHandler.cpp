@@ -50,10 +50,25 @@ namespace Konclude {
 
 
 			CConformanceTaskResult CConformanceTaskHandler::run(qint64 timeoutMs, const QString& outputLogFilePath, const QString& responseFilePath) {
+				removePreviousOutput(outputLogFilePath, responseFilePath);
 				if (CConformanceChannel::typeIsServer(mTestCase.mChannel)) {
 					return runServerChannel(timeoutMs, outputLogFilePath, responseFilePath);
 				}
 				return runFileChannel(timeoutMs, outputLogFilePath, responseFilePath);
+			}
+
+
+			void CConformanceTaskHandler::removePreviousOutput(const QString& outputLogFilePath, const QString& responseFilePath) {
+				// A test that exits without answering must not be reported from the files
+				// of a previous run (e.g. a rerun with the same output directory). QProcess
+				// truncates the log when it starts, but a failed start leaves the old one
+				// behind as well.
+				if (!responseFilePath.isEmpty()) {
+					QFile::remove(responseFilePath);
+				}
+				if (!outputLogFilePath.isEmpty()) {
+					QFile::remove(outputLogFilePath);
+				}
 			}
 
 

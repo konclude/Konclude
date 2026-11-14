@@ -85,6 +85,10 @@ namespace Konclude {
 					CComplexAnsweringQuery* setQueryStatistics(CQueryStatistics* stats);
 					CQueryStatistics* getQueryStatistics();
 
+					//! whether the answer depends on the realized data values of the individuals
+					bool isDataValueRealizationRequired();
+					CComplexAnsweringQuery* setDataValueRealizationRequired(bool required);
+
 				// protected methods
 				protected:
 
@@ -99,6 +103,8 @@ namespace Konclude {
 					QString mQueryName;
 
 					CQueryResult* mQueryResult;
+
+					bool mDataValueRealizationRequired;
 
 
 

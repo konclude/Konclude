@@ -1,0 +1,4 @@
+PREFIX : <http://konclude.test/property#>
+# :invOp1 is the inverse of :op1, so the asserted :a :op1 :b yields :b :invOp1 :a.
+SELECT ?s ?o
+WHERE { ?s :invOp1 ?o . }

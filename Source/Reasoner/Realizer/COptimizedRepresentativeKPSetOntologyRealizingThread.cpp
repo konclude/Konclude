@@ -67,6 +67,7 @@ namespace Konclude {
 				realization->setConceptRealization(item);
 				realization->setRoleRealization(item);
 				realization->setSameRealization(item);
+				realization->setDataLiteralRealization(item);
 
 
 				return item;
@@ -2403,6 +2404,56 @@ namespace Konclude {
 
 
 
+			bool COptimizedRepresentativeKPSetOntologyRealizingThread::createNextDataLiteralInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, CIndividualDataLiteralTestingItem* dataLiteralTestingItem) {
+				COptimizedRepresentativeKPSetDataLiteralCandidate* candidate = dataLiteralTestingItem->getDataLiteralCandidate();
+				if (!candidate) {
+					delete dataLiteralTestingItem;
+					return false;
+				}
+				CRole* dataRole = candidate->mDataRole;
+				CDataLiteral* dataLiteral = candidate->mDataLiteral;
+				CIndividualReference indiRef = dataLiteralTestingItem->getIndividualReference();
+
+				CConcept* testingConcept = reqConfPreCompItem->getDataLiteralTestingConcept(dataRole, dataLiteral);
+				if (!testingConcept) {
+					CConcept* literalConcept = reqConfPreCompItem->getDataLiteralConcept(dataLiteral);
+					if (!literalConcept) {
+						CConceptVector* conceptVector = reqConfPreCompItem->getOntology()->getTBox()->getConceptVector();
+						cint64 conceptCount = conceptVector->getItemCount();
+						for (cint64 conceptId = 0; conceptId < conceptCount && !literalConcept; ++conceptId) {
+							CConcept* concept = conceptVector->getData(conceptId);
+							if (concept && concept->getOperatorCode() == CCDATALITERAL && concept->getDataLiteral() == dataLiteral) {
+								literalConcept = concept;
+							}
+						}
+						if (!literalConcept) {
+							// the value has no literal concept in the ontology, so it cannot be tested
+							candidate->mState = COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_NOTENTAILED;
+							candidate->mTestingItem = nullptr;
+							QList<COntologyRealizingDynamicRequirmentProcessingData*> procDataList = dataLiteralTestingItem->getProcessingDataList();
+							delete dataLiteralTestingItem;
+							setDataLiteralRequirementProcessed(reqConfPreCompItem, procDataList);
+							return false;
+						}
+						reqConfPreCompItem->setDataLiteralConcept(dataLiteral, literalConcept);
+					}
+					// the value is verified with individual and not(SOME(dataRole,{dataLiteral}))
+					testingConcept = createTemporaryConcept(reqConfPreCompItem, reqConfPreCompItem->getOntology());
+					testingConcept->setOperatorCode(CCSOME);
+					testingConcept->setRole(dataRole);
+					addTemporaryConceptOperand(testingConcept, literalConcept, false, reqConfPreCompItem, reqConfPreCompItem->getOntology());
+					reqConfPreCompItem->setDataLiteralTestingConcept(dataRole, dataLiteral, testingConcept);
+				}
+
+				CSatisfiableCalculationJobGenerator satCalcJobGen(reqConfPreCompItem->getOntology());
+				CSatisfiableCalculationJob* satCalcJob = satCalcJobGen.getSatisfiableCalculationJob(testingConcept, true, indiRef);
+				satCalcJob->setCalculationConfiguration(reqConfPreCompItem->getCalculationConfiguration());
+				processCalculationJob(satCalcJob, reqConfPreCompItem, dataLiteralTestingItem);
+				return true;
+			}
+
+
+
 			bool COptimizedRepresentativeKPSetOntologyRealizingThread::createNextRoleInstantiationTest(COptimizedRepresentativeKPSetOntologyRealizingItem* reqConfPreCompItem, COptimizedKPSetRoleInstancesItem* instancesItem, COptimizedKPSetIndividualItemPair itemPair, COntologyRealizingDynamicRequirmentProcessingData* procData) {
 				instancesItem->incTestingPossibleInstancesCount();
 
@@ -3403,6 +3454,14 @@ namespace Konclude {
 					}
 
 
+					if (!workTestCreated && reqConfPreCompItem->hasDataLiteralCandidateTestingItems() && (!reqConfPreCompItem->isRealizeSameIndividualsStepRequired() || reqConfPreCompItem->isRealizeSameIndividualsStepFinished())) {
+						// the non-deterministically derived data values are verified after the same
+						// individuals have been merged (their values belong to the merged individual)
+						CIndividualDataLiteralTestingItem* dataLiteralTestingItem = reqConfPreCompItem->takeDataLiteralCandidateTestingItem();
+						workTestCreated = createNextDataLiteralInstantiationTest(reqConfPreCompItem, dataLiteralTestingItem);
+					}
+
+
 
 					if (!workTestCreated && reqConfPreCompItem->isRealizeConceptStepRequired() && !reqConfPreCompItem->isExtraConsistencyTesting()) {
 						if (!reqConfPreCompItem->isRealizeConceptStepFinished()) {
@@ -4312,6 +4371,26 @@ namespace Konclude {
 				}
 
 				if (!processed) {
+					CIndividualDataLiteralTestingItem* dataLiteralTestingItem = dynamic_cast<CIndividualDataLiteralTestingItem*>(preTestItem);
+					if (dataLiteralTestingItem) {
+						// the test is unsatisfiable exactly when the individual and the negated value
+						// clash, i.e. when the value holds in every model
+						bool isValueEntailed = !pcce->getTestResultSatisfiable();
+						COptimizedRepresentativeKPSetDataLiteralCandidate* candidate = dataLiteralTestingItem->getDataLiteralCandidate();
+						if (candidate) {
+							candidate->mState = isValueEntailed ? COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_ENTAILED : COptimizedRepresentativeKPSetDataLiteralCandidate::DLCS_NOTENTAILED;
+							candidate->mTestingItem = nullptr;
+						}
+						delete dataLiteralTestingItem;
+						processed = true;
+
+						if (!procDataList.isEmpty()) {
+							setDataLiteralRequirementProcessed(ontPreCompItem, procDataList);
+						}
+					}
+				}
+
+				if (!processed) {
 					CIndividualConceptInstanceTestingItem* indiConInstTestItem = dynamic_cast<CIndividualConceptInstanceTestingItem*>(preTestItem);
 					if (indiConInstTestItem) {
 						bool isIndividualInstance = !pcce->getTestResultSatisfiable();
@@ -4502,6 +4581,31 @@ namespace Konclude {
 					}
 				}
 				return false;
+			}
+
+
+			COptimizedRepresentativeKPSetOntologyRealizingThread* COptimizedRepresentativeKPSetOntologyRealizingThread::setDataLiteralRequirementProcessed(COntologyRealizingItem* ontRealItem, const QList<COntologyRealizingDynamicRequirmentProcessingData*>& procDataList) {
+				for (COntologyRealizingDynamicRequirmentProcessingData* procData : procDataList) {
+					procData->decProcessingItemCount(nullptr);
+					if (!procData->hasCurrentProcessingItemCount()) {
+						COntologyProcessingRequirement* procReq = procData->getProcessingRequirement();
+						if (procReq) {
+							procReq->submitRequirementUpdate(COntologyProcessingStatus::PSCOMPLETELYYPROCESSED, COntologyProcessingStatus::PSSUCESSFULL);
+						}
+						COntologyRealizingDynamicRequirmentCallbackData* callbackData = procData->getCallbackData();
+						if (callbackData) {
+							callbackData->decProcessingRequirmentCount();
+							if (!callbackData->hasCurrentProcessingRequirmentCount()) {
+								ontRealItem->logRequirementProcessingFinishStatistics(procData->getStatistics());
+								CCallbackData* callback = callbackData->getProcessingFinishedCallback();
+								callback->doCallback();
+								delete callbackData;
+							}
+						}
+						delete procData;
+					}
+				}
+				return this;
 			}
 
 

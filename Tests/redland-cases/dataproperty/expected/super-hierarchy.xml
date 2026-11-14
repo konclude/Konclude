@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for queries/super-hierarchy.sparql: :subProperty has itself,
+     its super-property and the built-in top data property as super-properties.
+     Rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="dp"/>
+    <variable name="superdp"/>
+  </head>
+  <results>
+    <result>
+      <binding name="dp"><uri>http://konclude.test/dataproperty#subProperty</uri></binding>
+      <binding name="superdp"><uri>http://konclude.test/dataproperty#subProperty</uri></binding>
+    </result>
+    <result>
+      <binding name="dp"><uri>http://konclude.test/dataproperty#subProperty</uri></binding>
+      <binding name="superdp"><uri>http://konclude.test/dataproperty#superProperty</uri></binding>
+    </result>
+    <result>
+      <binding name="dp"><uri>http://konclude.test/dataproperty#subProperty</uri></binding>
+      <binding name="superdp"><uri>http://www.w3.org/2002/07/owl#topDataProperty</uri></binding>
+    </result>
+  </results>
+</sparql>

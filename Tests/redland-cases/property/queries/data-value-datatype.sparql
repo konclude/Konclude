@@ -1,0 +1,4 @@
+PREFIX : <http://konclude.test/property#>
+# A typed data property value; :b asserts "042"^^xsd:integer, which is the value 42.
+SELECT ?s ?v
+WHERE { ?s :dpInt ?v . }

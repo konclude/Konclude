@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink data-property request-type coverage: data-property-targets-facet-restriction.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:DataProperty IRI="#dp1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#a"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#C"/></owl:Declaration>
+    <owl:SubClassOf>
+      <owl:Class IRI="#C"/>
+      <owl:DataSomeValuesFrom>
+        <owl:DataProperty IRI="#dp1"/>
+        <owl:DatatypeRestriction>
+          <owl:Datatype abbreviatedIRI="xsd:integer"/>
+          <owl:FacetRestriction facet="http://www.w3.org/2001/XMLSchema#minInclusive"><owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">5</owl:Literal></owl:FacetRestriction>
+        </owl:DatatypeRestriction>
+      </owl:DataSomeValuesFrom>
+    </owl:SubClassOf>
+    <owl:ClassAssertion><owl:Class IRI="#C"/><owl:NamedIndividual IRI="#a"/></owl:ClassAssertion>
+  </Tell>
+  <GetDataPropertyTargets kb="http://ex.test/kb" id="q-targets">
+    <owl:NamedIndividual IRI="#a"/>
+    <owl:DataProperty IRI="#dp1"/>
+  </GetDataPropertyTargets>
+</RequestMessage>

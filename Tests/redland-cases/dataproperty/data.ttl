@@ -1,0 +1,13 @@
+@prefix : <http://konclude.test/dataproperty#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:subSubProperty rdfs:subPropertyOf :subProperty .
+:subProperty rdfs:subPropertyOf :superProperty .
+
+:superProperty a owl:DatatypeProperty .
+:subProperty a owl:DatatypeProperty .
+:subSubProperty a owl:DatatypeProperty .
+
+:individual1 a owl:NamedIndividual ; :subProperty "value1" .
+:individual2 a owl:NamedIndividual ; :subSubProperty "value2" .

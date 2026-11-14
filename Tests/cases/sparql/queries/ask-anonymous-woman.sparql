@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/anonymous#>
+# The only sp:Woman in ask-anonymous-node.owl.xml is the anonymous hasSpouse
+# successor of sp:alice. This ASK therefore requires existential interpretation:
+# a SELECT ?w returns no rows, but the ASK must be true.
+ASK { ?w a sp:Woman }

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for object-inverse.sparql: the inverse of the asserted
+     :a :op1 :b. Rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="s"/>
+    <variable name="o"/>
+  </head>
+  <results>
+    <result>
+      <binding name="s"><uri>http://konclude.test/property#b</uri></binding>
+      <binding name="o"><uri>http://konclude.test/property#a</uri></binding>
+    </result>
+  </results>
+</sparql>

@@ -1,0 +1,5 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# A variable in the super-property position of a data property axiom; this
+# query crashed the answering handler with a null role (issue #26).
+SELECT (IRI("http://konclude.test/dataproperty#subProperty") as ?dp) ?superdp
+WHERE { <http://konclude.test/dataproperty#subProperty> rdfs:subPropertyOf ?superdp . }

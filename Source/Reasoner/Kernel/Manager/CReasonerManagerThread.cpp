@@ -20,6 +20,9 @@
 
 #include "CReasonerManagerThread.h"
 
+#include "Parser/Expressions/CDataPropertyAssertionExpression.h"
+#include "Parser/Expressions/CSubDataPropertyOfExpression.h"
+
 
 namespace Konclude {
 
@@ -28,6 +31,22 @@ namespace Konclude {
 		namespace Kernel {
 
 			namespace Manager {
+
+
+				// Values of a data property are also values of its super-properties, which are known
+				// only after the data property hierarchy has been classified, so a query that matches
+				// data property assertions needs that classification (issue #26).
+				static bool hasDataPropertyAxiom(CComplexVariablesAnsweringQuery* query) {
+					if (!query) {
+						return false;
+					}
+					for (CAxiomExpression* axiomExp : *query->getAxiomExpressions()) {
+						if (dynamic_cast<CDataPropertyAssertionExpression*>(axiomExp) || dynamic_cast<CSubDataPropertyOfExpression*>(axiomExp)) {
+							return true;
+						}
+					}
+					return false;
+				}
 
 
 				CReasonerManagerThread::CReasonerManagerThread(CWatchDog *threadWatchDog) : CIntervalThread("Reasoner-Manager",threadWatchDog) {
@@ -475,6 +494,14 @@ namespace Konclude {
 						if (realQuery->isDynamicRealisationRequired()) {
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
+							if (realQuery->isDataRoleClassificationRequired()) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY));
+							}
+							if (realQuery->isSameIndividualRealisationRequired()) {
+								// the data values (and the synsets of their answers) are only complete after
+								// the same individuals have been merged, so that step has to run first
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+							}
 							reqList.append(realQuery->getDynamicRealizationRequirement());
 						} else {
 							if (realQuery->isSameIndividualRealisationRequired()) {
@@ -497,6 +524,10 @@ namespace Konclude {
 						CConcreteOntology* ontology = complexAnsweringQuery->getBaseOntology();
 						QList<COntologyProcessingRequirement*> reqList;
 						reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSANSWERCOMPLEXQUERY));
+						// the data literal answering uses the realization of the individual data values
+						if (complexAnsweringQuery->isDataValueRealizationRequired()) {
+							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSSAMEINDIVIDUALSREALIZE));
+						}
 
 						CComplexConceptAnsweringQuery* complexConceptAnsweringQuery = dynamic_cast<CComplexConceptAnsweringQuery*>(complexAnsweringQuery);
 						if (complexConceptAnsweringQuery) {
@@ -512,6 +543,9 @@ namespace Konclude {
 						if (compVarAnsweringQuery) {
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSOBJECTROPERTYCLASSIFY));
 							reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSCLASSCLASSIFY));
+							if (hasDataPropertyAxiom(compVarAnsweringQuery)) {
+								reqList.append(mRequirementExpander->getCompletedDefaultOntologyProcessingStepRequirement(COntologyProcessingStep::OPSDATAROPERTYCLASSIFY));
+							}
 						}
 						CComplexAxiomsDataPropertyVariablesAnsweringQuery* compDataPropVarAnsweringQuery = dynamic_cast<CComplexAxiomsDataPropertyVariablesAnsweringQuery*>(complexAnsweringQuery);
 						if (compDataPropVarAnsweringQuery) {

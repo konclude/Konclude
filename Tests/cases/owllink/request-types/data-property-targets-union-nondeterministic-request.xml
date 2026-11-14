@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink data-property request-type coverage: data-property-targets-union-nondeterministic.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:DataProperty IRI="#dp1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#a"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#C"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#D1"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#D2"/></owl:Declaration>
+    <owl:SubClassOf><owl:Class IRI="#D1"/><owl:Class IRI="#C"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#D2"/><owl:Class IRI="#C"/></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#C"/><owl:ObjectUnionOf><owl:Class IRI="#D1"/><owl:Class IRI="#D2"/></owl:ObjectUnionOf></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#D1"/><owl:DataHasValue><owl:DataProperty IRI="#dp1"/><owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">u1</owl:Literal></owl:DataHasValue></owl:SubClassOf>
+    <owl:SubClassOf><owl:Class IRI="#D2"/><owl:DataHasValue><owl:DataProperty IRI="#dp1"/><owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">u2</owl:Literal></owl:DataHasValue></owl:SubClassOf>
+    <owl:ClassAssertion><owl:Class IRI="#C"/><owl:NamedIndividual IRI="#a"/></owl:ClassAssertion>
+  </Tell>
+  <GetDataPropertyTargets kb="http://ex.test/kb" id="q-targets">
+    <owl:NamedIndividual IRI="#a"/>
+    <owl:DataProperty IRI="#dp1"/>
+  </GetDataPropertyTargets>
+</RequestMessage>

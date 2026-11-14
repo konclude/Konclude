@@ -1,0 +1,5 @@
+PREFIX : <http://konclude.test/property#>
+# A variable in the predicate position with a constant object that is a class
+# (known failure: the answering crashes, see Tests/known-issues.owl.xml).
+SELECT ?s ?p
+WHERE { ?s ?p :C1 . }

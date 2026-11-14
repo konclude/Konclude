@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration for the existential *-regular ASK tests: anonymous completion
+  nodes are enabled and the direct closed-ASK boolean extraction is disabled, so
+  the regular Redland/Rasqal model path is exercised with anonymous witnesses.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables'>
+		<Literal>true</Literal>
+	</Set>
+	<Set key='Konclude.Answering.ClosedAskDirectBooleanAnswering'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

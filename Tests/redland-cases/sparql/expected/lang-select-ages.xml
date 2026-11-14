@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head><variable name="p"/><variable name="a"/></head>
+  <results>
+    <result><binding name="p"><uri>http://konclude.test/language#henry</uri></binding><binding name="a"><literal datatype="http://www.w3.org/2001/XMLSchema#integer">70</literal></binding></result>
+    <result><binding name="p"><uri>http://konclude.test/language#dave</uri></binding><binding name="a"><literal datatype="http://www.w3.org/2001/XMLSchema#integer">50</literal></binding></result>
+    <result><binding name="p"><uri>http://konclude.test/language#bob</uri></binding><binding name="a"><literal datatype="http://www.w3.org/2001/XMLSchema#integer">47</literal></binding></result>
+  </results>
+</sparql>

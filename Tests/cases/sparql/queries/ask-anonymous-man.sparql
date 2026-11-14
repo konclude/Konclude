@@ -1,0 +1,4 @@
+PREFIX sp: <http://konclude.test/anonymous#>
+# Negative control: the ontology has no sp:Man at all. The existential
+# interpretation must not turn every satisfiable class into a true ASK.
+ASK { ?w a sp:Man }

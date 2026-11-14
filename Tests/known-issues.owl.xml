@@ -414,7 +414,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -426,7 +426,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-optional-empty"/>
-    <Literal>SELECT with OPTIONAL returns no rows instead of the required left-join rows.</Literal>
+    <Literal>Fixed. The engine already returned the left-join rows; the XML serializers wrote a non-standard &lt;unbound/&gt; binding element for an unbound variable. Unbound variables are now omitted from the binding, as required by SPARQL Results XML. Guards: kt:sparql-optional and kt:sparql-lang-select-optional.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
@@ -449,7 +449,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-union-empty"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -484,7 +484,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
 
   <DataPropertyAssertion>
@@ -504,5 +504,317 @@
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-filter-hang"/>
     <NamedIndividual abbreviatedIRI="kt:sparql-filter"/>
   </ObjectPropertyAssertion>
+
+  <!-- GitHub issue #26: a SPARQL constant that is a string typed literal does not
+       match the plain literal of the assertion, although both are xsd:string in
+       RDF 1.1. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <Literal>Fixed by passing the datatype of an explicitly typed xsd:string literal on as its full IRI instead of the QName xsd:string, which the literal normaliser could not resolve. The test is a regular test again.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-typed-string-literal"/>
+    <NamedIndividual abbreviatedIRI="kt:property-data-typed-literal"/>
+  </ObjectPropertyAssertion>
+
+  <!-- GitHub issue #26: the declarations of the ontology (rdf:type of classes and
+       properties) are not answered as schema triples. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:UnsupportedFeature"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <Literal>A query for the declared classes or properties of the ontology answers nothing, so an ASK for the declaration of a class is false.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-schema-triples"/>
+    <NamedIndividual abbreviatedIRI="kt:property-ask-class-declaration"/>
+  </ObjectPropertyAssertion>
+
+  <!-- GitHub issue #26: a variable in the predicate position crashes the answering. -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <Literal>A triple pattern with a variable predicate and a constant object segfaulted in the Redland/Rasqal sub-query resolving because the sub-query had no answer result when it was initialised. The crash is guarded now (the sub-query contributes no statements), but such queries still answer nothing.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <NamedIndividual abbreviatedIRI="kt:property-predicate-variable-data"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-predicate-variable-crash"/>
+    <NamedIndividual abbreviatedIRI="kt:property-predicate-variable-class"/>
+  </ObjectPropertyAssertion>
+
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <Literal>An ASK about a data property value of a named subject crashes while the instance entailment result is processed (the query has no processing linker). The SELECT half was fixed separately: it answered no rows because the data literal base item resolved the query individual only in the expression mapping of the ontology; the item now resolves it by name through the ontology string mapping and answers the asserted value and values entailed through sub-properties. The ASK test is capped at 5 seconds.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ground-data-value"/>
+    <NamedIndividual abbreviatedIRI="kt:property-ask-data-super-value"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-entailed-data-value"/>
+    <Literal>Data property value queries (with a named subject and with a variable subject) answer the asserted values, including the values of sub-properties, and values that are only entailed: a value of an owl:hasValue restriction on the individual as well as a value that is derived from the TBox (for example B &lt;= C and C &lt;= (dp hasValue v) for an instance of B). The values are provided by the data literal realization of the individual, which is computed on demand from the asserted data, the asserted concepts and the backend cache labels. Non-deterministically derived values are only answered when they hold in the deterministic part of the realization.</Literal>
+  </DataPropertyAssertion>
+
+
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-nondeterministic-data-values"/>
+    <Literal>A data value that only follows from a non-deterministic branch (for example one branch of a union or an at-most restriction) is treated as a candidate and verified lazily. The realizing item queues a satisfiability test of the individual together with the negated value (individual and not(SOME(dataProperty,{value}))) and caches the result per (individual, data property, value); only values whose negation is unsatisfiable are published. The verification uses temporary SOME concepts in the ontology of the realizing item, so no answerer state is needed. Deterministic values, including TBox-derived hasValue and minimum cardinality values, are answered without a test.</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+    <Literal>https://github.com/konclude/Konclude/issues/26</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cardinality-data-values"/>
+    <Literal>A minimum cardinality restriction with a literal-only data range (DataMinCardinality 1 over DataOneOf "atleast") forces the data value. The label scan now also extracts the literal of the data range of an at-least restriction with cardinality one (CCATLEAST with CCATALITERAL operand), so the value is answered; the candidate verification covers branch-dependent variants.</Literal>
+  </DataPropertyAssertion>
+
+  <!-- issue-sparql-ask-class-assertion: 1 test(s) -->
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <Literal>https://www.w3.org/TR/sparql11-query/#ask</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <Literal>Fixed. The existential interpretation remains config-gated (Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables); the single-variable boolean ASK reduction is skipped so named witnesses work with the default config. A closed ASK is answered directly from the conjunction of its boolean sub-queries, and non-closed sub-queries use query-local placeholders for hidden individual variables while preserving direct-result streaming. The regular resolver path is covered by the *-regular tests with Konclude.Answering.ClosedAskDirectBooleanAnswering=false. Regression guards include kt:sparql-ask-class-assertion, kt:sparql-ask-complex, kt:sparql-ask-anonymous-woman, kt:sparql-ask-anonymous-child, kt:sparql-ask-anonymous-woman-child, kt:sparql-ask-anonymous-man, kt:sparql-select-anonymous-woman and kt:sparql-select-hidden-anonymous-join. See Docs/Analysis-SPARQL-ASK-ClassAssertion.md.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-ask-complex"/>
+  </ObjectPropertyAssertion>
+
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+  </ClassAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+  </ClassAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:tracker"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <Literal>https://www.w3.org/TR/sparql11-query/#rVariable</Literal>
+  </DataPropertyAssertion>
+
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <Literal>A variable-predicate query over constant individuals (for example SELECT ?p { sp:alice ?p sp:bob } or SELECT ?d ?v { sp:alice ?d ?v }) answers empty. The parser classifies the pattern as an object-property or data-property SCHEMA query (property hierarchy) instead of a fact query over the known subject/object, so the role/data-property variable never becomes a binding. The object-property path is the allObjPropVars branch; the data-property path is the allDataPropVars branch in CSPARQLRedlandRasqalReasoningBGPQueryParser::generateBGPBasedSubQueries. Affects kt:sparql-select-role-variable and kt:sparql-select-data-variable. See Docs/Investigation-SPARQL-VariablePredicate.md.</Literal>
+  </DataPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-select-role-variable"/>
+  </ObjectPropertyAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
+    <NamedIndividual abbreviatedIRI="kt:sparql-select-data-variable"/>
+  </ObjectPropertyAssertion>
+
 
 </Ontology>

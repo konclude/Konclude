@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink data-property request-type coverage: data-property-targets-same-individual.
+  The value is asserted for an individual that is the same individual as the queried one.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:DataProperty IRI="#dp1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#a"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#b"/></owl:Declaration>
+    <owl:SameIndividual>
+      <owl:NamedIndividual IRI="#a"/>
+      <owl:NamedIndividual IRI="#b"/>
+    </owl:SameIndividual>
+    <owl:DataPropertyAssertion><owl:DataProperty IRI="#dp1"/><owl:NamedIndividual IRI="#b"/><owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">same</owl:Literal></owl:DataPropertyAssertion>
+  </Tell>
+  <GetDataPropertyTargets kb="http://ex.test/kb" id="q-targets">
+    <owl:NamedIndividual IRI="#a"/>
+    <owl:DataProperty IRI="#dp1"/>
+  </GetDataPropertyTargets>
+</RequestMessage>

@@ -1,0 +1,3 @@
+PREFIX sp: <http://konclude.test/sparql#>
+# Selects the projected variable only; ?c is a hidden existential variable.
+SELECT ?w WHERE { ?w sp:hasChild ?c }

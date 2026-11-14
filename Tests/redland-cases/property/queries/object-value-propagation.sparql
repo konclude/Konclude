@@ -1,0 +1,4 @@
+PREFIX : <http://konclude.test/property#>
+# :a :op1 :b is asserted, so the pair is also an :op2 assertion.
+SELECT ?s ?o
+WHERE { ?s :op2 ?o . }

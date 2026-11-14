@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A qualified at-most restriction on a nominal and a new neighbour added by the test concept.
+  The nominal h is not crowded: at most one sitsAt-predecessor is a Pigeon, written as the negation
+  of an at-least restriction (not CrowdedHole, CrowdedHole = >= 2 inverse(sitsAt).Pigeon). The pigeon a
+  already sits at h, b is a different pigeon.
+    TestSecondPigeon = Pigeon and sitsAt value h and not {a}   (unsatisfiable)
+    TestPigeonBAtH   = {b} and sitsAt value h                  (unsatisfiable)
+    TestAnyPigeon    = Pigeon and sitsAt value h                (satisfiable, it can be a)
+    TestPigeonAAtH   = {a} and sitsAt value h                  (satisfiable)
+  The at-most restriction of h is applied in the consistency test before h has any neighbour, so it
+  has to be applied again for the new links of the test (dynamic reapply entry of the cached graph),
+  and the cached h has to lose its caching for the new pigeon (completion graph caching criterion C4).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/dl/nominal-qualified-atmost">
+  <Prefix name="" IRI="http://konclude.test/dl/nominal-qualified-atmost#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-qualified-atmost#CrowdedHole"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-qualified-atmost#Pigeon"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestSecondPigeon"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestAnyPigeon"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/dl/nominal-qualified-atmost#sitsAt"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#h"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#b"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestPigeonBAtH"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestPigeonAAtH"/></Declaration>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#CrowdedHole"/>
+    <ObjectMinCardinality cardinality="2">
+      <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/nominal-qualified-atmost#sitsAt"/></ObjectInverseOf>
+      <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#Pigeon"/>
+    </ObjectMinCardinality>
+  </EquivalentClasses>
+
+  <ClassAssertion>
+    <ObjectComplementOf><Class IRI="http://konclude.test/dl/nominal-qualified-atmost#CrowdedHole"/></ObjectComplementOf>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#h"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#Pigeon"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#Pigeon"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#b"/>
+  </ClassAssertion>
+  <DifferentIndividuals>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#a"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#b"/>
+  </DifferentIndividuals>
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="http://konclude.test/dl/nominal-qualified-atmost#sitsAt"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#a"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#h"/>
+  </ObjectPropertyAssertion>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestSecondPigeon"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#Pigeon"/>
+      <ObjectHasValue>
+        <ObjectProperty IRI="http://konclude.test/dl/nominal-qualified-atmost#sitsAt"/>
+        <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#h"/>
+      </ObjectHasValue>
+      <ObjectComplementOf>
+        <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#a"/></ObjectOneOf>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestPigeonBAtH"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#b"/></ObjectOneOf>
+      <ObjectHasValue>
+        <ObjectProperty IRI="http://konclude.test/dl/nominal-qualified-atmost#sitsAt"/>
+        <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#h"/>
+      </ObjectHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestPigeonAAtH"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#a"/></ObjectOneOf>
+      <ObjectHasValue>
+        <ObjectProperty IRI="http://konclude.test/dl/nominal-qualified-atmost#sitsAt"/>
+        <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#h"/>
+      </ObjectHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#TestAnyPigeon"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/nominal-qualified-atmost#Pigeon"/>
+      <ObjectHasValue>
+        <ObjectProperty IRI="http://konclude.test/dl/nominal-qualified-atmost#sitsAt"/>
+        <NamedIndividual IRI="http://konclude.test/dl/nominal-qualified-atmost#h"/>
+      </ObjectHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

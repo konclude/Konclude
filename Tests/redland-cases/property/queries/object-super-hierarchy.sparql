@@ -1,0 +1,6 @@
+PREFIX : <http://konclude.test/property#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# The super-properties of an object property (control for the data-property crash,
+# issue #26).
+SELECT ?super
+WHERE { :op1 rdfs:subPropertyOf ?super . }

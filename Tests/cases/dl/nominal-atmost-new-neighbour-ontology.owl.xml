@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  At-most restrictions on nominals that already have neighbours, and a test concept that adds one more.
+    h1: <= 1 inverse(sitsAt).Pigeon, the pigeon a sits at h1 by a role assertion
+    h2: <= 1 inverse(sitsAt).Pigeon, the pigeon d sits at h2 by (sitsAt value h2)(d)
+    h3: <= 2 inverse(sitsAt) (unqualified), a and c sit at h3 by role assertions
+  a, b, c, d are pairwise different pigeons. Each test adds the pigeon b as a further neighbour:
+    TestBAtH1, TestBAtH2, TestBAtH3 = {b} and (sitsAt value hN)        (unsatisfiable)
+    TestNonPigeonAtH1 = not Pigeon and (sitsAt value h1)                (satisfiable control)
+  The cached completion graph has to give up the cached state of hN, because the at-most restriction
+  was decided without the new neighbour (criterion C4), and the consistency test must not lose the
+  re-application of the at-most restriction for new links.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/dl/nominal-atmost-new-neighbour">
+  <Prefix name="" IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestNonPigeonAtH1"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#a"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#b"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#c"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#d"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h1"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h2"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h3"/></Declaration>
+
+  <ClassAssertion><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#a"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#b"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#c"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#d"/></ClassAssertion>
+  <DifferentIndividuals>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#a"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#b"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#c"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#d"/>
+  </DifferentIndividuals>
+
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/></ObjectInverseOf>
+      <Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/>
+    </ObjectMaxCardinality>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h1"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/></ObjectInverseOf>
+      <Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/>
+    </ObjectMaxCardinality>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h2"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="2">
+      <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h3"/>
+  </ClassAssertion>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#a"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h1"/>
+  </ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectHasValue>
+      <ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/>
+      <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h2"/>
+    </ObjectHasValue>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#d"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#a"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h3"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#c"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h3"/>
+  </ObjectPropertyAssertion>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#b"/></ObjectOneOf>
+      <ObjectHasValue><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h1"/></ObjectHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#b"/></ObjectOneOf>
+      <ObjectHasValue><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h2"/></ObjectHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH3"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#b"/></ObjectOneOf>
+      <ObjectHasValue><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h3"/></ObjectHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#TestNonPigeonAtH1"/>
+    <ObjectIntersectionOf>
+      <ObjectComplementOf><Class IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#Pigeon"/></ObjectComplementOf>
+      <ObjectHasValue><ObjectProperty IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#sitsAt"/><NamedIndividual IRI="http://konclude.test/dl/nominal-atmost-new-neighbour#h1"/></ObjectHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

@@ -1,0 +1,5 @@
+PREFIX : <http://konclude.test/property#>
+# Values of :dp1, of its sub-property :dpSub and of :dpInt (which is also under
+# :dp2) are all values of :dp2.
+SELECT ?s ?v
+WHERE { ?s :dp2 ?v . }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://ex.test/load-ontology-facts">
+  <Prefix name="" IRI="http://ex.test/load-ontology-facts#"/>
+  <Declaration><DataProperty IRI="#dp1"/></Declaration>
+  <Declaration><NamedIndividual IRI="#a"/></Declaration>
+  <DataPropertyAssertion>
+    <DataProperty IRI="#dp1"/>
+    <NamedIndividual IRI="#a"/>
+    <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">loaded</Literal>
+  </DataPropertyAssertion>
+</Ontology>

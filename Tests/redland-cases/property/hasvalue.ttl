@@ -1,0 +1,22 @@
+@prefix : <http://konclude.test/hasvalue#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# :a has one asserted value (:dp2 "asserted2", and :dp2 is a sub-property of :dp1)
+# and one value that exists only as a hasValue restriction on the individual
+# (:dp1 "hv1"). :c has a value that is derived from the TBox only: :c is a :B,
+# :B is a subclass of :C, and :C is a subclass of a hasValue restriction
+# (:dp1 "tbox"). None of these values is asserted as a data property assertion.
+:dp1 a owl:DatatypeProperty .
+:dp2 a owl:DatatypeProperty ; rdfs:subPropertyOf :dp1 .
+
+:a a owl:NamedIndividual ;
+   a [ a owl:Restriction ; owl:onProperty :dp1 ; owl:hasValue "hv1" ] ;
+   :dp2 "asserted2" .
+
+:B a owl:Class ; rdfs:subClassOf :C .
+:C a owl:Class ;
+   rdfs:subClassOf [ a owl:Restriction ; owl:onProperty :dp1 ; owl:hasValue "tbox" ] .
+
+:c a :B .

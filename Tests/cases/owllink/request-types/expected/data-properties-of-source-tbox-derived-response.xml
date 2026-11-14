@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-properties-of-source-tbox-derived-request.xml: #f has the
+     TBox-derived value of #dp3; owl:topDataProperty is always part of the answer. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/data-property-facts"/>
+ <OK/>
+ <SetOfDataPropertySynsets>
+  <DataPropertySynset>
+   <owl:DataProperty IRI="#dp3"/>
+  </DataPropertySynset>
+  <DataPropertySynset>
+   <owl:DataProperty IRI="http://www.w3.org/2002/07/owl#topDataProperty"/>
+  </DataPropertySynset>
+ </SetOfDataPropertySynsets>
+</ResponseMessage>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-atmost-literal-request.xml: A maximum cardinality restriction with a literal-only data range together with the asserted value answers the asserted value. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">atmost</Literal>
+ </SetOfLiterals>
+</ResponseMessage>

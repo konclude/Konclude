@@ -58,6 +58,7 @@
 #include "Reasoner/Query/CClassesResult.h"
 #include "Reasoner/Query/CIndividualsResult.h"
 #include "Reasoner/Query/CClassSynsetsResult.h"
+#include "Reasoner/Query/CDataLiteralSetResult.h"
 #include "Reasoner/Query/CIndividualSynsetsResult.h"
 #include "Reasoner/Query/CQueryInconsitentOntologyError.h"
 #include "Reasoner/Query/CSucceedQueryResult.h"

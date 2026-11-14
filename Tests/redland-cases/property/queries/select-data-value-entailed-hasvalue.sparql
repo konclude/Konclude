@@ -1,0 +1,5 @@
+﻿PREFIX : <http://konclude.test/hasvalue#>
+# :a has the asserted value "asserted2" for the sub-property :dp2 and the restriction
+# value "hv1" for :dp1, so both are values of :dp1.
+SELECT ?val
+WHERE { :a :dp1 ?val . }

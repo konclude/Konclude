@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration used by kt:usesTestSystemConfig in Tests/cases/sparql/sparql.kt.owl.xml
+  for the ask-anonymous-* tests. It interprets non-answer individual variables as
+  existential/anonymous, which routes an ASK without distinguished variables to
+  the completion-graph entailment path instead of named-individual realization.
+  This is required for ASK over a pattern whose only witness is an anonymous node.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables'>
+		<Literal>true</Literal>
+	</Set>
+</RequestMessage>

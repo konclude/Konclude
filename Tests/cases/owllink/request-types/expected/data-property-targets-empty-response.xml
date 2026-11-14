@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-empty-request.xml: A data property value query for an individual without any value of the queried data property. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals/>
+</ResponseMessage>

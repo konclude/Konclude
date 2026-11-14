@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/dataproperty">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-dataproperty"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-dataproperty"/><Literal>Data property</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-dataproperty"/><Literal>dataproperty</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-dataproperty"/><Literal>Data property queries of the SPARQL interface (GitHub issue #26). The dataset declares two levels of rdfs:subPropertyOf between data properties, so that a hierarchy query binds the variable to a declared property, to the built-in topDataProperty/bottomDataProperty and to the queried property itself, and so that values asserted for a sub-property have to appear under the super-properties as well.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:dataproperty-super-hierarchy"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dataproperty-super-hierarchy"/><Literal>The super-properties of a data property: the query shape of issue #26, whose variable in the super-property position crashed the answering handler.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dataproperty-super-hierarchy"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:dataproperty-super-hierarchy"/><Literal>data.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dataproperty-super-hierarchy"/><Literal>queries/super-hierarchy.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dataproperty-super-hierarchy"/><Literal>expected/super-hierarchy.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:sourceCase"/><NamedIndividual abbreviatedIRI="kt:dataproperty-super-hierarchy"/><Literal>GitHub issue #26</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:dataproperty-sub-hierarchy"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dataproperty-sub-hierarchy"/><Literal>The sub-properties of a data property, the direction that never crashed.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dataproperty-sub-hierarchy"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:dataproperty-sub-hierarchy"/><Literal>data.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dataproperty-sub-hierarchy"/><Literal>queries/sub-hierarchy.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dataproperty-sub-hierarchy"/><Literal>expected/sub-hierarchy.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:sourceCase"/><NamedIndividual abbreviatedIRI="kt:dataproperty-sub-hierarchy"/><Literal>GitHub issue #26</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:dataproperty-value-propagation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dataproperty-value-propagation"/><Literal>Values of the sub-properties under their super-property.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dataproperty-value-propagation"/><Literal>sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:dataproperty-value-propagation"/><Literal>data.ttl</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dataproperty-value-propagation"/><Literal>queries/value-propagation.sparql</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dataproperty-value-propagation"/><Literal>expected/value-propagation.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:sourceCase"/><NamedIndividual abbreviatedIRI="kt:dataproperty-value-propagation"/><Literal>GitHub issue #26</Literal></DataPropertyAssertion>
+
+</Ontology>

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Issue #19 variant with four pigeons on three holes: the cached model merges the pigeons'
+  hole successors into three different holes, so more merged nodes have to be rebuilt.
+  One hole holds two pigeons: TestSceneNotCrowded is unsatisfiable, Scene = CrowdedScene.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/dl/pigeonhole-4p3h">
+  <Prefix name="" IRI="http://konclude.test/dl/pigeonhole-4p3h#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#CrowdedHole"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#CrowdedScene"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Hole"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Pigeon"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#TestSceneNotCrowded"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#TestSceneCrowded"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-4p3h#sitsAt"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-4p3h#inScene"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#h1"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#h2"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#h3"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p1"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p2"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p3"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p4"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#s"/></Declaration>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#CrowdedHole"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Hole"/>
+      <ObjectMinCardinality cardinality="2">
+        <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-4p3h#sitsAt"/></ObjectInverseOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Pigeon"/>
+      </ObjectMinCardinality>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#CrowdedScene"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-4p3h#inScene"/></ObjectInverseOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#CrowdedHole"/>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Hole"/>
+    <ObjectOneOf>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#h1"/>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#h2"/>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#h3"/>
+    </ObjectOneOf>
+  </EquivalentClasses>
+  <SubClassOf>
+    <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Hole"/>
+    <ObjectSomeValuesFrom><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-4p3h#inScene"/><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/></ObjectSomeValuesFrom>
+  </SubClassOf>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Pigeon"/>
+    <ObjectOneOf>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p1"/>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p2"/>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p3"/>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p4"/>
+    </ObjectOneOf>
+  </EquivalentClasses>
+  <SubClassOf>
+    <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Pigeon"/>
+    <ObjectExactCardinality cardinality="1">
+      <ObjectProperty IRI="http://konclude.test/dl/pigeonhole-4p3h#sitsAt"/>
+      <Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Hole"/>
+    </ObjectExactCardinality>
+  </SubClassOf>
+
+  <EquivalentClasses><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/><ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#s"/></ObjectOneOf></EquivalentClasses>
+
+  <DisjointClasses><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Hole"/><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Pigeon"/></DisjointClasses>
+  <DisjointClasses><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Hole"/><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/></DisjointClasses>
+  <DisjointClasses><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Pigeon"/><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/></DisjointClasses>
+  <DifferentIndividuals><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p1"/><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p2"/><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p3"/><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-4p3h#p4"/></DifferentIndividuals>
+
+  <!-- The classifier's subsumption test for Scene <= CrowdedScene. -->
+  <EquivalentClasses><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#TestSceneNotCrowded"/><ObjectIntersectionOf><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/><ObjectComplementOf><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#CrowdedScene"/></ObjectComplementOf></ObjectIntersectionOf></EquivalentClasses>
+  <!-- Control: the scene can always be crowded. -->
+  <EquivalentClasses><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#TestSceneCrowded"/><ObjectIntersectionOf><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#Scene"/><Class IRI="http://konclude.test/dl/pigeonhole-4p3h#CrowdedScene"/></ObjectIntersectionOf></EquivalentClasses>
+</Ontology>

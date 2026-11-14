@@ -121,6 +121,18 @@ namespace Konclude {
 				expression = parseGetEquivalentClassesNode(node);
 			} else  if (nodeString == "IsEntailed") {
 				expression = parseIsEntailedNode(node);
+			} else  if (nodeString == "GetDataPropertyTargets") {
+				expression = parseGetDataPropertyTargetsNode(node);
+			} else  if (nodeString == "GetDataPropertiesOfSource") {
+				expression = parseGetDataPropertiesOfSourceNode(node);
+			} else  if (nodeString == "GetDataPropertiesBetween") {
+				expression = parseGetDataPropertiesBetweenNode(node);
+			} else  if (nodeString == "GetDataPropertiesOfLiteral") {
+				expression = parseGetDataPropertiesOfLiteralNode(node);
+			} else  if (nodeString == "GetDataPropertySources") {
+				expression = parseGetDataPropertySourcesNode(node);
+			} else  if (nodeString == "GetFlattenedDataPropertySources") {
+				expression = parseGetFlattenedDataPropertySourcesNode(node);
 			} else  if (nodeString == "GetObjectPropertyTargets") {
 				expression = parseGetObjectPropertyTargetsNode(node);
 			} else  if (nodeString == "GetFlattenedObjectPropertyTargets") {
@@ -503,6 +515,69 @@ namespace Konclude {
 		}
 
 
+
+
+		CQueryExpression *COWLlinkQueryParser::parseGetDataPropertyTargetsNode(QDomElement *node) {
+			// parse <GetDataPropertyTargets id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetDataPropertyTargetsQuery(builds,idName);
+			return queryExpression;
+		}
+
+		CQueryExpression *COWLlinkQueryParser::parseGetDataPropertiesOfSourceNode(QDomElement *node) {
+			// parse <GetDataPropertiesOfSource id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetDataPropertiesOfSourceQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+		CQueryExpression *COWLlinkQueryParser::parseGetDataPropertiesBetweenNode(QDomElement *node) {
+			// parse <GetDataPropertiesBetween id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetDataPropertiesBetweenQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+		CQueryExpression *COWLlinkQueryParser::parseGetDataPropertiesOfLiteralNode(QDomElement *node) {
+			// parse <GetDataPropertiesOfLiteral id="xxxx"/>
+			QString idName = getQueryIDNameString(node);
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetDataPropertiesOfLiteralQuery(builds,idName);
+			return queryExpression;
+		}
+
+
+		CQueryExpression *COWLlinkQueryParser::parseGetDataPropertySourcesNode(QDomElement *node) {
+			// parse <GetDataPropertySources id="xxxx" negative="true"/>
+			QString idName = getQueryIDNameString(node);
+			QString negativeString = node->attribute("negative");
+			bool negative = negativeString.toUpper() == "TRUE";
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetDataPropertySourcesQuery(builds,negative,idName);
+			return queryExpression;
+		}
+
+
+		CQueryExpression *COWLlinkQueryParser::parseGetFlattenedDataPropertySourcesNode(QDomElement *node) {
+			// parse <GetFlattenedDataPropertySources id="xxxx" negative="true"/>
+			QString idName = getQueryIDNameString(node);
+			QString negativeString = node->attribute("negative");
+			bool negative = negativeString.toUpper() == "TRUE";
+			QList<CBuildExpression*> builds = parseOntologyChildNodes(node);
+			CQueryExpression *queryExpression = 0;
+			queryExpression = mQueryBuilder->getGetFlattenedDataPropertySourcesQuery(builds,negative,idName);
+			return queryExpression;
+		}
 
 
 		CQueryExpression *COWLlinkQueryParser::parseGetObjectPropertyTargetsNode(QDomElement *node) {

@@ -1,22 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  AreClassesDisjoint regression cases.
-
-  The OWLlink query asks whether the given classes are *pairwise* disjoint,
-  i.e. whether C_i and C_j have no common instance for every i != j.  The
-  query builder used to enumerate i <= j as well, so every class was also
-  tested against itself (C and C, satisfiable whenever C is) and the query
-  answered false for satisfiable classes.  These cases pin the pair set and the
-  answer semantics:
-
-    named classes       disjoint, overlapping, equivalent, shared instance
-    degenerate          empty classes, duplicate list entry, owl:Thing/Nothing
-    larger lists        three and four classes, n-ary DisjointClasses axiom
-    complex queries     intersection and complement arguments (n <= j path of
-                        the extended builder)
-    entailed            disjointness implied by a disjoint union or by
-                        functionality plus disjoint fillers
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/owllink-disjointness">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
@@ -25,116 +7,107 @@
   <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-disjointness"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-disjointness"/><Literal>OWLlink-AreClassesDisjoint</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-disjointness"/><Literal>owllink/disjointness</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-disjointness"/><Literal>AreClassesDisjoint regression cases. The OWLlink query asks whether the given classes are *pairwise* disjoint, i.e. whether C_i and C_j have no common instance for every i != j. The query builder used to enumerate i &lt;= j as well, so every class was also tested against itself (C and C, satisfiable whenever C is) and the query answered false for satisfiable classes. These cases pin the pair set and the answer semantics: named classes disjoint, overlapping, equivalent, shared instance degenerate empty classes, duplicate list entry, owl:Thing/Nothing larger lists three and four classes, n-ary DisjointClasses axiom complex queries intersection and complement arguments (n &lt;= j path of the extended builder) entailed disjointness implied by a disjoint union or by functionality plus disjoint fillers Test group: two classes. Test group: degenerate lists. Test group: larger lists. Test group: anonymous class expressions (complex query path). Test group: entailed disjointness.</Literal></DataPropertyAssertion>
 
-  <!-- ===== two classes ===== -->
-
-  <!-- two classes, declared disjoint -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-classes"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-classes"/><Literal>two classes, declared disjoint -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-classes"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-classes"/><Literal>classes-disjoint-two-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-classes"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- subclass overlap: B is a subclass of A -> false -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-overlapping-subclass"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-overlapping-subclass"/><Literal>subclass overlap: B is a subclass of A -&gt; false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-overlapping-subclass"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-overlapping-subclass"/><Literal>classes-disjoint-overlap-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-overlapping-subclass"/><Literal>false</Literal></DataPropertyAssertion>
 
-  <!-- equivalent classes: A and B are the same -> false -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-equivalent-classes"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-equivalent-classes"/><Literal>equivalent classes: A and B are the same -&gt; false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-equivalent-classes"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-equivalent-classes"/><Literal>classes-disjoint-equivalent-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-equivalent-classes"/><Literal>false</Literal></DataPropertyAssertion>
 
-  <!-- common asserted instance: a1 is an A and a B -> false -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-shared-instance"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-shared-instance"/><Literal>common asserted instance: a1 is an A and a B -&gt; false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-shared-instance"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-shared-instance"/><Literal>classes-disjoint-shared-instance-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-shared-instance"/><Literal>false</Literal></DataPropertyAssertion>
 
-  <!-- ===== degenerate lists ===== -->
-
-  <!-- one unsatisfiable and one satisfiable class -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-unsatisfiable-class"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-unsatisfiable-class"/><Literal>one unsatisfiable and one satisfiable class -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-unsatisfiable-class"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-unsatisfiable-class"/><Literal>classes-disjoint-unsatisfiable-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-unsatisfiable-class"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- two different unsatisfiable classes -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-unsatisfiable"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-unsatisfiable"/><Literal>two different unsatisfiable classes -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-unsatisfiable"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-unsatisfiable"/><Literal>classes-disjoint-two-unsatisfiable-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-two-unsatisfiable"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- the same class twice in the list: the pair is (A, A) and A is satisfiable -> false -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-duplicate-class"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-duplicate-class"/><Literal>the same class twice in the list: the pair is (A, A) and A is satisfiable -&gt; false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-duplicate-class"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-duplicate-class"/><Literal>classes-disjoint-duplicate-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-duplicate-class"/><Literal>false</Literal></DataPropertyAssertion>
 
-  <!-- two requests in one message: (owl:Thing, A) -> false, (owl:Nothing, A) -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-builtins"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-builtins"/><Literal>two requests in one message: (owl:Thing, A) -&gt; false, (owl:Nothing, A) -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-builtins"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-builtins"/><Literal>classes-disjoint-builtins-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-builtins"/><Literal>false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-builtins"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- ===== larger lists ===== -->
-
-  <!-- three classes, pairwise disjoint -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-three-classes"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-three-classes"/><Literal>three classes, pairwise disjoint -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-three-classes"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-three-classes"/><Literal>classes-disjoint-three-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-three-classes"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- three classes, one overlapping pair (G is a subclass of A) -> false -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-mixed-three"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-mixed-three"/><Literal>three classes, one overlapping pair (G is a subclass of A) -&gt; false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-mixed-three"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-mixed-three"/><Literal>classes-disjoint-mixed-three-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-mixed-three"/><Literal>false</Literal></DataPropertyAssertion>
 
-  <!-- four classes, pairwise disjoint -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-four-classes"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-four-classes"/><Literal>four classes, pairwise disjoint -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-four-classes"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-four-classes"/><Literal>classes-disjoint-four-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-four-classes"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- three classes declared disjoint by one n-ary DisjointClasses axiom -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-nary-axiom"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-nary-axiom"/><Literal>three classes declared disjoint by one n-ary DisjointClasses axiom -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-nary-axiom"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-nary-axiom"/><Literal>classes-disjoint-nary-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-nary-axiom"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- ===== anonymous class expressions (complex query path) ===== -->
-
-  <!-- (A and E) and A: the intersection is empty -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-intersection"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-intersection"/><Literal>(A and E) and A: the intersection is empty -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-intersection"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-intersection"/><Literal>classes-disjoint-complex-empty-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-intersection"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- (A and B) and A with B a subclass of A: the intersection is B -> false -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-overlap"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-overlap"/><Literal>(A and B) and A with B a subclass of A: the intersection is B -&gt; false</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-overlap"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-overlap"/><Literal>classes-disjoint-complex-overlap-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-complex-overlap"/><Literal>false</Literal></DataPropertyAssertion>
 
-  <!-- A and not-A -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-complement"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-complement"/><Literal>A and not-A -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-complement"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-complement"/><Literal>classes-disjoint-complement-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-complement"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- ===== entailed disjointness ===== -->
-
-  <!-- B and C are members of the disjoint union A -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-union"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-union"/><Literal>B and C are members of the disjoint union A -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-union"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-union"/><Literal>classes-disjoint-union-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-union"/><Literal>true</Literal></DataPropertyAssertion>
 
-  <!-- functional r with disjoint fillers C and D makes A and B disjoint -> true -->
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-entailed-by-functionality"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-entailed-by-functionality"/><Literal>functional r with disjoint fillers C and D makes A and B disjoint -&gt; true</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-entailed-by-functionality"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-entailed-by-functionality"/><Literal>classes-disjoint-entailed-functional-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-entailed-by-functionality"/><Literal>true</Literal></DataPropertyAssertion>

@@ -71,6 +71,7 @@ namespace Konclude {
 					//! Executes the task once. When outputLogFilePath is non-empty the
 					//! subprocess' merged standard output and error are captured directly
 					//! into that file. The reasoner answer is read from responseFilePath.
+					//! Output files of a previous run are removed before the task starts.
 					CConformanceTaskResult run(qint64 timeoutMs, const QString& outputLogFilePath, const QString& responseFilePath);
 
 				// protected methods
@@ -113,6 +114,10 @@ namespace Konclude {
 
 				// private methods
 				private:
+					//! Deletes the log and response files a previous execution may have left
+					//! behind, so that only an answer of this execution can be read.
+					static void removePreviousOutput(const QString& outputLogFilePath, const QString& responseFilePath);
+
 					//! Executes the task through the command line and reads '-o'.
 					CConformanceTaskResult runFileChannel(qint64 timeoutMs, const QString& outputLogFilePath, const QString& responseFilePath);
 

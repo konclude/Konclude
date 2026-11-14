@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for object-sub-hierarchy.sparql. Rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="sub"/>
+  </head>
+  <results>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/property#op1</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/property#op2</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://www.w3.org/2002/07/owl#bottomObjectProperty</uri></binding>
+    </result>
+  </results>
+</sparql>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-sources-unknown-literal-request.xml: The literal is not
+     part of the ontology, so the answer is an empty set of individual synsets. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/data-property-facts"/>
+ <OK/>
+ <SetOfIndividualSynsets/>
+</ResponseMessage>

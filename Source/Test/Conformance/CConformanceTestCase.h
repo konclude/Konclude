@@ -69,6 +69,7 @@ namespace Konclude {
 					QString mTestIndividual;                 // individual IRI for a restricted realization (optional)
 					QString mControlFile;                    // originating *.kt.owl.xml (for messages)
 					QString mSuiteId;                        // suite the control ontology declares/derives
+					QString mDescription;                    // what the test checks (kt:description)
 					bool mKnownFailure;                      // marked via kt:knownFailure or kt:flaky
 					QStringList mKnownIssueIds;              // issues the test is linked to
 			};

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for queries/sub-hierarchy.sparql: both declared
+     sub-properties, the property itself and the built-in bottom data property
+     are sub-properties of :superProperty. Rows are compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="sub"/>
+  </head>
+  <results>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/dataproperty#subProperty</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/dataproperty#subSubProperty</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://konclude.test/dataproperty#superProperty</uri></binding>
+    </result>
+    <result>
+      <binding name="sub"><uri>http://www.w3.org/2002/07/owl#bottomDataProperty</uri></binding>
+    </result>
+  </results>
+</sparql>

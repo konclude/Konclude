@@ -1,0 +1,5 @@
+PREFIX sp: <http://konclude.test/dataproperty#>
+# Values that are asserted for the sub-properties are values of the
+# super-property as well.
+SELECT ?s ?val
+WHERE { ?s sp:superProperty ?val . }

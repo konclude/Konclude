@@ -28,6 +28,7 @@
 #include "RealizationSettings.h"
 #include "CConceptRealization.h"
 #include "CRoleRealization.h"
+#include "CDataLiteralRealization.h"
 #include "CSameRealization.h"
 
 // Other includes
@@ -70,6 +71,10 @@ namespace Konclude {
 					CRoleRealization* getRoleRealization();
 					CRealization* setRoleRealization(CRoleRealization* roleRealization);
 
+					bool hasDataLiteralRealization();
+					CDataLiteralRealization* getDataLiteralRealization();
+					CRealization* setDataLiteralRealization(CDataLiteralRealization* dataLiteralRealization);
+
 					bool isRealized();
 					CRealization* setRealized(bool realized);
 
@@ -82,6 +87,7 @@ namespace Konclude {
 					CConceptRealization* mConceptRealization;
 					CRoleRealization* mRoleRealization;
 					CSameRealization* mSameRealization;
+					CDataLiteralRealization* mDataLiteralRealization;
 
 				// private methods
 				private:

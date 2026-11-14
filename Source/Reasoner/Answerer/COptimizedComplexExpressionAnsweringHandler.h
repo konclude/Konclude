@@ -663,6 +663,8 @@ namespace Konclude {
 
 					bool canRetrieveInstantiatingDataValueIndividuals(CRole* dataRole, CDataLiteral* dataLiteral);
 					QMap<cint64, IndividualIdCandidateData>* getInstantiatingDataValueIndividualIdMap(CRole* dataRole, CDataLiteral* dataLiteral, QMap<cint64, IndividualIdCandidateData>* instantiatingDataValueIndividualIdMap, CAnswererContext* answererContext);
+					QSet<CRole*> getDataRoleWithSubRolesSet(CRole* dataRole);
+					CIndividual* getIndividualFromIndividualName(CIndividualTermExpression* indiTermExp);
 					QSet<CDataLiteral*>* getInstantiatedDataLiterals(const CIndividualReference& indiRef, CRole* dataRole, QSet<CDataLiteral*>* dataLiteralSet, CAnswererContext* answererContext);
 					CIndividualProcessNode* getNominalIndividualProcessNode(const CIndividualReference& indiRef, CIndividualProcessNodeVector* indiProcVector, bool* nondeterministicNodeFlag, CAnswererContext* answererContext);
 					CIndividualProcessNode* getMergeCorrectedIndividualProcessNode(CIndividualProcessNode* indiProcNode, CIndividualProcessNodeVector* indiProcVector, bool* nonDeterministicallyMergedFlag, CAnswererContext* answererContext);

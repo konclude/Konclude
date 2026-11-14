@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink data-property request-type coverage: data-property-targets-two-sub-property-values.
+  The request is self-contained: it creates a KB, tells the test ontology and asks the query.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/kb"/>
+  <Tell kb="http://ex.test/kb">
+    <owl:Declaration><owl:DataProperty IRI="#dp1"/></owl:Declaration>
+    <owl:Declaration><owl:DataProperty IRI="#dp2"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#a"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#b"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="#c"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#B"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="#C"/></owl:Declaration>
+    <owl:SubDataPropertyOf><owl:DataProperty IRI="#dp2"/><owl:DataProperty IRI="#dp1"/></owl:SubDataPropertyOf>
+    <owl:DataPropertyAssertion><owl:DataProperty IRI="#dp2"/><owl:NamedIndividual IRI="#a"/><owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">subOne</owl:Literal></owl:DataPropertyAssertion>
+    <owl:DataPropertyAssertion><owl:DataProperty IRI="#dp2"/><owl:NamedIndividual IRI="#a"/><owl:Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">subTwo</owl:Literal></owl:DataPropertyAssertion>
+  </Tell>
+  <GetDataPropertyTargets kb="http://ex.test/kb" id="q-targets">
+    <owl:NamedIndividual IRI="#a"/>
+    <owl:DataProperty IRI="#dp1"/>
+  </GetDataPropertyTargets>
+</RequestMessage>

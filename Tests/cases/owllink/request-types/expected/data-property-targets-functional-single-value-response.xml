@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-functional-single-value-request.xml: A functional data property with one asserted value answers exactly that value. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">one</Literal>
+ </SetOfLiterals>
+</ResponseMessage>

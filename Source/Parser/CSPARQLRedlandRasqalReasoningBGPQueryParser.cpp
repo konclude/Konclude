@@ -124,7 +124,9 @@ namespace Konclude {
 			} else if (RASQAL_LITERAL_STRING == rasqal_literal_get_type(literal)) {
 				string = QString("\"%1\"").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal)));
 			} else if (RASQAL_LITERAL_XSD_STRING == rasqal_literal_get_type(literal)) {
-				string = QString("\"%1\"^^xsd:string").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal)));
+				// the datatype has to be the full IRI, a prefixed name is not resolved by the
+				// query prefixes here and leaves the literal without a parseable datatype
+				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_STRING_DATATYPE);
 			} else if (RASQAL_LITERAL_BOOLEAN == rasqal_literal_get_type(literal)) {
 				string = QString("\"%1\"^^%2").arg(QString::fromUtf8((const char*)rasqal_literal_as_string(literal))).arg(PREFIX_XML_BOOLEAN_DATATYPE);
 			} else if (RASQAL_LITERAL_INTEGER == rasqal_literal_get_type(literal)) {
@@ -1053,9 +1055,19 @@ namespace Konclude {
 
 				cint64 limit = -1;
 				cint64 offset = 0;
-				if (mSingleBGPResultsDirectlyUsable && mConfPropagateBGPSubQueryDistinct) {
-					cint64 queryOffset = rasqal_query_get_offset(mRasqalQuery);
-					cint64 queryLimit = rasqal_query_get_limit(mRasqalQuery);
+				// Direct result streaming is only valid when this connected group covers
+				// the whole BGP. A query split into several sub-queries must go through
+				// the outer Redland join; attaching the outer result stream to one group
+				// would bypass the other groups and can dangle the query result.
+				bool groupCoversWholeBGP = subQueryGenData->usedtriplePosSet.size() == raptor_sequence_size(((rasqal_graph_pattern_s*)bgpData->bgp)->triples);
+				cint64 queryOffset = rasqal_query_get_offset(mRasqalQuery);
+				cint64 queryLimit = rasqal_query_get_limit(mRasqalQuery);
+				bool hasHiddenVariables = sortedDisVarList.size() < varExpSet.size();
+				// A hidden variable must not let the sub-query consume LIMIT/OFFSET:
+				// the hidden multiplicity is not part of the sub-query result, so the
+				// outer Redland query has to apply the limit after the join.
+				bool limitMustStayInOuterQuery = hasHiddenVariables && (queryLimit != -1 || queryOffset != 0);
+				if (mSingleBGPResultsDirectlyUsable && mConfPropagateBGPSubQueryDistinct && groupCoversWholeBGP && !limitMustStayInOuterQuery) {
 					limit = queryLimit;
 					offset = queryOffset;
 					bgpData->completelyHandledResultsTransfer = true;
@@ -1097,7 +1109,12 @@ namespace Konclude {
 						CQuerySPARQLBasicGraphPatternExpression* sparqlQuery = mQueryBuilder->getSPARQLBasicGraphPatternClassAskQuery(axiomList, subQueryName);
 						mBGPSubQueryNameHash.insert(subQueryName, bgpData);
 					}
-				} else if (hasIndiVars && allIndiVars || varExpSet.isEmpty()) {
+				} else if (allIndiVars || varExpSet.isEmpty()) {
+					// A pattern whose only variables are data literal variables (e.g. a known
+					// subject with a variable value, <a> :dp ?v) binds literals of a known
+					// individual and is answered by the individual variable query as well.
+					// Without this case no sub-query was created at all and the composition
+					// waited for a result that could never arrive (issue #26).
 
 					CEXPRESSIONLIST<COrderingTermExpression*> orderingList;
 					QList<CFilteringTermExpression*> filteringList;

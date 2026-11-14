@@ -1,0 +1,6 @@
+PREFIX : <http://konclude.test/property#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# Negative control: the data-property hierarchy under :dp2 must not contain any
+# object property (and no class).
+SELECT ?sub
+WHERE { ?sub rdfs:subPropertyOf :dp2 . }

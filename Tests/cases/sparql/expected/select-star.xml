@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head><variable name="w"/><variable name="c"/></head>
+  <results>
+    <result>
+      <binding name="w"><uri>http://konclude.test/sparql#alice</uri></binding>
+      <binding name="c"><uri>http://konclude.test/sparql#bob</uri></binding>
+    </result>
+  </results>
+</sparql>

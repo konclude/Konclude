@@ -206,6 +206,209 @@ jobs:
           if-no-files-found: ignore
 
 
+  # Konclude.pro enables the Redland integration (KONCLUDE_REDLAND_INTEGRATION): Turtle and the
+  # other RDF serialisations are parsed by raptor2 and the SPARQL queries are answered through
+  # rasqal, whereas the sources of that integration are empty in the KoncludeWithoutRedland.pro
+  # built above. The release workflow exercises the integration, but only for a tag, so a change
+  # that breaks it stays unnoticed until the next release. This job compiles Konclude.pro on
+  # every push and runs the conformance suites against the resulting binary, i.e., the standard
+  # Tests/cases as well as the cases that need Redland (Tests/redland-cases).
+  #
+  # It is a job of its own rather than a second build in the job above, because both projects
+  # compile the same sources with different defines into the object directory release/, which
+  # would mix the objects of the two builds if they shared a checkout.
+  redland:
+    name: Redland ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+        - {
+            name: "Ubuntu Latest GCC",
+            os: ubuntu-latest,
+            cc: "gcc",
+            cxx: "g++"
+          }
+        - {
+            name: "Windows Latest MSVC",
+            os: windows-latest,
+            cc: "cl",
+            cxx: "cl"
+          }
+        - {
+            name: "macOS Latest Clang",
+            os: macos-latest,
+            cc: "clang",
+            cxx: "clang++"
+          }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # The same compiler cache as the build above, under a key of its own, since the objects
+      # of the Redland build are compiled with other defines. The Windows build below uses
+      # MSBuild, for which sccache is not configured.
+      - name: Install sccache
+        if: ${{ !startsWith(matrix.config.os, 'windows') }}
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Prepare sccache
+        if: ${{ !startsWith(matrix.config.os, 'windows') }}
+        shell: bash
+        run: |
+          echo "SCCACHE_DIR=$RUNNER_TEMP/sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_CACHE_SIZE=2G" >> "$GITHUB_ENV"
+
+      - name: Restore the compiler cache
+        if: ${{ !startsWith(matrix.config.os, 'windows') }}
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/sccache
+          key: sccache-${{ github.job }}-${{ matrix.config.os }}-${{ github.sha }}
+          restore-keys: sccache-${{ github.job }}-${{ matrix.config.os }}-
+
+      - name: Install Qt
+        if: ${{ !startsWith(matrix.config.os, 'macos') }}
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '5.15.2'
+          cache: true
+
+      - name: Install Qt macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          brew install qt@5
+          echo "$(brew --prefix qt@5)/bin" >> "$GITHUB_PATH"
+
+      # Unlike Windows, Linux and macOS have no prebuilt Redland libraries in the repository,
+      # so they are compiled from source as the release builds do. That takes a few minutes and
+      # changes only with the script, hence the cache below.
+      - name: Install Dependencies Ubuntu
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential autoconf automake libtool pkg-config flex bison gperf \
+            zlib1g-dev libltdl-dev libgmp-dev
+
+      # The bison of the Xcode tools is too old to generate the parser of rasqal.
+      - name: Install Dependencies macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          brew install autoconf automake libtool bison
+          echo "$(brew --prefix bison)/bin" >> "$GITHUB_PATH"
+
+      - name: Cache the static Redland dependencies
+        id: cache-redland-dependencies
+        if: ${{ !startsWith(matrix.config.os, 'windows') }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            External/librdf/Linux/x64/lib/release
+            External/jemalloc/Linux/x64/lib/release
+          key: redland-dependencies-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/scripts/build-static-dependencies.sh') }}
+
+      # The script copies the libraries to the places where Konclude.pro expects them.
+      - name: Build the static Redland dependencies
+        if: ${{ !startsWith(matrix.config.os, 'windows') && steps.cache-redland-dependencies.outputs.cache-hit != 'true' }}
+        run: .github/scripts/build-static-dependencies.sh "$RUNNER_TEMP/redland-dependencies" .
+
+      - name: Compile Ubuntu
+        if: startsWith(matrix.config.os, 'ubuntu')
+        run: |
+          echo `gcc --version`
+          echo `qmake --version`
+          qmake Konclude.pro "QMAKE_CC=sccache ${{ matrix.config.cc }}" "QMAKE_CXX=sccache ${{ matrix.config.cxx }}"
+          make -j "$(nproc)"
+
+      # Konclude.pro refers to the shared libraries of libltdl and GMP on unix, which the
+      # release packages replace with the static GMP that the script above builds, as the
+      # shared ones are not part of macOS.
+      - name: Compile macOS
+        if: startsWith(matrix.config.os, 'macos')
+        run: |
+          sed -i '' -e 's#^unix: LIBS += -lz -lltdl -lgmp -ldl -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc#unix: LIBS += -lz -liconv External/librdf/Linux/x64/lib/release/libgmp.a -L External/jemalloc/Linux/x64/lib/release/ -ljemalloc#' Konclude.pro
+          grep -n "^unix: LIBS += -lz" Konclude.pro
+          echo `clang --version`
+          echo `qmake --version`
+          qmake Konclude.pro "QMAKE_CC=sccache ${{ matrix.config.cc }}" "QMAKE_CXX=sccache ${{ matrix.config.cxx }}"
+          make -j "$(sysctl -n hw.ncpu)"
+
+      # The Redland libraries of External/librdf are prebuilt for MSVC only, and Konclude.pro
+      # would refer to the Windows 8.1 SDK, which the runners do not have, so the Visual Studio
+      # project is built, as the Windows release build does.
+      - name: Prepare Visual Studio
+        if: startsWith(matrix.config.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          toolset: '14.29'
+
+      - name: Compile Windows
+        if: startsWith(matrix.config.os, 'windows')
+        run: |
+          msbuild Konclude-VS15.sln /m /p:Configuration=Release /p:Platform=Win64 /p:PlatformToolset=v142 /p:WindowsTargetPlatformVersion=10.0 "/p:Qt5_Dir=$env:QT_ROOT_DIR"
+
+      - name: Compiler cache statistics
+        if: ${{ always() && !startsWith(matrix.config.os, 'windows') }}
+        shell: bash
+        run: sccache --show-stats || true
+
+      - name: Run the Conformance Tests
+        if: ${{ !startsWith(matrix.config.os, 'windows') }}
+        run: |
+          mkdir -p conformance-results
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            binary=Release/Konclude.app/Contents/MacOS/Konclude
+          else
+            binary=Release/Konclude
+          fi
+          "$binary" conformance -i Tests/cases -o conformance-results/result.owl.xml -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
+
+      - name: Run the Redland Conformance Tests
+        if: ${{ !startsWith(matrix.config.os, 'windows') }}
+        run: |
+          mkdir -p conformance-results
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            binary=Release/Konclude.app/Contents/MacOS/Konclude
+          else
+            binary=Release/Konclude
+          fi
+          "$binary" conformance -i Tests/redland-cases -o conformance-results/redland-result.owl.xml -j "$(nproc 2>/dev/null || sysctl -n hw.ncpu)"
+
+      - name: Run the Conformance Tests Windows
+        if: startsWith(matrix.config.os, 'windows')
+        shell: pwsh
+        run: |
+          # The static Redland libraries need the DLLs of External\vcpkg at run time, which the
+          # release package copies beside the binary.
+          $env:PATH = "$env:GITHUB_WORKSPACE\External\vcpkg\Windows\x64\bin;$env:PATH"
+          New-Item -ItemType Directory -Force -Path conformance-results | Out-Null
+          & .\x64\Release\VS2015\Konclude.exe conformance -i Tests\cases -o conformance-results\result.owl.xml -j "$env:NUMBER_OF_PROCESSORS"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Run the Redland Conformance Tests Windows
+        if: startsWith(matrix.config.os, 'windows')
+        shell: pwsh
+        run: |
+          $env:PATH = "$env:GITHUB_WORKSPACE\External\vcpkg\Windows\x64\bin;$env:PATH"
+          New-Item -ItemType Directory -Force -Path conformance-results | Out-Null
+          & .\x64\Release\VS2015\Konclude.exe conformance -i Tests\redland-cases -o conformance-results\redland-result.owl.xml -j "$env:NUMBER_OF_PROCESSORS"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Upload Conformance Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: redland-conformance-results-${{ runner.os }}
+          path: |
+            conformance-results/result.owl.xml
+            conformance-results/redland-result.owl.xml
+            conformance-results/test-outputs/
+          if-no-files-found: ignore
+
+
   # The JNI interface of Konclude is compiled only for KoncludeLIB.pro, which defines
   # KONCLUDE_COMPILE_JNI_INTERFACE, so the sources of the bridge are empty in the builds above and
   # nothing notices when a change breaks the shared library or the bridge. The smoke test and

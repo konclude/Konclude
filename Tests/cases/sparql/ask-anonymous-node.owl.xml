@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/anonymous"
+          xml:base="http://konclude.test/anonymous">
+  <Prefix name="sp" IRI="http://konclude.test/anonymous#"/>
+  <Declaration><Class IRI="#Person"/></Declaration>
+  <Declaration><Class IRI="#Woman"/></Declaration>
+  <Declaration><Class IRI="#MarriedPerson"/></Declaration>
+  <Declaration><ObjectProperty IRI="#hasSpouse"/></Declaration>
+  <Declaration><ObjectProperty IRI="#hasChild"/></Declaration>
+  <Declaration><NamedIndividual IRI="#alice"/></Declaration>
+
+  <!-- alice is a MarriedPerson; there is no named Woman and no named child -->
+  <ClassAssertion><Class IRI="#MarriedPerson"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+
+  <!-- every MarriedPerson has a spouse that is a Woman with a (Person) child -->
+  <SubClassOf>
+    <Class IRI="#MarriedPerson"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty IRI="#hasSpouse"/>
+      <ObjectIntersectionOf>
+        <Class IRI="#Woman"/>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty IRI="#hasChild"/>
+          <Class IRI="#Person"/>
+        </ObjectSomeValuesFrom>
+      </ObjectIntersectionOf>
+    </ObjectSomeValuesFrom>
+  </SubClassOf>
+</Ontology>

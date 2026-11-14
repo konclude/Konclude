@@ -38,6 +38,8 @@
 #include "Reasoner/Query/CIsClassSubsumedByQuery.h"
 #include "Reasoner/Query/CIsInstanceOfQuery.h"
 #include "Reasoner/Query/CQueryStatisticsCollectionStrings.h"
+#include "Reasoner/Query/CDataPropertyTargetsQuery.h"
+#include "Reasoner/Query/CDataPropertyFactsQuery.h"
 #include "Reasoner/Query/CFlattenedTypesQuery.h"
 #include "Reasoner/Query/CFlattenedInstancesQuery.h"
 #include "Reasoner/Query/CTypesQuery.h"
@@ -114,6 +116,7 @@ namespace Konclude {
 
 					virtual CQueryingTemporaryNamedIndividualExpression* getQueryingTemporaryNamedIndividual(const QString& indiName);
 					virtual CQueryingTemporaryInverseObjectPropertyOfExpression* getQueryingTemporaryInverseObjectProperty(CObjectPropertyTermExpression* expression);
+					virtual CDataLiteralExpression* getQueryingDataLiteral(const QString& lexicalValue, const QString& datatypeIRI);
 
 
 
@@ -133,6 +136,7 @@ namespace Konclude {
 					virtual CQueryGetEquivalentClassesExpression* getGetEquivalentClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName);
 					virtual CQueryIsEntailedExpression* getIsEntailedQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName);
 					virtual CQueryGetObjectPropertyTargetsExpression* getGetObjectPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetDataPropertyTargetsExpression* getGetDataPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
 					virtual CQueryGetFlattenedObjectPropertyTargetsExpression* getGetFlattenedObjectPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
 					virtual CQueryGetObjectPropertySourcesExpression* getGetObjectPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
 					virtual CQueryGetFlattenedObjectPropertySourcesExpression* getGetFlattenedObjectPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
@@ -141,6 +145,12 @@ namespace Konclude {
 					virtual CQueryGetObjectPropertiesOfSourceExpression* getGetObjectPropertiesOfSourceQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
 					virtual CQueryGetObjectPropertiesOfTargetExpression* getGetObjectPropertiesOfTargetQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
 					virtual CQueryGetObjectPropertiesBetweenExpression* getGetObjectPropertiesBetweenQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+
+					virtual CQueryGetDataPropertyFactsExpression* getGetDataPropertiesOfSourceQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetDataPropertyFactsExpression* getGetDataPropertiesBetweenQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetDataPropertyFactsExpression* getGetDataPropertiesOfLiteralQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName);
+					virtual CQueryGetDataPropertyFactsExpression* getGetDataPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, bool negative, const QString& queryName);
+					virtual CQueryGetDataPropertyFactsExpression* getGetFlattenedDataPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, bool negative, const QString& queryName);
 
 
 
@@ -223,6 +233,7 @@ namespace Konclude {
 					virtual CIndividual *getIndividualFromBuildExpression(CIndividualTermExpression *buildExp);
 					virtual CIndividualReference getIndividualReferenceFromBuildExpression(CIndividualTermExpression *buildExp);
 					virtual QString getIndividualNameFromBuildExpression(CIndividualTermExpression *buildExp);
+					virtual CDataLiteral* getDataLiteralFromBuildExpression(CDataLiteralTermExpression* buildExp);
 
 				// protected variables
 				protected:		
@@ -231,6 +242,7 @@ namespace Konclude {
 					CConfigurationBase* config;
 
 					CEXPRESSIONLIST<CBuildExpression*> container;
+					QList<CBuildExpression*> mTemporaryExpressionList;
 
 
 					CEXPRESSIONLIST<CQueryIsClassSatisfiableExpression*> classSatExpList;
@@ -247,6 +259,7 @@ namespace Konclude {
 					CEXPRESSIONLIST<CQueryGetSuperClassesExpression*> mSuperClassesExpList;
 					CEXPRESSIONLIST<CQueryGetEquivalentClassesExpression*> mEquivClassesExpList;
 					CEXPRESSIONLIST<CQueryGetObjectPropertyTargetsExpression*> mObjectPropTargetsExpList;
+					CEXPRESSIONLIST<CQueryGetDataPropertyTargetsExpression*> mDataPropTargetsExpList;
 					CEXPRESSIONLIST<CQueryGetFlattenedObjectPropertyTargetsExpression*> mObjectFlattenedPropTargetsExpList;
 					CEXPRESSIONLIST<CQueryGetObjectPropertySourcesExpression*> mObjectPropSourcesExpList;
 					CEXPRESSIONLIST<CQueryGetFlattenedObjectPropertySourcesExpression*> mObjectFlattenedPropSourcesExpList;
@@ -255,6 +268,12 @@ namespace Konclude {
 					CEXPRESSIONLIST<CQueryGetObjectPropertiesOfSourceExpression*> mObjectPropsOfSourceExpList;
 					CEXPRESSIONLIST<CQueryGetObjectPropertiesOfTargetExpression*> mObjectPropsOfTargetExpList;
 					CEXPRESSIONLIST<CQueryGetObjectPropertiesBetweenExpression*> mObjectPropsBetweenExpList;
+
+					CEXPRESSIONLIST<CQueryGetDataPropertyFactsExpression*> mDataPropsOfSourceExpList;
+					CEXPRESSIONLIST<CQueryGetDataPropertyFactsExpression*> mDataPropsBetweenExpList;
+					CEXPRESSIONLIST<CQueryGetDataPropertyFactsExpression*> mDataPropsOfLiteralExpList;
+					CEXPRESSIONLIST<CQueryGetDataPropertyFactsExpression*> mDataPropSourcesExpList;
+					CEXPRESSIONLIST<CQueryGetDataPropertyFactsExpression*> mDataFlattenedPropSourcesExpList;
 
 
 

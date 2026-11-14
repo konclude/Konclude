@@ -20,6 +20,10 @@
 
 #include "CConcreteOntologyQueryBasicBuilder.h"
 
+#include "Parser/Expressions/CDataLiteralExpression.h"
+#include "Reasoner/Ontology/CExpressionDataBoxMapping.h"
+#include "Reasoner/Ontology/CIndividualVector.h"
+
 
 namespace Konclude {
 
@@ -36,6 +40,10 @@ namespace Konclude {
 
 
 			CConcreteOntologyQueryBasicBuilder::~CConcreteOntologyQueryBasicBuilder() {
+				for (CBuildExpression* temporaryExpression : mTemporaryExpressionList) {
+					delete temporaryExpression;
+				}
+				mTemporaryExpressionList.clear();
 			}
 
 
@@ -50,6 +58,19 @@ namespace Konclude {
 				CQueryingTemporaryInverseObjectPropertyOfExpression* tmpExp = new CQueryingTemporaryInverseObjectPropertyOfExpression(expression);
 				container.append(tmpExp);
 				return tmpExp;
+			}
+
+
+			CDataLiteralExpression* CConcreteOntologyQueryBasicBuilder::getQueryingDataLiteral(const QString& lexicalValue, const QString& datatypeIRI) {
+				// a query literal argument is not part of the build data of the ontology, so the
+				// expression is created here and owned by the query builder
+				CDataLexicalValueExpression* lexicalValueExpression = new CDataLexicalValueExpression(lexicalValue);
+				CDatatypeExpression* datatypeExpression = new CDatatypeExpression(datatypeIRI);
+				CDataLiteralExpression* dataLiteralExpression = new CDataLiteralExpression(lexicalValueExpression, datatypeExpression);
+				mTemporaryExpressionList.append(lexicalValueExpression);
+				mTemporaryExpressionList.append(datatypeExpression);
+				mTemporaryExpressionList.append(dataLiteralExpression);
+				return dataLiteralExpression;
 			}
 
 
@@ -176,6 +197,20 @@ namespace Konclude {
 
 
 
+			CQueryGetDataPropertyTargetsExpression* CConcreteOntologyQueryBasicBuilder::getGetDataPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& testExpressions, const QString& queryName) {
+				CQueryGetDataPropertyTargetsExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(testExpressions);
+				CIndividualTermExpression* indiTermExp = expSplitter.getFirstIndividualTermExpression();
+				CDataPropertyTermExpression* dataPropTermExp = expSplitter.getFirstDataPropertyTermExpression();
+				if (indiTermExp && dataPropTermExp) {
+					expression = new CQueryGetDataPropertyTargetsExpression(queryName, indiTermExp, dataPropTermExp);
+					mDataPropTargetsExpList.append(expression);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetDataPropertyTargets'-Expression."),this);
+				}
+				return expression;
+			}
+
 			CQueryGetObjectPropertyTargetsExpression* CConcreteOntologyQueryBasicBuilder::getGetObjectPropertyTargetsQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, const QString& queryName) {
 				CQueryGetObjectPropertyTargetsExpression* expression = nullptr;
 				CExpressionSplitter expSplitter(testClassExpressions);
@@ -287,6 +322,71 @@ namespace Konclude {
 
 
 
+
+
+			CQueryGetDataPropertyFactsExpression* CConcreteOntologyQueryBasicBuilder::getGetDataPropertiesOfSourceQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) {
+				CQueryGetDataPropertyFactsExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,1)) {
+					expression = new CQueryGetDataPropertyFactsExpression(queryName, CQueryGetDataPropertyFactsExpression::DPFTDATAPROPERTIESOFSOURCE, expSplitter.getFirstIndividualTermExpression(), nullptr, nullptr, false);
+					mDataPropsOfSourceExpList.append(expression);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetDataPropertiesOfSource'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+			CQueryGetDataPropertyFactsExpression* CConcreteOntologyQueryBasicBuilder::getGetDataPropertiesBetweenQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) {
+				CQueryGetDataPropertyFactsExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,1,0,0,1)) {
+					expression = new CQueryGetDataPropertyFactsExpression(queryName, CQueryGetDataPropertyFactsExpression::DPFTDATAPROPERTIESBETWEEN, expSplitter.getFirstIndividualTermExpression(), nullptr, expSplitter.getFirstDataLiteralTermExpression(), false);
+					mDataPropsBetweenExpList.append(expression);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetDataPropertiesBetween'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+			CQueryGetDataPropertyFactsExpression* CConcreteOntologyQueryBasicBuilder::getGetDataPropertiesOfLiteralQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, const QString& queryName) {
+				CQueryGetDataPropertyFactsExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,0,1)) {
+					expression = new CQueryGetDataPropertyFactsExpression(queryName, CQueryGetDataPropertyFactsExpression::DPFTDATAPROPERTIESOFLITERAL, nullptr, nullptr, expSplitter.getFirstDataLiteralTermExpression(), false);
+					mDataPropsOfLiteralExpList.append(expression);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetDataPropertiesOfLiteral'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+			CQueryGetDataPropertyFactsExpression* CConcreteOntologyQueryBasicBuilder::getGetDataPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, bool negative, const QString& queryName) {
+				CQueryGetDataPropertyFactsExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1,1)) {
+					expression = new CQueryGetDataPropertyFactsExpression(queryName, CQueryGetDataPropertyFactsExpression::DPFTDATAPROPERTYSOURCES, nullptr, expSplitter.getFirstDataPropertyTermExpression(), expSplitter.getFirstDataLiteralTermExpression(), negative);
+					mDataPropSourcesExpList.append(expression);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetDataPropertySources'-Expression."),this);
+				}
+				return expression;
+			}
+
+
+			CQueryGetDataPropertyFactsExpression* CConcreteOntologyQueryBasicBuilder::getGetFlattenedDataPropertySourcesQuery(const CEXPRESSIONLIST<CBuildExpression*>& expressions, bool negative, const QString& queryName) {
+				CQueryGetDataPropertyFactsExpression* expression = nullptr;
+				CExpressionSplitter expSplitter(expressions);
+				if (expSplitter.testForExpressionComposition(0,0,0,0,1,1)) {
+					expression = new CQueryGetDataPropertyFactsExpression(queryName, CQueryGetDataPropertyFactsExpression::DPFTFLATTENEDDATAPROPERTYSOURCES, nullptr, expSplitter.getFirstDataPropertyTermExpression(), expSplitter.getFirstDataLiteralTermExpression(), negative);
+					mDataFlattenedPropSourcesExpList.append(expression);
+				} else {
+					LOG(ERROR,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Couldn't match parameters for 'GetFlattenedDataPropertySources'-Expression."),this);
+				}
+				return expression;
+			}
 
 
 			CQueryGetSubClassesExpression* CConcreteOntologyQueryBasicBuilder::getGetSubClassesQuery(const CEXPRESSIONLIST<CBuildExpression*>& testClassExpressions, bool direct, const QString& queryName) {
@@ -874,6 +974,29 @@ namespace Konclude {
 					indiName = tmpNamedIndiExp->getName();
 				}
 				return indiName;
+			}
+
+
+			CDataLiteral* CConcreteOntologyQueryBasicBuilder::getDataLiteralFromBuildExpression(CDataLiteralTermExpression* buildExp) {
+				CDataLiteral* dataLiteral = nullptr;
+				CDataLiteralExpression* dataLiteralExp = dynamic_cast<CDataLiteralExpression*>(buildExp);
+				if (dataLiteralExp && dataLiteralExp->getDataLexicalValueExpression() && dataLiteralExp->getDatatypeExpression()) {
+					// the query constructs its literal argument expression itself (it is not an axiom
+					// expression of the build data), so the data literal object is resolved by the
+					// lexical value and the datatype IRI against the data box of the ontology
+					QString lexicalValue = dataLiteralExp->getDataLexicalValueExpression()->getName();
+					QString datatypeIRI = dataLiteralExp->getDatatypeExpression()->getName();
+					CExpressionDataBoxMapping* expDataBoxMapping = mOntology->getDataBoxes()->getExpressionDataBoxMapping();
+					CBUILDHASH<QPair<CDataLexicalValueExpression*, CDatatype*>, CDataLiteral*>* dataLiteralHash = expDataBoxMapping->getDataLexicalValueExpressionDatatypePairDataLiteralHash();
+					for (CBUILDHASH<QPair<CDataLexicalValueExpression*, CDatatype*>, CDataLiteral*>::const_iterator it = dataLiteralHash->constBegin(), itEnd = dataLiteralHash->constEnd(); it != itEnd && !dataLiteral; ++it) {
+						CDataLexicalValueExpression* hashCodeLexicalValue = it.key().first;
+						CDatatype* hashCodeDatatype = it.key().second;
+						if (hashCodeLexicalValue && hashCodeDatatype && it.value() && hashCodeLexicalValue->getName() == lexicalValue && hashCodeDatatype->getDatatypeIRI() == datatypeIRI) {
+							dataLiteral = it.value();
+						}
+					}
+				}
+				return dataLiteral;
 			}
 
 
@@ -1572,6 +1695,144 @@ namespace Konclude {
 
 
 
+
+				foreach (CQueryGetDataPropertyTargetsExpression* dataPropTargetsExp, mDataPropTargetsExpList) {
+					QString queryName = dataPropTargetsExp->getName();
+					CIndividualTermExpression* indiTermExp = dataPropTargetsExp->getIndividualTermExpression();
+					CDataPropertyTermExpression* dataPropTermExp = dataPropTargetsExp->getDataPropertyTermExpression();
+
+					if (indiTermExp && dataPropTermExp) {
+						CRole* role = getRoleFromBuildExpression(dataPropTermExp);
+						CIndividualReference individualReference = getIndividualReferenceFromBuildExpression(indiTermExp);
+						QString individualName = getIndividualNameFromBuildExpression(indiTermExp);
+
+						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
+						CDataPropertyTargetsQuery *query = new CDataPropertyTargetsQuery(mOntology,calcConfig, individualReference, individualName, role,queryName);
+
+						CQueryStatisticsCollectionStrings* queryStats = nullptr;
+						if (confBuildQueryStats) {
+							queryStats = new CQueryStatisticsCollectionStrings();
+						}
+						query->setQueryStatistics(queryStats);
+
+						queryList.append(query);
+						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated DataPropertyTargets-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					}
+				}
+				foreach (CQueryGetDataPropertyFactsExpression* dataPropFactsExp, mDataPropsOfSourceExpList) {
+					QString queryName = dataPropFactsExp->getName();
+					CIndividualTermExpression* indiTermExp = dataPropFactsExp->getIndividualTermExpression();
+					if (indiTermExp) {
+						CIndividualReference individualReference = getIndividualReferenceFromBuildExpression(indiTermExp);
+						QString individualName = getIndividualNameFromBuildExpression(indiTermExp);
+
+						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
+						CDataPropertyFactsQuery *query = new CDataPropertyFactsQuery(mOntology,calcConfig, CDataPropertyFactsQuery::DPFQK_DATAPROPERTIESOFSOURCE, individualReference, individualName, nullptr, nullptr, false, queryName);
+
+						CQueryStatisticsCollectionStrings* queryStats = nullptr;
+						if (confBuildQueryStats) {
+							queryStats = new CQueryStatisticsCollectionStrings();
+						}
+						query->setQueryStatistics(queryStats);
+
+						queryList.append(query);
+						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated DataPropertiesOfSource-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					}
+				}
+
+				foreach (CQueryGetDataPropertyFactsExpression* dataPropFactsExp, mDataPropsBetweenExpList) {
+					QString queryName = dataPropFactsExp->getName();
+					CIndividualTermExpression* indiTermExp = dataPropFactsExp->getIndividualTermExpression();
+					CDataLiteral* dataLiteral = getDataLiteralFromBuildExpression(dataPropFactsExp->getDataLiteralTermExpression());
+					if (indiTermExp && dataPropFactsExp->getDataLiteralTermExpression()) {
+						if (!dataLiteral) {
+							LOG(WARNING,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("The data literal of a 'GetDataPropertiesBetween'-Expression does not occur in the ontology; no data property is answered."),this);
+						}
+						CIndividualReference individualReference = getIndividualReferenceFromBuildExpression(indiTermExp);
+						QString individualName = getIndividualNameFromBuildExpression(indiTermExp);
+
+						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
+						CDataPropertyFactsQuery *query = new CDataPropertyFactsQuery(mOntology,calcConfig, CDataPropertyFactsQuery::DPFQK_DATAPROPERTIESBETWEEN, individualReference, individualName, nullptr, dataLiteral, false, queryName);
+
+						CQueryStatisticsCollectionStrings* queryStats = nullptr;
+						if (confBuildQueryStats) {
+							queryStats = new CQueryStatisticsCollectionStrings();
+						}
+						query->setQueryStatistics(queryStats);
+
+						queryList.append(query);
+						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated DataPropertiesBetween-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					}
+				}
+
+				foreach (CQueryGetDataPropertyFactsExpression* dataPropFactsExp, mDataPropsOfLiteralExpList) {
+					QString queryName = dataPropFactsExp->getName();
+					CDataLiteral* dataLiteral = getDataLiteralFromBuildExpression(dataPropFactsExp->getDataLiteralTermExpression());
+					if (dataPropFactsExp->getDataLiteralTermExpression()) {
+						if (!dataLiteral) {
+							LOG(WARNING,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("The data literal of a 'GetDataPropertiesOfLiteral'-Expression does not occur in the ontology; no data property is answered."),this);
+						}
+						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
+						CDataPropertyFactsQuery *query = new CDataPropertyFactsQuery(mOntology,calcConfig, CDataPropertyFactsQuery::DPFQK_DATAPROPERTIESOFLITERAL, CIndividualReference(), QString(), nullptr, dataLiteral, false, queryName);
+
+						CQueryStatisticsCollectionStrings* queryStats = nullptr;
+						if (confBuildQueryStats) {
+							queryStats = new CQueryStatisticsCollectionStrings();
+						}
+						query->setQueryStatistics(queryStats);
+
+						queryList.append(query);
+						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated DataPropertiesOfLiteral-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					}
+				}
+
+				foreach (CQueryGetDataPropertyFactsExpression* dataPropFactsExp, mDataPropSourcesExpList) {
+					QString queryName = dataPropFactsExp->getName();
+					CDataPropertyTermExpression* dataPropTermExp = dataPropFactsExp->getDataPropertyTermExpression();
+					CDataLiteral* dataLiteral = getDataLiteralFromBuildExpression(dataPropFactsExp->getDataLiteralTermExpression());
+					if (dataPropTermExp && dataPropFactsExp->getDataLiteralTermExpression()) {
+						if (!dataLiteral) {
+							LOG(WARNING,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("The data literal of a 'GetDataPropertySources'-Expression does not occur in the ontology; no individual is answered as a positive source."),this);
+						}
+						CRole* role = getRoleFromBuildExpression(dataPropTermExp);
+
+						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
+						CDataPropertyFactsQuery *query = new CDataPropertyFactsQuery(mOntology,calcConfig, CDataPropertyFactsQuery::DPFQK_DATAPROPERTYSOURCES, CIndividualReference(), QString(), role, dataLiteral, dataPropFactsExp->isNegative(), queryName);
+
+						CQueryStatisticsCollectionStrings* queryStats = nullptr;
+						if (confBuildQueryStats) {
+							queryStats = new CQueryStatisticsCollectionStrings();
+						}
+						query->setQueryStatistics(queryStats);
+
+						queryList.append(query);
+						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated DataPropertySources-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					}
+				}
+
+				foreach (CQueryGetDataPropertyFactsExpression* dataPropFactsExp, mDataFlattenedPropSourcesExpList) {
+					QString queryName = dataPropFactsExp->getName();
+					CDataPropertyTermExpression* dataPropTermExp = dataPropFactsExp->getDataPropertyTermExpression();
+					CDataLiteral* dataLiteral = getDataLiteralFromBuildExpression(dataPropFactsExp->getDataLiteralTermExpression());
+					if (dataPropTermExp && dataPropFactsExp->getDataLiteralTermExpression()) {
+						if (!dataLiteral) {
+							LOG(WARNING,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("The data literal of a 'GetFlattenedDataPropertySources'-Expression does not occur in the ontology; no individual is answered as a positive source."),this);
+						}
+						CRole* role = getRoleFromBuildExpression(dataPropTermExp);
+
+						CCalculationConfigurationExtension *calcConfig = new CCalculationConfigurationExtension(config,0);
+						CDataPropertyFactsQuery *query = new CDataPropertyFactsQuery(mOntology,calcConfig, CDataPropertyFactsQuery::DPFQK_FLATTENEDDATAPROPERTYSOURCES, CIndividualReference(), QString(), role, dataLiteral, dataPropFactsExp->isNegative(), queryName);
+
+						CQueryStatisticsCollectionStrings* queryStats = nullptr;
+						if (confBuildQueryStats) {
+							queryStats = new CQueryStatisticsCollectionStrings();
+						}
+						query->setQueryStatistics(queryStats);
+
+						queryList.append(query);
+						LOG(NOTICE,"::Konclude::Reasoner::Generator::ConcreteOntologyQueryBuilder",logTr("Generated FlattenedDataPropertySources-Query '%1' with question '%2'.").arg(query->getQueryName()).arg(query->getQueryString()),this);
+					}
+				}
 
 				foreach (CQueryGetObjectPropertyTargetsExpression* objPropTargetsExp, mObjectPropTargetsExpList) {
 					QString queryName = objPropTargetsExp->getName();

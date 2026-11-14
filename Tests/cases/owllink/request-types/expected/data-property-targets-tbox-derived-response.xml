@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-tbox-derived-request.xml: The value of a data property that is derived from the TBox: the individual has a class that is a subclass of a DataHasValue restriction. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/kb"/>
+ <OK/>
+ <SetOfLiterals>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">tbox</Literal>
+ </SetOfLiterals>
+</ResponseMessage>

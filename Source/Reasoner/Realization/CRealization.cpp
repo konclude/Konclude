@@ -33,6 +33,7 @@ namespace Konclude {
 				mConceptRealization = nullptr;
 				mSameRealization = nullptr;
 				mRoleRealization = nullptr;
+				mDataLiteralRealization = nullptr;
 			}
 
 			bool CRealization::isRealized() {
@@ -83,6 +84,20 @@ namespace Konclude {
 
 			CRealization* CRealization::setRoleRealization(CRoleRealization* roleRealization) {
 				mRoleRealization = roleRealization;
+				return this;
+			}
+
+
+			bool CRealization::hasDataLiteralRealization() {
+				return mDataLiteralRealization != nullptr;
+			}
+
+			CDataLiteralRealization* CRealization::getDataLiteralRealization() {
+				return mDataLiteralRealization;
+			}
+
+			CRealization* CRealization::setDataLiteralRealization(CDataLiteralRealization* dataLiteralRealization) {
+				mDataLiteralRealization = dataLiteralRealization;
 				return this;
 			}
 

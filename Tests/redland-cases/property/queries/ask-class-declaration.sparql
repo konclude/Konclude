@@ -1,0 +1,5 @@
+PREFIX : <http://konclude.test/property#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+# The ontology declares :C1 a class, so the declaration has to be entailed
+# (known failure, see Tests/known-issues.owl.xml).
+ASK { :C1 a owl:Class . }

@@ -20,6 +20,7 @@
 #ifdef KONCLUDE_REDLAND_INTEGRATION
 
 #include "CRedlandRasqalModelSubQueryResolver.h"
+#include "Reasoner/Query/CComplexAssertionsIndividualVariablesAnsweringQuery.h"
 
 
 namespace Konclude {
@@ -1358,6 +1359,66 @@ namespace Konclude {
 
 
 
+			bool is_individual_variable_sub_query(CRedlandRasqalSubQueryProcessingData* subQueryProcData) {
+				return dynamic_cast<CComplexAssertionsIndividualVariablesAnsweringQuery*>(subQueryProcData->getSubQuery()) != nullptr;
+			}
+
+
+			bool is_result_variable(CRedlandRasqalSubQueryProcessingData* subQueryProcData, const QString& varName) {
+				CVariableBindingsAnswersResult* result = dynamic_cast<CVariableBindingsAnswersResult*>(subQueryProcData->getSubQuery()->getQueryResult());
+				if (result) {
+					return result->getVariableNames().contains(varName);
+				}
+				return false;
+			}
+
+
+			QString get_placeholder_iri(CRedlandRasqalSubQueryProcessingData* subQueryProcData, const QString& varName) {
+				cint64 row = subQueryProcData->isBooleanSubQuery() ? 0 : subQueryProcData->getCurrentAnswerRow();
+				return QString("urn:konclude:query-local:%1:%2:%3").arg(subQueryProcData->getSubQueryId()).arg(row).arg(varName);
+			}
+
+
+			librdf_node* create_placeholder_node(CRedlandRasqalSubQueryProcessingData* subQueryProcData, const QString& varName) {
+				librdf_world* world = subQueryProcData->getRedlandWorld();
+				QByteArray bytes = get_placeholder_iri(subQueryProcData, varName).toUtf8();
+#ifdef KONCLUDE_REDLAND_RASQAL_SUBQUERY_LIBRDF_NODE_RESOLVING
+				librdf_uri* uri = librdf_new_uri(world, (const unsigned char*)bytes.constData());
+				return librdf_new_node_from_uri(world, uri);
+#else
+				rasqal_world* rasqalWorld = librdf_world_get_rasqal(world);
+				raptor_uri* uri = (raptor_uri*)librdf_new_uri(world, (const unsigned char*)bytes.constData());
+				return (librdf_node*)rasqal_new_uri_literal(rasqalWorld, uri);
+#endif
+			}
+
+
+			librdf_node* create_constant_node(CRedlandRasqalSubQueryProcessingData* subQueryProcData, CRedlandRasqalSubQueryTripleResolvingData* resolvingData, cint64 pos) {
+				rasqal_graph_pattern_s* gps = (rasqal_graph_pattern_s*)subQueryProcData->getSubqueryGraphPattern();
+				int triplePos = resolvingData->getTriplePosition();
+				if (!gps || !gps->triples || triplePos < 0 || triplePos >= raptor_sequence_size(gps->triples)) {
+					return nullptr;
+				}
+				rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(gps->triples, triplePos);
+				rasqal_literal* literal = nullptr;
+				if (pos == 0) {
+					literal = triple->subject;
+				} else if (pos == 1) {
+					literal = triple->predicate;
+				} else {
+					literal = triple->object;
+				}
+				if (!literal) {
+					return nullptr;
+				}
+#ifdef KONCLUDE_REDLAND_RASQAL_SUBQUERY_LIBRDF_NODE_RESOLVING
+				return rasqal_literal_to_redland_node(subQueryProcData->getRedlandWorld(), literal);
+#else
+				return (librdf_node*)rasqal_new_literal_from_literal(literal);
+#endif
+			}
+
+
 			librdf_node* create_node_from_binding(CRedlandRasqalSubQueryProcessingData* subQueryProcData, CVariableBindingResult* varBin) {
 				librdf_node* node = nullptr;
 				librdf_world* world = subQueryProcData->getRedlandWorld();
@@ -1401,6 +1462,31 @@ namespace Konclude {
 			librdf_node* create_node_from_binding(CRedlandRasqalSubQueryProcessingData* subQueryProcData, QVector<CVariableBindingResult*>* bindingsVec, CRedlandRasqalSubQueryTripleResolvingData* resolvingData, cint64 pos) {
 				librdf_node* node = nullptr;
 				librdf_world* world = subQueryProcData->getRedlandWorld();
+
+				rasqal_variable* variable = resolvingData->getVariable(pos);
+				if (!variable) {
+					// Constant position: preserve the actual RDF term. Without this a
+					// synthesized statement has a NULL predicate/object and the outer
+					// pattern (especially rdf:type) cannot match reliably.
+					return create_constant_node(subQueryProcData, resolvingData, pos);
+				}
+				{
+					QString varName = QString::fromUtf8((const char*)variable->name);
+					if (subQueryProcData->isBooleanSubQuery() && is_individual_variable_sub_query(subQueryProcData)) {
+						// A boolean sub-query has no bindings; represent the witness of
+						// each individual variable with a query-local placeholder so the
+						// pattern can still be materialised for Redland. Class and role
+						// variables are never existential and keep the regular path.
+						return create_placeholder_node(subQueryProcData, varName);
+					}
+					if (is_individual_variable_sub_query(subQueryProcData) && !is_result_variable(subQueryProcData, varName)) {
+						// Non-distinguished individual variable: the result stream does
+						// not carry it. A fresh placeholder per row keeps joins inside
+						// the BGP without computing/returning the hidden binding.
+						return create_placeholder_node(subQueryProcData, varName);
+					}
+				}
+
 				if (!resolvingData->getVariableBound(pos)) {
 					cint64 bindingPos = resolvingData->getBindingsVectorResolvingPosition(pos);
 					if (bindingPos >= 0) {
@@ -1463,6 +1549,7 @@ namespace Konclude {
 
 
 			void load_next_bindings(CRedlandRasqalSubQueryProcessingData* subQueryProcData) {
+				subQueryProcData->incCurrentAnswerRow();
 				*subQueryProcData->getCurrentBindingsVector() = *subQueryProcData->getNextBindingsVector();
 				CVariableBindingsResultIterator* varBindIt = subQueryProcData->getVariableBindingsIterator();
 				for (cint64 i = 0; i < subQueryProcData->getNextBindingsVector()->count(); ++i) {
@@ -1659,6 +1746,11 @@ namespace Konclude {
 				bool requiresBindingReturning = false;
 				QVector<CRedlandRasqalSubQueryTripleResolvingData*>* triplesResolvingDataVec = subQueryProcData->getTriplesResolvingDataVector();
 				librdf_world* world = subQueryProcData->getRedlandWorld();
+				if (triplePos >= triplesResolvingDataVec->size()) {
+					// no resolving data was created for this triple (the sub-query had no answer
+					// result that could be resolved), nothing can be bound (issue #26)
+					return false;
+				}
 				CRedlandRasqalSubQueryTripleResolvingData* tripleResolveData = (*triplesResolvingDataVec)[triplePos];
 
 				if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->subject)) {
@@ -1781,6 +1873,19 @@ namespace Konclude {
 
 					CRedlandRasqalSubQueryTripleResolvingData* newTripleResolvingData = new CRedlandRasqalSubQueryTripleResolvingData(subQueryProcData, triplePos, subjectBindingPos, predicateBindingPos, objectBindingPos);
 
+					// Remember the variable of every variable position. The boolean
+					// sub-query path does not call update_triple_bound_variables_resolving_data,
+					// and the placeholder mapping needs the variable name.
+					if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->subject)) {
+						newTripleResolvingData->setSubjectVariable(rasqal_literal_as_variable(triple->subject));
+					}
+					if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->predicate)) {
+						newTripleResolvingData->setPredicateVariable(rasqal_literal_as_variable(triple->predicate));
+					}
+					if (RASQAL_LITERAL_VARIABLE == rasqal_literal_get_type(triple->object)) {
+						newTripleResolvingData->setObjectVariable(rasqal_literal_as_variable(triple->object));
+					}
+
 					if (triplesResolvingDataVec->size() <= triplePos) {
 						triplesResolvingDataVec->resize(triplePos + 1);
 					}
@@ -1894,9 +1999,15 @@ namespace Konclude {
 
 				if (!subQueryProcData->isInitialized()) {
 					if (subQueryProcData->isBooleanSubQuery()) {
-						QVector<rasqal_literal*> varBoundVec(1);
-						rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(gps->triples, 0);
-						create_triple_resolving_data(subQueryProcData, triple, 0);
+						// A boolean sub-query represents one existential witness. Create
+						// resolving data for every triple of the pattern so Redland can
+						// match all of them; the variables are filled with placeholders
+						// in create_node_from_binding.
+						int subTripleCount = raptor_sequence_size(gps->triples);
+						for (int i = 0; i < subTripleCount; ++i) {
+							rasqal_triple* triple = (rasqal_triple*)raptor_sequence_get_at(gps->triples, i);
+							create_triple_resolving_data(subQueryProcData, triple, i);
+						}
 
 						QByteArray bytes = QString("x").toUtf8();
 						raptor_uri* uri = (raptor_uri*)librdf_new_uri(world, (const unsigned char*)bytes.constData());
@@ -2056,10 +2167,20 @@ namespace Konclude {
 				if (nextPos == 0) {
 					initialize_update_resolving(subQueryProcData);
 				}
+				// A sub-query that has no resolving data had no answer result when it was
+				// initialised (its answer is still composed by Rasqal). It contributes no
+				// matching statements instead of dereferencing a missing entry (issue #26).
+				if (!subQueryProcData->isBooleanSubQuery() && subQueryProcData->getTriplesResolvingDataVector()->isEmpty()) {
+					return librdf_new_empty_stream(world);
+				}
 				if (subQueryProcData->isBooleanSubQuery()) {
-					CRedlandRasqalSubQueryTripleResolvingData* tripleResolvData = get_triple_resolving_data(subQueryProcData, statement, 0);
-					librdf_stream * stream = librdf_new_stream(world, tripleResolvData, is_end_method_stream_next_boolean_result, next_method_stream_next_boolean_result, get_method_stream_next_boolean_result, finished_method_stream_next_boolean_result);
-					return stream;
+					QVector<CRedlandRasqalSubQueryTripleResolvingData*>* resolvingDataVec = subQueryProcData->getTriplesResolvingDataVector();
+					if (nextPos < resolvingDataVec->size()) {
+						CRedlandRasqalSubQueryTripleResolvingData* tripleResolvData = get_triple_resolving_data(subQueryProcData, statement, nextPos);
+						librdf_stream * stream = librdf_new_stream(world, tripleResolvData, is_end_method_stream_next_boolean_result, next_method_stream_next_boolean_result, get_method_stream_next_boolean_result, finished_method_stream_next_boolean_result);
+						return stream;
+					}
+					return librdf_new_empty_stream(world);
 
 				} else if (nextPos == subQueryProcData->getFirstTripleReturningBinding()) {
 					librdf_stream * stream = librdf_new_stream(world, subQueryProcData, is_end_method_stream_next_answer_resolving, next_method_stream_next_answer_resolving, get_method_stream_next_answer_resolving, finished_method_stream_next_answer_resolving);

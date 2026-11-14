@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2002/07/owl#" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    <Prefix name="" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+    <Prefix name="rdf" IRI="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
+    <Prefix name="xml" IRI="http://www.w3.org/XML/1998/namespace"/>
+    <Prefix name="xsd" IRI="http://www.w3.org/2001/XMLSchema#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://www.w3.org/2002/07/owl#Nothing"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneNotCrowded"/>
+    </Declaration>
+    <EquivalentClasses>
+        <Class IRI="http://www.w3.org/2002/07/owl#Nothing"/>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneNotCrowded"/>
+    </EquivalentClasses>
+    <Declaration>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#Pigeon"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#Pigeon"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#CrowdedScene"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#Scene"/>
+    </Declaration>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneCrowded"/>
+    </Declaration>
+    <EquivalentClasses>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#CrowdedScene"/>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#Scene"/>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneCrowded"/>
+    </EquivalentClasses>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#CrowdedScene"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#Hole"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#Hole"/>
+        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
+    </SubClassOf>
+    <Declaration>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#CrowdedHole"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#CrowdedHole"/>
+        <Class IRI="http://konclude.test/dl/pigeonhole-asserted-scene#Hole"/>
+    </SubClassOf>
+</Ontology>

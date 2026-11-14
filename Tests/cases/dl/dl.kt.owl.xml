@@ -1,158 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Control ontology for the DL corner cases (consistency tests).
-  Each expectation derived from the DL semantics. Picked up by discovery.
-  Note: usesOntology is a relative file name in the same directory.
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/dl">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- Suite: the folder containing this control ontology. Run configurations
-       (kt:usesTestRunConfig) and reasoner configurations (kt:usesTestSystemConfig) may be
-       assigned to the suite and apply to all of its tests. -->
   <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>DL-corner-cases</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>dl</Literal></DataPropertyAssertion>
-
-  <!-- Per test: ClassAssertion(ConsistencyTest) + task + usesOntology + expectedResult -->
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-dl"/><Literal>Control ontology for the DL corner cases (consistency tests). Each expectation derived from the DL semantics. . Note: usesOntology is a relative file name in the same directory. Run configurations (kt:usesTestRunConfig) and reasoner configurations (kt:usesTestSystemConfig) may be assigned to the suite and apply to all of its tests.</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>Per test: ClassAssertion(ConsistencyTest) + task + usesOntology + expectedResult</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>disjoint-violation-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>Test case: functional-two-fillers.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>functional-two-fillers-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:functional-two-fillers"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>Test case: functional-merge.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>functional-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:functional-merge"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>Test case: maxcard-violation.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>maxcard-violation-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:maxcard-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>Test case: mincard-maxcard-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>mincard-maxcard-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>Test case: mincard3-maxcard2-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>mincard3-maxcard2-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:mincard3-maxcard2-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>Test case: mincard-maxcard-equal.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>mincard-maxcard-equal-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:mincard-maxcard-equal"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>Test case: qualified-min-max-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>qualified-min-max-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:qualified-min-max-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>Test case: subrole-min-max-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>subrole-min-max-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:subrole-min-max-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>Test case: superrole-min-max-ok.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>superrole-min-max-ok-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:superrole-min-max-ok"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>Test case: unqualified-qualified-ok.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>unqualified-qualified-ok-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:unqualified-qualified-ok"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>Test case: data-min-max-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>data-min-max-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:data-min-max-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>Test case: irreflexive-selfloop.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>irreflexive-selfloop-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:irreflexive-selfloop"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>Test case: asymmetric-violation.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>asymmetric-violation-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:asymmetric-violation"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>Test case: nominal-oneof.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>nominal-oneof-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:nominal-oneof"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:transitive"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>Test case: transitive.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>transitive-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:transitive"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>Test case: datatype-conflict.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>datatype-conflict-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datatype-conflict"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>Test case: datatype-range.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>datatype-range-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datatype-range"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>Test case: disjoint-roles.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>disjoint-roles-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:disjoint-roles"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>Test case: simple-consistent.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>simple-consistent-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:simple-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>Test case: complement-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>complement-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:complement-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>Test case: all-some-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>all-some-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:all-some-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>A data max cardinality of one on xsd:dateTimeStamp is consistent with a single value of the datatype.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>datetimestamp-maxcard-ok-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-ok"/><Literal>consistent</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>Two distinct xsd:dateTimeStamp values violate a data max cardinality of one.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>datetimestamp-maxcard-clash-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:datetimestamp-maxcard-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
-  <!-- An existential restriction whose successor is an inverse-at-most witness: satisfying it
-       requires merging the named individual with another successor, which the saturation must
-       not decide on its own. -->
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>An existential restriction whose successor is an inverse-at-most witness: satisfying it requires merging the named individual with another successor, which the saturation must not decide on its own.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>inv-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-merge"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
-  <!-- The same contradiction behind a class definition (the asserted concept does not reveal it). -->
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>The same contradiction behind a class definition (the asserted concept does not reveal it).</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>inv-atmost-type-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:inv-atmost-type-merge"/><Literal>inconsistent</Literal></DataPropertyAssertion>
 
-
-  <!-- Classification of defined classes with all-values restrictions. -->
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/><Literal>class-classification</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/><Literal>defined-classes-ontology.owl.xml</Literal></DataPropertyAssertion>
@@ -160,4 +171,170 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/><Literal>Margherita is subsumed by VegetarianPizza through the all-values restriction.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:sourceCase"/><NamedIndividual abbreviatedIRI="kt:dl-defined-classes"/><Literal>pizza.owl</Literal></DataPropertyAssertion>
 
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-not-crowded"/><Literal>Issue #19: three pigeons on two holes force one hole to hold two pigeons, so the scene of that hole is a CrowdedScene and Scene is subsumed by CrowdedScene. This is the classifier's own test concept (Scene and not CrowdedScene) and it must be unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-not-crowded"/><Literal>pigeonhole-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-not-crowded"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-crowded"/><Literal>Negative control for the pigeonhole case: the scene itself is a CrowdedScene, so (Scene and CrowdedScene) must stay satisfiable. A fix for the missing subsumption must not make this class unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-crowded"/><Literal>pigeonhole-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-crowded"/><Literal>http://konclude.test/dl/pigeonhole#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-scene-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-not-crowded"/><Literal>Issue #19, reduced variant from the issue discussion: one hole, two pigeons and the redundant axiom CrowdedHole subsumed by Hole. Removing that axiom makes the answer correct, so it belongs to the reproduction; the test concept must be unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-not-crowded"/><Literal>pigeonhole-2p1h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole-2p1h#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-not-crowded"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-crowded"/><Literal>Negative control for the reduced pigeonhole variant: (Scene and CrowdedScene) must stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-crowded"/><Literal>pigeonhole-2p1h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-crowded"/><Literal>http://konclude.test/dl/pigeonhole-2p1h#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-scene-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-negated-conclusion"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-negated-conclusion"/><Literal>Issue #19 as an ABox test: the ontology entails CrowdedScene(s), so asserting its negation must make the knowledge base inconsistent. This case passes and guards the ABox path while the cached subsumption test is repaired.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-negated-conclusion"/><Literal>pigeonhole-negated-conclusion-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-negated-conclusion"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-classification"/><Literal>pigeonhole-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-classification"/><Literal>expected/pigeonhole-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-classification"/><Literal>Issue #19 as reported: the classification must place Scene and CrowdedScene in one equivalence class (and TestSceneNotCrowded under owl:Nothing).</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-classification"/><Literal>pigeonhole-2p1h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-classification"/><Literal>expected/pigeonhole-2p1h-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p1h-classification"/><Literal>Issue #19, reduced variant: Scene and CrowdedScene must be classified as equivalent.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-unsatisfiable"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-unsatisfiable"/><Literal>Nominal merge edge case: Node is the nominal {n}, k is an r-predecessor of n and a Forbidden, so (Node and (inverse r only (not Forbidden))) is inconsistent. The universal restriction is expanded on the test node before the merge with the nominal moves the link of k onto it, so the merge has to apply the restriction to the moved neighbour as well.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-unsatisfiable"/><Literal>nominal-merge-forall-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-unsatisfiable"/><Literal>http://konclude.test/dl/nominal-merge-forall#TestForallMerge</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-unsatisfiable"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-satisfiable"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-satisfiable"/><Literal>Negative control for the nominal merge edge case: the same universal restriction with the compatible filler Marker must stay satisfiable, so a fix for the missing application to the merged neighbours must not over-constrain them.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-satisfiable"/><Literal>nominal-merge-forall-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-satisfiable"/><Literal>http://konclude.test/dl/nominal-merge-forall#TestForallMergeOk</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-satisfiable"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-exists"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-exists"/><Literal>The existential counterpart of the nominal merge edge case: (Node and (inverse r some Forbidden)) is satisfiable and, because k is an r-predecessor of n, equivalent to Node, so the entailment Node is subsumed by (inverse r some Forbidden) is checked by the classification test of the same ontology.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-exists"/><Literal>nominal-merge-forall-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-exists"/><Literal>http://konclude.test/dl/nominal-merge-forall#TestExistsMerge</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-exists"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-classification"/><Literal>nominal-merge-forall-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-classification"/><Literal>expected/nominal-merge-forall-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-merge-forall-classification"/><Literal>Classification of the nominal merge edge case: TestForallMerge must be placed under owl:Nothing, TestForallMergeOk under Node, and Node and TestExistsMerge must be equivalent (the merge moves the predecessor link of k onto the nominal).</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-not-crowded"/><Literal>Completion graph caching, issue #19 variant (the holes are linked to the scene by role assertions): (Scene and not CrowdedScene) is unsatisfiable. The test merges the scene nominal into the test node, so the nodes that the cached model merged into the holes have to be rebuilt (criteria C8 and C11).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-not-crowded"/><Literal>pigeonhole-asserted-scene-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-not-crowded"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-crowded"/><Literal>Control for the issue #19 variant (the holes are linked to the scene by role assertions): (Scene and CrowdedScene) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-crowded"/><Literal>pigeonhole-asserted-scene-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-crowded"/><Literal>http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-scene-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-classification"/><Literal>pigeonhole-asserted-scene-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-classification"/><Literal>expected/pigeonhole-asserted-scene-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-asserted-scene-classification"/><Literal>Classification of the issue #19 variant (the holes are linked to the scene by role assertions): runs many satisfiability tests on the same cached completion graph, Scene and CrowdedScene are equivalent.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-not-crowded"/><Literal>Completion graph caching, issue #19 variant (four pigeons on three holes, so three merged hole successors per model): (Scene and not CrowdedScene) is unsatisfiable. The test merges the scene nominal into the test node, so the nodes that the cached model merged into the holes have to be rebuilt (criteria C8 and C11).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-not-crowded"/><Literal>pigeonhole-4p3h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole-4p3h#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-not-crowded"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-crowded"/><Literal>Control for the issue #19 variant (four pigeons on three holes, so three merged hole successors per model): (Scene and CrowdedScene) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-crowded"/><Literal>pigeonhole-4p3h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-crowded"/><Literal>http://konclude.test/dl/pigeonhole-4p3h#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-scene-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-classification"/><Literal>pigeonhole-4p3h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-classification"/><Literal>expected/pigeonhole-4p3h-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-4p3h-classification"/><Literal>Classification of the issue #19 variant (four pigeons on three holes, so three merged hole successors per model): runs many satisfiability tests on the same cached completion graph, Scene and CrowdedScene are equivalent.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-not-crowded"/><Literal>Completion graph caching, issue #19 variant (negative control, two pigeons on two holes need not share a hole): (Scene and not CrowdedScene) is satisfiable. The rebuilt part of the cached model must not produce a clash that the knowledge base does not entail.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-not-crowded"/><Literal>pigeonhole-2p2h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole-2p2h#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-not-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-crowded"/><Literal>Control for the issue #19 variant (negative control, two pigeons on two holes need not share a hole): (Scene and CrowdedScene) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-crowded"/><Literal>pigeonhole-2p2h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-crowded"/><Literal>http://konclude.test/dl/pigeonhole-2p2h#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-scene-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-classification"/><Literal>pigeonhole-2p2h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-classification"/><Literal>expected/pigeonhole-2p2h-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-pigeonhole-2p2h-classification"/><Literal>Classification of the issue #19 variant (negative control, two pigeons on two holes need not share a hole): runs many satisfiability tests on the same cached completion graph, Scene is not subsumed by CrowdedScene.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-any-pigeon"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-any-pigeon"/><Literal>Control: a pigeon that sits at the not crowded nominal h can be the pigeon a that already sits there.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-any-pigeon"/><Literal>nominal-qualified-atmost-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-any-pigeon"/><Literal>http://konclude.test/dl/nominal-qualified-atmost#TestAnyPigeon</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-any-pigeon"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-a"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-a"/><Literal>Control: the individual a sitting at h is already entailed.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-a"/><Literal>nominal-qualified-atmost-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-a"/><Literal>http://konclude.test/dl/nominal-qualified-atmost#TestPigeonAAtH</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-a"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-second-pigeon"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-second-pigeon"/><Literal>A second pigeon, different from a, at the nominal h that has at most one pigeon sitting at it (written as not (>= 2 inverse(sitsAt).Pigeon)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-second-pigeon"/><Literal>nominal-qualified-atmost-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-second-pigeon"/><Literal>http://konclude.test/dl/nominal-qualified-atmost#TestSecondPigeon</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-second-pigeon"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-b"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-b"/><Literal>The pigeon b (different from a) cannot sit at the nominal h that has at most one pigeon sitting at it.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-b"/><Literal>nominal-qualified-atmost-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-b"/><Literal>http://konclude.test/dl/nominal-qualified-atmost#TestPigeonBAtH</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-qualified-atmost-pigeon-b"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-asserted"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-asserted"/><Literal>The nominal h1 has at most one Pigeon sitsAt-predecessor and the pigeon a sits at h1 by a role assertion; a test that adds the different pigeon b at h1 is unsatisfiable. Needs the at-most re-application on the new link (the saturation must not consume the dynamic reapply entries of the cached graph) and the C4 check of the cached h1 for neighbours that are new in the test or only expanded from the backend cache.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-asserted"/><Literal>nominal-atmost-new-neighbour-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-asserted"/><Literal>http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-asserted"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-value"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-value"/><Literal>As before, but the pigeon d sits at h2 by (sitsAt value h2)(d), so the existing link is part of the cached graph and the new one comes from the test node.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-value"/><Literal>nominal-atmost-new-neighbour-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-value"/><Literal>http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-value"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-unqualified"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-unqualified"/><Literal>An unqualified at-most restriction (at most two sitsAt-predecessors) on the nominal h3 with two asserted predecessors; the third one added by the test is unsatisfiable. C4 has to count new neighbours for unqualified restrictions as well.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-unqualified"/><Literal>nominal-atmost-new-neighbour-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-unqualified"/><Literal>http://konclude.test/dl/nominal-atmost-new-neighbour#TestBAtH3</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-unqualified"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-non-pigeon"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-non-pigeon"/><Literal>Control: a non-pigeon at h1 does not count for the qualified at-most restriction, so it stays satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-non-pigeon"/><Literal>nominal-atmost-new-neighbour-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-non-pigeon"/><Literal>http://konclude.test/dl/nominal-atmost-new-neighbour#TestNonPigeonAtH1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-atmost-new-neighbour-non-pigeon"/><Literal>satisfiable</Literal></DataPropertyAssertion>
 </Ontology>

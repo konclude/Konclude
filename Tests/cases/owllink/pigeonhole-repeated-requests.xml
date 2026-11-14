@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Issue #19 over OWLlink: every request runs a satisfiability test on the same cached completion
+     graph. The same question is asked twice and is followed by other tests, so an answer that
+     depends on an earlier test (state written into the shared cached graph) shows up as a changed
+     answer. Expected, in response order: false, false, true, false, true. -->
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/kb/pigeonhole"/>
+  <Tell kb="http://konclude.test/kb/pigeonhole">
+    <owl:Declaration><owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedHole"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedScene"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="http://konclude.test/dl/pigeonhole#Pigeon"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneNotCrowded"/></owl:Declaration>
+    <owl:Declaration><owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneCrowded"/></owl:Declaration>
+    <owl:Declaration><owl:ObjectProperty IRI="http://konclude.test/dl/pigeonhole#sitsAt"/></owl:Declaration>
+    <owl:Declaration><owl:ObjectProperty IRI="http://konclude.test/dl/pigeonhole#inScene"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#h1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#h2"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p1"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p2"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p3"/></owl:Declaration>
+    <owl:Declaration><owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#s"/></owl:Declaration>
+    <owl:SubObjectPropertyOf>
+      <owl:ObjectProperty IRI="http://konclude.test/dl/pigeonhole#sitsAt"/>
+      <owl:ObjectProperty IRI="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+    </owl:SubObjectPropertyOf>
+    <owl:EquivalentClasses>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedHole"/>
+      <owl:ObjectIntersectionOf>
+        <owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/>
+        <owl:ObjectMinCardinality cardinality="2">
+          <owl:ObjectInverseOf><owl:ObjectProperty IRI="http://konclude.test/dl/pigeonhole#sitsAt"/></owl:ObjectInverseOf>
+          <owl:Class IRI="http://konclude.test/dl/pigeonhole#Pigeon"/>
+        </owl:ObjectMinCardinality>
+      </owl:ObjectIntersectionOf>
+    </owl:EquivalentClasses>
+    <owl:SubClassOf><owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedHole"/><owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/></owl:SubClassOf>
+    <owl:EquivalentClasses>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedScene"/>
+      <owl:ObjectIntersectionOf>
+        <owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/>
+        <owl:ObjectSomeValuesFrom>
+          <owl:ObjectInverseOf><owl:ObjectProperty IRI="http://konclude.test/dl/pigeonhole#inScene"/></owl:ObjectInverseOf>
+          <owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedHole"/>
+        </owl:ObjectSomeValuesFrom>
+      </owl:ObjectIntersectionOf>
+    </owl:EquivalentClasses>
+    <owl:SubClassOf><owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedScene"/><owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/></owl:SubClassOf>
+    <owl:EquivalentClasses>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/>
+      <owl:ObjectOneOf>
+        <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#h1"/>
+        <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#h2"/>
+      </owl:ObjectOneOf>
+    </owl:EquivalentClasses>
+    <owl:SubClassOf>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/>
+      <owl:ObjectSomeValuesFrom>
+        <owl:ObjectProperty IRI="http://konclude.test/dl/pigeonhole#inScene"/>
+        <owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/>
+      </owl:ObjectSomeValuesFrom>
+    </owl:SubClassOf>
+    <owl:EquivalentClasses>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#Pigeon"/>
+      <owl:ObjectOneOf>
+        <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p1"/>
+        <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p2"/>
+        <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p3"/>
+      </owl:ObjectOneOf>
+    </owl:EquivalentClasses>
+    <owl:SubClassOf>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#Pigeon"/>
+      <owl:ObjectExactCardinality cardinality="1">
+        <owl:ObjectProperty IRI="http://konclude.test/dl/pigeonhole#sitsAt"/>
+        <owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/>
+      </owl:ObjectExactCardinality>
+    </owl:SubClassOf>
+    <owl:EquivalentClasses>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/>
+      <owl:ObjectOneOf><owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#s"/></owl:ObjectOneOf>
+    </owl:EquivalentClasses>
+    <owl:DisjointClasses><owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/><owl:Class IRI="http://konclude.test/dl/pigeonhole#Pigeon"/></owl:DisjointClasses>
+    <owl:DisjointClasses><owl:Class IRI="http://konclude.test/dl/pigeonhole#Hole"/><owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/></owl:DisjointClasses>
+    <owl:DisjointClasses><owl:Class IRI="http://konclude.test/dl/pigeonhole#Pigeon"/><owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/></owl:DisjointClasses>
+    <owl:DifferentIndividuals>
+      <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p1"/>
+      <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p2"/>
+      <owl:NamedIndividual IRI="http://konclude.test/dl/pigeonhole#p3"/>
+    </owl:DifferentIndividuals>
+      <owl:EquivalentClasses>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneNotCrowded"/>
+      <owl:ObjectIntersectionOf>
+        <owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/>
+        <owl:ObjectComplementOf><owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedScene"/></owl:ObjectComplementOf>
+      </owl:ObjectIntersectionOf>
+    </owl:EquivalentClasses>
+      <owl:EquivalentClasses>
+      <owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneCrowded"/>
+      <owl:ObjectIntersectionOf>
+        <owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/>
+        <owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedScene"/>
+      </owl:ObjectIntersectionOf>
+    </owl:EquivalentClasses>
+  </Tell>
+  <IsClassSatisfiable kb="http://konclude.test/kb/pigeonhole"><owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneNotCrowded"/></IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/pigeonhole"><owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneNotCrowded"/></IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/pigeonhole"><owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneCrowded"/></IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/pigeonhole"><owl:Class IRI="http://konclude.test/dl/pigeonhole#TestSceneNotCrowded"/></IsClassSatisfiable>
+  <IsClassSubsumedBy kb="http://konclude.test/kb/pigeonhole"><owl:Class IRI="http://konclude.test/dl/pigeonhole#Scene"/><owl:Class IRI="http://konclude.test/dl/pigeonhole#CrowdedScene"/></IsClassSubsumedBy>
+  <ReleaseKB kb="http://konclude.test/kb/pigeonhole"/>
+</RequestMessage>

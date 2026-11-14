@@ -5190,7 +5190,8 @@ namespace Konclude {
 									CRole* superRole = superRoleIt->getData();
 									bool inversedSuperRole = superRoleIt->isNegated();
 									if (!inversedSuperRole) {
-										CReapplyQueueIterator reapplyRoleIt(nonDetNominalReapplyRoleSuccHash->getRoleReapplyIterator(superRole));
+										// the cached completion graph is shared, so its dynamic reapply entries must not be consumed
+										CReapplyQueueIterator reapplyRoleIt(nonDetNominalReapplyRoleSuccHash->getRoleReapplyIterator(superRole, false));
 										while (reapplyRoleIt.hasNext()) {
 											CReapplyConceptDescriptor* reapplyDes = reapplyRoleIt.next();
 											CConceptDescriptor* reapplyConDes = reapplyDes->getConceptDescriptor();
@@ -7107,7 +7108,8 @@ namespace Konclude {
 									if (inversedSuperRole) {
 										if (nominalReapplyRoleSuccHash) {
 
-											CReapplyQueueIterator reapplyRoleIt(nominalReapplyRoleSuccHash->getRoleReapplyIterator(superRole));
+											// the cached completion graph is shared, so its dynamic reapply entries must not be consumed
+											CReapplyQueueIterator reapplyRoleIt(nominalReapplyRoleSuccHash->getRoleReapplyIterator(superRole, false));
 											while (reapplyRoleIt.hasNext()) {
 												CReapplyConceptDescriptor* reapplyDes = reapplyRoleIt.next();
 												CConceptDescriptor* reapplyConDes = reapplyDes->getConceptDescriptor();

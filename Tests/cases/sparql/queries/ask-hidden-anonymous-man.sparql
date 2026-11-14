@@ -1,0 +1,3 @@
+PREFIX sp: <http://konclude.test/hidden-man#>
+# Closed ASK over an anonymous Man; the boolean path must answer true.
+ASK { ?w a sp:Woman . ?c a sp:Man }

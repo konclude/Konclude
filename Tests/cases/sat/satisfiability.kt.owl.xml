@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Satisfiability tests with full class IRIs (kt:testClass) against the shared
-  satisfiability-verification-ontology.owl.xml. The fixture contains both
-  satisfiable and unsatisfiable named classes, addressed by their full IRI.
--->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/sat">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- Suite: the folder containing this control ontology. All tests of this file
-       belong to it by default; kt:memberOfSuite states the membership explicitly. -->
   <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-sat"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-sat"/><Literal>Satisfiability</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-sat"/><Literal>sat</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-sat"/><Literal>Satisfiability tests with full class IRIs (kt:testClass) against the shared satisfiability-verification-ontology.owl.xml. The fixture contains both satisfiable and unsatisfiable named classes, addressed by their full IRI. All tests of this file belong to it by default; kt:memberOfSuite states the membership explicitly.</Literal></DataPropertyAssertion>
 
   <!-- Run configurations (harness settings: timeout and repetitions). The suite
        is executed once with kt:run-default; a test that adds kt:run-repeat2 is
@@ -33,22 +27,25 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-a"/><Literal>satisfiability-verification-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-a"/><Literal>http://konclude.test/sat#A</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-a"/><Literal>satisfiable</Literal></DataPropertyAssertion>
-  <!-- Explicit membership (same suite as the default of this file). -->
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:memberOfSuite"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-a"/><NamedIndividual abbreviatedIRI="kt:suite-sat"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-a"/><Literal>Explicit membership (same suite as the default of this file).</Literal></DataPropertyAssertion>
   <!-- Additional run configuration on top of the suite's kt:run-default. -->
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-a"/><NamedIndividual abbreviatedIRI="kt:run-repeat2"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-c-with-existential-restriction"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-c-with-existential-restriction"/><Literal>Test case: satisfiable-class-c-with-existential-restriction.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-c-with-existential-restriction"/><Literal>satisfiability-verification-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-c-with-existential-restriction"/><Literal>http://konclude.test/sat#C</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:satisfiable-class-c-with-existential-restriction"/><Literal>satisfiable</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-disjoint-axioms"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-disjoint-axioms"/><Literal>Test case: unsatisfiable-class-with-disjoint-axioms.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-disjoint-axioms"/><Literal>satisfiability-verification-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-disjoint-axioms"/><Literal>http://konclude.test/sat#Unsat</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-disjoint-axioms"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-complement-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-complement-clash"/><Literal>Test case: unsatisfiable-class-with-complement-clash.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-complement-clash"/><Literal>satisfiability-verification-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-complement-clash"/><Literal>http://konclude.test/sat#EmptyInter</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:unsatisfiable-class-with-complement-clash"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>

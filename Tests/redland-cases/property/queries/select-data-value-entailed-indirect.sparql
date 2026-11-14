@@ -1,0 +1,6 @@
+PREFIX : <http://konclude.test/hasvalue#>
+# All values of :dp1 over all individuals: the asserted value of :a (through the
+# sub-property :dp2), the restriction value of :a and the value that :c derives
+# from the TBox (:B <= :C, :C <= (dp1 hasValue "tbox")).
+SELECT ?s ?val
+WHERE { ?s :dp1 ?val . }

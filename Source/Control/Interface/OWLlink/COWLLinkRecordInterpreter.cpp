@@ -627,6 +627,21 @@ namespace Konclude {
 														}
 
 
+														CDataLiteralSetResult* dataLiteralSetResult = dynamic_cast<CDataLiteralSetResult*>(queryResult);
+														if (dataLiteralSetResult) {
+															queryResultNode = document.createElement(QString("SetOfLiterals"));
+															for (CDataLiteral* dataLiteral : *dataLiteralSetResult->getDataLiteralList()) {
+																QDomElement literalNode = document.createElement(QString("Literal"));
+																CDatatype* datatype = dataLiteral->getDatatype();
+																if (datatype) {
+																	literalNode.setAttribute("datatypeIRI", datatype->getDatatypeIRI());
+																}
+																QDomText literalTextNode = document.createTextNode(dataLiteral->getLexicalDataLiteralValueString());
+																literalNode.appendChild(literalTextNode);
+																queryResultNode.appendChild(literalNode);
+															}
+															domEl = queryResultNode;
+														}
 														CIndividualSynsetsResult* individualSynsetsResult = dynamic_cast<CIndividualSynsetsResult*>(queryResult);
 														if (individualSynsetsResult) {
 															queryResultNode = document.createElement("SetOfIndividualSynsets");

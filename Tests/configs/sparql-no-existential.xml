@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Explicitly disables the existential interpretation; used by the negative
+     ASK control. -->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

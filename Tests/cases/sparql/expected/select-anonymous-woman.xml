@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for select-anonymous-woman.sparql: the only sp:Woman is an
+     anonymous completion node and has no binding, so the result has no rows. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="w"/>
+  </head>
+  <results>
+  </results>
+</sparql>

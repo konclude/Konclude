@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Small ABox dataset for the SPARQL tests. xml:base is required so that the
+  '#Woman' style IRIs resolve to the namespace the queries use.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          xml:base="http://konclude.test/sparql"
+          ontologyIRI="http://konclude.test/sparql">
+  <Prefix name="" IRI="http://konclude.test/sparql#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class IRI="#Person"/></Declaration>
+  <Declaration><Class IRI="#Woman"/></Declaration>
+  <Declaration><Class IRI="#Man"/></Declaration>
+  <Declaration><ObjectProperty IRI="#hasChild"/></Declaration>
+  <Declaration><NamedIndividual IRI="#alice"/></Declaration>
+  <Declaration><NamedIndividual IRI="#bob"/></Declaration>
+
+  <SubClassOf><Class IRI="#Woman"/><Class IRI="#Person"/></SubClassOf>
+  <SubClassOf><Class IRI="#Man"/><Class IRI="#Person"/></SubClassOf>
+
+  <ClassAssertion><Class IRI="#Woman"/><NamedIndividual IRI="#alice"/></ClassAssertion>
+  <ClassAssertion><Class IRI="#Man"/><NamedIndividual IRI="#bob"/></ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty IRI="#hasChild"/><NamedIndividual IRI="#alice"/><NamedIndividual IRI="#bob"/></ObjectPropertyAssertion>
+</Ontology>

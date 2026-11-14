@@ -19,6 +19,8 @@
  */
 
 #include "COWLlinkQtXMLCommandParser.h"
+#include <QFileInfo>
+#include <QDir>
 
 
 namespace Konclude {
@@ -171,6 +173,18 @@ namespace Konclude {
 					}  else if (docElemName == "ox:GetFlattenedInstances" || docElemName == "GetFlattenedInstances") {
 						preComm = parseProcessQueryNode(&node);
 					}  else if (docElemName == "ox:GetTypes" || docElemName == "GetTypes") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetDataPropertyTargets" || docElemName == "GetDataPropertyTargets") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetDataPropertiesOfSource" || docElemName == "GetDataPropertiesOfSource") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetDataPropertiesBetween" || docElemName == "GetDataPropertiesBetween") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetDataPropertiesOfLiteral" || docElemName == "GetDataPropertiesOfLiteral") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetDataPropertySources" || docElemName == "GetDataPropertySources") {
+						preComm = parseProcessQueryNode(&node);
+					}  else if (docElemName == "ox:GetFlattenedDataPropertySources" || docElemName == "GetFlattenedDataPropertySources") {
 						preComm = parseProcessQueryNode(&node);
 					}  else if (docElemName == "ox:GetSameIndividuals" || docElemName == "GetSameIndividuals") {
 						preComm = parseProcessQueryNode(&node);
@@ -491,17 +505,34 @@ namespace Konclude {
 		CLoadKnowledgeBaseOWLAutoOntologyCommand *COWLlinkQtXMLCommandParser::parseLoadKnowledgeBaseOntologyNode(QDomElement *node) {
 			QString kbName = node->attribute(QString("kb"));
 
+			// a relative file IRI of a LoadOntologies request is resolved against the directory of the
+			// request document, so that requests can refer to an ontology next to them
+			function<QString(const QString&)> resolveLoadOntologyIRI = [&](const QString& iriString)->QString {
+				QString resolvedString = iriString;
+				if (iriString.startsWith("file:") && command) {
+					QString pathString = iriString.mid(5);
+					if (!pathString.startsWith("/")) {
+						QString baseDirString = QFileInfo(command->getSourcePath()).absolutePath();
+						if (!baseDirString.isEmpty()) {
+							QString absolutePathString = QDir(baseDirString).absoluteFilePath(pathString);
+							resolvedString = QString("file://%1").arg(absolutePathString);
+						}
+					}
+				}
+				return resolvedString;
+			};
+
 			QStringList ontoIRIList;
 			QDomElement childElm = node->firstChildElement("ontologyIRI");
 			while (!childElm.isNull()) {
 				QString ontoIRIString = childElm.attribute("IRI");
-				ontoIRIList.append(ontoIRIString);
+				ontoIRIList.append(resolveLoadOntologyIRI(ontoIRIString));
 				childElm = childElm.nextSiblingElement("ontologyIRI");
 			}
 			childElm = node->firstChildElement("OntologyIRI");
 			while (!childElm.isNull()) {
 				QString ontoIRIString = childElm.attribute("IRI");
-				ontoIRIList.append(ontoIRIString);
+				ontoIRIList.append(resolveLoadOntologyIRI(ontoIRIString));
 				childElm = childElm.nextSiblingElement("OntologyIRI");
 			}
 			return new CLoadKnowledgeBaseOWLAutoOntologyCommand(kbName,ontoIRIList);
@@ -622,6 +653,10 @@ namespace Konclude {
 				} else if (elName == "ObjectProperty" || elName == "owl:ObjectProperty") {
 					childComplex = false;
 				} else if (elName == "DataProperty" || elName == "owl:DataProperty") {
+					childComplex = false;
+				} else if (elName == "Literal" || elName == "owl:Literal") {
+					// a grounded literal argument (data property fact requests) is parsed by the
+					// simple query parser from the build data of the ontology
 					childComplex = false;
 				} else if (elName == "ExpectedResult") {
 					childComplex = false;

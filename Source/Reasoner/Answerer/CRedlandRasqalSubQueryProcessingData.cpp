@@ -44,6 +44,7 @@ namespace Konclude {
 				mCurrentVariableBinding = nullptr;
 				mNextBindingsVariablePosition = 0;
 				mBindingsCount = 0;
+				mCurrentAnswerRow = 0;
 				mBoundVariables = false;
 				mBaseResolvingData = nullptr;
 				mLastResolvingData = nullptr;
@@ -237,6 +238,16 @@ namespace Konclude {
 
 			CRedlandRasqalSubQueryProcessingData* CRedlandRasqalSubQueryProcessingData::setBindingsCount(cint64 count) {
 				mBindingsCount = count;
+				return this;
+			}
+
+
+			cint64 CRedlandRasqalSubQueryProcessingData::getCurrentAnswerRow() {
+				return mCurrentAnswerRow;
+			}
+
+			CRedlandRasqalSubQueryProcessingData* CRedlandRasqalSubQueryProcessingData::incCurrentAnswerRow() {
+				++mCurrentAnswerRow;
 				return this;
 			}
 

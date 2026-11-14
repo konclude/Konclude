@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OWLlink data-property request-type coverage: data-property-targets-load-ontology.
+  The ontology is loaded with LoadOntologies from a file next to this request (relative file IRI).
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://ex.test/load-ontology-facts"/>
+  <LoadOntologies kb="http://ex.test/load-ontology-facts">
+    <OntologyIRI IRI="file:load-ontology-facts.owl.xml"/>
+  </LoadOntologies>
+  <GetDataPropertyTargets kb="http://ex.test/load-ontology-facts" id="q-targets">
+    <owl:NamedIndividual IRI="#a"/>
+    <owl:DataProperty IRI="#dp1"/>
+  </GetDataPropertyTargets>
+</RequestMessage>

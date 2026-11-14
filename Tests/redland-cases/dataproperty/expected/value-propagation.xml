@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected answer for queries/value-propagation.sparql: :individual1 has
+     "value1" via :subProperty and :individual2 has "value2" via
+     :subSubProperty, and both are values of the super-property. Rows are
+     compared as a set. -->
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="s"/>
+    <variable name="val"/>
+  </head>
+  <results>
+    <result>
+      <binding name="s"><uri>http://konclude.test/dataproperty#individual1</uri></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">value1</literal></binding>
+    </result>
+    <result>
+      <binding name="s"><uri>http://konclude.test/dataproperty#individual2</uri></binding>
+      <binding name="val"><literal datatype="http://www.w3.org/2001/XMLSchema#string">value2</literal></binding>
+    </result>
+  </results>
+</sparql>

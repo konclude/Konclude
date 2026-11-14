@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected response for data-property-targets-load-ontology-request.xml: An ontology loaded with LoadOntologies from a file next to the request (relative file IRI) provides the data property value. -->
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xml:base="http://www.w3.org/2002/07/owl#">
+ <KB kb="http://ex.test/load-ontology-facts"/>
+ <OK/>
+ <SetOfLiterals>
+  <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#string">loaded</Literal>
+ </SetOfLiterals>
+</ResponseMessage>

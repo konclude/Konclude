@@ -33,6 +33,7 @@ namespace Konclude {
 
 			COptimizedComplexCompositionRedlandRasqalAnsweringHandler::COptimizedComplexCompositionRedlandRasqalAnsweringHandler(COptimizedComplexCompositionOntologyAnsweringItem* ontoAnsweringItem) : COptimizedComplexCompositionAnsweringHandler(ontoAnsweringItem) {
 				mCurrentProcessingRedlandRasqalQueryProcData = nullptr;
+				mConfClosedAskDirectBooleanAnswering = CConfigDataReader::readConfigBoolean(ontoAnsweringItem->getCalculationConfiguration(), "Konclude.Answering.ClosedAskDirectBooleanAnswering", true);
 			}
 
 
@@ -359,6 +360,60 @@ namespace Konclude {
 
 			void COptimizedComplexCompositionRedlandRasqalAnsweringHandler::processRasqal(CRedlandRasqalBGPsCompositionQuery* query, CComplexQueryCompositionRedlandRasqalProcessingData* redlandRasqalQueryProcData) {
 				LOG(INFO, getDomain(), logTr("Sub-queries of '%1' computed in %2 ms, starting answer resolving with Redland Rasqal.").arg(query->getQueryName()).arg(redlandRasqalQueryProcData->getSubQueryProcessingTime()), this);
+
+				// A closed ASK over one reasoning sub-query needs only the sub-query's
+				// boolean. Pushing it through the synthetic model would materialise at
+				// most triples[0] of a boolean sub-query and lose the other triples.
+				// The same applies to several independent boolean sub-queries (the
+				// parser splits disconnected components): their conjunction is the
+				// answer if their triple ranges cover the whole query.
+				if (mConfClosedAskDirectBooleanAnswering && rasqal_query_get_verb(query->getRasqalQuery()) == RASQAL_QUERY_VERB_ASK) {
+					QVector<CRedlandRasqalSubQueryProcessingData*>* subQueryProcDataVec = redlandRasqalQueryProcData->getSubQueryProcessingDataVector();
+					if (subQueryProcDataVec && !subQueryProcDataVec->isEmpty()) {
+						QList<QPair<int, int>> tripleRanges;
+						bool allBoolean = true;
+						bool booleanResult = true;
+						for (CRedlandRasqalSubQueryProcessingData* subQueryProcData : *subQueryProcDataVec) {
+							if (!subQueryProcData || !subQueryProcData->isBooleanSubQuery()) {
+								allBoolean = false;
+								break;
+							}
+							int tripleStart = subQueryProcData->getGPTripleStartPos();
+							int tripleEnd = subQueryProcData->getGPTriplesEndPos();
+							if (tripleStart > tripleEnd) {
+								int tmp = tripleStart;
+								tripleStart = tripleEnd;
+								tripleEnd = tmp;
+							}
+							tripleRanges.append(qMakePair(tripleStart, tripleEnd));
+							booleanResult = booleanResult && subQueryProcData->getBooleanQueryResult();
+						}
+						if (allBoolean) {
+							qSort(tripleRanges.begin(), tripleRanges.end());
+							int expectedTriple = 0;
+							bool coversAllTriples = true;
+							for (const QPair<int, int>& range : tripleRanges) {
+								if (range.first > expectedTriple) {
+									coversAllTriples = false;
+									break;
+								}
+								if (range.second >= expectedTriple) {
+									expectedTriple = range.second + 1;
+								}
+							}
+							raptor_sequence* tripleSeq = rasqal_query_get_triple_sequence(query->getRasqalQuery());
+							int tripleCount = tripleSeq ? raptor_sequence_size(tripleSeq) : 0;
+							if (tripleCount > 0 && coversAllTriples && expectedTriple >= tripleCount) {
+								CBooleanQueryResult* boolRes = new CBooleanQueryResult(booleanResult);
+								query->setQueryResult(boolRes);
+								redlandRasqalQueryProcData->setProcessingFinished();
+								librdf_free_query(query->getRedlandQuery());
+								LOG(INFO, getDomain(), logTr("Closed ASK query '%1' answered directly from the boolean sub-query result: %2.").arg(query->getQueryName()).arg(booleanResult ? "true" : "false"), this);
+								return;
+							}
+						}
+					}
+				}
 
 				mCurrentProcessingRedlandRasqalQueryProcData = redlandRasqalQueryProcData;
 				CRedlandRasqalModelSubQueryResolver* resolver = redlandRasqalQueryProcData->getResolver();

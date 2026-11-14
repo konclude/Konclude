@@ -1,0 +1,6 @@
+PREFIX : <http://konclude.test/property#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# The class analogue of the property hierarchy query: the super-classes of :C1,
+# including the equivalent :C4 and the built-in top class.
+SELECT ?super
+WHERE { :C1 rdfs:subClassOf ?super . }

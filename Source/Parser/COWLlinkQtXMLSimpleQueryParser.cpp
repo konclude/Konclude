@@ -20,6 +20,11 @@
 
 #include "COWLlinkQtXMLSimpleQueryParser.h"
 
+#include "Expressions/CDataLiteralExpression.h"
+#include "Expressions/CDataLexicalValueExpression.h"
+#include "Expressions/CDatatypeExpression.h"
+#include "Expressions/CDataRangeTermExpression.h"
+
 
 namespace Konclude {
 
@@ -87,6 +92,18 @@ namespace Konclude {
 
 					if (!expression) {
 						LOG(ERROR,"::Konclude::Parser::OWLlinkQtXMLSimpleQueryParser",logTr("Individual name '%1' cannot be resolved in ontology '%2'.").arg(indiName).arg(mConOntology->getOntologyName()),this);
+					}
+				} else if (nodeString == "Literal" || nodeString == "owl:Literal" ) {
+					// the data property fact requests take a grounded literal argument; the
+					// expression is resolved against the literals of the ontology build data
+					QString lexicalValue(childNode.text());
+					QString datatypeIRI(childNode.attribute("datatypeIRI"));
+					if (datatypeIRI.isEmpty()) {
+						datatypeIRI = childNode.attribute("owl:datatypeIRI");
+					}
+					expression = mQueryBuilder->getQueryingDataLiteral(lexicalValue,datatypeIRI);
+					if (!expression) {
+						LOG(ERROR,"::Konclude::Parser::OWLlinkQtXMLSimpleQueryParser",logTr("Data literal '%1' with datatype '%2' cannot be resolved in ontology '%3'.").arg(lexicalValue).arg(datatypeIRI).arg(mConOntology->getOntologyName()),this);
 					}
 				}
 
@@ -222,6 +239,12 @@ namespace Konclude {
 			}
 			return resolvedString;
 		}
+
+
+		CDataLiteralExpression* COWLlinkQtXMLSimpleQueryParser::getDataLiteralExpression(const QString& lexicalValue, const QString& datatypeIRI) {
+			return mQueryBuilder->getQueryingDataLiteral(lexicalValue, datatypeIRI);
+		}
+
 
 
 
