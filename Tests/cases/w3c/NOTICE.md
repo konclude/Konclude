@@ -17,3 +17,10 @@ Known divergences are recorded in `Tests/known-issues.owl.xml` (with
 `kt:knownFailure` links in the control ontology), not in separate lists.
 Approved tests whose RDF premises the RDF-to-OWL mapping rejects are not
 imported into the corpus.
+
+`WebOnt-miscellaneous-001`, `WebOnt-miscellaneous-002` and `WebOnt-imports-011`
+import further W3C ontologies, which are published as RDF/XML only. The
+conformance run is offline and also covers the build without the RDF/XML
+parser (`KoncludeWithoutRedland.pro`), so the axioms of the import closure are
+inlined into those three premise files instead of being imported; a regeneration
+has to apply the same inlining (see the note in each file's header).

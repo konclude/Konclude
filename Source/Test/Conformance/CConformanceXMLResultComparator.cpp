@@ -201,9 +201,13 @@ namespace Konclude {
 
 
 			bool CConformanceXMLResultComparator::isUnorderedContainer(const QString& elementName) {
-				// SPARQL result rows, OWLlink set members and synonym/synset members
-				// have no meaningful order.
+				// SPARQL result rows, the variables of a result head and the bindings
+				// of a row, OWLlink set members and synonym/synset members have no
+				// meaningful order. The variable order of 'SELECT *' in particular is
+				// not defined, so comparing it would reject an equivalent answer.
 				return elementName == "results"
+						|| elementName == "head"
+						|| elementName == "result"
 						|| elementName == "IndividualSynonyms"
 						|| elementName.startsWith("SetOf")
 						|| elementName.endsWith("Synset");

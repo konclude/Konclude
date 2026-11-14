@@ -1,7 +1,10 @@
 # Redland-only conformance cases
 
-These cases load Turtle/RDF data and therefore need a build with the Redland
-RDF libraries (`Konclude.pro`, not `KoncludeWithoutRedland.pro`).
+These cases need a build with the Redland/Rasqal libraries (`Konclude.pro`, not
+`KoncludeWithoutRedland.pro`): the Turtle/RDF datasets need the Redland RDF
+parser, and the queries of the `sparql` suite use SPARQL forms (`OPTIONAL`,
+`UNION`, `FILTER`, `ORDER BY`, class variables) that only the Rasqal query
+parser handles.
 
 Run them from the repository or source root, so that the `LOAD <file:Tests/...>`
 commands in the LUBM query resolve:

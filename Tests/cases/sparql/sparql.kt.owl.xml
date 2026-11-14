@@ -50,33 +50,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-persons-server"/><Literal>expected/persons.xml</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:onChannel"/><NamedIndividual abbreviatedIRI="kt:sparql-persons-server"/><NamedIndividual abbreviatedIRI="kt:SPARQLServer"/></ObjectPropertyAssertion>
 
-  <!-- Short timeout for the FILTER test: the query currently does not terminate. -->
-  <ClassAssertion><Class abbreviatedIRI="kt:RunConfig"/><NamedIndividual abbreviatedIRI="kt:run-sparql-timeout5"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:runConfigName"/><NamedIndividual abbreviatedIRI="kt:run-sparql-timeout5"/><Literal>sparql-timeout5</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:timeoutSeconds"/><NamedIndividual abbreviatedIRI="kt:run-sparql-timeout5"/><Literal>5</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>OPTIONAL left join: alice has child bob, bob has no child (unbound child is omitted from the XML binding).</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>queries/optional.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-optional"/><Literal>expected/optional.xml</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/><Literal>Test case: sparql-union.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/><Literal>queries/union.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-union"/><Literal>expected/union.xml</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-filter"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-filter"/><Literal>Test case: sparql-filter.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-filter"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-filter"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-filter"/><Literal>queries/filter.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-filter"/><Literal>expected/filter.xml</Literal></DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:sparql-filter"/><NamedIndividual abbreviatedIRI="kt:run-sparql-timeout5"/></ObjectPropertyAssertion>
-
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-distinct"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-distinct"/><Literal>Test case: sparql-distinct.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-distinct"/><Literal>sparql</Literal></DataPropertyAssertion>
@@ -167,13 +140,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-child"/><Literal>queries/select-hidden-child.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-child"/><Literal>expected/select-hidden-child.xml</Literal></DataPropertyAssertion>
 
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-filter-not-closed"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-filter-not-closed"/><Literal>Not a closed ASK: the FILTER uses ?w, so the sub-query must return bindings and Redland must apply the filter. Only alice is a Woman, so the answer is false.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-filter-not-closed"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-filter-not-closed"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-filter-not-closed"/><Literal>queries/ask-filter-not-closed.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-filter-not-closed"/><Literal>false</Literal></DataPropertyAssertion>
-
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-independent-class"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-independent-class"/><Literal>Two independent class assertions produce two reasoning sub-queries; the closed-ASK short-circuit must not collapse them. The answer is true.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-independent-class"/><Literal>sparql</Literal></DataPropertyAssertion>
@@ -196,13 +162,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-hidden-anonymous-man"/><Literal>queries/ask-hidden-anonymous-man.sparql</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-hidden-anonymous-man"/><NamedIndividual IRI="../../configs/sparql-existential-ask.xml"/></ObjectPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-hidden-anonymous-man"/><Literal>true</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-class-var"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-class-var"/><Literal>Hidden class variable: ?c is never existential and must be answered from named classes, not replaced by a placeholder. DISTINCT returns the two individuals.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-class-var"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-class-var"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-class-var"/><Literal>queries/select-hidden-class-var.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-select-hidden-class-var"/><Literal>expected/select-hidden-class-var.xml</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-ask-mother"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-ask-mother"/><Literal>Language-features ontology: Mother is equivalent to Woman and Parent; hasChild has domain Parent, so the named Mothers make the ASK true.</Literal></DataPropertyAssertion>
@@ -267,41 +226,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-parents"/><Literal>language-features.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-parents"/><Literal>queries/lang-select-parents.sparql</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-parents"/><Literal>expected/lang-select-parents.xml</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-ages"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-ages"/><Literal>Language-features ontology: integer ages, ORDER BY DESC and LIMIT.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-ages"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-ages"/><Literal>language-features.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-ages"/><Literal>queries/lang-select-ages.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-ages"/><Literal>expected/lang-select-ages.xml</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-optional"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-optional"/><Literal>Language-features ontology: OPTIONAL over hasChild for every Woman, including unbound children.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-optional"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-optional"/><Literal>language-features.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-optional"/><Literal>queries/lang-select-optional.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-optional"/><Literal>expected/lang-select-optional.xml</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-union"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-union"/><Literal>Language-features ontology: UNION of Woman and Man returns all persons.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-union"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-union"/><Literal>language-features.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-union"/><Literal>queries/lang-select-union.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:sparql-lang-select-union"/><Literal>expected/lang-select-union.xml</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-optional"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-optional"/><Literal>Not a closed ASK: OPTIONAL keeps it on the regular Redland path; the answer is true.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-optional"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-optional"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-optional"/><Literal>queries/ask-optional.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-optional"/><Literal>true</Literal></DataPropertyAssertion>
-
-  <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-union"/></ClassAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-union"/><Literal>ASK over a UNION; true because both branches have a witness.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-union"/><Literal>sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesDataset"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-union"/><Literal>family.owl.xml</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-union"/><Literal>queries/ask-union.sparql</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:sparql-ask-union"/><Literal>true</Literal></DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SparqlTest"/><NamedIndividual abbreviatedIRI="kt:sparql-select-distinct-hidden"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:sparql-select-distinct-hidden"/><Literal>DISTINCT with a hidden object variable; the projected answer is alice.</Literal></DataPropertyAssertion>
