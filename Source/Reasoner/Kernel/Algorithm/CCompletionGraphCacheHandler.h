@@ -95,6 +95,16 @@ namespace Konclude {
 						bool testDistinctSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 						bool testMergingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 						bool testBindingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
+						bool testNeighbourSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
+
+						bool addMergedNodesReactivation(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
+						bool addMergedNeighbourNodesReactivation(cint64 indiID, CIndividualProcessNode* detSatNeighbourIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
+
+						//! Largest node id of the deterministic graph, including the nominal node with id 0.
+						cint64 getDeterministicMaxIndividualNodeID();
+						CIndividualProcessNode* getCompletionGraphCachedRepresentativeNode(cint64 indiID);
+						CIndividualProcessNode* getCurrentRepresentativeNode(cint64 indiID);
+						bool isCompletionGraphCachingInvalid(CIndividualProcessNode* indiNode);
 
 						bool testCriticalConcept(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConceptDescriptor* conDes, bool containedFlag, CCalculationAlgorithmContext* calcAlgContext);
 						bool testCriticalB2AutomateTransitionOperands(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CConcept* concept, bool conNegation, CCalculationAlgorithmContext* calcAlgContext);

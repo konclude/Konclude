@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Nominal merge edge case: a universal restriction over an inverse role has to reach the
+  neighbours that the merge moves onto the nominal's individual.
+
+  The class Node is the nominal {n}. The individual k is an r-predecessor of n and is a
+  Forbidden, so a node that satisfies Node and (r only (not Forbidden)) is inconsistent:
+  the test node is merged with n, the merge moves the link from k to n onto the merged node,
+  and the universal restriction must then add (not Forbidden) to k.
+
+  Expected: TestForallMerge is unsatisfiable, TestForallMergeOk (r only Marker, and k is a
+  Marker) is satisfiable, and Node is a subclass of (r some Forbidden).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/dl/nominal-merge-forall">
+  <Prefix name="" IRI="http://konclude.test/dl/nominal-merge-forall#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-forall#Forbidden"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-forall#Marker"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-forall#Node"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-forall#TestForallMerge"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-forall#TestForallMergeOk"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-forall#TestExistsMerge"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/dl/nominal-merge-forall#r"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-merge-forall#k"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/nominal-merge-forall#n"/></Declaration>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-merge-forall#Node"/>
+    <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/nominal-merge-forall#n"/></ObjectOneOf>
+  </EquivalentClasses>
+
+  <ClassAssertion>
+    <Class IRI="http://konclude.test/dl/nominal-merge-forall#Forbidden"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-merge-forall#k"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class IRI="http://konclude.test/dl/nominal-merge-forall#Marker"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-merge-forall#k"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty IRI="http://konclude.test/dl/nominal-merge-forall#r"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-merge-forall#k"/>
+    <NamedIndividual IRI="http://konclude.test/dl/nominal-merge-forall#n"/>
+  </ObjectPropertyAssertion>
+
+  <!-- Node and (r only (not Forbidden)) contradicts k : Forbidden and k r n. -->
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-merge-forall#TestForallMerge"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/nominal-merge-forall#Node"/>
+      <ObjectAllValuesFrom>
+        <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/nominal-merge-forall#r"/></ObjectInverseOf>
+        <ObjectComplementOf><Class IRI="http://konclude.test/dl/nominal-merge-forall#Forbidden"/></ObjectComplementOf>
+      </ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+
+  <!-- The same restriction with a compatible filler stays satisfiable. -->
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-merge-forall#TestForallMergeOk"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/nominal-merge-forall#Node"/>
+      <ObjectAllValuesFrom>
+        <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/nominal-merge-forall#r"/></ObjectInverseOf>
+        <Class IRI="http://konclude.test/dl/nominal-merge-forall#Marker"/>
+      </ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+
+  <!-- Node is reached by k, so Node is a subclass of (r some Forbidden) and (r some Marker). -->
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/nominal-merge-forall#TestExistsMerge"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/nominal-merge-forall#Node"/>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/nominal-merge-forall#r"/></ObjectInverseOf>
+        <Class IRI="http://konclude.test/dl/nominal-merge-forall#Forbidden"/>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

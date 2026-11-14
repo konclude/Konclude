@@ -110,7 +110,9 @@ namespace Konclude {
 						CIndividualProcessNode* detCompGraphCachedIndiNode = mDetSatProcNodeVec->getData(indiID);
 
 						if (compGraphCachedIndiNode && compGraphCachedIndiNode != detCompGraphCachedIndiNode) {
-							cint64 detSatIndiCount = mDetSatProcNodeVec->getItemMaxIndex();
+							cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
+
+							addedReactivationIndi |= addMergedNodesReactivation(indiID, compGraphCachedIndiNode, reactProcQueue);
 
 							CPROCESSINGLIST<cint64> reactivateComplGraphCachedIndiList(calcAlgContext->getTaskProcessorContext());
 							CPROCESSINGSET<cint64> reactivateComplGraphCachedIndiSet(calcAlgContext->getTaskProcessorContext());
@@ -177,6 +179,87 @@ namespace Konclude {
 				}
 
 
+				bool CCompletionGraphCacheHandler::addMergedNodesReactivation(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue) {
+					// C11: a node that the cached graph merged into this node shares its cached state, so it has to
+					// be rebuilt as well (e.g. a successor that was merged into a nominal by a non-deterministic
+					// choice and has to make its choice again). The merge moved the link of such a node to this
+					// node, hence it is a deterministic neighbour of a neighbour of this node in the cached graph.
+					// A neighbour whose links did not change non-deterministically cannot have lost a node to this
+					// node and is skipped. Merged nominals are handled by the merging hash.
+					bool addedReactivationIndi = false;
+					cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
+					CIndividualProcessNode* detSatIndiNode = indiID <= detSatIndiCount ? mDetSatProcNodeVec->getData(indiID) : nullptr;
+					if (detSatIndiNode) {
+						addedReactivationIndi |= addMergedNeighbourNodesReactivation(indiID, detSatIndiNode, reactProcQueue);
+					}
+					CConnectionSuccessorSetIterator connSuccSetIt(compGraphCachedIndiNode->getConnectionSuccessorIterator());
+					while (connSuccSetIt.hasNext()) {
+						cint64 connIndiID = connSuccSetIt.next();
+						CIndividualProcessNode* detSatConnIndiNode = connIndiID <= detSatIndiCount ? mDetSatProcNodeVec->getData(connIndiID) : nullptr;
+						CIndividualProcessNode* compGraphCachedConnIndiNode = mCompGraphCachedProcNodeVec->getData(connIndiID);
+						if (detSatConnIndiNode && compGraphCachedConnIndiNode && compGraphCachedConnIndiNode->getConnectionSuccessorSet(false) != detSatConnIndiNode->getConnectionSuccessorSet(false)) {
+							addedReactivationIndi |= addMergedNeighbourNodesReactivation(indiID, detSatConnIndiNode, reactProcQueue);
+						}
+					}
+					return addedReactivationIndi;
+				}
+
+
+				bool CCompletionGraphCacheHandler::addMergedNeighbourNodesReactivation(cint64 indiID, CIndividualProcessNode* detSatNeighbourIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue) {
+					bool addedReactivationIndi = false;
+					cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
+					CConnectionSuccessorSetIterator detConnSuccSetIt(detSatNeighbourIndiNode->getConnectionSuccessorIterator());
+					while (detConnSuccSetIt.hasNext()) {
+						cint64 candIndiID = detConnSuccSetIt.next();
+						if (candIndiID <= 0 || candIndiID > detSatIndiCount || candIndiID == indiID) {
+							continue;
+						}
+						CIndividualProcessNode* detSatCandIndiNode = mDetSatProcNodeVec->getData(candIndiID);
+						CIndividualProcessNode* compGraphCachedCandIndiNode = getCompletionGraphCachedRepresentativeNode(candIndiID);
+						if (detSatCandIndiNode && compGraphCachedCandIndiNode && compGraphCachedCandIndiNode->getIndividualNodeID() == indiID) {
+							addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatCandIndiNode, true);
+						}
+					}
+					return addedReactivationIndi;
+				}
+
+
+				cint64 CCompletionGraphCacheHandler::getDeterministicMaxIndividualNodeID() {
+					// The node vector keeps the nodes with ids <= 0 (the nominal nodes) and the nodes with positive ids in
+					// two halves, and getItemMaxIndex() only reports the positive half. It is -1 for a deterministic graph
+					// without blockable nodes, which would exclude the nominal node with id 0.
+					return qMax(mDetSatProcNodeVec->getItemMaxIndex(), (cint64)0);
+				}
+
+
+				CIndividualProcessNode* CCompletionGraphCacheHandler::getCompletionGraphCachedRepresentativeNode(cint64 indiID) {
+					CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(indiID);
+					while (compGraphCachedIndiNode && compGraphCachedIndiNode->getMergedIntoIndividualNodeID() != compGraphCachedIndiNode->getIndividualNodeID()) {
+						compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(compGraphCachedIndiNode->getMergedIntoIndividualNodeID());
+					}
+					return compGraphCachedIndiNode;
+				}
+
+
+				CIndividualProcessNode* CCompletionGraphCacheHandler::getCurrentRepresentativeNode(cint64 indiID) {
+					CIndividualProcessNode* indiNode = mIndiProcNodeVec->getData(indiID);
+					while (indiNode && indiNode->getMergedIntoIndividualNodeID() != indiNode->getIndividualNodeID()) {
+						indiNode = mIndiProcNodeVec->getData(indiNode->getMergedIntoIndividualNodeID());
+					}
+					return indiNode;
+				}
+
+
+				bool CCompletionGraphCacheHandler::isCompletionGraphCachingInvalid(CIndividualProcessNode* indiNode) {
+					// A node that was localized for this test without being cached is new (e.g. the constructed node)
+					// or rebuilt; the same condition is used for the universal restrictions (C3).
+					if (indiNode->getLocalizationTag() > mDetLocalizationTag && !indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
+						return true;
+					}
+					return indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED | CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALID);
+				}
+
+
 				bool CCompletionGraphCacheHandler::isIndividualNodeCompletionGraphConsistenceBlocked(CIndividualProcessNode* individualNode, bool& conceptSetExtended, CCalculationAlgorithmContext* calcAlgContext) {
 					conceptSetExtended = false;
 					if (loadConsistenceModelData(calcAlgContext)) {
@@ -185,7 +268,7 @@ namespace Konclude {
 								return false;
 							}
 						}
-						cint64 detSatIndiCount = mDetSatProcNodeVec->getItemMaxIndex();
+						cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
 						cint64 indiID = individualNode->getIndividualNodeID();
 						if (indiID <= detSatIndiCount) {
 							CIndividualProcessNode* detSatIndiNode = mDetSatProcNodeVec->getData(indiID);
@@ -212,7 +295,8 @@ namespace Konclude {
 								return false;
 							}
 						}
-						cint64 nonDetSatIndiCount = mCompGraphCachedProcNodeVec->getItemMaxIndex();
+						// getItemMaxIndex() only reports the positive half of the node vector (see getDeterministicMaxIndividualNodeID())
+						cint64 nonDetSatIndiCount = qMax(mCompGraphCachedProcNodeVec->getItemMaxIndex(), (cint64)0);
 						cint64 indiID = individualNode->getIndividualNodeID();
 						if (indiID <= nonDetSatIndiCount) {
 							CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(indiID);
@@ -252,7 +336,38 @@ namespace Konclude {
 					if (cached) {
 						cached &= testBindingSubSetCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
 					}
+					if (cached) {
+						cached &= testNeighbourSubSetCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
+					}
 					return cached;
+				}
+
+
+
+				bool CCompletionGraphCacheHandler::testNeighbourSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext) {
+					// C8: a neighbour of the node in the cached graph that is no longer cached has to be a neighbour in
+					// the current graph as well. Otherwise the cached expansion of the node depends on a link, e.g. one
+					// moved by a non-deterministic merge, that the rebuilt neighbour does not have, and the cardinality
+					// restrictions of the node and of the neighbour are no longer checked against it. Only links that
+					// the cached graph added non-deterministically can be missing.
+					CReapplyRoleSuccessorHash* cachedSuccHash = compGraphCachedIndiNode->getReapplyRoleSuccessorHash(false);
+					if (!cachedSuccHash || cachedSuccHash == detSatIndiNode->getReapplyRoleSuccessorHash(false)) {
+						return true;
+					}
+					cint64 indiID = individualNode->getIndividualNodeID();
+					CSuccessorIterator cachedSuccIt = compGraphCachedIndiNode->getSuccessorIterator();
+					while (cachedSuccIt.hasNext()) {
+						cint64 cachedNeighbourIndiID = cachedSuccIt.nextIndividualID(true);
+						CIndividualProcessNode* neighbourIndiNode = getCurrentRepresentativeNode(cachedNeighbourIndiID);
+						if (neighbourIndiNode && neighbourIndiNode->getIndividualNodeID() != indiID && isCompletionGraphCachingInvalid(neighbourIndiNode)) {
+							// a node that is not processed again still refers to a neighbour that was merged in the
+							// current graph by the neighbour's own id, so both ids count as connected
+							if (!individualNode->hasSuccessorIndividualNode(cachedNeighbourIndiID) && !individualNode->hasSuccessorIndividualNode(neighbourIndiNode->getIndividualNodeID())) {
+								return false;
+							}
+						}
+					}
+					return true;
 				}
 
 

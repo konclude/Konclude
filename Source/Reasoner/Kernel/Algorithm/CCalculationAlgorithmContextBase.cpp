@@ -132,7 +132,9 @@ namespace Konclude {
 								CSatisfiableCalculationTask* detSatCalcTask = consTaskData->getDeterministicSatisfiableTask();
 								CSatisfiableCalculationTask* compGraphCachedCalcTask = consTaskData->getCompletionGraphCachedSatisfiableTask();
 								if (detSatCalcTask && compGraphCachedCalcTask) {
-									mMaxCompletionGraphCachedIndiNodeID = detSatCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector()->getItemMaxIndex();
+									// getItemMaxIndex() only reports the positive half of the node vector and is -1 for a
+									// graph without blockable nodes, the nominal node with id 0 belongs to the cached graph
+									mMaxCompletionGraphCachedIndiNodeID = qMax(detSatCalcTask->getProcessingDataBox()->getIndividualProcessNodeVector()->getItemMaxIndex(), (cint64)0);
 									mCompletionGraphCachedLocalizationTag = detSatCalcTask->getProcessingDataBox()->getProcessContext()->getProcessTagger()->getCurrentLocalizationTag();
 								}
 							}

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Issue #19, reduced variant from the issue discussion: one hole, two pigeons, and the
+  redundant axiom CrowdedHole <= Hole. Removing CrowdedHole <= Hole makes the answer
+  correct again, so the axiom is part of the reproduction.
+    Scene <= CrowdedScene  (the one hole holds both pigeons)
+    TestSceneNotCrowded <= (Scene and not CrowdedScene) must be unsatisfiable.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/dl/pigeonhole-2p1h">
+  <Prefix name="" IRI="http://konclude.test/dl/pigeonhole-2p1h#"/>
+  <Prefix name="owl" IRI="http://www.w3.org/2002/07/owl#"/>
+
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedHole"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedScene"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Pigeon"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#TestSceneNotCrowded"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#TestSceneCrowded"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-2p1h#sitsAt"/></Declaration>
+  <Declaration><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-2p1h#inScene"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#h1"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#p1"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#p2"/></Declaration>
+  <Declaration><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#s"/></Declaration>
+
+  <SubObjectPropertyOf>
+    <ObjectProperty IRI="http://konclude.test/dl/pigeonhole-2p1h#sitsAt"/>
+    <ObjectProperty IRI="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+  </SubObjectPropertyOf>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedHole"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/>
+      <ObjectMinCardinality cardinality="2">
+        <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-2p1h#sitsAt"/></ObjectInverseOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Pigeon"/>
+      </ObjectMinCardinality>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- This redundant axiom causes the conclusion to be missed. -->
+  <SubClassOf><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedHole"/><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/></SubClassOf>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedScene"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty IRI="http://konclude.test/dl/pigeonhole-2p1h#inScene"/></ObjectInverseOf>
+        <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedHole"/>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/>
+    <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#h1"/></ObjectOneOf>
+  </EquivalentClasses>
+  <SubClassOf>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty IRI="http://konclude.test/dl/pigeonhole-2p1h#inScene"/>
+      <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/>
+    </ObjectSomeValuesFrom>
+  </SubClassOf>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Pigeon"/>
+    <ObjectOneOf>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#p1"/>
+      <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#p2"/>
+    </ObjectOneOf>
+  </EquivalentClasses>
+  <SubClassOf>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Pigeon"/>
+    <ObjectExactCardinality cardinality="1">
+      <ObjectProperty IRI="http://konclude.test/dl/pigeonhole-2p1h#sitsAt"/>
+      <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/>
+    </ObjectExactCardinality>
+  </SubClassOf>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/>
+    <ObjectOneOf><NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#s"/></ObjectOneOf>
+  </EquivalentClasses>
+
+  <DisjointClasses><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Pigeon"/></DisjointClasses>
+  <DisjointClasses><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Hole"/><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/></DisjointClasses>
+  <DisjointClasses><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Pigeon"/><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/></DisjointClasses>
+  <DifferentIndividuals>
+    <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#p1"/>
+    <NamedIndividual IRI="http://konclude.test/dl/pigeonhole-2p1h#p2"/>
+  </DifferentIndividuals>
+
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#TestSceneNotCrowded"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/>
+      <ObjectComplementOf><Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedScene"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#TestSceneCrowded"/>
+    <ObjectIntersectionOf>
+      <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#Scene"/>
+      <Class IRI="http://konclude.test/dl/pigeonhole-2p1h#CrowdedScene"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

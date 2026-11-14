@@ -50,4 +50,13 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:owllink-instances"/><Literal>instances-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:owllink-instances"/><Literal>expected/instances-response.xml</Literal></DataPropertyAssertion>
 
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>Issue #19 over OWLlink: the same satisfiability question is asked twice and followed by other tests on the same cached completion graph. An answer that depends on an earlier test (state written into the shared deterministic graph) changes between the requests.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>pigeonhole-repeated-requests.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:owllink-pigeonhole-repeated-requests"/><Literal>true</Literal></DataPropertyAssertion>
 </Ontology>
