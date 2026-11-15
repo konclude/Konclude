@@ -81,7 +81,11 @@
   <Declaration><DataProperty abbreviatedIRI="kt:timeoutSeconds"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:repeatCount"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:flaky"/></Declaration>
+  <!-- on a test: the other reasoner and its version with which the expected
+       result of the test was cross-checked (independent oracle, e.g. "HermiT 1.4.5.519") -->
   <Declaration><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/></Declaration>
+  <!-- on a test: the other reasoner and its version whose answer differed from the
+       expected result (only for a documented divergence, never for a passing test) -->
   <Declaration><DataProperty abbreviatedIRI="kt:divergingResultByReasonerOnVersion"/></Declaration>
   <!-- on the issue -->
   <Declaration><DataProperty abbreviatedIRI="kt:description"/></Declaration>

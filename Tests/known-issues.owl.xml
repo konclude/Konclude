@@ -816,5 +816,38 @@
     <NamedIndividual abbreviatedIRI="kt:sparql-select-data-variable"/>
   </ObjectPropertyAssertion>
 
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <Literal>Fixed. Completion graph caching missed an equality between two nominals that is forced by a qualified minimum cardinality. In cgc-l-nominal-cardinality-ontology.owl.xml, A is {a0,a1} and B is {a0,a4}; B is a subclass of (at least 2 r.B), B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, which forces a4 = a1 and A = B. In the deterministic graph the successors of a4 and a0 are blocked during the deterministic expansion preprocessing (processing blocked) by one successor of a0, but they were not registered at that blocker. The consistency test woke them through its processing queues; a later test starts from the deterministic graph without these queue entries, so when it merged the rebuilt blocker into a4 the successors of a4 were never processed, never chose a0 or a4, and the cardinality conflict was not found. Processing-blocked nodes are now registered at their blocker (detectIndividualNodeBlockedStatus) and woken by eliminiateBlockedIndividuals, a woken node that is presumed cached is tested for caching again, and a node that the cached graph pruned is no longer accepted as a cache witness (CCompletionGraphCacheHandler::testCompletionGraphCached). Guards: kt:cgc-l-a-not-b, kt:cgc-l-a1-not-a4, kt:cgc-l-classification (four caching configurations) and the negative controls kt:cgc-l-a1-a4 and kt:cgc-l-consistent.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/>
+  </ObjectPropertyAssertion>
 
 </Ontology>

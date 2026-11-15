@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family J: role hierarchy, transitivity and role
+  chains.
+
+  Part 1: r1 and r2 are sub-roles of r. a has an r1-successor in B1 and an
+  r2-successor in B2, and at most one r-successor, so the two successors are
+  merged. The merged node is still reachable through r1 and through r2, so a
+  has an r1-successor in (B1 and B2) and an r2-successor in (B1 and B2) as well.
+  Part 2: t is transitive, t(c,d), t(d,e) and every t-successor of c is a C, so
+  d and e are Cs and c is an inv(t)-successor of e.
+  Part 3: the chain t1 o t2 <= s gives an s-link from f to h.
+  Part 4: o3 has at most one r-predecessor; r1(i,o3) and r2(j,o3) are two
+  r-predecessors because r1 and r2 are sub-roles of r, so i and j are the same.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/j">
+  <Prefix name="" IRI="http://konclude.test/cgc/j#"/>
+
+  <Declaration><Class abbreviatedIRI=":B1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoMergedSuccessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestMergedR1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestMergedR2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoB1Successor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoRSuccessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestTransitiveE"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestTransitiveD"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoTransitiveLink"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestChainLink"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestChainSat"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSubroleMerge"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSubroleSame"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r1"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r2"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t1"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t2"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":s"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":c"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":d"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":e"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":f"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":g"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":i"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":j"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o3"/></Declaration>
+
+  <SubObjectPropertyOf><ObjectProperty abbreviatedIRI=":r1"/><ObjectProperty abbreviatedIRI=":r"/></SubObjectPropertyOf>
+  <SubObjectPropertyOf><ObjectProperty abbreviatedIRI=":r2"/><ObjectProperty abbreviatedIRI=":r"/></SubObjectPropertyOf>
+
+  <!-- Part 1: sub-role successors merged by the at-most restriction on r. -->
+  <ClassAssertion>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":B1"/></ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r2"/><Class abbreviatedIRI=":B2"/></ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r"/></ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+
+  <!-- Part 2: transitivity. -->
+  <TransitiveObjectProperty><ObjectProperty abbreviatedIRI=":t"/></TransitiveObjectProperty>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":t"/><NamedIndividual abbreviatedIRI=":c"/><NamedIndividual abbreviatedIRI=":d"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":t"/><NamedIndividual abbreviatedIRI=":d"/><NamedIndividual abbreviatedIRI=":e"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":C"/></ObjectAllValuesFrom>
+    <NamedIndividual abbreviatedIRI=":c"/>
+  </ClassAssertion>
+
+  <!-- Part 3: role chain t1 o t2 <= s. -->
+  <SubObjectPropertyOf>
+    <ObjectPropertyChain>
+      <ObjectProperty abbreviatedIRI=":t1"/>
+      <ObjectProperty abbreviatedIRI=":t2"/>
+    </ObjectPropertyChain>
+    <ObjectProperty abbreviatedIRI=":s"/>
+  </SubObjectPropertyOf>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":t1"/><NamedIndividual abbreviatedIRI=":f"/><NamedIndividual abbreviatedIRI=":g"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":t2"/><NamedIndividual abbreviatedIRI=":g"/><NamedIndividual abbreviatedIRI=":h"/></ObjectPropertyAssertion>
+
+  <!-- Part 4: two sub-role predecessors of one at-most-one-predecessor node. -->
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o3"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r1"/><NamedIndividual abbreviatedIRI=":i"/><NamedIndividual abbreviatedIRI=":o3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r2"/><NamedIndividual abbreviatedIRI=":j"/><NamedIndividual abbreviatedIRI=":o3"/></ObjectPropertyAssertion>
+
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoMergedSuccessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty abbreviatedIRI=":r"/>
+          <ObjectIntersectionOf><Class abbreviatedIRI=":B1"/><Class abbreviatedIRI=":B2"/></ObjectIntersectionOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestMergedR1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty abbreviatedIRI=":r1"/>
+          <ObjectIntersectionOf><Class abbreviatedIRI=":B1"/><Class abbreviatedIRI=":B2"/></ObjectIntersectionOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestMergedR2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty abbreviatedIRI=":r2"/>
+          <ObjectIntersectionOf><Class abbreviatedIRI=":B1"/><Class abbreviatedIRI=":B2"/></ObjectIntersectionOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoB1Successor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":B1"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoRSuccessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectMaxCardinality cardinality="0"><ObjectProperty abbreviatedIRI=":r"/></ObjectMaxCardinality>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestTransitiveE"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":e"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":C"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestTransitiveD"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":d"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":C"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoTransitiveLink"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":e"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectInverseOf><ObjectProperty abbreviatedIRI=":t"/></ObjectInverseOf>
+          <ObjectOneOf><NamedIndividual abbreviatedIRI=":c"/></ObjectOneOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestChainLink"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":h"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectInverseOf><ObjectProperty abbreviatedIRI=":s"/></ObjectInverseOf>
+          <ObjectOneOf><NamedIndividual abbreviatedIRI=":f"/></ObjectOneOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestChainSat"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":f"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":s"/>
+        <ObjectOneOf><NamedIndividual abbreviatedIRI=":h"/></ObjectOneOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSubroleMerge"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":i"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":j"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSubroleSame"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":i"/></ObjectOneOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":j"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

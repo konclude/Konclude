@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Family A over OWLlink: one knowledge base, one cached completion graph.
+     The same question is asked before and after the other tests; a changed
+     answer indicates that a test wrote into the shared deterministic or
+     cached graph. Expected, in response order: false, true, false, true,
+     false, false. -->
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <CreateKB kb="http://konclude.test/kb/cgc-a"/>
+  <LoadOntologies kb="http://konclude.test/kb/cgc-a">
+    <OntologyIRI IRI="file:cgc-a-nominal-merge-ontology.owl.xml"/>
+  </LoadOntologies>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-a">
+    <owl:Class IRI="http://konclude.test/cgc/a#TestNotBoth"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-a">
+    <owl:Class IRI="http://konclude.test/cgc/a#TestBoth"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-a">
+    <owl:Class IRI="http://konclude.test/cgc/a#TestNotBoth"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-a">
+    <owl:Class IRI="http://konclude.test/cgc/a#TestSomeK1"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-a">
+    <owl:Class IRI="http://konclude.test/cgc/a#TestNoK"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-a">
+    <owl:Class IRI="http://konclude.test/cgc/a#TestNotBoth"/>
+  </IsClassSatisfiable>
+  <ReleaseKB kb="http://konclude.test/kb/cgc-a"/>
+</RequestMessage>

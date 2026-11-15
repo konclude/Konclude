@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family G: many independent ABox groups.
+
+  Twelve groups of two individuals a_i, b_i that are both an r-predecessor of
+  their own o_i, where o_i has at most one r-predecessor. Every pair has to be
+  merged in the consistency test, but the groups are independent, so the ABox
+  is processed in several saturation rounds / with many representative
+  neighbours. The tests touch one pair at a time; a test that merges the test
+  node with {a_5} must reactivate b_5 and re-derive the merge, but not the
+  other groups. Group 1 additionally has the disjunction in the t-successor of
+  a_1, so the cached model differs from the deterministic graph.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/g">
+  <Prefix name="" IRI="http://konclude.test/cgc/g#"/>
+
+  <Declaration><Class abbreviatedIRI=":K1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":K2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test5AB"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test5ABPos"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test9AB"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test12AB"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test1Choice"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test1ChoiceK1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test3Predecessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Test1BA"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a5"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b5"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o5"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a6"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b6"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o6"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a7"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b7"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o7"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a8"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b8"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o8"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a9"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b9"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o9"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a10"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b10"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o10"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a11"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b11"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o11"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a12"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b12"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o12"/></Declaration>
+
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a1"/><NamedIndividual abbreviatedIRI=":o1"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b1"/><NamedIndividual abbreviatedIRI=":o1"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o1"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a2"/><NamedIndividual abbreviatedIRI=":o2"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b2"/><NamedIndividual abbreviatedIRI=":o2"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o2"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a3"/><NamedIndividual abbreviatedIRI=":o3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b3"/><NamedIndividual abbreviatedIRI=":o3"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o3"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a4"/><NamedIndividual abbreviatedIRI=":o4"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b4"/><NamedIndividual abbreviatedIRI=":o4"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o4"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a5"/><NamedIndividual abbreviatedIRI=":o5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b5"/><NamedIndividual abbreviatedIRI=":o5"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o5"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a6"/><NamedIndividual abbreviatedIRI=":o6"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b6"/><NamedIndividual abbreviatedIRI=":o6"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o6"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a7"/><NamedIndividual abbreviatedIRI=":o7"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b7"/><NamedIndividual abbreviatedIRI=":o7"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o7"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a8"/><NamedIndividual abbreviatedIRI=":o8"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b8"/><NamedIndividual abbreviatedIRI=":o8"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o8"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a9"/><NamedIndividual abbreviatedIRI=":o9"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b9"/><NamedIndividual abbreviatedIRI=":o9"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o9"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a10"/><NamedIndividual abbreviatedIRI=":o10"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b10"/><NamedIndividual abbreviatedIRI=":o10"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o10"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a11"/><NamedIndividual abbreviatedIRI=":o11"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b11"/><NamedIndividual abbreviatedIRI=":o11"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o11"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a12"/><NamedIndividual abbreviatedIRI=":o12"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":b12"/><NamedIndividual abbreviatedIRI=":o12"/></ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o12"/>
+  </ClassAssertion>
+
+  <!-- Group 1 has the non-deterministic t-successor as well. -->
+  <ClassAssertion>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty abbreviatedIRI=":t"/>
+      <ObjectUnionOf><Class abbreviatedIRI=":K1"/><Class abbreviatedIRI=":K2"/></ObjectUnionOf>
+    </ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a1"/>
+  </ClassAssertion>
+
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test5AB"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a5"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":b5"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test5ABPos"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a5"/></ObjectOneOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":b5"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test9AB"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a9"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":b9"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test12AB"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a12"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":b12"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test1BA"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":b1"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test1Choice"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K1"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K2"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test1ChoiceK1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K1"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Test3Predecessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o3"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+        <ObjectOneOf><NamedIndividual abbreviatedIRI=":a3"/></ObjectOneOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

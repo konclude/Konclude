@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family F: an existential restriction on an inverse
+  role that is normalised into a universal restriction.
+
+  o is a B1 or a B2. The general concept inclusions (some inv(r) B1) <= D1 and
+  (some inv(r) B2) <= D2 are normalised to B1 <= (all r T1), T1 <= D1 (and the
+  same for B2/D2), so the cached node a has to receive the D of the branch that
+  o chose. The choice is made in the consistency test; a test that forbids one
+  of the two D concepts must re-decide the choice of o instead of keeping the
+  cached alternative.
+  Axioms: r(o,a), o in (B1 or B2), (some inv(r) B1) <= D1,
+  (some inv(r) B2) <= D2.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/f">
+  <Prefix name="" IRI="http://konclude.test/cgc/f#"/>
+
+  <Declaration><Class abbreviatedIRI=":B1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANoBranch"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANotD1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANotD2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAD1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAD1D2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestONoBranch"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestONotB1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANoB1Exists"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANoB1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANoB1All"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestONotB2"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o"/></Declaration>
+
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":r"/>
+    <NamedIndividual abbreviatedIRI=":o"/>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectUnionOf><Class abbreviatedIRI=":B1"/><Class abbreviatedIRI=":B2"/></ObjectUnionOf>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ClassAssertion>
+  <SubClassOf>
+    <ObjectSomeValuesFrom>
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+      <Class abbreviatedIRI=":B1"/>
+    </ObjectSomeValuesFrom>
+    <Class abbreviatedIRI=":D1"/>
+  </SubClassOf>
+  <SubClassOf>
+    <ObjectSomeValuesFrom>
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+      <Class abbreviatedIRI=":B2"/>
+    </ObjectSomeValuesFrom>
+    <Class abbreviatedIRI=":D2"/>
+  </SubClassOf>
+
+  <!-- o is a B1 or a B2, so a is a D1 or a D2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANoBranch"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D1"/></ObjectComplementOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a is not a D1: o has to choose B2, a cached B1 choice must be given up. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANotD1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D1"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANotD2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAD1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <Class abbreviatedIRI=":D1"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAD1D2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <Class abbreviatedIRI=":D1"/>
+      <Class abbreviatedIRI=":D2"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestONoBranch"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":B1"/></ObjectComplementOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":B2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestONotB1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":B1"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a has r(a,o) and o is a B1 or a B2, so one of the inverse existentials holds. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANoB1Exists"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+          <Class abbreviatedIRI=":B1"/>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+          <Class abbreviatedIRI=":B2"/>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANoB1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+          <Class abbreviatedIRI=":B1"/>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- o is the only inv(r)-successor of a, so it cannot be neither B1 nor B2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANoB1All"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+        <ObjectComplementOf><Class abbreviatedIRI=":B1"/></ObjectComplementOf>
+      </ObjectAllValuesFrom>
+      <ObjectAllValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+        <ObjectComplementOf><Class abbreviatedIRI=":B2"/></ObjectComplementOf>
+      </ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestONotB2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":B2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

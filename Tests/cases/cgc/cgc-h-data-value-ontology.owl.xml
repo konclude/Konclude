@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family H: data values under a functional data
+  property and a choice of value.
+
+  o is either a d-value 1 or a d-value 2 (a disjunction of two data has-value
+  restrictions), and d is functional. The universal restriction of a says that
+  every r-successor of a is not a d-value 1; because a has at most one
+  r-successor and r(a,o), o cannot be 1 and therefore has to be 2. The cached
+  model contains the chosen value; a test that adds or forbids a value has to
+  re-derive the data labels of the cached node.
+  Axioms: FunctionalDataProperty(d), r(a,o), a in (<=1 r) and
+  (all r (not (d = 1))), o in ((d = 1) or (d = 2)).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/h">
+  <Prefix name="" IRI="http://konclude.test/cgc/h#"/>
+
+  <Declaration><Class abbreviatedIRI=":TestValueNotTwo"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueTwo"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueNotOne"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueOne"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueBoth"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueNone"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueInSet"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueNotInSet"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSuccessorOne"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSuccessorTwo"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSuccessorNotTwo"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o"/></Declaration>
+
+  <FunctionalDataProperty><DataProperty abbreviatedIRI=":d"/></FunctionalDataProperty>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":r"/>
+    <NamedIndividual abbreviatedIRI=":a"/>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectProperty abbreviatedIRI=":r"/>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectAllValuesFrom>
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <ObjectComplementOf>
+        <DataHasValue>
+          <DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+        </DataHasValue>
+      </ObjectComplementOf>
+    </ObjectAllValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectUnionOf>
+      <DataHasValue>
+        <DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+      </DataHasValue>
+      <DataHasValue>
+        <DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+      </DataHasValue>
+    </ObjectUnionOf>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ClassAssertion>
+
+  <!-- a forces o to be a 2, so forbidding the value 2 is unsatisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueNotTwo"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <DataHasValue>
+          <DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+        </DataHasValue>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueTwo"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <DataHasValue>
+        <DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+      </DataHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueNotOne"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <DataHasValue>
+          <DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+        </DataHasValue>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- The value 1 contradicts the forced value 2 under the functional property. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueOne"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <DataHasValue>
+        <DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+      </DataHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueBoth"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <DataHasValue>
+        <DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+      </DataHasValue>
+      <DataHasValue>
+        <DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+      </DataHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueNone"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <DataHasValue>
+          <DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+        </DataHasValue>
+      </ObjectComplementOf>
+      <ObjectComplementOf>
+        <DataHasValue>
+          <DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+        </DataHasValue>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueInSet"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <DataSomeValuesFrom>
+        <DataProperty abbreviatedIRI=":d"/>
+        <DataOneOf>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+        </DataOneOf>
+      </DataSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestValueNotInSet"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <DataSomeValuesFrom>
+          <DataProperty abbreviatedIRI=":d"/>
+          <DataOneOf>
+            <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+            <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+          </DataOneOf>
+        </DataSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Every r-successor of a is not a 1, and o is the only r-successor. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSuccessorOne"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <DataHasValue>
+          <DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal>
+        </DataHasValue>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSuccessorTwo"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <DataHasValue>
+          <DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+        </DataHasValue>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- o is the only r-successor and it has the value 2, so it is not a non-2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSuccessorNotTwo"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <ObjectComplementOf>
+          <DataHasValue>
+            <DataProperty abbreviatedIRI=":d"/>
+            <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal>
+          </DataHasValue>
+        </ObjectComplementOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

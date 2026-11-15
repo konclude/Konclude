@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family E: a qualified at-most restriction between a
+  cached node and a new neighbour.
+
+  a has exactly one C-successor and it is a D1; D1 and D2 are disjoint. A test
+  that requires a second C-successor in D2 either merges that successor with the
+  existing one (D1 and D2 clash) or creates a second C-successor (the qualified
+  at-most restriction of a is exceeded), so it is unsatisfiable. The inverse part
+  counts the C-predecessors of o: a already is one, and the test asks for a
+  second one in D2, so it is unsatisfiable as well. The tests probe the
+  qualification and the polarity of the counted neighbours.
+  Axioms: a in C, D1, (some r (C and D1)), (<=1 r C); r(a,o); o in (<=1 inv(r) C);
+  D1 disjoint D2.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/e">
+  <Prefix name="" IRI="http://konclude.test/cgc/e#"/>
+
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSecondC"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestOneC"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNonC"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestCNotC"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNewCPredecessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestExistingCPredecessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNonCPredecessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoCPredecessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestRelaxedCount"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoExistingC"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o"/></Declaration>
+
+  <ClassAssertion><Class abbreviatedIRI=":C"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":D1"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <ClassAssertion>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <ObjectIntersectionOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D1"/></ObjectIntersectionOf>
+    </ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectProperty abbreviatedIRI=":r"/>
+      <Class abbreviatedIRI=":C"/>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":r"/>
+    <NamedIndividual abbreviatedIRI=":a"/>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+      <Class abbreviatedIRI=":C"/>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ClassAssertion>
+  <DisjointClasses><Class abbreviatedIRI=":D1"/><Class abbreviatedIRI=":D2"/></DisjointClasses>
+
+  <!-- A second C-successor in D2 would exceed the qualified at-most restriction. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSecondC"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <ObjectIntersectionOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D2"/></ObjectIntersectionOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestOneC"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <ObjectIntersectionOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D1"/></ObjectIntersectionOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- The qualified restriction does not limit non-C successors. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNonC"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":C"/></ObjectComplementOf></ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestCNotC"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <ObjectIntersectionOf><Class abbreviatedIRI=":C"/><ObjectComplementOf><Class abbreviatedIRI=":C"/></ObjectComplementOf></ObjectIntersectionOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a is already the one C-predecessor of o; a second one in D2 is impossible. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNewCPredecessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+        <ObjectIntersectionOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D2"/></ObjectIntersectionOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- The existing predecessor a itself is a C and a D1. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestExistingCPredecessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+        <ObjectIntersectionOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D1"/></ObjectIntersectionOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- A D2 predecessor need not be a C, so this does not count against the restriction. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNonCPredecessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+        <Class abbreviatedIRI=":D2"/>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a is a C-predecessor of o, so there is a C-predecessor. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoCPredecessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectAllValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+        <ObjectComplementOf><Class abbreviatedIRI=":C"/></ObjectComplementOf>
+      </ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestRelaxedCount"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectMaxCardinality cardinality="2">
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <Class abbreviatedIRI=":C"/>
+      </ObjectMaxCardinality>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoExistingC"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty abbreviatedIRI=":r"/>
+          <ObjectIntersectionOf><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D1"/></ObjectIntersectionOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

@@ -1,0 +1,990 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Suite "Completion-graph-caching": tests that exercise the completion graph
+  caching criteria and the reactivation paths of the completion algorithm.
+
+  Every test is executed with all system configurations assigned to the suite:
+  the default configuration (Configs/default-config.xml), the
+  reduced-saturation configuration (the saturation decision shortcuts off, the
+  ABox preparation kept), the two oracles without completion graph caching, the
+  delayed caching reactivation and the configuration without
+  backjumping/semantic branching. All configurations must produce the same
+  answer; the expected answers were derived from the DL semantics and
+  cross-checked with HermiT via the OWL API
+  (kt:verifiedResultByReasonerOnVersion).
+
+  The families (a to k) differ in where the non-determinism of the consistency
+  test comes from: nominal merging by at-most, the pigeonhole principle, a plain
+  disjunction, merging of blockable successors, a qualified at-most restriction,
+  normalised inverse existential restrictions, a large ABox, data values,
+  DL-safe rules, the role hierarchy/chains, and blocking in a cyclic TBox.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/cgc">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><Literal>Completion-graph-caching</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><Literal>cgc</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><Literal>Tests for the completion graph caching: each test asks a question whose answer depends on a choice that the consistency test made, and the answer differs from the one that a stale cached model would give. The suite runs every test with the default configuration, with reduced saturation (decision shortcuts off, ABox preparation kept), without completion graph caching (oracle), with reduced saturation and without caching (second oracle), with delayed caching reactivation and without backjumping/semantic branching. Correctness means: all configurations agree and agree with the expected answer.</Literal></DataPropertyAssertion>
+
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><NamedIndividual IRI="../../Configs/default-config.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><NamedIndividual IRI="../../configs/reduced-saturation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><NamedIndividual IRI="../../configs/no-completion-graph-caching.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><NamedIndividual IRI="../../configs/reduced-saturation-no-caching.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><NamedIndividual IRI="../../configs/delayed-caching-reactivation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc"/><NamedIndividual IRI="../../configs/no-backjumping.xml"/></ObjectPropertyAssertion>
+
+  <!-- ===== Family A: nominal merging by an at-most restriction ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-consistent"/><Literal>The ABox of the at-most-nominal-merge family is consistent: a and b are not asserted to be different, so the ontology has a model in which they are the same individual.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-consistent"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge"/><Literal>o has at most one r-predecessor and a and b are both asserted as r-predecessors of o, so a and b are the same individual. (a and not b) is therefore unsatisfiable. The test merges the test node with the nominal {a}; the cached merge of b into a has to be reactivated and re-derived instead of being taken from the cached model.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge"/><Literal>http://konclude.test/cgc/a#TestNotBoth</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge-control"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge-control"/><Literal>Negative control for the nominal merge test: (a and b) is satisfiable because the names may denote the same individual. A reactivation that over-constrains the merged nominal must not make this class unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge-control"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge-control"/><Literal>http://konclude.test/cgc/a#TestBoth</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge-control"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-merge-control"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-some"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-some"/><Literal>a has a t-successor in (K1 or K2), so a may have a K1 t-successor. The class is satisfiable; a cached model that chose K2 must not answer unsatisfiable when the test adds the K1 alternative.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-some"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-some"/><Literal>http://konclude.test/cgc/a#TestSomeK1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-some"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-some"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-not-some"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-not-some"/><Literal>a has at most one t-successor and it is a K1 or a K2, so forbidding a K1 t-successor leaves the K2 alternative and is satisfiable. The test checks that the negated existential is checked against the rebuilt successor instead of the cached label.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-not-some"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-not-some"/><Literal>http://konclude.test/cgc/a#TestNoK1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-not-some"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-not-some"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-none"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-none"/><Literal>Every t-successor of a is a K1 or a K2 (a has exactly one), so forbidding both is unsatisfiable. This is the positive counterpart of the choice tests and fails if the disjunction is not re-applied to the cached successor.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-none"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-none"/><Literal>http://konclude.test/cgc/a#TestNoK</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-none"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-choice-none"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-self-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-self-clash"/><Literal>Control: a is not different from itself, so (a and not a) is unsatisfiable for every configuration.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-self-clash"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-a-self-clash"/><Literal>http://konclude.test/cgc/a#TestSelfClash</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-self-clash"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-self-clash"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-a-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-classification"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-a-classification"/><Literal>expected/cgc-a-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-classification"/><Literal>The classifier runs many satisfiability tests on the same cached completion graph. TestNotBoth and TestSelfClash must be classified under owl:Nothing, and TestBoth must stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>OWLlink sequence on one cached graph: TestNotBoth, TestBoth, TestNotBoth, TestSomeK1, TestNoK and TestNotBoth again. The same question has to have the same answer after the other tests, otherwise a test wrote into the shared deterministic or cached graph.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>cgc-a-repeated-requests.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-owllink-repeated"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-a-realization"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-a-realization"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-a-realization"/><Literal>cgc-a-nominal-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-a-realization"/><Literal>expected/cgc-a-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-a-realization"/><Literal>The realizer derives the types of a, b and o from the same cached completion graph: a and b are instances of TestBoth (because they are the same individual) and of owl:Thing, o is an instance of owl:Thing. The realization is the second task type that consumes the cached graph; it must not lose the merged-nominal types.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-a-realization"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family B: pigeonhole principle (issue #19 shapes) ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-not-crowded"/><Literal>Four pigeons on three holes force two pigeons onto one hole, so one hole is crowded and the scene is crowded. (Scene and not CrowdedScene) is unsatisfiable. The test merges the scene nominal with the test node, so the hole successors that the cached model merged have to be rebuilt.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-not-crowded"/><Literal>../dl/pigeonhole-4p3h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole-4p3h#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-not-crowded"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-not-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-crowded"/><Literal>Control for the four-pigeons-three-holes case: (Scene and CrowdedScene) is satisfiable, so the reactivation of the merged holes must not introduce a false clash.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-crowded"/><Literal>../dl/pigeonhole-4p3h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-crowded"/><Literal>http://konclude.test/dl/pigeonhole-4p3h#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-not-crowded"/><Literal>Pigeonhole variant in which the holes are linked to the scene by role assertions: (Scene and not CrowdedScene) is unsatisfiable because the pigeon choices force a crowded hole.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-not-crowded"/><Literal>../dl/pigeonhole-asserted-scene-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-not-crowded"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-not-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-crowded"/><Literal>Control for the role-assertion pigeonhole variant: (Scene and CrowdedScene) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-crowded"/><Literal>../dl/pigeonhole-asserted-scene-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-crowded"/><Literal>http://konclude.test/dl/pigeonhole-asserted-scene#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-not-crowded"/><Literal>Negative control for the pigeonhole family: two pigeons on two holes need not share a hole, so (Scene and not CrowdedScene) is satisfiable. A reactivation that rebuilds too much must not produce a false clash here.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-not-crowded"/><Literal>../dl/pigeonhole-2p2h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-not-crowded"/><Literal>http://konclude.test/dl/pigeonhole-2p2h#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-not-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-not-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-classification"/><Literal>../dl/pigeonhole-4p3h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-classification"/><Literal>expected/cgc-b-pigeonhole-4p3h-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-classification"/><Literal>Classification of the four-pigeons-three-holes ontology: Scene and CrowdedScene are equivalent and TestSceneNotCrowded is unsatisfiable. The classifier runs the tests on the same cached graph.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-4p3h-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>OWLlink sequence of issue #19 on one cached graph: the same unsatisfiability question is asked twice, interrupted by other tests and by a subsumption test. The repeated answers must not change.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>../owllink/pigeonhole-repeated-requests.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-owllink-repeated"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family C: plain disjunction ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-consistent"/><Literal>The disjunction family is consistent: a chooses one of C1 and C2 and the respective D is propagated to o.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-consistent"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-no-branch"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-no-branch"/><Literal>Whichever disjunct a takes, it forces D1 or D2 onto its r-successor o, so (o and not D1 and not D2) is unsatisfiable. The test touches the cached neighbour of the disjunction decision.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-no-branch"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-no-branch"/><Literal>http://konclude.test/cgc/c#TestONoBranch</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-no-branch"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-no-branch"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-no-branch"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-no-branch"/><Literal>a is a C1 or a C2, so a itself is a D1 or a D2; forbidding both is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-no-branch"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-no-branch"/><Literal>http://konclude.test/cgc/c#TestANoBranch</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-no-branch"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-no-branch"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-rechoice"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-rechoice"/><Literal>o is a D2; a has to take C2. If the cached model chose C1 (which forces D1 onto o and D1 is disjoint from D2), the choice has to be given up; a stale cached choice would answer unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-rechoice"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-rechoice"/><Literal>http://konclude.test/cgc/c#TestORechoice</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-rechoice"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-rechoice"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-d1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-d1"/><Literal>o is a D1; the C1 alternative satisfies the ontology, so the class is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-d1"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-d1"/><Literal>http://konclude.test/cgc/c#TestOD1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-d1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-d1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-both"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-both"/><Literal>D1 and D2 are disjoint, so (o and D1 and D2) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-both"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-both"/><Literal>http://konclude.test/cgc/c#TestOD1D2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-both"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-both"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-not-d1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-not-d1"/><Literal>a is not a D1: the C2 alternative is still open, so this is satisfiable and must not inherit the cached D1 from a C1 model.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-not-d1"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-not-d1"/><Literal>http://konclude.test/cgc/c#TestANotD1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-not-d1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-self-not-d1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-forces-c1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-forces-c1"/><Literal>o is a D1 and not a D2, so the C2 alternative is impossible and a has to take C1; the class is satisfiable, which fails if the reactivated disjunction is not decided again.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-forces-c1"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-forces-c1"/><Literal>http://konclude.test/cgc/c#TestOForcesC1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-forces-c1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-neighbour-forces-c1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-c-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-c-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-c-classification"/><Literal>cgc-c-disjunction-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-c-classification"/><Literal>expected/cgc-c-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-c-classification"/><Literal>Classification of the disjunction family: TestONoBranch and TestANoBranch must be under owl:Nothing, and the satisfiable test classes must not be.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-c-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family D: at-most merging of blockable successors ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-consistent"/><Literal>The at-most-merge family is consistent: the two r-successors of a are merged into one node that is a B1 and a B2.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-consistent"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-merged-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-merged-successor"/><Literal>a has at most one r-successor and requires one in B1 and one in B2, so the only successor is a B1 and a B2. (a and not (some r (B1 and B2))) is unsatisfiable; it is the criterion C8/C4 shape for blockable successors.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-merged-successor"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-merged-successor"/><Literal>http://konclude.test/cgc/d#TestNoMergedSuccessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-merged-successor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-merged-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-merged-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-merged-successor"/><Literal>Control: (a and some r (B1 and B2)) is satisfiable because the two required successors are merged.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-merged-successor"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-merged-successor"/><Literal>http://konclude.test/cgc/d#TestMergedSuccessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-merged-successor"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-merged-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-all-merged"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-all-merged"/><Literal>There is exactly one r-successor and it is a B1 and a B2, so (a and all r (B1 and B2)) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-all-merged"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-all-merged"/><Literal>http://konclude.test/cgc/d#TestAllMerged</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-all-merged"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-all-merged"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-b1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-b1"/><Literal>a requires an r-successor in B1, so (a and not (some r B1)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-b1"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-b1"/><Literal>http://konclude.test/cgc/d#TestNoB1Successor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-b1"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-b1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-not-all-b1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-not-all-b1"/><Literal>a has an r-successor in B1, so not every r-successor is a non-B1; (a and not (all r B1)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-not-all-b1"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-not-all-b1"/><Literal>http://konclude.test/cgc/d#TestNotAllB1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-not-all-b1"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-not-all-b1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-two-successors"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-two-successors"/><Literal>Control: (a and some r B1 and some r B2) is satisfiable with one merged successor for both existentials.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-two-successors"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-two-successors"/><Literal>http://konclude.test/cgc/d#TestTwoSuccessors</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-two-successors"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-two-successors"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-successor"/><Literal>a requires an r-successor, so (a and at most 0 r) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-successor"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-successor"/><Literal>http://konclude.test/cgc/d#TestNoSuccessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-successor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-choice"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-choice"/><Literal>The t-successor of a is a K1 or a K2, so forbidding both is unsatisfiable. This is the second non-deterministic choice of the family; it has to be re-decided after the r-successors were merged.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-choice"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-choice"/><Literal>http://konclude.test/cgc/d#TestNoChoice</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-choice"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-no-choice"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-some-k2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-some-k2"/><Literal>Control: a may have a K2 t-successor, so (a and some t K2) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-some-k2"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-d-some-k2"/><Literal>http://konclude.test/cgc/d#TestSomeK2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-d-some-k2"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-some-k2"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-d-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-d-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-d-classification"/><Literal>cgc-d-atmost-merge-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-d-classification"/><Literal>expected/cgc-d-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-d-classification"/><Literal>Classification of the at-most-merge family: the unsatisfiable test classes must be under owl:Nothing while the control classes stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-d-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family E: qualified at-most restriction with a new neighbour ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-consistent"/><Literal>The qualified at-most family is consistent: a has one C-successor that is a D1, and o has one C-predecessor, namely a.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-consistent"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-second-c-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-second-c-successor"/><Literal>a already has one C-successor that is a D1, and D1 and D2 are disjoint. A second C-successor in D2 either merges with the existing one (D1 against D2) or exceeds the qualified at-most restriction of a; the class is unsatisfiable. The new successor is not in the cached model, so C4 has to count it.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-second-c-successor"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-second-c-successor"/><Literal>http://konclude.test/cgc/e#TestSecondC</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-second-c-successor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-second-c-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-one-c-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-one-c-successor"/><Literal>Control: the existing C-successor is a D1, so (a and some r (C and D1)) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-one-c-successor"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-one-c-successor"/><Literal>http://konclude.test/cgc/e#TestOneC</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-one-c-successor"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-one-c-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-successor"/><Literal>The qualified restriction counts only C-successors, so an additional non-C r-successor is allowed and (a and some r (not C)) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-successor"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-successor"/><Literal>http://konclude.test/cgc/e#TestNonC</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-successor"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-c-and-not-c"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-c-and-not-c"/><Literal>Control: (a and some r (C and not C)) is unsatisfiable, independent of the caching.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-c-and-not-c"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-c-and-not-c"/><Literal>http://konclude.test/cgc/e#TestCNotC</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-c-and-not-c"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-c-and-not-c"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-new-c-predecessor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-new-c-predecessor"/><Literal>o has at most one C-predecessor through the inverse role and a is such a predecessor. A new predecessor that is a C and a D2 is distinct from a (a is a D1), so it violates the inverse at-most restriction; the class is unsatisfiable. This checks C4 for a new nominal neighbour.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-new-c-predecessor"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-new-c-predecessor"/><Literal>http://konclude.test/cgc/e#TestNewCPredecessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-new-c-predecessor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-new-c-predecessor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-existing-c-predecessor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-existing-c-predecessor"/><Literal>Control: the one C-predecessor of o is a and a is a D1, so (o and some inv(r) (C and D1)) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-existing-c-predecessor"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-existing-c-predecessor"/><Literal>http://konclude.test/cgc/e#TestExistingCPredecessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-existing-c-predecessor"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-existing-c-predecessor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-predecessor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-predecessor"/><Literal>A D2 predecessor need not be a C, so it is not counted by the qualified inverse at-most restriction and (o and some inv(r) D2) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-predecessor"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-predecessor"/><Literal>http://konclude.test/cgc/e#TestNonCPredecessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-predecessor"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-non-c-predecessor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-c-predecessor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-c-predecessor"/><Literal>a is a C and an r-predecessor of o, so (o and all inv(r) (not C)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-c-predecessor"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-c-predecessor"/><Literal>http://konclude.test/cgc/e#TestNoCPredecessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-c-predecessor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-c-predecessor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-relaxed-count"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-relaxed-count"/><Literal>Control: with an at-most of two C-successors the single existing one is allowed, so the class is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-relaxed-count"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-relaxed-count"/><Literal>http://konclude.test/cgc/e#TestRelaxedCount</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-relaxed-count"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-relaxed-count"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-existing-c"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-existing-c"/><Literal>a requires a C-successor in D1, so (a and not (some r (C and D1))) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-existing-c"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-existing-c"/><Literal>http://konclude.test/cgc/e#TestNoExistingC</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-existing-c"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-no-existing-c"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-e-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-e-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-e-classification"/><Literal>cgc-e-atmost-open-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-e-classification"/><Literal>expected/cgc-e-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-e-classification"/><Literal>Classification of the qualified at-most family: the unsatisfiable test classes must be under owl:Nothing and the controls must stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-e-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family F: normalised inverse existential restrictions ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-consistent"/><Literal>The inverse-GCI family is consistent: o chooses B1 or B2 and the corresponding D is derived for a.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-consistent"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-branch"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-branch"/><Literal>o is a B1 or a B2, and the normalised inverse existentials derive D1 or D2 for a. (a and not D1 and not D2) is unsatisfiable; the cached ALL concept has to reach the rebuilt inverse successor of a.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-branch"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-branch"/><Literal>http://konclude.test/cgc/f#TestANoBranch</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-branch"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-branch"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d1"/><Literal>a is not a D1: o may choose B2 and derive D2, so the class is satisfiable. A cached model that chose B1 must give the choice up.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d1"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d1"/><Literal>http://konclude.test/cgc/f#TestANotD1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d2"/><Literal>Symmetric re-choice test: a is not a D2, so o may choose B1 and derive D1.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d2"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d2"/><Literal>http://konclude.test/cgc/f#TestANotD2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d2"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-not-d2"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1"/><Literal>Control: (a and D1) is satisfiable with o being a B1.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1"/><Literal>http://konclude.test/cgc/f#TestAD1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1d2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1d2"/><Literal>Control: (a and D1 and D2) is satisfiable because D1 and D2 do not exclude each other.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1d2"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1d2"/><Literal>http://konclude.test/cgc/f#TestAD1D2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1d2"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-d1d2"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-ono-branch"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-ono-branch"/><Literal>o is a B1 or a B2, so forbidding both is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-ono-branch"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-ono-branch"/><Literal>http://konclude.test/cgc/f#TestONoBranch</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-ono-branch"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-ono-branch"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b1"/><Literal>Control: o may be a B2, so (o and not B1) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b1"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b1"/><Literal>http://konclude.test/cgc/f#TestONotB1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-inverse-exists"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-inverse-exists"/><Literal>a has o as an inverse-r-successor and o is a B1 or a B2, so (a and not (some inv(r) B1) and not (some inv(r) B2)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-inverse-exists"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-inverse-exists"/><Literal>http://konclude.test/cgc/f#TestANoB1Exists</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-inverse-exists"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-inverse-exists"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1"/><Literal>Control: (a and not (some inv(r) B1)) is satisfiable with o being a B2.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1"/><Literal>http://konclude.test/cgc/f#TestANoB1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1-all"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1-all"/><Literal>o is the only inverse-r-successor of a and it is a B1 or a B2, so (a and all inv(r) (not B1) and all inv(r) (not B2)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1-all"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1-all"/><Literal>http://konclude.test/cgc/f#TestANoB1All</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1-all"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-no-b1-all"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b2"/><Literal>Control: o may be a B1, so (o and not B2) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b2"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b2"/><Literal>http://konclude.test/cgc/f#TestONotB2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b2"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-o-not-b2"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-f-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-classification"/><Literal>cgc-f-inverse-gci-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-f-classification"/><Literal>expected/cgc-f-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-classification"/><Literal>Classification of the inverse-GCI family: TestANoBranch and TestONoBranch must be under owl:Nothing, the re-choice controls stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>OWLlink sequence on one cached graph: TestANoBranch, TestANotD1 twice, TestANoBranch again and TestONoBranch. A changed answer of the repeated questions indicates a write into the shared cached graph.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>cgc-f-repeated-requests.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>true</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-f-owllink-repeated"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-crowded"/><Literal>Control for the negative pigeonhole case: (Scene and CrowdedScene) is satisfiable when two pigeons sit on two holes.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-crowded"/><Literal>../dl/pigeonhole-2p2h-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-crowded"/><Literal>http://konclude.test/dl/pigeonhole-2p2h#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-2p2h-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-classification"/><Literal>../dl/pigeonhole-asserted-scene-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-classification"/><Literal>expected/cgc-b-pigeonhole-asserted-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-classification"/><Literal>Classification of the role-assertion pigeonhole variant: Scene and CrowdedScene are equivalent and TestSceneNotCrowded is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-b-pigeonhole-asserted-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family G: many independent ABox groups ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-consistent"/><Literal>The ABox with twelve independent groups is consistent: in every group the two r-predecessors of o_i are the same individual.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-consistent"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-consistent"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5"/><Literal>In group 5, o_5 has at most one r-predecessor and both a_5 and b_5 are predecessors, so (a_5 and not b_5) is unsatisfiable. The test merges the test node with the nominal a_5 in a large ABox whose other groups must keep their cached state.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5"/><Literal>http://konclude.test/cgc/g#Test5AB</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5-control"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5-control"/><Literal>Control for group 5: (a_5 and b_5) is satisfiable because the two names may denote the same individual.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5-control"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5-control"/><Literal>http://konclude.test/cgc/g#Test5ABPos</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5-control"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5-control"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-5-control"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-9"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-9"/><Literal>Same merge test for group 9: the reactivation has to find b_9 without rebuilding the unrelated groups.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-9"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-9"/><Literal>http://konclude.test/cgc/g#Test9AB</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-9"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-9"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-9"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-12"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-12"/><Literal>Same merge test for the last group: it touches the group that the individual saturation processes last.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-12"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-12"/><Literal>http://konclude.test/cgc/g#Test12AB</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-12"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-12"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-12"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-reverse"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-reverse"/><Literal>The reverse nominal order of the merge test: (b_1 and not a_1) is unsatisfiable for the same reason as (a_1 and not b_1).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-reverse"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-reverse"/><Literal>http://konclude.test/cgc/g#Test1BA</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-reverse"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-reverse"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-merge-reverse"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-none"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-none"/><Literal>The t-successor of a_1 is a K1 or a K2, so forbidding both is unsatisfiable. The choice sits in the first group of a large ABox.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-none"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-none"/><Literal>http://konclude.test/cgc/g#Test1Choice</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-none"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-none"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-none"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-not-k1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-not-k1"/><Literal>Control for the choice in the large ABox: (a_1 and not (some t K1)) is satisfiable because a_1 may choose K2.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-not-k1"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-not-k1"/><Literal>http://konclude.test/cgc/g#Test1ChoiceK1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-not-k1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-not-k1"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-choice-not-k1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-predecessor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-predecessor"/><Literal>Control: a_3 is an r-predecessor of o_3, so (o_3 and some inv(r) {a_3}) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-predecessor"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-g-predecessor"/><Literal>http://konclude.test/cgc/g#Test3Predecessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-g-predecessor"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-predecessor"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-predecessor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-g-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-classification"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-g-classification"/><Literal>expected/cgc-g-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-classification"/><Literal>Classification over the large ABox: the merge test classes and the choice test classes must be placed under owl:Nothing, the controls must stay satisfiable.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-classification"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-g-realization"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-g-realization"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-g-realization"/><Literal>cgc-g-abox-many-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-g-realization"/><Literal>expected/cgc-g-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-g-realization"/><Literal>The realizer derives the types of every individual of the large ABox from the cached completion graph. All a_i, b_i and o_i are instances of owl:Thing; the merge of each pair must not remove an individual from the result.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-realization"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgc-g-realization"/><NamedIndividual IRI="../../configs/small-saturation-batch.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-g-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family H: data values ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-consistent"/><Literal>The data value family is consistent: o has one of the two disjunctive values and the universal restriction of a excludes the value 1.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-consistent"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-two"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-two"/><Literal>o is a d-value 1 or 2 and the universal restriction of a excludes the value 1, so o has to be 2; (o and not (d = 2)) is unsatisfiable. The cached node has a data label that has to be re-derived after the test node was merged with {o}.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-two"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-two"/><Literal>http://konclude.test/cgc/h#TestValueNotTwo</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-two"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-two"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-two"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-two"/><Literal>Control: (o and (d = 2)) is satisfiable because o is forced to the value 2.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-two"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-two"/><Literal>http://konclude.test/cgc/h#TestValueTwo</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-two"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-two"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-one"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-one"/><Literal>Control: (o and not (d = 1)) is satisfiable because o is forced to the value 2.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-one"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-one"/><Literal>http://konclude.test/cgc/h#TestValueNotOne</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-one"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-one"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-one"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-one"/><Literal>The functional data property forbids two different values, so (o and (d = 1)) contradicts the forced value 2 and is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-one"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-one"/><Literal>http://konclude.test/cgc/h#TestValueOne</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-one"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-one"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-both"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-both"/><Literal>(o and (d = 1) and (d = 2)) is unsatisfiable because the data property is functional and the two values are different.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-both"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-both"/><Literal>http://konclude.test/cgc/h#TestValueBoth</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-both"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-both"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-none"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-none"/><Literal>o is a value 1 or a value 2, so forbidding both is unsatisfiable. The disjunction of the data has-value restrictions is the cached choice.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-none"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-none"/><Literal>http://konclude.test/cgc/h#TestValueNone</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-none"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-none"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-in-set"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-in-set"/><Literal>Control: the value of o is in the data range {1, 2}, so the existential restriction is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-in-set"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-in-set"/><Literal>http://konclude.test/cgc/h#TestValueInSet</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-in-set"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-in-set"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-in-set"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-in-set"/><Literal>Every value of o is 1 or 2, so no value is outside {1, 2} and the negated existential is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-in-set"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-in-set"/><Literal>http://konclude.test/cgc/h#TestValueNotInSet</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-in-set"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-not-in-set"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-one"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-one"/><Literal>Every r-successor of a is not a d-value 1, so (a and some r (d = 1)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-one"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-one"/><Literal>http://konclude.test/cgc/h#TestSuccessorOne</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-one"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-one"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-two"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-two"/><Literal>Control: the only r-successor of a is o and o is forced to 2, so (a and some r (d = 2)) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-two"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-two"/><Literal>http://konclude.test/cgc/h#TestSuccessorTwo</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-two"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-two"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-not-two"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-not-two"/><Literal>The only r-successor of a is o with the forced value 2, so (a and some r (not (d = 2))) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-not-two"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-not-two"/><Literal>http://konclude.test/cgc/h#TestSuccessorNotTwo</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-not-two"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-successor-not-two"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-h-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-h-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-h-classification"/><Literal>cgc-h-data-value-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-h-classification"/><Literal>expected/cgc-h-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-h-classification"/><Literal>Classification of the data value family: the unsatisfiable value test classes must be under owl:Nothing and the value controls stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-h-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family I: DL-safe rules ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-consistent"/><Literal>The rule family is consistent: the named individual k is a K1 or a K2, and the rule corresponding to the chosen alternative derives M or N on the named individual l.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-consistent"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-rule-choice"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-rule-choice"/><Literal>k is the named individual that is a K1 or a K2 and t(k,l) links it to the named individual l. In the K1 alternative the rule derives M on every t-successor of k, in the K2 alternative it derives N; (l and not M and not N) is therefore unsatisfiable. DL-safe rules fire on named individuals only, so this is the caching-relevant shape: the rule binding depends on the cached choice for the nominal k and has to be re-derived when that choice is redone.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-rule-choice"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-rule-choice"/><Literal>http://konclude.test/cgc/i#TestNoRuleChoice</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-rule-choice"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-rule-choice"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-m"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-m"/><Literal>Control: choosing K1 derives M on l, so (l and M) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-m"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-m"/><Literal>http://konclude.test/cgc/i#TestRuleM</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-m"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-m"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-n"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-n"/><Literal>Control: choosing K2 derives N on l, so (l and N) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-n"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-n"/><Literal>http://konclude.test/cgc/i#TestRuleN</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-n"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-rule-n"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-m"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-m"/><Literal>Choosing K2 leaves l without M, so (l and not M) is satisfiable. A rule binding from a cached K1 choice must be given up and must not derive M.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-m"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-m"/><Literal>http://konclude.test/cgc/i#TestOnlyNotM</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-m"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-m"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-n"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-n"/><Literal>Symmetric control: choosing K1 leaves l without N.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-n"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-n"/><Literal>http://konclude.test/cgc/i#TestOnlyNotN</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-n"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-only-not-n"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k1"/><Literal>Control: k may be a K2, so (k and not K1) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k1"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k1"/><Literal>http://konclude.test/cgc/i#TestNoK1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k"/><Literal>k is a K1 or a K2, so forbidding both is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k"/><Literal>cgc-i-rules-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k"/><Literal>http://konclude.test/cgc/i#TestNoK</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-i-no-k"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family J: role hierarchy, transitivity and role chains ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-consistent"/><Literal>The role hierarchy family is consistent: the sub-role successors of a are merged by the at-most restriction on the super-role r, the transitive and the chain links are asserted consistently, and i and j are the same individual.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-consistent"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-successor"/><Literal>The r1-successor in B1 and the r2-successor in B2 are both r-successors and a has at most one, so they are merged into a B1/B2 node. (a and not (some r (B1 and B2))) is unsatisfiable; the r-successor is counted through the super-role of the two asserted sub-roles.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-successor"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-successor"/><Literal>http://konclude.test/cgc/j#TestNoMergedSuccessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-successor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r1"/><Literal>After the merge the surviving node is still reachable through r1, so (a and not (some r1 (B1 and B2))) is unsatisfiable. This is the cached-neighbour criterion C8 through a sub-role.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r1"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r1"/><Literal>http://konclude.test/cgc/j#TestMergedR1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r1"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r2"/><Literal>The symmetric sub-role test: the merged node is also reachable through r2, so (a and not (some r2 (B1 and B2))) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r2"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r2"/><Literal>http://konclude.test/cgc/j#TestMergedR2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r2"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-merged-r2"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-b1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-b1"/><Literal>a requires an r1-successor in B1, so (a and not (some r1 B1)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-b1"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-b1"/><Literal>http://konclude.test/cgc/j#TestNoB1Successor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-b1"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-b1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-successor"/><Literal>a has r-successors, so (a and at most 0 r) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-successor"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-successor"/><Literal>http://konclude.test/cgc/j#TestNoRSuccessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-successor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-no-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-e"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-e"/><Literal>t is transitive, t(c,d), t(d,e) and every t-successor of c is a C, so C(e) holds and (e and not C) is unsatisfiable. The test depends on the cached transitive link that the completion has to re-derive.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-e"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-e"/><Literal>http://konclude.test/cgc/j#TestTransitiveE</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-e"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-e"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-d"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-d"/><Literal>t(c,d) and every t-successor of c is a C, so (d and not C) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-d"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-d"/><Literal>http://konclude.test/cgc/j#TestTransitiveD</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-d"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-d"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-link"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-link"/><Literal>The transitive closure of t links c to e, so (e and not (some inv(t) {c})) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-link"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-link"/><Literal>http://konclude.test/cgc/j#TestNoTransitiveLink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-link"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-transitive-link"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-link"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-link"/><Literal>The chain t1 o t2 is a sub-property of s and links f to h, so (h and not (some inv(s) {f})) is unsatisfiable. The chain automaton has to be re-applied to the cached links.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-link"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-link"/><Literal>http://konclude.test/cgc/j#TestChainLink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-link"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-link"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-sat"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-sat"/><Literal>Control: the chain derives the s-link from f to h, so (f and some s {h}) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-sat"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-sat"/><Literal>http://konclude.test/cgc/j#TestChainSat</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-sat"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-chain-sat"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-merge"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-merge"/><Literal>o3 has at most one r-predecessor; r1(i,o3) and r2(j,o3) are two r-predecessors because r1 and r2 are sub-roles of r, so i and j are the same individual and (i and not j) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-merge"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-merge"/><Literal>http://konclude.test/cgc/j#TestSubroleMerge</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-merge"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-merge"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-same"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-same"/><Literal>Control: (i and j) is satisfiable because the two sub-role predecessors may be the same individual.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-same"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-same"/><Literal>http://konclude.test/cgc/j#TestSubroleSame</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-same"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-subrole-same"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-j-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-classification"/><Literal>cgc-j-role-hierarchy-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-j-classification"/><Literal>expected/cgc-j-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-classification"/><Literal>Classification of the role hierarchy family: the unsatisfiable sub-role, transitivity and chain test classes must be under owl:Nothing and the controls stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>OWLlink sequence on one cached graph: TestNoMergedSuccessor, TestMergedR1, TestNoMergedSuccessor again, TestChainLink and TestSubroleMerge. The repeated question must keep its answer.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>cgc-j-repeated-requests.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-j-owllink-repeated"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family K: blocking in a cyclic TBox ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-consistent"/><Literal>The cyclic blocking family is consistent: the A-node chain is blocked and every node chooses C1 or C2.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-consistent"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-a-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-a-successor"/><Literal>A is a subclass of (some r A) and a is an A, so (a and not (some r A)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-a-successor"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-a-successor"/><Literal>http://konclude.test/cgc/k#TestNoASuccessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-a-successor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-a-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-choice-successor"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-choice-successor"/><Literal>Every r-successor of a is an A and therefore a C1 or a C2, so (a and not (some r (C1 or C2))) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-choice-successor"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-choice-successor"/><Literal>http://konclude.test/cgc/k#TestNoChoiceSuccessor</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-choice-successor"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-no-choice-successor"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-choice"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-choice"/><Literal>Every r-successor is an A and therefore a C1 or a C2, so forbidding C1 and C2 on all r-successors is unsatisfiable. The universal restrictions have to be applied to the blocked successors as well.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-choice"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-choice"/><Literal>http://konclude.test/cgc/k#TestAllNotChoice</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-choice"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-choice"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c1"/><Literal>Control: choosing C2 at a and along the blocked chain leaves no C1 successor, so the class is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c1"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c1"/><Literal>http://konclude.test/cgc/k#TestAllNotC1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c2"/><Literal>Control: choosing C1 at a and along the blocked chain leaves no C2 successor.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c2"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c2"/><Literal>http://konclude.test/cgc/k#TestAllNotC2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c2"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-c2"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c1"/><Literal>Control: choosing C1 at a and on every successor satisfies (a and all r C1).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c1"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c1"/><Literal>http://konclude.test/cgc/k#TestAllC1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c2"/><Literal>Control: choosing C2 at a and on every successor satisfies (a and all r C2).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c2"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c2"/><Literal>http://konclude.test/cgc/k#TestAllC2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c2"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-c2"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-some-c1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-some-c1"/><Literal>Control: the successor of a may be a C1, so (a and some r C1) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-some-c1"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-some-c1"/><Literal>http://konclude.test/cgc/k#TestSomeC1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-some-c1"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-some-c1"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-not-choice-self"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-not-choice-self"/><Literal>a is an A and therefore a C1 or a C2, so (a and not (C1 or C2)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-not-choice-self"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-not-choice-self"/><Literal>http://konclude.test/cgc/k#TestNotChoiceSelf</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-not-choice-self"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-not-choice-self"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-a"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-a"/><Literal>Every r-successor of a is an A, so (a and all r (not A)) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-a"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-a"/><Literal>http://konclude.test/cgc/k#TestAllNotA</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-a"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-all-not-a"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-k-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-k-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-k-classification"/><Literal>cgc-k-blocking-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-k-classification"/><Literal>expected/cgc-k-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-k-classification"/><Literal>Classification of the cyclic blocking family: the unsatisfiable test classes must be under owl:Nothing and the control classes stay satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-k-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <!-- ===== Family M: larger pigeonhole with combined features ===== -->
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-consistent"/><Literal>The six-pigeons-five-holes family is consistent: the pigeons choose holes, one hole has to hold two pigeons, and the data value choice and the role chain are satisfiable together with the nominal merges.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-consistent"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-m-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-not-crowded"/><Literal>Six distinct pigeons on five distinct holes force one hole onto two pigeons, so that hole is a CrowdedHole and the scene is a CrowdedScene; (Scene and not CrowdedScene) is unsatisfiable. The instance is larger than family B, combines the data value choice and a chain on the same model, and every pigeon/hole choice is on the same cached graph.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-not-crowded"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-not-crowded"/><Literal>http://konclude.test/cgc/m#TestSceneNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-not-crowded"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-not-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-crowded"/><Literal>Control: (Scene and CrowdedScene) is satisfiable for the six-pigeons-five-holes instance; a reactivation that rebuilds too much must not turn it unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-crowded"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-crowded"/><Literal>http://konclude.test/cgc/m#TestSceneCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-scene-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-choice"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-choice"/><Literal>Every pigeon has the value 1 or the value 2 of the functional data property, so ({p0} and not (d = 1) and not (d = 2)) is unsatisfiable. The data label of a pigeon that was merged during the pigeonhole assignment has to be re-derived.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-choice"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-choice"/><Literal>http://konclude.test/cgc/m#TestValueChoice</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-choice"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-choice"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-one"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-one"/><Literal>Control: ({p0} and (d = 1)) is satisfiable because the value choice is open.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-one"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-one"/><Literal>http://konclude.test/cgc/m#TestValueOne</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-one"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-value-one"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-no-located-in"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-no-located-in"/><Literal>p0 sits on a hole and every hole is in the scene; the role chain sitsAt o inScene is a sub-property of locatedIn, so p0 is locatedIn s and ({p0} and not (some locatedIn {s})) is unsatisfiable. The chain link has to be re-derived on the cached successors.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-no-located-in"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-m-no-located-in"/><Literal>http://konclude.test/cgc/m#TestNoLocatedIn</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-m-no-located-in"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-no-located-in"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-hole-not-crowded"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-hole-not-crowded"/><Literal>Control: the six pigeons can be distributed as 2,1,1,1,1, so a particular hole such as h0 need not be crowded; (h0 and not CrowdedHole) is satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-hole-not-crowded"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-m-hole-not-crowded"/><Literal>http://konclude.test/cgc/m#TestHoleNotCrowded</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-m-hole-not-crowded"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-hole-not-crowded"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-m-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-m-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-m-classification"/><Literal>cgc-m-pigeonhole-large-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-m-classification"/><Literal>expected/cgc-m-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-m-classification"/><Literal>Classification of the six-pigeons-five-holes instance: Scene and CrowdedScene are equivalent, TestSceneNotCrowded, TestValueChoice and TestNoLocatedIn are under owl:Nothing, TestSceneCrowded and TestValueOne are satisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-m-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+</Ontology>

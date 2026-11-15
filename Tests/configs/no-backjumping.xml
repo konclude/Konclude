@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration for the completion graph caching tests: dependency directed
+  backjumping and semantic branching are switched off, so the branches are
+  explored in another order and the cached model (Gn) is built from other
+  alternatives. A caching defect that depends on the chosen alternative shows
+  up as a different answer under this configuration.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.Backjumping'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SemanticBranching'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

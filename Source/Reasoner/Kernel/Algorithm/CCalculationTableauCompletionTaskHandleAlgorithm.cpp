@@ -9490,6 +9490,11 @@ namespace Konclude {
 						CIndividualProcessNode* blockedNode = processingBlockedNodeLinker->getData();
 						CIndividualProcessNode* locBlockedNode = getLocalizedIndividual(blockedNode,true,calcAlgContext);
 						locBlockedNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFBLOCKINGRETESTDUEPROCESSINGCOMPLETED);
+						// a blocked node that is presumed cached is only covered by the cached graph as long as its blocker
+						// is unchanged, hence its caching has to be tested again
+						if (locBlockedNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
+							locBlockedNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED);
+						}
 						addIndividualToProcessingQueue(locBlockedNode,calcAlgContext);
 						processingBlockedNodeLinker = processingBlockedNodeLinker->getNext();
 					}
@@ -19211,7 +19216,15 @@ namespace Konclude {
 								locAncTestIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFDIRECTBLOCKED);
 							} else {
 								locAncTestIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFPROCESSINGBLOCKED);
-								addIndividualToBlockingUpdateReviewProcessingQueue(blockingIndi,calcAlgContext);
+								// The blocker has to know the nodes it blocks: when it is merged or pruned, they are queued again
+								// (eliminiateBlockedIndividuals). Otherwise a node of the deterministic graph that is still blocked
+								// by a node that a later test merges is never processed, since the processing queues of the deterministic
+								// graph are not taken over by the test.
+								CIndividualProcessNode* locBlockingNode = getLocalizedIndividual(blockingIndi,false,calcAlgContext);
+								CXLinker<CIndividualProcessNode*>* procBlockedIndiNodeLinker = CObjectAllocator< CXLinker<CIndividualProcessNode*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+								procBlockedIndiNodeLinker->initLinker(locAncTestIndi);
+								locBlockingNode->addProcessingBlockedIndividualsLinker(procBlockedIndiNodeLinker);
+								addIndividualToBlockingUpdateReviewProcessingQueue(locBlockingNode,calcAlgContext);
 							}
 							propagateIndirectSuccessorBlocking(locAncTestIndi,calcAlgContext);
 							blocked = true;

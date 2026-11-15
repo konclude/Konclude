@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family K: blocking in the cached model.
+
+  The cyclic TBox A <= (some r A) creates a blocked chain of A-nodes. Every
+  A-node is also a C1 or a C2; a C1-node forces all its r-successors to C1 and
+  a C2-node forces them to C2, so the choice is repeated along the blocked
+  chain and the cached model contains the already blocked part. The tests add
+  universal restrictions to the nominal {a}, which have to be applied to the
+  blocked successors as well. A cached blocked node that keeps its old
+  (blocked) state would decide the disjunction at the wrong node.
+  Axioms: a in A, A <= (some r A), A <= (C1 or C2), C1 <= (all r C1),
+  C2 <= (all r C2).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/k">
+  <Prefix name="" IRI="http://konclude.test/cgc/k#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoASuccessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoChoiceSuccessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAllNotChoice"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAllNotC1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAllNotC2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAllC1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAllC2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSomeC1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNotChoiceSelf"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAllNotA"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+
+  <ClassAssertion><Class abbreviatedIRI=":A"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <SubClassOf>
+    <Class abbreviatedIRI=":A"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":A"/></ObjectSomeValuesFrom>
+  </SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":A"/>
+    <ObjectUnionOf><Class abbreviatedIRI=":C1"/><Class abbreviatedIRI=":C2"/></ObjectUnionOf>
+  </SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":C1"/>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C1"/></ObjectAllValuesFrom>
+  </SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":C2"/>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C2"/></ObjectAllValuesFrom>
+  </SubClassOf>
+
+  <!-- Every A-node has an r-successor that is an A. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoASuccessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":A"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Every r-successor of a is an A and therefore a C1 or a C2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoChoiceSuccessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty abbreviatedIRI=":r"/>
+          <ObjectUnionOf><Class abbreviatedIRI=":C1"/><Class abbreviatedIRI=":C2"/></ObjectUnionOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- C1 and C2 are repeated along the chain, so neither can be excluded everywhere. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAllNotChoice"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":C1"/></ObjectComplementOf></ObjectAllValuesFrom>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":C2"/></ObjectComplementOf></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Choosing C2 at a and along the chain leaves no C1 successor. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAllNotC1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":C1"/></ObjectComplementOf></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAllNotC2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":C2"/></ObjectComplementOf></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAllC1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C1"/></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAllC2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C2"/></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSomeC1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a is an A, so it is a C1 or a C2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNotChoiceSelf"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectUnionOf><Class abbreviatedIRI=":C1"/><Class abbreviatedIRI=":C2"/></ObjectUnionOf>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Every r-successor of a is an A, so no r-successor can be a non-A. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAllNotA"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":A"/></ObjectComplementOf></ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

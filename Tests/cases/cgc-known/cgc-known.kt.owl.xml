@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Suite "Completion-graph-caching-known-issues": the configuration-dependent
+  regression of the nominal/cardinality equality that completion graph caching
+  got wrong (fixed).
+
+  The runner's kt:knownFailure marker is per test, not per system
+  configuration, and the caching-enabled and caching-disabled configurations
+  disagreed on these tests. The failing tests therefore live in a suite whose
+  configurations all enable the caching; the caching-off configurations are
+  covered by the main cgc suite.
+
+  Ontology and expected taxonomy are shared with Tests/cases/cgc.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/cgc-known">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/><Literal>Completion-graph-caching-known-issues</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/><Literal>cgc-known</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/><Literal>Configuration-dependent regression guard for the completion graph caching: A and B are equivalent and a1 = a4 is forced by a qualified minimum cardinality, but the caching configurations used to answer satisfiable for (A and not B) and ({a1} and not {a4}) and classify A and B as distinct. The caching-off configurations are covered by the main cgc suite. Tracked by kt:issue-cgc-nominal-cardinality-equality in Tests/known-issues.owl.xml.</Literal></DataPropertyAssertion>
+
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/><NamedIndividual IRI="../../Configs/default-config.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/><NamedIndividual IRI="../../configs/reduced-saturation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/><NamedIndividual IRI="../../configs/delayed-caching-reactivation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known"/><NamedIndividual IRI="../../configs/no-backjumping.xml"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>The nominal-cardinality family is consistent: A is {a0,a1}, B is {a0,a4}, and the cardinality requirement of B is satisfiable with two distinct B-instances as successors.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>A is {a0,a1} and B is {a0,a4}; B requires at least two distinct B-successors, so a0 and a4 are r-successors of a4 and a4 is its own r-successor. Because B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, a4 cannot be in C and has to be in A; a4 is not a0 (otherwise B has only one instance and the two successors are impossible), so a4 = a1 and A = B. (A and not B) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>http://konclude.test/cgc/l#TestANotB</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>The same forced equality from the nominal side: a1 = a4 follows from the cardinality and the disjointness argument, so ({a1} and not {a4}) is unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>http://konclude.test/cgc/l#TestA1NotA4</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>Control for the forced nominal equality: ({a1} and {a4}) is satisfiable because a1 and a4 are the same individual in every model. A reactivation that over-constrains the merged nominal must not make this class unsatisfiable.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>http://konclude.test/cgc/l#TestA1A4</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>../cgc/expected/cgc-l-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>Classification of the nominal-cardinality family: A and B are equivalent, TestANotB and TestA1NotA4 are under owl:Nothing and TestA1A4 is under A.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+</Ontology>

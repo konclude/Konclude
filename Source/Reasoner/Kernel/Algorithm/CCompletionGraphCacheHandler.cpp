@@ -333,6 +333,11 @@ namespace Konclude {
 
 
 				bool CCompletionGraphCacheHandler::testCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext) {
+					// A node that the cached graph pruned (e.g. a successor of a node that was merged into another node)
+					// is not part of the cached model, its state is no witness for the current node.
+					if (compGraphCachedIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+						return false;
+					}
 					bool cached = true;
 					if (cached) {
 						cached &= testConceptLabelSubSetCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);

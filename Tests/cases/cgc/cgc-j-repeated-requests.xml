@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Family J over OWLlink: one knowledge base, one cached completion graph.
+     The merge question is asked before and after the sub-role question, the
+     chain and the sub-role predecessor tests. Expected, in response order:
+     false, false, false, false, false. -->
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/kb/cgc-j"/>
+  <LoadOntologies kb="http://konclude.test/kb/cgc-j">
+    <OntologyIRI IRI="file:cgc-j-role-hierarchy-ontology.owl.xml"/>
+  </LoadOntologies>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-j">
+    <owl:Class IRI="http://konclude.test/cgc/j#TestNoMergedSuccessor"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-j">
+    <owl:Class IRI="http://konclude.test/cgc/j#TestMergedR1"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-j">
+    <owl:Class IRI="http://konclude.test/cgc/j#TestNoMergedSuccessor"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-j">
+    <owl:Class IRI="http://konclude.test/cgc/j#TestChainLink"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-j">
+    <owl:Class IRI="http://konclude.test/cgc/j#TestSubroleMerge"/>
+  </IsClassSatisfiable>
+  <ReleaseKB kb="http://konclude.test/kb/cgc-j"/>
+</RequestMessage>
