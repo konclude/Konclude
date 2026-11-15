@@ -20,7 +20,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:suite-abox"/>
-    <Literal>Control ontology for the ABox role-characteristic conformance cases (see Docs/Fix-Options-BackendNeighbourExpansionBlocking.md, section 7.B). Cases 1-5, 9 and 10 expect inconsistent, cases 6-8 expect consistent.</Literal>
+    <Literal>Control ontology for the ABox role-characteristic conformance cases. Cases 1-5, 9 and 10 expect inconsistent, cases 6-8 expect consistent.</Literal>
   </DataPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:asymmetric-3-cycle"/></ClassAssertion>
