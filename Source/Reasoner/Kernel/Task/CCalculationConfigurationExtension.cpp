@@ -94,6 +94,7 @@ namespace Konclude {
 					mConfDebuggingWriteDataForIncrementalExpansionTestsChecked = false;
 					mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsChecked = false;
 					mConfDebuggingWriteDataForAllTestsChecked = false;
+					mConfDebuggingWriteCompletionGraphCachingSnapshotsChecked = false;
 
 					mConfSuccessorConceptSaturationExpansionChecked = false;
 					mConfSaturationCachingChecked = false;
@@ -679,10 +680,19 @@ namespace Konclude {
 
 				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForAllTestsActivated() {
 					if (!mConfDebuggingWriteDataForAllTestsChecked) {
-						mConfDebuggingWriteDataForAllTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataForAllTests", false);
+						mConfDebuggingWriteDataForAllTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksForAllTests", false);
 						mConfDebuggingWriteDataForAllTestsChecked = true;
 					}
 					return mConfDebuggingWriteDataForAllTestsActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteCompletionGraphCachingSnapshotsActivated() {
+					if (!mConfDebuggingWriteCompletionGraphCachingSnapshotsChecked) {
+						mConfDebuggingWriteCompletionGraphCachingSnapshotsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteCompletionGraphCachingSnapshots", false);
+						mConfDebuggingWriteCompletionGraphCachingSnapshotsChecked = true;
+					}
+					return mConfDebuggingWriteCompletionGraphCachingSnapshotsActivated;
 				}
 
 

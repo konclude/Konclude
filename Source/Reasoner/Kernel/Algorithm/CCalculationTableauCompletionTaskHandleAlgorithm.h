@@ -44,6 +44,7 @@
 #include "CSatisfiableExpanderCacheHandler.h"
 #include "CReuseCompletionGraphCacheHandler.h"
 #include "CCompletionGraphCacheHandler.h"
+#include "CCompletionGraphSnapshotWriter.h"
 #include "CConceptNominalSchemaGroundingHandler.h"
 #include "CSaturationNodeExpansionCacheHandler.h"
 #include "CDatatypeIndividualProcessNodeHandler.h"
@@ -287,6 +288,9 @@ namespace Konclude {
 						bool isIndividualNodeCompletionGraphCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool detectIndividualNodeCompletionGraphCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
 						void clearCompletionGraphCaching(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
+
+						//! Writes the graph of the current test (and, once, the deterministic and the cached graph) as JSON for the snapshot tooling.
+						void writeCompletionGraphCachingSnapshot(const QString& phase, const QString& note, CCalculationAlgorithmContextBase* calcAlgContext);
 
 
 						bool isIndividualNodeValidBlocker(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext);
@@ -1324,6 +1328,8 @@ namespace Konclude {
 						bool mConfDebuggingWriteDataForRepCacheIndiComputationTests;
 						bool mConfDebuggingWriteDataForAnsweringPropagationTests;
 						bool mConfDebuggingWriteDataForAllTests;
+						bool mConfDebuggingWriteCachingSnapshots;
+						cint64 mCachingSnapshotCount;
 						bool mDebug = false;
 						bool mBacktrackDebug;
 

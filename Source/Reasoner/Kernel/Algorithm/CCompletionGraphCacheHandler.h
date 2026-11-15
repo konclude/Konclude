@@ -84,6 +84,12 @@ namespace Konclude {
 
 						bool getReactivationIndividuals(CIndividualProcessNode* individualNode, CIndividualReactivationProcessingQueue* reactProcQueue, CCalculationAlgorithmContext* calcAlgContext);
 
+						//! Node vector of the deterministic graph (Gd), nullptr as long as no cached graph is loaded.
+						CIndividualProcessNodeVector* getDeterministicNodeVector();
+
+						//! Node vector of the cached non-deterministic model (Gn), nullptr as long as no cached graph is loaded.
+						CIndividualProcessNodeVector* getCompletionGraphCachedNodeVector();
+
 					// protected methods
 					protected:
 						bool testCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);

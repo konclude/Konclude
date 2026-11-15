@@ -1683,6 +1683,7 @@
     <ClCompile Include="Source\Reasoner\Kernel\Algorithm\CCalculationTableauCompletionTaskHandleAlgorithm.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Algorithm\CClashDescriptorFactory.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Algorithm\CCompletionGraphCacheHandler.cpp" />
+    <ClCompile Include="Source\Reasoner\Kernel\Algorithm\CCompletionGraphSnapshotWriter.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Algorithm\CComputedConsequencesCacheHandler.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Algorithm\CConceptNominalSchemaGroundingHandler.cpp" />
     <ClCompile Include="Source\Reasoner\Kernel\Algorithm\CDatatypeDependencyCollection.cpp" />
@@ -4787,6 +4788,7 @@
     <ClInclude Include="Source\Reasoner\Kernel\Algorithm\CCalculationTableauCompletionTaskHandleAlgorithm.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Algorithm\CClashDescriptorFactory.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Algorithm\CCompletionGraphCacheHandler.h" />
+    <ClInclude Include="Source\Reasoner\Kernel\Algorithm\CCompletionGraphSnapshotWriter.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Algorithm\CComputedConsequencesCacheHandler.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Algorithm\CConceptNominalSchemaGroundingHandler.h" />
     <ClInclude Include="Source\Reasoner\Kernel\Algorithm\CDatatypeDependencyCollection.h" />

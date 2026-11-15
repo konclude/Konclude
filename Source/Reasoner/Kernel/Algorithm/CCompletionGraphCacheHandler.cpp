@@ -42,6 +42,16 @@ namespace Konclude {
 				}
 
 
+				CIndividualProcessNodeVector* CCompletionGraphCacheHandler::getDeterministicNodeVector() {
+					return mDetSatProcNodeVec;
+				}
+
+
+				CIndividualProcessNodeVector* CCompletionGraphCacheHandler::getCompletionGraphCachedNodeVector() {
+					return mCompGraphCachedProcNodeVec;
+				}
+
+
 
 				bool CCompletionGraphCacheHandler::loadConsistenceModelData(CCalculationAlgorithmContext* calcAlgContext) {
 					CConcreteOntology* ontology = calcAlgContext->getProcessingDataBox()->getOntology();

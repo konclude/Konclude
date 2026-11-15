@@ -19,6 +19,7 @@
  */
 
 #include "CCalculationTableauCompletionTaskHandleAlgorithm.h"
+#include <QDir>
 
 
 
@@ -186,6 +187,8 @@ namespace Konclude {
 					mConfDebuggingWriteDataForIncrementalExpansionTests = false;
 					mConfDebuggingWriteDataForRepCacheIndiComputationTests = false;
 					mConfDebuggingWriteDataForAllTests = false;
+					mConfDebuggingWriteCachingSnapshots = false;
+					mCachingSnapshotCount = 0;
 
 					mConfExpandCreatedSuccessorsFromSaturation = true;
 					// dependencies are not yet generated correctly for resolvings (must include resolved foralls as dependency in addition to the existential restriction)
@@ -548,6 +551,7 @@ namespace Konclude {
 							mConfDebuggingWriteDataForIncrementalExpansionTests = config->isDebuggingWriteDataCompletionTasksForIncrementalExpansionTestsActivated();
 							mConfDebuggingWriteDataForRepCacheIndiComputationTests = config->isDebuggingWriteDataCompletionTasksForRepresentativeCacheRecomputationTestsActivated();
 							mConfDebuggingWriteDataForAllTests = config->isDebuggingWriteDataCompletionTasksForAllTestsActivated();
+							mConfDebuggingWriteCachingSnapshots = config->isDebuggingWriteCompletionGraphCachingSnapshotsActivated();
 
 							mConfExpandCreatedSuccessorsFromSaturation = config->isSuccessorConceptSaturationExpansionActivated();
 							mConfCachingBlockingFromSaturation = config->isSaturationCachingActivated();
@@ -655,6 +659,7 @@ namespace Konclude {
 							mConfDebuggingWriteDataForIncrementalExpansionTests = false;
 							mConfDebuggingWriteDataForRepCacheIndiComputationTests = false;
 							mConfDebuggingWriteDataForAllTests = false;
+							mConfDebuggingWriteCachingSnapshots = false;
 							mConfExpandCreatedSuccessorsFromSaturation = true;
 							mConfCachingBlockingFromSaturation = true;
 							mConfSaturationCachingWithNominals = true;
@@ -1432,6 +1437,10 @@ namespace Konclude {
 						//	}
 						//}
 
+
+						if (mConfDebuggingWriteCachingSnapshots && mCachingSnapshotCount > 0) {
+							writeCompletionGraphCachingSnapshot(clashed ? "end-clashed" : (satisfiable ? "end-satisfiable" : "end-stopped"), "final graph of the test", calcAlgContext);
+						}
 
 						if (mDebug && sDebug || xDebug || mConfDebuggingWriteData && mConfDebuggingWriteDataComplationTasks) {
 
@@ -4302,7 +4311,43 @@ namespace Konclude {
 
 
 
+				void CCalculationTableauCompletionTaskHandleAlgorithm::writeCompletionGraphCachingSnapshot(const QString& phase, const QString& note, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (!mConfDebuggingWriteCachingSnapshots || !mCompGraphCacheHandler) {
+						return;
+					}
+					QString folder("./Debugging/CompletionGraphCaching/");
+					QDir().mkpath(folder);
+
+					CCompletionGraphSnapshotWriter::CSnapshotDescription description;
+					description.mMaxCachedNodeID = calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID();
+					description.mNote = note;
+
+					// the deterministic and the cached graph do not change during a run, one file each is sufficient
+					if (!QFile::exists(folder + "gd.json")) {
+						description.mGraphName = "gd";
+						description.mPhase = "deterministic";
+						description.mNote = "deterministic graph Gd";
+						CCompletionGraphSnapshotWriter::writeSnapshot(folder + "gd.json", description, mCompGraphCacheHandler->getDeterministicNodeVector());
+					}
+					if (!QFile::exists(folder + "gn.json")) {
+						description.mGraphName = "gn";
+						description.mPhase = "cached";
+						description.mNote = "cached model Gn";
+						CCompletionGraphSnapshotWriter::writeSnapshot(folder + "gn.json", description, mCompGraphCacheHandler->getCompletionGraphCachedNodeVector());
+					}
+
+					description.mNote = note;
+					description.mGraphName = "test";
+					description.mPhase = phase;
+					cint64 taskID = calcAlgContext->getUsedSatisfiableCalculationTask()->getTaskID();
+					QString fileName = QString("%1test-task-%2-%3-%4.json").arg(folder).arg(taskID).arg(mCachingSnapshotCount++, 3, 10, QChar('0')).arg(phase);
+					CCompletionGraphSnapshotWriter::writeSnapshot(fileName, description, calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector());
+				}
+
+
 				void CCalculationTableauCompletionTaskHandleAlgorithm::clearCompletionGraphCaching(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+					writeCompletionGraphCachingSnapshot("before-invalidation", QString("node %1 loses its completion graph caching").arg(individualNode->getIndividualNodeID()), calcAlgContext);
 
 					trackIndividualExtendedDependence(individualNode->getIndividualNodeID(), calcAlgContext);
 
@@ -4332,6 +4377,8 @@ namespace Konclude {
 						reactProcQueue = processingDataBox->getEarlyIndividualReactivationProcessingQueue(true);
 					}
 					bool reactivatedIndis = mCompGraphCacheHandler->getReactivationIndividuals(individualNode, reactProcQueue, calcAlgContext);
+
+					writeCompletionGraphCachingSnapshot("after-invalidation", QString("node %1 lost its completion graph caching").arg(individualNode->getIndividualNodeID()), calcAlgContext);
 				}
 
 
