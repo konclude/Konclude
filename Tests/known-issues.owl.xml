@@ -850,4 +850,62 @@
     <NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/>
   </ObjectPropertyAssertion>
 
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <Literal>Completion graph caching still misses consequences in the three-instance variant of the forced nominal equality. In cgc-n2-three-nominal-ontology.owl.xml, A is {a0,a1,a2}, B is {a0,a4,a5}, every B-instance has at least three distinct B-successors (so a0, a4, a5 are distinct and mutually r-related), B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, which forces a4 = a1 and a5 = a2 (in some order) and A = B. With the default configuration, Configs/default-config.xml, delayed-caching-reactivation and no-backjumping, ({a4} and not A) and ({a4} and {a5}) are answered satisfiable and the classification misses B below A (A is below B but not vice versa). The reduced-saturation configuration and both completion-graph-caching-off configurations are correct. The two-instance shape (cgc-l) was fixed by registering processing-blocked nodes at their blocker and rejecting pruned cached witnesses; this three-instance complete graph still misses these consequences and is under investigation. Guards: kt:cgc-n2-a4-not-a, kt:cgc-n2-a4-a5, kt:cgc-n2-classification in Tests/cases/cgc-known-n2.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+    <Literal>Classification under reduced saturation misses one direction of the forced nominal equality in the exact-cardinality variant. In cgc-n1-exact-cardinality-ontology.owl.xml A is {a0,a1}, B is {a0,a4}, B has exactly two B-successors, B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, which forces a4 = a1 and A = B. Under Tests/configs/reduced-saturation.xml the classification contains A below B but not B below A (the closure differs from HermiT); all direct satisfiability questions of the variant are correct, and all other configurations including both caching-off configurations produce A = B. This is a configuration/order-dependent caching effect in the taxonomy, probably the same remaining blocked-nominal processing gap as kt:issue-cgc-three-nominal-graph. Guard: kt:cgc-n1-classification in Tests/cases/cgc-known-n1.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/>
+  </ObjectPropertyAssertion>
+
 </Ontology>

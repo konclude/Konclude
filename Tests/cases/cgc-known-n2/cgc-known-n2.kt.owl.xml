@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Known-issue suite for the three-instance complete-graph variant (family N2).
+  In the default/stock, delayed-reactivation and no-backjumping configurations
+  the caching answers {a4} and not A and {a4} and {a5} satisfiable and misses
+  B below A (and A = B) in the classification. Reduced saturation and the
+  caching-off configurations are correct.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/cgc-known-n2">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n2"/><Literal>Completion-graph-caching-known-n2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n2"/><Literal>cgc-known-n2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n2"/><Literal>Known-issue guard for the three-instance complete-graph variant: the caching configurations listed here answer satisfiable for ({a4} and not A) and for ({a4} and {a5}) and miss B below A in the classification. Reduced saturation and the caching-off configurations are correct. Tracked by kt:issue-cgc-three-nominal-graph.</Literal></DataPropertyAssertion>
+
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n2"/><NamedIndividual IRI="../../Configs/default-config.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n2"/><NamedIndividual IRI="../../configs/delayed-caching-reactivation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n2"/><NamedIndividual IRI="../../configs/no-backjumping.xml"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>../cgc/cgc-n2-three-nominal-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>http://konclude.test/cgc/n2#TestA4NotA</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>a4 is in A in every model, so ({a4} and not A) is unsatisfiable. The default, delayed-reactivation and no-backjumping configurations answer satisfiable.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>../cgc/cgc-n2-three-nominal-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>http://konclude.test/cgc/n2#TestA4A5</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>a4 and a5 are two of the three distinct B-successors, so ({a4} and {a5}) is unsatisfiable. The default, delayed-reactivation and no-backjumping configurations answer satisfiable.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>../cgc/cgc-n2-three-nominal-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>../cgc/expected/cgc-n2-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>Classification of the three-instance complete-graph variant: A and B are equivalent, and TestANotB, TestA4NotA and TestA4A5 are under owl:Nothing.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+</Ontology>

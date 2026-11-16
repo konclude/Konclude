@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family N2: three B-instances on a complete
+  r-graph, so the cardinality creates a denser set of blocked and merged nodes
+  than family L.
+
+  A is {a0,a1,a2}, B is {a0,a4,a5} and every B-instance has at least three
+  distinct B-successors. Since B has exactly three instances, all three are
+  r-successors of each B-instance (self loops included), and the three are
+  distinct. A C-instance would be a D-instance through its self-successor and
+  clash with the disjointness, so a4 and a5 are in A. They are distinct and not
+  a0, hence {a4,a5} = {a1,a2} and A = B; a1 and a2 are distinct as well.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/n2">
+  <Prefix name="" IRI="http://konclude.test/cgc/n2#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANotB"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA1NotA2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA4NotA"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA4A5"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA4A1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a5"/></Declaration>
+
+  <EquivalentClasses><Class abbreviatedIRI=":A"/>
+    <ObjectOneOf>
+      <NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a1"/>
+      <NamedIndividual abbreviatedIRI=":a2"/>
+    </ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":B"/>
+    <ObjectOneOf>
+      <NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a4"/>
+      <NamedIndividual abbreviatedIRI=":a5"/>
+    </ObjectOneOf>
+  </EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":B"/>
+    <ObjectMinCardinality cardinality="3">
+      <ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/>
+    </ObjectMinCardinality>
+  </SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":B"/>
+    <ObjectUnionOf><Class abbreviatedIRI=":A"/><Class abbreviatedIRI=":C"/></ObjectUnionOf>
+  </SubClassOf>
+  <SubClassOf>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom>
+    <Class abbreviatedIRI=":D"/>
+  </SubClassOf>
+  <DisjointClasses><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D"/></DisjointClasses>
+
+  <EquivalentClasses><Class abbreviatedIRI=":TestANotB"/>
+    <ObjectIntersectionOf><Class abbreviatedIRI=":A"/><ObjectComplementOf><Class abbreviatedIRI=":B"/></ObjectComplementOf></ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA1NotA2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a2"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA4NotA"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":A"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA4A5"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a5"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA4A1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA"/>
+    <Class abbreviatedIRI=":A"/>
+  </EquivalentClasses>
+</Ontology>
