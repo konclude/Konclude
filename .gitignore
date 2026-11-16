@@ -28,6 +28,8 @@
 # ---------- Logs ---------------------------------------------------------
 # Local build, test and conformance logs.
 /logs/
+# Conformance runner output (result ontology and response files).
+/conformance-results/
 # Local debug data dumps (./Debugging from -c Configs/debugging-config.xml runs).
 /Debugging/
 *.log
