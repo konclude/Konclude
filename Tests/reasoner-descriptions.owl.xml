@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  reasoner-descriptions.owl.xml - the independent reasoners that confirmed test
+  expectations. A test links to one of these individuals with
+  kt:verifiedResultByReasonerOnVersion (or its divergence counterpart) instead
+  of a string literal, so the name and version are stated once.
+  The file is not a control ontology (it is not *.kt.owl.xml) and no reasoning
+  runs over it.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/reasoners">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <Declaration><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/></Declaration>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:Reasoner"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerName"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/><Literal>HermiT</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerVersion"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/><Literal>1.4.5.519</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerDescription"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/><Literal>HermiT 1.4.5.519 through the OWL API 5.1.20 (the independent oracle of the completion graph caching suite).</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:Reasoner"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerName"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/><Literal>HermiT</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerVersion"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/><Literal>1.4.5</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerDescription"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/><Literal>HermiT 1.4.5, used for the legacy cross-check of the EL family tests.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:Reasoner"/><NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerName"/><NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/><Literal>ELK</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerVersion"/><NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/><Literal>0.5.0</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerDescription"/><NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/><Literal>ELK 0.5.0, used for the legacy cross-check of the EL family tests.</Literal></DataPropertyAssertion>
+</Ontology>

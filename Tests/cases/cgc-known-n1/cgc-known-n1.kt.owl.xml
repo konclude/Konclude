@@ -23,5 +23,5 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><Literal>../cgc/expected/cgc-n1-classification.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><Literal>Classification of the exact-cardinality variant under reduced saturation: A and B are equivalent, and the three unsatisfiable nominal/class tests are under owl:Nothing.</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/></ObjectPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 </Ontology>

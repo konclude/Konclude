@@ -46,6 +46,8 @@
   <Declaration><Class abbreviatedIRI="kt:TestResult"/></Declaration>
   <!-- Default config declaration (used in configs.kt.owl.xml) -->
   <Declaration><Class abbreviatedIRI="kt:ConfigSet"/></Declaration>
+  <!-- A described reasoner; the individuals live in reasoner-descriptions.owl.xml. -->
+  <Declaration><Class abbreviatedIRI="kt:Reasoner"/></Declaration>
 
   <!-- ===== Object Properties ===== -->
   <Declaration><ObjectProperty abbreviatedIRI="kt:memberOfSuite"/></Declaration>
@@ -62,6 +64,21 @@
   <Declaration><ObjectProperty abbreviatedIRI="kt:resultOf"/></Declaration>
   <!-- on a test result: the suite individual the result belongs to -->
   <Declaration><ObjectProperty abbreviatedIRI="kt:suite"/></Declaration>
+  <!-- on a test: the independent reasoner individual whose answer confirmed the
+       expected result; the individual carries kt:reasonerName and
+       kt:reasonerVersion (see reasoner-descriptions.owl.xml) -->
+  <Declaration><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/></Declaration>
+  <ObjectPropertyRange>
+    <ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+    <Class abbreviatedIRI="kt:Reasoner"/>
+  </ObjectPropertyRange>
+  <!-- on a test: the reasoner individual whose answer differed from the expected
+       result (only for a documented divergence, never for a passing test) -->
+  <Declaration><ObjectProperty abbreviatedIRI="kt:divergingResultByReasonerOnVersion"/></Declaration>
+  <ObjectPropertyRange>
+    <ObjectProperty abbreviatedIRI="kt:divergingResultByReasonerOnVersion"/>
+    <Class abbreviatedIRI="kt:Reasoner"/>
+  </ObjectPropertyRange>
 
   <!-- ===== Data Properties ===== -->
   <Declaration><DataProperty abbreviatedIRI="kt:usesOntology"/></Declaration>
@@ -81,12 +98,9 @@
   <Declaration><DataProperty abbreviatedIRI="kt:timeoutSeconds"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:repeatCount"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:flaky"/></Declaration>
-  <!-- on a test: the other reasoner and its version with which the expected
-       result of the test was cross-checked (independent oracle, e.g. "HermiT 1.4.5.519") -->
-  <Declaration><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/></Declaration>
-  <!-- on a test: the other reasoner and its version whose answer differed from the
-       expected result (only for a documented divergence, never for a passing test) -->
-  <Declaration><DataProperty abbreviatedIRI="kt:divergingResultByReasonerOnVersion"/></Declaration>
+  <!-- on a reasoner individual (reasoner-descriptions.owl.xml) -->
+  <Declaration><DataProperty abbreviatedIRI="kt:reasonerName"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI="kt:reasonerDescription"/></Declaration>
   <!-- on the issue -->
   <Declaration><DataProperty abbreviatedIRI="kt:description"/></Declaration>
   <Declaration><DataProperty abbreviatedIRI="kt:tracker"/></Declaration>

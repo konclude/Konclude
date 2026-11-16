@@ -30,33 +30,33 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>The nominal-cardinality family is consistent: A is {a0,a1}, B is {a0,a4}, and the cardinality requirement of B is satisfiable with two distinct B-instances as successors.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-consistent"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>A is {a0,a1} and B is {a0,a4}; B requires at least two distinct B-successors, so a0 and a4 are r-successors of a4 and a4 is its own r-successor. Because B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, a4 cannot be in C and has to be in A; a4 is not a0 (otherwise B has only one instance and the two successors are impossible), so a4 = a1 and A = B. (A and not B) is unsatisfiable.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>http://konclude.test/cgc/l#TestANotB</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>The same forced equality from the nominal side: a1 = a4 follows from the cardinality and the disjointness argument, so ({a1} and not {a4}) is unsatisfiable.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>http://konclude.test/cgc/l#TestA1NotA4</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>Control for the forced nominal equality: ({a1} and {a4}) is satisfiable because a1 and a4 are the same individual in every model. A reactivation that over-constrains the merged nominal must not make this class unsatisfiable.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>http://konclude.test/cgc/l#TestA1A4</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>satisfiable</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-a1-a4"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>../cgc/cgc-l-nominal-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>../cgc/expected/cgc-l-classification.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>Classification of the nominal-cardinality family: A and B are equivalent, TestANotB and TestA1NotA4 are under owl:Nothing and TestA1A4 is under A.</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 </Ontology>

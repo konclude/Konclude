@@ -25,7 +25,7 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>a4 is in A in every model, so ({a4} and not A) is unsatisfiable. The default, delayed-reactivation and no-backjumping configurations answer satisfiable.</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/></ObjectPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>../cgc/cgc-n2-three-nominal-ontology.owl.xml</Literal></DataPropertyAssertion>
@@ -33,7 +33,7 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>a4 and a5 are two of the three distinct B-successors, so ({a4} and {a5}) is unsatisfiable. The default, delayed-reactivation and no-backjumping configurations answer satisfiable.</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/></ObjectPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
@@ -41,5 +41,5 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>../cgc/expected/cgc-n2-classification.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>Classification of the three-instance complete-graph variant: A and B are equivalent, and TestANotB, TestA4NotA and TestA4A5 are under owl:Nothing.</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/></ObjectPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><Literal>HermiT 1.4.5.519</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 </Ontology>
