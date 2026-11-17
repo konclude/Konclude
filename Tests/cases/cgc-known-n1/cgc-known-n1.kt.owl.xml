@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Known-issue suite for the exact-cardinality blocked-node variant (family N1).
-  The classification is wrong only under the reduced-saturation configuration:
-  A is classified below B but B is not classified below A, although the direct
-  satisfiability questions are all correct. The other configurations and the
-  caching-off runs produce the expected taxonomy.
+  Regression guard for the exact-cardinality blocked-node variant (family N1)
+  under the reduced-saturation configuration. This configuration used to miss
+  B below A in the classification because the cached representative of a
+  nominal that lost its caching was not rebuilt.
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#"
           ontologyIRI="http://konclude.test/suite/cgc-known-n1">
@@ -13,7 +12,7 @@
   <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n1"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n1"/><Literal>Completion-graph-caching-known-n1</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n1"/><Literal>cgc-known-n1</Literal></DataPropertyAssertion>
-  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n1"/><Literal>Known-issue guard for the exact-cardinality variant: only the reduced-saturation configuration misses B below A in the classification, all direct satisfiability questions are correct. Tracked by kt:issue-cgc-exact-cardinality-classification.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n1"/><Literal>Regression guard for the exact-cardinality variant under reduced saturation: the classification has to contain A = B. Formerly kt:issue-cgc-exact-cardinality-classification (fixed).</Literal></DataPropertyAssertion>
 
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-known-n1"/><NamedIndividual IRI="../../configs/reduced-saturation.xml"/></ObjectPropertyAssertion>
 
@@ -22,6 +21,5 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><Literal>../cgc/cgc-n1-exact-cardinality-ontology.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><Literal>../cgc/expected/cgc-n1-classification.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><Literal>Classification of the exact-cardinality variant under reduced saturation: A and B are equivalent, and the three unsatisfiable nominal/class tests are under owl:Nothing.</Literal></DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 </Ontology>

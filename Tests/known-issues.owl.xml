@@ -861,12 +861,12 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
-    <Literal>Completion graph caching still misses consequences in the three-instance variant of the forced nominal equality. In cgc-n2-three-nominal-ontology.owl.xml, A is {a0,a1,a2}, B is {a0,a4,a5}, every B-instance has at least three distinct B-successors (so a0, a4, a5 are distinct and mutually r-related), B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, which forces a4 = a1 and a5 = a2 (in some order) and A = B. With the default configuration, Configs/default-config.xml, delayed-caching-reactivation and no-backjumping, ({a4} and not A) and ({a4} and {a5}) are answered satisfiable and the classification misses B below A (A is below B but not vice versa). The reduced-saturation configuration and both completion-graph-caching-off configurations are correct. The two-instance shape (cgc-l) was fixed by registering processing-blocked nodes at their blocker and rejecting pruned cached witnesses; this three-instance complete graph still misses these consequences and is under investigation. Guards: kt:cgc-n2-a4-not-a, kt:cgc-n2-a4-a5, kt:cgc-n2-classification in Tests/cases/cgc-known-n2.</Literal>
+    <Literal>Fixed. When a node lost its completion graph caching, the reactivation followed the nodes that the cached model had merged into it, but not the node that it had been merged into. In cgc-n2-three-nominal-ontology.owl.xml the cached model merged a4 into a2 and a5 into a1; a test that adds a concept to a4 rebuilt a4, while a2 stayed cached with the merge of a4 in its cached state, so the a2 choice was never redone and ({a4} and not A) and ({a4} and {a5}) were answered satisfiable. The same gap made the classification of cgc-n1-exact-cardinality-ontology.owl.xml under reduced saturation miss B below A. CCompletionGraphCacheHandler::getReactivationIndividuals now also reactivates (forced) the cached representative of a node that loses its caching. The classification additionally tested {a4} and {a1}, where the nominal a4 is merged into a test node that already carries the nominal a1; a nominal that is merged into another nominal node did not lose its caching, so mergeIndividualNodeInto now clears the caching of every merged nominal. Guards: kt:cgc-n2-a4-not-a, kt:cgc-n2-a4-a5 and kt:cgc-n2-classification in Tests/cases/cgc-known-n2 (default-config, delayed-caching-reactivation, no-backjumping).</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion>
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
@@ -895,17 +895,56 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
-    <Literal>Classification under reduced saturation misses one direction of the forced nominal equality in the exact-cardinality variant. In cgc-n1-exact-cardinality-ontology.owl.xml A is {a0,a1}, B is {a0,a4}, B has exactly two B-successors, B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, which forces a4 = a1 and A = B. Under Tests/configs/reduced-saturation.xml the classification contains A below B but not B below A (the closure differs from HermiT); all direct satisfiability questions of the variant are correct, and all other configurations including both caching-off configurations produce A = B. This is a configuration/order-dependent caching effect in the taxonomy, probably the same remaining blocked-nominal processing gap as kt:issue-cgc-three-nominal-graph. Guard: kt:cgc-n1-classification in Tests/cases/cgc-known-n1.</Literal>
+    <Literal>Fixed. When a node lost its completion graph caching, the reactivation followed the nodes that the cached model had merged into it, but not the node that it had been merged into. In cgc-n2-three-nominal-ontology.owl.xml the cached model merged a4 into a2 and a5 into a1; a test that adds a concept to a4 rebuilt a4, while a2 stayed cached with the merge of a4 in its cached state, so the a2 choice was never redone and ({a4} and not A) and ({a4} and {a5}) were answered satisfiable. The same gap made the classification of cgc-n1-exact-cardinality-ontology.owl.xml under reduced saturation miss B below A. CCompletionGraphCacheHandler::getReactivationIndividuals now also reactivates (forced) the cached representative of a node that loses its caching. Guards: kt:cgc-n1-classification in Tests/cases/cgc-known-n1 (reduced-saturation).</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion>
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
     <NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <Literal>Fixed. Differential fuzzing (caching on against caching off and HermiT) found four more cases in which a node kept its cached state although a node it shares that state with was rebuilt. (1) Nodes merged into a node through a chain of merges (v into a1, a1 into a0) were not found, only nodes whose final representative is the node (cgc-o1). (2) A node that is taken from the reactivation queue as a forced reactivation did not pass the reactivation on to the nodes merged with it (cgc-o1, cgc-o3); it now calls CCompletionGraphCacheHandler::getMergeDependentReactivationIndividuals, which covers the representative, the merged blockable nodes and the merged nominals but not the connection neighbours (the full caching loss there made the roberts classification about six times slower). (3) CIndividualReactivationProcessingQueue::insertReactivationIndiviudal let a later re-check request turn an earlier forced entry of the same node into a re-check (cgc-o2). (4) The classification message analyser accepted the deterministic concepts of a node into which the tested node was merged by a choice as subsumers (maximum deterministic branch tag 0 still accepts concepts with tag 0); it now accepts none of them in that case (cgc-o4).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o1-x"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o2-x"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o3-x"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o4-classification"/>
   </ObjectPropertyAssertion>
 
 </Ontology>
