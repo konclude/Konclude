@@ -152,6 +152,11 @@ namespace Konclude {
 					//! index and thread id are only recorded for the report.
 					CConformanceTestResult executeTestRun(const CConformanceExecution& execution, int workerIndex, const QString& threadId);
 
+					//! Maps the observed outcome (PASS/FAIL/TIMEOUT/FLAKY) to the reported one: a known
+					//! failure that passes is FIXED, a known or flaky test that fails is KNOWN, and a flaky
+					//! test that passes stays PASS.
+					static CConformanceOutcome::TYPE getReportedOutcome(const CConformanceTestCase& testCase, CConformanceOutcome::TYPE observedOutcome);
+
 					//! Determines the path to this binary (for subprocess calls).
 					QString resolveBinaryFile();
 
