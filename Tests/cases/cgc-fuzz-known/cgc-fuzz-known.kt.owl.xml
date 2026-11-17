@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Suite "Completion-graph-caching-fuzz-known": ontologies from the differential fuzzing campaign of the
+  completion graph caching (Konclude with and without caching against HermiT) that show problems which
+  are not caching criteria: classifications that do not terminate in some configurations, one that does
+  not terminate only sometimes, and a wrong subsumption in the classification. The expected taxonomies
+  are HermiT's. The non-terminating tests use a short run configuration so that the suite stays fast.
+  Tests whose configuration terminates are kept as guards next to the known failures.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/cgc-fuzz-known">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-fuzz-known"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-fuzz-known"/><Literal>Completion-graph-caching-fuzz-known</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-fuzz-known"/><Literal>cgc-fuzz-known</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-cgc-fuzz-known"/><Literal>Known problems found by differential fuzzing of the completion graph caching that are not caching criteria: non-terminating classifications (configuration dependent, one only sometimes) and a wrong subsumption. Expected taxonomies are HermiT's.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:RunConfig"/><NamedIndividual abbreviatedIRI="kt:run-hang"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:timeoutSeconds"/><NamedIndividual abbreviatedIRI="kt:run-hang"/><Literal>10</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:repeatCount"/><NamedIndividual abbreviatedIRI="kt:run-hang"/><Literal>1</Literal></DataPropertyAssertion>
+  <ClassAssertion><Class abbreviatedIRI="kt:RunConfig"/><NamedIndividual abbreviatedIRI="kt:run-repeat"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:timeoutSeconds"/><NamedIndividual abbreviatedIRI="kt:run-repeat"/><Literal>15</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:repeatCount"/><NamedIndividual abbreviatedIRI="kt:run-repeat"/><Literal>4</Literal></DataPropertyAssertion>
+  <ClassAssertion><Class abbreviatedIRI="kt:RunConfig"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:timeoutSeconds"/><NamedIndividual abbreviatedIRI="kt:run-guard"/><Literal>60</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:repeatCount"/><NamedIndividual abbreviatedIRI="kt:run-guard"/><Literal>1</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><Literal>cgc-fz-611-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><Literal>expected/cgc-fz-611-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><Literal>Classification of fuzz seed 611 without completion graph caching and with delayed caching reactivation: does not terminate (expected: the HermiT taxonomy).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><NamedIndividual abbreviatedIRI="kt:run-hang"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><NamedIndividual IRI="../../configs/no-completion-graph-caching.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><NamedIndividual IRI="../../configs/reduced-saturation-no-caching.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><NamedIndividual IRI="../../configs/delayed-caching-reactivation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-noconfig"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-noconfig"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-noconfig"/><Literal>cgc-fz-611-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-noconfig"/><Literal>expected/cgc-fz-611-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-noconfig"/><Literal>Classification of fuzz seed 611 in the configurations that terminate (about 0.15 s); guards that the HermiT taxonomy is produced. This test runs without a configuration file.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-noconfig"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-noconfig"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><Literal>cgc-fz-611-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><Literal>expected/cgc-fz-611-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><Literal>Classification of fuzz seed 611 in the configurations that terminate (about 0.15 s); guards that the HermiT taxonomy is produced.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><NamedIndividual IRI="../../configs/reduced-saturation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><NamedIndividual IRI="../../configs/no-backjumping.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/><Literal>cgc-fz-620-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/><Literal>expected/cgc-fz-620-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/><Literal>Classification of fuzz seed 620 with completion graph caching: does not terminate (expected: the HermiT taxonomy). This test runs without a configuration file.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/><NamedIndividual abbreviatedIRI="kt:run-hang"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/><NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><Literal>cgc-fz-620-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><Literal>expected/cgc-fz-620-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><Literal>Classification of fuzz seed 620 with completion graph caching: does not terminate (expected: the HermiT taxonomy).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><NamedIndividual abbreviatedIRI="kt:run-hang"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><NamedIndividual IRI="../../configs/reduced-saturation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><NamedIndividual IRI="../../configs/delayed-caching-reactivation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><NamedIndividual IRI="../../configs/no-backjumping.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><Literal>cgc-fz-620-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><Literal>expected/cgc-fz-620-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><Literal>Classification of fuzz seed 620 without completion graph caching (about 0.1 s); guards that the HermiT taxonomy is produced.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><NamedIndividual IRI="../../configs/no-completion-graph-caching.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><NamedIndividual IRI="../../configs/reduced-saturation-no-caching.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI="kt:FlakyTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><Literal>cgc-fz-890-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><Literal>expected/cgc-fz-890-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><Literal>Classification of fuzz seed 890 with reduced saturation and without backjumping: did not terminate in the measured runs (marked flaky as well, the termination depends on timing).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:flaky"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><NamedIndividual abbreviatedIRI="kt:run-hang"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><NamedIndividual IRI="../../configs/reduced-saturation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><NamedIndividual IRI="../../configs/no-backjumping.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI="kt:FlakyTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><Literal>cgc-fz-890-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><Literal>expected/cgc-fz-890-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><Literal>Classification of fuzz seed 890 with the default configuration, repeated: usually 0.15 s, but 1 of 8 runs did not finish within 15 s.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:flaky"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><NamedIndividual abbreviatedIRI="kt:run-repeat"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification-noconfig"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification-noconfig"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification-noconfig"/><Literal>cgc-fz-3591-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification-noconfig"/><Literal>expected/cgc-fz-3591-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification-noconfig"/><Literal>Termination guard: the classification of fuzz seed 3591 finishes and matches HermiT. This test runs without a configuration file.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification-noconfig"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification-noconfig"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/><Literal>cgc-fz-3591-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/><Literal>expected/cgc-fz-3591-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/><Literal>Termination guard: the classification of fuzz seed 3591 finishes and matches HermiT.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/><NamedIndividual IRI="../../configs/reduced-saturation.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3591-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/><Literal>cgc-fz-1270-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/><Literal>expected/cgc-fz-1270-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/><Literal>Classification of the reduced fuzz seed 1270: T0 is not below T3 (HermiT); Konclude adds T0 below T3 with and without completion graph caching. This test runs without a configuration file.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/><NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><Literal>cgc-fz-1270-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><Literal>expected/cgc-fz-1270-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><Literal>Classification of the reduced fuzz seed 1270: T0 is not below T3 (HermiT); Konclude adds T0 below T3 with and without completion graph caching.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><NamedIndividual IRI="../../configs/no-completion-graph-caching.xml"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+</Ontology>

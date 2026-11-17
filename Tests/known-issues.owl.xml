@@ -947,4 +947,77 @@
     <NamedIndividual abbreviatedIRI="kt:cgc-o4-classification"/>
   </ObjectPropertyAssertion>
 
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <Literal>Open. The classification of three small random ontologies from the differential fuzzing of the completion graph caching (cgc-fz-611, cgc-fz-620, cgc-fz-890 in Tests/cases/cgc-fuzz-known) does not terminate in some configurations, while HermiT classifies each of them in about 4 s and the consistency test is fast in every configuration. The process stays at 100 percent CPU with constant memory after the log line 'Testing order of N classes created from the saturation data', so it loops in the classification tests rather than running out of memory. The configuration dependence is opposite for the seeds: 611 hangs only without completion graph caching (and with delayed caching reactivation), 620 hangs only with completion graph caching, 890 hangs with reduced saturation and without backjumping and in about 1 of 8 runs with the default configuration (timing dependent, hence also marked flaky). The ontologies contain nominals, inverse roles, qualified number restrictions, functional roles and data values (SHOIQ(D)).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/>
+    <Literal>Open. In the classification of cgc-fz-1270-ontology.owl.xml (three axioms: T0 = (some r0-.C2) and {a0} and C0; T3 = (at most 1 r1-.C1) and (some r0-.C2); T2 = (d value 2) and not {a2} and (all r1.C1) and not C1) Konclude derives T0 below T3, with and without completion graph caching. The subsumption does not hold (a0 may have two C1 r1-predecessors); HermiT does not derive it, and Konclude itself answers the satisfiability test of (T0 and not T3) correctly with satisfiable. Without the T2 axiom the classification is correct, so the wrong subsumer comes from the classification path (subsumer extraction from a test or from the saturation data), not from the tableau test of the class.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-nominal-inverse-atmost-subsumer"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-1270-classification-noconfig"/>
+  </ObjectPropertyAssertion>
+
 </Ontology>
