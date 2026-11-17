@@ -2437,6 +2437,11 @@ namespace Konclude {
 									reapplySatisfiableCachedAbsorbedDisjunctionConcepts(indiProcNode,calcAlgContext);
 									reapplySatisfiableCachedAbsorbedGeneratingConcepts(indiProcNode,calcAlgContext);
 								}
+								if (!indiProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
+									// the nodes that share the cached state of this node through a merge are rebuilt with it, also when the
+									// node itself was only reached through the reactivation of another node
+									mCompGraphCacheHandler->getMergeDependentReactivationIndividuals(indiProcNode, mEarlyIndiReactProcessingQueue, calcAlgContext);
+								}
 								indiProcNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
 							}
 							mIndiNodeFromQueueType = INQT_COMPCACHEDREACT;
@@ -2650,6 +2655,11 @@ namespace Konclude {
 									indiProcNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
 									reapplySatisfiableCachedAbsorbedDisjunctionConcepts(indiProcNode,calcAlgContext);
 									reapplySatisfiableCachedAbsorbedGeneratingConcepts(indiProcNode,calcAlgContext);
+								}
+								if (!indiProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
+									// the nodes that share the cached state of this node through a merge are rebuilt with it, also when the
+									// node itself was only reached through the reactivation of another node
+									mCompGraphCacheHandler->getMergeDependentReactivationIndividuals(indiProcNode, mLateIndiReactProcessingQueue, calcAlgContext);
 								}
 								indiProcNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
 							}
@@ -21171,7 +21181,10 @@ namespace Konclude {
 
 
 
-					if (mCompGraphCacheHandler && mConfCompletionGraphCaching && individual->isNominalIndividualNode() && !mergeIntoIndividualNode->isNominalIndividualNode()) {
+					// A nominal that is merged away gives up its cached state, whether the target is a new node or a node
+					// that already carries another nominal (e.g. a test node into which a first nominal was merged). The
+					// nodes that the cached graph merged into this nominal are rebuilt by the caching loss.
+					if (mCompGraphCacheHandler && mConfCompletionGraphCaching && individual->isNominalIndividualNode()) {
 						if (!individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED) && individual->getIndividualNodeID() <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
 							individual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHEDNODELOCATED);
 

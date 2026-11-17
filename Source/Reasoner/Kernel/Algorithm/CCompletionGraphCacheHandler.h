@@ -84,6 +84,9 @@ namespace Konclude {
 
 						bool getReactivationIndividuals(CIndividualProcessNode* individualNode, CIndividualReactivationProcessingQueue* reactProcQueue, CCalculationAlgorithmContext* calcAlgContext);
 
+						//! Inserts the nodes that share the cached state of the node through a merge in the cached graph (forced).
+						bool getMergeDependentReactivationIndividuals(CIndividualProcessNode* individualNode, CIndividualReactivationProcessingQueue* reactProcQueue, CCalculationAlgorithmContext* calcAlgContext);
+
 						//! Node vector of the deterministic graph (Gd), nullptr as long as no cached graph is loaded.
 						CIndividualProcessNodeVector* getDeterministicNodeVector();
 
@@ -103,11 +106,15 @@ namespace Konclude {
 						bool testBindingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 						bool testNeighbourSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 
+						bool addMergeDependentReactivationIndividuals(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
+						bool addRepresentativeNodeReactivation(cint64 indiID, CIndividualReactivationProcessingQueue* reactProcQueue);
 						bool addMergedNodesReactivation(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
 						bool addMergedNeighbourNodesReactivation(cint64 indiID, CIndividualProcessNode* detSatNeighbourIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
 
 						//! Largest node id of the deterministic graph, including the nominal node with id 0.
 						cint64 getDeterministicMaxIndividualNodeID();
+						//! Whether the cached graph merged the node, directly or through a chain of merges, into the target node.
+						bool isMergedIntoCompletionGraphCachedNode(cint64 indiID, cint64 targetIndiID);
 						CIndividualProcessNode* getCompletionGraphCachedRepresentativeNode(cint64 indiID);
 						CIndividualProcessNode* getCurrentRepresentativeNode(cint64 indiID);
 						bool isCompletionGraphCachingInvalid(CIndividualProcessNode* indiNode);
