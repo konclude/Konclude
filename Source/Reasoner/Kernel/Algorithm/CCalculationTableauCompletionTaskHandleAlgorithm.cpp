@@ -22079,15 +22079,7 @@ namespace Konclude {
 						CSortedNegLinker<CConcept*>* conceptOpLinker = concept->getOperandList();
 						if (conceptOpLinker && !conceptOpLinker->hasNext()) {
 							CConcept* opConcept = conceptOpLinker->getData();
-							// The filler of a (negated) existential restriction is the negated operand, but the filler of
-							// an at-least successor, whether it comes from an at-least or from a negated at-most concept,
-							// is the operand itself (see applyATLEASTRule). Negating it here would select the saturated
-							// node of the complement of the filler.
-							bool opConNegation = conceptOpLinker->isNegated();
-							cint64 conceptOpCode = concept->getOperatorCode();
-							if (conceptOpCode != CCATMOST && conceptOpCode != CCATLEAST) {
-								opConNegation ^= conceptNegation;
-							}
+							bool opConNegation = concept->getSuccessorFillerNegation(conceptOpLinker->isNegated(),conceptNegation);
 							CConceptData* opConceptData = opConcept->getConceptData();
 							if (opConceptData) {
 								CConceptProcessData* conProcData = (CConceptProcessData*)opConceptData;

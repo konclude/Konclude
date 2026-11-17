@@ -178,6 +178,15 @@ namespace Konclude {
 				return mOperatorCode;
 			}
 
+
+			bool CConcept::getSuccessorFillerNegation(bool operandNegated, bool conceptNegated) {
+				qint64 opCode = getOperatorCode();
+				if (opCode == CCATMOST || opCode == CCATLEAST) {
+					return operandNegated;
+				}
+				return operandNegated ^ conceptNegated;
+			}
+
 			CConcept *CConcept::setOperatorTag(qint64 opTag) {
 				mOperatorCode = CConceptOperator::getConceptOperator(opTag);
 				return this;

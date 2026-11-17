@@ -3590,7 +3590,7 @@ namespace Konclude {
 							while (conceptOpLinkerIt) {
 								foundOperandIndiNode = true;
 								CConcept* opConcept = conceptOpLinkerIt->getData();
-								bool opConNegation = conceptOpLinkerIt->isNegated()^conNegation;
+								bool opConNegation = concept->getSuccessorFillerNegation(conceptOpLinkerIt->isNegated(),conNegation);
 								CConceptData* opConceptData = opConcept->getConceptData();
 								if (opConceptData) {
 									CConceptProcessData* conProcData = (CConceptProcessData*)opConceptData;
@@ -7545,7 +7545,7 @@ namespace Konclude {
 					if (!existIndiNode && !specializedExistentialRestriction) {
 						while (!existIndiNode && conceptOpLinkerIt) {
 							CConcept* opConcept = conceptOpLinkerIt->getData();
-							bool opConNegation = conceptOpLinkerIt->isNegated()^conNegation;
+							bool opConNegation = concept->getSuccessorFillerNegation(conceptOpLinkerIt->isNegated(),conNegation);
 							CConceptData* opConceptData = opConcept->getConceptData();
 							KONCLUDE_ASSERT_X(opConceptData,"SOME saturation rule","concept data missing");
 							if (opConceptData) {
