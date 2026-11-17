@@ -1102,4 +1102,26 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2078-classification"/></ObjectPropertyAssertion>
 
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+    <Literal>Open. Konclude answers consistent for cgc-fz-2167-ontology.owl.xml, which is inconsistent: C2 = {a0}, C0 = {a2}, C2 is below (some inverse r0.C0) so a2 r0 a0, C0 is below (all r0.C3) so a0 is in C3, and a0 is in C1 while C1 is disjoint with C3. HermiT answers inconsistent. Konclude gives the wrong answer deterministically (five runs with and without completion graph caching) and the campaign saw it with both configurations. Unsound consistency check; root cause not investigated.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2167-consistency"/>
+  </ObjectPropertyAssertion>
+
 </Ontology>
