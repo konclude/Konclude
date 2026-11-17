@@ -1580,7 +1580,9 @@ namespace Konclude {
 							CIndividualProcessNode* baseIndi = getCorrectedIndividualID(constructedIndiNode,indiNodeVec,&nondetMerged);
 							cint64 baseIndiID = baseIndi->getIndividualNodeID();
 							if (nondetMerged) {
-								maxDetBranchTag = 0;
+								// The tested node was merged into another node by a choice: even the deterministic concepts of the
+								// merge target (e.g. the classes of a nominal) do not hold for every instance of the tested concept.
+								maxDetBranchTag = -1;
 							}
 
 							CPROCESSINGSET<CConcept*>* analysedConceptSet = nullptr;
