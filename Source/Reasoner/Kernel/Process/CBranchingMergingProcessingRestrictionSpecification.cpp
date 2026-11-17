@@ -164,6 +164,10 @@ namespace Konclude {
 					return mMergingNodesLinker;
 				}
 
+				CBranchingMergingIndividualNodeCandidateLinker* CBranchingMergingProcessingRestrictionSpecification::getNominalMergingCandidateNodeLinker() {
+					return mNominalMergingNodesLinker;
+				}
+
 				CBranchingMergingIndividualNodeCandidateLinker* CBranchingMergingProcessingRestrictionSpecification::takeNextMergingCandidateNodeLinker() {
 					CBranchingMergingIndividualNodeCandidateLinker* tmpMergingNodeLinker = nullptr;
 					tmpMergingNodeLinker = takeNextMergingInitializationCandidateNodeLinker();

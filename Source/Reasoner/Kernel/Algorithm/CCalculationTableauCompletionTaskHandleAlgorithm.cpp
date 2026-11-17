@@ -15197,6 +15197,25 @@ namespace Konclude {
 
 
 
+				cint64 CCalculationTableauCompletionTaskHandleAlgorithm::countMergedAwayMergingCandidates(CIndividualProcessNode* processIndi, CRole* role, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest) {
+					cint64 mergedAwayCount = 0;
+					CBranchingMergingIndividualNodeCandidateLinker* candidateLinkerLists[] = {
+						branchingMergingProcRest->getMergingInitializationCandidateNodeLinker(),
+						branchingMergingProcRest->getNominalMergingCandidateNodeLinker(),
+						branchingMergingProcRest->getMergingCandidateNodeLinker()
+					};
+					for (CBranchingMergingIndividualNodeCandidateLinker* candidateLinkerList : candidateLinkerLists) {
+						for (CBranchingMergingIndividualNodeCandidateLinker* candidateLinker = candidateLinkerList; candidateLinker; candidateLinker = candidateLinker->getNext()) {
+							if (!processIndi->getRoleSuccessorToIndividualLink(role,candidateLinker->getMergingIndividualNodeCandidate()->getIndividualNodeID(),true)) {
+								++mergedAwayCount;
+							}
+						}
+					}
+					return mergedAwayCount;
+				}
+
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::mergeMergingIndividualNodes(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, cint64 linkCount, cint64 cardinality, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CConceptDescriptor* conDes = conProDes->getConceptDescriptor();
 					CConcept* concept = conDes->getConcept();
@@ -15267,6 +15286,17 @@ namespace Konclude {
 
 					if (linkAndCandidateCount > tmpCardinality || requiresNNOperating) {
 						// needs merging
+
+						// The counters above only notice lost links. When a candidate node was merged away, its link is removed and a new link
+						// to the merge target is added, which keeps the counts balanced although the candidate refers to a node that is gone.
+						// The candidates are therefore verified against the links before they are trusted.
+						if (branchingMergingProcRest->hasValidRemainingMergingCandidates()) {
+							cint64 mergedAwayCandidateCount = countMergedAwayMergingCandidates(processIndi,role,branchingMergingProcRest);
+							if (mergedAwayCandidateCount > 0) {
+								branchingMergingProcRest->setRemainingValidMergingCandidateIndividualNodeCount(branchingMergingProcRest->getRemainingLinkerMergingCandidateIndividualNodeCount()-mergedAwayCandidateCount);
+							}
+						}
+
 						if (fixedNominalMerging) {
 							bool requiresNNInitialization = fixedNominalMerging && !branchingMergingProcRest->isDistinctSetFixed();
 							if (requiresNNInitialization) {
@@ -15341,7 +15371,8 @@ namespace Konclude {
 						}
 
 
-						if (!branchingMergingProcRest->hasValidRemainingMergingCandidates()) {
+						// The distinct nodes are verified even if the counters are balanced, because a merged away node leaves a stale id in the set.
+						if (!branchingMergingProcRest->hasValidRemainingMergingCandidates() || (distinctMergedSet && distinctMergedSet->count() > 0)) {
 							// update distinct hash
 							if (!distinctMergedSet) {
 								locDistinctMergedSet = branchingMergingProcRest->getDistinctMergedNodesSet(true);
@@ -15349,28 +15380,31 @@ namespace Konclude {
 							}
 							bool relocated = false;
 
+							// the set is changed while the stale ids are replaced, so they are collected first
+							CPROCESSINGLIST<cint64> mergedAwayDistinctIDList(calcAlgContext->getUsedTaskProcessorContext());
 							for (CPROCESSSET<cint64>::const_iterator disIt = distinctMergedSet->constBegin(), disItEnd = distinctMergedSet->constEnd(); disIt != disItEnd; ++disIt) {
+								if (!processIndi->getRoleSuccessorToIndividualLink(role,*disIt,true)) {
+									mergedAwayDistinctIDList.append(*disIt);
+								}
+							}
+
+							for (CPROCESSINGLIST<cint64>::const_iterator disIt = mergedAwayDistinctIDList.constBegin(), disItEnd = mergedAwayDistinctIDList.constEnd(); disIt != disItEnd; ++disIt) {
 								cint64 distinctIndiID = *disIt;
 
-								CIndividualLinkEdge* disIndiLink = processIndi->getRoleSuccessorToIndividualLink(role,distinctIndiID,true);
-								if (!disIndiLink) {
-									CIndividualProcessNode* mergedIntoNode = getCorrectedNominalIndividualNode(distinctIndiID,calcAlgContext);
-									if (!locDistinctMergedSet) {
-										locDistinctMergedSet = branchingMergingProcRest->getDistinctMergedNodesSet(true);
-										distinctMergedSet = locDistinctMergedSet;
-									}
-									locDistinctMergedSet->remove(distinctIndiID);
-									relocated = true;
-									if (locDistinctMergedSet->contains(mergedIntoNode->getIndividualNodeID())) {
-										--distinctCount;
-										if (fixedNominalMerging) {
-											tmpCardinality = distinctCount;
-										}
-									}
-									locDistinctMergedSet->insert(mergedIntoNode->getIndividualNodeID());
-								} else if (locDistinctMergedSet) {
-									locDistinctMergedSet->insert(distinctIndiID);
+								CIndividualProcessNode* mergedIntoNode = getCorrectedNominalIndividualNode(distinctIndiID,calcAlgContext);
+								if (!locDistinctMergedSet) {
+									locDistinctMergedSet = branchingMergingProcRest->getDistinctMergedNodesSet(true);
+									distinctMergedSet = locDistinctMergedSet;
 								}
+								locDistinctMergedSet->remove(distinctIndiID);
+								relocated = true;
+								if (locDistinctMergedSet->contains(mergedIntoNode->getIndividualNodeID())) {
+									--distinctCount;
+									if (fixedNominalMerging) {
+										tmpCardinality = distinctCount;
+									}
+								}
+								locDistinctMergedSet->insert(mergedIntoNode->getIndividualNodeID());
 							}
 
 							if (relocated) {

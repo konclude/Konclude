@@ -70,6 +70,7 @@ namespace Konclude {
 						CPROCESSSET<cint64>* getDistinctMergedNodesSet(bool create = true);
 
 						CBranchingMergingIndividualNodeCandidateLinker* getMergingCandidateNodeLinker();
+						CBranchingMergingIndividualNodeCandidateLinker* getNominalMergingCandidateNodeLinker();
 						CBranchingMergingIndividualNodeCandidateLinker* takeNextMergingCandidateNodeLinker();
 						CBranchingMergingProcessingRestrictionSpecification* addMergingCandidateNodeLinker(CBranchingMergingIndividualNodeCandidateLinker* linker);
 

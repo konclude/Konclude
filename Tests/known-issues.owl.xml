@@ -958,12 +958,12 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
-    <Literal>Open. The classification of three small random ontologies from the differential fuzzing of the completion graph caching (cgc-fz-611, cgc-fz-620, cgc-fz-890 in Tests/cases/cgc-fuzz-known) does not terminate in some configurations, while HermiT classifies each of them in about 4 s and the consistency test is fast in every configuration. The process stays at 100 percent CPU with constant memory after the log line 'Testing order of N classes created from the saturation data', so it loops in the classification tests rather than running out of memory. The configuration dependence is opposite for the seeds: 611 hangs only without completion graph caching (and with delayed caching reactivation), 620 hangs only with completion graph caching, 890 hangs with reduced saturation and without backjumping and in about 1 of 8 runs with the default configuration (timing dependent, hence also marked flaky). The ontologies contain nominals, inverse roles, qualified number restrictions, functional roles and data values (SHOIQ(D)).</Literal>
+    <Literal>Fixed. The classification of three small random ontologies from the differential fuzzing of the completion graph caching (cgc-fz-611, cgc-fz-620, cgc-fz-890 in Tests/cases/cgc-fuzz-known) did not terminate in some configurations. The process spun at 100 percent CPU with constant memory in CCalculationTableauCompletionTaskHandleAlgorithm::mergeMergingIndividualNodes. The at-most rule keeps the ids of the successors that are known to be distinct, and the successors that still have to be merged. When a successor is merged away, its link is removed and a link to the merge target is added, so the link count stays the same and the counters that decide whether the stored ids are still valid stayed balanced. The stale id was never replaced by its merge target, the lookup of its link returned null and the loop over the distinct set did not advance. The candidates are now verified against the links (countMergedAwayMergingCandidates) and the distinct set is relocated whenever it is not empty, not only when the counters are unbalanced. The relocation collects the stale ids before it changes the set. The configuration dependence of the original hangs came from the order in which nodes were merged.</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion>
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
