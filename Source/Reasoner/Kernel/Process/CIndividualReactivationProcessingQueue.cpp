@@ -85,7 +85,8 @@ namespace Konclude {
 					CIndividualDepthPriority priority(individual->getIndividualNominalLevelOrAncestorDepth(),individual->getIndividualNodeID());
 					CIndividualForceReactivationData& inFoReDa = mPriorityIndiReactivationMap[priority];
 					bool newEntry = inFoReDa.mIndiNode == nullptr || !inFoReDa.mForceReactivation && forceReactivation;
-					inFoReDa.mForceReactivation = forceReactivation;
+					// a later re-check request must not downgrade an earlier forced reactivation of the same node
+					inFoReDa.mForceReactivation = (inFoReDa.mIndiNode && inFoReDa.mForceReactivation) || forceReactivation;
 					inFoReDa.mIndiNode = individual;
 					return newEntry;
 				}
