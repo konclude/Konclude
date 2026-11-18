@@ -2037,7 +2037,7 @@ namespace Konclude {
 												}
 											}
 											while (itPoss != itPossEnd) {
-												COptimizedKPSetClassPossibleSubsumptionData* possData = itDownPoss.value();
+												COptimizedKPSetClassPossibleSubsumptionData* possData = itPoss.value();
 												if (!downPropItem->hasSubsumerConceptItem(possData->getClassItem()) && downPropItem != possData->getClassItem()) {
 													if (!possData->isSubsumptionInvalided()) {
 														possData->setSubsumptionInvalid(true);
