@@ -1065,14 +1065,13 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/>
-    <Literal>Open. Fuzz ontologies on which the classification did not terminate. Fixed: cgc-fz-2420 and cgc-fz-3122 (they hung in both configurations; the existential rule no longer accepts a cached neighbour of an incompletely handled individual for a successor integrated into a nominal) and cgc-fz-3016, cgc-fz-2042 and cgc-fz-2078 (the qualification branches of an at-most restriction localized the processed node a second time when it was its own role successor, the second local copy replaced the first one and the at-most merging continued on the replaced copy; getLocalizedIndividual now always continues from the newest version of a node). Still open: cgc-fz-3310 does not finish with completion graph caching (100 percent CPU, constant memory; without caching it finishes and matches HermiT), and cgc-fz-2245 now terminates without caching and has the correct subsumption closure, but its class hierarchy contains the redundant direct edge C3 below owl:Thing next to C3 below C0.</Literal>
+    <Literal>Fixed. Fuzz ontologies on which the classification did not terminate. cgc-fz-2420 and cgc-fz-3122 hung in both configurations until the existential rule stopped accepting a cached neighbour of an incompletely handled individual for a successor integrated into a nominal. cgc-fz-3016, cgc-fz-2042 and cgc-fz-2078 hung because the qualification branches of an at-most restriction localized the processed node a second time when it was its own role successor; the second local copy replaced the first one and the at-most merging continued on the replaced copy (getLocalizedIndividual now always continues from the newest version of a node). cgc-fz-3310 and cgc-fz-2245 (whose classification without caching then still had a redundant direct edge below owl:Thing) hung because a successor recorded as distinct by the at-most merging was pruned when its creator was merged away; the repair of the distinct nodes replaced the missing id by the node itself, the dead id stayed in the set and the scan over the set did not advance. A pruned successor is now removed from the distinct nodes.</Literal>
   </DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2029-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3208-classification"/></ObjectPropertyAssertion>
@@ -1080,7 +1079,6 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2029-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3208-classification"/></ObjectPropertyAssertion>
@@ -1089,7 +1087,6 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3397-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/></ObjectPropertyAssertion>
 
   <ClassAssertion>
     <Class abbreviatedIRI="kt:Issue"/>
@@ -1124,7 +1121,6 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3397-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2029-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
@@ -1134,7 +1130,6 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3397-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2351-satisfiability"/></ObjectPropertyAssertion>
 

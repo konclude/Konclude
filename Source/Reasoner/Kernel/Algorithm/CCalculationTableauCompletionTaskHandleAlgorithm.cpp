@@ -15402,13 +15402,18 @@ namespace Konclude {
 								}
 								locDistinctMergedSet->remove(distinctIndiID);
 								relocated = true;
-								if (locDistinctMergedSet->contains(mergedIntoNode->getIndividualNodeID())) {
+								// a pruned successor (its creator was merged away) is not merged into another node, i.e., it is no longer a successor and
+								// it is only removed from the distinct nodes
+								bool noLongerSuccessor = !processIndi->getRoleSuccessorToIndividualLink(role,mergedIntoNode->getIndividualNodeID(),true);
+								if (noLongerSuccessor || locDistinctMergedSet->contains(mergedIntoNode->getIndividualNodeID())) {
 									--distinctCount;
 									if (fixedNominalMerging) {
 										tmpCardinality = distinctCount;
 									}
 								}
-								locDistinctMergedSet->insert(mergedIntoNode->getIndividualNodeID());
+								if (!noLongerSuccessor) {
+									locDistinctMergedSet->insert(mergedIntoNode->getIndividualNodeID());
+								}
 							}
 
 							if (relocated) {

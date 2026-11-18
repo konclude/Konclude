@@ -214,7 +214,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/><Literal>Classification of fuzz seed 3310 with completion graph caching: did not finish within 10 s in the campaign; a three-minute run stayed at 100 percent CPU with constant memory. Expected: the HermiT taxonomy, which the no-cache configuration produces.</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:flaky"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/><Literal>true</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/><NamedIndividual abbreviatedIRI="kt:run-hang-repeat"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3310-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ClassAssertion>
@@ -283,7 +282,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:flaky"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/><Literal>true</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/><NamedIndividual abbreviatedIRI="kt:run-hang-repeat"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/><NamedIndividual IRI="../../configs/no-completion-graph-caching.xml"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2420-classification"/></ClassAssertion>

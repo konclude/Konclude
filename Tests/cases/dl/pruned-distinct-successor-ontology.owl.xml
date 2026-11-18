@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A pruned successor in the distinct set of an at-most restriction (reduced from fuzz seed 3310):
+
+    C1 = {a0, a1}, C1 below (=1 r2.C2), C2 below (all r0.C1), C2 below (=1 r0.C2),
+    T0, T4, T5 defined with qualified cardinalities over r0, r1, r2 and the nominals
+
+  The at-most merging of a nominal recorded a successor as distinct; later the node that had
+  created that successor was merged away, so the successor was pruned (not merged into another
+  node) and lost its link. The repair of the distinct set replaced the id by the node it was merged
+  into, which for a pruned node is the node itself, so the dead id stayed in the set and the scan
+  over the distinct set did not advance (no termination with completion graph caching).
+  Expected: the HermiT taxonomy in expected/pruned-distinct-successor-classification.owl.xml.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/pruned-distinct-successor">
+  <Prefix name="" IRI="http://konclude.test/dl/pruned-distinct-successor#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r0"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r1"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r2"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T5"/></Declaration>
+  <EquivalentClasses><Class abbreviatedIRI=":C1"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf></EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":C2"/><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C1"/></ObjectAllValuesFrom></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C2"/><ObjectExactCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C2"/></ObjectExactCardinality></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C1"/><ObjectExactCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r2"/><Class abbreviatedIRI=":C2"/></ObjectExactCardinality></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":T0"/><ObjectIntersectionOf><ObjectMinCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r2"/><Class abbreviatedIRI=":C2"/></ObjectMinCardinality><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom><ObjectMinCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C2"/></ObjectMinCardinality></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T4"/><ObjectIntersectionOf><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r0"/></ObjectInverseOf><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r1"/></ObjectInverseOf><Class abbreviatedIRI=":C2"/></ObjectSomeValuesFrom><ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T5"/><ObjectIntersectionOf><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r2"/></ObjectInverseOf><Class abbreviatedIRI=":C2"/></ObjectSomeValuesFrom><ObjectComplementOf><Class abbreviatedIRI=":C2"/></ObjectComplementOf><ObjectMaxCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":C2"/></ObjectMaxCardinality></ObjectIntersectionOf></EquivalentClasses>
+</Ontology>
