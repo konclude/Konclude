@@ -24078,9 +24078,11 @@ namespace Konclude {
 					}
 
 					CDependencyTrackPoint* nominalConDepTrackPoint = nullptr;
-					if (locNominalIndi->getNominalIndividual() && -repNeighbourIndiId != locNominalIndi->getIndividualNodeID() && repNeighbourIndiId != locNominalIndi->getNominalIndividual()->getIndividualID() && locNominalIndi->getIndividualMergingHash(false)) {
+					// the node can represent the neighbour individual only through a (possibly non-deterministic) merge, also if it is the individual of the
+					// node (e.g., a nominal merged into a test node), and then the connection depends on that merge
+					if (locNominalIndi->getNominalIndividual() && -repNeighbourIndiId != locNominalIndi->getIndividualNodeID() && locNominalIndi->getIndividualMergingHash(false)) {
 						nominalConDepTrackPoint = locNominalIndi->getIndividualMergingHash(false)->value(repNeighbourIndiId).getDependencyTrackPoint();
-						if (!nominalConDepTrackPoint || hasNondeterministicDependency(nominalConDepTrackPoint, calcAlgContext)) {
+						if (repNeighbourIndiId != locNominalIndi->getNominalIndividual()->getIndividualID() && (!nominalConDepTrackPoint || hasNondeterministicDependency(nominalConDepTrackPoint, calcAlgContext))) {
 							CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData tmpNeighbourExpData;
 							expanded |= expandIndividualNeighbourNodeFromBackendCache(indiNode, assocData, locNominalIndi->getNominalIndividual()->getIndividualID(), tmpNeighbourExpData, forceExpansion, forceProcessing, nullptr, baseDepTrackPoint, calcAlgContext);
 						}

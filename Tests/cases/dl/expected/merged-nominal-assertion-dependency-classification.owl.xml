@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected classification of merged-nominal-assertion-dependency-ontology.owl.xml, derived with HermiT 1.4.5. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T5"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Nothing"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></Declaration>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C0"/><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C1"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#C3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T4"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#T5"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+</Ontology>

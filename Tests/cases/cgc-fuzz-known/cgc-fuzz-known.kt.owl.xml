@@ -236,7 +236,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/><Literal>Classification of the reduced fuzz seed 2056, repeated: the taxonomy varies from run to run (extra C0 below C3 or extra C1 below C3; HermiT has neither).</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:flaky"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/><Literal>true</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/><NamedIndividual abbreviatedIRI="kt:run-repeat"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2078-classification"/></ClassAssertion>

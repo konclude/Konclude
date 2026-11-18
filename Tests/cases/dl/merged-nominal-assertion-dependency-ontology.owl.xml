@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A role assertion to a nominal that was merged into the test node by a choice (reduced from fuzz
+  seed 2056):
+
+    C1 = {a4, a1}, (some r1.C1) below C1, C1 below (=1 r0.C3), C0 below (at least 2 r1.C1),
+    r0 functional, r0(a3, a1), C0(a3)
+
+  C0 is not below C3: a4 can be an instance of C0 outside C3. In the test of C0 and not-C3 the
+  choice C1 = {a4, a1} merged a1 into the test node. The backend cache expansion of a3 then linked
+  its asserted r0-successor a1 to that node without the dependency of the merge, because the node
+  already had a1 as its individual. The clash of the functional r0 looked independent of the choice,
+  the alternative a4 was skipped and the classification derived C0 below C3 (in most runs).
+  Expected: the HermiT taxonomy in expected/merged-nominal-assertion-dependency-classification.owl.xml.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/merged-nominal-assertion-dependency">
+  <Prefix name="" IRI="http://konclude.test/dl/merged-nominal-assertion-dependency#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a4"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r0"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r1"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T5"/></Declaration>
+  <EquivalentClasses><Class abbreviatedIRI=":C1"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf></EquivalentClasses>
+  <SubClassOf><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom><Class abbreviatedIRI=":C1"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C1"/><ObjectExactCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C3"/></ObjectExactCardinality></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectMinCardinality cardinality="2"><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":C1"/></ObjectMinCardinality></SubClassOf>
+  <FunctionalObjectProperty><ObjectProperty abbreviatedIRI=":r0"/></FunctionalObjectProperty>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r0"/><NamedIndividual abbreviatedIRI=":a3"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectPropertyAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":C0"/><NamedIndividual abbreviatedIRI=":a3"/></ClassAssertion>
+</Ontology>

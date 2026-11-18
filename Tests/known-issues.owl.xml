@@ -1022,12 +1022,12 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/>
-    <Literal>Open. cgc-fz-2056 derives the extra C0 below C3 in some runs and not in others, with and without completion graph caching (minimal shape: C1 = {a4, a1}, (some r1.C1) below C1, C1 below (=1 r0.C3), C0 below (at least 2 r1.C1), r0 functional, r0(a3, a1), C0(a3); C0 is not below C3 since a4 can be an instance of C0 outside C3). With AllowBackendNeighbourExpansionBlocking=false the answer is always correct. Fixed: cgc-fz-3397 (since the existential rule builds the link to a nominal successor of an incompletely handled individual) and cgc-fz-3229 (since the backend cache synchronisation of a node that represents a nominal only through a non-deterministic merge uses the dependency of the merge).</Literal>
+    <Literal>Fixed. Fuzz ontologies whose classification differed from run to run (with and without completion graph caching): cgc-fz-3397 (fixed since the existential rule builds the link to a nominal successor of an incompletely handled individual), cgc-fz-3229 (fixed since the backend cache synchronisation of a node that represents a nominal only through a non-deterministic merge uses the dependency of the merge) and cgc-fz-2056 (the backend neighbour expansion linked the role assertion r0(a3, a1) to a test node into which a1 was merged by a choice without the dependency of that merge, because the node already had a1 as its individual; the clash of the functional r0 then skipped the other alternative and the classification derived C0 below C3 in most runs).</Literal>
   </DataPropertyAssertion>
 
   <ClassAssertion>
