@@ -1002,12 +1002,12 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/>
-    <Literal>Open. Deterministic wrong classification answers of fuzz ontologies (completion graph caching on and off give the same answer, HermiT and FaCT++ disagree): cgc-fz-3203 misses T5 below T4 (also in the direct satisfiability test of T5 and not T4). Fixed: cgc-fz-2462 (a second local copy of a node that is its own role successor in the qualification branches of an at-most restriction), cgc-fz-2029 (the backend cache synchronisation of a node that represents a nominal only through a non-deterministic merge used the deterministic base dependency, so a clash with the expanded role assertions skipped the other alternatives) and cgc-fz-3208 (the pseudo-model pretest of the classifier took a missing internal consequence of the subsumer as proof of a non-subsumption although the model of the subsumed class contained the subsumer itself). cgc-fz-2351 is not a Konclude error: T2 is satisfiable (FaCT++, JFact and an explicit model agree), the expectation came from an inconsistent HermiT answer.</Literal>
+    <Literal>Fixed. Deterministic wrong classification answers of fuzz ontologies (completion graph caching on and off gave the same answer; HermiT and FaCT++ disagreed): cgc-fz-2462 (a second local copy of a node that is its own role successor in the qualification branches of an at-most restriction), cgc-fz-2029 (the backend cache synchronisation of a node that represents a nominal only through a non-deterministic merge used the deterministic base dependency, so a clash with the expanded role assertions skipped the other alternatives), cgc-fz-3208 (the pseudo-model pretest of the classifier took a missing internal consequence of the subsumer as proof of a non-subsumption although the model of the subsumed class contained the subsumer itself) and cgc-fz-3203 (the functional rule checked the distinct edges of an older version of a node, so two distinct nodes were merged without a clash). cgc-fz-2351 is not a Konclude error: T2 is satisfiable (FaCT++, JFact and an explicit model agree), the expectation came from an inconsistent HermiT answer.</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
 

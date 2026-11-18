@@ -20886,19 +20886,26 @@ namespace Konclude {
 
 
 
+				CDistinctEdge* CCalculationTableauCompletionTaskHandleAlgorithm::getIndividualNodesDistinctEdge(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualProcessNode* upIndi1 = getUpToDateIndividual(indi1, calcAlgContext);
+					CIndividualProcessNode* upIndi2 = getUpToDateIndividual(indi2, calcAlgContext);
+					CDistinctHash* disHash = upIndi1->getDistinctHash(false);
+					return disHash ? disHash->getIndividualDistinctEdge(upIndi2->getIndividualNodeID()) : nullptr;
+				}
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::isIndividualNodesMergeable(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CClashedDependencyDescriptor*& clashDescriptors, CCalculationAlgorithmContextBase* calcAlgContext) {
 					STATINC(INDINODESMERGEABLETESTCOUNT,calcAlgContext);
-					CDistinctHash* disHash = indi1->getDistinctHash(false);
 					STATINC(INDINODESMERGEABLEDISTINCTTESTCOUNT,calcAlgContext);
 
 					expandBackendCacheIndividualNodesNominalMerging(indi1, indi2, calcAlgContext);
 
-					if (disHash) {
-						CDistinctEdge* disEdge = disHash->getIndividualDistinctEdge(indi2->getIndividualNodeID());
-						if (disEdge) {
-							clashDescriptors = createClashedIndividualDistinctDescriptor(clashDescriptors,disEdge,disEdge->getDependencyTrackPoint(),calcAlgContext);
-							return false;
-						}
+					// the given nodes can be older versions (e.g., the opposite node of a link) that do not have the latest distinct edges, hence, the
+					// newest versions of both nodes are checked
+					CDistinctEdge* disEdge = getIndividualNodesDistinctEdge(indi1, indi2, calcAlgContext);
+					if (disEdge) {
+						clashDescriptors = createClashedIndividualDistinctDescriptor(clashDescriptors,disEdge,disEdge->getDependencyTrackPoint(),calcAlgContext);
+						return false;
 					}
 
 					if (mConfUniqueNameAssumption) {

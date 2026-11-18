@@ -1052,6 +1052,7 @@ namespace Konclude {
 						bool expandBackendCacheIndividualNodesNominalMerging(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool expandBackendCacheIndividualNodesNominalMergingNeighbouringConnections(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CCalculationAlgorithmContextBase* calcAlgContext);
 
+						CDistinctEdge* getIndividualNodesDistinctEdge(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualNodesMergeable(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CClashedDependencyDescriptor*& clashDescriptors, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool isIndividualNodesMergeableWithoutNewRuleApplications(CIndividualProcessNode* mergeIntoIndi1, CIndividualProcessNode* indi2, bool* mergingPossiblyRequiresRuleApplications, bool cancelOnPossiblyNewRuleApplications, CCalculationAlgorithmContextBase* calcAlgContext);
 

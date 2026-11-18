@@ -154,7 +154,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/><Literal>expected/cgc-fz-3203-classification.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/><Literal>Classification of the reduced fuzz seed 3203: Konclude (with and without completion graph caching) misses T5 below T4, so the equivalence T4 = T5 and T4 below C0, C1, T0 are missing.</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestRunConfig"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/><NamedIndividual abbreviatedIRI="kt:run-guard"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3208-classification"/></ClassAssertion>
