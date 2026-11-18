@@ -14328,7 +14328,11 @@ namespace Konclude {
 
 					// check whether there is already a suitable neighbour node in the cache
 					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)processIndi->getIndividualBackendCacheSynchronisationData(false);
-					if (backendSyncData && backendSyncData->getAssocitaionData()) {
+					// if the saturation integrated the successor into a nominal, then the cached neighbour can stem from this existential, but the saturation
+					// does not propagate the concepts of the nominal back to the individual, i.e., the connection has to be built if the individual is not
+					// completely handled
+					bool nominalSuccessor = saturationNode && saturationNode->hasNominalIntegrated();
+					if (backendSyncData && backendSyncData->getAssocitaionData() && (!nominalSuccessor || backendSyncData->getAssocitaionData()->isCompletelyHandled())) {
 						cint64 neighbourVisitLimit = 1;
 						if (!saturationNode || saturationNode->isCompleted() && (saturationNode->hasNominalIntegrated() || saturationNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT, false))) {
 							neighbourVisitLimit = 5;

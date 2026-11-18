@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  An existential whose filler is a nominal: C0 is below {a2}, so the r0-predecessor
+  that (exists inverse r0.C0)(a0) requires can only be a2. a2 is in C0, hence in
+  (all r0.C3), so a0 must be in C3, which contradicts not-C3(a0):
+
+    C0 below {a2}, C0 below (all r0.C3), C0(a2), (exists inverse r0.C0)(a0), not-C3(a0)
+
+  The individual saturation records a2 as the r0-predecessor of a0 but does not
+  propagate the universal restriction of a2 back to a0, so it marks a0 as not
+  completely handled. The completion must then build the link a2 -r0-> a0 instead
+  of accepting the cached neighbour a2 as witness of the existential.
+  Expected: inconsistent (HermiT agrees).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/nominal-successor-universal">
+  <Prefix name="" IRI="http://konclude.test/abox/nominal-successor-universal#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C3"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a2"/></ObjectOneOf></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C3"/></ObjectAllValuesFrom></SubClassOf>
+  <ClassAssertion><Class abbreviatedIRI=":C0"/><NamedIndividual abbreviatedIRI=":a2"/></ClassAssertion>
+  <ClassAssertion><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r0"/></ObjectInverseOf><Class abbreviatedIRI=":C0"/></ObjectSomeValuesFrom><NamedIndividual abbreviatedIRI=":a0"/></ClassAssertion>
+  <ClassAssertion><ObjectComplementOf><Class abbreviatedIRI=":C3"/></ObjectComplementOf><NamedIndividual abbreviatedIRI=":a0"/></ClassAssertion>
+</Ontology>

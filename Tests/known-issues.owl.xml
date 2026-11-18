@@ -1113,16 +1113,20 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
-    <Literal>Open. Konclude answers consistent for cgc-fz-2167-ontology.owl.xml, which is inconsistent: C2 = {a0}, C0 = {a2}, C2 is below (some inverse r0.C0) so a2 r0 a0, C0 is below (all r0.C3) so a0 is in C3, and a0 is in C1 while C1 is disjoint with C3. HermiT answers inconsistent. Konclude gives the wrong answer deterministically (five runs with and without completion graph caching) and the campaign saw it with both configurations. Unsound consistency check; root cause not investigated.</Literal>
+    <Literal>Fixed. Konclude answered consistent for cgc-fz-2167-ontology.owl.xml, which is inconsistent: C2 = {a0}, C0 = {a2}, C2 is below (some inverse r0.C0) so a2 r0 a0, C0 is below (all r0.C3) so a0 is in C3, and a0 is in C1 while C1 is disjoint with C3. Minimal shape: C0 below {a2}, C0 below (all r0.C3), C0(a2), (some inverse r0.C0)(a0), not-C3(a0). The individual saturation integrates the successor of the existential into the nominal a2 and records a2 as cached neighbour of a0, but it does not propagate the universal restriction of a2 back to a0 and marks a0 as not completely handled. The completion rule for existentials then found the cached neighbour a2 with C0 and accepted it as witness, so the link a2 r0 a0 was never built and the clash never derived (with and without completion graph caching). The cached-neighbour shortcut of the existential rule is now skipped when the saturation integrated the successor into a nominal and the association of the individual is not completely handled; the following nominal branch builds the link. The shortcut stays for all other cases (on roberts-family all of its hits are kept).</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2167-consistency"/>
   </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal-choice"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal-equivalent"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal-consistent"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2029-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3208-classification"/></ObjectPropertyAssertion>
