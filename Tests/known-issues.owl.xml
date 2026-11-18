@@ -1007,7 +1007,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/>
-    <Literal>Open. Deterministic wrong classification or satisfiability answers of fuzz ontologies (completion graph caching on and off give the same answer, HermiT disagrees): cgc-fz-2029 has the extra T5 below T2, cgc-fz-3203 misses T5 below T4, cgc-fz-3208 misses T2 below C1, and cgc-fz-2351 answers T2 satisfiable although it is unsatisfiable. cgc-fz-2462 (missing C0 below C3) is fixed: it was caused by a second local copy of a node that is its own role successor in the qualification branches of an at-most restriction.</Literal>
+    <Literal>Open. Deterministic wrong classification or satisfiability answers of fuzz ontologies (completion graph caching on and off give the same answer, HermiT disagrees): cgc-fz-2029 has the extra T5 below T2, cgc-fz-3203 misses T5 below T4, cgc-fz-3208 misses T2 below C1. cgc-fz-2351 is not a Konclude error: T2 is satisfiable (FaCT++, JFact and an explicit model agree), the expectation came from an inconsistent HermiT answer. cgc-fz-2462 (missing C0 below C3) is fixed: it was caused by a second local copy of a node that is its own role successor in the qualification branches of an at-most restriction.</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2029-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
@@ -1131,6 +1131,5 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2351-satisfiability"/></ObjectPropertyAssertion>
 
 </Ontology>

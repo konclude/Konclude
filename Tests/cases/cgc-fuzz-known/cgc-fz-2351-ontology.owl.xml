@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Reduced differential-fuzzing ontology (seed 2351). The classification taxonomy agrees with
-  HermiT, but the satisfiability answer for T2 does not: Konclude says satisfiable (with and
-  without completion graph caching, five of five runs), HermiT says unsatisfiable.
+  Reduced differential-fuzzing ontology (seed 2351). T2 is satisfiable (Konclude, FaCT++ and JFact;
+  a model is x in T2 with two distinct r2-successors in C2 that are also r2-successors of a1).
+  HermiT 1.4.5.519 answers T2 unsatisfiable although it accepts the extension with T2(a1) as consistent.
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/fuzz/23510">
   <Prefix name="" IRI="http://konclude.test/fuzz/23510#"/>
