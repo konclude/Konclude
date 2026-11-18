@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected classification of merged-nominal-empty-node-ontology.owl.xml, derived with HermiT 1.4.5. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T5"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Nothing"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></Declaration>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T0"/><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C0"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C4"/><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C3"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#C3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T4"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/merged-nominal-empty-node#T5"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+</Ontology>

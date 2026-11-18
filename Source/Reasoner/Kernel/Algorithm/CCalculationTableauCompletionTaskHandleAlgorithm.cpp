@@ -21476,6 +21476,10 @@ namespace Konclude {
 						CIndividual* nominalIndividual = individual->getNominalIndividual();
 						if (!mergeIntoIndividualNode->isNominalIndividualNode()) {
 							mergeIntoIndividualNode->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
+						}
+						// a node can already be of the nominal type without representing an individual (e.g., a new empty node created for merging a
+						// nominal), it then represents the merged nominal individual since its merging hash and backend data are taken over below
+						if (!mergeIntoIndividualNode->getNominalIndividual()) {
 							mergeIntoIndividualNode->setNominalIndividual(nominalIndividual);
 						}
 

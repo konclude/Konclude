@@ -1044,12 +1044,12 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/>
-    <Literal>Open. The classification of cgc-fz-3241 (both configurations) and cgc-fz-3344 (with completion graph caching) segfaults after 50-130 ms. The backtrace of 3241 ends in CIndividualIdentifier::getIndividualID() called from visitIndividualsRelevantMergingsBackendSynchronisationDataIndividuals, from testIndividualNodeBackendCacheNewMergings, while initialNodeInitialize sets up a nominal node (applyNOMINALRule -> getForcedInitializedNominalIndividualNode). The individual identifier taken from the backend-cache merging data is null or stale. Memory safety defect; root cause not investigated.</Literal>
+    <Literal>Fixed. The classification of cgc-fz-3241 (both configurations) and cgc-fz-3344 (with completion graph caching) segfaulted in CIndividualIdentifier::getIndividualID() called from visitIndividualsRelevantMergingsBackendSynchronisationDataIndividuals. The test node was merged with a nominal into a new empty node (getIntoEmptyMergedIndividualNode), which is created with the nominal node type before the merge; mergeIndividualNodeInto only set the nominal individual for a target that was not yet a nominal node, so the new node received the merging hash and the backend cache synchronisation data of the nominal but no nominal individual, and the synchronisation dereferenced it. mergeIndividualNodeInto now sets the nominal individual whenever the target has none. Reduced reproducer: Tests/cases/dl/merged-nominal-empty-node-ontology.owl.xml.</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
