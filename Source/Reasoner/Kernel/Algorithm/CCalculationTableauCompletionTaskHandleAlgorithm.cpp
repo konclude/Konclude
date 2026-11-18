@@ -26907,9 +26907,10 @@ namespace Konclude {
 
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::getLocalizedIndividual(CIndividualProcessNode* indi, bool updateIndividual, CCalculationAlgorithmContextBase* calcAlgContext) {
 					if (!indi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
-						if (updateIndividual) {
-							indi = getUpToDateIndividual(indi,calcAlgContext);
-						}
+						// the node may already be localized in the current task (e.g., the given node is an older version of a node that
+						// was localized before in the same task), a second local copy would replace the first one in the node vector and
+						// the changes made through the first one would be lost, hence, the newest version is used independently of updateIndividual
+						indi = getUpToDateIndividual(indi,calcAlgContext);
 						if (!indi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
 							STATINC(INDINODELOCALIZEDLOADCOUNT,calcAlgContext);
 							CMemoryAllocationManager* taskMemMan = nullptr;

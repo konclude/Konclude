@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected classification of self-successor-qualify-branch-ontology.owl.xml, derived with HermiT 1.4.5. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T5"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Nothing"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></Declaration>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#C4"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T4"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/self-successor-qualify-branch#T5"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+</Ontology>
