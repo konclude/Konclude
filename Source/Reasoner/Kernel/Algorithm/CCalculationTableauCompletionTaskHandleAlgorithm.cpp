@@ -23286,7 +23286,14 @@ namespace Konclude {
 					CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
 					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
 					if (backendSyncData && visitBaseIndividual) {
-						continueVisiting = visitFunc(indiNode, indiNode, depTrackPoint);
+						// a node that represents its individual only through a (possibly non-deterministic) merge has the dependency of that merge
+						// in its merging hash, the synchronisation with the backend data of the individual depends on it
+						CDependencyTrackPoint* baseDepTrackPoint = depTrackPoint;
+						CIndividualMergingHash* baseMergingHash = indiNode->getIndividualMergingHash(false);
+						if (baseMergingHash && indiNode->getNominalIndividual() && baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint()) {
+							baseDepTrackPoint = baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint();
+						}
+						continueVisiting = visitFunc(indiNode, indiNode, baseDepTrackPoint);
 						visited = true;
 					}
 					if (newIndiMergedHash) {
@@ -23315,7 +23322,14 @@ namespace Konclude {
 					CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
 					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
 					if (backendSyncData && visitBaseIndividual) {
-						continueVisiting = visitFunc(indiNode, indiNode, depTrackPoint);
+						// a node that represents its individual only through a (possibly non-deterministic) merge has the dependency of that merge
+						// in its merging hash, the synchronisation with the backend data of the individual depends on it
+						CDependencyTrackPoint* baseDepTrackPoint = depTrackPoint;
+						CIndividualMergingHash* baseMergingHash = indiNode->getIndividualMergingHash(false);
+						if (baseMergingHash && indiNode->getNominalIndividual() && baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint()) {
+							baseDepTrackPoint = baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint();
+						}
+						continueVisiting = visitFunc(indiNode, indiNode, baseDepTrackPoint);
 						visited = true;
 					}
 					if (newIndiMergedLinker != prevIndiMergedLinker) {
