@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected classification of nominal-merge-pseudo-model-ontology.owl.xml, derived with HermiT 1.4.5. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T5"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Nothing"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></Declaration>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T2"/><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C0"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T2"/><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C1"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T2"/><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C4"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#C4"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T4"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-merge-pseudo-model#T5"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+</Ontology>
