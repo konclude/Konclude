@@ -526,7 +526,9 @@ namespace Konclude {
 					}
 					reader->fixOntologyData(ontologyData);
 					mFixedOntologyIdentifierDataHashLock.unlock();
-					ontologyData->waitIndividualLabelAssociationIndexed();
+					if (ontologyData) {
+						ontologyData->waitIndividualLabelAssociationIndexed();
+					}
 					return reader;
 				}
 
