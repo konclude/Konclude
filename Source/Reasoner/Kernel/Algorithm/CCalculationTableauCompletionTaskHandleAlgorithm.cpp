@@ -21294,7 +21294,7 @@ namespace Konclude {
 								CConceptDescriptor* conDes = conSetIt.getConceptDescriptor();
 								CDependencyTrackPoint* depTrackPoint = conSetIt.getDependencyTrackPoint();
 								if (conDes) {
-									if (!mergeIntoConceptLabelSet->containsConcept(conDes->getConcept(), nullptr)) {
+									if (!mergeIntoConceptLabelSet->containsConcept(conDes->getConcept(), conDes->getNegation())) {
 										STATINC(INDINODEMERGECONCEPTSADDCOUNT, calcAlgContext);
 
 										// create dependency
@@ -21333,7 +21333,10 @@ namespace Konclude {
 											hasPrevData = false;
 										}
 									}
-									if (!hasPrevData || (hasPrevData && prevDataTag != conTag)) {
+									// the concept with the opposite polarity is added as well, the addition detects the clash (e.g., a forced merge
+									// of a nominal with A into a node with not A)
+									bool complementaryConcept = hasPrevData && prevDataTag == conTag && !mergeIntoConceptLabelSet->containsConcept(conDes->getConcept(), conDes->getNegation());
+									if (!hasPrevData || (hasPrevData && prevDataTag != conTag) || complementaryConcept) {
 										STATINC(INDINODEMERGECONCEPTSADDCOUNT,calcAlgContext);
 
 										// create dependency
