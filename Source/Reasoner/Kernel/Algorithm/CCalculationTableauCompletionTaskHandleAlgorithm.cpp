@@ -6976,7 +6976,8 @@ namespace Konclude {
 					if (!processingDataBox->hasMultipleConstructionIndividualNodes() && constIndiNode && constIndiNode->isNominalIndividualNode()) {
 						CXSortedNegLinker<CConcept*>* initConLinker = constIndiNode->getInitializingConceptLinker();
 						CIndividual* individual = constIndiNode->getNominalIndividual();
-						if (initConLinker && !initConLinker->hasNext()) {
+						// the constructed node can be a nominal node without individual, e.g., if it was merged into a new nominal of the NN-rule
+						if (individual && initConLinker && !initConLinker->hasNext()) {
 							CConcept* initConcept = initConLinker->getData();
 							bool conNegation = initConLinker->isNegated();
 
@@ -14834,7 +14835,11 @@ namespace Konclude {
 					if (!hasAlreadyMergingNominal) {
 						if (requiresNNRule) {
 
-							createNominalsSuccessorIndividuals(processIndi,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,false,nnRequireDepTrackPoint,1,calcAlgContext);
+							createNominalsSuccessorIndividuals(processIndi,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,false,nnRequireDepTrackPoint,1,calcAlgContext);
+							// the iterators were taken before the new nominal was linked, they would neither find the new nominal as merging target
+							// (if an older neighbour has a smaller id) nor merge it with the other neighbours
+							baseRoleSuccIt = processIndi->getRoleSuccessorLinkIterator(role);
+							roleSuccIt = baseRoleSuccIt;
 							CRoleSuccessorLinkIterator lastRoleSuccIt = processIndi->getRoleSuccessorHistoryLinkIterator(role,nullptr);
 							if (lastRoleSuccIt.hasNext()) {
 								CIndividualLinkEdge* link = lastRoleSuccIt.next();

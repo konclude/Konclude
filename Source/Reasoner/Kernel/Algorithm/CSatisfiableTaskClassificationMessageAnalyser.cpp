@@ -236,15 +236,12 @@ namespace Konclude {
 											CRoleSuccessorLinkIterator roleSucc2It(roleSuccIt); 
 											while (roleSucc2It.hasNext()) {
 												CIndividualLinkEdge* succLink = roleSucc2It.next(true);
-												CIndividualProcessNode* succIndi = nullptr;
-												if (succLink->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
-													succIndi = succLink->getOppositeIndividual(indiNode);
-												} else {
-													if (!succIndi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag()) && succIndi->isRelocalized()) {
-														cint64 succIndiId = succLink->getOppositeIndividualID(indiNode);
-														CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
-														succIndi = indiProcNodeVec->getData(succIndiId);
-													}
+												// a link of an older localization can refer to an older version of the successor, the current one is in the node vector
+												CIndividualProcessNode* succIndi = succLink->getOppositeIndividual(indiNode);
+												if (!succLink->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
+													cint64 succIndiId = succLink->getOppositeIndividualID(indiNode);
+													CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+													succIndi = indiProcNodeVec->getData(succIndiId);
 												}
 												CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
 												for (CSortedNegLinker<CConcept*>* opConIt = concept->getOperandList(); opConIt; opConIt = opConIt->getNext()) {
