@@ -2290,11 +2290,13 @@ namespace Konclude {
 								if (checkTrivialInstanceConceptCachedCompletionGraphBasedMerging(reqConfPreCompItem, concept, true, indiProcNode, indiProcVector, &mergeable, &unmergeable, &mergeOperationLimit)) {
 									if (mergeable) {
 										isInstance = false;
+										return true;
 									}
+									// a clash in a node that was merged non-deterministically does not prove the instance, the test decides it
 									if (unmergeable && !nondeterministicallyMergedFlag) {
 										isInstance = true;
+										return true;
 									}
-									return true;
 								}
 							}
 						} else {
