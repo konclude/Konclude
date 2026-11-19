@@ -2186,8 +2186,9 @@ namespace Konclude {
 						if (-nominalIndi->getIndividualID() == indiNode->getIndividualNodeID()) {
 							mergeable = true;
 						} else {
+							// the merging hash is keyed by the individual id (cf. mergeIndividualNodeInto) and exists only if something was merged
 							CIndividualMergingHash* indiMergingHash = indiNode->getIndividualMergingHash(false);
-							if (indiMergingHash->value(-nominalIndi->getIndividualID()).isMergedWithIndividual()) {
+							if (indiMergingHash && indiMergingHash->value(nominalIndi->getIndividualID()).isMergedWithIndividual()) {
 								mergeable = true;
 							}
 						}
@@ -2198,8 +2199,9 @@ namespace Konclude {
 						if (-nominalIndi->getIndividualID() == indiNode->getIndividualNodeID()) {
 							unmergeable = true;
 						} else {
+							// the merging hash is keyed by the individual id (cf. mergeIndividualNodeInto) and exists only if something was merged
 							CIndividualMergingHash* indiMergingHash = indiNode->getIndividualMergingHash(false);
-							if (indiMergingHash->value(-nominalIndi->getIndividualID()).isMergedWithIndividual()) {
+							if (indiMergingHash && indiMergingHash->value(nominalIndi->getIndividualID()).isMergedWithIndividual()) {
 								unmergeable = true;
 							}
 						}
