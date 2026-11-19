@@ -980,6 +980,7 @@ namespace Konclude {
 						bool testIndividualNodeConceptBackendCacheNeighbourExpansionBlockingCritical(CConcept* concept, bool conNegation, bool nondeterministic, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool debugCheckDirectlyInfluencedNeighbourWithPropagationPossible(CConcept* concept, bool conNegation, CIndividualProcessNode* indiNode, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* locBackendSyncData, CCalculationAlgorithmContextBase* calcAlgContext);
 
+						bool hasBlockableRoleNeighbour(CIndividualProcessNode* indiNode, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						bool testIndividualNodeBackendCacheNominalIndirectConnectionBlockingCritical(CIndividualProcessNode* indi, CCalculationAlgorithmContextBase* calcAlgContext);
 						cint64 getBackendCacheRoleRepresentativeNeighbourCount(CIndividualProcessNode* indiNode, CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData, CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext);

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected classification of nominal-inverse-atmost-chain-ontology.owl.xml, derived with HermiT 1.4.5. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#A"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#B"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#D"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#D4"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestAsymmetricChain"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestClosingChain"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestInverseFunctionalChain"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestInverseFunctionalLoop"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Nothing"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></Declaration>
+  <EquivalentClasses><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C2"/><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#D"/><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestAsymmetricChain"/><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestInverseFunctionalChain"/><Class IRI="http://www.w3.org/2002/07/owl#Nothing"/></EquivalentClasses>
+  <EquivalentClasses><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C3"/><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestClosingChain"/></EquivalentClasses>
+  <EquivalentClasses><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#D4"/><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#TestInverseFunctionalLoop"/></EquivalentClasses>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#D4"/><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C4"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#A"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#B"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#C4"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+</Ontology>

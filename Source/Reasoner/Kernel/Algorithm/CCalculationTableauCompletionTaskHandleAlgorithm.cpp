@@ -15458,7 +15458,11 @@ namespace Konclude {
 
 							KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
 
-							if (((branchingMergingProcRest->hasValidRemainingMergingCandidates() && branchingMergingProcRest->getRemainingValidMergingCandidateIndividualNodeCount() > 0) || processIndi->hasRoleSuccessorToIndividual(role,mergeCandIndiNode,true)) && !distinctMergedSet->contains(mergeCandIndiNode->getIndividualNodeID())) {
+							// the counters do not notice candidates that were pruned or merged away by merges of this loop (e.g., the successors of a node
+							// that was merged into a new nominal), such candidates are only taken if they are still linked
+							CIndividualProcessNode* upToDateMergeCandIndiNode = getUpToDateIndividual(mergeCandIndiNode,calcAlgContext);
+							bool mergeCandidateRemoved = upToDateMergeCandIndiNode->hasPurgedBlockedProcessingRestrictionFlags() || upToDateMergeCandIndiNode->hasMergedIntoIndividualNodeID();
+							if (((!mergeCandidateRemoved && branchingMergingProcRest->hasValidRemainingMergingCandidates() && branchingMergingProcRest->getRemainingValidMergingCandidateIndividualNodeCount() > 0) || processIndi->hasRoleSuccessorToIndividual(role,mergeCandIndiNode,true)) && !distinctMergedSet->contains(mergeCandIndiNode->getIndividualNodeID())) {
 								++deterministicMergingStep;
 
 								CIndividualProcessNode* mergingIndiNode = getUpToDateIndividual(mergeCandIndiNode,calcAlgContext);
@@ -23408,6 +23412,19 @@ namespace Konclude {
 				}
 
 
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::hasBlockableRoleNeighbour(CIndividualProcessNode* indiNode, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CRoleSuccessorLinkIterator roleSuccIt(indiNode->getRoleSuccessorLinkIterator(role));
+					while (roleSuccIt.hasNext()) {
+						CIndividualLinkEdge* link = roleSuccIt.next();
+						CIndividualProcessNode* neighbourIndi = getUpToDateIndividual(link->getOppositeIndividual(indiNode), calcAlgContext);
+						if (!neighbourIndi->isNominalIndividualNode()) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 
 					bool expansionBlockingCritical = false;
@@ -23462,7 +23479,9 @@ namespace Konclude {
 											}
 
 											cint64 minCard = cardData->getMinimumRestrictingCardinality();
-											if (linkCount > minCard) {
+											// a blockable neighbour of a nominal with a cardinality restriction requires the NN-rule, even if the cardinality
+											// is not yet exceeded: the neighbour could otherwise be blocked although its unravelling creates more neighbours
+											if (linkCount > minCard || hasBlockableRoleNeighbour(indiNode, role, calcAlgContext)) {
 												expansionBlockingCritical = true;
 											}
 										}
