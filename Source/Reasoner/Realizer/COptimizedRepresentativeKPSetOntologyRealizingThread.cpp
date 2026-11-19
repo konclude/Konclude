@@ -2119,6 +2119,48 @@ namespace Konclude {
 							mergeable = true;
 						}
 
+						if (mergeable && neighbourLinksIncomplete) {
+							// the links do not show the neighbours that are only in the representative cache, they are counted in addition
+							// if they are not linked (a nominal node has the negated individual id; a merged neighbour may be counted twice,
+							// which only leads to an instance test)
+							cint64 linkedNeighbourCount = 0;
+							QSet<cint64> linkedNeighbourIdSet;
+							if (roleSuccHash) {
+								CRoleSuccessorLinkIterator linkedIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+								while (linkedIt.hasNext()) {
+									CIndividualLinkEdge* neighbourLink = linkedIt.next();
+									linkedNeighbourIdSet.insert(neighbourLink->getOppositeIndividualID(indiNode->getIndividualNodeID()));
+									++linkedNeighbourCount;
+								}
+							}
+							cint64 cachedNeighbourCount = 0;
+							CIndividual* nominalIndi = indiNode->getNominalIndividual();
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = nominalIndi ? reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nominalIndi->getIndividualID()) : nullptr;
+							if (!assData) {
+								mergeable = false;
+							} else {
+								visitRepresentativeCacheNeighbours(reqConfPreCompItem, role, assData, [&](cint64 neighbourIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourAssData, bool deterministicNeighbour)->bool {
+									if (!linkedNeighbourIdSet.contains(-neighbourIndiId)) {
+										// as for the cache based merging, a neighbour that can take the negation of the qualification is ignored
+										bool ignorable = false;
+										for (CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList(); opConLinkerIt && neighbourAssData && !ignorable; opConLinkerIt = opConLinkerIt->getNext()) {
+											bool opConMergeable = false;
+											bool opConUnmergeable = false;
+											checkTrivialInstanceConceptRepresentativeCacheBasedMerging(reqConfPreCompItem, opConLinkerIt->getData(), !opConLinkerIt->isNegated(), neighbourAssData, &opConMergeable, &opConUnmergeable, mergingOperationLimit);
+											ignorable = opConMergeable;
+										}
+										if (!ignorable) {
+											++cachedNeighbourCount;
+										}
+									}
+									return linkedNeighbourCount + cachedNeighbourCount <= cardinality;
+								});
+								if (linkedNeighbourCount + cachedNeighbourCount > cardinality) {
+									mergeable = false;
+								}
+							}
+						}
+
 					} else if (!conceptNegation && (opCode == CCSOME) || conceptNegation && (opCode == CCALL)) {
 						// mergeable if there is one neighbour that satisfies the qualifying restriction
 						// unmergeable is non-trivial to detect (maybe we can use the saturation graph somehow?)
