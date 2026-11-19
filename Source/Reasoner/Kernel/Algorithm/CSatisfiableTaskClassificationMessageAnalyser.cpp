@@ -570,6 +570,9 @@ namespace Konclude {
 
 								if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
 									CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
+									if (!extSatIndiNode) {
+										return false;
+									}
 									nextSuccessorList.prepend(extSatIndiNode);
 
 									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
@@ -768,6 +771,9 @@ namespace Konclude {
 
 								if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
 									CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
+									if (!extSatIndiNode) {
+										return false;
+									}
 									nextSuccessorList.prepend(extSatIndiNode);
 
 									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
@@ -915,7 +921,9 @@ namespace Konclude {
 														return false;
 													}
 
-													nextSuccessorList.append(satIndiNode);
+													if (satIndiNode) {
+														nextSuccessorList.append(satIndiNode);
+													}
 												}
 											} else {
 												return false;
