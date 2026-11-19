@@ -436,4 +436,39 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-inverse-atmost-chain-classification"/><Literal>Classification of the NN-rule chains: D, C2 (and the tests equivalent to them) are unsatisfiable, the controls are not.</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-inverse-atmost-chain-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
 
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-unqualified"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-unqualified"/><Literal>Two p-successors that are both the nominal a (forall p.{a}, at least 2 p): the saturation represents them by the shared top node plus an extension node with {a} and did not flag the clash (fuzz seed 2792).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-unqualified"/><Literal>nominal-universal-atleast-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-unqualified"/><Literal>http://konclude.test/dl/nominal-universal-atleast#E1</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-unqualified"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-unqualified"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-qualified"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-qualified"/><Literal>Qualified variant (at least 2 q.A): was already answered correctly.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-qualified"/><Literal>nominal-universal-atleast-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-qualified"/><Literal>http://konclude.test/dl/nominal-universal-atleast#E2</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-qualified"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-qualified"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-inverse"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-inverse"/><Literal>Inverse variant (forall inverse(t).{a}, at least 2 inverse(t)), the shape of fuzz seed 2792.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-inverse"/><Literal>nominal-universal-atleast-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-inverse"/><Literal>http://konclude.test/dl/nominal-universal-atleast#E3</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-inverse"/><Literal>unsatisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-inverse"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-one-control"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-one-control"/><Literal>Control: one u-successor can be a.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-one-control"/><Literal>nominal-universal-atleast-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-one-control"/><Literal>http://konclude.test/dl/nominal-universal-atleast#E4</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-one-control"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-one-control"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-choice-control"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-choice-control"/><Literal>Control: two v-successors can be a and b.</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-choice-control"/><Literal>nominal-universal-atleast-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:testClass"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-choice-control"/><Literal>http://konclude.test/dl/nominal-universal-atleast#E5</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-choice-control"/><Literal>satisfiable</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dl-nominal-universal-atleast-choice-control"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
 </Ontology>

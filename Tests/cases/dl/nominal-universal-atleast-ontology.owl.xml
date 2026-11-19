@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  At-least restrictions whose successors are all one nominal by a universal restriction. Two distinct successors
+  cannot both be a, so E1 (unqualified), E2 (qualified) and E3 (inverse role) are unsatisfiable. The saturation
+  represents the successors of an unqualified at-least restriction by the shared top node and the universal
+  restriction by an extension node; the nominal in that extension node was not flagged as a clash (fuzz seed 2792).
+  Controls: one successor (E4) and a choice between two nominals (E5) are satisfiable.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/nominal-universal-atleast">
+  <Prefix name="" IRI="http://konclude.test/dl/nominal-universal-atleast#"/>
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":E1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":E2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":E3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":E4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":E5"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":p"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":q"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":u"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":v"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b"/></Declaration>
+
+  <SubClassOf><Class abbreviatedIRI=":E1"/><ObjectIntersectionOf>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":p"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf></ObjectAllValuesFrom>
+    <ObjectMinCardinality cardinality="2"><ObjectProperty abbreviatedIRI=":p"/></ObjectMinCardinality>
+  </ObjectIntersectionOf></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":E2"/><ObjectIntersectionOf>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":q"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf></ObjectAllValuesFrom>
+    <ObjectMinCardinality cardinality="2"><ObjectProperty abbreviatedIRI=":q"/><Class abbreviatedIRI=":A"/></ObjectMinCardinality>
+  </ObjectIntersectionOf></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":E3"/><ObjectIntersectionOf>
+    <ObjectAllValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":t"/></ObjectInverseOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf></ObjectAllValuesFrom>
+    <ObjectMinCardinality cardinality="2"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":t"/></ObjectInverseOf></ObjectMinCardinality>
+  </ObjectIntersectionOf></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":E4"/><ObjectIntersectionOf>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":u"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf></ObjectAllValuesFrom>
+    <ObjectMinCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":u"/></ObjectMinCardinality>
+  </ObjectIntersectionOf></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":E5"/><ObjectIntersectionOf>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":v"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":b"/></ObjectOneOf></ObjectAllValuesFrom>
+    <ObjectMinCardinality cardinality="2"><ObjectProperty abbreviatedIRI=":v"/></ObjectMinCardinality>
+  </ObjectIntersectionOf></SubClassOf>
+</Ontology>
