@@ -1997,6 +1997,10 @@ namespace Konclude {
 				cint64 opCode = concept->getOperatorCode();
 				CReapplyConceptLabelSet* labelSet = indiNode->getReapplyConceptLabelSet(false);
 
+				// the links of a node whose neighbours were (partially) not expanded from the backend cache do not show all its
+				// neighbours, a restriction on its neighbours can then not be judged by the links
+				bool neighbourLinksIncomplete = indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENNEIGHBOURDPARTIALEXPANSION);
+
 				CConceptDescriptor* conDes = nullptr;
 				CDependencyTrackPoint* depTrackPoint = nullptr;
 				if (labelSet->getConceptDescriptor(concept, conDes, depTrackPoint)) {
@@ -2125,7 +2129,10 @@ namespace Konclude {
 						bool oneMergable = false;
 						bool allUnmergeable = true;
 
-						CRoleSuccessorLinkIterator roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						CRoleSuccessorLinkIterator roleSuccIt;
+						if (roleSuccHash) {
+							roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						}
 						while (roleSuccIt.hasNext() && !oneMergable) {
 
 							CIndividualLinkEdge* neighbourLink = roleSuccIt.next();
@@ -2151,10 +2158,14 @@ namespace Konclude {
 						CRole* role = concept->getRole();
 						CReapplyRoleSuccessorHash* roleSuccHash = indiNode->getReapplyRoleSuccessorHash(false);
 
-						bool allMergable = true;
+						// all neighbours must accept the filler, which cannot be judged if neighbours are missing from the links
+						bool allMergable = !neighbourLinksIncomplete;
 						bool oneUnmergeable = false;
 
-						CRoleSuccessorLinkIterator roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						CRoleSuccessorLinkIterator roleSuccIt;
+						if (roleSuccHash) {
+							roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						}
 						while (roleSuccIt.hasNext() && (allMergable || !oneUnmergeable)) {
 
 							CIndividualLinkEdge* neighbourLink = roleSuccIt.next();
