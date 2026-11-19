@@ -54,6 +54,7 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><Literal>2a-SHN-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-2b-shn"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-2b-shn"/><Literal>Archived hand-written OWLlink test 2b-SHN (transitive roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
@@ -136,12 +137,14 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><Literal>28a-ALC-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>Archived hand-written OWLlink test 28b-ALC (ALC): IsClassSatisfiable with the expected answers true (confirmed with FaCT++ 1.6.3, HermiT does not answer within 60 s).</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>owllink</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>28b-ALC-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/><Literal>Archived hand-written OWLlink test 36-hilf-ALCF (functional roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
@@ -433,6 +436,7 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><Literal>60-ALCOIF-request.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><Literal>false</Literal></DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-61-alcoif"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-61-alcoif"/><Literal>Archived hand-written OWLlink test 61-ALCOIF (nominals, inverse and functional roles): IsClassSatisfiable with the expected answers true (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
