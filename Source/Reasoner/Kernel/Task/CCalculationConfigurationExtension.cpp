@@ -513,9 +513,9 @@ namespace Konclude {
 				bool CCalculationConfigurationExtension::isIndividualsBackendCacheLoadingActivated() {
 					if (!mConfIndividualsBackendCacheLoadingChecked) {
 						mConfIndividualsBackendCacheLoadingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.IndividualsBackendCacheLoading",true);
-						// the representative cache is filled by the saturation of the individuals; without concept saturation its
-						// entries stay empty and the completion graph would take them instead of the assertions of the individuals
-						if (!CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.ConceptSaturation",true)) {
+						// the representative cache is filled by the saturation of the individuals; without concept or individual saturation
+						// its entries stay empty and the completion graph would take them instead of the assertions of the individuals
+						if (!CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.ConceptSaturation",true) || !CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.IndividualSaturation",true)) {
 							mConfIndividualsBackendCacheLoadingActivated = false;
 						}
 						mConfIndividualsBackendCacheLoadingChecked = true;
