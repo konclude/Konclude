@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/nosat/clash">
+  <Prefix name="" IRI="http://konclude.test/nosat#"/>
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration><Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration><Declaration><NamedIndividual abbreviatedIRI=":b"/></Declaration><ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":b"/></ObjectPropertyAssertion><ClassAssertion><Class abbreviatedIRI=":A"/><NamedIndividual abbreviatedIRI=":b"/></ClassAssertion>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <ClassAssertion><Class abbreviatedIRI=":A"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <ClassAssertion><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":A"/></ObjectComplementOf></ObjectAllValuesFrom><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+</Ontology>

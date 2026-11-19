@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/realization-fuzz">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-realization-fuzz"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-realization-fuzz"/><Literal>Realization-fuzz</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-realization-fuzz"/><Literal>realization-fuzz</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-realization-fuzz"/><Literal>Reduced ABoxes of the realization fuzz campaign 2026-11-19 (random ABoxes with complex class assertions, inverse and complex role assertions, same and different individuals over SHOIQ/SRIQ TBoxes). Expected types from Openllet 2.6.5 where FaCT++ 1.6.3 agrees; HermiT 1.4.5 is not used for the expectations because it derives wrong types in some of these realizations. Fixed cases are guards, the open ones are known failures of kt:issue-realization-fuzz-missed-types.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-crash-same-nominal-all"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-crash-same-nominal-all"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-crash-same-nominal-all"/><Literal>rf-crash-same-nominal-all.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-crash-same-nominal-all"/><Literal>expected/rf-crash-same-nominal-all-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-crash-same-nominal-all"/><Literal>r(a,b), SameIndividual(c,b) and a defined class R = all r-.{d}: the realization crashed twice, first when it created a reader for the representative cache although no cache data was fixed for the ontology, then in the trivial model merging check, which looked up the merging hash of a node with the negated individual id and dereferenced the hash of a node into which nothing was merged (fixed in 998a13ce and 78710bf3). No class but owl:Thing is entailed.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-crash-same-nominal-all"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-crash-same-nominal-all"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-exact-functional-different"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-exact-functional-different"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-exact-functional-different"/><Literal>rf-exact-functional-different.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-exact-functional-different"/><Literal>expected/rf-exact-functional-different-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-exact-functional-different"/><Literal>f functional, f(x5,x0) (written as an inverse assertion), C2(x0), R4 = (=1 f.C2) and an unrelated DifferentIndividuals axiom that makes the consistency check build a completion graph: x5 is an instance of R4. The realizer accepted 'all f.not C2' for x5 by the links of x5 in the cached graph, which did not contain the neighbour x0 because the neighbour expansion from the backend cache was blocked (fixed in eeeef583).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-exact-functional-different"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-exact-functional-different"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-clash"/><Literal>rf-no-saturation-clash.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-clash"/><NamedIndividual IRI="../../configs/no-saturation.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-clash"/><Literal>A(a) and not A(a) without concept saturation: the individuals were loaded from the empty representative cache instead of their assertions and the ontology was reported consistent (fixed in 928fc4b0).</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/><Literal>rf-no-saturation-all-clash.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/><NamedIndividual IRI="../../configs/no-saturation.xml"/></ObjectPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/><Literal>r(a,b), A(b) and all r.not A on a without concept saturation: same defect as rf-no-saturation-clash.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/><Literal>rf-101290-x4-c0.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/><Literal>expected/rf-101290-x4-c0-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/><Literal>Fuzz seed 101290. C0 = {a0,a1}, C0 subclass of all h.{a0,a1}, h(a0,x4): x4 is a0 or a1 in every model, hence in C0; Konclude misses it (also with every optimisation switched off).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-101290-x4-c0"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/><Literal>rf-101320-a1-r1.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/><Literal>expected/rf-101320-a1-r1-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/><Literal>Fuzz seed 101320. f functional, C0 = {a0,a3}, f(a1,a3), R1 = all f.(C0 or C1): the only f-successor of a1 is in C0, so a1 is in R1; correct without loading individuals from the backend cache.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-101320-a1-r1"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/><Literal>rf-101416-a2-r4.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/><Literal>expected/rf-101416-a2-r4-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/><Literal>Fuzz seed 101416. f functional, C0 = {a0,a2}, f(a2,a0), R4 = all f.{x3,a0}: a2 is in R4.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-101416-a2-r4"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/><Literal>rf-100612-x2-r0.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/><Literal>expected/rf-100612-x2-r0-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/><Literal>Fuzz seed 100612. f functional, f(x2,x2) (inverse assertion), x2 in not C0 and C1, R0 = all f.(C0 or C1): x2 is in R0.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-100612-x2-r0"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/><Literal>rf-100009-x1-r1.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/><Literal>expected/rf-100009-x1-r1-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/><Literal>Fuzz seed 100009. f functional, f(x1,x1) (inverse assertion), x1 in C0, R1 = all f.C0: x1 is in R1.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-100009-x1-r1"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/><Literal>rf-100763-x2-r2.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/><Literal>expected/rf-100763-x2-r2-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/><Literal>Fuzz seed 100763. s inverse functional, s(a0,x2) (inverse assertion), a negative f assertion, R2 = all s-.{a0}: the only s-predecessor of x2 is a0, so x2 is in R2.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-100763-x2-r2"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/><Literal>rf-101278-x4-r0.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/><Literal>expected/rf-101278-x4-r0-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/><Literal>Fuzz seed 101278. h inverse functional, h(a0,x4), C0(a0), R0 = (all hi.C0) and (some hi.C0) with hi = h-: x4 is in R0.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-101278-x4-r0"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/><Literal>rf-101098-x2-c0.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/><Literal>expected/rf-101098-x2-c0-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/><Literal>Fuzz seed 101098. h inverse functional, C2 subclass of all hi.(C2 and C0), C0 subclass of some hi.some h.C2, C1 subclass of some h.C0, x2 in C0 or C1: x2 is in C0.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/><Literal>rf-100263-x3-r2.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/><Literal>expected/rf-100263-x3-r2-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/><Literal>Fuzz seed 100263. C0 subclass of =3 q-.C1 and further axioms with a role chain r3; x3 in C0, q(x3,x1), q-(x2,x3): x3 is in R2 = (>=2 q).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassRealizationTest"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/><Literal>class-realization</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/><Literal>rf-100838-b-r3.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/><Literal>expected/rf-100838-b-r3-realization.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/><Literal>Fuzz seed 100838. r functional, r(b,a), r(b,x0), sInv(b,b), C subclass of some r.C and value s a: b is in R3 = some s.(not C or A).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/></ObjectPropertyAssertion>
+
+</Ontology>

@@ -15,6 +15,7 @@
   <Declaration><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/></Declaration>
   <Declaration><NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/></Declaration>
   <Declaration><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></Declaration>
 
   <ClassAssertion><Class abbreviatedIRI="kt:Reasoner"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerName"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/><Literal>HermiT</Literal></DataPropertyAssertion>
@@ -35,4 +36,9 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerName"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/><Literal>FaCT++</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerVersion"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/><Literal>1.6.3</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerDescription"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/><Literal>FaCT++ 1.6.3 (JNI) through the OWL API 3.4.10 and the ORE 2015 reasoner wrapper; the second opinion of the DL fuzz campaign and the verifier of the archived OWLlink tests that HermiT does not answer within 60 s.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:Reasoner"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerName"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/><Literal>Openllet</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerVersion"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/><Literal>2.6.5</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:reasonerDescription"/><NamedIndividual abbreviatedIRI="kt:reasoner-openllet-2-6-5"/><Literal>Openllet 2.6.5 (openllet-owlapi, OWL API 5); the reference of the realization fuzz tests together with FaCT++ 1.6.3, because HermiT 1.4.5 derives wrong types in some realizations.</Literal></DataPropertyAssertion>
 </Ontology>
