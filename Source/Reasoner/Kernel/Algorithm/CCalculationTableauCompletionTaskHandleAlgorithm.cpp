@@ -20916,6 +20916,10 @@ namespace Konclude {
 					STATINC(INDINODESMERGEABLEDISTINCTTESTCOUNT,calcAlgContext);
 
 					expandBackendCacheIndividualNodesNominalMerging(indi1, indi2, calcAlgContext);
+					// the nodes may be older versions (e.g., taken from a link by getSuccessorIndividual), the labels of the current versions
+					// are merged, so they are also the ones that are checked
+					indi1 = getUpToDateIndividual(indi1, calcAlgContext);
+					indi2 = getUpToDateIndividual(indi2, calcAlgContext);
 
 					// the given nodes can be older versions (e.g., the opposite node of a link) that do not have the latest distinct edges, hence, the
 					// newest versions of both nodes are checked
