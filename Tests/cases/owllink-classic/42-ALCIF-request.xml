@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/42#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/42"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/42">
+
+        <owl:Declaration>
+            <owl:Class IRI="A"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="C"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+        
+        <owl:SubClassOf>
+            <owl:Class IRI="C"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="A"/>
+                </owl:ObjectComplementOf>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectInverseOf>
+                        <owl:ObjectProperty IRI="r"/>
+                    </owl:ObjectInverseOf>
+                    <owl:Class IRI="A"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectMaxCardinality cardinality="1">
+                    <owl:ObjectProperty IRI="1"/>
+                </owl:ObjectMaxCardinality>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectInverseOf>
+                        <owl:ObjectProperty IRI="r"/>
+                    </owl:ObjectInverseOf>
+                    <owl:ObjectSomeValuesFrom>
+                        <owl:ObjectInverseOf>
+                            <owl:ObjectProperty IRI="r"/>
+                        </owl:ObjectInverseOf>
+                        <owl:ObjectIntersectionOf>
+                            <owl:Class IRI="A"/>
+                            <owl:ObjectMaxCardinality cardinality="1">
+                                <owl:ObjectProperty IRI="r"/>
+                            </owl:ObjectMaxCardinality>
+                        </owl:ObjectIntersectionOf>
+                    </owl:ObjectSomeValuesFrom>
+                </owl:ObjectAllValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:SubClassOf>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/42" timing="simple">
+        <owl:Class IRI="C"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/42"/>
+
+</RequestMessage>

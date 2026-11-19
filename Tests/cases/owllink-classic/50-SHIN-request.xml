@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xml:base="http://www.owllink.org/testsuite/50#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+    
+    <CreateKB kb="http://www.owllink.org/testsuite/50"/>
+    
+    <Tell kb="http://www.owllink.org/testsuite/50">
+        
+        <owl:Declaration>
+            <owl:Class IRI="F"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="C"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="s"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="ri"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="si"/>
+        </owl:Declaration>
+        
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="ri"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:InverseObjectProperties>
+        
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="s"/>
+            <owl:ObjectProperty IRI="si"/>
+        </owl:InverseObjectProperties>
+        
+        <owl:SubClassOf>
+            <owl:Class abbreviatedIRI="owl:Thing"/>
+            <owl:ObjectAllValuesFrom>
+                <owl:ObjectProperty IRI="ri"/>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="si"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="C"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectAllValuesFrom>
+            </owl:ObjectAllValuesFrom>
+        </owl:SubClassOf>
+        
+        <owl:SubClassOf>
+            <owl:Class abbreviatedIRI="owl:Thing"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="r"/>
+                <owl:Class IRI="C"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:SubClassOf>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="F"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="C"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="s"/>
+                    <owl:Class IRI="C"/>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+        
+    </Tell>
+    
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/50" timing="simple">
+        <owl:Class IRI="F"/>
+		</IsClassSatisfiable>
+    
+    <ReleaseKB kb="http://www.owllink.org/testsuite/50"/>
+
+</RequestMessage>

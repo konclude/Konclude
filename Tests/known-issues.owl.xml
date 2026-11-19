@@ -1114,4 +1114,26 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/></ObjectPropertyAssertion>
 
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+    <Literal>open</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+    <Literal>Open. Wrong subsumptions of the DL fuzz campaign 2026-11-19 (confirmed by HermiT and FaCT++), all with nominals and (inverse) functional roles or at-most restrictions on inverse roles of nominals: dlfz-1024 and dlfz-1042 miss a subsumption (also before the campaign), dlfz-1136 has an unsound one (reachable since the NN-rule fixes). Investigation: Docs/Status-DLFuzz-Campaign.md.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/></ObjectPropertyAssertion>
+
 </Ontology>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.owllink.org/testsuite/49-SHQ#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/49-SHQ"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/49-SHQ">
+
+        <owl:Declaration>
+            <owl:Class IRI="A"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="X"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="Y"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="Z"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="W"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r1"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r2"/>
+        </owl:Declaration>
+ 
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="r1"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="r2"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+ 
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="r"/>
+            <owl:ObjectUnionOf>
+                <owl:Class IRI="X"/>
+                <owl:Class IRI="Y"/>
+                <owl:Class IRI="Z"/>
+            </owl:ObjectUnionOf>
+        </owl:ObjectPropertyRange>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="r1"/>
+            <owl:ObjectComplementOf>
+                <owl:Class IRI="Z"/>
+            </owl:ObjectComplementOf>
+        </owl:ObjectPropertyRange>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="r2"/>
+            <owl:ObjectUnionOf>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="Y"/>
+                </owl:ObjectComplementOf>
+                <owl:Class IRI="X"/>
+            </owl:ObjectUnionOf>
+        </owl:ObjectPropertyRange>
+ 
+        <owl:EquivalentClasses>
+            <owl:Class IRI="A"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectMaxCardinality cardinality="3">
+                    <owl:ObjectProperty IRI="r"/>
+                </owl:ObjectMaxCardinality>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r1"/>
+                    <owl:ObjectUnionOf>
+                        <owl:Class IRI="Y"/>
+                        <owl:ObjectIntersectionOf>
+                            <owl:Class IRI="X"/>
+                            <owl:Class IRI="Y"/>
+                        </owl:ObjectIntersectionOf>
+                    </owl:ObjectUnionOf>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectMinCardinality cardinality="2">
+                    <owl:ObjectProperty IRI="r1"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMinCardinality cardinality="3">
+                    <owl:ObjectProperty IRI="r2"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:ObjectIntersectionOf>
+                        <owl:ObjectComplementOf>
+                            <owl:Class IRI="X"/>
+                        </owl:ObjectComplementOf>
+                        <owl:ObjectComplementOf>
+                            <owl:Class IRI="Y"/>
+                        </owl:ObjectComplementOf>
+                    </owl:ObjectIntersectionOf>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectMinCardinality cardinality="1">
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:ObjectUnionOf>
+                        <owl:ObjectIntersectionOf>
+                            <owl:Class IRI="X"/>
+                            <owl:ObjectComplementOf>
+                                <owl:ObjectUnionOf>
+                                    <owl:Class IRI="Y"/>
+                                    <owl:Class IRI="Z"/>
+                                </owl:ObjectUnionOf>
+                            </owl:ObjectComplementOf>
+                        </owl:ObjectIntersectionOf>
+                        <owl:ObjectIntersectionOf>
+                            <owl:ObjectComplementOf>
+                                <owl:Class IRI="X"/>
+                            </owl:ObjectComplementOf>
+                            <owl:Class IRI="Y"/>
+                            <owl:Class IRI="Z"/>
+                        </owl:ObjectIntersectionOf>
+                    </owl:ObjectUnionOf>
+                </owl:ObjectMinCardinality>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/49-SHQ" timing="simple">
+        <owl:Class IRI="A"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/49-SHQ"/>
+
+</RequestMessage>

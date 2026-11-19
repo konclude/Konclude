@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/46#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/46"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/46">
+
+        <owl:Declaration>
+            <owl:Class IRI="P"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="NO"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="RO"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="ITN"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="ITR"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="d"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="s"/>
+        </owl:Declaration>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="s"/>
+            <owl:ObjectProperty IRI="d"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:InverseFunctionalObjectProperty>
+            <owl:ObjectProperty IRI="s"/>
+        </owl:InverseFunctionalObjectProperty>
+
+        <owl:TransitiveObjectProperty>
+            <owl:ObjectProperty IRI="d"/>
+        </owl:TransitiveObjectProperty>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="RO"/>
+            <owl:ObjectComplementOf>
+                <owl:ObjectMinCardinality cardinality="1">
+                    <owl:ObjectInverseOf>
+                        <owl:ObjectProperty IRI="s"/>
+                    </owl:ObjectInverseOf>
+                </owl:ObjectMinCardinality>
+            </owl:ObjectComplementOf>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="ITN"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="NO"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="s"/>
+                    <owl:Class IRI="ITN"/>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="ITR"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="ITN"/>
+                <owl:Class IRI="RO"/>
+            </owl:ObjectIntersectionOf>
+        </owl:SubClassOf>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="P"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="ITR"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectInverseOf>
+                        <owl:ObjectProperty IRI="s"/>
+                    </owl:ObjectInverseOf>
+                    <owl:Class IRI="RO"/>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/46" timing="simple">
+        <owl:Class IRI="P"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/46"/>
+
+</RequestMessage>

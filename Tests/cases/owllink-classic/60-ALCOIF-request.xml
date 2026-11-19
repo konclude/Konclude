@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.owllink.org/testsuite/sat-exp-test#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/60"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/60">
+
+        <owl:Declaration>
+            <owl:Class IRI="#C1"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#C2"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#C3"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#C4"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#C5"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#B1"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#C"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#DIS1"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#DIS2"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#r"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#s"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#sInv"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#rInv"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#r1"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#r2"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#t"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#a"/>
+        </owl:Declaration>
+
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="#r1"/>
+            <owl:ObjectProperty IRI="#r1Inv"/>
+        </owl:InverseObjectProperties>
+        
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="#r2"/>
+            <owl:ObjectProperty IRI="#r2Inv"/>
+        </owl:InverseObjectProperties>
+
+        <owl:FunctionalObjectProperty>
+            <owl:ObjectProperty IRI="#r1Inv"/>
+        </owl:FunctionalObjectProperty>
+
+        <owl:FunctionalObjectProperty>
+            <owl:ObjectProperty IRI="#r2Inv"/>
+        </owl:FunctionalObjectProperty>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#C"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="#s"/>
+                    <owl:Class IRI="#B1"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="#s"/>
+                    <owl:Class IRI="#D1"/>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#B1"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="#r1"/>
+                    <owl:Class IRI="#C1"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:Class IRI="#DIS1"/>
+            </owl:ObjectIntersectionOf>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#D1"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="#t"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="#t"/>
+                    <owl:ObjectSomeValuesFrom>
+                        <owl:ObjectProperty IRI="#t"/>
+                        <owl:ObjectSomeValuesFrom>
+                            <owl:ObjectProperty IRI="#t"/>
+                            <owl:ObjectSomeValuesFrom>
+                                <owl:ObjectProperty IRI="#t"/>
+                                <owl:ObjectIntersectionOf>
+                                    <owl:ObjectSomeValuesFrom>
+                                        <owl:ObjectProperty IRI="#r1"/>
+                                        <owl:Class IRI="#C1"/>
+                                    </owl:ObjectSomeValuesFrom>
+                                    <owl:Class IRI="#DIS2"/>
+                                </owl:ObjectIntersectionOf>
+                            </owl:ObjectSomeValuesFrom>
+                        </owl:ObjectSomeValuesFrom>
+                    </owl:ObjectSomeValuesFrom>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectSomeValuesFrom>
+        </owl:SubClassOf>
+
+        <owl:DisjointClasses>
+            <owl:Class IRI="#DIS1"/>
+            <owl:Class IRI="#DIS2"/>
+        </owl:DisjointClasses>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#C1"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="#r1"/>
+                <owl:Class IRI="#C2"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#C2"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="#r1"/>
+                <owl:Class IRI="#C3"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#C3"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="#r1"/>
+                <owl:Class IRI="#C4"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#C4"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="#r1"/>
+                <owl:Class IRI="#C5"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:SubClassOf>
+
+        <owl:SubClassOf>
+            <owl:Class IRI="#C5"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="#r2"/>
+                <owl:ObjectOneOf>
+                    <owl:NamedIndividual IRI="#a"/>
+                </owl:ObjectOneOf>
+            </owl:ObjectSomeValuesFrom>
+        </owl:SubClassOf>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/60" timing="simple">
+        <owl:Class IRI="#C"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/60"/>
+
+</RequestMessage>

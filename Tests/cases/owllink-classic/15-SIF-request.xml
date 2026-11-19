@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:base="http://www.owllink.org/testsuite/15#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/15"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/15">
+
+        <owl:Declaration>
+            <owl:Class IRI="A"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="C"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="D"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="NotA"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="NotC"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="NotSatisfiable"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="Satisfiable"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="SomeInvfA"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="SomeInvfD"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="f"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="invf"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="invr"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="q"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="w"/>
+        </owl:Declaration>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="f"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="invf"/>
+            <owl:ObjectProperty IRI="f"/>
+        </owl:InverseObjectProperties>
+
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="invr"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:InverseObjectProperties>
+
+        <owl:FunctionalObjectProperty>
+            <owl:ObjectProperty IRI="f"/>
+        </owl:FunctionalObjectProperty>
+
+        <owl:FunctionalObjectProperty>
+            <owl:ObjectProperty IRI="invf"/>
+        </owl:FunctionalObjectProperty>
+
+        <owl:TransitiveObjectProperty>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:TransitiveObjectProperty>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="A"/>
+            <owl:ObjectMaxCardinality cardinality="0">
+                <owl:ObjectProperty IRI="w"/>
+            </owl:ObjectMaxCardinality>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="C"/>
+            <owl:ObjectMaxCardinality cardinality="0">
+                <owl:ObjectProperty IRI="q"/>
+            </owl:ObjectMaxCardinality>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="D"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="C"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="f"/>
+                    <owl:Class IRI="NotC"/>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="NotA"/>
+            <owl:ObjectMinCardinality cardinality="1">
+                <owl:ObjectProperty IRI="w"/>
+            </owl:ObjectMinCardinality>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="NotC"/>
+            <owl:ObjectMinCardinality cardinality="1">
+                <owl:ObjectProperty IRI="q"/>
+            </owl:ObjectMinCardinality>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="NotSatisfiable"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="NotC"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="invf"/>
+                    <owl:Class IRI="D"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="invr"/>
+                    <owl:Class IRI="SomeInvfD"/>
+                </owl:ObjectAllValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="Satisfiable"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="NotA"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="invf"/>
+                    <owl:Class IRI="A"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="invr"/>
+                    <owl:Class IRI="SomeInvfA"/>
+                </owl:ObjectAllValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="SomeInvfA"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="invf"/>
+                <owl:Class IRI="A"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="SomeInvfD"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="invf"/>
+                <owl:Class IRI="D"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:EquivalentClasses>
+
+    </Tell>
+    
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/15" timing="simple">
+        <owl:Class IRI="NotSatisfiable"/>		
+    </IsClassSatisfiable>
+    
+    <ReleaseKB kb="http://www.owllink.org/testsuite/15"/>
+
+</RequestMessage>

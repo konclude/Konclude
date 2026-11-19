@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Suite "DL-fuzz-known": ontologies of the DL fuzz campaign of 2026-11-19 (Docs/scripts/dlfuzz/gen_dl_fuzz.py: qualified
+  number restrictions, SHIN, nominals with at-most restrictions on inverse roles (NN-rule), role chains, ALCOIF) on which
+  Konclude crashed or answered differently from HermiT and FaCT++. The expected taxonomies are HermiT's. The fixed cases
+  are guards; the open ones carry kt:knownFailure.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/dl-fuzz-known">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-dl-fuzz-known"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-dl-fuzz-known"/><Literal>DL-fuzz-known</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-dl-fuzz-known"/><Literal>dl-fuzz-known</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-dl-fuzz-known"/><Literal>Classification of small fuzzed SHOIQ/SRIQ ontologies (DL fuzz campaign 2026-11-19) on which Konclude crashed or disagreed with HermiT and FaCT++. Expected taxonomies from HermiT 1.4.5; fixed cases are guards, open ones are known failures of kt:issue-dl-fuzz-wrong-subsumption.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-116-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-116-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-116-classification"/><Literal>dlfz-116-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-116-classification"/><Literal>expected/dlfz-116-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-116-classification"/><Literal>Fuzz seed 116. Segfault: the constructed node had been merged into a new nominal of the NN-rule and has no individual, the computed-consequences types cache was asked for it (fixed in 20fd9473).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-116-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-632-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-632-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-632-classification"/><Literal>dlfz-632-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-632-classification"/><Literal>expected/dlfz-632-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-632-classification"/><Literal>Fuzz seed 632. Segfault, same cause as seed 116 (fixed in 20fd9473).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-632-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-130-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-130-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-130-classification"/><Literal>dlfz-130-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-130-classification"/><Literal>expected/dlfz-130-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-130-classification"/><Literal>Fuzz seed 130. Segfault: testRoleSuccessorsWithSaturatedModelMergable dereferenced a null node for a link of an older localization (fixed in 20fd9473).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-130-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-963-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-963-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-963-classification"/><Literal>dlfz-963-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-963-classification"/><Literal>expected/dlfz-963-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-963-classification"/><Literal>Fuzz seed 963. Segfault, same cause as seed 130 (fixed in 20fd9473).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-963-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-974-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-974-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-974-classification"/><Literal>dlfz-974-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-974-classification"/><Literal>expected/dlfz-974-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-974-classification"/><Literal>Fuzz seed 974. Wrong satisfiability: the NN branch of the functional rule created the new nominal after the link iterators were taken, the other neighbour was never merged into it (fixed in 20fd9473).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-974-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-1066-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-1066-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-1066-classification"/><Literal>dlfz-1066-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-1066-classification"/><Literal>expected/dlfz-1066-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-1066-classification"/><Literal>Fuzz seed 1066. Missed subsumption, same cause as seed 974 (fixed in 20fd9473).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-1066-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-1264-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-1264-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-1264-classification"/><Literal>dlfz-1264-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-1264-classification"/><Literal>expected/dlfz-1264-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-1264-classification"/><Literal>Fuzz seed 1264. Missed subsumption, same cause as seed 974 (fixed in 20fd9473).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-1264-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/><Literal>dlfz-1024-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/><Literal>expected/dlfz-1024-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/><Literal>Fuzz seed 1024. Missed subsumption T3 of C1 (also on the build before the campaign): C1-elements all reach the nominal a2 by the inverse functional role h, so they collapse into a2.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/><Literal>dlfz-1042-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/><Literal>expected/dlfz-1042-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/><Literal>Fuzz seed 1042. Missed subsumption T4 of T0 (also on the build before the campaign): nominals, functional and inverse functional roles.</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ClassClassificationTest"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/><Literal>class-classification</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/><Literal>dlfz-1136-ontology.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedFile"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/><Literal>expected/dlfz-1136-classification.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/><Literal>Fuzz seed 1136. Wrong subsumption T3 of A: T3 and not A has a model (a 3-cycle of C-nodes that are s-predecessors of the nominal a with at most 3); visible since the NN-rule fixes (the build before crashed).</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/></ObjectPropertyAssertion>
+
+</Ontology>

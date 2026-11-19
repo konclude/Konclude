@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/40#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/40"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/40">
+
+        <owl:Declaration>
+            <owl:Class IRI="A"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="Z"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+        
+        <owl:SubClassOf>
+            <owl:Class IRI="Z"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="A"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:ObjectMinCardinality cardinality="1">
+                        <owl:ObjectProperty IRI="r"/>
+                    </owl:ObjectMinCardinality>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:ObjectAllValuesFrom>
+                        <owl:ObjectProperty IRI="r"/>
+                        <owl:ObjectAllValuesFrom>
+                            <owl:ObjectInverseOf>
+                                <owl:ObjectProperty IRI="r"/>
+                            </owl:ObjectInverseOf>
+                            <owl:ObjectAllValuesFrom>
+                                <owl:ObjectInverseOf>
+                                    <owl:ObjectProperty IRI="r"/>
+                                </owl:ObjectInverseOf>
+                                <owl:ObjectComplementOf>
+                                    <owl:Class IRI="A"/>
+                                </owl:ObjectComplementOf>
+                            </owl:ObjectAllValuesFrom>
+                        </owl:ObjectAllValuesFrom>
+                    </owl:ObjectAllValuesFrom>
+                </owl:ObjectAllValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:SubClassOf>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/40" timing="simple">
+        <owl:Class IRI="Z"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/40"/>
+
+</RequestMessage>

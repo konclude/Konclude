@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.owllink.org/testsuite/39#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/39"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/39">
+
+        <owl:Declaration>
+            <owl:Class IRI="B"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="F"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="V"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="W"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="p"/>
+        </owl:Declaration>
+
+        <owl:EquivalentClasses>
+            <owl:ObjectExactCardinality cardinality="0">
+                <owl:ObjectProperty IRI="p"/>
+            </owl:ObjectExactCardinality>
+            <owl:ObjectAllValuesFrom>
+                <owl:ObjectProperty IRI="r"/>
+                <owl:ObjectUnionOf>
+                    <owl:ObjectIntersectionOf>
+                        <owl:Class IRI="B"/>
+                        <owl:ObjectComplementOf>
+                            <owl:Class IRI="F"/>
+                        </owl:ObjectComplementOf>
+                    </owl:ObjectIntersectionOf>
+                    <owl:ObjectIntersectionOf>
+                        <owl:ObjectComplementOf>
+                            <owl:Class IRI="B"/>
+                        </owl:ObjectComplementOf>
+                        <owl:Class IRI="F"/>
+                    </owl:ObjectIntersectionOf>
+                </owl:ObjectUnionOf>
+            </owl:ObjectAllValuesFrom>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="r"/>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="F"/>
+                </owl:ObjectComplementOf>
+            </owl:ObjectSomeValuesFrom>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="r"/>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="http://www.w3.org/2002/07/owl#Nothing"/>
+                </owl:ObjectComplementOf>
+            </owl:ObjectSomeValuesFrom>
+            <owl:ObjectComplementOf>
+                <owl:ObjectMinCardinality cardinality="1">
+                    <owl:ObjectProperty IRI="p"/>
+                </owl:ObjectMinCardinality>
+            </owl:ObjectComplementOf>
+            <owl:ObjectUnionOf>
+                <owl:Class IRI="V"/>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="W"/>
+                </owl:ObjectComplementOf>
+            </owl:ObjectUnionOf>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:ObjectAllValuesFrom>
+                <owl:ObjectProperty IRI="r"/>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="B"/>
+                </owl:ObjectComplementOf>
+            </owl:ObjectAllValuesFrom>
+            <owl:Class IRI="V"/>
+        </owl:EquivalentClasses>
+
+    </Tell>
+
+    <IsClassSubsumedBy kb="http://www.owllink.org/testsuite/39" timing="simple">
+        <owl:Class IRI="W"/>
+        <owl:ObjectSomeValuesFrom>
+            <owl:ObjectProperty IRI="r"/>
+            <owl:Class IRI="B"/>
+        </owl:ObjectSomeValuesFrom>
+    </IsClassSubsumedBy>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/39"/>
+
+</RequestMessage>

@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/44#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/44"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/44">
+
+        <owl:Declaration>
+            <owl:Class IRI="CNF"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K1"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K2"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K3"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K4"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K5"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K6"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K7"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K8"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="K9"/>
+        </owl:Declaration>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="CNF"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K1"/>
+                    <owl:Class IRI="K2"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K1"/>
+                    <owl:Class IRI="K4"/>
+                    <owl:Class IRI="K6"/>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K1"/>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K6"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K1"/>
+                    <owl:Class IRI="K9"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K1"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K1"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K5"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K2"/>
+                    <owl:Class IRI="K3"/>
+                    <owl:Class IRI="K6"/>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K2"/>
+                    <owl:Class IRI="K3"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K2"/>
+                    <owl:Class IRI="K5"/>
+                    <owl:Class IRI="K8"/>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K2"/>
+                    <owl:Class IRI="K5"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K2"/>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K2"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K6"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K2"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:Class IRI="K6"/>
+                    <owl:Class IRI="K7"/>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:Class IRI="K6"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:Class IRI="K8"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K5"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:Class IRI="K8"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K6"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:Class IRI="K8"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K5"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K3"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K4"/>
+                    <owl:Class IRI="K5"/>
+                    <owl:Class IRI="K8"/>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K4"/>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K5"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K4"/>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K4"/>
+                    <owl:Class IRI="K8"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K4"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K5"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K5"/>
+                    <owl:Class IRI="K6"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K5"/>
+                    <owl:Class IRI="K6"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K5"/>
+                    <owl:Class IRI="K8"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K5"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K6"/>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K6"/>
+                    <owl:Class IRI="K8"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K4"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K7"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K8"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K4"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K6"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K9"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="K9"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K1"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K7"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K4"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K2"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K9"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K3"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K6"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+                <owl:ObjectUnionOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K5"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K6"/>
+                    </owl:ObjectComplementOf>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="K8"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectUnionOf>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/44" timing="simple">
+        <owl:Class IRI="CNF"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/44"/>
+
+</RequestMessage>

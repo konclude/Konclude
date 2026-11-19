@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/5#" xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/5"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/5">
+
+        <owl:Declaration>
+            <owl:Class IRI="A"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="M2"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="MyBottom"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="NotM2"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="q"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="qi"/>
+        </owl:Declaration>
+
+        <owl:InverseObjectProperties>
+            <owl:ObjectProperty IRI="qi"/>
+            <owl:ObjectProperty IRI="q"/>
+        </owl:InverseObjectProperties>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="MyBottom"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="M2"/>
+                <owl:Class IRI="NotM2"/>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+        
+        <owl:SubClassOf>
+            <owl:Class IRI="MyBottom"/>
+            <owl:Class abbreviatedIRI="owl:Nothing"/>
+        </owl:SubClassOf>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="M2"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="A"/>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="q"/>
+                    <owl:Class IRI="M2"/>
+                </owl:ObjectAllValuesFrom>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectProperty IRI="qi"/>
+                    <owl:Class IRI="NotM2"/>
+                </owl:ObjectAllValuesFrom>
+                <owl:ObjectMinCardinality cardinality="1">
+                    <owl:ObjectProperty IRI="q"/>
+                    <owl:Class abbreviatedIRI="owl:Thing"/>
+                </owl:ObjectMinCardinality>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/5" timing="simple">
+        <owl:Class IRI="M2"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/5"/>
+
+</RequestMessage>

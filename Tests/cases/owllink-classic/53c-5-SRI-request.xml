@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/53#" xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/53"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/53">
+		<owl:Declaration>
+			<owl:Class IRI="#C"/>
+		</owl:Declaration>
+
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#r1"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#r2"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#r3"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#r4"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#r5"/>
+		</owl:Declaration>
+
+
+
+
+		<owl:SubClassOf>
+			<owl:Class IRI="#C"/>
+			<owl:ObjectIntersectionOf>
+				<owl:ObjectSomeValuesFrom>
+					<owl:ObjectProperty IRI="#r5"/>
+					<owl:Class IRI="#C"/>
+				</owl:ObjectSomeValuesFrom>
+				<owl:ObjectAllValuesFrom>
+					<owl:ObjectInverseOf>
+						<owl:ObjectProperty IRI="#r1"/>
+					</owl:ObjectInverseOf>
+					<owl:ObjectComplementOf>
+						<owl:Class IRI="#C"/>
+					</owl:ObjectComplementOf>
+				</owl:ObjectAllValuesFrom>
+			</owl:ObjectIntersectionOf>
+		</owl:SubClassOf>
+		<owl:SubObjectPropertyOf>
+			<owl:ObjectPropertyChain>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+				<owl:ObjectProperty IRI="#r2"/>
+			</owl:ObjectPropertyChain>
+			<owl:ObjectProperty IRI="#r1"/>
+		</owl:SubObjectPropertyOf>
+		<owl:SubObjectPropertyOf>
+			<owl:ObjectPropertyChain>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+				<owl:ObjectProperty IRI="#r3"/>
+			</owl:ObjectPropertyChain>
+			<owl:ObjectProperty IRI="#r2"/>
+		</owl:SubObjectPropertyOf>
+		<owl:SubObjectPropertyOf>
+			<owl:ObjectPropertyChain>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+				<owl:ObjectProperty IRI="#r4"/>
+			</owl:ObjectPropertyChain>
+			<owl:ObjectProperty IRI="#r3"/>
+		</owl:SubObjectPropertyOf>
+		<owl:SubObjectPropertyOf>
+			<owl:ObjectPropertyChain>
+				<owl:ObjectProperty IRI="#r5"/>
+				<owl:ObjectProperty IRI="#r5"/>
+				<owl:ObjectProperty IRI="#r5"/>
+				<owl:ObjectProperty IRI="#r5"/>
+				<owl:ObjectProperty IRI="#r5"/>
+			</owl:ObjectPropertyChain>
+			<owl:ObjectProperty IRI="#r4"/>
+		</owl:SubObjectPropertyOf>
+		
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/53" timing="simple">
+        <owl:Class IRI="#C"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/53"/>
+
+</RequestMessage>

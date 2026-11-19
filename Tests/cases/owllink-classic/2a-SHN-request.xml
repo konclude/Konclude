@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.owllink.org/testsuite/2a#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/2a"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/2a">
+
+        <owl:Declaration>
+            <owl:Class IRI="A"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="P"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="Q"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="L"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="M"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="N"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="I"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:Class IRI="F"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rnotF"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rMorQP"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rP"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rF"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rI"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rMnotL"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="rMP"/>
+        </owl:Declaration>
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="q"/>
+        </owl:Declaration>
+
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rnotF"/>
+            <owl:ObjectComplementOf>
+                <owl:Class IRI="D"/>
+            </owl:ObjectComplementOf>
+        </owl:ObjectPropertyRange>
+
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rMorQP"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="M"/>
+                <owl:ObjectUnionOf>
+                    <owl:Class IRI="Q"/>
+                    <owl:Class IRI="P"/>
+                </owl:ObjectUnionOf>
+            </owl:ObjectIntersectionOf>
+        </owl:ObjectPropertyRange>
+
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rP"/>
+            <owl:Class IRI="P"/>
+        </owl:ObjectPropertyRange>
+
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rF"/>
+            <owl:Class IRI="F"/>
+        </owl:ObjectPropertyRange>
+
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rI"/>
+            <owl:Class IRI="I"/>
+        </owl:ObjectPropertyRange>
+
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rMnotL"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="M"/>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="L"/>
+                </owl:ObjectComplementOf>
+            </owl:ObjectIntersectionOf>
+        </owl:ObjectPropertyRange>
+
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rMP"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="M"/>
+                <owl:Class IRI="P"/>
+            </owl:ObjectIntersectionOf>
+        </owl:ObjectPropertyRange>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rnotF"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rMorQP"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rP"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rF"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rI"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rMnotL"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rMP"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+
+        <!-- alternativ zu obigem SubObjectProperty und range von rMP:
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="rMP"/>
+            <owl:ObjectProperty IRI="rMorQP"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:ObjectPropertyRange>
+            <owl:ObjectProperty IRI="rMP"/>
+            <owl:ObjectComplementOf>
+                <owl:Class IRI="Q"/>
+            </owl:ObjectComplementOf>
+        </owl:ObjectPropertyRange>
+        -->
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="P"/>
+            <owl:ObjectMinCardinality cardinality="3">
+                <owl:ObjectProperty IRI="q"/>
+            </owl:ObjectMinCardinality>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="A"/>
+            <owl:ObjectMinCardinality cardinality="5">
+                <owl:ObjectProperty IRI="q"/>
+            </owl:ObjectMinCardinality>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="Q"/>
+            <owl:ObjectMaxCardinality cardinality="2">
+                <owl:ObjectProperty IRI="q"/>
+            </owl:ObjectMaxCardinality>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="L"/>
+            <owl:ObjectMaxCardinality cardinality="1">
+                <owl:ObjectProperty IRI="q"/>
+            </owl:ObjectMaxCardinality>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="M"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectMinCardinality cardinality="2">
+                    <owl:ObjectProperty IRI="q"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMaxCardinality cardinality="4">
+                    <owl:ObjectProperty IRI="q"/>
+                </owl:ObjectMaxCardinality>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="I"/>
+            <owl:ObjectUnionOf>
+                <owl:Class IRI="L"/>
+                <owl:Class IRI="M"/>
+                <owl:Class IRI="A"/>
+            </owl:ObjectUnionOf>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="F"/>
+            <owl:ObjectMaxCardinality cardinality="3">
+                <owl:ObjectProperty IRI="q"/>
+            </owl:ObjectMaxCardinality>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="V"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r"/>
+                    <owl:Class IRI="L"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectMinCardinality cardinality="4">
+                    <owl:ObjectProperty IRI="rMnotL"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMinCardinality cardinality="4">
+                    <owl:ObjectProperty IRI="rF"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMinCardinality cardinality="3">
+                    <owl:ObjectProperty IRI="rP"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectExactCardinality cardinality="4">
+                    <owl:ObjectProperty IRI="rMorQP"/>
+                </owl:ObjectExactCardinality>
+                <owl:ObjectMinCardinality cardinality="2">
+                    <owl:ObjectProperty IRI="rnotF"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMinCardinality cardinality="4">
+                    <owl:ObjectProperty IRI="rI"/>
+                </owl:ObjectMinCardinality>
+                <owl:ObjectMaxCardinality cardinality="2">
+                    <owl:ObjectProperty IRI="rMP"/>
+                </owl:ObjectMaxCardinality>
+                <owl:ObjectMaxCardinality cardinality="6">
+                    <owl:ObjectProperty IRI="r"/>
+                </owl:ObjectMaxCardinality>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/2a" timing="simple">
+        <owl:Class IRI="V"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/2a"/>
+
+</RequestMessage>

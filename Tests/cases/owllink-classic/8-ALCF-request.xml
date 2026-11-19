@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/8#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/8"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/8">
+
+        <owl:Declaration>
+            <owl:Class IRI="negV"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="h"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="F"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="ShnegV"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="V"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="VandShnegV"/>
+        </owl:Declaration>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="F"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="h"/>
+                <owl:Class IRI="VandShnegV"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="ShnegV"/>
+            <owl:ObjectSomeValuesFrom>
+                <owl:ObjectProperty IRI="h"/>
+                <owl:Class IRI="negV"/>
+            </owl:ObjectSomeValuesFrom>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="V"/>
+            <owl:ObjectMinCardinality cardinality="1">
+                <owl:ObjectProperty IRI="r"/>
+            </owl:ObjectMinCardinality>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="VandShnegV"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="ShnegV"/>
+                <owl:Class IRI="V"/>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="negV"/>
+            <owl:ObjectMaxCardinality cardinality="0">
+                <owl:ObjectProperty IRI="r"/>
+            </owl:ObjectMaxCardinality>
+        </owl:EquivalentClasses>
+
+        <owl:ClassAssertion>
+            <owl:Class abbreviatedIRI="owl:Thing"/>
+            <owl:NamedIndividual IRI="I"/>
+        </owl:ClassAssertion>
+
+        <owl:ObjectPropertyAssertion>
+            <owl:ObjectProperty IRI="h"/>
+            <owl:NamedIndividual IRI="I"/>
+            <owl:NamedIndividual IRI="P"/>
+        </owl:ObjectPropertyAssertion>
+
+        <owl:ObjectPropertyAssertion>
+            <owl:ObjectProperty IRI="h"/>
+            <owl:NamedIndividual IRI="I"/>
+            <owl:NamedIndividual IRI="O"/>
+        </owl:ObjectPropertyAssertion>
+
+        <owl:ClassAssertion>
+            <owl:Class IRI="V"/>
+            <owl:NamedIndividual IRI="O"/>
+        </owl:ClassAssertion>
+
+        <owl:ObjectPropertyAssertion>
+            <owl:ObjectProperty IRI="h"/>
+            <owl:NamedIndividual IRI="O"/>
+            <owl:NamedIndividual IRI="P"/>
+        </owl:ObjectPropertyAssertion>
+
+        <owl:ClassAssertion>
+            <owl:Class abbreviatedIRI="owl:Thing"/>
+            <owl:NamedIndividual IRI="P"/>
+        </owl:ClassAssertion>
+
+        <owl:ObjectPropertyAssertion>
+            <owl:ObjectProperty IRI="h"/>
+            <owl:NamedIndividual IRI="P"/>
+            <owl:NamedIndividual IRI="T"/>
+        </owl:ObjectPropertyAssertion>
+
+        <owl:ClassAssertion>
+            <owl:Class IRI="negV"/>
+            <owl:NamedIndividual IRI="T"/>
+        </owl:ClassAssertion>
+
+    </Tell>
+
+    <IsInstanceOf kb="http://www.owllink.org/testsuite/8" timing="simple">
+        <owl:NamedIndividual IRI="I"/>
+        <owl:Class IRI="F"/>
+    </IsInstanceOf>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/8"/>
+
+</RequestMessage>
