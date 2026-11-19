@@ -15732,6 +15732,11 @@ namespace Konclude {
 						KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mDebugIndiModelString = generateDebugIndiModelStringList(newCalcAlgContext));
 
 					} else {
+						// a nominal that becomes distinct takes one of the new nominals of the NN-rule, as in the deterministic case
+						// (mergeMergingIndividualNodes), otherwise distinct nodes and remaining new nominals exceed the cardinality
+						if (createAsNominal) {
+							newBranchingMergingProcRest->decRemainingNominalCreationCount();
+						}
 						newBranchingMergingProcRest->initMergingDependencyNode(mergeDependencyNode);
 						newBranchingMergingProcRest->initDependencyTracker(mergeNonDetDepTrackPoint);
 
