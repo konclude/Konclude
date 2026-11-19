@@ -22477,6 +22477,7 @@ namespace Konclude {
 						}
 					}
 					cint64 succLinkCount = sourceIndi->installIndividualLink(individualLink);
+					markIndividualNodeBackendSynchronisationRetestDueLinkAddition(sourceIndi, calcAlgContext);
 
 					if (mConfOccurrenceStatisticsCollecting && mOptCollectOccurrenceStatistics) {
 						bool nondeterministically = hasNondeterministicDependency(individualLink->getDependencyTrackPoint(), calcAlgContext);
@@ -22499,6 +22500,7 @@ namespace Konclude {
 						}
 					}
 					cint64 succLinkCount = sourceIndi->installIndividualLink(individualLink,&reapplyIterator);
+					markIndividualNodeBackendSynchronisationRetestDueLinkAddition(sourceIndi, calcAlgContext);
 
 					if (mConfOccurrenceStatisticsCollecting && mOptCollectOccurrenceStatistics) {
 						bool nondeterministically = hasNondeterministicDependency(individualLink->getDependencyTrackPoint(), calcAlgContext);
@@ -28130,6 +28132,17 @@ namespace Konclude {
 							STATINC(INDINODESADDEDPROCESSINGQUEUECOUNT,calcAlgContext);
 							return true;
 						}
+					}
+					return false;
+				}
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::markIndividualNodeBackendSynchronisationRetestDueLinkAddition(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext) {
+					// a new link can exceed a cardinality restriction together with the neighbours that are still only in the backend cache,
+					// the critical cardinality test of the backend synchronisation retest counts both and expands the neighbours if necessary
+					if (individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED) && !individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED)) {
+						individual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED);
+						return addIndividualToBackendSynchronisationRetestQueue(individual, calcAlgContext);
 					}
 					return false;
 				}
