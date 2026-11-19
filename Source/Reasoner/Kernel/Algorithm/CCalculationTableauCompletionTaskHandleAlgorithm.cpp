@@ -21203,6 +21203,13 @@ namespace Konclude {
 					CMemoryAllocationManager* taskMemMan = nullptr;
 					STATINC(INDINODEMERGECOUNT,calcAlgContext);
 
+					// Only a new empty node (e.g., a new nominal of the NN-rule) takes over the creation dependency of the merged node. A node
+					// without a dependency that already has a label (e.g., a new nominal into which a first node was merged) keeps none, since
+					// its concepts do not depend on the creation of the node merged into it. A link with the same dependency as the node is
+					// considered as implied by the node's concepts and it is not added to clashes (e.g., a self-link created by the merge).
+					CReapplyConceptLabelSet* mergeIntoConSet = mergeIntoIndividualNode->getReapplyConceptLabelSet(false);
+					bool mergeIntoNewEmptyNode = !mergeIntoIndividualNode->getDependencyTrackPoint() && (!mergeIntoConSet || mergeIntoConSet->getConceptCount() <= 0);
+
 
 					KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mBeforeMergingTaskDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
 
@@ -21579,7 +21586,7 @@ namespace Konclude {
 						}
 					}
 
-					if (!mergeIntoIndividualNode->getDependencyTrackPoint()) {
+					if (mergeIntoNewEmptyNode) {
 						mergeIntoIndividualNode->setDependencyTrackPoint(depTrackPointHash.value(individual->getDependencyTrackPoint()));
 					}
 					if (mConfMinimizeMerging) {
