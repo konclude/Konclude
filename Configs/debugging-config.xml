@@ -28,7 +28,7 @@
 	</Set>
 
 	<!-- Write for all test types (safety net). -->
-	<Set key='Konclude.Debugging.WriteDebuggingDataForAllTests'>
+	<Set key='Konclude.Debugging.WriteDebuggingDataCompletionTasksForAllTests'>
 		<Literal>true</Literal>
 	</Set>
 </RequestMessage>

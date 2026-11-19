@@ -2,8 +2,7 @@
 <!--
   Reduced differential-fuzzing ontology (seed 3229). The classification is nondeterministic with and
   without completion graph caching: it sometimes matches HermiT, sometimes adds C2 below T0 and
-  sometimes adds T3 below T0. The ten taxonomies of each configuration are in
-  Docs/evidence/cgc/saved-seeds/seed-3229/runs-{on,off}/.
+  sometimes adds T3 below T0 (observed in ten runs of each configuration).
 -->
 <Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/fuzz/32290">
   <Prefix name="" IRI="http://konclude.test/fuzz/32290#"/>
