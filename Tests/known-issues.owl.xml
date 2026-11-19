@@ -1130,7 +1130,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
-    <Literal>Fixed. Wrong subsumptions of the DL fuzz campaign 2026-11-19 (confirmed by HermiT and FaCT++): dlfz-1136 (unsound) by 89faba5a (a new nominal no longer takes the creation dependency of a later merge, so a self-link keeps its dependency in clashes), dlfz-1024 and dlfz-1042 (missed) by 1404f3ed (C11 finds the nodes merged into a node that loses its caching by their merge target) and the redundant owl:Thing parent of dlfz-1024 by 688a8a16. Investigation: Docs/Investigation-DLFuzz-OpenIssues.md.</Literal>
+    <Literal>Fixed. Wrong subsumptions of the DL fuzz campaign 2026-11-19 (confirmed by HermiT and FaCT++): dlfz-1136 (unsound) by 89faba5a (a new nominal no longer takes the creation dependency of a later merge, so a self-link keeps its dependency in clashes), dlfz-1024 and dlfz-1042 (missed) by 1404f3ed (C11 finds the nodes merged into a node that loses its caching by their merge target) and the redundant owl:Thing parent of dlfz-1024 by 688a8a16.</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/></ObjectPropertyAssertion>
@@ -1152,7 +1152,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/>
-    <Literal>Open. Fuzz seed 1024 crashes in the classification with CompletionGraphCaching=false (default otherwise): mergeIndividualNodeInto, called by the functional rule, looks up a role successor link whose source and destination are null. The link was valid when it was inserted, its memory was released or reused later, and it is still reachable through the shared link list. It only happens with the backend neighbour expansion (no crash with IndividualsBackendCacheLoading=false). Investigation: Docs/Investigation-DLFuzz-OpenIssues.md.</Literal>
+    <Literal>Open. Fuzz seed 1024 crashes in the classification with CompletionGraphCaching=false (default otherwise): mergeIndividualNodeInto, called by the functional rule, looks up a role successor link whose source and destination are null. The link was valid when it was inserted, its memory was released or reused later, and it is still reachable through the shared link list. It only happens with the backend neighbour expansion (no crash with IndividualsBackendCacheLoading=false).</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification-no-cgc"/></ObjectPropertyAssertion>
 

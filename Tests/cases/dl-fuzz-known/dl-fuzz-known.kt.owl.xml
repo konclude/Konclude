@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  Suite "DL-fuzz-known": ontologies of the DL fuzz campaign of 2026-11-19 (Docs/scripts/dlfuzz/gen_dl_fuzz.py: qualified
+  Suite "DL-fuzz-known": ontologies of the DL fuzz campaign of 2026-11-19 (a differential fuzzer: qualified
   number restrictions, SHIN, nominals with at-most restrictions on inverse roles (NN-rule), role chains, ALCOIF) on which
   Konclude crashed or answered differently from HermiT and FaCT++. The expected taxonomies are HermiT's. The fixed cases
   are guards; the open ones carry kt:knownFailure.
