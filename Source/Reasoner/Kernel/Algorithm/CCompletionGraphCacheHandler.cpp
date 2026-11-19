@@ -801,18 +801,20 @@ namespace Konclude {
 						continueVisiting = visitFunc(indiNode, indiNode);
 						visited = true;
 					}
-					CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
-					CBackendRepresentativeMemoryLabelCacheItem* detSameIndiLabel = assocData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+					// the node itself may have no backend data (e.g., a new nominal or without loading individuals from the backend cache),
+					// then every merged individual with backend data is visited
+					CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData ? backendSyncData->getAssocitaionData() : nullptr;
+					CBackendRepresentativeMemoryLabelCacheItem* detSameIndiLabel = assocData ? assocData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL) : nullptr;
 					CIndividualMergingHash* mergingHash = indiNode->getIndividualMergingHash(false);
 					if (mergingHash) {
 						for (CXLinker<cint64>* newIndiMergedLinkerIt = mergingHash->getMergedIndividualLinker(); newIndiMergedLinkerIt && continueVisiting; newIndiMergedLinkerIt = newIndiMergedLinkerIt->getNext()) {
 							cint64 newIndiMergedId = newIndiMergedLinkerIt->getData();
 
-							if (!mBackendCacheHandler->hasIndividualIdsInAssociatedIndividualSetLabel(assocData, detSameIndiLabel, newIndiMergedId)) {
+							if (!assocData || !mBackendCacheHandler->hasIndividualIdsInAssociatedIndividualSetLabel(assocData, detSameIndiLabel, newIndiMergedId)) {
 
 								CIndividualProcessNode* backendSyncDataIndiNode = mIndiProcNodeVec->getData(-newIndiMergedId);
 
-								if (backendSyncDataIndiNode->getIndividualBackendCacheSynchronisationData(false)) {
+								if (backendSyncDataIndiNode && backendSyncDataIndiNode->getIndividualBackendCacheSynchronisationData(false)) {
 									continueVisiting = visitFunc(indiNode, backendSyncDataIndiNode);
 									visited = true;
 								}
