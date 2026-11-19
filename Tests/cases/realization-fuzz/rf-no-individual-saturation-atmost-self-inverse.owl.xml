@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/self">
+  <Prefix name="" IRI="http://konclude.test/self#"/>
+  <ClassAssertion><ObjectMaxCardinality cardinality="1"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":s"/></ObjectInverseOf></ObjectMaxCardinality><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":a"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":b"/><NamedIndividual abbreviatedIRI=":a"/></ObjectPropertyAssertion>
+  <DifferentIndividuals><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":b"/></DifferentIndividuals>
+</Ontology>

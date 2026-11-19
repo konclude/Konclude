@@ -1172,10 +1172,9 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/>
-    <Literal>Open. Realization misses types that Openllet 2.6.5 and FaCT++ 1.6.3 derive (realization fuzz campaign 2026-11-19). Fixed: universal restrictions over functional and inverse functional roles (db8d4c39) and classes defined by nominals for an individual that is merged with a nominal by a choice (f8116918). Still open: types that need a case distinction or the distinctness of two neighbours: rf-101098 (h inverse functional, x2 in C0 or C1, C1 implies some h.C0: x2 in C0), rf-100838 (b in some s.(not C or A) by a case distinction on C) and rf-100263 (x3 has two q-successors that differ because one is in C0 and the other is not: x3 in at least 2 q).</Literal>
+    <Literal>Open. Realization misses types that Openllet 2.6.5 and FaCT++ 1.6.3 derive (realization fuzz campaign 2026-11-19). Fixed: universal restrictions over functional and inverse functional roles (db8d4c39), classes defined by nominals for an individual that is merged with a nominal by a choice (f8116918), at-least restrictions whose neighbours are partly only in the representative cache (rf-100263). Still open: types that need a case distinction: rf-101098 (h inverse functional, x2 in C0 or C1, C1 implies some h.C0: x2 in C0) and rf-100838 (b in some s.(not C or A) by a case distinction on C).</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/></ObjectPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/><NamedIndividual abbreviatedIRI="kt:rf-100263-x3-r2"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/></ObjectPropertyAssertion>
 
 </Ontology>
