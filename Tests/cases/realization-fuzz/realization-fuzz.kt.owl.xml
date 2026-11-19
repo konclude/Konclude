@@ -38,6 +38,36 @@
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:usesTestSystemConfig"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/><NamedIndividual IRI="../../configs/no-saturation.xml"/></ObjectPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-no-saturation-all-clash"/><Literal>r(a,b), A(b) and all r.not A on a without concept saturation: same defect as rf-no-saturation-clash.</Literal></DataPropertyAssertion>
 
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-asymmetric"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-asymmetric"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-asymmetric"/><Literal>rf-nn-self-asymmetric.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-asymmetric"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-asymmetric"/><Literal>C subclass of some r.C and s value a, a has at most 2 s-predecessors, s(a,a), r asymmetric, x in C: inconsistent (the r-chain must fold back onto a and x). The NN-rule on a guessed new nominals; when the nominal x was kept distinct in a branch, the number of new nominals still to create was not decremented, so a ended with three s-predecessors (fixed in the NN-rule's distinct branching).</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-irreflexive-consistent"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-irreflexive-consistent"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-irreflexive-consistent"/><Literal>rf-nn-self-irreflexive-consistent.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-irreflexive-consistent"/><Literal>consistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-nn-self-irreflexive-consistent"/><Literal>Control for rf-nn-self-asymmetric with an irreflexive instead of an asymmetric r: the cycle r(x,a), r(a,x) is a model.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100232"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100232"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100232"/><Literal>rf-nn-seed-100232.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100232"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100232"/><Literal>Reduced fuzz seed 100232, same defect as rf-nn-self-asymmetric (HermiT, Openllet and Pellet agree).</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100982"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100982"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100982"/><Literal>rf-nn-seed-100982.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100982"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-100982"/><Literal>Reduced fuzz seed 100982 (irreflexive r, qualified at-most), same defect as rf-nn-self-asymmetric.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-101324"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-101324"/><Literal>consistency</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-101324"/><Literal>rf-nn-seed-101324.owl.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-101324"/><Literal>inconsistent</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:rf-nn-seed-101324"/><Literal>Reduced fuzz seed 101324 (irreflexive r, qualified at-most), same defect as rf-nn-self-asymmetric.</Literal></DataPropertyAssertion>
+
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:rf-no-individual-saturation-atmost-self"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:rf-no-individual-saturation-atmost-self"/><Literal>consistency</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:rf-no-individual-saturation-atmost-self"/><Literal>rf-no-individual-saturation-atmost-self.owl.xml</Literal></DataPropertyAssertion>

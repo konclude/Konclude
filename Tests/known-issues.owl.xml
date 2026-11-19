@@ -15,7 +15,7 @@
           ontologyIRI="http://konclude.test/known-issues">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- issue-w3c-webont-description-logic: 7 test(s) -->
+  <!-- issue-w3c-webont-description-logic: 6 test(s) -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:Issue"/>
     <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
@@ -41,7 +41,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
-    <Literal>Legacy OWL 1 description-logic tests whose current result differs. Not yet triaged; some cases may reflect OWL 1/RDF-based semantics rather than a defect.</Literal>
+    <Literal>Legacy OWL 1 description-logic tests whose current result differs. Not yet triaged; some cases may reflect OWL 1/RDF-based semantics rather than a defect. WebOnt-description-logic-035 (one-of and inverse) was a reasoner bug and passes since the new nominals of the NN-rule are counted correctly when a nominal neighbour is kept distinct in a branch.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
@@ -60,12 +60,6 @@
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
     <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
     <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-017"/>
-  </ObjectPropertyAssertion>
-
-  <ObjectPropertyAssertion>
-    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
-    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
-    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-035"/>
   </ObjectPropertyAssertion>
 
   <ObjectPropertyAssertion>

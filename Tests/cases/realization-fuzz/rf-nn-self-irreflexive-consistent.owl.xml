@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/c">
+  <Prefix name="" IRI="http://konclude.test/c#"/>
+  <SubClassOf><Class abbreviatedIRI=":C"/><ObjectIntersectionOf><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom><ObjectHasValue><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":a"/></ObjectHasValue></ObjectIntersectionOf></SubClassOf>
+  <ClassAssertion><ObjectMaxCardinality cardinality="2"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":s"/></ObjectInverseOf></ObjectMaxCardinality><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <IrreflexiveObjectProperty><ObjectProperty abbreviatedIRI=":r"/></IrreflexiveObjectProperty>
+  <ClassAssertion><Class abbreviatedIRI=":C"/><NamedIndividual abbreviatedIRI=":x"/></ClassAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":a"/></ObjectPropertyAssertion>
+</Ontology>

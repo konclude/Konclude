@@ -1719,7 +1719,6 @@
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-035"/><Literal>ontologies/webont-description-logic-035.owl.xml</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-035"/><Literal>inconsistent</Literal></DataPropertyAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:sourceCase"/><NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-035"/><Literal>WebOnt-description-logic-035</Literal></DataPropertyAssertion>
-  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:knownFailure"/><NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-035"/><NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/></ObjectPropertyAssertion>
 
   <ClassAssertion><Class abbreviatedIRI="kt:ConsistencyTest"/><NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-040"/></ClassAssertion>
   <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-040"/><Literal>This kind of pattern comes up a lot in more complex ontologies. Failure to cope with this kind of pattern is one of the reasons that many reasoners have been unable to cope with such ontologies.</Literal></DataPropertyAssertion>
