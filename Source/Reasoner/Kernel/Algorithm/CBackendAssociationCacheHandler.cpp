@@ -398,6 +398,10 @@ namespace Konclude {
 
 
 				bool CBackendAssociationCacheHandler::visitNeighbourIndividualIdsForRole(CBackendRepresentativeMemoryCacheIndividualAssociationData* assData, CRole* role, function<bool(cint64 neighbourIndividualId, CBackendRepresentativeMemoryLabelCacheItem* neighbourRoleSetLabel, bool nondeterministic)> visitFunc, bool visitOnlyDeterministicNeighbours, CCalculationAlgorithmContext* calcAlgContext) {
+					// a node without backend data (e.g., not loaded from the representative cache) has no cached neighbours
+					if (!assData) {
+						return false;
+					}
 					return mAssBackCacheReader->visitNeighbourIndividualIdsForRole(assData, role, visitFunc, visitOnlyDeterministicNeighbours);
 				}
 
