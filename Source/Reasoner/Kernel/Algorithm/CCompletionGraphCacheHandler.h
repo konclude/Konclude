@@ -22,6 +22,8 @@
 #define KONCLUDE_REASONER_KERNEL_ALGORITHM_CCOMPLETIONGRAPHCACHEHANDLER_H
 
 // Libraries includes
+#include <QHash>
+#include <QVector>
 
 
 // Namespace includes
@@ -108,13 +110,13 @@ namespace Konclude {
 
 						bool addMergeDependentReactivationIndividuals(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
 						bool addRepresentativeNodeReactivation(cint64 indiID, CIndividualReactivationProcessingQueue* reactProcQueue);
-						bool addMergedNodesReactivation(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
-						bool addMergedNeighbourNodesReactivation(cint64 indiID, CIndividualProcessNode* detSatNeighbourIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
+						bool addMergedNodesReactivation(cint64 indiID, CIndividualReactivationProcessingQueue* reactProcQueue);
+						//! The blockable nodes of the deterministic graph that the cached graph merged into the node, directly or through a chain of merges.
+						const QVector<cint64>& getMergedBlockableNodeIDs(cint64 indiID);
+						void buildMergedBlockableNodeIDsHash();
 
 						//! Largest node id of the deterministic graph, including the nominal node with id 0.
 						cint64 getDeterministicMaxIndividualNodeID();
-						//! Whether the cached graph merged the node, directly or through a chain of merges, into the target node.
-						bool isMergedIntoCompletionGraphCachedNode(cint64 indiID, cint64 targetIndiID);
 						CIndividualProcessNode* getCompletionGraphCachedRepresentativeNode(cint64 indiID);
 						CIndividualProcessNode* getCurrentRepresentativeNode(cint64 indiID);
 						bool isCompletionGraphCachingInvalid(CIndividualProcessNode* indiNode);
@@ -145,6 +147,12 @@ namespace Konclude {
 						bool mIncrementalExpansionCaching;
 						cint64 mCurrentIncrementalExpansionID;
 						CConfiguration* mLastConfig;
+
+						// the blockable nodes of the deterministic graph by the nodes of the cached graph into which they were merged (C11), built on
+						// the first request for the loaded consistency model
+						QHash< cint64,QVector<cint64> > mMergedBlockableNodeIDsHash;
+						bool mMergedBlockableNodeIDsHashBuilt;
+						QVector<cint64> mNoMergedBlockableNodeIDs;
 
 
 						CIndividualNodeBackendCacheHandler* mBackendCacheHandler;
