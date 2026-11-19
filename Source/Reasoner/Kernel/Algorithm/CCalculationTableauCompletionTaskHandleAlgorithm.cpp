@@ -16465,6 +16465,12 @@ namespace Konclude {
 					CSortedNegLinker<CConcept*>* conceptOpLinker = concept->getOperandList();
 
 
+					// the reapplication is installed before the existing links are processed: adding the filler to a neighbour (e.g., to
+					// the node itself over a self-link) can create new links of the role through deterministic expansion, they
+					// must also get the filler
+					if (!conProDes->isConceptReapplied()) {
+						addConceptToReapplyQueue(conDes,role,processIndi,true,depTrackPoint,calcAlgContext);
+					}
 					CIndividualLinkEdge* restLink = getLinkProcessingRestriction(conProDes);
 					if (restLink) {
 						++mAppliedALLRuleCount;
@@ -16544,9 +16550,6 @@ namespace Konclude {
 								}
 							}
 						}
-					}
-					if (!conProDes->isConceptReapplied()) {
-						addConceptToReapplyQueue(conDes,role,processIndi,true,depTrackPoint,calcAlgContext);
 					}
 				}
 
