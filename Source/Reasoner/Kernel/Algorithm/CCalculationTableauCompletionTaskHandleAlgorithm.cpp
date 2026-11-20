@@ -6656,6 +6656,11 @@ namespace Konclude {
 								if (!succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED)) {
 									CIndividualProcessNode* locIndiNode = getLocalizedIndividual(succIndi,false,calcAlgContext);
 									locIndiNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED);
+									// a node that was presumed to be completion graph cached while it was blocked by the saturation caching of an ancestor was
+									// not retested against the cached graph, it is retested now, otherwise it is not queued and stays blocked
+									if (locIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) && !locIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED)) {
+										locIndiNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED);
+									}
 									addIndividualToProcessingQueue(locIndiNode,calcAlgContext);
 								}
 
