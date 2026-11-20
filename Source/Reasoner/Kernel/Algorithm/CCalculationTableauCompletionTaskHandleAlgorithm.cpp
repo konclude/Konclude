@@ -24111,6 +24111,10 @@ namespace Konclude {
 						expanded = true;
 					}
 					CIndividualProcessNode* locNominalIndi = getLocalizedForcedBackendInitializedNominalIndividualNode(repNeighbourIndiId, calcAlgContext);
+					// the links are installed into the node of the current task: the given node can be a version of a previous task (e.g., a merging
+					// candidate) or it became outdated by the localization of the neighbour (the neighbour is merged into it), and a link installed
+					// into a previous version remains referenced by its successor lists after the memory of the current task is released
+					indiNode = getLocalizedIndividual(indiNode, false, calcAlgContext);
 
 					markIndividualNodeBackendNonConceptSetRelatedProcessing(locNominalIndi, calcAlgContext);
 					if (representativeLabelExpansionData) {
