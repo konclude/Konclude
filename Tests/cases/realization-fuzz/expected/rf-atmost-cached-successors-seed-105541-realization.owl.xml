@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected realization of rf-atmost-cached-successors-seed-105541.owl.xml: Openllet 2.6.5, confirmed by FaCT++ 1.6.3. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/105541#x0"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/105541#x1"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/105541#x2"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/105541#x3"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dlfuzz/105541#C3"/><NamedIndividual IRI="http://konclude.test/dlfuzz/105541#x1"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dlfuzz/105541#R3"/><NamedIndividual IRI="http://konclude.test/dlfuzz/105541#x3"/></ClassAssertion>
+</Ontology>
