@@ -17432,7 +17432,8 @@ namespace Konclude {
 						}
 					} else {
 						if (restLink) {
-							if (restLink->isDestinationIndividual(processIndi) && restLink->isSourceIndividual(processIndi)) {
+							// the link may refer to an older version of the node (e.g., a self-link created by a merge), hence the ids are compared
+							if (restLink->isDestinationIndividualID(processIndi) && restLink->isSourceIndividualID(processIndi)) {
 								// throw clash
 								CClashedDependencyDescriptor* clashDes = nullptr;
 								clashDes = createClashedIndividualLinkDescriptor(clashDes,restLink,restLink->getDependencyTrackPoint(),calcAlgContext);
