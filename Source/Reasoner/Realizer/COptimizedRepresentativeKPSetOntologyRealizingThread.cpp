@@ -2161,6 +2161,22 @@ namespace Konclude {
 							}
 						}
 
+						if (mergeable && indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+							// the successors that are only represented by the representative cache (e.g., for an at-least restriction of the
+							// individual) are not in the links, if the cache has existential successors for the role, the instance test decides
+							CIndividual* nominalIndi = indiNode->getNominalIndividual();
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = nominalIndi ? reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nominalIndi->getIndividualID()) : nullptr;
+							if (!assData) {
+								mergeable = false;
+							} else {
+								CBackendRepresentativeMemoryLabelCacheItem* detExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
+								CBackendRepresentativeMemoryLabelCacheItem* nondetExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
+								if (reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, detExtLabelItem, role, false) || reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, nondetExtLabelItem, role, false)) {
+									mergeable = false;
+								}
+							}
+						}
+
 					} else if (!conceptNegation && (opCode == CCSOME) || conceptNegation && (opCode == CCALL)) {
 						// mergeable if there is one neighbour that satisfies the qualifying restriction
 						// unmergeable is non-trivial to detect (maybe we can use the saturation graph somehow?)
