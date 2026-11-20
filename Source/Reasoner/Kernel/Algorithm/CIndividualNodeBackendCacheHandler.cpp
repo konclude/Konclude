@@ -1309,7 +1309,10 @@ namespace Konclude {
 
 
 
-					if (extIndiBackSyncData && !extIndiBackSyncData->hasNonDeterministicallyMergedIndividuals() && !extIndiBackSyncData->hasNewlyMergedAllNeighbourExpansion() && extIndiBackSyncData->hasNewlyMergedIndividuals() && extIndiBackSyncData->hasNewlyMergedInferringNeighbourExpansion()) {
+					// the expansion of all neighbours of the newly merged individuals (e.g., required by critical role characteristics
+					// such as irreflexivity) also covers the neighbours of the inferring expansion, otherwise the cache cannot install
+					// the deterministically same individuals and leaves their representative incompletely handled
+					if (extIndiBackSyncData && !extIndiBackSyncData->hasNonDeterministicallyMergedIndividuals() && extIndiBackSyncData->hasNewlyMergedIndividuals() && (extIndiBackSyncData->hasNewlyMergedInferringNeighbourExpansion() || extIndiBackSyncData->hasNewlyMergedAllNeighbourExpansion())) {
 						CBackendRepresentativeMemoryLabelCacheItem* detSameIndiSetLabel = indiAssData->getDeterministicConceptSetLabelCacheEntry();
 						visitMergedIndividualNodesAssociationData(extractionIndiNode, indiAssData, detSameIndiSetLabel, true, maxDetBranchTag, [&](cint64 mergedIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* mergedIndiAssData, bool deterministicallyMerged)->bool {
 
