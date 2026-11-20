@@ -15455,7 +15455,9 @@ namespace Konclude {
 									//	distinctMergedSet = locDistinctMergedSet;
 									//}
 									//++distinctCount;
-									++tmpCardinality;
+									// at most one further distinct node (the new nominal) is allowed for this candidate, the bound must not grow with every
+									// attempt, e.g., when the previous candidate was merged into an existing distinct node instead of a new nominal
+									tmpCardinality = distinctCount + 1;
 									createNewNodesAsNominals = true;
 									//CRoleSuccessorLinkIterator roleSuccIt(processIndi->getRoleSuccessorHistoryLinkIterator(role,branchingMergingProcRest->getLastIndividualLink()));
 									//if (roleSuccIt.hasNext()) {
