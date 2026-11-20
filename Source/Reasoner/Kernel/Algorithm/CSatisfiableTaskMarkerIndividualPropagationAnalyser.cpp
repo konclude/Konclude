@@ -75,6 +75,19 @@ namespace Konclude {
 
 
 						CProcessingDataBox* procDataBox = calcAlgContext->getProcessingDataBox();
+						// the testing individual can be represented by another node of the continued (non-deterministic) completion graph, i.e., it
+						// was merged into that node by a choice, and the concepts of the test were added to that node independently of the merge,
+						// hence the marked individuals can then only be possible instances
+						bool subjectNondeterministicallyMerged = false;
+						CIndividualProcessNodeVector* subjectIndiNodeVec = procDataBox->getIndividualProcessNodeVector();
+						cint64 subjectNodeId = -individualReference.getIndividualID();
+						CIndividualProcessNode* subjectNode = subjectIndiNodeVec ? subjectIndiNodeVec->getData(subjectNodeId) : nullptr;
+						if (subjectNode && subjectNode->hasMergedIntoIndividualNodeID()) {
+							subjectNode = getCorrectedIndividualNode(subjectNodeId, subjectIndiNodeVec);
+							CIndividualMergingHash* subjectMergingHash = subjectNode->getIndividualMergingHash(false);
+							CDependencyTrackPoint* subjectMergeDepTrackPoint = subjectMergingHash ? subjectMergingHash->value(individualReference.getIndividualID()).getDependencyTrackPoint() : nullptr;
+							subjectNondeterministicallyMerged = !subjectMergeDepTrackPoint || subjectMergeDepTrackPoint->getBranchingTag() > procDataBox->getMaximumDeterministicBranchTag();
+						}
 						cint64 maxDetBranchTag = procDataBox->getMaximumDeterministicBranchTag();
 						CIndividualVector* indiVec = procDataBox->getOntology()->getABox()->getIndividualVector();
 						CMarkerIndividualNodeHash* markerIndiNodeHash = procDataBox->getMarkerIndividualNodeHash(false);
@@ -96,7 +109,7 @@ namespace Konclude {
 										} else {
 											tmpLinker->initLinker(candIndividual);
 										}
-										bool nondeterministicallyAdded = candIndiLinkerIt->isNegated();
+										bool nondeterministicallyAdded = candIndiLinkerIt->isNegated() || subjectNondeterministicallyMerged;
 										if (nondeterministicallyAdded) {
 											ndetIndiCandLinker = tmpLinker->append(ndetIndiCandLinker);
 										} else {
