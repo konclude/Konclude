@@ -1161,12 +1161,12 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/>
-    <Literal>Open. Realization misses types that Openllet 2.6.5 and FaCT++ 1.6.3 derive (realization fuzz campaign 2026-11-19). Fixed: universal restrictions over functional and inverse functional roles (db8d4c39), classes defined by nominals for an individual that is merged with a nominal by a choice (f8116918), at-least restrictions whose neighbours are partly only in the representative cache (rf-100263). Still open: types that need a case distinction: rf-101098 (h inverse functional, x2 in C0 or C1, C1 implies some h.C0: x2 in C0) and rf-100838 (b in some s.(not C or A) by a case distinction on C).</Literal>
+    <Literal>Fixed. Realization missed types that Openllet 2.6.5 and FaCT++ 1.6.3 derive (realization fuzz campaign 2026-11-19): universal restrictions over functional and inverse functional roles (db8d4c39), classes defined by nominals for an individual that is merged with a nominal by a choice (f8116918), at-least restrictions whose neighbours are partly only in the representative cache (rf-100263), a saturation cached node that kept the abolished saturation caching of an ancestor and stayed blocked (rf-101098, 1d6706ea) and a representative cache recomputation that replaced the cached neighbour role sets instead of merging them after a link addition (rf-100838, 99e65f9d).</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/></ObjectPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/></ObjectPropertyAssertion>
