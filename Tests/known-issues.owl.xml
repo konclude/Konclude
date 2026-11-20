@@ -1141,12 +1141,12 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:status"/>
     <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/>
-    <Literal>open</Literal>
+    <Literal>fixed</Literal>
   </DataPropertyAssertion>
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/>
-    <Literal>Open. Fuzz seed 1024 crashes in the classification with CompletionGraphCaching=false (default otherwise): mergeIndividualNodeInto, called by the functional rule, looks up a role successor link whose source and destination are null. The link was valid when it was inserted, its memory was released or reused later, and it is still reachable through the shared link list. It only happens with the backend neighbour expansion (no crash with IndividualsBackendCacheLoading=false).</Literal>
+    <Literal>Fixed. Fuzz seed 1024 crashed in the classification with CompletionGraphCaching=false: mergeIndividualNodeInto looked up a role successor link whose source and destination were null. expandIndividualNeighbourNodeFromBackendCache had installed the link into a node of a previous task instead of its localized version, so the successor list of that node kept the link after the memory of the current task was released (fixed in 465dc1be).</Literal>
   </DataPropertyAssertion>
   <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification-no-cgc"/></ObjectPropertyAssertion>
 
