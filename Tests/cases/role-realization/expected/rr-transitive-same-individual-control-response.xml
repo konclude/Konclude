@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+ <!-- Expected response for rr-transitive-same-individual-control-request.xml (Openllet 2.6.5, confirmed by HermiT 1.4.5); set order and namespace prefixes are ignored by the comparator. --><KB kb="http://konclude.test/role-realization/rr-transitive-same-individual-control"/>
+ <OK/>
+ <SetOfIndividualSynsets>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106435#x2"/>
+  </IndividualSynset>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106435#x5"/>
+  </IndividualSynset>
+ </SetOfIndividualSynsets>
+ <OK/>
+</ResponseMessage>
