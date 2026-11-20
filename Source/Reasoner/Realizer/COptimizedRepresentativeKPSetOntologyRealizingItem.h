@@ -488,6 +488,7 @@ namespace Konclude {
 
 
 					bool visitSourceTargetIndividuals(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem, bool target, CRoleRealizationInstanceVisitor* visitor);
+					bool visitSourceTargetIndividualsOfIndividual(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem, bool target, CRoleRealizationInstanceVisitor* visitor);
 					bool visitSourceTargetIndividualRoles(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool target, CRoleRealizationInstantiatedVisitor* visitor);
 
 					bool collectSourceTargetIndividualRoles(const CRealizationIndividualInstanceItemReference& indiRealItemRef, bool target, bool collectKnown, QSet<CRoleInstantiatedItem*>& roleSetCollection, QSet<CRoleInstantiatedItem*>* excludeRoleSet = nullptr);

@@ -1054,13 +1054,29 @@ namespace Konclude {
 								inversed = !inversed;
 								indiDestination = CIndividualReference();
 							}
-							if (role) {
-								queueRoleFillerInstanceRealization(procData, indiSource, role, inversed);
-							} else {
-								for (QList<COptimizedKPSetRoleInstancesItem*>::const_iterator it = mRoleInstancesItemContainer.constBegin(), itEnd = mRoleInstancesItemContainer.constEnd(); it != itEnd; ++it) {
-									COptimizedKPSetRoleInstancesItem* roleItem(*it);
-									CRole* role = roleItem->getRole();
-									queueRoleFillerInstanceRealization(procData, indiSource, role, inversed);
+							// the role instances are realized per individual, the deterministically same individuals share them (e.g., the instances of a
+							// transitive role are completed for one of them), hence they are realized for all of them
+							QList<CIndividualReference> sameIndiSourceList;
+							sameIndiSourceList.append(indiSource);
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* sourceAssData = mBackendAssocCacheReader->getIndividualAssociationData(indiSource.getIndividualID());
+							CBackendRepresentativeMemoryLabelCacheItem* sameIndiSetLabel = sourceAssData ? sourceAssData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL) : nullptr;
+							if (sameIndiSetLabel) {
+								mBackendAssocCacheReader->visitIndividualIdsOfAssociatedIndividualSetLabel(nullptr, sameIndiSetLabel, [&](cint64 sameIndiId)->bool {
+									if (sameIndiId != indiSource.getIndividualID()) {
+										sameIndiSourceList.append(CIndividualReference(mOntology->getABox()->getIndividualVector()->getData(sameIndiId), sameIndiId));
+									}
+									return true;
+								});
+							}
+							for (const CIndividualReference& sameIndiSource : sameIndiSourceList) {
+								if (role) {
+									queueRoleFillerInstanceRealization(procData, sameIndiSource, role, inversed);
+								} else {
+									for (QList<COptimizedKPSetRoleInstancesItem*>::const_iterator it = mRoleInstancesItemContainer.constBegin(), itEnd = mRoleInstancesItemContainer.constEnd(); it != itEnd; ++it) {
+										COptimizedKPSetRoleInstancesItem* roleItem(*it);
+										CRole* role = roleItem->getRole();
+										queueRoleFillerInstanceRealization(procData, sameIndiSource, role, inversed);
+									}
 								}
 							}
 						}
@@ -3073,6 +3089,51 @@ namespace Konclude {
 
 
 			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitSourceTargetIndividuals(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem, bool source, CRoleRealizationInstanceVisitor* visitor) {
+				// the role instances of same individuals are stored separately for the individuals (e.g., the instances of a transitive or
+				// complex role only for the representative), hence the instances of all known same individuals are visited, each target once
+				class CSameIndividualsRoleInstanceVisitor : public CSameRealizationIndividualVisitor, public CRoleRealizationInstanceVisitor {
+					public:
+						QList<CIndividualReference> mSameIndividuals;
+						QSet<cint64> mVisitedTargetIds;
+						CRoleRealizationInstanceVisitor* mVisitor = nullptr;
+						bool mContinueVisiting = true;
+			
+						bool visitIndividual(const CIndividualReference& indiRef, CSameRealization* sameRealization) {
+							mSameIndividuals.append(indiRef);
+							return true;
+						}
+			
+						bool visitRoleInstance(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleRealization* roleRealization) {
+							if (!mVisitedTargetIds.contains(indiRealItemRef.getIndividualID())) {
+								mVisitedTargetIds.insert(indiRealItemRef.getIndividualID());
+								mContinueVisiting = mVisitor->visitRoleInstance(indiRealItemRef, roleRealization);
+							}
+							return mContinueVisiting;
+						}
+				};
+			
+				CSameIndividualsRoleInstanceVisitor sameIndiVisitor;
+				sameIndiVisitor.mVisitor = visitor;
+				visitSameIndividuals(getInstanceItemReference((const CIndividualReference&)indiRealItemRef, true), &sameIndiVisitor);
+				bool subjectVisited = false;
+				for (const CIndividualReference& sameIndiRef : sameIndiVisitor.mSameIndividuals) {
+					subjectVisited |= sameIndiRef.getIndividualID() == indiRealItemRef.getIndividualID();
+				}
+				if (!subjectVisited) {
+					sameIndiVisitor.mSameIndividuals.prepend((const CIndividualReference&)indiRealItemRef);
+				}
+				for (const CIndividualReference& sameIndiRef : sameIndiVisitor.mSameIndividuals) {
+					if (!sameIndiVisitor.mContinueVisiting) {
+						break;
+					}
+					CRealizationIndividualInstanceItemReference sameIndiRealItemRef = sameIndiRef.getIndividualID() == indiRealItemRef.getIndividualID() ? indiRealItemRef : getInstanceItemReference(sameIndiRef, false);
+					visitSourceTargetIndividualsOfIndividual(sameIndiRealItemRef, roleItem, source, &sameIndiVisitor);
+				}
+				return false;
+			}
+
+
+			bool COptimizedRepresentativeKPSetOntologyRealizingItem::visitSourceTargetIndividualsOfIndividual(const CRealizationIndividualInstanceItemReference& indiRealItemRef, CRoleInstantiatedItem* roleItem, bool source, CRoleRealizationInstanceVisitor* visitor) {
 				COptimizedKPSetRoleInstancesRedirectionItem* roleRedirectionItem = (COptimizedKPSetRoleInstancesRedirectionItem*)roleItem;
 				COptimizedKPSetRoleInstancesItem* roleInstItem = roleRedirectionItem->getRedirectedItem();
 				bool roleItemInversed = roleRedirectionItem->isInversed() ^ source;
