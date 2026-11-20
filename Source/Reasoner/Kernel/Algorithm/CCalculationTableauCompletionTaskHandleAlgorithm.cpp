@@ -4827,6 +4827,12 @@ namespace Konclude {
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::detectIndividualNodeSaturationCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 
+					// an abolished ancestor caching is taken over first, also for a node that is saturation cached itself, otherwise the node
+					// stays blocked by an ancestor that lost its saturation caching
+					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHED) && individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED)) {
+						individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED);
+						individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHED);
+					}
 					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED) && !individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTSATURATIONBLOCKINGCACHEDDUEDIRECTMODIFIED)) {
 						return true;
 					}
