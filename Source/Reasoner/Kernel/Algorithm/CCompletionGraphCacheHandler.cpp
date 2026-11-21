@@ -35,10 +35,21 @@ namespace Konclude {
 					mPreviousConsistencyCachedCompletionGraph = false;
 					mLastConfig = nullptr;
 					mBackendCacheHandler = backendCacheHandler;
+					mMergedBlockableNodeIDsHashBuilt = false;
 				}
 
 
 				CCompletionGraphCacheHandler::~CCompletionGraphCacheHandler() {
+				}
+
+
+				CIndividualProcessNodeVector* CCompletionGraphCacheHandler::getDeterministicNodeVector() {
+					return mDetSatProcNodeVec;
+				}
+
+
+				CIndividualProcessNodeVector* CCompletionGraphCacheHandler::getCompletionGraphCachedNodeVector() {
+					return mCompGraphCachedProcNodeVec;
 				}
 
 
@@ -55,6 +66,8 @@ namespace Konclude {
 						mLastLoadedCachedCompletionGraph = false;
 						mPreviousConsistencyCachedCompletionGraph = false;
 						mCurrentIncrementalExpansionID = 0;
+						mMergedBlockableNodeIDsHashBuilt = false;
+						mMergedBlockableNodeIDsHash.clear();
 						CConsistence* consistence = ontology->getConsistence();
 						if (consistence) {
 							CConsistenceData* consData = consistence->getConsistenceModelData();
@@ -112,28 +125,10 @@ namespace Konclude {
 						if (compGraphCachedIndiNode && compGraphCachedIndiNode != detCompGraphCachedIndiNode) {
 							cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
 
-							addedReactivationIndi |= addMergedNodesReactivation(indiID, compGraphCachedIndiNode, reactProcQueue);
+							addedReactivationIndi |= addMergeDependentReactivationIndividuals(indiID, compGraphCachedIndiNode, reactProcQueue);
 
 							CPROCESSINGLIST<cint64> reactivateComplGraphCachedIndiList(calcAlgContext->getTaskProcessorContext());
 							CPROCESSINGSET<cint64> reactivateComplGraphCachedIndiSet(calcAlgContext->getTaskProcessorContext());
-
-							CIndividualMergingHash* mergingHash = compGraphCachedIndiNode->getIndividualMergingHash(false);
-							if (mergingHash) {
-								for (CIndividualMergingHash::const_iterator it = mergingHash->constBegin(), itEnd = mergingHash->constEnd(); it != itEnd; ++it) {
-									if (it.value().isMergedWithIndividual()) {
-										cint64 mergedIndiID = it.key();
-										CIndividualProcessNode* compGraphCachedMergedIndiNode = mCompGraphCachedProcNodeVec->getData(-mergedIndiID);
-										CIndividualProcessNode* detSatMergedIndiNode = nullptr;
-										if (-mergedIndiID <= detSatIndiCount) {
-											detSatMergedIndiNode = mDetSatProcNodeVec->getData(-mergedIndiID);
-										}
-										if (compGraphCachedMergedIndiNode != detSatMergedIndiNode && detSatMergedIndiNode) {
-											addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatMergedIndiNode, true);
-										}
-									}
-								}
-							}
-
 
 							CConnectionSuccessorSetIterator connSuccSetIt(compGraphCachedIndiNode->getConnectionSuccessorIterator());
 							while (connSuccSetIt.hasNext()) {
@@ -179,48 +174,107 @@ namespace Konclude {
 				}
 
 
-				bool CCompletionGraphCacheHandler::addMergedNodesReactivation(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue) {
-					// C11: a node that the cached graph merged into this node shares its cached state, so it has to
-					// be rebuilt as well (e.g. a successor that was merged into a nominal by a non-deterministic
-					// choice and has to make its choice again). The merge moved the link of such a node to this
-					// node, hence it is a deterministic neighbour of a neighbour of this node in the cached graph.
-					// A neighbour whose links did not change non-deterministically cannot have lost a node to this
-					// node and is skipped. Merged nominals are handled by the merging hash.
+				bool CCompletionGraphCacheHandler::addMergedNodesReactivation(cint64 indiID, CIndividualReactivationProcessingQueue* reactProcQueue) {
+					// C11: a node that the cached graph merged into this node shares its cached state, so it has to be rebuilt as well (e.g. a
+					// successor that was merged into a nominal by a non-deterministic choice and has to make its choice again). Such a node can
+					// be far away from this node in the deterministic graph, e.g. if its neighbour was merged into another node by the cached
+					// graph as well, hence the nodes are looked up by their merge target. Merged nominals are handled by the merging hash.
 					bool addedReactivationIndi = false;
 					cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
-					CIndividualProcessNode* detSatIndiNode = indiID <= detSatIndiCount ? mDetSatProcNodeVec->getData(indiID) : nullptr;
-					if (detSatIndiNode) {
-						addedReactivationIndi |= addMergedNeighbourNodesReactivation(indiID, detSatIndiNode, reactProcQueue);
-					}
-					CConnectionSuccessorSetIterator connSuccSetIt(compGraphCachedIndiNode->getConnectionSuccessorIterator());
-					while (connSuccSetIt.hasNext()) {
-						cint64 connIndiID = connSuccSetIt.next();
-						CIndividualProcessNode* detSatConnIndiNode = connIndiID <= detSatIndiCount ? mDetSatProcNodeVec->getData(connIndiID) : nullptr;
-						CIndividualProcessNode* compGraphCachedConnIndiNode = mCompGraphCachedProcNodeVec->getData(connIndiID);
-						if (detSatConnIndiNode && compGraphCachedConnIndiNode && compGraphCachedConnIndiNode->getConnectionSuccessorSet(false) != detSatConnIndiNode->getConnectionSuccessorSet(false)) {
-							addedReactivationIndi |= addMergedNeighbourNodesReactivation(indiID, detSatConnIndiNode, reactProcQueue);
+					const QVector<cint64>& mergedIndiIDs = getMergedBlockableNodeIDs(indiID);
+					for (cint64 mergedIndiID : mergedIndiIDs) {
+						CIndividualProcessNode* detSatMergedIndiNode = mergedIndiID <= detSatIndiCount ? mDetSatProcNodeVec->getData(mergedIndiID) : nullptr;
+						if (detSatMergedIndiNode) {
+							addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatMergedIndiNode, true);
 						}
 					}
 					return addedReactivationIndi;
 				}
 
 
-				bool CCompletionGraphCacheHandler::addMergedNeighbourNodesReactivation(cint64 indiID, CIndividualProcessNode* detSatNeighbourIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue) {
-					bool addedReactivationIndi = false;
+				const QVector<cint64>& CCompletionGraphCacheHandler::getMergedBlockableNodeIDs(cint64 indiID) {
+					if (!mMergedBlockableNodeIDsHashBuilt) {
+						buildMergedBlockableNodeIDsHash();
+					}
+					QHash< cint64,QVector<cint64> >::const_iterator it = mMergedBlockableNodeIDsHash.constFind(indiID);
+					if (it == mMergedBlockableNodeIDsHash.constEnd()) {
+						return mNoMergedBlockableNodeIDs;
+					}
+					return it.value();
+				}
+
+
+				void CCompletionGraphCacheHandler::buildMergedBlockableNodeIDsHash() {
+					// every node on the merge chain shares the cached state of the merged node (v2 into a1, a1 into a0: v2 belongs to a1 and a0)
+					mMergedBlockableNodeIDsHash.clear();
 					cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
-					CConnectionSuccessorSetIterator detConnSuccSetIt(detSatNeighbourIndiNode->getConnectionSuccessorIterator());
-					while (detConnSuccSetIt.hasNext()) {
-						cint64 candIndiID = detConnSuccSetIt.next();
-						if (candIndiID <= 0 || candIndiID > detSatIndiCount || candIndiID == indiID) {
+					for (cint64 candIndiID = 1; candIndiID <= detSatIndiCount; ++candIndiID) {
+						if (!mDetSatProcNodeVec->getData(candIndiID)) {
 							continue;
 						}
-						CIndividualProcessNode* detSatCandIndiNode = mDetSatProcNodeVec->getData(candIndiID);
-						CIndividualProcessNode* compGraphCachedCandIndiNode = getCompletionGraphCachedRepresentativeNode(candIndiID);
-						if (detSatCandIndiNode && compGraphCachedCandIndiNode && compGraphCachedCandIndiNode->getIndividualNodeID() == indiID) {
-							addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatCandIndiNode, true);
+						CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(candIndiID);
+						while (compGraphCachedIndiNode && compGraphCachedIndiNode->getMergedIntoIndividualNodeID() != compGraphCachedIndiNode->getIndividualNodeID()) {
+							cint64 mergedIntoIndiID = compGraphCachedIndiNode->getMergedIntoIndividualNodeID();
+							mMergedBlockableNodeIDsHash[mergedIntoIndiID].append(candIndiID);
+							compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(mergedIntoIndiID);
+						}
+					}
+					mMergedBlockableNodeIDsHashBuilt = true;
+				}
+
+
+				bool CCompletionGraphCacheHandler::getMergeDependentReactivationIndividuals(CIndividualProcessNode* individualNode, CIndividualReactivationProcessingQueue* reactProcQueue, CCalculationAlgorithmContext* calcAlgContext) {
+					if (!loadConsistenceModelData(calcAlgContext)) {
+						return false;
+					}
+					cint64 indiID = individualNode->getIndividualNodeID();
+					CIndividualProcessNode* compGraphCachedIndiNode = mCompGraphCachedProcNodeVec->getData(indiID);
+					if (!compGraphCachedIndiNode || compGraphCachedIndiNode == mDetSatProcNodeVec->getData(indiID)) {
+						return false;
+					}
+					return addMergeDependentReactivationIndividuals(indiID, compGraphCachedIndiNode, reactProcQueue);
+				}
+
+
+				bool CCompletionGraphCacheHandler::addMergeDependentReactivationIndividuals(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue) {
+					// The cached state of a node is shared with every node that the cached graph merged with it: the node it
+					// was merged into (its representative) and the nodes merged into it (blockable nodes directly or through a
+					// chain, nominals through the merging hash). They are rebuilt together.
+					bool addedReactivationIndi = false;
+					cint64 detSatIndiCount = getDeterministicMaxIndividualNodeID();
+					addedReactivationIndi |= addRepresentativeNodeReactivation(indiID, reactProcQueue);
+					addedReactivationIndi |= addMergedNodesReactivation(indiID, reactProcQueue);
+					CIndividualMergingHash* mergingHash = compGraphCachedIndiNode->getIndividualMergingHash(false);
+					if (mergingHash) {
+						for (CIndividualMergingHash::const_iterator it = mergingHash->constBegin(), itEnd = mergingHash->constEnd(); it != itEnd; ++it) {
+							if (it.value().isMergedWithIndividual()) {
+								cint64 mergedIndiID = it.key();
+								CIndividualProcessNode* compGraphCachedMergedIndiNode = mCompGraphCachedProcNodeVec->getData(-mergedIndiID);
+								CIndividualProcessNode* detSatMergedIndiNode = nullptr;
+								if (-mergedIndiID <= detSatIndiCount) {
+									detSatMergedIndiNode = mDetSatProcNodeVec->getData(-mergedIndiID);
+								}
+								if (compGraphCachedMergedIndiNode != detSatMergedIndiNode && detSatMergedIndiNode) {
+									addedReactivationIndi |= reactProcQueue->insertReactivationIndiviudal(detSatMergedIndiNode, true);
+								}
+							}
 						}
 					}
 					return addedReactivationIndi;
+				}
+
+
+				bool CCompletionGraphCacheHandler::addRepresentativeNodeReactivation(cint64 indiID, CIndividualReactivationProcessingQueue* reactProcQueue) {
+					CIndividualProcessNode* compGraphCachedRepIndiNode = getCompletionGraphCachedRepresentativeNode(indiID);
+					if (!compGraphCachedRepIndiNode || compGraphCachedRepIndiNode->getIndividualNodeID() == indiID) {
+						return false;
+					}
+					cint64 repIndiID = compGraphCachedRepIndiNode->getIndividualNodeID();
+					CIndividualProcessNode* detSatRepIndiNode = repIndiID <= getDeterministicMaxIndividualNodeID() ? mDetSatProcNodeVec->getData(repIndiID) : nullptr;
+					if (!detSatRepIndiNode) {
+						return false;
+					}
+					return reactProcQueue->insertReactivationIndiviudal(detSatRepIndiNode, true);
 				}
 
 
@@ -323,6 +377,11 @@ namespace Konclude {
 
 
 				bool CCompletionGraphCacheHandler::testCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext) {
+					// A node that the cached graph pruned (e.g. a successor of a node that was merged into another node)
+					// is not part of the cached model, its state is no witness for the current node.
+					if (compGraphCachedIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFPURGEDBLOCKED)) {
+						return false;
+					}
 					bool cached = true;
 					if (cached) {
 						cached &= testConceptLabelSubSetCompletionGraphCached(individualNode,detSatIndiNode,compGraphCachedIndiNode,calcAlgContext);
@@ -742,18 +801,20 @@ namespace Konclude {
 						continueVisiting = visitFunc(indiNode, indiNode);
 						visited = true;
 					}
-					CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData->getAssocitaionData();
-					CBackendRepresentativeMemoryLabelCacheItem* detSameIndiLabel = assocData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL);
+					// the node itself may have no backend data (e.g., a new nominal or without loading individuals from the backend cache),
+					// then every merged individual with backend data is visited
+					CBackendRepresentativeMemoryCacheIndividualAssociationData* assocData = backendSyncData ? backendSyncData->getAssocitaionData() : nullptr;
+					CBackendRepresentativeMemoryLabelCacheItem* detSameIndiLabel = assocData ? assocData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_SAME_INDIVIDUAL_SET_LABEL) : nullptr;
 					CIndividualMergingHash* mergingHash = indiNode->getIndividualMergingHash(false);
 					if (mergingHash) {
 						for (CXLinker<cint64>* newIndiMergedLinkerIt = mergingHash->getMergedIndividualLinker(); newIndiMergedLinkerIt && continueVisiting; newIndiMergedLinkerIt = newIndiMergedLinkerIt->getNext()) {
 							cint64 newIndiMergedId = newIndiMergedLinkerIt->getData();
 
-							if (!mBackendCacheHandler->hasIndividualIdsInAssociatedIndividualSetLabel(assocData, detSameIndiLabel, newIndiMergedId)) {
+							if (!assocData || !mBackendCacheHandler->hasIndividualIdsInAssociatedIndividualSetLabel(assocData, detSameIndiLabel, newIndiMergedId)) {
 
 								CIndividualProcessNode* backendSyncDataIndiNode = mIndiProcNodeVec->getData(-newIndiMergedId);
 
-								if (backendSyncDataIndiNode->getIndividualBackendCacheSynchronisationData(false)) {
+								if (backendSyncDataIndiNode && backendSyncDataIndiNode->getIndividualBackendCacheSynchronisationData(false)) {
 									continueVisiting = visitFunc(indiNode, backendSyncDataIndiNode);
 									visited = true;
 								}

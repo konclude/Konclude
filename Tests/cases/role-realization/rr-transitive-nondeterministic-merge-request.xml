@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Role realization: rr-transitive-nondeterministic-merge. The ontology is loaded from the file next to this request.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/role-realization/rr-transitive-nondeterministic-merge"/>
+  <LoadOntologies kb="http://konclude.test/role-realization/rr-transitive-nondeterministic-merge"><OntologyIRI IRI="file:rr-transitive-nondeterministic-merge.owl.xml"/></LoadOntologies>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-transitive-nondeterministic-merge"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106255#ti"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106255#x3"/></GetObjectPropertyTargets>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-transitive-nondeterministic-merge"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106255#t"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106255#x0"/></GetObjectPropertyTargets>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-transitive-nondeterministic-merge"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106255#t"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106255#x2"/></GetObjectPropertyTargets>
+  <ReleaseKB kb="http://konclude.test/role-realization/rr-transitive-nondeterministic-merge"/>
+</RequestMessage>

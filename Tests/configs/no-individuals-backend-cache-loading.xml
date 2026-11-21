@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The individuals are not loaded lazily from the backend representative cache
+  of the consistency check; a test only reuses the completion graph of the
+  consistency check (completion graph caching). Used by tests that cover the
+  paths for nodes without backend data.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.IndividualsBackendCacheLoading'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

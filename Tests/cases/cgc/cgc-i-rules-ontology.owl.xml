@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family I: DL-safe rules whose body is bound to a
+  cached choice on a named individual.
+
+  The named individual k is a K1 or a K2 and the assertion t(k,l) links it to the
+  named individual l. The rule K1(x) and t(x,y) -> M(y) derives M(l) in the K1
+  alternative, and K2(x) and t(x,y) -> N(y) derives N(l) in the K2 alternative.
+  DL-safe rules only fire on named individuals, which is why k and l are named
+  and the earlier version of this family (rules over anonymous existential
+  successors) was wrong. The consistency test chooses the alternative for k; a
+  test that forbids M on l has to re-decide the choice and to re-fire or cancel
+  the rule binding, and a cached binding that is kept would wrongly answer
+  unsatisfiable.
+  Axioms: k in (K1 or K2), t(k,l), K1(x) and t(x,y) -> M(y),
+  K2(x) and t(x,y) -> N(y).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/i">
+  <Prefix name="" IRI="http://konclude.test/cgc/i#"/>
+
+  <Declaration><Class abbreviatedIRI=":K1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":K2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":M"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":N"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoRuleChoice"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestRuleM"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestRuleN"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestOnlyNotM"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestOnlyNotN"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoK1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoK"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":k"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":l"/></Declaration>
+
+  <ClassAssertion>
+    <ObjectUnionOf><Class abbreviatedIRI=":K1"/><Class abbreviatedIRI=":K2"/></ObjectUnionOf>
+    <NamedIndividual abbreviatedIRI=":k"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":t"/>
+    <NamedIndividual abbreviatedIRI=":k"/>
+    <NamedIndividual abbreviatedIRI=":l"/>
+  </ObjectPropertyAssertion>
+
+  <DLSafeRule>
+    <Body>
+      <ClassAtom><Class abbreviatedIRI=":K1"/><Variable IRI="http://konclude.test/cgc/i#x"/></ClassAtom>
+      <ObjectPropertyAtom>
+        <ObjectProperty abbreviatedIRI=":t"/>
+        <Variable IRI="http://konclude.test/cgc/i#x"/>
+        <Variable IRI="http://konclude.test/cgc/i#y"/>
+      </ObjectPropertyAtom>
+    </Body>
+    <Head>
+      <ClassAtom><Class abbreviatedIRI=":M"/><Variable IRI="http://konclude.test/cgc/i#y"/></ClassAtom>
+    </Head>
+  </DLSafeRule>
+  <DLSafeRule>
+    <Body>
+      <ClassAtom><Class abbreviatedIRI=":K2"/><Variable IRI="http://konclude.test/cgc/i#x"/></ClassAtom>
+      <ObjectPropertyAtom>
+        <ObjectProperty abbreviatedIRI=":t"/>
+        <Variable IRI="http://konclude.test/cgc/i#x"/>
+        <Variable IRI="http://konclude.test/cgc/i#y"/>
+      </ObjectPropertyAtom>
+    </Body>
+    <Head>
+      <ClassAtom><Class abbreviatedIRI=":N"/><Variable IRI="http://konclude.test/cgc/i#y"/></ClassAtom>
+    </Head>
+  </DLSafeRule>
+
+  <!-- k is a K1 or a K2, so the corresponding rule derives M or N on l. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoRuleChoice"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":l"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":M"/></ObjectComplementOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":N"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestRuleM"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":l"/></ObjectOneOf>
+      <Class abbreviatedIRI=":M"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestRuleN"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":l"/></ObjectOneOf>
+      <Class abbreviatedIRI=":N"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Choosing K2 leaves l without M. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestOnlyNotM"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":l"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":M"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestOnlyNotN"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":l"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":N"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoK1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":k"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":K1"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoK"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":k"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":K1"/></ObjectComplementOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":K2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

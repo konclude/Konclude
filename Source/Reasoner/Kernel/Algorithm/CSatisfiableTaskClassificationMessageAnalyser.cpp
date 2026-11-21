@@ -236,15 +236,12 @@ namespace Konclude {
 											CRoleSuccessorLinkIterator roleSucc2It(roleSuccIt); 
 											while (roleSucc2It.hasNext()) {
 												CIndividualLinkEdge* succLink = roleSucc2It.next(true);
-												CIndividualProcessNode* succIndi = nullptr;
-												if (succLink->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
-													succIndi = succLink->getOppositeIndividual(indiNode);
-												} else {
-													if (!succIndi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag()) && succIndi->isRelocalized()) {
-														cint64 succIndiId = succLink->getOppositeIndividualID(indiNode);
-														CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
-														succIndi = indiProcNodeVec->getData(succIndiId);
-													}
+												// a link of an older localization can refer to an older version of the successor, the current one is in the node vector
+												CIndividualProcessNode* succIndi = succLink->getOppositeIndividual(indiNode);
+												if (!succLink->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
+													cint64 succIndiId = succLink->getOppositeIndividualID(indiNode);
+													CIndividualProcessNodeVector* indiProcNodeVec = calcAlgContext->getProcessingDataBox()->getIndividualProcessNodeVector();
+													succIndi = indiProcNodeVec->getData(succIndiId);
 												}
 												CReapplyConceptLabelSet* succConSet = succIndi->getReapplyConceptLabelSet(false);
 												for (CSortedNegLinker<CConcept*>* opConIt = concept->getOperandList(); opConIt; opConIt = opConIt->getNext()) {
@@ -573,6 +570,9 @@ namespace Konclude {
 
 								if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
 									CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
+									if (!extSatIndiNode) {
+										return false;
+									}
 									nextSuccessorList.prepend(extSatIndiNode);
 
 									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
@@ -771,6 +771,9 @@ namespace Konclude {
 
 								if (!nextSuccessorList.isEmpty() || !trivialSuccessorPropagatedConceptList->isEmpty()) {
 									CIndividualSaturationProcessNode* extSatIndiNode = getExistentialSaturatedIndividualNodeForConcept(concept,calcAlgContext);
+									if (!extSatIndiNode) {
+										return false;
+									}
 									nextSuccessorList.prepend(extSatIndiNode);
 
 									if (!testSaturatedSuccessorModelMergable(extSatIndiNode,nextSuccessorList,&nextTrivialSuccessorPropagatedConceptList,nextBackwardRoleSet,remainingMergingDepth,remainingMergingCount,calcAlgContext)) {
@@ -918,7 +921,9 @@ namespace Konclude {
 														return false;
 													}
 
-													nextSuccessorList.append(satIndiNode);
+													if (satIndiNode) {
+														nextSuccessorList.append(satIndiNode);
+													}
 												}
 											} else {
 												return false;
@@ -1580,7 +1585,9 @@ namespace Konclude {
 							CIndividualProcessNode* baseIndi = getCorrectedIndividualID(constructedIndiNode,indiNodeVec,&nondetMerged);
 							cint64 baseIndiID = baseIndi->getIndividualNodeID();
 							if (nondetMerged) {
-								maxDetBranchTag = 0;
+								// The tested node was merged into another node by a choice: even the deterministic concepts of the
+								// merge target (e.g. the classes of a nominal) do not hold for every instance of the tested concept.
+								maxDetBranchTag = -1;
 							}
 
 							CPROCESSINGSET<CConcept*>* analysedConceptSet = nullptr;

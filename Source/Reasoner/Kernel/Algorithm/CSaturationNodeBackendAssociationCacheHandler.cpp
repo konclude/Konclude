@@ -383,7 +383,7 @@ namespace Konclude {
 					CSortedNegLinker<CConcept*>* conceptOpLinkerIt = concept->getOperandList();
 					while (conceptOpLinkerIt) {
 						CConcept* opConcept = conceptOpLinkerIt->getData();
-						bool opConNegation = conceptOpLinkerIt->isNegated() ^ conNegation;
+						bool opConNegation = concept->getSuccessorFillerNegation(conceptOpLinkerIt->isNegated(), conNegation);
 						CConceptData* opConceptData = opConcept->getConceptData();
 						if (opConceptData) {
 							CConceptProcessData* conProcData = (CConceptProcessData*)opConceptData;

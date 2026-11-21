@@ -2286,6 +2286,11 @@ namespace Konclude {
 					new CBooleanConfigType(false)),
 					new CBooleanConfigType(false));
 
+				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteCompletionGraphCachingSnapshots",
+					"If enabled (true) the reasoner writes JSON snapshots of the deterministic graph, the cached model and the graph of a test to ./Debugging/CompletionGraphCaching/ whenever completion graph caching is lost.",
+					new CBooleanConfigType(false)),
+					new CBooleanConfigType(false));
+
 
 
 				addConfigProperty(new CConfigDescription("Konclude.Debugging.WriteAnsweringVariableCompositionItems",

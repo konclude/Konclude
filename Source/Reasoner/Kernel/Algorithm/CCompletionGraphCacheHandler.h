@@ -22,6 +22,8 @@
 #define KONCLUDE_REASONER_KERNEL_ALGORITHM_CCOMPLETIONGRAPHCACHEHANDLER_H
 
 // Libraries includes
+#include <QHash>
+#include <QVector>
 
 
 // Namespace includes
@@ -84,6 +86,15 @@ namespace Konclude {
 
 						bool getReactivationIndividuals(CIndividualProcessNode* individualNode, CIndividualReactivationProcessingQueue* reactProcQueue, CCalculationAlgorithmContext* calcAlgContext);
 
+						//! Inserts the nodes that share the cached state of the node through a merge in the cached graph (forced).
+						bool getMergeDependentReactivationIndividuals(CIndividualProcessNode* individualNode, CIndividualReactivationProcessingQueue* reactProcQueue, CCalculationAlgorithmContext* calcAlgContext);
+
+						//! Node vector of the deterministic graph (Gd), nullptr as long as no cached graph is loaded.
+						CIndividualProcessNodeVector* getDeterministicNodeVector();
+
+						//! Node vector of the cached non-deterministic model (Gn), nullptr as long as no cached graph is loaded.
+						CIndividualProcessNodeVector* getCompletionGraphCachedNodeVector();
+
 					// protected methods
 					protected:
 						bool testCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
@@ -97,8 +108,12 @@ namespace Konclude {
 						bool testBindingSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 						bool testNeighbourSubSetCompletionGraphCached(CIndividualProcessNode* individualNode, CIndividualProcessNode* detSatIndiNode, CIndividualProcessNode* compGraphCachedIndiNode, CCalculationAlgorithmContext* calcAlgContext);
 
-						bool addMergedNodesReactivation(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
-						bool addMergedNeighbourNodesReactivation(cint64 indiID, CIndividualProcessNode* detSatNeighbourIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
+						bool addMergeDependentReactivationIndividuals(cint64 indiID, CIndividualProcessNode* compGraphCachedIndiNode, CIndividualReactivationProcessingQueue* reactProcQueue);
+						bool addRepresentativeNodeReactivation(cint64 indiID, CIndividualReactivationProcessingQueue* reactProcQueue);
+						bool addMergedNodesReactivation(cint64 indiID, CIndividualReactivationProcessingQueue* reactProcQueue);
+						//! The blockable nodes of the deterministic graph that the cached graph merged into the node, directly or through a chain of merges.
+						const QVector<cint64>& getMergedBlockableNodeIDs(cint64 indiID);
+						void buildMergedBlockableNodeIDsHash();
 
 						//! Largest node id of the deterministic graph, including the nominal node with id 0.
 						cint64 getDeterministicMaxIndividualNodeID();
@@ -132,6 +147,12 @@ namespace Konclude {
 						bool mIncrementalExpansionCaching;
 						cint64 mCurrentIncrementalExpansionID;
 						CConfiguration* mLastConfig;
+
+						// the blockable nodes of the deterministic graph by the nodes of the cached graph into which they were merged (C11), built on
+						// the first request for the loaded consistency model
+						QHash< cint64,QVector<cint64> > mMergedBlockableNodeIDsHash;
+						bool mMergedBlockableNodeIDsHashBuilt;
+						QVector<cint64> mNoMergedBlockableNodeIDs;
 
 
 						CIndividualNodeBackendCacheHandler* mBackendCacheHandler;

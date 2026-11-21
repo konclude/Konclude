@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://t/f">
+<Prefix name="" IRI="http://t/f#"/>
+<Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration><Declaration><NamedIndividual abbreviatedIRI=":x0"/></Declaration><Declaration><NamedIndividual abbreviatedIRI=":x1"/></Declaration>
+<ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":x0"/></ObjectPropertyAssertion>
+<ClassAssertion><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":s"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":x1"/></ObjectOneOf></ObjectSomeValuesFrom><NamedIndividual abbreviatedIRI=":x0"/></ClassAssertion></Ontology>

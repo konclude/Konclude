@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Reduced differential-fuzzing finding: a1 = a4 is forced by a qualified
+  minimum cardinality on a nominal class, and the caching configuration misses
+  the resulting equality A = B.
+  A = {a0,a1}, B = {a0,a4}; every B-instance needs two distinct B-successors,
+  so a4 is an r-successor of itself; B <= A or C and (some r C) <= D with C
+  disjoint D then force a4 into A, and a4 != a0, so a4 = a1 and A = B.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/l">
+  <Prefix name="" IRI="http://konclude.test/cgc/l#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANotB"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA1NotA4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA1A4"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a4"/></Declaration>
+
+  <EquivalentClasses><Class abbreviatedIRI=":A"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":B"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+  </EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":B"/>
+    <ObjectMinCardinality cardinality="2"><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/></ObjectMinCardinality>
+  </SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":B"/>
+    <ObjectUnionOf><Class abbreviatedIRI=":A"/><Class abbreviatedIRI=":C"/></ObjectUnionOf>
+  </SubClassOf>
+  <SubClassOf>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom>
+    <Class abbreviatedIRI=":D"/>
+  </SubClassOf>
+  <DisjointClasses><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D"/></DisjointClasses>
+
+  <EquivalentClasses><Class abbreviatedIRI=":TestANotB"/>
+    <ObjectIntersectionOf><Class abbreviatedIRI=":A"/><ObjectComplementOf><Class abbreviatedIRI=":B"/></ObjectComplementOf></ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA1NotA4"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA1A4"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

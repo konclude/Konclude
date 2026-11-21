@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A nominal merged into the test node by a choice, with backend cached role assertions
+  (reduced from fuzz seed 2029):
+
+    C4 = {a0, a1}, r1(a0, a1), not-C2(a1),
+    T2 = not-C4 and (at most 1 inverse r0.C2),
+    T5 = not-C0 and (some inverse r2.C1) and (all r1.C2) and (at most 1 r1.C1)
+
+  T5 is not below T2: a1 can be an instance of T5 (it has no r1-successors) and a1 is in C4.
+  In the test of T5 and not-T2, the choice C4 = {a0, a1} merged a0 into the test node; the role
+  assertion r1(a0, a1) was then expanded from the backend cache with the deterministic base
+  dependency instead of the dependency of the merge, so the clash of (all r1.C2) with not-C2(a1)
+  looked independent of the choice, the alternative a1 was skipped and the classification
+  wrongly derived T5 below T2.
+  Expected: the HermiT taxonomy in expected/merged-nominal-backend-dependency-classification.owl.xml.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/merged-nominal-backend-dependency">
+  <Prefix name="" IRI="http://konclude.test/dl/merged-nominal-backend-dependency#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r0"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r1"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r2"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T5"/></Declaration>
+  <EquivalentClasses><Class abbreviatedIRI=":C4"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf></EquivalentClasses>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r1"/><NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectPropertyAssertion>
+  <ClassAssertion><ObjectComplementOf><Class abbreviatedIRI=":C2"/></ObjectComplementOf><NamedIndividual abbreviatedIRI=":a1"/></ClassAssertion>
+  <EquivalentClasses><Class abbreviatedIRI=":T2"/><ObjectIntersectionOf><ObjectComplementOf><Class abbreviatedIRI=":C4"/></ObjectComplementOf><ObjectMaxCardinality cardinality="1"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r0"/></ObjectInverseOf><Class abbreviatedIRI=":C2"/></ObjectMaxCardinality></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T5"/><ObjectIntersectionOf><ObjectComplementOf><Class abbreviatedIRI=":C0"/></ObjectComplementOf><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r2"/></ObjectInverseOf><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":C2"/></ObjectAllValuesFrom><ObjectMaxCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":C1"/></ObjectMaxCardinality></ObjectIntersectionOf></EquivalentClasses>
+</Ontology>

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ResponseMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+ <!-- Expected response for rr-asymmetric-functional-self-merge-request.xml (Openllet 2.6.5, confirmed by HermiT 1.4.5); set order and namespace prefixes are ignored by the comparator. --><KB kb="http://konclude.test/role-realization/rr-asymmetric-functional-self-merge"/>
+ <OK/>
+ <SetOfIndividualSynsets>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106121#x5"/>
+  </IndividualSynset>
+ </SetOfIndividualSynsets>
+ <SetOfIndividualSynsets>
+  <IndividualSynset>
+   <owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106121#a0"/>
+  </IndividualSynset>
+ </SetOfIndividualSynsets>
+ <OK/>
+</ResponseMessage>

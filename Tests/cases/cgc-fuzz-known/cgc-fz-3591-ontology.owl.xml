@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Differential-fuzzing ontology (seed 3591). Its classification did not finish within 10 s in one
+  fuzzing campaign before the merge-dependant reactivation fixes; it finished in 0.17 s in all later
+  runs. Kept as a termination guard.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/fuzz/3591">
+  <Prefix name="" IRI="http://konclude.test/fuzz/3591#"/>
+  <Declaration><Class abbreviatedIRI=":Scene"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Hole"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Pigeon"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":CrowdedHole"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":CrowdedScene"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":s"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p5"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":sitsAt"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":inScene"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T5"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T6"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T7"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T8"/></Declaration>
+  <EquivalentClasses><Class abbreviatedIRI=":Scene"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":s"/></ObjectOneOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":Hole"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":h0"/><NamedIndividual abbreviatedIRI=":h1"/><NamedIndividual abbreviatedIRI=":h2"/><NamedIndividual abbreviatedIRI=":h3"/></ObjectOneOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":Pigeon"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/><NamedIndividual abbreviatedIRI=":p1"/><NamedIndividual abbreviatedIRI=":p2"/><NamedIndividual abbreviatedIRI=":p3"/><NamedIndividual abbreviatedIRI=":p4"/><NamedIndividual abbreviatedIRI=":p5"/></ObjectOneOf></EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":Pigeon"/><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":sitsAt"/><Class abbreviatedIRI=":Hole"/></ObjectSomeValuesFrom></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":Pigeon"/><ObjectMaxCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":sitsAt"/><Class abbreviatedIRI=":Hole"/></ObjectMaxCardinality></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":Hole"/><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":inScene"/><Class abbreviatedIRI=":Scene"/></ObjectSomeValuesFrom></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":CrowdedHole"/><ObjectIntersectionOf><Class abbreviatedIRI=":Hole"/><ObjectMinCardinality cardinality="2"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":sitsAt"/></ObjectInverseOf><Class abbreviatedIRI=":Pigeon"/></ObjectMinCardinality></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":CrowdedScene"/><ObjectIntersectionOf><Class abbreviatedIRI=":Scene"/><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":inScene"/></ObjectInverseOf><Class abbreviatedIRI=":CrowdedHole"/></ObjectSomeValuesFrom></ObjectIntersectionOf></EquivalentClasses>
+  <DisjointClasses><Class abbreviatedIRI=":Hole"/><Class abbreviatedIRI=":Pigeon"/></DisjointClasses>
+  <DisjointClasses><Class abbreviatedIRI=":Hole"/><Class abbreviatedIRI=":Scene"/></DisjointClasses>
+  <DisjointClasses><Class abbreviatedIRI=":Pigeon"/><Class abbreviatedIRI=":Scene"/></DisjointClasses>
+  <DifferentIndividuals><NamedIndividual abbreviatedIRI=":p0"/><NamedIndividual abbreviatedIRI=":p1"/><NamedIndividual abbreviatedIRI=":p2"/><NamedIndividual abbreviatedIRI=":p3"/><NamedIndividual abbreviatedIRI=":p4"/><NamedIndividual abbreviatedIRI=":p5"/></DifferentIndividuals>
+  <DifferentIndividuals><NamedIndividual abbreviatedIRI=":h0"/><NamedIndividual abbreviatedIRI=":h1"/><NamedIndividual abbreviatedIRI=":h2"/><NamedIndividual abbreviatedIRI=":h3"/></DifferentIndividuals>
+  <FunctionalDataProperty><DataProperty abbreviatedIRI=":d"/></FunctionalDataProperty>
+  <SubClassOf><Class abbreviatedIRI=":Pigeon"/><ObjectUnionOf><DataHasValue><DataProperty abbreviatedIRI=":d"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal></DataHasValue><DataHasValue><DataProperty abbreviatedIRI=":d"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal></DataHasValue></ObjectUnionOf></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":T0"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":s"/></ObjectOneOf><ObjectComplementOf><Class abbreviatedIRI=":CrowdedScene"/></ObjectComplementOf></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T1"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":s"/></ObjectOneOf><Class abbreviatedIRI=":CrowdedScene"/></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T2"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/></ObjectOneOf><DataHasValue><DataProperty abbreviatedIRI=":d"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal></DataHasValue></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T3"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/></ObjectOneOf><ObjectComplementOf><DataHasValue><DataProperty abbreviatedIRI=":d"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal></DataHasValue></ObjectComplementOf><ObjectComplementOf><DataHasValue><DataProperty abbreviatedIRI=":d"/><Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal></DataHasValue></ObjectComplementOf></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T4"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/></ObjectOneOf><ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":p1"/></ObjectOneOf></ObjectComplementOf></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T5"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/></ObjectOneOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":p1"/></ObjectOneOf></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T6"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":h0"/></ObjectOneOf><ObjectComplementOf><Class abbreviatedIRI=":CrowdedHole"/></ObjectComplementOf></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T7"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":s"/></ObjectOneOf><ObjectComplementOf><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":inScene"/></ObjectInverseOf><Class abbreviatedIRI=":CrowdedHole"/></ObjectSomeValuesFrom></ObjectComplementOf></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T8"/><ObjectIntersectionOf><Class abbreviatedIRI=":Pigeon"/><ObjectMaxCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":sitsAt"/><Class abbreviatedIRI=":Hole"/></ObjectMaxCardinality></ObjectIntersectionOf></EquivalentClasses>
+</Ontology>

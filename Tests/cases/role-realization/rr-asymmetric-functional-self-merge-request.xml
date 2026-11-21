@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Role realization: rr-asymmetric-functional-self-merge. The ontology is loaded from the file next to this request.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/role-realization/rr-asymmetric-functional-self-merge"/>
+  <LoadOntologies kb="http://konclude.test/role-realization/rr-asymmetric-functional-self-merge"><OntologyIRI IRI="file:rr-asymmetric-functional-self-merge.owl.xml"/></LoadOntologies>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-asymmetric-functional-self-merge"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106121#s"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106121#a0"/></GetObjectPropertyTargets>
+  <GetObjectPropertySources kb="http://konclude.test/role-realization/rr-asymmetric-functional-self-merge"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106121#s"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106121#x5"/></GetObjectPropertySources>
+  <ReleaseKB kb="http://konclude.test/role-realization/rr-asymmetric-functional-self-merge"/>
+</RequestMessage>

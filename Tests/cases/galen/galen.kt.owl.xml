@@ -52,15 +52,15 @@
     <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
     <Literal>GALEN medical ontology</Literal>
   </DataPropertyAssertion>
-  <DataPropertyAssertion>
-    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+<ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
     <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
-    <Literal>ELK 0.5.0</Literal>
-  </DataPropertyAssertion>
-  <DataPropertyAssertion>
-    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+    <NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/>
+  </ObjectPropertyAssertion>
+<ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
     <NamedIndividual abbreviatedIRI="kt:galen-classification"/>
-    <Literal>HermiT 1.4.5</Literal>
-  </DataPropertyAssertion>
+    <NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/>
+  </ObjectPropertyAssertion>
 
 </Ontology>

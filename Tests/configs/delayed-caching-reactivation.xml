@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Configuration for the completion graph caching tests: the reactivation of
+  nodes that depend on a node that lost its caching is delayed to the late
+  reactivation queue instead of the early one. Order-dependent caching defects
+  show up here while the default configuration still answers correctly.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.DelayedCompletionGraphCachingReactivation'>
+		<Literal>true</Literal>
+	</Set>
+</RequestMessage>

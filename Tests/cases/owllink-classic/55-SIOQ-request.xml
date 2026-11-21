@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/55#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/55"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/55">
+
+		<owl:Declaration>
+			<owl:Class IRI="#A"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:Class IRI="#C"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#r"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#s"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#sInv"/>
+		</owl:Declaration>
+		<owl:Declaration>
+			<owl:NamedIndividual IRI="#a"/>
+		</owl:Declaration>
+		<owl:SubClassOf>
+			<owl:Class IRI="#A"/>
+			<owl:ObjectMaxCardinality cardinality="2">
+				<owl:ObjectProperty IRI="#sInv"/>
+			</owl:ObjectMaxCardinality>
+		</owl:SubClassOf>
+		<owl:SubClassOf>
+			<owl:Class IRI="#C"/>
+			<owl:ObjectIntersectionOf>
+				<owl:ObjectSomeValuesFrom>
+					<owl:ObjectProperty IRI="#r"/>
+					<owl:Class IRI="#C"/>
+				</owl:ObjectSomeValuesFrom>
+				<owl:ObjectSomeValuesFrom>
+					<owl:ObjectProperty IRI="#s"/>
+					<owl:ObjectOneOf>
+						<owl:NamedIndividual IRI="#a"/>
+					</owl:ObjectOneOf>
+				</owl:ObjectSomeValuesFrom>
+			</owl:ObjectIntersectionOf>
+		</owl:SubClassOf>
+		<owl:ClassAssertion>
+			<owl:Class IRI="#A"/>
+			<owl:NamedIndividual IRI="#a"/>
+		</owl:ClassAssertion>
+		<owl:InverseObjectProperties>
+			<owl:ObjectProperty IRI="#sInv"/>
+			<owl:ObjectProperty IRI="#s"/>
+		</owl:InverseObjectProperties>
+		<owl:AsymmetricObjectProperty>
+			<owl:ObjectProperty IRI="#r"/>
+		</owl:AsymmetricObjectProperty>
+
+   
+   </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/55" timing="simple">
+        <owl:Class IRI="#C"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/55"/>
+
+</RequestMessage>

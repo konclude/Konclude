@@ -15,7 +15,9 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:classification-complex"/>
-    <Literal>Direct superclasses include A to M (role chain) and B to A; F collapses into owl:Nothing and C/E/G into one synset.</Literal>
+    <Literal>Direct superclasses include A to M (role chain) and B to A; F collapses into owl:Nothing and C/E/G into one synset. M is the only direct superclass of A (the expectation first also listed owl:Thing, a redundant edge of the classifier that HermiT and FaCT++ do not have).</Literal>
   </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classification-complex"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classification-complex"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
 
 </Ontology>

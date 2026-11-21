@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dlfuzz/1264">
+  <Prefix name="" IRI="http://konclude.test/dlfuzz/1264#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":f"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":h"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":hi"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T4"/></Declaration>
+  <InverseObjectProperties><ObjectProperty abbreviatedIRI=":hi"/><ObjectProperty abbreviatedIRI=":h"/></InverseObjectProperties>
+  <FunctionalObjectProperty><ObjectProperty abbreviatedIRI=":f"/></FunctionalObjectProperty>
+  <InverseFunctionalObjectProperty><ObjectProperty abbreviatedIRI=":h"/></InverseFunctionalObjectProperty>
+  <EquivalentClasses><Class abbreviatedIRI=":C0"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/><NamedIndividual abbreviatedIRI=":a2"/></ObjectOneOf></EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":C1"/><ObjectAllValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":f"/></ObjectInverseOf><Class abbreviatedIRI=":C1"/></ObjectAllValuesFrom></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":f"/><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":f"/><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom></SubClassOf>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":f"/><NamedIndividual abbreviatedIRI=":a2"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":f"/><NamedIndividual abbreviatedIRI=":a1"/><NamedIndividual abbreviatedIRI=":a0"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":h"/><NamedIndividual abbreviatedIRI=":a1"/><NamedIndividual abbreviatedIRI=":a2"/></ObjectPropertyAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":C1"/><NamedIndividual abbreviatedIRI=":a2"/></ClassAssertion>
+  <EquivalentClasses><Class abbreviatedIRI=":T0"/><ObjectIntersectionOf><ObjectMinCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":f"/><ObjectIntersectionOf><Class abbreviatedIRI=":C1"/><ObjectComplementOf><Class abbreviatedIRI=":C1"/></ObjectComplementOf></ObjectIntersectionOf></ObjectMinCardinality><ObjectExactCardinality cardinality="2"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":hi"/></ObjectInverseOf><Class abbreviatedIRI=":C0"/></ObjectExactCardinality><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":h"/><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T1"/><ObjectIntersectionOf><ObjectMinCardinality cardinality="3"><ObjectProperty abbreviatedIRI=":h"/><ObjectMinCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":f"/><Class abbreviatedIRI=":C0"/></ObjectMinCardinality></ObjectMinCardinality><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":h"/><Class abbreviatedIRI=":C1"/></ObjectAllValuesFrom><Class abbreviatedIRI=":C0"/></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T2"/><ObjectIntersectionOf><Class abbreviatedIRI=":C2"/><Class abbreviatedIRI=":C0"/><Class abbreviatedIRI=":C1"/><ObjectMaxCardinality cardinality="3"><ObjectProperty abbreviatedIRI=":hi"/><ObjectComplementOf><Class abbreviatedIRI=":C2"/></ObjectComplementOf></ObjectMaxCardinality></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T3"/><ObjectIntersectionOf><ObjectAllValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":f"/></ObjectInverseOf><ObjectComplementOf><Class abbreviatedIRI=":C1"/></ObjectComplementOf></ObjectAllValuesFrom><Class abbreviatedIRI=":C2"/><Class abbreviatedIRI=":C2"/><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":h"/></ObjectInverseOf><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T4"/><ObjectIntersectionOf><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":h"/><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":h"/><ObjectComplementOf><Class abbreviatedIRI=":C0"/></ObjectComplementOf></ObjectAllValuesFrom></ObjectSomeValuesFrom><Class abbreviatedIRI=":C0"/></ObjectIntersectionOf></EquivalentClasses>
+</Ontology>

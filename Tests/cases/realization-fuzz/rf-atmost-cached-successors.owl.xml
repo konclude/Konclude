@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://t/q">
+<Prefix name="" IRI="http://t/q#"/>
+<Declaration><NamedIndividual abbreviatedIRI=":x1"/></Declaration>
+<Declaration><NamedIndividual abbreviatedIRI=":x3"/></Declaration>
+<ClassAssertion><ObjectMinCardinality cardinality="3"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":g"/></ObjectInverseOf><Class abbreviatedIRI=":C2"/></ObjectMinCardinality><NamedIndividual abbreviatedIRI=":x3"/></ClassAssertion><EquivalentClasses><Class abbreviatedIRI=":R3"/><ObjectMinCardinality cardinality="2"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":g"/></ObjectInverseOf></ObjectMinCardinality></EquivalentClasses>
+<ClassAssertion><ObjectUnionOf><Class abbreviatedIRI=":C3"/><Class abbreviatedIRI=":C4"/></ObjectUnionOf><NamedIndividual abbreviatedIRI=":x1"/></ClassAssertion>
+</Ontology>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family A: two nominals merged by an at-most
+  restriction on an inverse role.
+
+  o has at most one r-predecessor, and both a and b are asserted as
+  r-predecessors of o. Therefore a and b have to be the same individual in every
+  model, although nothing asserts their equality. The consistency test merges
+  one nominal into the other; a later test that asks for a and not b reuses that
+  cached model. If the merge is not re-derived after the test node was merged
+  with {a}, the test wrongly answers satisfiable.
+
+  The second source of non-determinism is the disjunction in the existential
+  restriction of a: the t-successor is a K1 or a K2, so the cached model (Gn)
+  differs from the deterministic graph (Gd) and changing the t-successor in a
+  test must re-decide the choice.
+  Axioms: o in (<=1 inv(r)), r(a,o), r(b,o), a in (<=1 t) and (some t (K1 or K2)).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/a">
+  <Prefix name="" IRI="http://konclude.test/cgc/a#"/>
+
+  <Declaration><Class abbreviatedIRI=":K1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":K2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestBoth"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNotBoth"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSomeK1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoK1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoK"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSelfClash"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o"/></Declaration>
+
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ClassAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":r"/>
+    <NamedIndividual abbreviatedIRI=":a"/>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":r"/>
+    <NamedIndividual abbreviatedIRI=":b"/>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ObjectPropertyAssertion>
+  <ClassAssertion>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty abbreviatedIRI=":t"/>
+      <ObjectUnionOf><Class abbreviatedIRI=":K1"/><Class abbreviatedIRI=":K2"/></ObjectUnionOf>
+    </ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectProperty abbreviatedIRI=":t"/>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+
+  <!-- a and b are the same individual, so this is satisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestBoth"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":b"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a and b are the same individual, so asking for a and not b is unsatisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNotBoth"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":b"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- The t-successor may be a K1, so this stays satisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSomeK1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K1"/></ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- The t-successor may be a K2, so forbidding a K1 t-successor stays satisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoK1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K1"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Every t-successor is a K1 or a K2, so forbidding both is unsatisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoK"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K1"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K2"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Control: a is not different from itself. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSelfClash"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

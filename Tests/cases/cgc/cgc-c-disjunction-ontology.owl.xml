@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family C: a plain disjunction whose choice
+  determines the type of a neighbour.
+
+  a is a C1 or a C2. C1 implies D1 and forces every r-successor into D1, C2
+  implies D2 and forces every r-successor into D2. Because r(a,o) and D1 and D2
+  are disjoint, a test that puts o into D2 still has a model (a takes C2), but a
+  cached model that absorbed the C1 alternative would clash and wrongly answer
+  unsatisfiable. Conversely a test that asks for o and not D1 and not D2 is
+  unsatisfiable because whichever alternative a takes forces one of them onto o.
+  Axioms: a in (C1 or C2), C1 <= D1, C2 <= D2, C1 <= all r D1,
+  C2 <= all r D2, r(a,o), D1 disjoint D2.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/c">
+  <Prefix name="" IRI="http://konclude.test/cgc/c#"/>
+
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestONoBranch"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANoBranch"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestORechoice"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestOD1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestOD1D2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANotD1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestONotD1NotD2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestOForcesC1"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":o"/></Declaration>
+
+  <ClassAssertion>
+    <ObjectUnionOf><Class abbreviatedIRI=":C1"/><Class abbreviatedIRI=":C2"/></ObjectUnionOf>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <SubClassOf><Class abbreviatedIRI=":C1"/><Class abbreviatedIRI=":D1"/></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C2"/><Class abbreviatedIRI=":D2"/></SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":C1"/>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":D1"/></ObjectAllValuesFrom>
+  </SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":C2"/>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":D2"/></ObjectAllValuesFrom>
+  </SubClassOf>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI=":r"/>
+    <NamedIndividual abbreviatedIRI=":a"/>
+    <NamedIndividual abbreviatedIRI=":o"/>
+  </ObjectPropertyAssertion>
+  <DisjointClasses><Class abbreviatedIRI=":D1"/><Class abbreviatedIRI=":D2"/></DisjointClasses>
+
+  <!-- a forces D1 or D2 onto o, so forbidding both is unsatisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestONoBranch"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D1"/></ObjectComplementOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a itself is a D1 or a D2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANoBranch"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D1"/></ObjectComplementOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- o is a D2: a has to choose C2, a cached C1 choice must be given up. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestORechoice"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <Class abbreviatedIRI=":D2"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- o is a D1; only the C1 alternative is left because C2 would force D2 onto o. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestOD1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <Class abbreviatedIRI=":D1"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- o is a D1 and a D2; D1 and D2 are disjoint. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestOD1D2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <Class abbreviatedIRI=":D1"/>
+      <Class abbreviatedIRI=":D2"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a is not a D1: satisfiable through C2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestANotD1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D1"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- o is neither a D1 nor a D2; a forces one of them onto o. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestONotD1NotD2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D1"/></ObjectComplementOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":D2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- o is a D1 and not a D2: only the C1 alternative remains. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestOForcesC1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":o"/></ObjectOneOf>
+      <Class abbreviatedIRI=":D1"/>
+      <ObjectComplementOf><Class abbreviatedIRI=":D2"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

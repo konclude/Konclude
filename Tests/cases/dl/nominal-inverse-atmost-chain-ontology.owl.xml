@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  At-most restrictions on the inverse role of a nominal and infinite chains of anonymous predecessors (the NN-rule).
+  Every C-node has an s-edge to the nominal a and an r-successor in C. If the chain cannot close (D starts it and
+  all r-successors are not D, r is inverse functional), every model has infinitely many s-predecessors of a, but a
+  has at most 5 (TestInverseFunctionalChain, from the old OWLlink test 56-SIOQ-5). The same with an asymmetric
+  chain role and at most 2 predecessors of b (TestAsymmetricChain, from 55-SIOQ): a chain closes only through at least
+  three nodes. The controls have chains that can close in one node.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/nominal-inverse-atmost-chain">
+  <Prefix name="" IRI="http://konclude.test/dl/nominal-inverse-atmost-chain#"/>
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestInverseFunctionalChain"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAsymmetricChain"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestClosingChain"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestInverseFunctionalLoop"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r2"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r3"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r4"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":s"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":sInv"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b"/></Declaration>
+
+  <InverseObjectProperties><ObjectProperty abbreviatedIRI=":sInv"/><ObjectProperty abbreviatedIRI=":s"/></InverseObjectProperties>
+  <InverseFunctionalObjectProperty><ObjectProperty abbreviatedIRI=":r"/></InverseFunctionalObjectProperty>
+  <AsymmetricObjectProperty><ObjectProperty abbreviatedIRI=":r2"/></AsymmetricObjectProperty>
+  <InverseFunctionalObjectProperty><ObjectProperty abbreviatedIRI=":r4"/></InverseFunctionalObjectProperty>
+
+  <SubClassOf><Class abbreviatedIRI=":A"/><ObjectMaxCardinality cardinality="5"><ObjectProperty abbreviatedIRI=":sInv"/></ObjectMaxCardinality></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":B"/><ObjectMaxCardinality cardinality="2"><ObjectProperty abbreviatedIRI=":sInv"/></ObjectMaxCardinality></SubClassOf>
+  <ClassAssertion><Class abbreviatedIRI=":A"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":B"/><NamedIndividual abbreviatedIRI=":b"/></ClassAssertion>
+
+  <!-- 56-SIOQ-5: the chain started by D cannot close -->
+  <SubClassOf><Class abbreviatedIRI=":C"/><ObjectIntersectionOf>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom>
+    <ObjectHasValue><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":a"/></ObjectHasValue>
+    <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><ObjectComplementOf><Class abbreviatedIRI=":D"/></ObjectComplementOf></ObjectAllValuesFrom>
+  </ObjectIntersectionOf></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":D"/><Class abbreviatedIRI=":C"/></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":TestInverseFunctionalChain"/><Class abbreviatedIRI=":D"/></EquivalentClasses>
+
+  <!-- 55-SIOQ: an asymmetric chain needs at least three nodes to close, b has at most two predecessors -->
+  <SubClassOf><Class abbreviatedIRI=":C2"/><ObjectIntersectionOf>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r2"/><Class abbreviatedIRI=":C2"/></ObjectSomeValuesFrom>
+    <ObjectHasValue><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":b"/></ObjectHasValue>
+  </ObjectIntersectionOf></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":TestAsymmetricChain"/><Class abbreviatedIRI=":C2"/></EquivalentClasses>
+
+  <!-- control: without a restriction on r3 the chain closes in one node (an r3-loop) -->
+  <SubClassOf><Class abbreviatedIRI=":C3"/><ObjectIntersectionOf>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r3"/><Class abbreviatedIRI=":C3"/></ObjectSomeValuesFrom>
+    <ObjectHasValue><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":b"/></ObjectHasValue>
+  </ObjectIntersectionOf></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":TestClosingChain"/><Class abbreviatedIRI=":C3"/></EquivalentClasses>
+
+  <!-- control: inverse functional, but nothing prevents the start node from being its own r4-successor -->
+  <SubClassOf><Class abbreviatedIRI=":C4"/><ObjectIntersectionOf>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r4"/><Class abbreviatedIRI=":C4"/></ObjectSomeValuesFrom>
+    <ObjectHasValue><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":a"/></ObjectHasValue>
+  </ObjectIntersectionOf></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":D4"/><Class abbreviatedIRI=":C4"/></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":TestInverseFunctionalLoop"/><Class abbreviatedIRI=":D4"/></EquivalentClasses>
+</Ontology>

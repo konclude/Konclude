@@ -362,7 +362,7 @@ namespace Konclude {
 					} else if (propertyName.endsWith("timeoutSeconds")) {
 						LOG(WARN, getLogDomain(), logTr("kt:timeoutSeconds on test '%1' in '%2' is ignored; declare a kt:RunConfig and assign it with kt:usesTestRunConfig.").arg(individualName).arg(filePath), this);
 					} else if (propertyName.endsWith("flaky")) {
-						testCase.mKnownFailure = (QString::compare(value, "true", Qt::CaseInsensitive) == 0);
+						testCase.mFlaky = (QString::compare(value, "true", Qt::CaseInsensitive) == 0);
 					}
 				}
 			}
@@ -828,25 +828,31 @@ namespace Konclude {
 				result.mActualVerdict = lastTaskResult.mVerdict;
 				result.mExplanation = lastTaskResult.mExplanation;
 
+				CConformanceOutcome::TYPE observedOutcome = CConformanceOutcome::TYPE::FAIL;
 				if (!sameObservation) {
-					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::FLAKY;
-					return result;
+					observedOutcome = CConformanceOutcome::TYPE::FLAKY;
+				} else if (sawTimeout) {
+					observedOutcome = CConformanceOutcome::TYPE::TIMEOUT;
+				} else if (lastTaskResult.mStatus != CConformanceTaskResult::STATUS::EXECUTION_ERROR && lastTaskResult.isMatched()) {
+					observedOutcome = CConformanceOutcome::TYPE::PASS;
 				}
-				if (sawTimeout) {
-					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::TIMEOUT;
-					return result;
-				}
-				if (lastTaskResult.mStatus == CConformanceTaskResult::STATUS::EXECUTION_ERROR) {
-					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::FAIL;
-					return result;
-				}
-
-				if (lastTaskResult.isMatched()) {
-					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::FIXED : CConformanceOutcome::TYPE::PASS;
-				} else {
-					result.mOutcome = execution.mTestCase.mKnownFailure ? CConformanceOutcome::TYPE::KNOWN : CConformanceOutcome::TYPE::FAIL;
-				}
+				result.mOutcome = getReportedOutcome(execution.mTestCase, observedOutcome);
 				return result;
+			}
+
+
+			CConformanceOutcome::TYPE CConformanceRunner::getReportedOutcome(const CConformanceTestCase& testCase, CConformanceOutcome::TYPE observedOutcome) {
+				if (observedOutcome == CConformanceOutcome::TYPE::PASS) {
+					// a flaky test is expected to pass at times, its pass does not mean that a known issue is fixed
+					if (testCase.mKnownFailure && !testCase.mFlaky) {
+						return CConformanceOutcome::TYPE::FIXED;
+					}
+					return CConformanceOutcome::TYPE::PASS;
+				}
+				if (testCase.mKnownFailure || testCase.mFlaky) {
+					return CConformanceOutcome::TYPE::KNOWN;
+				}
+				return observedOutcome;
 			}
 
 

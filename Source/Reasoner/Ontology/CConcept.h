@@ -80,6 +80,12 @@ namespace Konclude {
 
 					CConceptOperator* getConceptOperator();
 
+					//! Polarity of the filler of the successors that are created for this concept (or its negation).
+					//! The filler of an at-least restriction, which is also a negated at-most restriction, is the operand
+					//! as it is stored. The filler of an existential restriction, which is stored as a negated all
+					//! restriction, is the operand with the polarity of the concept applied.
+					bool getSuccessorFillerNegation(bool operandNegated, bool conceptNegated);
+
 					CConcept *setTerminology(CTerminology *terminology);
 					CTerminology *getTerminology();
 

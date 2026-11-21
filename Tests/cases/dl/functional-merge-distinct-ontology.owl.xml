@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Two distinct at-least successors merged through nominals by a functional role (reduced from
+  fuzz seed 3203):
+
+    C0 = {a1, a2}, C0 below (some inverse r1.C1), C0 below C2, (some r0.C1) below C0,
+    r1 below r0, r0 functional, C1(a0), C0(a0),
+    T4 = (at most 1 inverse r0.C1) and {a0} and (all r0.C2), T5 = {a0} and (at most 1 r1.C2)
+
+  Every r0-predecessor in C1 of a0 is in C0 = {a1, a2}, and the functional r0 prevents two of
+  them, so T5 is below T4. In the test of T5 and not-T4 the two distinct r0-predecessors created
+  for (at least 2 inverse r0.C1) were merged with a1 and a2, and the functional r0 then merged
+  these nodes. The functional rule checked the distinct edge on an older version of one node
+  (the opposite node of a link), which did not have the edge yet, so the distinct nodes were
+  merged without a clash and the test answered satisfiable.
+  Expected: the HermiT taxonomy in expected/functional-merge-distinct-classification.owl.xml.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/functional-merge-distinct">
+  <Prefix name="" IRI="http://konclude.test/dl/functional-merge-distinct#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r0"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r1"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T5"/></Declaration>
+  <EquivalentClasses><Class abbreviatedIRI=":C0"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/><NamedIndividual abbreviatedIRI=":a2"/></ObjectOneOf></EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r1"/></ObjectInverseOf><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectUnionOf><Class abbreviatedIRI=":C2"/><Class abbreviatedIRI=":C2"/></ObjectUnionOf></SubClassOf>
+  <SubClassOf><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C1"/></ObjectSomeValuesFrom><Class abbreviatedIRI=":C0"/></SubClassOf>
+  <SubObjectPropertyOf><ObjectProperty abbreviatedIRI=":r1"/><ObjectProperty abbreviatedIRI=":r0"/></SubObjectPropertyOf>
+  <FunctionalObjectProperty><ObjectProperty abbreviatedIRI=":r0"/></FunctionalObjectProperty>
+  <ClassAssertion><Class abbreviatedIRI=":C1"/><NamedIndividual abbreviatedIRI=":a0"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":C0"/><NamedIndividual abbreviatedIRI=":a0"/></ClassAssertion>
+  <EquivalentClasses><Class abbreviatedIRI=":T4"/><ObjectIntersectionOf><ObjectMaxCardinality cardinality="1"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r0"/></ObjectInverseOf><Class abbreviatedIRI=":C1"/></ObjectMaxCardinality><ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/></ObjectOneOf><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C2"/></ObjectAllValuesFrom></ObjectIntersectionOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":T5"/><ObjectIntersectionOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/></ObjectOneOf><ObjectMaxCardinality cardinality="1"><ObjectProperty abbreviatedIRI=":r1"/><Class abbreviatedIRI=":C2"/></ObjectMaxCardinality></ObjectIntersectionOf></EquivalentClasses>
+</Ontology>

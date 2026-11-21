@@ -29,10 +29,6 @@
     <Declaration>
         <Class IRI="http://konclude.test/features/classification#A"/>
     </Declaration>
-    <SubClassOf>
-        <Class IRI="http://konclude.test/features/classification#A"/>
-        <Class IRI="http://www.w3.org/2002/07/owl#Thing"/>
-    </SubClassOf>
     <Declaration>
         <Class IRI="http://konclude.test/features/classification#R"/>
     </Declaration>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family D: two blockable r-successors merged by an
+  unqualified at-most restriction.
+
+  a requires one r-successor in B1 and one r-successor in B2, but has at most one
+  r-successor at all. The two successors are merged, so the remaining successor
+  is a B1 and a B2; asking for a and no r-successor in (B1 and B2) must be
+  unsatisfiable. The choice in the t-successor makes the cached model (Gn)
+  different from the deterministic graph (Gd), so a test that changes a also has
+  to re-decide that choice.
+  Axioms: a in (some r B1), (some r B2), (<=1 r) and (some t (K1 or K2)).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/d">
+  <Prefix name="" IRI="http://konclude.test/cgc/d#"/>
+
+  <Declaration><Class abbreviatedIRI=":B1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":K1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":K2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoMergedSuccessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestMergedSuccessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestAllMerged"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoB1Successor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNotAllB1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestTwoSuccessors"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoSuccessor"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoChoice"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSomeK2"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":t"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+
+  <ClassAssertion>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B1"/></ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B2"/></ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectMaxCardinality cardinality="1">
+      <ObjectProperty abbreviatedIRI=":r"/>
+    </ObjectMaxCardinality>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <ObjectSomeValuesFrom>
+      <ObjectProperty abbreviatedIRI=":t"/>
+      <ObjectUnionOf><Class abbreviatedIRI=":K1"/><Class abbreviatedIRI=":K2"/></ObjectUnionOf>
+    </ObjectSomeValuesFrom>
+    <NamedIndividual abbreviatedIRI=":a"/>
+  </ClassAssertion>
+
+  <!-- The merged successor is a B1 and a B2, so forbidding it is unsatisfiable. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoMergedSuccessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty abbreviatedIRI=":r"/>
+          <ObjectIntersectionOf><Class abbreviatedIRI=":B1"/><Class abbreviatedIRI=":B2"/></ObjectIntersectionOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestMergedSuccessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <ObjectIntersectionOf><Class abbreviatedIRI=":B1"/><Class abbreviatedIRI=":B2"/></ObjectIntersectionOf>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- There is only one r-successor, so it carries both fillers. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestAllMerged"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectAllValuesFrom>
+        <ObjectProperty abbreviatedIRI=":r"/>
+        <ObjectIntersectionOf><Class abbreviatedIRI=":B1"/><Class abbreviatedIRI=":B2"/></ObjectIntersectionOf>
+      </ObjectAllValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoB1Successor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B1"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- a has an r-successor, so not all r-successors can be non-B1. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNotAllB1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B1"/></ObjectAllValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestTwoSuccessors"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B1"/></ObjectSomeValuesFrom>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B2"/></ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoSuccessor"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectMaxCardinality cardinality="0"><ObjectProperty abbreviatedIRI=":r"/></ObjectMaxCardinality>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Every t-successor is a K1 or a K2. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestNoChoice"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K1"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K2"/></ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":TestSomeK2"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+      <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":t"/><Class abbreviatedIRI=":K2"/></ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

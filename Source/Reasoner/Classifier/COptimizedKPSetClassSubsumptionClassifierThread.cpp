@@ -1702,7 +1702,7 @@ namespace Konclude {
 					CClassificationClassPseudoModelData* subsumedPMData = subsumedPMHash->getPseudoModelData(0,false);
 					CClassificationClassPseudoModelData* subsumerPMData = subsumerPMHash->getPseudoModelData(0,false);
 
-					if (subsumedPMData && subsumerPMData) {
+					if (subsumedPMData && subsumerPMData && !hasPseudoModelSubsumerConcept(optSubClassItem,subsumedPMData,subsumerItem)) {
 						bool isSubSumPossible =  isPseudoModelSubsumerPossible(optSubClassItem,subsumedPMData,subsumedPMHash,subsumerPMData,subsumerPMHash);
 						if (!isSubSumPossible) {
 							if (isSubsumptionFlag) {
@@ -1714,6 +1714,23 @@ namespace Konclude {
 					return false;
 				}
 				return false;
+			}
+
+
+			bool COptimizedKPSetClassSubsumptionClassifierThread::hasPseudoModelSubsumerConcept(COptimizedKPSetClassOntologyClassificationItem *optSubClassItem, CClassificationClassPseudoModelData* subsumedPMData, COptimizedKPSetClassTestingItem* subsumerItem) {
+				// the comparison of the pseudo models only shows a non-subsumption if the node of the subsumed model is not an instance of the subsumer,
+				// a model that contains the subsumer itself (e.g., obtained by a merge with a nominal whose label does not contain all the internal
+				// consequences of the subsumer) is no evidence for a non-subsumption
+				CClassificationClassPseudoModelConceptMap* subsumedConMap = subsumedPMData->getPseudoModelConceptMap(false);
+				if (!subsumedConMap) {
+					return false;
+				}
+				CConcept* subsumerConcept = subsumerItem->getTestingConcept();
+				if (subsumedConMap->contains(CConceptTagComparer(subsumerConcept))) {
+					return true;
+				}
+				CConcept* candidateConcept = optSubClassItem->getEquivalentConceptCandidateHash()->value(subsumerConcept);
+				return candidateConcept && subsumedConMap->contains(CConceptTagComparer(candidateConcept));
 			}
 
 
@@ -1919,7 +1936,8 @@ namespace Konclude {
 												CConcept* possSubsumConcept = possSubsumDataIt->getPossibleSubsumerConcept();
 												if (possSubsumConcept->getOperatorCode() != CCEQ || !equivConCandidateHash->contains(possSubsumConcept)) {
 													COptimizedKPSetClassTestingItem* possSubsumItem = optKPSetClassificationItem->getConceptSatisfiableTestItem(possSubsumConcept);
-													if (!subsumedItem->hasSubsumerConceptItem(possSubsumItem) && subsumedItem != possSubsumItem) {
+													// owl:Thing is a subsumer of every class, there is nothing to test
+													if (!subsumedItem->hasSubsumerConceptItem(possSubsumItem) && subsumedItem != possSubsumItem && possSubsumItem != optKPSetClassificationItem->getTopConceptSatisfiableTestItem()) {
 														COptimizedKPSetClassPossibleSubsumptionData* possSubsumData = new COptimizedKPSetClassPossibleSubsumptionData(possSubsumItem);
 														possSubsumMap->insert(CConceptTagComparer(possSubsumConcept),possSubsumData);
 														incRemainingPossibleSubsumptionTestingCount(optKPSetClassificationItem,possSubsumMap);
@@ -2037,7 +2055,7 @@ namespace Konclude {
 												}
 											}
 											while (itPoss != itPossEnd) {
-												COptimizedKPSetClassPossibleSubsumptionData* possData = itDownPoss.value();
+												COptimizedKPSetClassPossibleSubsumptionData* possData = itPoss.value();
 												if (!downPropItem->hasSubsumerConceptItem(possData->getClassItem()) && downPropItem != possData->getClassItem()) {
 													if (!possData->isSubsumptionInvalided()) {
 														possData->setSubsumptionInvalid(true);
@@ -2229,7 +2247,15 @@ namespace Konclude {
 					possSubsumData = possSubsumMap->value(candidateConcept);
 				}
 
-				if (isSubsumption) {
+				if (isSubsumption && subsumerItem == topItem) {
+					// owl:Thing subsumes every class and it is never recorded as a subsumer (cf. tellConceptSupsumption), otherwise it
+					// would become an additional direct parent in the transitive reduction and change the subsumer counts that are
+					// compared for equivalences
+					optKPSetClassificationItem->incCalculatedTruePossibleSubsumerCount();
+					if (possSubsumData) {
+						possSubsumData->setSubsumptionConfirmed(true);
+					}
+				} else if (isSubsumption) {
 					optKPSetClassificationItem->incCalculatedTruePossibleSubsumerCount();
 					if (possSubsumData) {
 						possSubsumData->setSubsumptionConfirmed(true);

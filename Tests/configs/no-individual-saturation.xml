@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The individuals are not saturated; the consistency check and all tests use
+  completion graphs only (the representative cache stays empty, so the
+  individuals are not loaded from it either).
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.IndividualSaturation'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

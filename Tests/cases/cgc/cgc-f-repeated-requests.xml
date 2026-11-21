@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Family F over OWLlink: one knowledge base, one cached completion graph.
+     The re-choice question is asked twice and the entailed-type question before
+     and after it. Expected, in response order: false, true, true, false,
+     false. -->
+<RequestMessage xmlns="http://www.owllink.org/owllink#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/kb/cgc-f"/>
+  <LoadOntologies kb="http://konclude.test/kb/cgc-f">
+    <OntologyIRI IRI="file:cgc-f-inverse-gci-ontology.owl.xml"/>
+  </LoadOntologies>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-f">
+    <owl:Class IRI="http://konclude.test/cgc/f#TestANoBranch"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-f">
+    <owl:Class IRI="http://konclude.test/cgc/f#TestANotD1"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-f">
+    <owl:Class IRI="http://konclude.test/cgc/f#TestANotD1"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-f">
+    <owl:Class IRI="http://konclude.test/cgc/f#TestANoBranch"/>
+  </IsClassSatisfiable>
+  <IsClassSatisfiable kb="http://konclude.test/kb/cgc-f">
+    <owl:Class IRI="http://konclude.test/cgc/f#TestONoBranch"/>
+  </IsClassSatisfiable>
+  <ReleaseKB kb="http://konclude.test/kb/cgc-f"/>
+</RequestMessage>

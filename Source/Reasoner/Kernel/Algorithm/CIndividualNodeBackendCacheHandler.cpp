@@ -1192,6 +1192,25 @@ namespace Konclude {
 								}
 
 
+								// the links of the graph can be incomplete (e.g., a role assertion that is only represented by the cache because the neighbour
+								// expansion was partial), the deterministic roles of the previous label for this neighbour hold in every model and are kept
+								if (roleAssertionLinker && prevNeighbourRoleSetLabelRef) {
+									mAssBackCacheReader->visitRolesOfAssociatedNeigbourRoleSetLabel(nullptr, prevNeighbourRoleSetLabelRef, [&](CRole* prevRole, bool prevInversed, bool prevAsserted, bool prevNominalConnected, bool prevNondeterministic)->bool {
+										if (!prevNondeterministic) {
+											bool contained = false;
+											for (CBackendRepresentativeMemoryCacheRoleAssertionLinker* linkerIt = roleAssertionLinker; linkerIt && !contained; linkerIt = (CBackendRepresentativeMemoryCacheRoleAssertionLinker*)linkerIt->getNext()) {
+												contained = linkerIt->getData() == prevRole && linkerIt->isNegated() == prevInversed;
+											}
+											if (!contained) {
+												CBackendRepresentativeMemoryCacheRoleAssertionLinker* linker = CObjectAllocator< CBackendRepresentativeMemoryCacheRoleAssertionLinker >::allocateAndConstruct(calcAlgContext->getMemoryAllocationManager());
+												linker->initRoleAssertionLinker(prevRole, prevInversed, prevAsserted, prevNominalConnected, false);
+												roleAssertionLinker = (CBackendRepresentativeMemoryCacheRoleAssertionLinker*)linker->append(roleAssertionLinker);
+											}
+										}
+										return true;
+									});
+								}
+
 								if (roleAssertionLinker) {
 
 
@@ -1290,7 +1309,10 @@ namespace Konclude {
 
 
 
-					if (extIndiBackSyncData && !extIndiBackSyncData->hasNonDeterministicallyMergedIndividuals() && !extIndiBackSyncData->hasNewlyMergedAllNeighbourExpansion() && extIndiBackSyncData->hasNewlyMergedIndividuals() && extIndiBackSyncData->hasNewlyMergedInferringNeighbourExpansion()) {
+					// the expansion of all neighbours of the newly merged individuals (e.g., required by critical role characteristics
+					// such as irreflexivity) also covers the neighbours of the inferring expansion, otherwise the cache cannot install
+					// the deterministically same individuals and leaves their representative incompletely handled
+					if (extIndiBackSyncData && !extIndiBackSyncData->hasNonDeterministicallyMergedIndividuals() && extIndiBackSyncData->hasNewlyMergedIndividuals() && (extIndiBackSyncData->hasNewlyMergedInferringNeighbourExpansion() || extIndiBackSyncData->hasNewlyMergedAllNeighbourExpansion())) {
 						CBackendRepresentativeMemoryLabelCacheItem* detSameIndiSetLabel = indiAssData->getDeterministicConceptSetLabelCacheEntry();
 						visitMergedIndividualNodesAssociationData(extractionIndiNode, indiAssData, detSameIndiSetLabel, true, maxDetBranchTag, [&](cint64 mergedIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* mergedIndiAssData, bool deterministicallyMerged)->bool {
 

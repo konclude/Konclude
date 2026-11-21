@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/atleast-successor-saturation-polarity">
+  <Prefix name="" IRI="http://konclude.test/dl/atleast-successor-saturation-polarity#"/>
+  <Declaration><Class abbreviatedIRI=":Hub"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Single"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Guard"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":F"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":s"/></Declaration>
+  <!-- Hub is the nominal {a} with an r-predecessor in B; nothing bounds its s-predecessors in F. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Hub"/>
+    <ObjectIntersectionOf>
+      <ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Single bounds the s-predecessors in F, so Hub is not below it. Testing Hub and not Single creates two distinct s-predecessors in F. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Single"/>
+    <ObjectIntersectionOf>
+      <ObjectMaxCardinality cardinality="1"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":s"/></ObjectInverseOf><Class abbreviatedIRI=":F"/></ObjectMaxCardinality>
+      <ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf><Class abbreviatedIRI=":B"/></ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <!-- Guard mentions the complement of F, which gives the complement of F a saturated node. -->
+  <EquivalentClasses>
+    <Class abbreviatedIRI=":Guard"/>
+    <ObjectIntersectionOf>
+      <ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":s"/><Class abbreviatedIRI=":F"/></ObjectAllValuesFrom>
+      <ObjectComplementOf><Class abbreviatedIRI=":F"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

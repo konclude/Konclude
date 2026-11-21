@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Role realization: rr-transitive-same-individual. The ontology is loaded from the file next to this request.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/role-realization/rr-transitive-same-individual"/>
+  <LoadOntologies kb="http://konclude.test/role-realization/rr-transitive-same-individual"><OntologyIRI IRI="file:rr-transitive-same-individual.owl.xml"/></LoadOntologies>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-transitive-same-individual"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106435#ti"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106435#x4"/></GetObjectPropertyTargets>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-transitive-same-individual"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106435#ti"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106435#x1"/></GetObjectPropertyTargets>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-transitive-same-individual"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106435#t"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106435#x2"/></GetObjectPropertyTargets>
+  <ReleaseKB kb="http://konclude.test/role-realization/rr-transitive-same-individual"/>
+</RequestMessage>

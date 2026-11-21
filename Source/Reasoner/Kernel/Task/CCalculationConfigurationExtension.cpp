@@ -94,6 +94,7 @@ namespace Konclude {
 					mConfDebuggingWriteDataForIncrementalExpansionTestsChecked = false;
 					mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsChecked = false;
 					mConfDebuggingWriteDataForAllTestsChecked = false;
+					mConfDebuggingWriteCompletionGraphCachingSnapshotsChecked = false;
 
 					mConfSuccessorConceptSaturationExpansionChecked = false;
 					mConfSaturationCachingChecked = false;
@@ -512,6 +513,11 @@ namespace Konclude {
 				bool CCalculationConfigurationExtension::isIndividualsBackendCacheLoadingActivated() {
 					if (!mConfIndividualsBackendCacheLoadingChecked) {
 						mConfIndividualsBackendCacheLoadingActivated = CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.IndividualsBackendCacheLoading",true);
+						// the representative cache is filled by the saturation of the individuals; without concept or individual saturation
+						// its entries stay empty and the completion graph would take them instead of the assertions of the individuals
+						if (!CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.ConceptSaturation",true) || !CConfigDataReader::readConfigBoolean(this,"Konclude.Calculation.Optimization.IndividualSaturation",true)) {
+							mConfIndividualsBackendCacheLoadingActivated = false;
+						}
 						mConfIndividualsBackendCacheLoadingChecked = true;
 					}
 					return mConfIndividualsBackendCacheLoadingActivated;
@@ -679,10 +685,19 @@ namespace Konclude {
 
 				bool CCalculationConfigurationExtension::isDebuggingWriteDataCompletionTasksForAllTestsActivated() {
 					if (!mConfDebuggingWriteDataForAllTestsChecked) {
-						mConfDebuggingWriteDataForAllTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataForAllTests", false);
+						mConfDebuggingWriteDataForAllTestsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteDebuggingDataCompletionTasksForAllTests", false);
 						mConfDebuggingWriteDataForAllTestsChecked = true;
 					}
 					return mConfDebuggingWriteDataForAllTestsActivated;
+				}
+
+
+				bool CCalculationConfigurationExtension::isDebuggingWriteCompletionGraphCachingSnapshotsActivated() {
+					if (!mConfDebuggingWriteCompletionGraphCachingSnapshotsChecked) {
+						mConfDebuggingWriteCompletionGraphCachingSnapshotsActivated = CConfigDataReader::readConfigBoolean(this, "Konclude.Debugging.WriteCompletionGraphCachingSnapshots", false);
+						mConfDebuggingWriteCompletionGraphCachingSnapshotsChecked = true;
+					}
+					return mConfDebuggingWriteCompletionGraphCachingSnapshotsActivated;
 				}
 
 

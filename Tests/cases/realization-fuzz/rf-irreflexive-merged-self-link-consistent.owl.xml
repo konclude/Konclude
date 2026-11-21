@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://t/u">
+<Prefix name="" IRI="http://t/u#"/>
+<SubClassOf><Class abbreviatedIRI=":A"/><ObjectMaxCardinality cardinality="2"><ObjectInverseOf><ObjectProperty abbreviatedIRI=":s"/></ObjectInverseOf></ObjectMaxCardinality></SubClassOf>
+<ClassAssertion><Class abbreviatedIRI=":A"/><NamedIndividual abbreviatedIRI=":a"/></ClassAssertion>
+<SubClassOf><Class abbreviatedIRI=":C"/><ObjectIntersectionOf><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom><ObjectHasValue><ObjectProperty abbreviatedIRI=":s"/><NamedIndividual abbreviatedIRI=":a"/></ObjectHasValue></ObjectIntersectionOf></SubClassOf>
+<ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":x"/></ObjectPropertyAssertion>
+<ClassAssertion><ObjectComplementOf><ObjectHasValue><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a"/></ObjectHasValue></ObjectComplementOf><NamedIndividual abbreviatedIRI=":x"/></ClassAssertion>
+<ClassAssertion><ObjectIntersectionOf><ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":s"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":s"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a"/></ObjectOneOf></ObjectAllValuesFrom></ObjectIntersectionOf><NamedIndividual abbreviatedIRI=":x"/></ClassAssertion></Ontology>

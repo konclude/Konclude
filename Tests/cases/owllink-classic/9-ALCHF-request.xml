@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/9#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/9"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/9">
+
+        <owl:Declaration>
+            <owl:Class IRI="E"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="F"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="C"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="D"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r1"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r2"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r3"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r4"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r5"/>
+        </owl:Declaration>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="r5"/>
+            <owl:ObjectProperty IRI="r2"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="r4"/>
+            <owl:ObjectProperty IRI="r2"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="r3"/>
+            <owl:ObjectProperty IRI="r1"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="r4"/>
+            <owl:ObjectProperty IRI="r1"/>
+        </owl:SubObjectPropertyOf>
+
+        <owl:FunctionalObjectProperty>
+            <owl:ObjectProperty IRI="r1"/>
+        </owl:FunctionalObjectProperty>
+
+        <owl:FunctionalObjectProperty>
+            <owl:ObjectProperty IRI="r2"/>
+        </owl:FunctionalObjectProperty>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="E"/>
+            <owl:ObjectIntersectionOf>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r3"/>
+                    <owl:Class IRI="C"/>
+                </owl:ObjectSomeValuesFrom>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="r4"/>
+                    <owl:Class IRI="D"/>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+        <owl:EquivalentClasses>
+            <owl:Class IRI="F"/>
+            <owl:ObjectAllValuesFrom>
+                <owl:ObjectProperty IRI="r5"/>
+                <owl:Class IRI="C"/>
+            </owl:ObjectAllValuesFrom>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="X"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="E"/>
+                <owl:ObjectComplementOf>
+                    <owl:Class IRI="F"/>
+                </owl:ObjectComplementOf>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+    </Tell>
+
+<!--
+    <IsClassSubsumedBy kb="http://www.owllink.org/testsuite/9">
+        <owl:Class IRI="E"/>
+        <owl:Class IRI="F"/>
+    </IsClassSubsumedBy>
+    -->
+    
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/9" timing="simple">
+        <owl:Class IRI="X"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/9"/>
+
+</RequestMessage>

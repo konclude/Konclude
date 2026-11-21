@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A subsumption that only holds through nominals (reduced from fuzz seed 3208):
+
+    C1 = {a2, a0}, C4 = {a4, a3}, C3 and C0 disjoint, C0(a0), C4(a0), C3(a4),
+    T2 = not-C3 and C4 and not-{a1}
+
+  a0 is in C4 = {a4, a3} and cannot be a4 (C0 and C3 are disjoint), so a0 = a3; an instance of
+  T2 is in C4 but not in C3, hence a3 = a0, which is in C1: T2 is below C1.
+  The model of T2 merges the test node with a3 = a0 and contains C1 only as part of the label of
+  a0, without the internal consequences that C1 has in its own test. The pseudo-model pretest
+  of the classifier compared the two models, found a consequence of C1 missing and dropped C1 as
+  possible subsumer of T2 without a test, although the model of T2 contained C1 itself.
+  Expected: the HermiT taxonomy in expected/nominal-merge-pseudo-model-classification.owl.xml.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/dl/nominal-merge-pseudo-model">
+  <Prefix name="" IRI="http://konclude.test/dl/nominal-merge-pseudo-model#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a4"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r0"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r1"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T3"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":T5"/></Declaration>
+  <EquivalentClasses><Class abbreviatedIRI=":C1"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a2"/><NamedIndividual abbreviatedIRI=":a0"/></ObjectOneOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":C4"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/><NamedIndividual abbreviatedIRI=":a3"/></ObjectOneOf></EquivalentClasses>
+  <DisjointClasses><Class abbreviatedIRI=":C3"/><Class abbreviatedIRI=":C0"/></DisjointClasses>
+  <SubClassOf><Class abbreviatedIRI=":C1"/><Class abbreviatedIRI=":C1"/></SubClassOf>
+  <FunctionalDataProperty><DataProperty abbreviatedIRI=":d"/></FunctionalDataProperty>
+  <ClassAssertion><Class abbreviatedIRI=":C0"/><NamedIndividual abbreviatedIRI=":a0"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":C4"/><NamedIndividual abbreviatedIRI=":a0"/></ClassAssertion>
+  <ClassAssertion><Class abbreviatedIRI=":C3"/><NamedIndividual abbreviatedIRI=":a4"/></ClassAssertion>
+  <EquivalentClasses><Class abbreviatedIRI=":T2"/><ObjectIntersectionOf><ObjectComplementOf><Class abbreviatedIRI=":C3"/></ObjectComplementOf><Class abbreviatedIRI=":C4"/><ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf></ObjectComplementOf></ObjectIntersectionOf></EquivalentClasses>
+</Ontology>

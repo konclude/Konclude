@@ -70,7 +70,8 @@ namespace Konclude {
 					QString mControlFile;                    // originating *.kt.owl.xml (for messages)
 					QString mSuiteId;                        // suite the control ontology declares/derives
 					QString mDescription;                    // what the test checks (kt:description)
-					bool mKnownFailure;                      // marked via kt:knownFailure or kt:flaky
+					bool mKnownFailure;                      // marked via kt:knownFailure
+					bool mFlaky;                             // kt:flaky: a failure is tolerated, a pass stays PASS
 					QStringList mKnownIssueIds;              // issues the test is linked to
 			};
 
@@ -78,7 +79,7 @@ namespace Konclude {
 			inline CConformanceTestCase::CConformanceTestCase()
 					: mTask(CConformanceTask::TYPE::CONSISTENCY), mHasTask(false),
 					  mChannel(CConformanceChannel::TYPE::COMMAND_LINE), mHasChannel(false),
-					  mExpectedVerdict(CConformanceTask::VERDICT::UNSET), mKnownFailure(false) {
+					  mExpectedVerdict(CConformanceTask::VERDICT::UNSET), mKnownFailure(false), mFlaky(false) {
 			}
 
 		}; // end namespace Conformance

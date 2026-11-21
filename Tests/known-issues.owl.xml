@@ -15,7 +15,7 @@
           ontologyIRI="http://konclude.test/known-issues">
   <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
 
-  <!-- issue-w3c-webont-description-logic: 7 test(s) -->
+  <!-- issue-w3c-webont-description-logic: 6 test(s) -->
   <ClassAssertion>
     <Class abbreviatedIRI="kt:Issue"/>
     <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
@@ -60,12 +60,6 @@
     <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
     <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
     <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-017"/>
-  </ObjectPropertyAssertion>
-
-  <ObjectPropertyAssertion>
-    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
-    <NamedIndividual abbreviatedIRI="kt:issue-w3c-webont-description-logic"/>
-    <NamedIndividual abbreviatedIRI="kt:w3c-webont-description-logic-035"/>
   </ObjectPropertyAssertion>
 
   <ObjectPropertyAssertion>
@@ -766,7 +760,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-ask-class-assertion"/>
-    <Literal>Fixed. The existential interpretation remains config-gated (Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables); the single-variable boolean ASK reduction is skipped so named witnesses work with the default config. A closed ASK is answered directly from the conjunction of its boolean sub-queries, and non-closed sub-queries use query-local placeholders for hidden individual variables while preserving direct-result streaming. The regular resolver path is covered by the *-regular tests with Konclude.Answering.ClosedAskDirectBooleanAnswering=false. Regression guards include kt:sparql-ask-class-assertion, kt:sparql-ask-complex, kt:sparql-ask-anonymous-woman, kt:sparql-ask-anonymous-child, kt:sparql-ask-anonymous-woman-child, kt:sparql-ask-anonymous-man, kt:sparql-select-anonymous-woman and kt:sparql-select-hidden-anonymous-join. See Docs/Analysis-SPARQL-ASK-ClassAssertion.md.</Literal>
+    <Literal>Fixed. The existential interpretation remains config-gated (Konclude.Answering.InterpretNonAnswerIndividualVariablesAsAnonymousVariables); the single-variable boolean ASK reduction is skipped so named witnesses work with the default config. A closed ASK is answered directly from the conjunction of its boolean sub-queries, and non-closed sub-queries use query-local placeholders for hidden individual variables while preserving direct-result streaming. The regular resolver path is covered by the *-regular tests with Konclude.Answering.ClosedAskDirectBooleanAnswering=false. Regression guards include kt:sparql-ask-class-assertion, kt:sparql-ask-complex, kt:sparql-ask-anonymous-woman, kt:sparql-ask-anonymous-child, kt:sparql-ask-anonymous-woman-child, kt:sparql-ask-anonymous-man, kt:sparql-select-anonymous-woman and kt:sparql-select-hidden-anonymous-join.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
@@ -801,7 +795,7 @@
   <DataPropertyAssertion>
     <DataProperty abbreviatedIRI="kt:description"/>
     <NamedIndividual abbreviatedIRI="kt:issue-sparql-variable-predicate"/>
-    <Literal>A variable-predicate query over constant individuals (for example SELECT ?p { sp:alice ?p sp:bob } or SELECT ?d ?v { sp:alice ?d ?v }) answers empty. The parser classifies the pattern as an object-property or data-property SCHEMA query (property hierarchy) instead of a fact query over the known subject/object, so the role/data-property variable never becomes a binding. The object-property path is the allObjPropVars branch; the data-property path is the allDataPropVars branch in CSPARQLRedlandRasqalReasoningBGPQueryParser::generateBGPBasedSubQueries. Affects kt:sparql-select-role-variable and kt:sparql-select-data-variable. See Docs/Investigation-SPARQL-VariablePredicate.md.</Literal>
+    <Literal>A variable-predicate query over constant individuals (for example SELECT ?p { sp:alice ?p sp:bob } or SELECT ?d ?v { sp:alice ?d ?v }) answers empty. The parser classifies the pattern as an object-property or data-property SCHEMA query (property hierarchy) instead of a fact query over the known subject/object, so the role/data-property variable never becomes a binding. The object-property path is the allObjPropVars branch; the data-property path is the allDataPropVars branch in CSPARQLRedlandRasqalReasoningBGPQueryParser::generateBGPBasedSubQueries. Affects kt:sparql-select-role-variable and kt:sparql-select-data-variable.</Literal>
   </DataPropertyAssertion>
 
   <ObjectPropertyAssertion>
@@ -816,5 +810,365 @@
     <NamedIndividual abbreviatedIRI="kt:sparql-select-data-variable"/>
   </ObjectPropertyAssertion>
 
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <Literal>Fixed. Completion graph caching missed an equality between two nominals that is forced by a qualified minimum cardinality. In cgc-l-nominal-cardinality-ontology.owl.xml, A is {a0,a1} and B is {a0,a4}; B is a subclass of (at least 2 r.B), B is a subclass of (A or C), (some r.C) is a subclass of D and C is disjoint from D, which forces a4 = a1 and A = B. In the deterministic graph the successors of a4 and a0 are blocked during the deterministic expansion preprocessing (processing blocked) by one successor of a0, but they were not registered at that blocker. The consistency test woke them through its processing queues; a later test starts from the deterministic graph without these queue entries, so when it merged the rebuilt blocker into a4 the successors of a4 were never processed, never chose a0 or a4, and the cardinality conflict was not found. Processing-blocked nodes are now registered at their blocker (detectIndividualNodeBlockedStatus) and woken by eliminiateBlockedIndividuals, a woken node that is presumed cached is tested for caching again, and a node that the cached graph pruned is no longer accepted as a cache witness (CCompletionGraphCacheHandler::testCompletionGraphCached). Guards: kt:cgc-l-a-not-b, kt:cgc-l-a1-not-a4, kt:cgc-l-classification (four caching configurations) and the negative controls kt:cgc-l-a1-a4 and kt:cgc-l-consistent.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-l-a-not-b"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-l-a1-not-a4"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-nominal-cardinality-equality"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-l-classification"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <Literal>Fixed. When a node lost its completion graph caching, the reactivation followed the nodes that the cached model had merged into it, but not the node that it had been merged into. In cgc-n2-three-nominal-ontology.owl.xml the cached model merged a4 into a2 and a5 into a1; a test that adds a concept to a4 rebuilt a4, while a2 stayed cached with the merge of a4 in its cached state, so the a2 choice was never redone and ({a4} and not A) and ({a4} and {a5}) were answered satisfiable. The same gap made the classification of cgc-n1-exact-cardinality-ontology.owl.xml under reduced saturation miss B below A. CCompletionGraphCacheHandler::getReactivationIndividuals now also reactivates (forced) the cached representative of a node that loses its caching. The classification additionally tested {a4} and {a1}, where the nominal a4 is merged into a test node that already carries the nominal a1; a nominal that is merged into another nominal node did not lose its caching, so mergeIndividualNodeInto now clears the caching of every merged nominal. Guards: kt:cgc-n2-a4-not-a, kt:cgc-n2-a4-a5 and kt:cgc-n2-classification in Tests/cases/cgc-known-n2 (default-config, delayed-caching-reactivation, no-backjumping).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-not-a"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n2-a4-a5"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-three-nominal-graph"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n2-classification"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+    <Literal>Fixed. When a node lost its completion graph caching, the reactivation followed the nodes that the cached model had merged into it, but not the node that it had been merged into. In cgc-n2-three-nominal-ontology.owl.xml the cached model merged a4 into a2 and a5 into a1; a test that adds a concept to a4 rebuilt a4, while a2 stayed cached with the merge of a4 in its cached state, so the a2 choice was never redone and ({a4} and not A) and ({a4} and {a5}) were answered satisfiable. The same gap made the classification of cgc-n1-exact-cardinality-ontology.owl.xml under reduced saturation miss B below A. CCompletionGraphCacheHandler::getReactivationIndividuals now also reactivates (forced) the cached representative of a node that loses its caching. Guards: kt:cgc-n1-classification in Tests/cases/cgc-known-n1 (reduced-saturation).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-exact-cardinality-classification"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-n1-classification"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <Literal>Fixed. Differential fuzzing (caching on against caching off and HermiT) found four more cases in which a node kept its cached state although a node it shares that state with was rebuilt. (1) Nodes merged into a node through a chain of merges (v into a1, a1 into a0) were not found, only nodes whose final representative is the node (cgc-o1). (2) A node that is taken from the reactivation queue as a forced reactivation did not pass the reactivation on to the nodes merged with it (cgc-o1, cgc-o3); it now calls CCompletionGraphCacheHandler::getMergeDependentReactivationIndividuals, which covers the representative, the merged blockable nodes and the merged nominals but not the connection neighbours (the full caching loss there made the roberts classification about six times slower). (3) CIndividualReactivationProcessingQueue::insertReactivationIndiviudal let a later re-check request turn an earlier forced entry of the same node into a re-check (cgc-o2). (4) The classification message analyser accepted the deterministic concepts of a node into which the tested node was merged by a choice as subsumers (maximum deterministic branch tag 0 still accepts concepts with tag 0); it now accepts none of them in that case (cgc-o4).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o1-x"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o2-x"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o3-x"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-merge-dependant-reactivation"/>
+    <NamedIndividual abbreviatedIRI="kt:cgc-o4-classification"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <Literal>Fixed. The classification of three small random ontologies from the differential fuzzing of the completion graph caching (cgc-fz-611, cgc-fz-620, cgc-fz-890 in Tests/cases/cgc-fuzz-known) did not terminate in some configurations. The process spun at 100 percent CPU with constant memory in CCalculationTableauCompletionTaskHandleAlgorithm::mergeMergingIndividualNodes. The at-most rule keeps the ids of the successors that are known to be distinct, and the successors that still have to be merged. When a successor is merged away, its link is removed and a link to the merge target is added, so the link count stays the same and the counters that decide whether the stored ids are still valid stayed balanced. The stale id was never replaced by its merge target, the lookup of its link returned null and the loop over the distinct set did not advance. The candidates are now verified against the links (countMergedAwayMergingCandidates) and the distinct set is relocated whenever it is not empty, not only when the counters are unbalanced. The relocation collects the stale ids before it changes the set. The configuration dependence of the original hangs came from the order in which nodes were merged.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-611-classification-hang"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-620-classification-hang-noconfig"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-flaky"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-classification-fuzz-nontermination"/>
+    <NamedIndividual abbreviatedIRI="kt:cgcfz-890-classification-hang"/>
+  </ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/>
+    <Literal>Fixed. Deterministic wrong classification answers of fuzz ontologies (completion graph caching on and off gave the same answer; HermiT and FaCT++ disagreed): cgc-fz-2462 (a second local copy of a node that is its own role successor in the qualification branches of an at-most restriction), cgc-fz-2029 (the backend cache synchronisation of a node that represents a nominal only through a non-deterministic merge used the deterministic base dependency, so a clash with the expanded role assertions skipped the other alternatives), cgc-fz-3208 (the pseudo-model pretest of the classifier took a missing internal consequence of the subsumer as proof of a non-subsumption although the model of the subsumed class contained the subsumer itself) and cgc-fz-3203 (the functional rule checked the distinct edges of an older version of a node, so two distinct nodes were merged without a clash). cgc-fz-2351 is not a Konclude error: T2 is satisfiable (FaCT++, JFact and an explicit model agree), the expectation came from an inconsistent HermiT answer.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/>
+    <Literal>Fixed. Fuzz ontologies whose classification differed from run to run (with and without completion graph caching): cgc-fz-3397 (fixed since the existential rule builds the link to a nominal successor of an incompletely handled individual), cgc-fz-3229 (fixed since the backend cache synchronisation of a node that represents a nominal only through a non-deterministic merge uses the dependency of the merge) and cgc-fz-2056 (the backend neighbour expansion linked the role assertion r0(a3, a1) to a test node into which a1 was merged by a choice without the dependency of that merge, because the node already had a1 as its individual; the clash of the functional r0 then skipped the other alternative and the classification derived C0 below C3 in most runs).</Literal>
+  </DataPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/>
+    <Literal>Fixed. The classification of cgc-fz-3241 (both configurations) and cgc-fz-3344 (with completion graph caching) segfaulted in CIndividualIdentifier::getIndividualID() called from visitIndividualsRelevantMergingsBackendSynchronisationDataIndividuals. The test node was merged with a nominal into a new empty node (getIntoEmptyMergedIndividualNode), which is created with the nominal node type before the merge; mergeIndividualNodeInto only set the nominal individual for a target that was not yet a nominal node, so the new node received the merging hash and the backend cache synchronisation data of the nominal but no nominal individual, and the synchronisation dereferenced it. mergeIndividualNodeInto now sets the nominal individual whenever the target has none. Reduced reproducer: Tests/cases/dl/merged-nominal-empty-node-ontology.owl.xml.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/>
+    <Literal>Fixed. Fuzz ontologies on which the classification did not terminate. cgc-fz-2420 and cgc-fz-3122 hung in both configurations until the existential rule stopped accepting a cached neighbour of an incompletely handled individual for a successor integrated into a nominal. cgc-fz-3016, cgc-fz-2042 and cgc-fz-2078 hung because the qualification branches of an at-most restriction localized the processed node a second time when it was its own role successor; the second local copy replaced the first one and the at-most merging continued on the replaced copy (getLocalizedIndividual now always continues from the newest version of a node). cgc-fz-3310 and cgc-fz-2245 (whose classification without caching then still had a redundant direct edge below owl:Thing) hung because a successor recorded as distinct by the at-most merging was pruned when its creator was merged away; the repair of the distinct nodes replaced the missing id by the node itself, the dead id stayed in the set and the scan over the set did not advance. A pruned successor is now removed from the distinct nodes.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/>
+    <Literal>Fixed. Konclude answered consistent for cgc-fz-2167-ontology.owl.xml, which is inconsistent: C2 = {a0}, C0 = {a2}, C2 is below (some inverse r0.C0) so a2 r0 a0, C0 is below (all r0.C3) so a0 is in C3, and a0 is in C1 while C1 is disjoint with C3. Minimal shape: C0 below {a2}, C0 below (all r0.C3), C0(a2), (some inverse r0.C0)(a0), not-C3(a0). The individual saturation integrates the successor of the existential into the nominal a2 and records a2 as cached neighbour of a0, but it does not propagate the universal restriction of a2 back to a0 and marks a0 as not completely handled. The completion rule for existentials then found the cached neighbour a2 with C0 and accepted it as witness, so the link a2 r0 a0 was never built and the clash never derived (with and without completion graph caching). The cached-neighbour shortcut of the existential rule is now skipped when the saturation integrated the successor into a nominal and the association of the individual is not completely handled; the following nominal branch builds the link. The shortcut stays for all other cases (on roberts-family all of its hits are kept).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2167-consistency"/>
+  </ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal-choice"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal-equivalent"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-consistency"/><NamedIndividual abbreviatedIRI="kt:nominal-successor-universal-consistent"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-wrong-answer"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3203-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-nondeterministic-taxonomy"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2056-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3241-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-backend-sync-crash"/><NamedIndividual abbreviatedIRI="kt:cgcfz-3344-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-cgc-fuzz-remaining-hang"/><NamedIndividual abbreviatedIRI="kt:cgcfz-2245-classification"/></ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/>
+    <Literal>Fixed. Wrong subsumptions of the DL fuzz campaign 2026-11-19 (confirmed by HermiT and FaCT++): dlfz-1136 (unsound) by 89faba5a (a new nominal no longer takes the creation dependency of a later merge, so a self-link keeps its dependency in clashes), dlfz-1024 and dlfz-1042 (missed) by 1404f3ed (C11 finds the nodes merged into a node that loses its caching by their merge target) and the redundant owl:Thing parent of dlfz-1024 by 688a8a16.</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1042-classification"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-wrong-subsumption"/><NamedIndividual abbreviatedIRI="kt:dlfz-1136-classification"/></ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/>
+    <Literal>Fixed. Fuzz seed 1024 crashed in the classification with CompletionGraphCaching=false: mergeIndividualNodeInto looked up a role successor link whose source and destination were null. expandIndividualNeighbourNodeFromBackendCache had installed the link into a node of a previous task instead of its localized version, so the successor list of that node kept the link after the memory of the current task was released (fixed in 465dc1be).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-dl-fuzz-no-cgc-stale-link"/><NamedIndividual abbreviatedIRI="kt:dlfz-1024-classification-no-cgc"/></ObjectPropertyAssertion>
+
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:Issue"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/>
+  </ClassAssertion>
+  <ClassAssertion>
+    <Class abbreviatedIRI="kt:ReasonerBug"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/>
+  </ClassAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:status"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/>
+    <Literal>fixed</Literal>
+  </DataPropertyAssertion>
+  <DataPropertyAssertion>
+    <DataProperty abbreviatedIRI="kt:description"/>
+    <NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/>
+    <Literal>Fixed. Realization missed types that Openllet 2.6.5 and FaCT++ 1.6.3 derive (realization fuzz campaign 2026-11-19): universal restrictions over functional and inverse functional roles (db8d4c39), classes defined by nominals for an individual that is merged with a nominal by a choice (f8116918), at-least restrictions whose neighbours are partly only in the representative cache (rf-100263), a saturation cached node that kept the abolished saturation caching of an ancestor and stayed blocked (rf-101098, 1d6706ea) and a representative cache recomputation that replaced the cached neighbour role sets instead of merging them after a link addition (rf-100838, 99e65f9d).</Literal>
+  </DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/><NamedIndividual abbreviatedIRI="kt:rf-101098-x2-c0"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:affectsTest"/><NamedIndividual abbreviatedIRI="kt:issue-realization-fuzz-missed-types"/><NamedIndividual abbreviatedIRI="kt:rf-100838-b-r3"/></ObjectPropertyAssertion>
 
 </Ontology>

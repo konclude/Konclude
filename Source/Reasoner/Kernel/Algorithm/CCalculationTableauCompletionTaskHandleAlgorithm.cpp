@@ -19,6 +19,7 @@
  */
 
 #include "CCalculationTableauCompletionTaskHandleAlgorithm.h"
+#include <QDir>
 
 
 
@@ -186,6 +187,8 @@ namespace Konclude {
 					mConfDebuggingWriteDataForIncrementalExpansionTests = false;
 					mConfDebuggingWriteDataForRepCacheIndiComputationTests = false;
 					mConfDebuggingWriteDataForAllTests = false;
+					mConfDebuggingWriteCachingSnapshots = false;
+					mCachingSnapshotCount = 0;
 
 					mConfExpandCreatedSuccessorsFromSaturation = true;
 					// dependencies are not yet generated correctly for resolvings (must include resolved foralls as dependency in addition to the existential restriction)
@@ -548,6 +551,7 @@ namespace Konclude {
 							mConfDebuggingWriteDataForIncrementalExpansionTests = config->isDebuggingWriteDataCompletionTasksForIncrementalExpansionTestsActivated();
 							mConfDebuggingWriteDataForRepCacheIndiComputationTests = config->isDebuggingWriteDataCompletionTasksForRepresentativeCacheRecomputationTestsActivated();
 							mConfDebuggingWriteDataForAllTests = config->isDebuggingWriteDataCompletionTasksForAllTestsActivated();
+							mConfDebuggingWriteCachingSnapshots = config->isDebuggingWriteCompletionGraphCachingSnapshotsActivated();
 
 							mConfExpandCreatedSuccessorsFromSaturation = config->isSuccessorConceptSaturationExpansionActivated();
 							mConfCachingBlockingFromSaturation = config->isSaturationCachingActivated();
@@ -655,6 +659,7 @@ namespace Konclude {
 							mConfDebuggingWriteDataForIncrementalExpansionTests = false;
 							mConfDebuggingWriteDataForRepCacheIndiComputationTests = false;
 							mConfDebuggingWriteDataForAllTests = false;
+							mConfDebuggingWriteCachingSnapshots = false;
 							mConfExpandCreatedSuccessorsFromSaturation = true;
 							mConfCachingBlockingFromSaturation = true;
 							mConfSaturationCachingWithNominals = true;
@@ -1432,6 +1437,10 @@ namespace Konclude {
 						//	}
 						//}
 
+
+						if (mConfDebuggingWriteCachingSnapshots && mCachingSnapshotCount > 0) {
+							writeCompletionGraphCachingSnapshot(clashed ? "end-clashed" : (satisfiable ? "end-satisfiable" : "end-stopped"), "final graph of the test", calcAlgContext);
+						}
 
 						if (mDebug && sDebug || xDebug || mConfDebuggingWriteData && mConfDebuggingWriteDataComplationTasks) {
 
@@ -2428,6 +2437,11 @@ namespace Konclude {
 									reapplySatisfiableCachedAbsorbedDisjunctionConcepts(indiProcNode,calcAlgContext);
 									reapplySatisfiableCachedAbsorbedGeneratingConcepts(indiProcNode,calcAlgContext);
 								}
+								if (!indiProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
+									// the nodes that share the cached state of this node through a merge are rebuilt with it, also when the
+									// node itself was only reached through the reactivation of another node
+									mCompGraphCacheHandler->getMergeDependentReactivationIndividuals(indiProcNode, mEarlyIndiReactProcessingQueue, calcAlgContext);
+								}
 								indiProcNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
 							}
 							mIndiNodeFromQueueType = INQT_COMPCACHEDREACT;
@@ -2641,6 +2655,11 @@ namespace Konclude {
 									indiProcNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED);
 									reapplySatisfiableCachedAbsorbedDisjunctionConcepts(indiProcNode,calcAlgContext);
 									reapplySatisfiableCachedAbsorbedGeneratingConcepts(indiProcNode,calcAlgContext);
+								}
+								if (!indiProcNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED)) {
+									// the nodes that share the cached state of this node through a merge are rebuilt with it, also when the
+									// node itself was only reached through the reactivation of another node
+									mCompGraphCacheHandler->getMergeDependentReactivationIndividuals(indiProcNode, mLateIndiReactProcessingQueue, calcAlgContext);
 								}
 								indiProcNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED);
 							}
@@ -4302,7 +4321,43 @@ namespace Konclude {
 
 
 
+				void CCalculationTableauCompletionTaskHandleAlgorithm::writeCompletionGraphCachingSnapshot(const QString& phase, const QString& note, CCalculationAlgorithmContextBase* calcAlgContext) {
+					if (!mConfDebuggingWriteCachingSnapshots || !mCompGraphCacheHandler) {
+						return;
+					}
+					QString folder("./Debugging/CompletionGraphCaching/");
+					QDir().mkpath(folder);
+
+					CCompletionGraphSnapshotWriter::CSnapshotDescription description;
+					description.mMaxCachedNodeID = calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID();
+					description.mNote = note;
+
+					// the deterministic and the cached graph do not change during a run, one file each is sufficient
+					if (!QFile::exists(folder + "gd.json")) {
+						description.mGraphName = "gd";
+						description.mPhase = "deterministic";
+						description.mNote = "deterministic graph Gd";
+						CCompletionGraphSnapshotWriter::writeSnapshot(folder + "gd.json", description, mCompGraphCacheHandler->getDeterministicNodeVector());
+					}
+					if (!QFile::exists(folder + "gn.json")) {
+						description.mGraphName = "gn";
+						description.mPhase = "cached";
+						description.mNote = "cached model Gn";
+						CCompletionGraphSnapshotWriter::writeSnapshot(folder + "gn.json", description, mCompGraphCacheHandler->getCompletionGraphCachedNodeVector());
+					}
+
+					description.mNote = note;
+					description.mGraphName = "test";
+					description.mPhase = phase;
+					cint64 taskID = calcAlgContext->getUsedSatisfiableCalculationTask()->getTaskID();
+					QString fileName = QString("%1test-task-%2-%3-%4.json").arg(folder).arg(taskID).arg(mCachingSnapshotCount++, 3, 10, QChar('0')).arg(phase);
+					CCompletionGraphSnapshotWriter::writeSnapshot(fileName, description, calcAlgContext->getUsedProcessingDataBox()->getIndividualProcessNodeVector());
+				}
+
+
 				void CCalculationTableauCompletionTaskHandleAlgorithm::clearCompletionGraphCaching(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
+
+					writeCompletionGraphCachingSnapshot("before-invalidation", QString("node %1 loses its completion graph caching").arg(individualNode->getIndividualNodeID()), calcAlgContext);
 
 					trackIndividualExtendedDependence(individualNode->getIndividualNodeID(), calcAlgContext);
 
@@ -4332,6 +4387,8 @@ namespace Konclude {
 						reactProcQueue = processingDataBox->getEarlyIndividualReactivationProcessingQueue(true);
 					}
 					bool reactivatedIndis = mCompGraphCacheHandler->getReactivationIndividuals(individualNode, reactProcQueue, calcAlgContext);
+
+					writeCompletionGraphCachingSnapshot("after-invalidation", QString("node %1 lost its completion graph caching").arg(individualNode->getIndividualNodeID()), calcAlgContext);
 				}
 
 
@@ -4770,6 +4827,12 @@ namespace Konclude {
 
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::detectIndividualNodeSaturationCached(CIndividualProcessNode*& individualNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 
+					// an abolished ancestor caching is taken over first, also for a node that is saturation cached itself, otherwise the node
+					// stays blocked by an ancestor that lost its saturation caching
+					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHED) && individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED)) {
+						individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED);
+						individualNode->clearProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHED);
+					}
 					if (individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSATURATIONBLOCKINGCACHED) && !individualNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTSATURATIONBLOCKINGCACHEDDUEDIRECTMODIFIED)) {
 						return true;
 					}
@@ -6593,6 +6656,11 @@ namespace Konclude {
 								if (!succIndi->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED)) {
 									CIndividualProcessNode* locIndiNode = getLocalizedIndividual(succIndi,false,calcAlgContext);
 									locIndiNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFANCESTORSATURATIONBLOCKINGCACHEDABOLISHED);
+									// a node that was presumed to be completion graph cached while it was blocked by the saturation caching of an ancestor was
+									// not retested against the cached graph, it is retested now, otherwise it is not queued and stays blocked
+									if (locIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED) && !locIndiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED)) {
+										locIndiNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED);
+									}
 									addIndividualToProcessingQueue(locIndiNode,calcAlgContext);
 								}
 
@@ -6919,7 +6987,8 @@ namespace Konclude {
 					if (!processingDataBox->hasMultipleConstructionIndividualNodes() && constIndiNode && constIndiNode->isNominalIndividualNode()) {
 						CXSortedNegLinker<CConcept*>* initConLinker = constIndiNode->getInitializingConceptLinker();
 						CIndividual* individual = constIndiNode->getNominalIndividual();
-						if (initConLinker && !initConLinker->hasNext()) {
+						// the constructed node can be a nominal node without individual, e.g., if it was merged into a new nominal of the NN-rule
+						if (individual && initConLinker && !initConLinker->hasNext()) {
 							CConcept* initConcept = initConLinker->getData();
 							bool conNegation = initConLinker->isNegated();
 
@@ -9443,6 +9512,11 @@ namespace Konclude {
 						CIndividualProcessNode* blockedNode = processingBlockedNodeLinker->getData();
 						CIndividualProcessNode* locBlockedNode = getLocalizedIndividual(blockedNode,true,calcAlgContext);
 						locBlockedNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFBLOCKINGRETESTDUEPROCESSINGCOMPLETED);
+						// a blocked node that is presumed cached is only covered by the cached graph as long as its blocker
+						// is unchanged, hence its caching has to be tested again
+						if (locBlockedNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHED)) {
+							locBlockedNode->addProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTCOMPLETIONGRAPHCACHEDDUEDIRECTMODIFIED);
+						}
 						addIndividualToProcessingQueue(locBlockedNode,calcAlgContext);
 						processingBlockedNodeLinker = processingBlockedNodeLinker->getNext();
 					}
@@ -14266,7 +14340,11 @@ namespace Konclude {
 
 					// check whether there is already a suitable neighbour node in the cache
 					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)processIndi->getIndividualBackendCacheSynchronisationData(false);
-					if (backendSyncData && backendSyncData->getAssocitaionData()) {
+					// if the saturation integrated the successor into a nominal, then the cached neighbour can stem from this existential, but the saturation
+					// does not propagate the concepts of the nominal back to the individual, i.e., the connection has to be built if the individual is not
+					// completely handled
+					bool nominalSuccessor = saturationNode && saturationNode->hasNominalIntegrated();
+					if (backendSyncData && backendSyncData->getAssocitaionData() && (!nominalSuccessor || backendSyncData->getAssocitaionData()->isCompletelyHandled())) {
 						cint64 neighbourVisitLimit = 1;
 						if (!saturationNode || saturationNode->isCompleted() && (saturationNode->hasNominalIntegrated() || saturationNode->getIndirectStatusFlags()->hasFlags(CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGINSUFFICIENT, false))) {
 							neighbourVisitLimit = 5;
@@ -14768,7 +14846,11 @@ namespace Konclude {
 					if (!hasAlreadyMergingNominal) {
 						if (requiresNNRule) {
 
-							createNominalsSuccessorIndividuals(processIndi,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,false,nnRequireDepTrackPoint,1,calcAlgContext);
+							createNominalsSuccessorIndividuals(processIndi,role->getIndirectSuperRoleList(),role,conceptOpLinkerIt,false,nnRequireDepTrackPoint,1,calcAlgContext);
+							// the iterators were taken before the new nominal was linked, they would neither find the new nominal as merging target
+							// (if an older neighbour has a smaller id) nor merge it with the other neighbours
+							baseRoleSuccIt = processIndi->getRoleSuccessorLinkIterator(role);
+							roleSuccIt = baseRoleSuccIt;
 							CRoleSuccessorLinkIterator lastRoleSuccIt = processIndi->getRoleSuccessorHistoryLinkIterator(role,nullptr);
 							if (lastRoleSuccIt.hasNext()) {
 								CIndividualLinkEdge* link = lastRoleSuccIt.next();
@@ -15135,6 +15217,25 @@ namespace Konclude {
 
 
 
+				cint64 CCalculationTableauCompletionTaskHandleAlgorithm::countMergedAwayMergingCandidates(CIndividualProcessNode* processIndi, CRole* role, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest) {
+					cint64 mergedAwayCount = 0;
+					CBranchingMergingIndividualNodeCandidateLinker* candidateLinkerLists[] = {
+						branchingMergingProcRest->getMergingInitializationCandidateNodeLinker(),
+						branchingMergingProcRest->getNominalMergingCandidateNodeLinker(),
+						branchingMergingProcRest->getMergingCandidateNodeLinker()
+					};
+					for (CBranchingMergingIndividualNodeCandidateLinker* candidateLinkerList : candidateLinkerLists) {
+						for (CBranchingMergingIndividualNodeCandidateLinker* candidateLinker = candidateLinkerList; candidateLinker; candidateLinker = candidateLinker->getNext()) {
+							if (!processIndi->getRoleSuccessorToIndividualLink(role,candidateLinker->getMergingIndividualNodeCandidate()->getIndividualNodeID(),true)) {
+								++mergedAwayCount;
+							}
+						}
+					}
+					return mergedAwayCount;
+				}
+
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::mergeMergingIndividualNodes(CIndividualProcessNode*& processIndi, CConceptProcessDescriptor*& conProDes, cint64 linkCount, cint64 cardinality, CBranchingMergingProcessingRestrictionSpecification* branchingMergingProcRest, CCalculationAlgorithmContextBase* calcAlgContext) {
 					CConceptDescriptor* conDes = conProDes->getConceptDescriptor();
 					CConcept* concept = conDes->getConcept();
@@ -15205,6 +15306,17 @@ namespace Konclude {
 
 					if (linkAndCandidateCount > tmpCardinality || requiresNNOperating) {
 						// needs merging
+
+						// The counters above only notice lost links. When a candidate node was merged away, its link is removed and a new link
+						// to the merge target is added, which keeps the counts balanced although the candidate refers to a node that is gone.
+						// The candidates are therefore verified against the links before they are trusted.
+						if (branchingMergingProcRest->hasValidRemainingMergingCandidates()) {
+							cint64 mergedAwayCandidateCount = countMergedAwayMergingCandidates(processIndi,role,branchingMergingProcRest);
+							if (mergedAwayCandidateCount > 0) {
+								branchingMergingProcRest->setRemainingValidMergingCandidateIndividualNodeCount(branchingMergingProcRest->getRemainingLinkerMergingCandidateIndividualNodeCount()-mergedAwayCandidateCount);
+							}
+						}
+
 						if (fixedNominalMerging) {
 							bool requiresNNInitialization = fixedNominalMerging && !branchingMergingProcRest->isDistinctSetFixed();
 							if (requiresNNInitialization) {
@@ -15279,7 +15391,8 @@ namespace Konclude {
 						}
 
 
-						if (!branchingMergingProcRest->hasValidRemainingMergingCandidates()) {
+						// The distinct nodes are verified even if the counters are balanced, because a merged away node leaves a stale id in the set.
+						if (!branchingMergingProcRest->hasValidRemainingMergingCandidates() || (distinctMergedSet && distinctMergedSet->count() > 0)) {
 							// update distinct hash
 							if (!distinctMergedSet) {
 								locDistinctMergedSet = branchingMergingProcRest->getDistinctMergedNodesSet(true);
@@ -15287,27 +15400,35 @@ namespace Konclude {
 							}
 							bool relocated = false;
 
+							// the set is changed while the stale ids are replaced, so they are collected first
+							CPROCESSINGLIST<cint64> mergedAwayDistinctIDList(calcAlgContext->getUsedTaskProcessorContext());
 							for (CPROCESSSET<cint64>::const_iterator disIt = distinctMergedSet->constBegin(), disItEnd = distinctMergedSet->constEnd(); disIt != disItEnd; ++disIt) {
+								if (!processIndi->getRoleSuccessorToIndividualLink(role,*disIt,true)) {
+									mergedAwayDistinctIDList.append(*disIt);
+								}
+							}
+
+							for (CPROCESSINGLIST<cint64>::const_iterator disIt = mergedAwayDistinctIDList.constBegin(), disItEnd = mergedAwayDistinctIDList.constEnd(); disIt != disItEnd; ++disIt) {
 								cint64 distinctIndiID = *disIt;
 
-								CIndividualLinkEdge* disIndiLink = processIndi->getRoleSuccessorToIndividualLink(role,distinctIndiID,true);
-								if (!disIndiLink) {
-									CIndividualProcessNode* mergedIntoNode = getCorrectedNominalIndividualNode(distinctIndiID,calcAlgContext);
-									if (!locDistinctMergedSet) {
-										locDistinctMergedSet = branchingMergingProcRest->getDistinctMergedNodesSet(true);
-										distinctMergedSet = locDistinctMergedSet;
+								CIndividualProcessNode* mergedIntoNode = getCorrectedNominalIndividualNode(distinctIndiID,calcAlgContext);
+								if (!locDistinctMergedSet) {
+									locDistinctMergedSet = branchingMergingProcRest->getDistinctMergedNodesSet(true);
+									distinctMergedSet = locDistinctMergedSet;
+								}
+								locDistinctMergedSet->remove(distinctIndiID);
+								relocated = true;
+								// a pruned successor (its creator was merged away) is not merged into another node, i.e., it is no longer a successor and
+								// it is only removed from the distinct nodes
+								bool noLongerSuccessor = !processIndi->getRoleSuccessorToIndividualLink(role,mergedIntoNode->getIndividualNodeID(),true);
+								if (noLongerSuccessor || locDistinctMergedSet->contains(mergedIntoNode->getIndividualNodeID())) {
+									--distinctCount;
+									if (fixedNominalMerging) {
+										tmpCardinality = distinctCount;
 									}
-									locDistinctMergedSet->remove(distinctIndiID);
-									relocated = true;
-									if (locDistinctMergedSet->contains(mergedIntoNode->getIndividualNodeID())) {
-										--distinctCount;
-										if (fixedNominalMerging) {
-											tmpCardinality = distinctCount;
-										}
-									}
+								}
+								if (!noLongerSuccessor) {
 									locDistinctMergedSet->insert(mergedIntoNode->getIndividualNodeID());
-								} else if (locDistinctMergedSet) {
-									locDistinctMergedSet->insert(distinctIndiID);
 								}
 							}
 
@@ -15334,7 +15455,9 @@ namespace Konclude {
 									//	distinctMergedSet = locDistinctMergedSet;
 									//}
 									//++distinctCount;
-									++tmpCardinality;
+									// at most one further distinct node (the new nominal) is allowed for this candidate, the bound must not grow with every
+									// attempt, e.g., when the previous candidate was merged into an existing distinct node instead of a new nominal
+									tmpCardinality = distinctCount + 1;
 									createNewNodesAsNominals = true;
 									//CRoleSuccessorLinkIterator roleSuccIt(processIndi->getRoleSuccessorHistoryLinkIterator(role,branchingMergingProcRest->getLastIndividualLink()));
 									//if (roleSuccIt.hasNext()) {
@@ -15353,7 +15476,11 @@ namespace Konclude {
 
 							KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
 
-							if (((branchingMergingProcRest->hasValidRemainingMergingCandidates() && branchingMergingProcRest->getRemainingValidMergingCandidateIndividualNodeCount() > 0) || processIndi->hasRoleSuccessorToIndividual(role,mergeCandIndiNode,true)) && !distinctMergedSet->contains(mergeCandIndiNode->getIndividualNodeID())) {
+							// the counters do not notice candidates that were pruned or merged away by merges of this loop (e.g., the successors of a node
+							// that was merged into a new nominal), such candidates are only taken if they are still linked
+							CIndividualProcessNode* upToDateMergeCandIndiNode = getUpToDateIndividual(mergeCandIndiNode,calcAlgContext);
+							bool mergeCandidateRemoved = upToDateMergeCandIndiNode->hasPurgedBlockedProcessingRestrictionFlags() || upToDateMergeCandIndiNode->hasMergedIntoIndividualNodeID();
+							if (((!mergeCandidateRemoved && branchingMergingProcRest->hasValidRemainingMergingCandidates() && branchingMergingProcRest->getRemainingValidMergingCandidateIndividualNodeCount() > 0) || processIndi->hasRoleSuccessorToIndividual(role,mergeCandIndiNode,true)) && !distinctMergedSet->contains(mergeCandIndiNode->getIndividualNodeID())) {
 								++deterministicMergingStep;
 
 								CIndividualProcessNode* mergingIndiNode = getUpToDateIndividual(mergeCandIndiNode,calcAlgContext);
@@ -15618,6 +15745,11 @@ namespace Konclude {
 						KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mDebugIndiModelString = generateDebugIndiModelStringList(newCalcAlgContext));
 
 					} else {
+						// a nominal that becomes distinct takes one of the new nominals of the NN-rule, as in the deterministic case
+						// (mergeMergingIndividualNodes), otherwise distinct nodes and remaining new nominals exceed the cardinality
+						if (createAsNominal) {
+							newBranchingMergingProcRest->decRemainingNominalCreationCount();
+						}
 						newBranchingMergingProcRest->initMergingDependencyNode(mergeDependencyNode);
 						newBranchingMergingProcRest->initDependencyTracker(mergeNonDetDepTrackPoint);
 
@@ -16346,6 +16478,12 @@ namespace Konclude {
 					CSortedNegLinker<CConcept*>* conceptOpLinker = concept->getOperandList();
 
 
+					// the reapplication is installed before the existing links are processed: adding the filler to a neighbour (e.g., to
+					// the node itself over a self-link) can create new links of the role through deterministic expansion, they
+					// must also get the filler
+					if (!conProDes->isConceptReapplied()) {
+						addConceptToReapplyQueue(conDes,role,processIndi,true,depTrackPoint,calcAlgContext);
+					}
 					CIndividualLinkEdge* restLink = getLinkProcessingRestriction(conProDes);
 					if (restLink) {
 						++mAppliedALLRuleCount;
@@ -16425,9 +16563,6 @@ namespace Konclude {
 								}
 							}
 						}
-					}
-					if (!conProDes->isConceptReapplied()) {
-						addConceptToReapplyQueue(conDes,role,processIndi,true,depTrackPoint,calcAlgContext);
 					}
 				}
 
@@ -17304,7 +17439,8 @@ namespace Konclude {
 						}
 					} else {
 						if (restLink) {
-							if (restLink->isDestinationIndividual(processIndi) && restLink->isSourceIndividual(processIndi)) {
+							// the link may refer to an older version of the node (e.g., a self-link created by a merge), hence the ids are compared
+							if (restLink->isDestinationIndividualID(processIndi) && restLink->isSourceIndividualID(processIndi)) {
 								// throw clash
 								CClashedDependencyDescriptor* clashDes = nullptr;
 								clashDes = createClashedIndividualLinkDescriptor(clashDes,restLink,restLink->getDependencyTrackPoint(),calcAlgContext);
@@ -19164,7 +19300,15 @@ namespace Konclude {
 								locAncTestIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFDIRECTBLOCKED);
 							} else {
 								locAncTestIndi->addProcessingRestrictionFlags(CIndividualProcessNode::PRFPROCESSINGBLOCKED);
-								addIndividualToBlockingUpdateReviewProcessingQueue(blockingIndi,calcAlgContext);
+								// The blocker has to know the nodes it blocks: when it is merged or pruned, they are queued again
+								// (eliminiateBlockedIndividuals). Otherwise a node of the deterministic graph that is still blocked
+								// by a node that a later test merges is never processed, since the processing queues of the deterministic
+								// graph are not taken over by the test.
+								CIndividualProcessNode* locBlockingNode = getLocalizedIndividual(blockingIndi,false,calcAlgContext);
+								CXLinker<CIndividualProcessNode*>* procBlockedIndiNodeLinker = CObjectAllocator< CXLinker<CIndividualProcessNode*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+								procBlockedIndiNodeLinker->initLinker(locAncTestIndi);
+								locBlockingNode->addProcessingBlockedIndividualsLinker(procBlockedIndiNodeLinker);
+								addIndividualToBlockingUpdateReviewProcessingQueue(locBlockingNode,calcAlgContext);
 							}
 							propagateIndirectSuccessorBlocking(locAncTestIndi,calcAlgContext);
 							blocked = true;
@@ -20773,19 +20917,30 @@ namespace Konclude {
 
 
 
+				CDistinctEdge* CCalculationTableauCompletionTaskHandleAlgorithm::getIndividualNodesDistinctEdge(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CIndividualProcessNode* upIndi1 = getUpToDateIndividual(indi1, calcAlgContext);
+					CIndividualProcessNode* upIndi2 = getUpToDateIndividual(indi2, calcAlgContext);
+					CDistinctHash* disHash = upIndi1->getDistinctHash(false);
+					return disHash ? disHash->getIndividualDistinctEdge(upIndi2->getIndividualNodeID()) : nullptr;
+				}
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::isIndividualNodesMergeable(CIndividualProcessNode* indi1, CIndividualProcessNode* indi2, CClashedDependencyDescriptor*& clashDescriptors, CCalculationAlgorithmContextBase* calcAlgContext) {
 					STATINC(INDINODESMERGEABLETESTCOUNT,calcAlgContext);
-					CDistinctHash* disHash = indi1->getDistinctHash(false);
 					STATINC(INDINODESMERGEABLEDISTINCTTESTCOUNT,calcAlgContext);
 
 					expandBackendCacheIndividualNodesNominalMerging(indi1, indi2, calcAlgContext);
+					// the nodes may be older versions (e.g., taken from a link by getSuccessorIndividual), the labels of the current versions
+					// are merged, so they are also the ones that are checked
+					indi1 = getUpToDateIndividual(indi1, calcAlgContext);
+					indi2 = getUpToDateIndividual(indi2, calcAlgContext);
 
-					if (disHash) {
-						CDistinctEdge* disEdge = disHash->getIndividualDistinctEdge(indi2->getIndividualNodeID());
-						if (disEdge) {
-							clashDescriptors = createClashedIndividualDistinctDescriptor(clashDescriptors,disEdge,disEdge->getDependencyTrackPoint(),calcAlgContext);
-							return false;
-						}
+					// the given nodes can be older versions (e.g., the opposite node of a link) that do not have the latest distinct edges, hence, the
+					// newest versions of both nodes are checked
+					CDistinctEdge* disEdge = getIndividualNodesDistinctEdge(indi1, indi2, calcAlgContext);
+					if (disEdge) {
+						clashDescriptors = createClashedIndividualDistinctDescriptor(clashDescriptors,disEdge,disEdge->getDependencyTrackPoint(),calcAlgContext);
+						return false;
 					}
 
 					if (mConfUniqueNameAssumption) {
@@ -21074,6 +21229,13 @@ namespace Konclude {
 					CMemoryAllocationManager* taskMemMan = nullptr;
 					STATINC(INDINODEMERGECOUNT,calcAlgContext);
 
+					// Only a new empty node (e.g., a new nominal of the NN-rule) takes over the creation dependency of the merged node. A node
+					// without a dependency that already has a label (e.g., a new nominal into which a first node was merged) keeps none, since
+					// its concepts do not depend on the creation of the node merged into it. A link with the same dependency as the node is
+					// considered as implied by the node's concepts and it is not added to clashes (e.g., a self-link created by the merge).
+					CReapplyConceptLabelSet* mergeIntoConSet = mergeIntoIndividualNode->getReapplyConceptLabelSet(false);
+					bool mergeIntoNewEmptyNode = !mergeIntoIndividualNode->getDependencyTrackPoint() && (!mergeIntoConSet || mergeIntoConSet->getConceptCount() <= 0);
+
 
 					KONCLUCE_TASK_ALGORITHM_MODEL_STRING_INSTRUCTION(mBeforeMergingTaskDebugIndiModelString = generateDebugIndiModelStringList(calcAlgContext));
 
@@ -21111,7 +21273,10 @@ namespace Konclude {
 
 
 
-					if (mCompGraphCacheHandler && mConfCompletionGraphCaching && individual->isNominalIndividualNode() && !mergeIntoIndividualNode->isNominalIndividualNode()) {
+					// A nominal that is merged away gives up its cached state, whether the target is a new node or a node
+					// that already carries another nominal (e.g. a test node into which a first nominal was merged). The
+					// nodes that the cached graph merged into this nominal are rebuilt by the caching loss.
+					if (mCompGraphCacheHandler && mConfCompletionGraphCaching && individual->isNominalIndividualNode()) {
 						if (!individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHINGINVALIDATED) && individual->getIndividualNodeID() <= calcAlgContext->getMaxCompletionGraphCachedIndividualNodeID()) {
 							individual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFCOMPLETIONGRAPHCACHEDNODELOCATED);
 
@@ -21365,6 +21530,10 @@ namespace Konclude {
 						CIndividual* nominalIndividual = individual->getNominalIndividual();
 						if (!mergeIntoIndividualNode->isNominalIndividualNode()) {
 							mergeIntoIndividualNode->setIndividualType(CIndividualProcessNode::NOMINALINDIVIDUALTYPE);
+						}
+						// a node can already be of the nominal type without representing an individual (e.g., a new empty node created for merging a
+						// nominal), it then represents the merged nominal individual since its merging hash and backend data are taken over below
+						if (!mergeIntoIndividualNode->getNominalIndividual()) {
 							mergeIntoIndividualNode->setNominalIndividual(nominalIndividual);
 						}
 
@@ -21443,7 +21612,7 @@ namespace Konclude {
 						}
 					}
 
-					if (!mergeIntoIndividualNode->getDependencyTrackPoint()) {
+					if (mergeIntoNewEmptyNode) {
 						mergeIntoIndividualNode->setDependencyTrackPoint(depTrackPointHash.value(individual->getDependencyTrackPoint()));
 					}
 					if (mConfMinimizeMerging) {
@@ -22006,7 +22175,7 @@ namespace Konclude {
 						CSortedNegLinker<CConcept*>* conceptOpLinker = concept->getOperandList();
 						if (conceptOpLinker && !conceptOpLinker->hasNext()) {
 							CConcept* opConcept = conceptOpLinker->getData();
-							bool opConNegation = conceptOpLinker->isNegated()^conceptNegation;
+							bool opConNegation = concept->getSuccessorFillerNegation(conceptOpLinker->isNegated(),conceptNegation);
 							CConceptData* opConceptData = opConcept->getConceptData();
 							if (opConceptData) {
 								CConceptProcessData* conProcData = (CConceptProcessData*)opConceptData;
@@ -22334,6 +22503,7 @@ namespace Konclude {
 						}
 					}
 					cint64 succLinkCount = sourceIndi->installIndividualLink(individualLink);
+					markIndividualNodeBackendSynchronisationRetestDueLinkAddition(sourceIndi, calcAlgContext);
 
 					if (mConfOccurrenceStatisticsCollecting && mOptCollectOccurrenceStatistics) {
 						bool nondeterministically = hasNondeterministicDependency(individualLink->getDependencyTrackPoint(), calcAlgContext);
@@ -22356,6 +22526,7 @@ namespace Konclude {
 						}
 					}
 					cint64 succLinkCount = sourceIndi->installIndividualLink(individualLink,&reapplyIterator);
+					markIndividualNodeBackendSynchronisationRetestDueLinkAddition(sourceIndi, calcAlgContext);
 
 					if (mConfOccurrenceStatisticsCollecting && mOptCollectOccurrenceStatistics) {
 						bool nondeterministically = hasNondeterministicDependency(individualLink->getDependencyTrackPoint(), calcAlgContext);
@@ -23166,7 +23337,14 @@ namespace Konclude {
 					CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
 					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
 					if (backendSyncData && visitBaseIndividual) {
-						continueVisiting = visitFunc(indiNode, indiNode, depTrackPoint);
+						// a node that represents its individual only through a (possibly non-deterministic) merge has the dependency of that merge
+						// in its merging hash, the synchronisation with the backend data of the individual depends on it
+						CDependencyTrackPoint* baseDepTrackPoint = depTrackPoint;
+						CIndividualMergingHash* baseMergingHash = indiNode->getIndividualMergingHash(false);
+						if (baseMergingHash && indiNode->getNominalIndividual() && baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint()) {
+							baseDepTrackPoint = baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint();
+						}
+						continueVisiting = visitFunc(indiNode, indiNode, baseDepTrackPoint);
 						visited = true;
 					}
 					if (newIndiMergedHash) {
@@ -23195,7 +23373,14 @@ namespace Konclude {
 					CDependencyTrackPoint* depTrackPoint = calcAlgContext->getBaseDependencyNode()->getContinueDependencyTrackPoint();
 					CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData* backendSyncData = (CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationData*)indiNode->getIndividualBackendCacheSynchronisationData(false);
 					if (backendSyncData && visitBaseIndividual) {
-						continueVisiting = visitFunc(indiNode, indiNode, depTrackPoint);
+						// a node that represents its individual only through a (possibly non-deterministic) merge has the dependency of that merge
+						// in its merging hash, the synchronisation with the backend data of the individual depends on it
+						CDependencyTrackPoint* baseDepTrackPoint = depTrackPoint;
+						CIndividualMergingHash* baseMergingHash = indiNode->getIndividualMergingHash(false);
+						if (baseMergingHash && indiNode->getNominalIndividual() && baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint()) {
+							baseDepTrackPoint = baseMergingHash->value(indiNode->getNominalIndividual()->getIndividualID()).getDependencyTrackPoint();
+						}
+						continueVisiting = visitFunc(indiNode, indiNode, baseDepTrackPoint);
 						visited = true;
 					}
 					if (newIndiMergedLinker != prevIndiMergedLinker) {
@@ -23267,6 +23452,19 @@ namespace Konclude {
 				}
 
 
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::hasBlockableRoleNeighbour(CIndividualProcessNode* indiNode, CRole* role, CCalculationAlgorithmContextBase* calcAlgContext) {
+					CRoleSuccessorLinkIterator roleSuccIt(indiNode->getRoleSuccessorLinkIterator(role));
+					while (roleSuccIt.hasNext()) {
+						CIndividualLinkEdge* link = roleSuccIt.next();
+						CIndividualProcessNode* neighbourIndi = getUpToDateIndividual(link->getOppositeIndividual(indiNode), calcAlgContext);
+						if (!neighbourIndi->isNominalIndividualNode()) {
+							return true;
+						}
+					}
+					return false;
+				}
+
+
 				bool CCalculationTableauCompletionTaskHandleAlgorithm::testIndividualNodeBackendCacheExpansionBlockingCriticalCardinality(CIndividualProcessNode* indiNode, CCalculationAlgorithmContextBase* calcAlgContext) {
 
 					bool expansionBlockingCritical = false;
@@ -23321,7 +23519,9 @@ namespace Konclude {
 											}
 
 											cint64 minCard = cardData->getMinimumRestrictingCardinality();
-											if (linkCount > minCard) {
+											// a blockable neighbour of a nominal with a cardinality restriction requires the NN-rule, even if the cardinality
+											// is not yet exceeded: the neighbour could otherwise be blocked although its unravelling creates more neighbours
+											if (linkCount > minCard || hasBlockableRoleNeighbour(indiNode, role, calcAlgContext)) {
 												expansionBlockingCritical = true;
 											}
 										}
@@ -23911,6 +24111,10 @@ namespace Konclude {
 						expanded = true;
 					}
 					CIndividualProcessNode* locNominalIndi = getLocalizedForcedBackendInitializedNominalIndividualNode(repNeighbourIndiId, calcAlgContext);
+					// the links are installed into the node of the current task: the given node can be a version of a previous task (e.g., a merging
+					// candidate) or it became outdated by the localization of the neighbour (the neighbour is merged into it), and a link installed
+					// into a previous version remains referenced by its successor lists after the memory of the current task is released
+					indiNode = getLocalizedIndividual(indiNode, false, calcAlgContext);
 
 					markIndividualNodeBackendNonConceptSetRelatedProcessing(locNominalIndi, calcAlgContext);
 					if (representativeLabelExpansionData) {
@@ -23937,9 +24141,11 @@ namespace Konclude {
 					}
 
 					CDependencyTrackPoint* nominalConDepTrackPoint = nullptr;
-					if (locNominalIndi->getNominalIndividual() && -repNeighbourIndiId != locNominalIndi->getIndividualNodeID() && repNeighbourIndiId != locNominalIndi->getNominalIndividual()->getIndividualID() && locNominalIndi->getIndividualMergingHash(false)) {
+					// the node can represent the neighbour individual only through a (possibly non-deterministic) merge, also if it is the individual of the
+					// node (e.g., a nominal merged into a test node), and then the connection depends on that merge
+					if (locNominalIndi->getNominalIndividual() && -repNeighbourIndiId != locNominalIndi->getIndividualNodeID() && locNominalIndi->getIndividualMergingHash(false)) {
 						nominalConDepTrackPoint = locNominalIndi->getIndividualMergingHash(false)->value(repNeighbourIndiId).getDependencyTrackPoint();
-						if (!nominalConDepTrackPoint || hasNondeterministicDependency(nominalConDepTrackPoint, calcAlgContext)) {
+						if (repNeighbourIndiId != locNominalIndi->getNominalIndividual()->getIndividualID() && (!nominalConDepTrackPoint || hasNondeterministicDependency(nominalConDepTrackPoint, calcAlgContext))) {
 							CIndividualNodeRepresentativeMemoryBackendCacheSynchronisationNeighbourExpansionData tmpNeighbourExpData;
 							expanded |= expandIndividualNeighbourNodeFromBackendCache(indiNode, assocData, locNominalIndi->getNominalIndividual()->getIndividualID(), tmpNeighbourExpData, forceExpansion, forceProcessing, nullptr, baseDepTrackPoint, calcAlgContext);
 						}
@@ -26792,9 +26998,10 @@ namespace Konclude {
 
 				CIndividualProcessNode* CCalculationTableauCompletionTaskHandleAlgorithm::getLocalizedIndividual(CIndividualProcessNode* indi, bool updateIndividual, CCalculationAlgorithmContextBase* calcAlgContext) {
 					if (!indi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
-						if (updateIndividual) {
-							indi = getUpToDateIndividual(indi,calcAlgContext);
-						}
+						// the node may already be localized in the current task (e.g., the given node is an older version of a node that
+						// was localized before in the same task), a second local copy would replace the first one in the node vector and
+						// the changes made through the first one would be lost, hence, the newest version is used independently of updateIndividual
+						indi = getUpToDateIndividual(indi,calcAlgContext);
 						if (!indi->isLocalizationTagUpToDate(calcAlgContext->getUsedProcessTagger()->getCurrentLocalizationTag())) {
 							STATINC(INDINODELOCALIZEDLOADCOUNT,calcAlgContext);
 							CMemoryAllocationManager* taskMemMan = nullptr;
@@ -27955,6 +28162,17 @@ namespace Konclude {
 							STATINC(INDINODESADDEDPROCESSINGQUEUECOUNT,calcAlgContext);
 							return true;
 						}
+					}
+					return false;
+				}
+
+
+				bool CCalculationTableauCompletionTaskHandleAlgorithm::markIndividualNodeBackendSynchronisationRetestDueLinkAddition(CIndividualProcessNode* individual, CCalculationAlgorithmContextBase* calcAlgContext) {
+					// a new link can exceed a cardinality restriction together with the neighbours that are still only in the backend cache,
+					// the critical cardinality test of the backend synchronisation retest counts both and expands the neighbours if necessary
+					if (individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED) && !individual->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED)) {
+						individual->addProcessingRestrictionFlags(CIndividualProcessNode::PRFRETESTBACKENDSYNCHRONIZATIONDUEDIRECTMODIFIED);
+						return addIndividualToBackendSynchronisationRetestQueue(individual, calcAlgContext);
 					}
 					return false;
 				}

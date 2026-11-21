@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family N1: the nominal/cardinality equality with an
+  exact cardinality, so the at-most side is part of the blocked-node shape.
+
+  A is {a0,a1}, B is {a0,a4}. B has exactly two r-successors, both in B, so a4
+  is an r-successor of itself. A C-successor would give D through the
+  self-successor and clash with the disjointness, so a4 is an A, and a4 is not
+  a0 because B would then have only one instance; hence a4 = a1 and A = B.
+  The exact cardinality adds the at-most count to the shape that the
+  processing-blocked reactivation fix has to handle.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/n1">
+  <Prefix name="" IRI="http://konclude.test/cgc/n1#"/>
+
+  <Declaration><Class abbreviatedIRI=":A"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":B"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":D"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestANotB"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA1NotA4"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA4NotA1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestA1A4"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a4"/></Declaration>
+
+  <EquivalentClasses><Class abbreviatedIRI=":A"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":B"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+  </EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":B"/>
+    <ObjectExactCardinality cardinality="2">
+      <ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":B"/>
+    </ObjectExactCardinality>
+  </SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":B"/>
+    <ObjectUnionOf><Class abbreviatedIRI=":A"/><Class abbreviatedIRI=":C"/></ObjectUnionOf>
+  </SubClassOf>
+  <SubClassOf>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":r"/><Class abbreviatedIRI=":C"/></ObjectSomeValuesFrom>
+    <Class abbreviatedIRI=":D"/>
+  </SubClassOf>
+  <DisjointClasses><Class abbreviatedIRI=":C"/><Class abbreviatedIRI=":D"/></DisjointClasses>
+
+  <EquivalentClasses><Class abbreviatedIRI=":TestANotB"/>
+    <ObjectIntersectionOf><Class abbreviatedIRI=":A"/><ObjectComplementOf><Class abbreviatedIRI=":B"/></ObjectComplementOf></ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA1NotA4"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA4NotA1"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+      <ObjectComplementOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestA1A4"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a1"/></ObjectOneOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":a4"/></ObjectOneOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

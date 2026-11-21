@@ -136,6 +136,7 @@ namespace Konclude {
 						bool isDebuggingWriteDataCompletionTasksForIncrementalExpansionTestsActivated();
 						bool isDebuggingWriteDataCompletionTasksForRepresentativeCacheRecomputationTestsActivated();
 						bool isDebuggingWriteDataCompletionTasksForAllTestsActivated();
+						bool isDebuggingWriteCompletionGraphCachingSnapshotsActivated();
 
 
 						bool isSuccessorConceptSaturationExpansionActivated();
@@ -281,6 +282,7 @@ namespace Konclude {
 						bool mConfDebuggingWriteDataForIncrementalExpansionTestsActivated;
 						bool mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsActivated;
 						bool mConfDebuggingWriteDataForAllTestsActivated;
+						bool mConfDebuggingWriteCompletionGraphCachingSnapshotsActivated;
 
 						bool mConfSuccessorConceptSaturationExpansionActivated;
 						bool mConfSaturationCachingActivated;
@@ -436,6 +438,7 @@ namespace Konclude {
 						bool mConfDebuggingWriteDataForIncrementalExpansionTestsChecked;
 						bool mConfDebuggingWriteDataForRepresentativeCacheRecomputationTestsChecked;
 						bool mConfDebuggingWriteDataForAllTestsChecked;
+						bool mConfDebuggingWriteCompletionGraphCachingSnapshotsChecked;
 
 						bool mConfSuccessorConceptSaturationExpansionChecked;
 						bool mConfSaturationCachingChecked;

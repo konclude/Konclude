@@ -1997,6 +1997,10 @@ namespace Konclude {
 				cint64 opCode = concept->getOperatorCode();
 				CReapplyConceptLabelSet* labelSet = indiNode->getReapplyConceptLabelSet(false);
 
+				// the links of a node whose neighbours were (partially) not expanded from the backend cache do not show all its
+				// neighbours, a restriction on its neighbours can then not be judged by the links
+				bool neighbourLinksIncomplete = indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDNEIGHBOUREXPANSIONBLOCKED | CIndividualProcessNode::PRFSYNCHRONIZEDBACKENNEIGHBOURDPARTIALEXPANSION);
+
 				CConceptDescriptor* conDes = nullptr;
 				CDependencyTrackPoint* depTrackPoint = nullptr;
 				if (labelSet->getConceptDescriptor(concept, conDes, depTrackPoint)) {
@@ -2115,6 +2119,64 @@ namespace Konclude {
 							mergeable = true;
 						}
 
+						if (mergeable && neighbourLinksIncomplete) {
+							// the links do not show the neighbours that are only in the representative cache, they are counted in addition
+							// if they are not linked (a nominal node has the negated individual id; a merged neighbour may be counted twice,
+							// which only leads to an instance test)
+							cint64 linkedNeighbourCount = 0;
+							QSet<cint64> linkedNeighbourIdSet;
+							if (roleSuccHash) {
+								CRoleSuccessorLinkIterator linkedIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+								while (linkedIt.hasNext()) {
+									CIndividualLinkEdge* neighbourLink = linkedIt.next();
+									linkedNeighbourIdSet.insert(neighbourLink->getOppositeIndividualID(indiNode->getIndividualNodeID()));
+									++linkedNeighbourCount;
+								}
+							}
+							cint64 cachedNeighbourCount = 0;
+							CIndividual* nominalIndi = indiNode->getNominalIndividual();
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = nominalIndi ? reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nominalIndi->getIndividualID()) : nullptr;
+							if (!assData) {
+								mergeable = false;
+							} else {
+								visitRepresentativeCacheNeighbours(reqConfPreCompItem, role, assData, [&](cint64 neighbourIndiId, CBackendRepresentativeMemoryCacheIndividualAssociationData* neighbourAssData, bool deterministicNeighbour)->bool {
+									if (!linkedNeighbourIdSet.contains(-neighbourIndiId)) {
+										// as for the cache based merging, a neighbour that can take the negation of the qualification is ignored
+										bool ignorable = false;
+										for (CSortedNegLinker<CConcept*>* opConLinkerIt = concept->getOperandList(); opConLinkerIt && neighbourAssData && !ignorable; opConLinkerIt = opConLinkerIt->getNext()) {
+											bool opConMergeable = false;
+											bool opConUnmergeable = false;
+											checkTrivialInstanceConceptRepresentativeCacheBasedMerging(reqConfPreCompItem, opConLinkerIt->getData(), !opConLinkerIt->isNegated(), neighbourAssData, &opConMergeable, &opConUnmergeable, mergingOperationLimit);
+											ignorable = opConMergeable;
+										}
+										if (!ignorable) {
+											++cachedNeighbourCount;
+										}
+									}
+									return linkedNeighbourCount + cachedNeighbourCount <= cardinality;
+								});
+								if (linkedNeighbourCount + cachedNeighbourCount > cardinality) {
+									mergeable = false;
+								}
+							}
+						}
+
+						if (mergeable && indiNode->hasPartialProcessingRestrictionFlags(CIndividualProcessNode::PRFSYNCHRONIZEDBACKENDSUCCESSOREXPANSIONBLOCKED)) {
+							// the successors that are only represented by the representative cache (e.g., for an at-least restriction of the
+							// individual) are not in the links, if the cache has existential successors for the role, the instance test decides
+							CIndividual* nominalIndi = indiNode->getNominalIndividual();
+							CBackendRepresentativeMemoryCacheIndividualAssociationData* assData = nominalIndi ? reqConfPreCompItem->getBackendAssociationCacheReader()->getIndividualAssociationData(nominalIndi->getIndividualID()) : nullptr;
+							if (!assData) {
+								mergeable = false;
+							} else {
+								CBackendRepresentativeMemoryLabelCacheItem* detExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
+								CBackendRepresentativeMemoryLabelCacheItem* nondetExtLabelItem = assData->getLabelCacheEntry(CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_EXISTENTIAL_INSTANTIATED_ROLE_SET_LABEL);
+								if (reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, detExtLabelItem, role, false) || reqConfPreCompItem->getBackendAssociationCacheReader()->hasRoleInAssociatedCompinationRoleSetLabel(assData, nondetExtLabelItem, role, false)) {
+									mergeable = false;
+								}
+							}
+						}
+
 					} else if (!conceptNegation && (opCode == CCSOME) || conceptNegation && (opCode == CCALL)) {
 						// mergeable if there is one neighbour that satisfies the qualifying restriction
 						// unmergeable is non-trivial to detect (maybe we can use the saturation graph somehow?)
@@ -2125,7 +2187,10 @@ namespace Konclude {
 						bool oneMergable = false;
 						bool allUnmergeable = true;
 
-						CRoleSuccessorLinkIterator roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						CRoleSuccessorLinkIterator roleSuccIt;
+						if (roleSuccHash) {
+							roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						}
 						while (roleSuccIt.hasNext() && !oneMergable) {
 
 							CIndividualLinkEdge* neighbourLink = roleSuccIt.next();
@@ -2151,10 +2216,14 @@ namespace Konclude {
 						CRole* role = concept->getRole();
 						CReapplyRoleSuccessorHash* roleSuccHash = indiNode->getReapplyRoleSuccessorHash(false);
 
-						bool allMergable = true;
+						// all neighbours must accept the filler, which cannot be judged if neighbours are missing from the links
+						bool allMergable = !neighbourLinksIncomplete;
 						bool oneUnmergeable = false;
 
-						CRoleSuccessorLinkIterator roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						CRoleSuccessorLinkIterator roleSuccIt;
+						if (roleSuccHash) {
+							roleSuccIt = roleSuccHash->getRoleSuccessorLinkIterator(role);
+						}
 						while (roleSuccIt.hasNext() && (allMergable || !oneUnmergeable)) {
 
 							CIndividualLinkEdge* neighbourLink = roleSuccIt.next();
@@ -2186,8 +2255,9 @@ namespace Konclude {
 						if (-nominalIndi->getIndividualID() == indiNode->getIndividualNodeID()) {
 							mergeable = true;
 						} else {
+							// the merging hash is keyed by the individual id (cf. mergeIndividualNodeInto) and exists only if something was merged
 							CIndividualMergingHash* indiMergingHash = indiNode->getIndividualMergingHash(false);
-							if (indiMergingHash->value(-nominalIndi->getIndividualID()).isMergedWithIndividual()) {
+							if (indiMergingHash && indiMergingHash->value(nominalIndi->getIndividualID()).isMergedWithIndividual()) {
 								mergeable = true;
 							}
 						}
@@ -2198,8 +2268,9 @@ namespace Konclude {
 						if (-nominalIndi->getIndividualID() == indiNode->getIndividualNodeID()) {
 							unmergeable = true;
 						} else {
+							// the merging hash is keyed by the individual id (cf. mergeIndividualNodeInto) and exists only if something was merged
 							CIndividualMergingHash* indiMergingHash = indiNode->getIndividualMergingHash(false);
-							if (indiMergingHash->value(-nominalIndi->getIndividualID()).isMergedWithIndividual()) {
+							if (indiMergingHash && indiMergingHash->value(nominalIndi->getIndividualID()).isMergedWithIndividual()) {
 								unmergeable = true;
 							}
 						}
@@ -2277,11 +2348,13 @@ namespace Konclude {
 								if (checkTrivialInstanceConceptCachedCompletionGraphBasedMerging(reqConfPreCompItem, concept, true, indiProcNode, indiProcVector, &mergeable, &unmergeable, &mergeOperationLimit)) {
 									if (mergeable) {
 										isInstance = false;
+										return true;
 									}
+									// a clash in a node that was merged non-deterministically does not prove the instance, the test decides it
 									if (unmergeable && !nondeterministicallyMergedFlag) {
 										isInstance = true;
+										return true;
 									}
-									return true;
 								}
 							}
 						} else {

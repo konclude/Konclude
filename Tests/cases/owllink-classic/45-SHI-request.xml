@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xml:base="http://www.owllink.org/testsuite/45#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/45"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/45">
+
+        <owl:Declaration>
+            <owl:Class IRI="D"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="C"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:Class IRI="P"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:Declaration>
+        
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="f"/>
+        </owl:Declaration>
+        
+        <owl:SubObjectPropertyOf>
+            <owl:ObjectProperty IRI="f"/>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:SubObjectPropertyOf>
+        
+        <owl:TransitiveObjectProperty>
+            <owl:ObjectProperty IRI="r"/>
+        </owl:TransitiveObjectProperty>
+        
+        <owl:FunctionalObjectProperty>
+            <owl:ObjectProperty IRI="f"/>
+        </owl:FunctionalObjectProperty>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="D"/>
+            <owl:ObjectIntersectionOf>
+                <owl:Class IRI="C"/>
+                <owl:ObjectSomeValuesFrom>
+                    <owl:ObjectProperty IRI="f"/>
+                    <owl:ObjectComplementOf>
+                        <owl:Class IRI="C"/>
+                    </owl:ObjectComplementOf>
+                </owl:ObjectSomeValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+        
+        <owl:EquivalentClasses>
+            <owl:Class IRI="P"/>
+            <owl:ObjectIntersectionOf>
+               <owl:ObjectComplementOf>
+                   <owl:Class IRI="C"/>
+               </owl:ObjectComplementOf>
+               <owl:ObjectSomeValuesFrom>
+                   <owl:ObjectInverseOf>
+                       <owl:ObjectProperty IRI="f"/>
+                   </owl:ObjectInverseOf>
+                   <owl:Class IRI="D"/>
+               </owl:ObjectSomeValuesFrom>
+                <owl:ObjectAllValuesFrom>
+                    <owl:ObjectInverseOf>
+                        <owl:ObjectProperty IRI="r"/>
+                    </owl:ObjectInverseOf>
+                    <owl:ObjectSomeValuesFrom>
+                        <owl:ObjectInverseOf>
+                            <owl:ObjectProperty IRI="f"/>
+                        </owl:ObjectInverseOf>
+                        <owl:Class IRI="D"/>
+                    </owl:ObjectSomeValuesFrom>
+                </owl:ObjectAllValuesFrom>
+            </owl:ObjectIntersectionOf>
+        </owl:EquivalentClasses>
+
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/45" timing="simple">
+        <owl:Class IRI="P"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/45"/>
+
+</RequestMessage>

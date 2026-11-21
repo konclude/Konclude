@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/suite/owllink-classic">
+  <Prefix name="kt" IRI="http://konclude.test/vocabulary#"/>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:TestSuite"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-classic"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteName"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-classic"/><Literal>OWLlink-classic-DL</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:suiteDirectory"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-classic"/><Literal>owllink-classic</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:suite-owllink-classic"/><Literal>The hand-written OWLlink tests of the early Konclude development (1a-SHIN ... 73-ALCOV): small TBoxes that exercise one description logic feature each (qualified number restrictions, inverse and transitive roles, role hierarchies, role chains, nominals, nominal schemas), with satisfiability, subsumption and instance queries. task=owllink: every BooleanResponse is checked against kt:expectedResult (one per response in document order, or a single one for all). Every expected result was confirmed with HermiT 1.4.5; requests that no reasoner answers within a minute (41_5..41_1000-ALCQ, 56-SIOQ-1000) are not included.</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shin"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shin"/><Literal>Archived hand-written OWLlink test 1a-SHIN (transitive, inverse roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shin"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shin"/><Literal>1a-SHIN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shin"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shin"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shn"/><Literal>Archived hand-written OWLlink test 1a-SHN (transitive roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shn"/><Literal>1a-SHN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shn"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shq"/><Literal>Archived hand-written OWLlink test 1a-SHQ (transitive roles, role hierarchy and qualified number restrictions): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shq"/><Literal>1a-SHQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shq"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-1a-shq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shin"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shin"/><Literal>Archived hand-written OWLlink test 1b-SHIN (transitive, inverse roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shin"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shin"/><Literal>1b-SHIN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shin"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shin"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shn"/><Literal>Archived hand-written OWLlink test 1b-SHN (transitive roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shn"/><Literal>1b-SHN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shn"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shq"/><Literal>Archived hand-written OWLlink test 1b-SHQ (transitive roles, role hierarchy and qualified number restrictions): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shq"/><Literal>1b-SHQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-1b-shq"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><Literal>Archived hand-written OWLlink test 2a-SHN (transitive roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers true (confirmed with FaCT++ 1.6.3, HermiT does not answer within 60 s).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><Literal>2a-SHN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-2a-shn"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-2b-shn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-2b-shn"/><Literal>Archived hand-written OWLlink test 2b-SHN (transitive roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-2b-shn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-2b-shn"/><Literal>2b-SHN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-2b-shn"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-3a-alcn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-3a-alcn"/><Literal>Archived hand-written OWLlink test 3a-ALCN (number restrictions): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-3a-alcn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-3a-alcn"/><Literal>3a-ALCN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-3a-alcn"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-3a-alcn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-3b-alcn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-3b-alcn"/><Literal>Archived hand-written OWLlink test 3b-ALCN (number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-3b-alcn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-3b-alcn"/><Literal>3b-ALCN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-3b-alcn"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-3b-alcn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-4-alif"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-4-alif"/><Literal>Archived hand-written OWLlink test 4-ALIF (inverse and functional roles): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-4-alif"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-4-alif"/><Literal>4-ALIF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-4-alif"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-4-alif"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-5-sif"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-5-sif"/><Literal>Archived hand-written OWLlink test 5-SIF (transitive, inverse and functional roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-5-sif"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-5-sif"/><Literal>5-SIF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-5-sif"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-5-sif"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-6-sif"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-6-sif"/><Literal>Archived hand-written OWLlink test 6-SIF (transitive, inverse and functional roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-6-sif"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-6-sif"/><Literal>6-SIF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-6-sif"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-6-sif"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-8-alcf"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-8-alcf"/><Literal>Archived hand-written OWLlink test 8-ALCF (functional roles): IsInstanceOf with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-8-alcf"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-8-alcf"/><Literal>8-ALCF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-8-alcf"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-8-alcf"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-9-alchf"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-9-alchf"/><Literal>Archived hand-written OWLlink test 9-ALCHF (role hierarchy and functional roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-9-alchf"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-9-alchf"/><Literal>9-ALCHF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-9-alchf"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-9-alchf"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-10a-alcn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-10a-alcn"/><Literal>Archived hand-written OWLlink test 10a-ALCN (number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-10a-alcn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-10a-alcn"/><Literal>10a-ALCN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-10a-alcn"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-10a-alcn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-10b-alcn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-10b-alcn"/><Literal>Archived hand-written OWLlink test 10b-ALCN (number restrictions): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-10b-alcn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-10b-alcn"/><Literal>10b-ALCN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-10b-alcn"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-10b-alcn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-15-sif"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-15-sif"/><Literal>Archived hand-written OWLlink test 15-SIF (transitive, inverse and functional roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-15-sif"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-15-sif"/><Literal>15-SIF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-15-sif"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-15-sif"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><Literal>Archived hand-written OWLlink test 28a-ALC (ALC): IsClassSatisfiable with the expected answers false (confirmed with FaCT++ 1.6.3, HermiT does not answer within 60 s).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><Literal>28a-ALC-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-28a-alc"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>Archived hand-written OWLlink test 28b-ALC (ALC): IsClassSatisfiable with the expected answers true (confirmed with FaCT++ 1.6.3, HermiT does not answer within 60 s).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>28b-ALC-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-28b-alc"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/><Literal>Archived hand-written OWLlink test 36-hilf-ALCF (functional roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/><Literal>36-hilf-ALCF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-36-hilf-alcf"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-37-alchq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-37-alchq"/><Literal>Archived hand-written OWLlink test 37-ALCHQ (role hierarchy and qualified number restrictions): IsClassSubsumedBy with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-37-alchq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-37-alchq"/><Literal>37-ALCHQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-37-alchq"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-37-alchq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-38-alchq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-38-alchq"/><Literal>Archived hand-written OWLlink test 38-ALCHQ (role hierarchy and qualified number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-38-alchq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-38-alchq"/><Literal>38-ALCHQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-38-alchq"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-38-alchq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-39-alcf"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-39-alcf"/><Literal>Archived hand-written OWLlink test 39-ALCF (functional roles): IsClassSubsumedBy with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-39-alcf"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-39-alcf"/><Literal>39-ALCF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-39-alcf"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-39-alcf"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcf"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcf"/><Literal>Archived hand-written OWLlink test 39b-ALCF (functional roles): IsClassSatisfiable, IsClassSubsumedBy with the expected answers false true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcf"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcf"/><Literal>39b-ALCF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcf"/><Literal>false</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcf"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcf"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcn"/><Literal>Archived hand-written OWLlink test 39b-ALCN (number restrictions): IsClassSatisfiable with the expected answers false false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcn"/><Literal>39b-ALCN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcn"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-39b-alcn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-40-alcf"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-40-alcf"/><Literal>Archived hand-written OWLlink test 40-ALCF (functional roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-40-alcf"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-40-alcf"/><Literal>40-ALCF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-40-alcf"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-40-alcf"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-41-1-alcq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-41-1-alcq"/><Literal>Archived hand-written OWLlink test 41_1-ALCQ (qualified number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-41-1-alcq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-41-1-alcq"/><Literal>41_1-ALCQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-41-1-alcq"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-41-1-alcq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-42-alcif"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-42-alcif"/><Literal>Archived hand-written OWLlink test 42-ALCIF (inverse and functional roles): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-42-alcif"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-42-alcif"/><Literal>42-ALCIF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-42-alcif"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-42-alcif"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhn"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhn"/><Literal>Archived hand-written OWLlink test 43-ALHN (role hierarchy and number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhn"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhn"/><Literal>43-ALHN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhn"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhn"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhq"/><Literal>Archived hand-written OWLlink test 43-ALHQ (role hierarchy and qualified number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhq"/><Literal>43-ALHQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhq"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-43-alhq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-44a-alc"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-44a-alc"/><Literal>Archived hand-written OWLlink test 44a-ALC (ALC): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-44a-alc"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-44a-alc"/><Literal>44a-ALC-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-44a-alc"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-44a-alc"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-44b-alc"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-44b-alc"/><Literal>Archived hand-written OWLlink test 44b-ALC (ALC): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-44b-alc"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-44b-alc"/><Literal>44b-ALC-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-44b-alc"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-44b-alc"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-45-shi"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-45-shi"/><Literal>Archived hand-written OWLlink test 45-SHI (transitive, inverse roles and role hierarchy): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-45-shi"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-45-shi"/><Literal>45-SHI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-45-shi"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-45-shi"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-46-shi"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-46-shi"/><Literal>Archived hand-written OWLlink test 46-SHI (transitive, inverse roles and role hierarchy): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-46-shi"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-46-shi"/><Literal>46-SHI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-46-shi"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-46-shi"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-48-alci"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-48-alci"/><Literal>Archived hand-written OWLlink test 48-ALCI (inverse roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-48-alci"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-48-alci"/><Literal>48-ALCI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-48-alci"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-48-alci"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-49-shq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-49-shq"/><Literal>Archived hand-written OWLlink test 49-SHQ (transitive roles, role hierarchy and qualified number restrictions): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-49-shq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-49-shq"/><Literal>49-SHQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-49-shq"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-49-shq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-50-shin"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-50-shin"/><Literal>Archived hand-written OWLlink test 50-SHIN (transitive, inverse roles, role hierarchy and number restrictions): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-50-shin"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-50-shin"/><Literal>50-SHIN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-50-shin"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-50-shin"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-52a-sr"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-52a-sr"/><Literal>Archived hand-written OWLlink test 52a-SR (role chains): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-52a-sr"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-52a-sr"/><Literal>52a-SR-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-52a-sr"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-52a-sr"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-52b-sr"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-52b-sr"/><Literal>Archived hand-written OWLlink test 52b-SR (role chains): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-52b-sr"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-52b-sr"/><Literal>52b-SR-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-52b-sr"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-52b-sr"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-52c-sr"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-52c-sr"/><Literal>Archived hand-written OWLlink test 52c-SR (role chains): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-52c-sr"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-52c-sr"/><Literal>52c-SR-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-52c-sr"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-52c-sr"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-52d-sr"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-52d-sr"/><Literal>Archived hand-written OWLlink test 52d-SR (role chains): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-52d-sr"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-52d-sr"/><Literal>52d-SR-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-52d-sr"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-52d-sr"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-52e-sr"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-52e-sr"/><Literal>Archived hand-written OWLlink test 52e-SR (role chains): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-52e-sr"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-52e-sr"/><Literal>52e-SR-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-52e-sr"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53a-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53a-sri"/><Literal>Archived hand-written OWLlink test 53a-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53a-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53a-sri"/><Literal>53a-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53a-sri"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-53a-sri"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53b-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53b-sri"/><Literal>Archived hand-written OWLlink test 53b-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53b-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53b-sri"/><Literal>53b-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53b-sri"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-53b-sri"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-2-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-2-sri"/><Literal>Archived hand-written OWLlink test 53c-2-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-2-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-2-sri"/><Literal>53c-2-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-2-sri"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-53c-2-sri"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-3-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-3-sri"/><Literal>Archived hand-written OWLlink test 53c-3-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-3-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-3-sri"/><Literal>53c-3-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-3-sri"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-53c-3-sri"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-4-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-4-sri"/><Literal>Archived hand-written OWLlink test 53c-4-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-4-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-4-sri"/><Literal>53c-4-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-4-sri"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-53c-4-sri"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-5-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-5-sri"/><Literal>Archived hand-written OWLlink test 53c-5-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-5-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-5-sri"/><Literal>53c-5-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-5-sri"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-6-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-6-sri"/><Literal>Archived hand-written OWLlink test 53c-6-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-6-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-6-sri"/><Literal>53c-6-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-6-sri"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-7-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-7-sri"/><Literal>Archived hand-written OWLlink test 53c-7-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-7-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-7-sri"/><Literal>53c-7-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-7-sri"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-8-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-8-sri"/><Literal>Archived hand-written OWLlink test 53c-8-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-8-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-8-sri"/><Literal>53c-8-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-8-sri"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-53c-sri"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-53c-sri"/><Literal>Archived hand-written OWLlink test 53c-SRI (role chains with inverse roles): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-53c-sri"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-53c-sri"/><Literal>53c-SRI-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-53c-sri"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-55-sioq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-55-sioq"/><Literal>Archived hand-written OWLlink test 55-SIOQ (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-55-sioq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-55-sioq"/><Literal>55-SIOQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-55-sioq"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-55-sioq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq"/><Literal>Archived hand-written OWLlink test 56-SIOQ (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq"/><Literal>56-SIOQ-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-5"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-5"/><Literal>Archived hand-written OWLlink test 56-SIOQ-5 (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-5"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-5"/><Literal>56-SIOQ-5-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-5"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-5"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-6"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-6"/><Literal>Archived hand-written OWLlink test 56-SIOQ-6 (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-6"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-6"/><Literal>56-SIOQ-6-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-6"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-6"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-7"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-7"/><Literal>Archived hand-written OWLlink test 56-SIOQ-7 (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-7"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-7"/><Literal>56-SIOQ-7-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-7"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-8"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-8"/><Literal>Archived hand-written OWLlink test 56-SIOQ-8 (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-8"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-8"/><Literal>56-SIOQ-8-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-8"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-9"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-9"/><Literal>Archived hand-written OWLlink test 56-SIOQ-9 (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-9"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-9"/><Literal>56-SIOQ-9-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-9"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-10"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-10"/><Literal>Archived hand-written OWLlink test 56-SIOQ-10 (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-10"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-10"/><Literal>56-SIOQ-10-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-10"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-100"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-100"/><Literal>Archived hand-written OWLlink test 56-SIOQ-100 (nominals, inverse roles and qualified number restrictions (NN-rule)): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-100"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-100"/><Literal>56-SIOQ-100-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-56-sioq-100"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><Literal>Archived hand-written OWLlink test 60-ALCOIF (nominals, inverse and functional roles): IsClassSatisfiable with the expected answers false (the original test expected true; HermiT 1.4.5 and FaCT++ 1.6.3 answer false: the two r1-chains end in the same r2-predecessor of a and are merged back to their starts (DIS1 and DIS2)).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><Literal>60-ALCOIF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><Literal>false</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-60-alcoif"/><NamedIndividual abbreviatedIRI="kt:reasoner-factpp-1-6-3"/></ObjectPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-61-alcoif"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-61-alcoif"/><Literal>Archived hand-written OWLlink test 61-ALCOIF (nominals, inverse and functional roles): IsClassSatisfiable with the expected answers true (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-61-alcoif"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-61-alcoif"/><Literal>61-ALCOIF-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-61-alcoif"/><Literal>true</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-62-alcin"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-62-alcin"/><Literal>Archived hand-written OWLlink test 62-ALCIN (inverse roles and number restrictions): IsClassSatisfiable with the expected answers true (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-62-alcin"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-62-alcin"/><Literal>62-ALCIN-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-62-alcin"/><Literal>true</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-70-n10-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-70-n10-alcov"/><Literal>Archived hand-written OWLlink test 70-n10-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-70-n10-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-70-n10-alcov"/><Literal>70-n10-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-70-n10-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-70-n20-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-70-n20-alcov"/><Literal>Archived hand-written OWLlink test 70-n20-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-70-n20-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-70-n20-alcov"/><Literal>70-n20-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-70-n20-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-70-n30-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-70-n30-alcov"/><Literal>Archived hand-written OWLlink test 70-n30-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-70-n30-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-70-n30-alcov"/><Literal>70-n30-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-70-n30-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-70-n40-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-70-n40-alcov"/><Literal>Archived hand-written OWLlink test 70-n40-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-70-n40-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-70-n40-alcov"/><Literal>70-n40-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-70-n40-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-70-n50-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-70-n50-alcov"/><Literal>Archived hand-written OWLlink test 70-n50-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-70-n50-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-70-n50-alcov"/><Literal>70-n50-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-70-n50-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-71-n0-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-71-n0-alcov"/><Literal>Archived hand-written OWLlink test 71-n0-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-71-n0-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-71-n0-alcov"/><Literal>71-n0-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-71-n0-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-71-n5-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-71-n5-alcov"/><Literal>Archived hand-written OWLlink test 71-n5-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-71-n5-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-71-n5-alcov"/><Literal>71-n5-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-71-n5-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-71-n10-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-71-n10-alcov"/><Literal>Archived hand-written OWLlink test 71-n10-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-71-n10-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-71-n10-alcov"/><Literal>71-n10-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-71-n10-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-71-n20-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-71-n20-alcov"/><Literal>Archived hand-written OWLlink test 71-n20-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-71-n20-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-71-n20-alcov"/><Literal>71-n20-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-71-n20-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-71-n30-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-71-n30-alcov"/><Literal>Archived hand-written OWLlink test 71-n30-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-71-n30-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-71-n30-alcov"/><Literal>71-n30-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-71-n30-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-71-n40-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-71-n40-alcov"/><Literal>Archived hand-written OWLlink test 71-n40-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-71-n40-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-71-n40-alcov"/><Literal>71-n40-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-71-n40-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-71-n50-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-71-n50-alcov"/><Literal>Archived hand-written OWLlink test 71-n50-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-71-n50-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-71-n50-alcov"/><Literal>71-n50-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-71-n50-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-72-n10-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-72-n10-alcov"/><Literal>Archived hand-written OWLlink test 72-n10-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-72-n10-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-72-n10-alcov"/><Literal>72-n10-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-72-n10-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-72-n100-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-72-n100-alcov"/><Literal>Archived hand-written OWLlink test 72-n100-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-72-n100-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-72-n100-alcov"/><Literal>72-n100-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-72-n100-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-72-n200-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-72-n200-alcov"/><Literal>Archived hand-written OWLlink test 72-n200-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-72-n200-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-72-n200-alcov"/><Literal>72-n200-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-72-n200-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-72-n300-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-72-n300-alcov"/><Literal>Archived hand-written OWLlink test 72-n300-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-72-n300-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-72-n300-alcov"/><Literal>72-n300-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-72-n300-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-72-n400-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-72-n400-alcov"/><Literal>Archived hand-written OWLlink test 72-n400-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-72-n400-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-72-n400-alcov"/><Literal>72-n400-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-72-n400-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-72-n500-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-72-n500-alcov"/><Literal>Archived hand-written OWLlink test 72-n500-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers false (expectation of the original test; HermiT and FaCT++ do not answer within 60 s or cannot load the request, Konclude 0.6.2 agrees).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-72-n500-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-72-n500-alcov"/><Literal>72-n500-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-72-n500-alcov"/><Literal>false</Literal></DataPropertyAssertion>
+
+  <ClassAssertion><Class abbreviatedIRI="kt:SatisfiabilityTest"/><NamedIndividual abbreviatedIRI="kt:classic-73-n10-alcov"/></ClassAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:description"/><NamedIndividual abbreviatedIRI="kt:classic-73-n10-alcov"/><Literal>Archived hand-written OWLlink test 73-n10-ALCOV (nominal schemas): IsClassSatisfiable with the expected answers true (confirmed with HermiT 1.4.5).</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:task"/><NamedIndividual abbreviatedIRI="kt:classic-73-n10-alcov"/><Literal>owllink</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:usesOntology"/><NamedIndividual abbreviatedIRI="kt:classic-73-n10-alcov"/><Literal>73-n10-ALCOV-request.xml</Literal></DataPropertyAssertion>
+  <DataPropertyAssertion><DataProperty abbreviatedIRI="kt:expectedResult"/><NamedIndividual abbreviatedIRI="kt:classic-73-n10-alcov"/><Literal>true</Literal></DataPropertyAssertion>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/><NamedIndividual abbreviatedIRI="kt:classic-73-n10-alcov"/><NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5-519"/></ObjectPropertyAssertion>
+
+</Ontology>

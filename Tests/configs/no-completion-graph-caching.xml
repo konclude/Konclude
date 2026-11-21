@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Oracle configuration for the completion graph caching tests: the completion
+  graph caching is switched off completely, so every test is decided by the
+  completion algorithm alone. An answer that differs from the default
+  configuration is a caching defect by definition.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.CompletionGraphCaching'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

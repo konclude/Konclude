@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Reduced-saturation configuration for the completion graph caching tests: the
+  saturation-based decision shortcuts are switched off so that the completion
+  algorithm decides more tests on its own, but the concept saturation itself
+  stays enabled. It is the replacement for Tests/configs/no-saturation.xml,
+  which switches ConceptSaturation off and with it the ABox preparation of the
+  precomputation: under that configuration an inconsistent ABox is reported as
+  consistent (reproduce with Tests/cases/dl/maxcard-violation-ontology.owl.xml),
+  so it cannot serve as a reference answer for ABox tests.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.EquivalentAlternativesSaturationMerging'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Classification.SaturationSubsumerExtraction'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SuccessorConceptSaturationExpansion'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SaturationCaching'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SaturationSuccessorExtension'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.NominalSaturationCachingByNodeReactivation'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected realization of rf-101416-a2-r4.owl.xml: Openllet 2.6.5, confirmed by FaCT++ 1.6.3. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#a0"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#a1"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#a2"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#x0"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#x1"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#x2"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://www.w3.org/2002/07/owl#Thing"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#x3"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dlfuzz/101416#C0"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#a0"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dlfuzz/101416#C0"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#a2"/></ClassAssertion>
+  <ClassAssertion><Class IRI="http://konclude.test/dlfuzz/101416#R4"/><NamedIndividual IRI="http://konclude.test/dlfuzz/101416#a2"/></ClassAssertion>
+</Ontology>

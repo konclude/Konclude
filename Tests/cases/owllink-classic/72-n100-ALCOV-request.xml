@@ -1,0 +1,1184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.owllink.org/testsuite/sat-exp-test#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology">
+
+        <owl:Declaration>
+            <owl:Class IRI="#C"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:Class IRI="#D"/>
+        </owl:Declaration>
+
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#r"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#a"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#v"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#c"/>
+        </owl:Declaration>
+	
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#s"/>
+        </owl:Declaration>
+	
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#t"/>
+        </owl:Declaration>
+
+	
+	
+	
+        <owl:SubClassOf>
+			<owl:ObjectIntersectionOf>
+			
+				<owl:ObjectSomeValuesFrom>
+					<owl:ObjectProperty IRI="#r"/>
+					<owl:ObjectIntersectionOf>
+						<owl:ObjectSomeValuesFrom>
+							<owl:ObjectProperty IRI="#t"/>
+							<owl:IndividualVariable IRI="#x"/>
+						</owl:ObjectSomeValuesFrom>
+						
+						<owl:ObjectSomeValuesFrom>
+							<owl:ObjectProperty IRI="#t"/>
+							<owl:IndividualVariable IRI="#y"/>
+						</owl:ObjectSomeValuesFrom>
+						
+						<owl:ObjectSomeValuesFrom>
+							<owl:ObjectProperty IRI="#t"/>
+							<owl:IndividualVariable IRI="#z"/>
+						</owl:ObjectSomeValuesFrom>
+						
+					</owl:ObjectIntersectionOf>           
+				</owl:ObjectSomeValuesFrom>	
+				
+			</owl:ObjectIntersectionOf>  			
+
+			<owl:ObjectSomeValuesFrom>
+				<owl:ObjectProperty IRI="#c"/>
+				<owl:IndividualVariable IRI="#x"/>
+			</owl:ObjectSomeValuesFrom>
+			
+        </owl:SubClassOf>
+
+
+        <owl:SubClassOf>
+			<owl:ObjectSomeValuesFrom>
+				<owl:ObjectProperty IRI="#c"/>
+				<owl:Class abbreviatedIRI="owl:Thing"/>
+			</owl:ObjectSomeValuesFrom>
+			<owl:Class IRI="#C"/>
+		</owl:SubClassOf>
+
+        <owl:SubClassOf>
+			<owl:Class IRI="#D"/>
+			<owl:ObjectIntersectionOf>  
+				<owl:ObjectComplementOf>  
+					<owl:Class IRI="#C"/>
+				</owl:ObjectComplementOf>  
+				<owl:IndividualVariable IRI="#x"/>
+			</owl:ObjectIntersectionOf>  
+		</owl:SubClassOf>
+		
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#ia"/>
+        </owl:Declaration>
+		
+		<owl:Declaration>
+            <owl:NamedIndividual IRI="#ib"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#ix"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#iy"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#iz"/>
+        </owl:Declaration>
+
+		
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#r"/>
+            <owl:NamedIndividual IRI="#ia"/>
+            <owl:NamedIndividual IRI="#ib"/>
+		</owl:ObjectPropertyAssertion>
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#ix"/>
+		</owl:ObjectPropertyAssertion>
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#iy"/>
+		</owl:ObjectPropertyAssertion>
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#iz"/>
+		</owl:ObjectPropertyAssertion>	
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#s"/>
+            <owl:NamedIndividual IRI="#ia"/>
+            <owl:NamedIndividual IRI="#ib"/>
+		</owl:ObjectPropertyAssertion>		
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#a"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#iy"/>
+		</owl:ObjectPropertyAssertion>			
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#v"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#iz"/>
+		</owl:ObjectPropertyAssertion>			
+		
+		
+
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0000"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0000"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0001"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0001"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0002"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0002"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0003"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0003"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0004"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0004"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0005"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0005"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0006"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0006"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0007"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0007"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0008"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0008"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0009"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0009"/>
+		</owl:ObjectPropertyAssertion>	
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0010"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0010"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0011"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0011"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0012"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0012"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0013"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0013"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0014"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0014"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0015"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0015"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0016"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0016"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0017"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0017"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0018"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0018"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0019"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0019"/>
+		</owl:ObjectPropertyAssertion>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0020"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0020"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0021"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0021"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0022"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0022"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0023"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0023"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0024"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0024"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0025"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0025"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0026"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0026"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0027"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0027"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0028"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0028"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0029"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0029"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0030"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0030"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0031"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0031"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0032"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0032"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0033"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0033"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0034"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0034"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0035"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0035"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0036"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0036"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0037"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0037"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0038"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0038"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0039"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0039"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0040"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0040"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0041"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0041"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0042"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0042"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0043"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0043"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0044"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0044"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0045"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0045"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0046"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0046"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0047"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0047"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0048"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0048"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0049"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0049"/>
+		</owl:ObjectPropertyAssertion>		
+
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0050"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0050"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0051"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0051"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0052"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0052"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0053"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0053"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0054"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0054"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0055"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0055"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0056"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0056"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0057"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0057"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0058"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0058"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0059"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0059"/>
+		</owl:ObjectPropertyAssertion>			
+
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0060"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0060"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0061"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0061"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0062"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0062"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0063"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0063"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0064"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0064"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0065"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0065"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0066"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0066"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0067"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0067"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0068"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0068"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0069"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0069"/>
+		</owl:ObjectPropertyAssertion>			
+		
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0070"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0070"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0071"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0071"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0072"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0072"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0073"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0073"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0074"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0074"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0075"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0075"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0076"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0076"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0077"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0077"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0078"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0078"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0079"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0079"/>
+		</owl:ObjectPropertyAssertion>			
+		
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0080"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0080"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0081"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0081"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0082"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0082"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0083"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0083"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0084"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0084"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0085"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0085"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0086"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0086"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0087"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0087"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0088"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0088"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0089"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0089"/>
+		</owl:ObjectPropertyAssertion>			
+		
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0090"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0090"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0091"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0091"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0092"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0092"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0093"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0093"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0094"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0094"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0095"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0095"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0096"/>
+        </owl:Declaration>	
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0096"/>
+		</owl:ObjectPropertyAssertion>			
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0097"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0097"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0098"/>
+        </owl:Declaration>			
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0098"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0099"/>
+        </owl:Declaration>		
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#t"/>
+            <owl:NamedIndividual IRI="#ib"/>
+            <owl:NamedIndividual IRI="#i0099"/>
+		</owl:ObjectPropertyAssertion>			
+		
+		
+		
+		
+		
+		
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology" timing="simple">
+        <owl:Class IRI="#D"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology"/>
+
+</RequestMessage>

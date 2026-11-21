@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/crashA">
+  <Prefix name="" IRI="http://konclude.test/crashA#"/>
+  <Declaration><Class abbreviatedIRI=":R"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":b"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":c"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":d"/></Declaration>
+  <ObjectPropertyAssertion><ObjectProperty abbreviatedIRI=":r"/><NamedIndividual abbreviatedIRI=":a"/><NamedIndividual abbreviatedIRI=":b"/></ObjectPropertyAssertion>
+  <SameIndividual><NamedIndividual abbreviatedIRI=":c"/><NamedIndividual abbreviatedIRI=":b"/></SameIndividual>
+  <EquivalentClasses><Class abbreviatedIRI=":R"/><ObjectAllValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r"/></ObjectInverseOf><ObjectOneOf><NamedIndividual abbreviatedIRI=":d"/></ObjectOneOf></ObjectAllValuesFrom></EquivalentClasses>
+</Ontology>

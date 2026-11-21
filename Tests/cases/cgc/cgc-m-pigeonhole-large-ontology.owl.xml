@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Completion graph caching, family M: a larger pigeonhole instance with combined
+  features.
+
+  Six pigeons sit on exactly one of five holes, so one hole holds two pigeons and
+  the scene is crowded (the issue #19 argument at a larger scale). On top of the
+  pigeonhole core the ontology combines a functional data property with a value
+  choice on the pigeons, a sub-role and a role chain from a pigeon through its
+  hole to the scene. The same cached model therefore has to carry nominal
+  merges, a qualified cardinality, inverse roles, data values and a chain.
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://konclude.test/cgc/m">
+  <Prefix name="" IRI="http://konclude.test/cgc/m#"/>
+
+  <Declaration><Class abbreviatedIRI=":CrowdedHole"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":CrowdedScene"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Hole"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Pigeon"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":Scene"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSceneNotCrowded"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestSceneCrowded"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueChoice"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestValueOne"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestNoLocatedIn"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":TestHoleNotCrowded"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":sitsAt"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":inScene"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":locatedIn"/></Declaration>
+  <Declaration><DataProperty abbreviatedIRI=":d"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":s"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":h4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p1"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p2"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p3"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p4"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":p5"/></Declaration>
+
+  <SubObjectPropertyOf>
+    <ObjectProperty abbreviatedIRI=":sitsAt"/>
+    <ObjectProperty IRI="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+  </SubObjectPropertyOf>
+  <SubObjectPropertyOf>
+    <ObjectPropertyChain>
+      <ObjectProperty abbreviatedIRI=":sitsAt"/>
+      <ObjectProperty abbreviatedIRI=":inScene"/>
+    </ObjectPropertyChain>
+    <ObjectProperty abbreviatedIRI=":locatedIn"/>
+  </SubObjectPropertyOf>
+
+  <EquivalentClasses><Class abbreviatedIRI=":Scene"/>
+    <ObjectOneOf><NamedIndividual abbreviatedIRI=":s"/></ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":Hole"/>
+    <ObjectOneOf>
+      <NamedIndividual abbreviatedIRI=":h0"/><NamedIndividual abbreviatedIRI=":h1"/>
+      <NamedIndividual abbreviatedIRI=":h2"/><NamedIndividual abbreviatedIRI=":h3"/>
+      <NamedIndividual abbreviatedIRI=":h4"/>
+    </ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":Pigeon"/>
+    <ObjectOneOf>
+      <NamedIndividual abbreviatedIRI=":p0"/><NamedIndividual abbreviatedIRI=":p1"/>
+      <NamedIndividual abbreviatedIRI=":p2"/><NamedIndividual abbreviatedIRI=":p3"/>
+      <NamedIndividual abbreviatedIRI=":p4"/><NamedIndividual abbreviatedIRI=":p5"/>
+    </ObjectOneOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":CrowdedHole"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":Hole"/>
+      <ObjectMinCardinality cardinality="2">
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":sitsAt"/></ObjectInverseOf>
+        <Class abbreviatedIRI=":Pigeon"/>
+      </ObjectMinCardinality>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":CrowdedHole"/><Class abbreviatedIRI=":Hole"/></SubClassOf>
+  <EquivalentClasses><Class abbreviatedIRI=":CrowdedScene"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":Scene"/>
+      <ObjectSomeValuesFrom>
+        <ObjectInverseOf><ObjectProperty abbreviatedIRI=":inScene"/></ObjectInverseOf>
+        <Class abbreviatedIRI=":CrowdedHole"/>
+      </ObjectSomeValuesFrom>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <SubClassOf><Class abbreviatedIRI=":CrowdedScene"/><Class abbreviatedIRI=":Scene"/></SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":Hole"/>
+    <ObjectSomeValuesFrom><ObjectProperty abbreviatedIRI=":inScene"/><Class abbreviatedIRI=":Scene"/></ObjectSomeValuesFrom>
+  </SubClassOf>
+  <SubClassOf>
+    <Class abbreviatedIRI=":Pigeon"/>
+    <ObjectExactCardinality cardinality="1">
+      <ObjectProperty abbreviatedIRI=":sitsAt"/>
+      <Class abbreviatedIRI=":Hole"/>
+    </ObjectExactCardinality>
+  </SubClassOf>
+
+  <DisjointClasses><Class abbreviatedIRI=":Hole"/><Class abbreviatedIRI=":Pigeon"/></DisjointClasses>
+  <DisjointClasses><Class abbreviatedIRI=":Hole"/><Class abbreviatedIRI=":Scene"/></DisjointClasses>
+  <DisjointClasses><Class abbreviatedIRI=":Pigeon"/><Class abbreviatedIRI=":Scene"/></DisjointClasses>
+  <DifferentIndividuals>
+    <NamedIndividual abbreviatedIRI=":p0"/><NamedIndividual abbreviatedIRI=":p1"/>
+    <NamedIndividual abbreviatedIRI=":p2"/><NamedIndividual abbreviatedIRI=":p3"/>
+    <NamedIndividual abbreviatedIRI=":p4"/><NamedIndividual abbreviatedIRI=":p5"/>
+  </DifferentIndividuals>
+  <DifferentIndividuals>
+    <NamedIndividual abbreviatedIRI=":h0"/><NamedIndividual abbreviatedIRI=":h1"/>
+    <NamedIndividual abbreviatedIRI=":h2"/><NamedIndividual abbreviatedIRI=":h3"/>
+    <NamedIndividual abbreviatedIRI=":h4"/>
+  </DifferentIndividuals>
+
+  <FunctionalDataProperty><DataProperty abbreviatedIRI=":d"/></FunctionalDataProperty>
+  <SubClassOf>
+    <Class abbreviatedIRI=":Pigeon"/>
+    <ObjectUnionOf>
+      <DataHasValue><DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal></DataHasValue>
+      <DataHasValue><DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal></DataHasValue>
+    </ObjectUnionOf>
+  </SubClassOf>
+
+  <EquivalentClasses><Class abbreviatedIRI=":TestSceneNotCrowded"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":Scene"/>
+      <ObjectComplementOf><Class abbreviatedIRI=":CrowdedScene"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestSceneCrowded"/>
+    <ObjectIntersectionOf>
+      <Class abbreviatedIRI=":Scene"/><Class abbreviatedIRI=":CrowdedScene"/>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestValueChoice"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <DataHasValue><DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal></DataHasValue>
+      </ObjectComplementOf>
+      <ObjectComplementOf>
+        <DataHasValue><DataProperty abbreviatedIRI=":d"/>
+          <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">2</Literal></DataHasValue>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestValueOne"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/></ObjectOneOf>
+      <DataHasValue><DataProperty abbreviatedIRI=":d"/>
+        <Literal datatypeIRI="http://www.w3.org/2001/XMLSchema#integer">1</Literal></DataHasValue>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestNoLocatedIn"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":p0"/></ObjectOneOf>
+      <ObjectComplementOf>
+        <ObjectSomeValuesFrom>
+          <ObjectProperty abbreviatedIRI=":locatedIn"/>
+          <ObjectOneOf><NamedIndividual abbreviatedIRI=":s"/></ObjectOneOf>
+        </ObjectSomeValuesFrom>
+      </ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":TestHoleNotCrowded"/>
+    <ObjectIntersectionOf>
+      <ObjectOneOf><NamedIndividual abbreviatedIRI=":h0"/></ObjectOneOf>
+      <ObjectComplementOf><Class abbreviatedIRI=":CrowdedHole"/></ObjectComplementOf>
+    </ObjectIntersectionOf>
+  </EquivalentClasses>
+</Ontology>

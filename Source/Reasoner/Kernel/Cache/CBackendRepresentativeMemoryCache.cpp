@@ -526,7 +526,9 @@ namespace Konclude {
 					}
 					reader->fixOntologyData(ontologyData);
 					mFixedOntologyIdentifierDataHashLock.unlock();
-					ontologyData->waitIndividualLabelAssociationIndexed();
+					if (ontologyData) {
+						ontologyData->waitIndividualLabelAssociationIndexed();
+					}
 					return reader;
 				}
 
@@ -1920,9 +1922,13 @@ namespace Konclude {
 
 							DEBUG_HANDLING_STRING(QString("Updating labels for %1").arg(individualID))
 							for (cint64 i = 0; i < CBackendRepresentativeMemoryLabelCacheItem::LABEL_CACHE_ITEM_ASSOCIATABLE_TYPE_COUNT; ++i) {
-								if (referredLabels[i] != locAssociationData->getLabelCacheEntry(i)) {
+								// with added links, the neighbours of the previous data remain, so the labels describing the neighbours are merged
+								// (as for an incompatible update); replacing them would drop the neighbours that are not in the new data
+								bool neighbourLabelAddition = linksAddition && !labelRemoval && (i == CBackendRepresentativeMemoryLabelCacheItem::NEIGHBOUR_INSTANTIATED_ROLE_SET_COMBINATION_LABEL
+									|| i == CBackendRepresentativeMemoryLabelCacheItem::NONDETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL || i == CBackendRepresentativeMemoryLabelCacheItem::DETERMINISTIC_COMBINED_NEIGHBOUR_INSTANTIATED_ROLE_SET_LABEL);
+								if (referredLabels[i] != locAssociationData->getLabelCacheEntry(i) && !(neighbourLabelAddition && !referredLabels[i])) {
 									if (referredLabels[i] || labelReplacement || labelRemoval) {
-										if (locAssociationData->getLabelCacheEntry(i) && labelAddition) {
+										if (locAssociationData->getLabelCacheEntry(i) && (labelAddition || neighbourLabelAddition)) {
 											CBackendRepresentativeMemoryLabelCacheItem* mergedLabel = getAdditionMergedLabel(i, referredLabels[i], locAssociationData->getLabelCacheEntry(i), ontologyData);
 											if (mergedLabel != locAssociationData->getLabelCacheEntry(i)) {
 												DEBUG_HANDLING_STRING(QString("Replacing label %1 for %4 with %5 (merged from %2 and %3)").arg(getRepresentativeCacheLabelItemString(i)).arg(locAssociationData->getLabelCacheEntry(i) ? locAssociationData->getLabelCacheEntry(i)->getCacheEntryID() : 0).arg(referredLabels[i] ? referredLabels[i]->getCacheEntryID() : 0).arg(locAssociationData->getAssociatedIndividualId()).arg(mergedLabel->getCacheEntryID()))

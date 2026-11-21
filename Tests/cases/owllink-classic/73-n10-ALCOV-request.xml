@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:owl="http://www.w3.org/2002/07/owl#" xml:base="http://www.owllink.org/testsuite/sat-exp-test#"
+    xsi:schemaLocation="http://www.owllink.org/owllink-xml# http://www.owllink.org/owllink-xml.xsd">
+
+    <CreateKB kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology"/>
+
+    <Tell kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology">
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#l"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:ObjectProperty IRI="#f"/>
+        </owl:Declaration>
+
+		<owl:Declaration>
+			<owl:ObjectProperty IRI="#fwci"/>
+		</owl:Declaration>
+		
+		<owl:SymmetricObjectProperty>
+			<owl:ObjectProperty IRI="#f"/>
+		</owl:SymmetricObjectProperty>		
+		
+		<owl:DLSafeRule>
+			<owl:Body>
+				<owl:ObjectPropertyAtom>
+					<owl:ObjectProperty IRI="#f"/>
+					<owl:Variable IRI="urn:swrl#x"/>
+					<owl:Variable IRI="urn:swrl#y"/>
+				</owl:ObjectPropertyAtom>
+				<owl:ObjectPropertyAtom>
+					<owl:ObjectProperty IRI="#l"/>
+					<owl:Variable IRI="urn:swrl#x"/>
+					<owl:Variable IRI="urn:swrl#z"/>
+				</owl:ObjectPropertyAtom>
+				<owl:ObjectPropertyAtom>
+					<owl:ObjectProperty IRI="#l"/>
+					<owl:Variable IRI="urn:swrl#y"/>
+					<owl:Variable IRI="urn:swrl#z"/>
+				</owl:ObjectPropertyAtom>
+			</owl:Body>
+			<owl:Head>
+				<owl:ObjectPropertyAtom>
+					<owl:ObjectProperty IRI="#fwci"/>
+					<owl:Variable IRI="urn:swrl#x"/>
+					<owl:Variable IRI="urn:swrl#y"/>
+				</owl:ObjectPropertyAtom>
+			</owl:Head>
+		</owl:DLSafeRule>  	
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#ix"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#iy"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#iz"/>
+        </owl:Declaration>
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#f"/>
+            <owl:NamedIndividual IRI="#ix"/>
+            <owl:NamedIndividual IRI="#iy"/>
+		</owl:ObjectPropertyAssertion>	
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#l"/>
+            <owl:NamedIndividual IRI="#ix"/>
+            <owl:NamedIndividual IRI="#iz"/>
+		</owl:ObjectPropertyAssertion>	
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#l"/>
+            <owl:NamedIndividual IRI="#iy"/>
+            <owl:NamedIndividual IRI="#iz"/>
+		</owl:ObjectPropertyAssertion>	
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0000"/>
+        </owl:Declaration>
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#l"/>
+            <owl:NamedIndividual IRI="#i0000"/>
+            <owl:NamedIndividual IRI="#iz"/>
+		</owl:ObjectPropertyAssertion>	
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0001"/>
+        </owl:Declaration>
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#l"/>
+            <owl:NamedIndividual IRI="#i0001"/>
+            <owl:NamedIndividual IRI="#iz"/>
+		</owl:ObjectPropertyAssertion>	
+		
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#f"/>
+            <owl:NamedIndividual IRI="#i0000"/>
+            <owl:NamedIndividual IRI="#i0001"/>
+		</owl:ObjectPropertyAssertion>	
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0002"/>
+        </owl:Declaration>
+
+		<owl:ObjectPropertyAssertion>
+			<owl:ObjectProperty IRI="#l"/>
+            <owl:NamedIndividual IRI="#i0002"/>
+            <owl:NamedIndividual IRI="#iz"/>
+		</owl:ObjectPropertyAssertion>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0003"/>
+        </owl:Declaration>
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0004"/>
+        </owl:Declaration>		
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0005"/>
+        </owl:Declaration>		
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0006"/>
+        </owl:Declaration>	
+
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0007"/>
+        </owl:Declaration>		
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0008"/>
+        </owl:Declaration>			
+		
+        <owl:Declaration>
+            <owl:NamedIndividual IRI="#i0009"/>
+        </owl:Declaration>		
+
+		
+    </Tell>
+
+    <IsClassSatisfiable kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology" timing="simple">
+        <owl:Class abbreviatedIRI="owl:Thing"/>
+    </IsClassSatisfiable>
+
+    <ReleaseKB kb="http://www.owllink.org/testsuite/nominal-schema-test-ontology"/>
+
+</RequestMessage>

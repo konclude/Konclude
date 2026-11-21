@@ -1101,6 +1101,7 @@ HEADERS += \
    ./Source/Reasoner/Kernel/Algorithm/CConceptNominalSchemaGroundingHandler.h \
    ./Source/Reasoner/Kernel/Algorithm/CComputedConsequencesCacheHandler.h \
    ./Source/Reasoner/Kernel/Algorithm/CCompletionGraphCacheHandler.h \
+   ./Source/Reasoner/Kernel/Algorithm/CCompletionGraphSnapshotWriter.h \
    ./Source/Reasoner/Kernel/Algorithm/CClashDescriptorFactory.h \
    ./Source/Reasoner/Kernel/Algorithm/CCalculationTableauCompletionTaskHandleAlgorithm.h \
    ./Source/Reasoner/Kernel/Algorithm/CCalculationTableauApproximationSaturationTaskHandleAlgorithm.h \
@@ -3765,6 +3766,7 @@ SOURCES += \
    ./Source/Reasoner/Kernel/Algorithm/CConceptNominalSchemaGroundingHandler.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CComputedConsequencesCacheHandler.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CCompletionGraphCacheHandler.cpp \
+   ./Source/Reasoner/Kernel/Algorithm/CCompletionGraphSnapshotWriter.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CClashDescriptorFactory.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CCalculationTableauCompletionTaskHandleAlgorithm.cpp \
    ./Source/Reasoner/Kernel/Algorithm/CCalculationTableauApproximationSaturationTaskHandleAlgorithm.cpp \

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Expected classification of dlfz-100395-ontology.owl.xml, derived with HermiT 1.4.5. -->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#">
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#C0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#C1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#C2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#C3"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#R0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#R1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#R2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#T0"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#T1"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#T2"/></Declaration>
+  <Declaration><Class IRI="http://konclude.test/dlfuzz/100395#T3"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Nothing"/></Declaration>
+  <Declaration><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></Declaration>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#T0"/><Class IRI="http://konclude.test/dlfuzz/100395#C0"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#C0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#C1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#C2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#C3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#R0"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#R1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#R2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#T1"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#T2"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+  <SubClassOf><Class IRI="http://konclude.test/dlfuzz/100395#T3"/><Class IRI="http://www.w3.org/2002/07/owl#Thing"/></SubClassOf>
+</Ontology>

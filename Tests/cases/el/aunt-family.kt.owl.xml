@@ -52,16 +52,16 @@
     <Literal>ELK el-reasoner family example</Literal>
   </DataPropertyAssertion>
   <!-- cross-confirmation by other reasoners -->
-  <DataPropertyAssertion>
-    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+<ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
-    <Literal>ELK 0.5.0</Literal>
-  </DataPropertyAssertion>
-  <DataPropertyAssertion>
-    <DataProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
+    <NamedIndividual abbreviatedIRI="kt:reasoner-elk-0-5-0"/>
+  </ObjectPropertyAssertion>
+<ObjectPropertyAssertion>
+    <ObjectProperty abbreviatedIRI="kt:verifiedResultByReasonerOnVersion"/>
     <NamedIndividual abbreviatedIRI="kt:aunt-family-classification"/>
-    <Literal>HermiT 1.4.5</Literal>
-  </DataPropertyAssertion>
+    <NamedIndividual abbreviatedIRI="kt:reasoner-hermit-1-4-5"/>
+  </ObjectPropertyAssertion>
 
   <ClassAssertion>
     <Class abbreviatedIRI="kt:ConsistencyTest"/>

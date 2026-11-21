@@ -2126,6 +2126,19 @@ namespace Konclude {
 							resolvedIndiNode->addNonInverseConnectedIndividualNodeLinker(nonInvConnectedIndiNodeLinker);
 							if (mParallelMode) resolvedIndiNode->unlockParallel();
 										}
+										// the extension node stands for several successors if the cardinality is greater than one, as the successor of the
+										// existential rule does: a nominal in it means a clash (it is registered for nominals that are integrated later)
+										if (requiredSuccCard > 1 && resolvedIndiNode != lastResolvedIndiNode) {
+											if (resolvedIndiNode->hasNominalIntegrated()) {
+												updateDirectAddingIndividualStatusFlags(indiProcSatNode,CIndividualSaturationProcessNodeStatusFlags::INDSATFLAGCLASHED,calcAlgContext);
+											} else {
+												CXLinker<CIndividualSaturationProcessNode*>* multipleCardinalityAncestorNodesLinker = CObjectAllocator< CXLinker<CIndividualSaturationProcessNode*> >::allocateAndConstruct(calcAlgContext->getUsedProcessTaskMemoryAllocationManager());
+												multipleCardinalityAncestorNodesLinker->initLinker(indiProcSatNode);
+												if (mParallelMode) resolvedIndiNode->lockParallel();
+												resolvedIndiNode->addMultipleCardinalityAncestorNodesLinker(multipleCardinalityAncestorNodesLinker);
+												if (mParallelMode) resolvedIndiNode->unlockParallel();
+											}
+										}
 										satSucALLConExtData->setLastResolvedIndividualNode(resolvedIndiNode);
 										satSucALLConExtData->setLastConnectedSuccessorCardinality(requiredSuccCard);
 									}
@@ -3590,7 +3603,7 @@ namespace Konclude {
 							while (conceptOpLinkerIt) {
 								foundOperandIndiNode = true;
 								CConcept* opConcept = conceptOpLinkerIt->getData();
-								bool opConNegation = conceptOpLinkerIt->isNegated()^conNegation;
+								bool opConNegation = concept->getSuccessorFillerNegation(conceptOpLinkerIt->isNegated(),conNegation);
 								CConceptData* opConceptData = opConcept->getConceptData();
 								if (opConceptData) {
 									CConceptProcessData* conProcData = (CConceptProcessData*)opConceptData;
@@ -7545,7 +7558,7 @@ namespace Konclude {
 					if (!existIndiNode && !specializedExistentialRestriction) {
 						while (!existIndiNode && conceptOpLinkerIt) {
 							CConcept* opConcept = conceptOpLinkerIt->getData();
-							bool opConNegation = conceptOpLinkerIt->isNegated()^conNegation;
+							bool opConNegation = concept->getSuccessorFillerNegation(conceptOpLinkerIt->isNegated(),conNegation);
 							CConceptData* opConceptData = opConcept->getConceptData();
 							KONCLUDE_ASSERT_X(opConceptData,"SOME saturation rule","concept data missing");
 							if (opConceptData) {

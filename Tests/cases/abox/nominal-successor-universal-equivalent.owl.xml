@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The shape of the fuzzing case (seed 2167) with equivalences: C0 = {a2} and
+  C2 = {a0}, so a2 is in C0 without a class assertion, and C2 below
+  (exists inverse r0.C0) gives the link a2 -r0-> a0. C0 below (all r0.C3) puts
+  a0 into C3, while a0 is in C1 and C1 is disjoint with C3.
+
+  Expected: inconsistent (HermiT agrees).
+-->
+<Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://konclude.test/abox/nominal-successor-universal-equivalent">
+  <Prefix name="" IRI="http://konclude.test/abox/nominal-successor-universal-equivalent#"/>
+  <Declaration><Class abbreviatedIRI=":C0"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C1"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C2"/></Declaration>
+  <Declaration><Class abbreviatedIRI=":C3"/></Declaration>
+  <Declaration><ObjectProperty abbreviatedIRI=":r0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a0"/></Declaration>
+  <Declaration><NamedIndividual abbreviatedIRI=":a2"/></Declaration>
+  <EquivalentClasses><Class abbreviatedIRI=":C2"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a0"/></ObjectOneOf></EquivalentClasses>
+  <EquivalentClasses><Class abbreviatedIRI=":C0"/><ObjectOneOf><NamedIndividual abbreviatedIRI=":a2"/></ObjectOneOf></EquivalentClasses>
+  <DisjointClasses><Class abbreviatedIRI=":C3"/><Class abbreviatedIRI=":C1"/></DisjointClasses>
+  <SubClassOf><Class abbreviatedIRI=":C0"/><ObjectAllValuesFrom><ObjectProperty abbreviatedIRI=":r0"/><Class abbreviatedIRI=":C3"/></ObjectAllValuesFrom></SubClassOf>
+  <SubClassOf><Class abbreviatedIRI=":C2"/><ObjectSomeValuesFrom><ObjectInverseOf><ObjectProperty abbreviatedIRI=":r0"/></ObjectInverseOf><Class abbreviatedIRI=":C0"/></ObjectSomeValuesFrom></SubClassOf>
+  <ClassAssertion><Class abbreviatedIRI=":C1"/><NamedIndividual abbreviatedIRI=":a0"/></ClassAssertion>
+</Ontology>

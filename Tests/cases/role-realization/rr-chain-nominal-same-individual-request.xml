@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Role realization: rr-chain-nominal-same-individual. The ontology is loaded from the file next to this request.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/role-realization/rr-chain-nominal-same-individual"/>
+  <LoadOntologies kb="http://konclude.test/role-realization/rr-chain-nominal-same-individual"><OntologyIRI IRI="file:rr-chain-nominal-same-individual.owl.xml"/></LoadOntologies>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-chain-nominal-same-individual"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106293#r3"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106293#x4"/></GetObjectPropertyTargets>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-chain-nominal-same-individual"><owl:ObjectProperty IRI="http://konclude.test/dlfuzz/106293#r3"/><owl:NamedIndividual IRI="http://konclude.test/dlfuzz/106293#x2"/></GetObjectPropertyTargets>
+  <ReleaseKB kb="http://konclude.test/role-realization/rr-chain-nominal-same-individual"/>
+</RequestMessage>

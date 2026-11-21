@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Reduced-saturation configuration without completion graph caching: the second
+  oracle of the completion graph caching tests. The saturation-based decision
+  shortcuts and the completion graph caching are switched off, the concept
+  saturation itself stays enabled so that the ABox is prepared (see
+  reduced-saturation.xml for why ConceptSaturation must not be disabled).
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink-xml#">
+	<Set key='Konclude.Calculation.Optimization.EquivalentAlternativesSaturationMerging'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Classification.SaturationSubsumerExtraction'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SuccessorConceptSaturationExpansion'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SaturationCaching'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.SaturationSuccessorExtension'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.NominalSaturationCachingByNodeReactivation'>
+		<Literal>false</Literal>
+	</Set>
+	<Set key='Konclude.Calculation.Optimization.CompletionGraphCaching'>
+		<Literal>false</Literal>
+	</Set>
+</RequestMessage>

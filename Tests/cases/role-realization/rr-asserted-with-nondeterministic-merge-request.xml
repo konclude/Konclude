@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Role realization: rr-asserted-with-nondeterministic-merge. The ontology is loaded from the file next to this request.
+-->
+<RequestMessage xmlns="http://www.owllink.org/owllink#" xmlns:owl="http://www.w3.org/2002/07/owl#">
+  <CreateKB kb="http://konclude.test/role-realization/rr-asserted-with-nondeterministic-merge"/>
+  <LoadOntologies kb="http://konclude.test/role-realization/rr-asserted-with-nondeterministic-merge"><OntologyIRI IRI="file:rr-asserted-with-nondeterministic-merge.owl.xml"/></LoadOntologies>
+  <GetObjectPropertyTargets kb="http://konclude.test/role-realization/rr-asserted-with-nondeterministic-merge"><owl:ObjectProperty IRI="http://t/f#r"/><owl:NamedIndividual IRI="http://t/f#a"/></GetObjectPropertyTargets>
+  <GetObjectPropertySources kb="http://konclude.test/role-realization/rr-asserted-with-nondeterministic-merge"><owl:ObjectProperty IRI="http://t/f#r"/><owl:NamedIndividual IRI="http://t/f#x0"/></GetObjectPropertySources>
+  <ReleaseKB kb="http://konclude.test/role-realization/rr-asserted-with-nondeterministic-merge"/>
+</RequestMessage>

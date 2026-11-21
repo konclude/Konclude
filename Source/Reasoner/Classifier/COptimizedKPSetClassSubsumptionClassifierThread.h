@@ -157,6 +157,7 @@ namespace Konclude {
 					bool fastSatisfiableOnlySubClassPrecheckTest(COptimizedKPSetClassOntologyClassificationItem *optSubClassItem, COptimizedKPSetClassTestingItem* nextSatTestItem, bool* isSatisfiableFlag);
 
 					bool fastPseudoModelSubsumptionClassPrecheckTest(COptimizedKPSetClassOntologyClassificationItem *optSubClassItem, COptimizedKPSetClassTestingItem* subsumedItem, COptimizedKPSetClassTestingItem* subsumerItem, bool* isSubsumptionFlag);
+					bool hasPseudoModelSubsumerConcept(COptimizedKPSetClassOntologyClassificationItem *optSubClassItem, CClassificationClassPseudoModelData* subsumedPMData, COptimizedKPSetClassTestingItem* subsumerItem);
 					bool isPseudoModelSubsumerPossible(COptimizedKPSetClassOntologyClassificationItem *optSubClassItem, CClassificationClassPseudoModelData* subsumedPMData, CClassificationClassPseudoModelHash* subsumedPMHash, CClassificationClassPseudoModelData* subsumerPMData, CClassificationClassPseudoModelHash* subsumerPMHash);
 
 
